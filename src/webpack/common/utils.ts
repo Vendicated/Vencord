@@ -93,7 +93,7 @@ export const UserUtils = {
 };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".default.copy("),
+    copy: filters.byCode(".copy("),
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 

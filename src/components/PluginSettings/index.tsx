@@ -22,10 +22,8 @@ import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { Flex } from "@components/Flex";
-import { Badge } from "@components/PluginSettings/components";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import { Switch } from "@components/Switch";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
@@ -152,31 +150,31 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex className={cl("card", { "card-disabled": disabled })} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <div className={cl("card-header")}>
-                <Text variant="text-md/bold" className={cl("name")}>
-                    {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
-                </Text>
+        <AddonCard
+            name={plugin.name}
+            description={plugin.description}
+            isNew={isNew}
+            enabled={isEnabled()}
+            setEnabled={toggleEnabled}
+            disabled={disabled}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            infoButton={
                 <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
                     {plugin.options
                         ? <CogWheel />
                         : <InfoIcon width="24" height="24" />}
                 </button>
-                <Switch
-                    checked={isEnabled()}
-                    onChange={toggleEnabled}
-                    disabled={disabled}
-                />
-            </div>
-            <Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>
-        </Flex >
+            }
+        />
     );
 }
 
 const enum SearchStatus {
     ALL,
     ENABLED,
-    DISABLED
+    DISABLED,
+    NEW
 }
 
 export default function PluginSettings() {
@@ -229,6 +227,7 @@ export default function PluginSettings() {
         const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
+        if (searchValue.status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
         if (!searchValue.value.length) return true;
 
         const v = searchValue.value.toLowerCase();
@@ -321,7 +320,8 @@ export default function PluginSettings() {
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED }
+                            { label: "Show Disabled", value: SearchStatus.DISABLED },
+                            { label: "Show New", value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}

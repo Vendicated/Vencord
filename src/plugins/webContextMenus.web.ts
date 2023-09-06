@@ -39,8 +39,8 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Add back the Discord context menus for images, links and the chat input bar",
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
-        // so disable this by default. Vencord Desktop just doesn't, so enable by default
-        default: IS_VENCORD_DESKTOP,
+        // so disable this by default. Vesktop just doesn't, so enable by default
+        default: IS_VESKTOP,
         restartNeeded: true
     }
 });
@@ -50,7 +50,7 @@ export default definePlugin({
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
     authors: [Devs.Ven],
     enabledByDefault: true,
-    required: IS_VENCORD_DESKTOP,
+    required: IS_VESKTOP,
 
     settings,
 
@@ -86,7 +86,7 @@ export default definePlugin({
                 },
                 // Fix silly Discord calling the non web support copy
                 {
-                    match: /\w\.default\.copy/,
+                    match: /\i\.\i\.copy/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
                 }
             ]
@@ -102,7 +102,7 @@ export default definePlugin({
                     replace: "if(null=="
                 },
                 {
-                    match: /return\s*?\[\i\.default\.canCopyImage\(\)/,
+                    match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
                     replace: "return [true"
                 },
                 {
@@ -158,7 +158,7 @@ export default definePlugin({
                 },
                 {
                     // Change calls to DiscordNative.clipboard to us instead
-                    match: /\b\i\.default\.(copy|cut|paste)/g,
+                    match: /\b\i\.\i\.(copy|cut|paste)/g,
                     replace: "$self.$1"
                 }
             ]

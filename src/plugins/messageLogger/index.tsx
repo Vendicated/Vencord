@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -92,7 +92,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
     start() {
         addDeleteStyle();
@@ -152,14 +152,24 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Comma-separated list of user IDs to ignore",
             default: ""
-        }
+        },
+        ignoreChannels: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of channel IDs to ignore",
+            default: ""
+        },
+        ignoreGuilds: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of guild IDs to ignore",
+            default: ""
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf, ignoreUsers } = Settings.plugins.MessageLogger;
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
             const myId = UserStore.getCurrentUser().id;
 
             function mutate(id: string) {
@@ -171,7 +181,9 @@ export default definePlugin({
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
                     ignoreBots && msg.author?.bot ||
                     ignoreSelf && msg.author?.id === myId ||
-                    ignoreUsers.includes(msg.author?.id);
+                    ignoreUsers.includes(msg.author?.id) ||
+                    ignoreChannels.includes(msg.channel_id) ||
+                    ignoreGuilds.includes(ChannelStore.getChannel(msg.channel_id)?.guild_id);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);

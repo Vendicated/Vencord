@@ -16,28 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import {
-    FluxDispatcher,
-    Forms,
-    GuildStore,
-    React,
-    SelectedChannelStore,
-    SelectedGuildStore,
-    UserStore
-} from "@webpack/common";
+import { FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
 
-// START yoinked from lastfm.tsx
 const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
@@ -46,6 +37,7 @@ const assetManager = mapMangledModuleLazy(
 );
 
 async function getApplicationAsset(key: string): Promise<string> {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
     return (await assetManager.getAsset(settings.store.appID, [key, undefined]))[0];
 }
 
@@ -71,65 +63,226 @@ interface Activity {
         button_urls?: Array<string>;
     };
     type: ActivityType;
+    url?: string;
     flags: number;
 }
 
 const enum ActivityType {
     PLAYING = 0,
+    STREAMING = 1,
     LISTENING = 2,
     WATCHING = 3,
     COMPETING = 5
 }
-// END
 
-const strOpt = (description: string) => ({
-    type: OptionType.STRING,
-    description,
-    onChange: setRpc
-}) as const;
-
-const numOpt = (description: string) => ({
-    type: OptionType.NUMBER,
-    description,
-    onChange: setRpc
-}) as const;
-
-const choice = (label: string, value: any, _default?: boolean) => ({
-    label,
-    value,
-    default: _default
-}) as const;
-
-const choiceOpt = <T,>(description: string, options: T) => ({
-    type: OptionType.SELECT,
-    description,
-    onChange: setRpc,
-    options
-}) as const;
-
+const enum TimestampMode {
+    NONE,
+    NOW,
+    TIME,
+    CUSTOM,
+}
 
 const settings = definePluginSettings({
-    appID: strOpt("The ID of the application for the rich presence."),
-    appName: strOpt("The name of the presence."),
-    details: strOpt("Line 1 of rich presence."),
-    state: strOpt("Line 2 of rich presence."),
-    type: choiceOpt("Type of presence", [
-        choice("Playing", ActivityType.PLAYING, true),
-        choice("Listening", ActivityType.LISTENING),
-        choice("Watching", ActivityType.WATCHING),
-        choice("Competing", ActivityType.COMPETING)
-    ]),
-    startTime: numOpt("Unix Timestamp for beginning of activity."),
-    endTime: numOpt("Unix Timestamp for end of activity."),
-    imageBig: strOpt("Sets the big image to the specified image."),
-    imageBigTooltip: strOpt("Sets the tooltip text for the big image."),
-    imageSmall: strOpt("Sets the small image to the specified image."),
-    imageSmallTooltip: strOpt("Sets the tooltip text for the small image."),
-    buttonOneText: strOpt("The text for the first button"),
-    buttonOneURL: strOpt("The URL for the first button"),
-    buttonTwoText: strOpt("The text for the second button"),
-    buttonTwoURL: strOpt("The URL for the second button")
+    appID: {
+        type: OptionType.STRING,
+        description: "Application ID (required)",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (!value) return "Application ID is required.";
+            if (value && !/^\d+$/.test(value)) return "Application ID must be a number.";
+            return true;
+        }
+    },
+    appName: {
+        type: OptionType.STRING,
+        description: "Application name (required)",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (!value) return "Application name is required.";
+            if (value.length > 128) return "Application name must be not longer than 128 characters.";
+            return true;
+        }
+    },
+    details: {
+        type: OptionType.STRING,
+        description: "Details (line 1)",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Details (line 1) must be not longer than 128 characters.";
+            return true;
+        }
+    },
+    state: {
+        type: OptionType.STRING,
+        description: "State (line 2)",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "State (line 2) must be not longer than 128 characters.";
+            return true;
+        }
+    },
+    type: {
+        type: OptionType.SELECT,
+        description: "Activity type",
+        onChange: onChange,
+        options: [
+            {
+                label: "Playing",
+                value: ActivityType.PLAYING,
+                default: true
+            },
+            {
+                label: "Streaming",
+                value: ActivityType.STREAMING
+            },
+            {
+                label: "Listening",
+                value: ActivityType.LISTENING
+            },
+            {
+                label: "Watching",
+                value: ActivityType.WATCHING
+            },
+            {
+                label: "Competing",
+                value: ActivityType.COMPETING
+            }
+        ]
+    },
+    streamLink: {
+        type: OptionType.STRING,
+        description: "Twitch.tv or Youtube.com link (only for Streaming activity type)",
+        onChange: onChange,
+        disabled: isStreamLinkDisabled,
+        isValid: isStreamLinkValid
+    },
+    timestampMode: {
+        type: OptionType.SELECT,
+        description: "Timestamp mode",
+        onChange: onChange,
+        options: [
+            {
+                label: "None",
+                value: TimestampMode.NONE,
+                default: true
+            },
+            {
+                label: "Since discord open",
+                value: TimestampMode.NOW
+            },
+            {
+                label: "Same as your current time",
+                value: TimestampMode.TIME
+            },
+            {
+                label: "Custom",
+                value: TimestampMode.CUSTOM
+            }
+        ]
+    },
+    startTime: {
+        type: OptionType.NUMBER,
+        description: "Start timestamp (only for custom timestamp mode)",
+        onChange: onChange,
+        disabled: isTimestampDisabled,
+        isValid: (value: number) => {
+            if (value && value < 0) return "Start timestamp must be greater than 0.";
+            return true;
+        }
+    },
+    endTime: {
+        type: OptionType.NUMBER,
+        description: "End timestamp (only for custom timestamp mode)",
+        onChange: onChange,
+        disabled: isTimestampDisabled,
+        isValid: (value: number) => {
+            if (value && value < 0) return "End timestamp must be greater than 0.";
+            return true;
+        }
+    },
+    imageBig: {
+        type: OptionType.STRING,
+        description: "Big image key/link",
+        onChange: onChange,
+        isValid: isImageKeyValid
+    },
+    imageBigTooltip: {
+        type: OptionType.STRING,
+        description: "Big image tooltip",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Big image tooltip must be not longer than 128 characters.";
+            return true;
+        }
+    },
+    imageSmall: {
+        type: OptionType.STRING,
+        description: "Small image key/link",
+        onChange: onChange,
+        isValid: isImageKeyValid
+    },
+    imageSmallTooltip: {
+        type: OptionType.STRING,
+        description: "Small image tooltip",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 128) return "Small image tooltip must be not longer than 128 characters.";
+            return true;
+        }
+    },
+    buttonOneText: {
+        type: OptionType.STRING,
+        description: "Button 1 text",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 31) return "Button 1 text must be not longer than 31 characters.";
+            return true;
+        }
+    },
+    buttonOneURL: {
+        type: OptionType.STRING,
+        description: "Button 1 URL",
+        onChange: onChange
+    },
+    buttonTwoText: {
+        type: OptionType.STRING,
+        description: "Button 2 text",
+        onChange: onChange,
+        isValid: (value: string) => {
+            if (value && value.length > 31) return "Button 2 text must be not longer than 31 characters.";
+            return true;
+        }
+    },
+    buttonTwoURL: {
+        type: OptionType.STRING,
+        description: "Button 2 URL",
+        onChange: onChange
+    }
 });
+
+function onChange() {
+    setRpc(true);
+    if (Settings.plugins.CustomRPC.enabled) setRpc();
+}
+
+function isStreamLinkDisabled() {
+    return settings.store.type !== ActivityType.STREAMING;
+}
+
+function isStreamLinkValid(value: string) {
+    if (!isStreamLinkDisabled() && !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
+    return true;
+}
+
+function isTimestampDisabled() {
+    return settings.store.timestampMode !== TimestampMode.CUSTOM;
+}
+
+function isImageKeyValid(value: string) {
+    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
+    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
+    return true;
+}
 
 async function createActivity(): Promise<Activity | undefined> {
     const {
@@ -138,6 +291,7 @@ async function createActivity(): Promise<Activity | undefined> {
         details,
         state,
         type,
+        streamLink,
         startTime,
         endTime,
         imageBig,
@@ -161,13 +315,29 @@ async function createActivity(): Promise<Activity | undefined> {
         flags: 1 << 0,
     };
 
-    if (startTime) {
-        activity.timestamps = {
-            start: startTime,
-        };
-        if (endTime) {
-            activity.timestamps.end = endTime;
-        }
+    if (type === ActivityType.STREAMING) activity.url = streamLink;
+
+    switch (settings.store.timestampMode) {
+        case TimestampMode.NOW:
+            activity.timestamps = {
+                start: Math.floor(Date.now() / 1000)
+            };
+            break;
+        case TimestampMode.TIME:
+            activity.timestamps = {
+                start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
+            };
+            break;
+        case TimestampMode.CUSTOM:
+            if (startTime || endTime) {
+                activity.timestamps = {};
+                if (startTime) activity.timestamps.start = startTime;
+                if (endTime) activity.timestamps.end = endTime;
+            }
+            break;
+        case TimestampMode.NONE:
+        default:
+            break;
     }
 
     if (buttonOneText) {
@@ -187,7 +357,7 @@ async function createActivity(): Promise<Activity | undefined> {
     if (imageBig) {
         activity.assets = {
             large_image: await getApplicationAsset(imageBig),
-            large_text: imageBigTooltip
+            large_text: imageBigTooltip || undefined
         };
     }
 
@@ -195,13 +365,13 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.assets = {
             ...activity.assets,
             small_image: await getApplicationAsset(imageSmall),
-            small_text: imageSmallTooltip
+            small_text: imageSmallTooltip || undefined
         };
     }
 
 
     for (const k in activity) {
-        if (k === "type") continue; // without type, the presence is considered invalid.
+        if (k === "type") continue;
         const v = activity[k];
         if (!v || v.length === 0)
             delete activity[k];
@@ -223,7 +393,7 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain],
+    authors: [Devs.captain, Devs.AutumnVN],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
@@ -232,11 +402,15 @@ export default definePlugin({
         const activity = useAwaiter(createActivity);
         return (
             <>
-                <Forms.FormTitle tag="h2">NOTE:</Forms.FormTitle>
                 <Forms.FormText>
-                    You will need to <Link href="https://discord.com/developers/applications">create an
-                        application</Link> and
-                    get its ID to use this plugin.
+                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to create an application and
+                    get the application ID.
+                </Forms.FormText>
+                <Forms.FormText>
+                    Upload images in the Rich Presence tab to get the image keys.
+                </Forms.FormText>
+                <Forms.FormText>
+                    If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>

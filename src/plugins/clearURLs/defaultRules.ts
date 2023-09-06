@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export const defaultRules = [
     "action_object_map",
     "action_type_map",
@@ -128,6 +127,7 @@ export const defaultRules = [
     "redircnt@yandex.*",
     "feature@youtube.com",
     "kw@youtube.com",
+    "si@youtu.be",
     "wt_zmc",
     "utm_source",
     "utm_content",
