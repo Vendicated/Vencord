@@ -649,7 +649,8 @@
     height: 32px;
     border-radius: 50px;
     border: 1px solid transparent;
-    transition: none;
+    transition: .15s ease;
+    padding: 0 12px;
 }
 
 .colorwaySelector-searchInput:hover {
@@ -674,6 +675,7 @@
     overflow: hidden;
     color: var(--text-normal);
     cursor: pointer;
+    transition: .15s ease
 }
 
 .colorwaySelector-pillWrapper {

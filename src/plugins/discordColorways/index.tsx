@@ -24,6 +24,7 @@ import { Devs } from "@utils/constants";
 import { openUserProfile, sendMessage } from "@utils/discord";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, Clipboard, Flex, Forms, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, SettingsRouter, Switch, Text, TextInput, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
 import { CSSProperties } from "react";
 
@@ -42,6 +43,17 @@ export interface Colorway {
     isGradient?: boolean;
 }
 
+const PillCode = findByCodeLazy("pill", "wrapper", "selected", "unread", "hovered", "disabled");
+const PillClass = findByPropsLazy("pill", "homeIcon");
+type PillCode = JSX.Element;
+
+/**
+ * Returns a Server list item pill that accepts a number as a state (0 = nothing, 1 = hover, 2 = unread, 3 = selected, 4 = disabled)
+ */
+export function Pill({ state = 0 }: { state?: number; }): JSX.Element {
+    return <PillCode className={PillClass.pill} style={{ position: "absolute", top: 0, left: 0 }} selected={state === 3} disabled={state === 4} hovered={state === 1} unread={state === 2} />;
+}
+
 let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>, LazySwatchLoaded: boolean = false;
 DataStore.get("colorwaySourceFiles").then(e => { if (!e) DataStore.set("colorwaySourceFiles", ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"]); });
 DataStore.get("customColorways").then(e => { if (!e) DataStore.set("customColorways", []); });
@@ -50,7 +62,7 @@ export const ColorwayCSS = {
     get: () => document.getElementById("activeColorwayCSS")?.textContent || "",
     set: (e: string) => {
         if (!document.getElementById("activeColorwayCSS")) {
-            var activeColorwayCSS = document.createElement("style");
+            var activeColorwayCSS: HTMLStyleElement = document.createElement("style");
             activeColorwayCSS.id = "activeColorwayCSS";
             activeColorwayCSS.textContent = e;
             document.head.append(activeColorwayCSS);
@@ -59,7 +71,7 @@ export const ColorwayCSS = {
     remove: () => document.getElementById("activeColorwayCSS")!.remove()
 };
 
-function HexToHSL(H: string) {
+export function HexToHSL(H: string) {
     let r: any = 0, g: any = 0, b: any = 0;
     if (H.length === 4) r = "0x" + H[1] + H[1], g = "0x" + H[2] + H[2], b = "0x" + H[3] + H[3];
     else if (H.length === 7) r = "0x" + H[1] + H[2], g = "0x" + H[3] + H[4], b = "0x" + H[5] + H[6];
@@ -71,7 +83,11 @@ function HexToHSL(H: string) {
     else h = (r - g) / delta + 4;
     h = Math.round(h * 60);
     if (h < 0) h += 360;
-    l = (cmax + cmin) / 2, s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1)), s = +(s * 100).toFixed(1), l = +(l * 100).toFixed(1);
+
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
 
     return [Math.round(h), Math.round(s), Math.round(l)];
 }
@@ -79,14 +95,21 @@ function HexToHSL(H: string) {
 function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnContainer", listItemWrapperClass = "", listItemTooltipClass = "colorwaysBtn-tooltipContent" }: { listItemClass?: string, listItemWrapperClass?: string, listItemTooltipClass?: string; }) {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [isLoading, setLoading] = useState<boolean>(false);
+    const [state, setState] = useState<number>(0);
     return (<Tooltip text={[<span>Colorways</span>, <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>]} position="right" tooltipContentClassName={listItemTooltipClass}>
         {({ onMouseEnter, onMouseLeave }) => {
-            return <div className={listItemClass}><div onContextMenu={() => openModal(props => <ToolboxModal modalProps={props} />)} className={listItemWrapperClass + " ColorwaySelectorBtn"} onMouseEnter={e => {
+            return <div className={listItemClass}><Pill state={state} /><div onContextMenu={() => openModal(props => <ToolboxModal modalProps={props} />)} className={listItemWrapperClass + " ColorwaySelectorBtn"} onMouseEnter={e => {
                 onMouseEnter();
                 DataStore.get("actveColorwayID").then((actveColorwayID: string) => setActiveColorway(actveColorwayID || "None"));
-            }} onMouseLeave={onMouseLeave} onClick={() => {
+                setState(1);
+            }} onMouseLeave={() => {
+                onMouseLeave();
+                setState(0);
+            }} onClick={() => {
                 onMouseLeave();
                 setLoading(true);
+                onMouseLeave();
+                setState(0);
                 var colorways = new Array<Colorway>;
                 DataStore.get("colorwaySourceFiles").then(colorwaySourceFiles => {
                     colorwaySourceFiles.forEach((colorwayList, i) => {
@@ -106,6 +129,7 @@ function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnContainer", listI
                                             }
                                             openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} />);
                                             setLoading(false);
+                                            onMouseLeave();
                                         });
                                     });
                                 }
@@ -440,7 +464,7 @@ function CreatorModal({ modalProps }: { modalProps: ModalProps; }) {
                                             setPrimaryColor(colorArray[1].split("#")[1]);
                                             setSecondaryColor(colorArray[2].split("#")[1]);
                                             setTertiaryColor(colorArray[3].split("#")[1]);
-                                            modalProps.onClose();
+                                            props.onClose();
                                         }
                                     }}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => { modalProps.onClose(); }}>Cancel</Button>
                                 </ModalFooter>
@@ -478,6 +502,9 @@ export function SearchIcon({ height = 24, width = 24, viewboxX = width, viewboxY
     );
 }
 
+/**
+ * Discord's "X" icon
+ */
 export function CloseIcon({ height = 24, width = 24, viewboxX = width, viewboxY = height, className, style }: { height?: number, width?: number, viewboxX?: number, viewboxY?: number, className?: string, style?: CSSProperties; }) {
     return (
         <svg
@@ -913,6 +940,8 @@ export function ThemePreviewCategory({ accent, primary, secondary, tertiary, cla
     </div>);
 }
 
+const body: HTMLElement | null = document.getElementById("app-mount");
+
 export function ThemePreview({ accent, primary, secondary, tertiary, previewCSS }: { accent: string, primary: string, secondary: string, tertiary: string, previewCSS?: string; }) {
     return (<div className="colorwaysPreview-container">
         <style>{previewCSS}</style>
@@ -1073,7 +1102,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                                         setPrimaryColor(colorArray[1].split("#")[1]);
                                         setSecondaryColor(colorArray[2].split("#")[1]);
                                         setTertiaryColor(colorArray[3].split("#")[1]);
-                                        modalProps.onClose();
+                                        props.onClose();
                                     }
                                 }}>Finish</Button><Button style={{ marginLeft: 8 }} color={Button.Colors.PRIMARY} size={Button.Sizes.MEDIUM} look={Button.Looks.FILLED} onClick={() => { modalProps.onClose(); }}>Cancel</Button>
                             </ModalFooter>
@@ -1536,8 +1565,8 @@ const DiscordColorways = definePlugin({
         DataStore.get("actveColorway").then(activeColorway => {
             ColorwayCSS.set(activeColorway);
         });
-        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
         addContextMenuPatch("channel-attach", ctxMenuPatch);
+        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
     },
     stop: () => {
         disableStyle(style);
