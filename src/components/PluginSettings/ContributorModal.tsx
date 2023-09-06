@@ -35,12 +35,15 @@ export function openContributorModal(user: User) {
 function ContributorModal({ user }: { user: User; }) {
     useSettings();
 
-    const pluginList = useMemo(() => {
-        const allPlugins = Object.values(Plugins).filter(p => !p.name.endsWith("API"));
-        if (DevsById[user.id])
-            return allPlugins.filter(p => p.authors.includes(DevsById[user.id]));
+    const plugins = useMemo(() => {
+        const allPlugins = Object.values(Plugins);
+        const pluginsByAuthor = DevsById[user.id]
+            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
+            : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
 
-        return allPlugins.filter(p => p.authors.some(a => a.name === user.username));
+        return pluginsByAuthor
+            .filter(p => !p.name.endsWith("API"))
+            .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
     return (
@@ -54,7 +57,7 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             <div className={cl("plugins")}>
-                {pluginList.map(p =>
+                {plugins.map(p =>
                     <PluginCard
                         key={p.name}
                         plugin={p}
