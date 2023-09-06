@@ -53,10 +53,12 @@ async function listThemes(): Promise<UserThemeHeader[]> {
     const themeInfo: UserThemeHeader[] = [];
 
     for (const fileName of files) {
+        if (!fileName.endsWith(".css")) continue;
+
         const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
-        if (!data) continue;
-        const parsed = getThemeInfo(data, fileName);
-        themeInfo.push(parsed);
+        if (data == null) continue;
+
+        themeInfo.push(getThemeInfo(data, fileName));
     }
 
     return themeInfo;
@@ -138,7 +140,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {
-            preload: join(__dirname, "preload.js"),
+            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: false

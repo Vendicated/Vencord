@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
