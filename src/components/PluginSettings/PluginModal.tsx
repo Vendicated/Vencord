@@ -209,7 +209,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 >
                                     <img
                                         className={AvatarStyles.avatar}
-                                        src={user.getAvatarURL(void 0, true)}
+                                        src={user.getAvatarURL(void 0, 80, true)}
                                         alt={user.username}
                                         title={user.username}
                                     />
