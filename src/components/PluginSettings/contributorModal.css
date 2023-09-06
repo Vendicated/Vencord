@@ -1,0 +1,28 @@
+.vc-author-modal-root {
+    padding: 1em;
+}
+
+.vc-author-modal-header {
+    display: inline-flex;
+    padding: 0.4em 1em 0.4em 0.8em;
+    border-radius: 9999px;
+    align-items: center;
+    gap: 0.4em;
+    margin-bottom: 1em;
+    background: var(--background-tertiary);
+}
+
+.vc-author-modal-name {
+    text-transform: none;
+}
+
+.vc-author-modal-header img {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+}
+
+.vc-author-modal-plugins {
+    display: grid;
+    gap: 0.5em;
+}
