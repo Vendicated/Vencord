@@ -206,6 +206,7 @@ export default definePlugin({
             ignoreSelf && message.author?.id === myId ||
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
+            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
