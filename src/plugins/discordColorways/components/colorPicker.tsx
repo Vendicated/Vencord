@@ -273,7 +273,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                                                             "#"
                                                         )[1]
                                                     );
-                                                    modalProps.onClose();
+                                                    props.onClose();
                                                 }
                                             }}
                                         >
@@ -285,7 +285,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                                             size={Button.Sizes.MEDIUM}
                                             look={Button.Looks.FILLED}
                                             onClick={() => {
-                                                modalProps.onClose();
+                                                props.onClose();
                                             }}
                                         >
                                             Cancel

@@ -394,7 +394,7 @@ export default function CreatorModal({
                                                             "#"
                                                         )[1]
                                                     );
-                                                    modalProps.onClose();
+                                                    props.onClose();
                                                 }
                                             }}
                                         >
@@ -406,7 +406,7 @@ export default function CreatorModal({
                                             size={Button.Sizes.MEDIUM}
                                             look={Button.Looks.FILLED}
                                             onClick={() => {
-                                                modalProps.onClose();
+                                                props.onClose();
                                             }}
                                         >
                                             Cancel
