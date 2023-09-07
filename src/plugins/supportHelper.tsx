@@ -75,7 +75,7 @@ export default definePlugin({
                 OpenAsar: "openasar" in window,
             };
 
-            if (!IS_WEB) {
+            if (IS_DISCORD_DESKTOP) {
                 info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash()).rendererCrashReason ?? "N/A";
             }
 
