@@ -3,14 +3,14 @@
 }
 
 .vc-author-modal-header {
-    display: inline-flex;
-    border-radius: 9999px;
+    display: flex;
     align-items: center;
     margin-bottom: 1em;
 }
 
 .vc-author-modal-name {
     text-transform: none;
+    flex-grow: 0;
     background: var(--background-tertiary);
     border-radius: 0 9999px 9999px 0;
     padding: 6px 0.8em 6px 0.5em;
@@ -31,10 +31,22 @@
     top: 0;
 }
 
-.vc-author-modal-header img {
+.vc-author-modal-avatar {
     height: 32px;
     width: 32px;
     border-radius: 50%;
+}
+
+.vc-author-modal-links {
+    margin-left: auto;
+}
+
+.vc-author-modal-links img {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    border: 4px solid var(--background-tertiary);
+    box-sizing: border-box
 }
 
 .vc-author-modal-plugins {

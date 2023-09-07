@@ -9,6 +9,7 @@ import "./contributorModal.css";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Forms, showToast, useMemo } from "@webpack/common";
@@ -35,6 +36,9 @@ export function openContributorModal(user: User) {
 function ContributorModal({ user }: { user: User; }) {
     useSettings();
 
+    // TODO: unhardcode - Decide whether we want to hardcode in devs object or fetch from discord connections
+    const githubName = "Vendicated";
+
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
         const pluginsByAuthor = DevsById[user.id]
@@ -50,10 +54,22 @@ function ContributorModal({ user }: { user: User; }) {
         <>
             <div className={cl("header")}>
                 <img
+                    className={cl("avatar")}
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
                 <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+
+                <div className={cl("links")}>
+                    {githubName && (
+                        <Link href={`https://github.com/${githubName}`}>
+                            <img
+                                src="/assets/6a853b4c87fce386cbfef4a2efbacb09.svg"
+                                alt="GitHub"
+                            />
+                        </Link>
+                    )}
+                </div>
             </div>
 
             <div className={cl("plugins")}>
