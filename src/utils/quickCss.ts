@@ -78,7 +78,7 @@ async function initThemes() {
                 normalizedValue = `${normalizedValue}${meta.units ?? ""}`;
             }
 
-            cssVars.push(`--${id}: ${normalizedValue};`);
+            cssVars.push(`--${id}:${normalizedValue};`);
         }
     }
 
