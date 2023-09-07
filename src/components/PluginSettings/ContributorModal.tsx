@@ -11,6 +11,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
+import { getTheme, Theme } from "@utils/discord";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Forms, showToast, useMemo } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -31,6 +32,14 @@ export function openContributorModal(user: User) {
             </ErrorBoundary>
         </ModalRoot>
     );
+}
+
+const GithubLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
+const GithubDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
+
+function GithubIcon() {
+    const src = getTheme() === Theme.Light ? GithubLight : GithubDark;
+    return <img src={src} alt="GitHub" />;
 }
 
 function ContributorModal({ user }: { user: User; }) {
@@ -63,10 +72,7 @@ function ContributorModal({ user }: { user: User; }) {
                 <div className={cl("links")}>
                     {githubName && (
                         <Link href={`https://github.com/${githubName}`}>
-                            <img
-                                src="/assets/6a853b4c87fce386cbfef4a2efbacb09.svg"
-                                alt="GitHub"
-                            />
+                            <GithubIcon />
                         </Link>
                     )}
                 </div>
