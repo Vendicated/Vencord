@@ -4,21 +4,35 @@
 
 .vc-author-modal-header {
     display: inline-flex;
-    padding: 0.4em 1em 0.4em 0.8em;
     border-radius: 9999px;
     align-items: center;
-    gap: 0.4em;
     margin-bottom: 1em;
-    background: var(--background-tertiary);
 }
 
 .vc-author-modal-name {
     text-transform: none;
+    background: var(--background-tertiary);
+    border-radius: 0 9999px 9999px 0;
+    padding: 6px 0.8em 6px 0.5em;
+    font-size: 20px;
+    position: relative;
+}
+
+.vc-author-modal-name::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 16px;
+    background: var(--background-tertiary);
+    z-index: -1;
+    left: -16px;
+    top: 0;
 }
 
 .vc-author-modal-header img {
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
     border-radius: 50%;
 }
 
