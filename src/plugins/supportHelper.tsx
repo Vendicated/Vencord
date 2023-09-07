@@ -76,7 +76,7 @@ export default definePlugin({
             };
 
             if (IS_DISCORD_DESKTOP) {
-                info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash()).rendererCrashReason ?? "N/A";
+                info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash())?.rendererCrashReason ?? "N/A";
             }
 
             const debugInfo = `
