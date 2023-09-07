@@ -6,9 +6,9 @@
 
 import * as DataStore from "@api/DataStore";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { TextInput, Tooltip, useState } from "@webpack/common";
+import { SettingsRouter, TextInput, Tooltip, useState } from "@webpack/common";
 
-import { ColorwayCSS } from "..";
+import { ColorwayCSS, LazySwatchLoaded } from "..";
 import { Colorway } from "../types";
 import CreatorModal from "./creatorModal";
 import { CloseIcon, SearchIcon } from "./icons";
@@ -206,6 +206,7 @@ export default function SelectorModal({
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
+                                            if (!LazySwatchLoaded) SettingsRouter.open("Appearance");
                                             openModal(props => (
                                                 <CreatorModal
                                                     modalProps={props}

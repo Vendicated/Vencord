@@ -6,9 +6,8 @@
 
 import * as DataStore from "@api/DataStore";
 import { openModal } from "@utils/modal";
-import { SettingsRouter, Text, Tooltip, useState } from "@webpack/common";
+import { Text, Tooltip, useState } from "@webpack/common";
 
-import { LazySwatchLoaded } from "..";
 import { Colorway } from "../types";
 import SelectorModal from "./selectorModal";
 import Spinner from "./spinner";
@@ -106,14 +105,6 @@ export default function ColorwaysButton({
                                                                         (
                                                                             actveColorwayID: string
                                                                         ) => {
-                                                                            if (
-                                                                                LazySwatchLoaded ===
-                                                                                false
-                                                                            ) {
-                                                                                SettingsRouter.open(
-                                                                                    "Appearance"
-                                                                                );
-                                                                            }
                                                                             openModal(
                                                                                 props => (
                                                                                     <SelectorModal
