@@ -141,10 +141,10 @@ const settings = definePluginSettings({
             }
         ],
     },
-    showNameInStatus: {
-      description: "Show name of song and artist in status name",
-      type: OptionType.BOOLEAN,
-      default: false,
+    showSongNameInStatus: {
+        description: "Show name of song and artist in status name",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 
 });
@@ -272,8 +272,8 @@ export default definePlugin({
                 label: "Last.fm Profile",
                 url: `https://www.last.fm/user/${settings.store.username}`,
             });
-        
-        const status_name = settings.store.showNameInStatus ?
+
+        const status_name = settings.store.showSongNameInStatus ?
             trackData.name + " - " + trackData.artist :
             settings.store.statusName;
 
