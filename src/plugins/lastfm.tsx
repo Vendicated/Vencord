@@ -273,13 +273,13 @@ export default definePlugin({
                 url: `https://www.last.fm/user/${settings.store.username}`,
             });
 
-        const status_name = settings.store.showSongNameInStatus ?
+        const statusName = settings.store.showSongNameInStatus ?
             trackData.name + " - " + trackData.artist :
             settings.store.statusName;
 
         return {
             application_id: applicationId,
-            name: status_name,
+            name: statusName,
 
             details: trackData.name,
             state: trackData.artist,
