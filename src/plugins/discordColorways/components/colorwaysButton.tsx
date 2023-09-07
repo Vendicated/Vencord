@@ -39,15 +39,16 @@ export default function ColorwaysButton({
             position="right"
             tooltipContentClassName={listItemTooltipClass}
         >
-            {({ onMouseEnter, onMouseLeave }) => {
+            {({ onMouseEnter, onMouseLeave, onClick, onContextMenu }) => {
                 return (
                     <div className={listItemClass}>
                         <div
-                            onContextMenu={() =>
+                            onContextMenu={() => {
+                                onContextMenu();
                                 openModal(props => (
                                     <ToolboxModal modalProps={props} />
-                                ))
-                            }
+                                ));
+                            }}
                             className={
                                 listItemWrapperClass + " ColorwaySelectorBtn"
                             }
@@ -62,18 +63,20 @@ export default function ColorwaysButton({
                             }}
                             onMouseLeave={onMouseLeave}
                             onClick={() => {
-                                onMouseLeave();
-                                setLoading(true);
+                                onClick();
                                 var colorways = new Array<Colorway>();
                                 DataStore.get("colorwaySourceFiles").then(
                                     colorwaySourceFiles => {
+                                        setLoading(true);
                                         colorwaySourceFiles.forEach(
-                                            (colorwayList, i) => {
+                                            (colorwayList: string, i: number) => {
                                                 fetch(colorwayList)
                                                     .then(response =>
                                                         response.json()
                                                     )
-                                                    .then(data => {
+                                                    .then((data: {
+                                                        colorways: Colorway[];
+                                                    }) => {
                                                         if (!data) return;
                                                         if (
                                                             !data.colorways
