@@ -363,6 +363,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RuukuLada",
         id: 119705748346241027n,
     },
+    blahaj_zip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
