@@ -39,6 +39,8 @@
 
 .vc-author-modal-links {
     margin-left: auto;
+    display: flex;
+    gap: 0.2em;
 }
 
 .vc-author-modal-links img {
