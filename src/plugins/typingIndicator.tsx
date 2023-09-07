@@ -19,10 +19,11 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getDisplayName } from "@utils/discord";
 import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "./typingTweaks";
 
@@ -33,9 +34,6 @@ const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
 
-function getDisplayName(guildId: string, userId: string) {
-    return GuildMemberStore.getNick(guildId, userId) ?? UserStore.getUser(userId).username;
-}
 
 function TypingIndicator({ channelId }: { channelId: string; }) {
     const typingUsers: Record<string, number> = useStateFromStores(

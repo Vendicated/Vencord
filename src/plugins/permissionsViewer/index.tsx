@@ -21,6 +21,7 @@ import "./styles.css";
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getUniqueUsername } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore, Menu, PermissionsBits, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
@@ -86,7 +87,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                             });
                         }
 
-                        header = member.nick ?? UserStore.getUser(member.userId).username;
+                        header = getUniqueUsername(UserStore.getUser(member.userId));
 
                         break;
                     }
