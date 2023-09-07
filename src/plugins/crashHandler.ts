@@ -23,10 +23,12 @@ import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
+import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, NavigationRouter } from "@webpack/common";
 import type { ReactElement } from "react";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
+const ModalStack = findByPropsLazy("pushLazy", "popAll");
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
@@ -51,8 +53,6 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
-    popAllModals: undefined as (() => void) | undefined,
-
     settings,
 
     patches: [
@@ -61,13 +61,6 @@ export default definePlugin({
             replacement: {
                 match: /(?=this\.setState\()/,
                 replace: "$self.handleCrash(this)||"
-            }
-        },
-        {
-            find: 'dispatch({type:"MODAL_POP_ALL"})',
-            replacement: {
-                match: /"MODAL_POP_ALL".+?};(?<=(\i)=function.+?)/,
-                replace: (m, popAll) => `${m}$self.popAllModals=${popAll};`
             }
         }
     ],
@@ -128,7 +121,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to close open context menu.", err);
         }
         try {
-            this.popAllModals?.();
+            ModalStack?.popAll();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close old modals.", err);
         }
