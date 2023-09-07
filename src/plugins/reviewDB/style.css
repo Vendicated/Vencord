@@ -14,7 +14,6 @@
     overflow: hidden;
     background: transparent;
     border: 1px solid var(--profile-message-input-border-color);
-    font-size: 14px;
 }
 
 .vc-rdb-placeholder {
@@ -22,6 +21,10 @@
     font-weight: bold;
     font-style: italic;
     color: var(--text-muted);
+}
+
+.vc-rdb-input * {
+    font-size: 14px;
 }
 
 .vc-rdb-modal-footer {
@@ -48,4 +51,10 @@
 
 .vc-rdb-modal-reviews {
     margin-top: 16px;
+}
+
+.vc-rdb-review-comment img {
+    height: 20px !important;
+    width: 20px !important;
+    vertical-align: middle;
 }

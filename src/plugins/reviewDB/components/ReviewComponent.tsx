@@ -20,7 +20,7 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
@@ -125,10 +125,12 @@ export default LazyComponent(() => {
                 }
 
                 <p
-                    className={classes(messageContent)}
+                    className={classes(messageContent, cl("review-comment"))}
                     style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
                 >
-                    {review.comment}
+                    {
+                        Parser.parse(review.comment)
+                    }
                 </p>
                 {review.id !== 0 && (
                     <div className={classes(container, isHeader, buttons)} style={{

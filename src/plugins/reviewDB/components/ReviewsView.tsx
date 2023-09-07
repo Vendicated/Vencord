@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes } from "@utils/misc";
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, waitFor } from "@webpack";
 import { Forms, React, RelationshipStore, UserStore } from "@webpack/common";
-import type { KeyboardEvent } from "react";
 
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
@@ -28,7 +26,11 @@ import { settings } from "../settings";
 import { authorize, cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findByPropsLazy("inputDefault", "editable");
+let InputComponent;
+const Editor = findByPropsLazy("start", "end", "addMark");
+const Transform = findByPropsLazy("unwrapNodes");
+waitFor(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider"), m => InputComponent = m.Z);
+const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
 
 interface UserProps {
     discordId: string;
@@ -113,48 +115,86 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
     );
 }
 
+
 export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
     const { token } = settings.store;
+    let editorRef = null;
 
-    function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
-        if (key === "Enter") {
-            addReview({
-                userid: discordId,
-                comment: (target as HTMLInputElement).value,
-                star: -1
-            }).then(res => {
-                if (res?.success) {
-                    (target as HTMLInputElement).value = ""; // clear the input
-                    refetch();
-                } else if (res?.message) {
-                    showToast(res.message);
-                }
-            });
-        }
-    }
+
+    const inputType = InputTypes.FORM;
+
+    inputType.disableAutoFocus = true;
+
+    const channel = {
+        flags_: 256,
+        guild_id_: null,
+        id: "0",
+        getGuildId: () => null,
+        isPrivate: () => true,
+        isActiveThread: () => false,
+        isArchivedLockedThread: () => false,
+        isDM: () => true,
+        roles: { "0": { permissions: 0n } },
+        getRecipientId: () => "0",
+        hasFlag: () => false,
+    };
 
     return (
-        <textarea
-            className={classes(Classes.inputDefault, "enter-comment", cl("input"))}
-            onKeyDownCapture={e => {
-                if (e.key === "Enter") {
-                    e.preventDefault(); // prevent newlines
-                }
-            }}
-            placeholder={
-                !token
-                    ? "You need to authorize to review users!"
-                    : isAuthor
-                        ? `Update review for @${name}`
-                        : `Review @${name}`
-            }
-            onKeyDown={onKeyPress}
-            onClick={() => {
+        <>
+            <div onClick={() => {
                 if (!token) {
                     showToast("Opening authorization window...");
                     authorize();
                 }
-            }}
-        />
+            }}>
+                <InputComponent
+                    className={cl("input")}
+                    channel={channel} placeholder={
+                        !token
+                            ? "You need to authorize to review users!"
+                            : isAuthor
+                                ? `Update review for @${name}`
+                                : `Review @${name}`
+                    }
+                    type={inputType}
+                    disableThemedBackground={true}
+                    focused={false}
+                    setEditorRef={r => {
+                        if (!r) return;
+                        editorRef = r.ref.current.getSlateEditor();
+                    }}
+                    textValue=""
+                    onSubmit={
+                        res => {
+                            return addReview({
+                                userid: discordId,
+                                comment: res.value,
+                            }).then(res => {
+                                if (res?.success) {
+                                    refetch();
+
+                                    // clear editor
+                                    Transform.delete(editorRef, {
+                                        at: {
+                                            anchor: Editor.start(editorRef, []),
+                                            focus: Editor.end(editorRef, []),
+                                        }
+                                    });
+                                } else if (res?.message) {
+                                    showToast(res.message);
+                                }
+
+                                // even tho we need to return this, it doesnt do anything
+                                return {
+                                    shouldClear: false,
+                                    shouldRefocus: true,
+                                };
+                            });
+                        }
+                    }
+                />
+            </div>
+
+        </>
     );
 }
