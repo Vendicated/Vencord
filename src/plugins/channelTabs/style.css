@@ -26,7 +26,7 @@
     margin-left: 0.125rem;
 }
 
-.vc-channeltabs-tab-base {
+.vc-channeltabs-tab-inner {
     border-radius: 0.5rem;
     padding: 0.25rem 0 0.25rem 0.25rem;
     display: flex;

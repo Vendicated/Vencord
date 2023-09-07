@@ -244,7 +244,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }), []);
     drag(drop(ref));
 
-    const tab = <div className={cl("tab-base")} data-compact={props.compact} ref={ref}>
+    const tab = <div className={cl("tab-inner")} data-compact={props.compact} ref={ref}>
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
     return tab;
