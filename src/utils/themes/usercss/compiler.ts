@@ -8,7 +8,7 @@ import { Settings } from "@api/Settings";
 import { getLess, getStylus } from "@utils/dependencies";
 import { Logger } from "@utils/Logger";
 
-import { usercssParse as usercssParse } from ".";
+import { usercssParse } from ".";
 
 const UserCSSLogger = new Logger("UserCSS:Compiler", "#d2acf5");
 
