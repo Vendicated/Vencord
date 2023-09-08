@@ -114,7 +114,7 @@ interface UserCSSCardProps {
 function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardProps) {
     return (
         <AddonCard
-            name={theme.name}
+            name={theme.name ?? "Unknown"}
             description={theme.description}
             author={theme.author ?? "Unknown"}
             enabled={enabled}

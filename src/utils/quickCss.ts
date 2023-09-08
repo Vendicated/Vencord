@@ -17,6 +17,7 @@
 */
 
 import { addSettingsListener, Settings } from "@api/Settings";
+import { Toasts } from "@webpack/common";
 
 import { compileUsercss } from "./themes/usercss/compiler";
 
@@ -70,7 +71,18 @@ async function initThemes() {
     for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
         // UserCSS goes through a compile step first
         const css = await compileUsercss(theme);
-        if (!css) continue; // something went wrong during the compile step...
+        if (!css) {
+            // let's not leave the user in the dark about this and point them to where they can find the error
+            Toasts.show({
+                message: `Failed to compile ${theme}, check the console for more info.`,
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId(),
+                options: {
+                    position: Toasts.Position.BOTTOM
+                }
+            });
+            continue;
+        }
 
         const blob = new Blob([css], { type: "text/css" });
         links.push(URL.createObjectURL(blob));

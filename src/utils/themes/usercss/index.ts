@@ -10,7 +10,7 @@ import { parse as originalParse, UserstyleHeader } from "usercss-meta";
 const UserCSSLogger = new Logger("UserCSS", "#d2acf5");
 
 export function parse(text: string, fileName: string): UserstyleHeader {
-    const { metadata, errors } = originalParse(text.replace(/\r/g, ""));
+    var { metadata, errors } = originalParse(text.replace(/\r/g, ""), { allowErrors: true });
 
     if (errors.length) {
         UserCSSLogger.warn("Parsed", fileName, "with errors:", errors);

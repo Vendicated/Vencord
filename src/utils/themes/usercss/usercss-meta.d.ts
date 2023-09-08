@@ -102,5 +102,5 @@ declare module "usercss-meta" {
         vars: Record<string, UserCSSVariable>;
     }
 
-    export function parse(text: string): { metadata: UserstyleHeader; errors: { code: string; args: any; }[] };
+    export function parse(text: string, options: { allowErrors: boolean; }): { metadata: UserstyleHeader; errors: { code: string; args: any; }[]; };
 }

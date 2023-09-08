@@ -58,18 +58,16 @@ export async function compileUsercss(fileName: string) {
     const themeData = await VencordNative.themes.getThemeData(fileName);
     if (!themeData) return null;
 
-    const { preprocessor: definedPreprocessor, vars } = usercssParse(themeData, fileName);
-
     // UserCSS preprocessor order look like this:
     // - use the preprocessor defined
     // - if variables are set, `uso`
     // - otherwise, `default`
-    const usedPreprocessor = definedPreprocessor ?? (Object.keys(vars).length > 0 ? "uso" : "default");
+    const { vars = {}, preprocessor = Object.keys(vars).length > 0 ? "uso" : "default" } = usercssParse(themeData, fileName);
 
-    const preprocessorFn = preprocessors[usedPreprocessor];
+    const preprocessorFn = preprocessors[preprocessor];
 
     if (!preprocessorFn) {
-        UserCSSLogger.error("File", fileName, "requires preprocessor", usedPreprocessor, "which isn't known to Vencord");
+        UserCSSLogger.error("File", fileName, "requires preprocessor", preprocessor, "which isn't known to Vencord");
         return null;
     }
 
@@ -82,7 +80,7 @@ export async function compileUsercss(fileName: string) {
     try {
         return await preprocessorFn(themeData, varsToPass);
     } catch (error) {
-        UserCSSLogger.error("File", fileName, "failed to compile with preprocessor", usedPreprocessor, error);
+        UserCSSLogger.error("File", fileName, "failed to compile with preprocessor", preprocessor, error);
         return null;
     }
 }
