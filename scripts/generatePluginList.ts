@@ -165,7 +165,11 @@ async function parseFile(fileName: string) {
             data.target = target as any;
         }
 
-        return data;
+        let readme = "";
+        try {
+            readme = readFileSync(join(fileName, "..", "README.md"), "utf-8");
+        } catch { }
+        return [data, readme] as const;
     }
 
     throw fail("no default export called 'definePlugin' found");
@@ -194,18 +198,24 @@ function isPluginFile({ name }: { name: string; }) {
 (async () => {
     parseDevs();
 
-    const plugins = ["src/plugins", "src/plugins/_core"].flatMap(dir =>
+    const plugins = [] as PluginData[];
+    const readmes = {} as Record<string, string>;
+
+    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
-            .map(async dirent =>
-                parseFile(await getEntryPoint(dir, dirent))
-            )
-    );
+            .map(async dirent => {
+                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
+                plugins.push(data);
+                if (readme) readmes[data.name] = readme;
+            })
+    ));
 
-    const data = JSON.stringify(await Promise.all(plugins));
+    const data = JSON.stringify(plugins);
 
-    if (process.argv.length > 2) {
+    if (process.argv.length > 3) {
         writeFileSync(process.argv[2], data);
+        writeFileSync(process.argv[3], JSON.stringify(readmes));
     } else {
         console.log(data);
     }

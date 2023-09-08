@@ -55,8 +55,8 @@ export default definePlugin({
         {
             find: '"MaskedLinkStore"',
             replacement: {
-                match: /return ((\i)\.apply\(this,arguments\))(?=\}function \i.{0,200}\.trusted)/,
-                replace: "return $self.handleLink(...arguments).then(handled => handled || $1)"
+                match: /return ((\i)\.apply\(this,arguments\))(?=\}function \i.{0,250}\.trusted)/,
+                replace: "return $self.handleLink(...arguments).then(handled => handled||$1)"
             }
         },
         // Make Spotify profile activity links open in app on web
