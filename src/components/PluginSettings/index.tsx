@@ -257,8 +257,7 @@ export default function PluginSettings() {
     if (newPlugins != null) {
         const combinedArray = [...new Set([...newPlugins, ...sortedPlugins.map(obj => obj.name)])];
         sortedPlugins = combinedArray
-            .map(name => sortedPlugins.find(obj => obj.name === name)!)
-            .filter(obj => obj !== undefined);
+            .map(name => sortedPlugins.find(obj => obj.name === name)!);
     }
 
 
