@@ -17,6 +17,7 @@
     font-size: 20px;
     height: 36px;
     position: relative;
+    white-space: nowrap;
 }
 
 .vc-author-modal-name::before {
