@@ -8,6 +8,7 @@
     width: 100%;
     transition: 0.1s ease-out;
     transition-property: box-shadow, transform, background, opacity;
+    box-sizing: border-box;
 }
 
 .vc-addon-card-disabled {
