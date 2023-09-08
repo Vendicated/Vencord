@@ -19,10 +19,11 @@
 import { generateId, sendBotMessage } from "@api/Commands";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
-import { MessageAttachment } from "discord-types/general";
+import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, FluxDispatcher, SelectedChannelStore, Tooltip, useEffect, UserStore } from "@webpack/common";
+import { Message, MessageAttachment } from "discord-types/general";
 
 interface Props {
     type: {
@@ -85,10 +86,28 @@ export function PreviewButton(chatBoxProps: Props) {
     const { isEmpty, attachments } = chatBoxProps.type;
 
     const channelId = SelectedChannelStore.getChannelId();
+    const author = UserStore.getCurrentUser();
     const draft = getDraft(channelId);
 
     const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
+
+    const forceUpdate = useForceUpdater();
+
+    useEffect(() => {
+        // i tried to use presendListner but i needed to add a delay for it to work. and sometimes it doenst even do anything
+        const messageCreate = ({ message, channelId: cid }: { channelId: string, message: Message; }) => {
+            if (channelId !== cid || message.author.id !== author.id) return;
+
+            forceUpdate();
+        };
+        FluxDispatcher.subscribe("MESSAGE_CREATE", messageCreate);
+
+        return () => {
+            FluxDispatcher.unsubscribe("MESSAGE_CREATE", messageCreate);
+        };
+
+    }, [channelId]);
 
     if (!hasContent && !hasAttachments) return null;
 
@@ -102,7 +121,7 @@ export function PreviewButton(chatBoxProps: Props) {
                             channelId,
                             {
                                 content: getDraft(channelId),
-                                author: UserStore.getCurrentUser(),
+                                author,
                                 attachments: hasAttachments ? await getAttachments(channelId) : undefined,
                             }
                         )}
