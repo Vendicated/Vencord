@@ -48,7 +48,7 @@ export default definePlugin({
         name: "vencord-debug",
         description: "Send Vencord Debug info",
         predicate: ctx => AllowedChannelIds.includes(ctx.channel.id),
-        execute() {
+        async execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
             const client = (() => {
@@ -74,6 +74,10 @@ export default definePlugin({
                 Outdated: isOutdated,
                 OpenAsar: "openasar" in window,
             };
+
+            if (IS_DISCORD_DESKTOP) {
+                info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash())?.rendererCrashReason ?? "N/A";
+            }
 
             const debugInfo = `
 **Vencord Debug Info**
