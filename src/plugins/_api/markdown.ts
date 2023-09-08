@@ -29,16 +29,33 @@ export default definePlugin({
         {
             find: '"then you probably need to add it to this file so that the rich chat box understands it."',
             replacement: [
+                // grab slate rules
                 {
-                    match: /(?<=originalMatch:\i}}}},\i=(\(0,\i\.\i\))\(\[(\i),(\i)\]\),\i=\(0,\i\.\i\)\(\[(\i),\i\]\),(\i)=(\i.\i)\(\i\),(\i)=.{0,160},guildId:\i}),(\i)=(\i)\?\i:\i,/,
-                    replace: (_, flatten, rules, slateOverrides, inlineRules, rulesParser, astParserFor, inlineParser, parser, inline) => `;const vc_rules=Vencord.Api.Markdown.__getCustomRules();var ${parser}=${inline}?(${inlineParser}=${astParserFor}(${flatten}([${inlineRules},${slateOverrides},vc_rules]))):(${rulesParser}=${astParserFor}(${flatten}([${rules},${slateOverrides},vc_rules]))),`,
+                    match: /=({link:{type:.{0,1240}type:"inlineObject"}}),/,
+                    replace: (_, rules) => `=Vencord.Api.Markdown.__setSlateRules(${rules}),`,
                 },
+
+                // grab slate overrides
+                {
+                    match: /=({url:{parse:.{0,620}originalMatch:\i}}}}),/,
+                    replace: (_, rules) => `=Vencord.Api.Markdown.__setSlateOverrides(${rules}),`,
+                },
+
+                // replace parsers with ones with new rules
+                {
+                    match: /(?<=,guildId:\i}),(\i)=(\i)\?\i:\i,/,
+                    replace: (_, parser, inline) => `;const vc_parsers=Vencord.Api.Markdown.__getSlateParsers();var ${parser}=${inline}?vc_parsers.inline:vc_parsers.normal,`,
+                },
+
+                // patch into rule parsing
                 {
                     match: /=(\i)\.originalMatch;(.{0,160}case"emoticon":(return .+?;).{0,1100}case"link":(.{0,420}))(?=default:)/,
                     replace: (_, rule, orig, plaintextReturn, inlineStyleBody) => `=${rule}.originalMatch;if(${rule}.type.startsWith("vc_")){if(Vencord.Api.Markdown.__getSlateRule(${rule}.type)?.type==="inlineStyle"){${inlineStyleBody.replace(inlineStylePatch, "=Vencord.Api.Markdown.__getSlateRule($1);")}}else{${plaintextReturn}}}${orig}`,
                 },
             ]
         },
+
+        // add new decorators
         {
             find: '"Slate: Unknown decoration attribute: "',
             replacement: {
