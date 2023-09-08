@@ -13,9 +13,9 @@
     flex-grow: 0;
     background: var(--background-tertiary);
     border-radius: 0 9999px 9999px 0;
-    padding: 6px 0.8em 6px 0.5em;
+    padding: 6px 0.8em 12px 0.5em;
     font-size: 20px;
-    height: 20px;
+    height: 36px;
     position: relative;
 }
 
@@ -31,9 +31,13 @@
     top: 0;
 }
 
+.vc-author-modal-name span {
+    font-size: 16px;
+}
+
 .vc-author-modal-avatar {
-    height: 32px;
-    width: 32px;
+    height: 48px;
+    width: 48px;
     border-radius: 50%;
 }
 

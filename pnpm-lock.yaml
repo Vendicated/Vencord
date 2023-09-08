@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 patchedDependencies:
   eslint-plugin-path-alias@1.0.0:
@@ -60,8 +64,8 @@ devDependencies:
     specifier: ^5.1.0
     version: 5.1.0
   discord-types:
-    specifier: ^1.3.26
-    version: 1.3.26
+    specifier: https://github.com/Swishilicous/discord-types.git#7ece571cd9f5c9e238eb09c5635d4468ede050d2
+    version: github.com/Swishilicous/discord-types/7ece571cd9f5c9e238eb09c5635d4468ede050d2
   esbuild:
     specifier: ^0.15.18
     version: 0.15.18
@@ -1171,13 +1175,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       path-type: 4.0.0
-    dev: true
-
-  /discord-types@1.3.26:
-    resolution: {integrity: sha512-ToG51AOCH+JTQf7b+8vuYQe5Iqwz7nZ7StpECAZ/VZcI1ZhQk13pvt9KkRTfRv1xNvwJ2qib4e3+RifQlo8VPQ==}
-    dependencies:
-      '@types/react': 17.0.2
-      moment: 2.29.4
     dev: true
 
   /doctrine@3.0.0:
@@ -3377,6 +3374,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
+  github.com/Swishilicous/discord-types/7ece571cd9f5c9e238eb09c5635d4468ede050d2:
+    resolution: {tarball: https://codeload.github.com/Swishilicous/discord-types/tar.gz/7ece571cd9f5c9e238eb09c5635d4468ede050d2}
+    name: discord-types
+    version: 1.3.26
+    dependencies:
+      '@types/react': 17.0.2
+      moment: 2.29.4
+    dev: true
