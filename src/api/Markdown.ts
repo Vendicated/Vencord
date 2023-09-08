@@ -95,10 +95,10 @@ export function removeBlacklist(ruleset: Ruleset, rule: string) {
 }
 
 const rulesets = findByPropsLazy("RULES");
-function __getCustomRules(ruleset: string) {
+export function __getCustomRules(ruleset: string) {
     const rules = {};
     const blacklist = blacklistedRules.get(ruleset);
-    for (const [name, rule] of markdownRules.entries()) {
+    for (const [name, rule] of markdownRules) {
         if (blacklist?.has(name)) continue;
 
         rules["vc_" + name] = rule(rulesets[ruleset] ?? rulesets.RULES);
@@ -169,7 +169,7 @@ function __rebuildParsers() {
     for (const props of parserMap) {
         const customRules = __getCustomRules(props.ruleset);
 
-        const reactOptions = props.reactOptions ? {...Parser.defaultReactRuleOptions, ...props.reactOptions} : Parser.defaultReactRuleOptions;
+        const reactOptions = props.reactOptions ? { ...Parser.defaultReactRuleOptions, ...props.reactOptions } : Parser.defaultReactRuleOptions;
         const overrides = {};
         if (props.overrides) {
             for (const [rule, override] of Object.entries(props.overrides)) {

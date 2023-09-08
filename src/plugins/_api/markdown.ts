@@ -19,6 +19,8 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+const inlineStylePatch = new RegExp(('=\\i\\[("link"===\\i\\?"url":\\i)\\];').replaceAll("\\i", "[A-Za-z_$][\\w$]*"));
+
 export default definePlugin({
     name: "MarkdownAPI",
     description: "API to add markdown rules",
@@ -28,12 +30,12 @@ export default definePlugin({
             find: '"then you probably need to add it to this file so that the rich chat box understands it."',
             replacement: [
                 {
-                    match: /(\.RULES\){if\(!\(\i in \i\))(\)throw.+?=)(\i\[(\i)\]);/,
-                    replace: "$1&&!Vencord.Api.Markdown.__getSlateRule($4)$2$3??Vencord.Api.Markdown.__getSlateRule($4);",
+                    match: /(?<=originalMatch:\i}}}},\i=(\(0,\i\.\i\))\(\[(\i),(\i)\]\),\i=\(0,\i\.\i\)\(\[(\i),\i\]\),(\i)=(\i.\i)\(\i\),(\i)=.{0,160},guildId:\i}),(\i)=(\i)\?\i:\i,/,
+                    replace: (_, flatten, rules, slateOverrides, inlineRules, rulesParser, astParserFor, inlineParser, parser, inline) => `;const vc_rules=Vencord.Api.Markdown.__getCustomRules();var ${parser}=${inline}?(${inlineParser}=${astParserFor}(${flatten}([${inlineRules},${slateOverrides},vc_rules]))):(${rulesParser}=${astParserFor}(${flatten}([${rules},${slateOverrides},vc_rules]))),`,
                 },
                 {
-                    match: /=(\i)\.originalMatch;(.+?case"emoticon":(return .+?;).+?case"link":(.+?))(?=default:)/,
-                    replace: (_, rule, orig, plaintextReturn, inlineStyleBody) => `=${rule}.originalMatch;if(${rule}.type.startsWith("vc_")){if(Vencord.Api.Markdown.__getSlateRule(${rule}.type)?.type==="inlineStyle"){${inlineStyleBody}}else{${plaintextReturn}}}${orig}`,
+                    match: /=(\i)\.originalMatch;(.{0,160}case"emoticon":(return .+?;).{0,1100}case"link":(.{0,420}))(?=default:)/,
+                    replace: (_, rule, orig, plaintextReturn, inlineStyleBody) => `=${rule}.originalMatch;if(${rule}.type.startsWith("vc_")){if(Vencord.Api.Markdown.__getSlateRule(${rule}.type)?.type==="inlineStyle"){${inlineStyleBody.replace(inlineStylePatch, "=Vencord.Api.Markdown.__getSlateRule($1);")}}else{${plaintextReturn}}}${orig}`,
                 },
             ]
         },
