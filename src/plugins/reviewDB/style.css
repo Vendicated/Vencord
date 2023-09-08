@@ -53,8 +53,17 @@
     margin-top: 16px;
 }
 
+.vc-rdb-review {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+}
+
 .vc-rdb-review-comment img {
-    height: 20px !important;
-    width: 20px !important;
-    vertical-align: middle;
+    vertical-align: text-top;
+}
+
+.vc-rdb-review-comment {
+    overflow-y: hidden;
+    margin-top: 1px;
+    margin-bottom: 8px;
 }
