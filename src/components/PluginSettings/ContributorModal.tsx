@@ -80,7 +80,7 @@ function ContributorModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <Forms.FormTitle tag="h2" className={cl("name")}>{user.globalName}<br /><span>{user.username}</span></Forms.FormTitle>
+                <Forms.FormTitle tag="h2" className={cl("name")}>{(user as any).globalName}<br /><span>{user.username}</span></Forms.FormTitle>
 
                 <div className={cl("links")}>
                     {website && (
