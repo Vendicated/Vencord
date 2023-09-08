@@ -116,10 +116,29 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
-    statusName: {
-        description: "text shown in status",
+    customStatusName: {
+        description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
+    },
+    showSongNameInStatus: {
+        description: "Show name of song and artist in status name",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Use custom status name",
+                value: "dontshow",
+                default: true
+            },
+            {
+                label: "Use format 'artist - song'",
+                value: "artistfirst"
+            },
+            {
+                label: "Use format 'song - artist'",
+                value: "songfirst"
+            }
+        ],
     },
     useListeningStatus: {
         description: 'show "Listening to" status instead of "Playing"',
@@ -141,12 +160,6 @@ const settings = definePluginSettings({
             }
         ],
     },
-    showSongNameInStatus: {
-        description: "Show name of song and artist in status name",
-        type: OptionType.BOOLEAN,
-        default: false,
-    }
-
 });
 
 export default definePlugin({
@@ -273,9 +286,11 @@ export default definePlugin({
                 url: `https://www.last.fm/user/${settings.store.username}`,
             });
 
-        const statusName = settings.store.showSongNameInStatus ?
+        const statusName = settings.store.showSongNameInStatus === "songfirst" ?
             trackData.name + " - " + trackData.artist :
-            settings.store.statusName;
+            settings.store.showSongNameInStatus === "artistfirst" ?
+                trackData.artist + " - " + trackData.name :
+                settings.store.customStatusName;
 
         return {
             application_id: applicationId,
