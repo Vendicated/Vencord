@@ -18,7 +18,7 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, SelectedChannelStore, SelectedGuildStore, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
@@ -116,6 +116,41 @@ export async function openUserProfile(id: string) {
             section: "Profile Popout"
         }
     });
+}
+
+interface FetchUserProfileOptions {
+    friend_token?: string;
+    connections_role_id?: string;
+    guild_id?: string;
+    with_mutual_guilds?: boolean;
+    with_mutual_friends_count?: boolean;
+}
+
+/**
+ * Fetch a user's profile
+ */
+export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions) {
+    const cached = UserProfileStore.getUserProfile(id);
+    if (cached) return cached;
+
+    FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
+
+    const { body } = await RestAPI.get({
+        url: `/users/${id}/profile`,
+        query: {
+            with_mutual_guilds: false,
+            with_mutual_friends_count: false,
+            ...options
+        },
+        oldFormErrors: true,
+    });
+
+    FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", ...body });
+    if (options?.guild_id && body.guild_member)
+        FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
+
+    return UserProfileStore.getUserProfile(id);
 }
 
 /**

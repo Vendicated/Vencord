@@ -21,13 +21,10 @@ import { VENCORD_USER_AGENT } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
-import { findStoreLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
-
-const UserProfileStore = findStoreLazy("UserProfileStore");
 
 type PronounsWithSource = [string | null, string];
 const EmptyPronouns: PronounsWithSource = [null, ""];
