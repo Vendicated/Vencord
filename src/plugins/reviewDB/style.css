@@ -16,6 +16,11 @@
     border: 1px solid var(--profile-message-input-border-color);
 }
 
+/* When input becomes disabled(while sending review), input adds unneccesary padding to left, this prevents it */
+.vc-rdb-input > div > div {
+    padding-left: 0px !important;
+}
+
 .vc-rdb-placeholder {
     margin-bottom: 4px;
     font-weight: bold;

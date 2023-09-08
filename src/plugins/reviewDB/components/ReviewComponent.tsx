@@ -30,12 +30,12 @@ import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame mantika
+    // this is terrible, blame ven
     const p = filters.byProps;
     const [
         { cozyMessage, buttons, message, buttonsInner, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, wrapper, cozy },
         buttonClasses,
         botTag
     ] = findBulk(

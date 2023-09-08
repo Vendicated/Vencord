@@ -29,8 +29,9 @@ import ReviewComponent from "./ReviewComponent";
 let InputComponent;
 const Editor = findByPropsLazy("start", "end", "addMark");
 const Transform = findByPropsLazy("unwrapNodes");
-waitFor(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider"), m => InputComponent = m.Z);
 const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
+
+waitFor(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider"), m => InputComponent = m.Z);
 
 interface UserProps {
     discordId: string;
@@ -120,9 +121,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
     const { token } = settings.store;
     let editorRef = null;
 
-
     const inputType = InputTypes.FORM;
-
     inputType.disableAutoFocus = true;
 
     const channel = {
@@ -158,7 +157,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     }
                     type={inputType}
                     disableThemedBackground={true}
-                    focused={false}
                     setEditorRef={r => {
                         if (!r) return;
                         editorRef = r.ref.current.getSlateEditor();
