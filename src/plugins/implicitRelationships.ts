@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
 
@@ -59,6 +59,25 @@ export default definePlugin({
                 },
             ],
         },
+
+        // Add support for the nonce parameter to Discord's shitcode
+        {
+            find: ".REQUEST_GUILD_MEMBERS",
+            replacement: [
+                {
+                    match: /presences:!!(\i)\.presences/,
+                    replace: "$&,nonce:$1.nonce"
+                },
+                {
+                    match: /\.send\((\i)\.REQUEST_GUILD_MEMBERS,{/,
+                    replace: "$&nonce:arguments[1].nonce,"
+                },
+                {
+                    match: /notFound:(\i)\.not_found/,
+                    replace: "$&,nonce:$1.nonce"
+                },
+            ]
+        }
     ],
 
     hasDM(userId: string): boolean {
@@ -81,39 +100,34 @@ export default definePlugin({
         // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
         const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || this.hasDM(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
+        const sentNonce = SnowflakeUtils.fromTimestamp(Date.now());
         let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
 
         // OP 8 Request Guild Members allows 100 user IDs at a time
-        // Subscribe to GUILD_MEMBERS_CHUNK and unsubscribe when we've received all the chunks
-        // and hope to god the client doesn't send any other OP 8s during this time
-        // as they haven't implemented the nonce parameter :grrrr:
         const ignore = new Set(toRequest);
-        const callback = ({ members }) => {
+        const { relationships } = RelationshipStore.__getLocalVars();
+        const callback = ({ nonce, members }) => {
+            if (nonce !== sentNonce) return;
             members.forEach(member => {
                 ignore.delete(member.user.id);
             });
+
+            nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
+            RelationshipStore.emitChange();
             if (--count === 0) {
                 FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK", callback);
             }
         };
-        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", callback);
 
+        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", callback);
         for (let i = 0; i < toRequest.length; i += 100) {
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
                 guildIds: allGuildIds,
                 userIds: toRequest.slice(i, i + 100),
+                nonce: sentNonce,
             });
         }
-        for (let i = 0; i < 50 && count > 0; i++) {
-            await new Promise(r => setTimeout(r, 100));
-        }
-
-        const implicitRelationships = nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id));
-        const { relationships } = RelationshipStore.__getLocalVars();
-        implicitRelationships.forEach(user => relationships[user.id] = 5);
-
-        RelationshipStore.emitChange();
     },
 
     start() {
