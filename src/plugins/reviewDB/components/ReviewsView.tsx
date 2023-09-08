@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByPropsLazy, waitFor } from "@webpack";
+import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
+import { find, findByPropsLazy } from "@webpack";
 import { Forms, React, RelationshipStore, UserStore } from "@webpack/common";
 
 import { Review } from "../entities";
@@ -26,12 +26,11 @@ import { settings } from "../settings";
 import { authorize, cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-let InputComponent;
+
 const Editor = findByPropsLazy("start", "end", "addMark");
 const Transform = findByPropsLazy("unwrapNodes");
 const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
-
-waitFor(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider"), m => InputComponent = m.Z);
+const InputComponent = LazyComponent(() => find(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")).Z);
 
 interface UserProps {
     discordId: string;

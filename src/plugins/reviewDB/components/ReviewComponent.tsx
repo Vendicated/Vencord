@@ -124,12 +124,9 @@ export default LazyComponent(() => {
                         </Timestamp>)
                 }
 
-                {
-                    <div className={cl("review-comment")} style={{ color: "var(--text-normal)", fontSize: "15px" }}
-                    >
-                        {Parser.parseGuildEventDescription(review.comment)}
-                    </div>
-                }
+                <div className={cl("review-comment")}>
+                    {Parser.parseGuildEventDescription(review.comment)}
+                </div>
 
                 {review.id !== 0 && (
                     <div className={classes(container, isHeader, buttons)} style={{

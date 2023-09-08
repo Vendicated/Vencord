@@ -16,9 +16,14 @@
     border: 1px solid var(--profile-message-input-border-color);
 }
 
+.vc-rdb-modal-footer > div {
+    width: 100%;
+    margin: 6px 16px;
+}
+
 /* When input becomes disabled(while sending review), input adds unneccesary padding to left, this prevents it */
 .vc-rdb-input > div > div {
-    padding-left: 0px !important;
+    padding-left: 0 !important;
 }
 
 .vc-rdb-placeholder {
@@ -34,11 +39,6 @@
 
 .vc-rdb-modal-footer {
     padding: 0;
-}
-
-.vc-rdb-modal-footer > div {
-    width: 100%;
-    margin: 6px 16px;
 }
 
 .vc-rdb-modal-footer .vc-rdb-input {
@@ -71,4 +71,5 @@
     overflow-y: hidden;
     margin-top: 1px;
     margin-bottom: 8px;
+    color: var(--text-normal);
 }
