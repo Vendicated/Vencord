@@ -62,7 +62,11 @@ export interface Settings {
         settingsSyncVersion: number;
     };
 
-    userCssVars: Record<string, string>;
+    userCssVars: {
+        [fileName: string]: {
+            [varName: string]: string;
+        };
+    };
 }
 
 const DefaultSettings: Settings = {

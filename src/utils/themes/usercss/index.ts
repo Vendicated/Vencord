@@ -4,10 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Logger } from "@utils/Logger";
 import { parse as originalParse, UserstyleHeader } from "usercss-meta";
 
+const UserCSSLogger = new Logger("UserCSS", "#d2acf5");
+
 export function parse(text: string, fileName: string): UserstyleHeader {
-    const { metadata } = originalParse(text.replace(/\r/g, ""));
+    const { metadata, errors } = originalParse(text.replace(/\r/g, ""));
+
+    if (errors.length) {
+        UserCSSLogger.warn("Parsed", fileName, "with errors:", errors);
+    }
+
     return {
         ...metadata,
         fileName,

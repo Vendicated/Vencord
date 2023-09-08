@@ -17,7 +17,9 @@
 */
 
 import { addSettingsListener, Settings } from "@api/Settings";
-import { parse as usercssParse } from "@utils/themes/usercss";
+
+import { compileUsercss } from "./themes/usercss/compiler";
+
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -51,39 +53,30 @@ async function initThemes() {
     const links: string[] = [...themeLinks];
 
     if (IS_WEB) {
-        for (const theme of enabledThemes) {
+        // UserCSS handled separately
+        for (const theme of enabledThemes) if (!theme.endsWith(".user.css")) {
             const themeData = await VencordNative.themes.getThemeData(theme);
             if (!themeData) continue;
+
             const blob = new Blob([themeData], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
-    }
-
-    const cssVars: string[] = [];
-
-    // for UserCSS, we need to inject the variables
-    for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
-        const themeData = await VencordNative.themes.getThemeData(theme);
-        if (!themeData) continue;
-
-        const { vars } = usercssParse(themeData, theme);
-
-        for (const [id, meta] of Object.entries(vars)) {
-            let normalizedValue: string = userCssVars[id] ?? meta.default;
-
-            if (meta.type === "range") {
-                normalizedValue = `${normalizedValue}${meta.units ?? ""}`;
-            }
-
-            cssVars.push(`--${id}:${normalizedValue};`);
+        for (const theme of enabledThemes) if (!theme.endsWith(".user.css")) {
+            links.push(`vencord:///themes/${theme}?v=${Date.now()}`);
         }
     }
 
+    for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
+        // UserCSS goes through a compile step first
+        const css = await compileUsercss(theme);
+        if (!css) continue; // something went wrong during the compile step...
+
+        const blob = new Blob([css], { type: "text/css" });
+        links.push(URL.createObjectURL(blob));
+    }
+
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
-    if (cssVars.length > 0) themesStyle.textContent += `:root{${cssVars.join("\n")}}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

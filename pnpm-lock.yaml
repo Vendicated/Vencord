@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 patchedDependencies:
+  '@types/less@3.0.4':
+    hash: krcufrsfhsuxuoj7hocqugs6zi
+    path: patches/@types__less@3.0.4.patch
   eslint-plugin-path-alias@1.0.0:
     hash: m6sma4g6bh67km3q6igf6uxaja
     path: patches/eslint-plugin-path-alias@1.0.0.patch
@@ -38,6 +41,9 @@ devDependencies:
   '@types/diff':
     specifier: ^5.0.3
     version: 5.0.3
+  '@types/less':
+    specifier: ^3.0.4
+    version: 3.0.4(patch_hash=krcufrsfhsuxuoj7hocqugs6zi)
   '@types/lodash':
     specifier: ^4.14.194
     version: 4.14.194
@@ -50,6 +56,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^18.2.1
     version: 18.2.1
+  '@types/stylus':
+    specifier: ^0.48.39
+    version: 0.48.39
   '@types/yazl':
     specifier: ^2.4.2
     version: 2.4.2
@@ -531,6 +540,11 @@ packages:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
 
+  /@types/less@3.0.4(patch_hash=krcufrsfhsuxuoj7hocqugs6zi):
+    resolution: {integrity: sha512-djlMpTdDF+tLaqVpK/0DWGNIr7BFjN8ykDLkgS0sQGYYLop51imRRE3foTjl+dMAH1zFE8bMZAG0VbYPEcSgsA==}
+    dev: true
+    patched: true
+
   /@types/lodash@4.14.194:
     resolution: {integrity: sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==}
     dev: true
@@ -578,6 +592,12 @@ packages:
 
   /@types/semver@7.3.13:
     resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
+    dev: true
+
+  /@types/stylus@0.48.39:
+    resolution: {integrity: sha512-98a0QrJorrq8+Vsan9yfxol2Qr6nvUWBeV3oYnSMks4QdLMebAzZvRd9IuoZOcnB6Erfjcjn1J2J+63MPCxJnw==}
+    dependencies:
+      '@types/node': 18.16.3
     dev: true
 
   /@types/yauzl@2.10.0:

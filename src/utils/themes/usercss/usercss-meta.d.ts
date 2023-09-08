@@ -93,10 +93,8 @@ declare module "usercss-meta" {
         license?: string;
         /**
          * The CSS preprocessor used to write this style.
-         *
-         * @vencord Unimplemented in Vencord, just part of the metadata.
          */
-        preprocessor?: string;
+        preprocessor?: "default" | "uso" | "less" | "stylus";
 
         /**
          * A list of variables the style defines.
@@ -104,5 +102,5 @@ declare module "usercss-meta" {
         vars: Record<string, UserCSSVariable>;
     }
 
-    export function parse(text: string): { metadata: UserstyleHeader; };
+    export function parse(text: string): { metadata: UserstyleHeader; errors: { code: string; args: any; }[] };
 }
