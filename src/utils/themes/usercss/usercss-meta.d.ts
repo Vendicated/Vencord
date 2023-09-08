@@ -36,11 +36,18 @@ declare module "usercss-meta" {
         | {
             type: "select";
             default: string;
-            options: Record<string, string>;
+            options: { name: string; label: string; value: string; }[];
         }
     )>;
 
     export interface UserstyleHeader {
+        /**
+         * The unique ID of the UserCSS style.
+         *
+         * @vencord Specific to Vencord, not part of the original module.
+         */
+        id: string;
+
         /**
          * The file name of the UserCSS style.
          *

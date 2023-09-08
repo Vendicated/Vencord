@@ -62,7 +62,7 @@ export async function compileUsercss(fileName: string) {
     // - use the preprocessor defined
     // - if variables are set, `uso`
     // - otherwise, `default`
-    const { vars = {}, preprocessor = Object.keys(vars).length > 0 ? "uso" : "default" } = usercssParse(themeData, fileName);
+    const { vars = {}, preprocessor = Object.keys(vars).length > 0 ? "uso" : "default", id } = await usercssParse(themeData, fileName);
 
     const preprocessorFn = preprocessors[preprocessor];
 
@@ -74,7 +74,7 @@ export async function compileUsercss(fileName: string) {
     const varsToPass = {};
 
     for (const [k, v] of Object.entries(vars)) {
-        varsToPass[k] = Settings.userCssVars[fileName]?.[k] ?? v.default;
+        varsToPass[k] = Settings.userCssVars[id]?.[k] ?? v.default;
     }
 
     try {
