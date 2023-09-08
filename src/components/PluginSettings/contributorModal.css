@@ -24,20 +24,20 @@
     display: block;
     position: absolute;
     height: 100%;
-    width: 16px;
+    width: 32px;
     background: var(--background-tertiary);
     z-index: -1;
-    left: -16px;
+    left: -32px;
     top: 0;
 }
 
 .vc-author-modal-name span {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .vc-author-modal-avatar {
-    height: 48px;
-    width: 48px;
+    height: 52px;
+    width: 52px;
     border-radius: 50%;
 }
 
