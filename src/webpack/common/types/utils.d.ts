@@ -36,24 +36,10 @@ export interface FluxDispatcher {
 interface ASTNode {
     content: string | ASTNode[];
     type: string;
-    [key: string]: any;
 }
-type State = {
-    key?: string | number;
-    inline?: boolean;
-    [key: string]: any;
-};
-type Capture = | (string[] & {index: number;}) | (string[] & {index?: number;})
-type MatchFunction = {regex?: RegExp;} & ((source: string, state: State) => Capture | null);
-export interface MarkdownRules {
-    order: number;
-    match: MatchFunction;
-    parse: ASTParser;
-    react?: ReactParser;
-    html?: any;
-}
+type MarkdownRules = Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>;
 type ReactParser = (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[];
-export type ASTParser = (content: string, inline?: boolean, state?: Record<string, any>) => ASTNode | ASTNode[];
+type ASTParser = (content: string, inline?: boolean, state?: Record<string, any>) => ASTNode[];
 export type Parser = Record<
     | "parse"
     | "parseTopic"

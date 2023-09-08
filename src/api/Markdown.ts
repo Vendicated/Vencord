@@ -18,7 +18,35 @@
 
 import { findByPropsLazy, findLazy } from "@webpack";
 import { Parser } from "@webpack/common";
-import { ASTParser, MarkdownRules } from "@webpack/types";
+
+// taken from simple-markdown, don't know if a types package exists
+type State = {
+    key?: string | number;
+    inline?: boolean;
+    [key: string]: any;
+};
+type Capture = | (string[] & {index: number;}) | (string[] & {index?: number;})
+type MatchFunction = {regex?: RegExp;} & ((source: string, state: State) => Capture | null);
+type SingleASTNode = {
+    type: string;
+    [key: string]: any;
+};
+type UnTypedASTNode = {
+    [key: string]: any;
+};
+type ASTNode = SingleASTNode | SingleASTNode[];
+type Parser = ((source: string, state?: State) => SingleASTNode[]);
+type ParseFunction = ((capture: Capture, parse: Parser, state: State) => UnTypedASTNode | ASTNode);
+type Output<Result> = ((node: ASTNode, state?: State) => Result);
+type NodeOutput<Result> = ((node: SingleASTNode, nestedOutput: Output<Result>, state: State) => Result);
+type ASTParser = ((source: string, inline?: boolean, state?: State) => ASTNode[]);
+
+interface MarkdownRule {
+    order: number;
+    match: MatchFunction;
+    parse: ParseFunction;
+    react: NodeOutput<JSX.Element>;
+}
 
 interface SlateRule {
     type: "skip" | "verbatim" | "inlineObject" | "inlineStyle";
@@ -26,7 +54,7 @@ interface SlateRule {
     after?: string;
 }
 
-type MarkdownRuleFactory = ((rules: Record<string, MarkdownRules>) => MarkdownRules)
+type MarkdownRuleFactory = ((rules: Record<string, MarkdownRule>) => MarkdownRule)
 
 const markdownRules: Map<string, MarkdownRuleFactory> = new Map();
 const slateRules: Map<string, SlateRule> = new Map();
@@ -178,8 +206,8 @@ export function __getSlateDecorator(rule: string): string | null | undefined {
     return slateDecorators.get(rule.substring(3));
 }
 
-let slateOverrides: Record<string, MarkdownRules>;
-export function __setSlateOverrides(overrides: Record<string, MarkdownRules>): Record<string, MarkdownRules> {
+let slateOverrides: Record<string, MarkdownRule>;
+export function __setSlateOverrides(overrides: Record<string, MarkdownRule>): Record<string, MarkdownRule> {
     slateOverrides = overrides;
 
     return overrides;
@@ -191,7 +219,7 @@ export function __setSlateRules(rules: Record<string, SlateRule>): Record<string
     return rules;
 }
 
-function __createSlateParser(rule: MarkdownRules) {
+function __createSlateParser(rule: MarkdownRule) {
     const originalParse = rule.parse;
 
     return Object.assign({}, rule, {
@@ -206,7 +234,7 @@ function __createSlateParser(rule: MarkdownRules) {
     });
 }
 
-const inlineTextRule: MarkdownRules = findLazy(x=>x.match?.regex);
+const inlineTextRule: MarkdownRule = findLazy(x=>x.match?.regex);
 const slateParsers: Record<string, ASTParser> = {};
 function __rebuildSlateParsers() {
     const customSlateRules = {};
