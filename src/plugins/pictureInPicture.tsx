@@ -49,7 +49,7 @@ export default definePlugin({
                             paddingRight: "4px",
                         }}
                         onClick={e => {
-                            const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!; // Get the video corresponding to the download/pip/remove attachment buttons
+                            const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
                             const videoClone = document.body.appendChild(video.cloneNode(true)) as HTMLVideoElement;
 
                             videoClone.loop = settings.store.loop;
