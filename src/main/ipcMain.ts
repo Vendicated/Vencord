@@ -22,9 +22,6 @@ import "./ipcPlugins";
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
-import type { ThemeHeader } from "@utils/themes";
-import { getThemeInfo, stripBOM } from "@utils/themes/bd";
-import { parse as usercssParse } from "@utils/themes/usercss";
 import { BrowserWindow, ipcMain, shell } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
@@ -49,33 +46,11 @@ function readCss() {
     return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
 }
 
-async function listThemes(): Promise<ThemeHeader[]> {
-    const files = await readdir(THEMES_DIR).catch(() => []);
-
-    const themeInfo: ThemeHeader[] = [];
-
-    for (const fileName of files) {
-        if (!fileName.endsWith(".css")) continue;
-
-        const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
-        if (data == null) continue;
-
-        if (fileName.endsWith(".user.css")) {
-            // handle it as usercss
-            themeInfo.push({
-                type: "usercss",
-                header: usercssParse(data, fileName)
-            });
-        } else {
-            // presumably BD but could also be plain css
-            themeInfo.push({
-                type: "bd",
-                header: getThemeInfo(data, fileName)
-            });
-        }
-    }
-
-    return themeInfo;
+function listThemes(): Promise<{ fileName: string; content: string; }[]> {
+    return readdir(THEMES_DIR)
+        .then(files =>
+            Promise.all(files.map(async fileName => ({ fileName, content: await getThemeData(fileName) }))))
+        .catch(() => []);
 }
 
 function getThemeData(fileName: string) {

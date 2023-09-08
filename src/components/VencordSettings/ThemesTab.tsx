@@ -25,7 +25,8 @@ import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
-import type { UserThemeHeader } from "@utils/themes/bd";
+import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
+import { usercssParse } from "@utils/themes/usercss";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
@@ -206,7 +207,28 @@ function ThemesTab() {
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
-        setUserThemes(themes);
+
+        const themeInfo: ThemeHeader[] = [];
+
+        for (const { fileName, content } of themes) {
+            if (!fileName.endsWith(".css")) continue;
+
+            if (fileName.endsWith(".user.css")) {
+                // handle it as usercss
+                themeInfo.push({
+                    type: "usercss",
+                    header: usercssParse(content, fileName)
+                });
+            } else {
+                // presumably BD but could also be plain css
+                themeInfo.push({
+                    type: "bd",
+                    header: getThemeInfo(stripBOM(content), fileName)
+                });
+            }
+        }
+
+        setUserThemes(themeInfo);
     }
 
     // When a local theme is enabled/disabled, update the settings
