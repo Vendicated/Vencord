@@ -48,6 +48,7 @@
         "@types/react": "^18.2.0",
         "@types/react-dom": "^18.2.1",
         "@types/stylus": "^0.48.39",
+        "@types/tinycolor2": "^1.4.3",
         "@types/yazl": "^2.4.2",
         "@typescript-eslint/eslint-plugin": "^5.59.1",
         "@typescript-eslint/parser": "^5.59.1",

@@ -59,6 +59,9 @@ devDependencies:
   '@types/stylus':
     specifier: ^0.48.39
     version: 0.48.39
+  '@types/tinycolor2':
+    specifier: ^1.4.3
+    version: 1.4.3
   '@types/yazl':
     specifier: ^2.4.2
     version: 2.4.2
@@ -598,6 +601,10 @@ packages:
     resolution: {integrity: sha512-98a0QrJorrq8+Vsan9yfxol2Qr6nvUWBeV3oYnSMks4QdLMebAzZvRd9IuoZOcnB6Erfjcjn1J2J+63MPCxJnw==}
     dependencies:
       '@types/node': 18.16.3
+    dev: true
+
+  /@types/tinycolor2@1.4.3:
+    resolution: {integrity: sha512-Kf1w9NE5HEgGxCRyIcRXR/ZYtDv0V8FVPtYHwLxl0O+maGX0erE77pQlD0gpP+/KByMZ87mOA79SjifhSB3PjQ==}
     dev: true
 
   /@types/yauzl@2.10.0:
