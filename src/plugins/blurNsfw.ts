@@ -49,7 +49,7 @@ export default definePlugin({
                 replace: "$1,vcProps=$2$3+(vcProps.channel.nsfw?' vc-nsfw-img':'')"
             }, {
                 match: /(\.renderAttachments=.+?(.)=this\.props)(.+?\.embedWrapper)/g,
-                replace: "$1,vcProps=$2$3+(vcProps.channel.nsfw?' vc-nsfw-img':'')"
+                replace: "$1,vcProps=$2$3+(vcProps.nsfw?' vc-nsfw-img':'')"
             }]
         }
     ],
