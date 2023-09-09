@@ -21,7 +21,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "LoopAnyVideo",
+    name: "LoopVideos",
     description: "Adds a loop button next to the volume slider for embedded videos",
     authors: [Devs.Lumap],
     settings,
