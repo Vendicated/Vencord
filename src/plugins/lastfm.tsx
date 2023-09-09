@@ -72,6 +72,12 @@ const enum ActivityFlag {
     INSTANCE = 1 << 0,
 }
 
+const enum NameFormat {
+    StatusName = "status-name",
+    ArtistFirst = "artist-first",
+    SongFirst = "song-first",
+}
+
 const applicationId = "1108588077900898414";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
@@ -121,22 +127,22 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "some music",
     },
-    showSongNameInStatus: {
+    nameFormat: {
         description: "Show name of song and artist in status name",
         type: OptionType.SELECT,
         options: [
             {
                 label: "Use custom status name",
-                value: "dontshow",
+                value: NameFormat.StatusName,
                 default: true
             },
             {
                 label: "Use format 'artist - song'",
-                value: "artistfirst"
+                value: NameFormat.ArtistFirst
             },
             {
                 label: "Use format 'song - artist'",
-                value: "songfirst"
+                value: NameFormat.SongFirst
             }
         ],
     },
@@ -286,11 +292,16 @@ export default definePlugin({
                 url: `https://www.last.fm/user/${settings.store.username}`,
             });
 
-        const statusName = settings.store.showSongNameInStatus === "songfirst" ?
-            trackData.name + " - " + trackData.artist :
-            settings.store.showSongNameInStatus === "artistfirst" ?
-                trackData.artist + " - " + trackData.name :
-                settings.store.customStatusName;
+        const statusName = (() => {
+            switch (settings.store.nameFormat) {
+                case NameFormat.ArtistFirst:
+                    return trackData.artist + " - " + trackData.name;
+                case NameFormat.SongFirst:
+                    return trackData.name + " - " + trackData.artist;
+                default:
+                    return settings.store.customStatusName;
+            }
+        })();
 
         return {
             application_id: applicationId,
