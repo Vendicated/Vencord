@@ -235,7 +235,7 @@ function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) 
 
                     key: option.name,
                     value: option.value,
-                    default: varInfo.default === option.value,
+                    default: varInfo.default === option.name,
                     label: option.label
                 } as ComponentTypes.SelectOption));
 
