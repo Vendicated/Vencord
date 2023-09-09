@@ -8,6 +8,7 @@ import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Tooltip } from "@webpack/common";
 import type { Component } from "react";
@@ -36,37 +37,41 @@ interface Props {
 const embedUrlRe = /https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/;
 
 async function embedDidMount(this: Component<Props>) {
-    const { embed } = this.props;
-    if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
+    try {
+        const { embed } = this.props;
+        if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
 
-    const videoId = embedUrlRe.exec(embed.video.url)?.[1];
-    if (!videoId) return;
+        const videoId = embedUrlRe.exec(embed.video.url)?.[1];
+        if (!videoId) return;
 
-    const res = await fetch(`https://sponsor.ajay.app/api/branding?videoID=${videoId}`);
-    if (!res.ok) return;
+        const res = await fetch(`https://sponsor.ajay.app/api/branding?videoID=${videoId}`);
+        if (!res.ok) return;
 
-    const { titles, thumbnails } = await res.json();
+        const { titles, thumbnails } = await res.json();
 
-    const hasTitle = titles[0]?.votes >= 0;
-    const hasThumb = thumbnails[0]?.votes >= 0;
+        const hasTitle = titles[0]?.votes >= 0;
+        const hasThumb = thumbnails[0]?.votes >= 0;
 
-    if (!hasTitle && !hasThumb) return;
+        if (!hasTitle && !hasThumb) return;
 
-    embed.dearrow = {
-        enabled: true
-    };
+        embed.dearrow = {
+            enabled: true
+        };
 
-    if (titles[0]?.votes >= 0) {
-        embed.dearrow.oldTitle = embed.rawTitle;
-        embed.rawTitle = titles[0].title;
+        if (titles[0]?.votes >= 0) {
+            embed.dearrow.oldTitle = embed.rawTitle;
+            embed.rawTitle = titles[0].title;
+        }
+
+        if (thumbnails[0]?.votes >= 0) {
+            embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
+            embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
+        }
+
+        this.forceUpdate();
+    } catch (err) {
+        new Logger("Dearrow").error("Failed to dearrow embed", err);
     }
-
-    if (thumbnails[0]?.votes >= 0) {
-        embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
-        embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
-    }
-
-    this.forceUpdate();
 }
 
 function renderButton(this: Component<Props>) {
