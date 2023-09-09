@@ -122,7 +122,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
-    customStatusName: {
+    statusName: {
         description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
@@ -299,7 +299,7 @@ export default definePlugin({
                 case NameFormat.SongFirst:
                     return trackData.name + " - " + trackData.artist;
                 default:
-                    return settings.store.customStatusName;
+                    return settings.store.statusName;
             }
         })();
 
