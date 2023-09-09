@@ -72,6 +72,12 @@ const enum ActivityFlag {
     INSTANCE = 1 << 0,
 }
 
+const enum NameFormat {
+    StatusName = "status-name",
+    ArtistFirst = "artist-first",
+    SongFirst = "song-first",
+}
+
 const applicationId = "1108588077900898414";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
@@ -117,9 +123,28 @@ const settings = definePluginSettings({
         default: true,
     },
     statusName: {
-        description: "text shown in status",
+        description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
+    },
+    nameFormat: {
+        description: "Show name of song and artist in status name",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Use custom status name",
+                value: NameFormat.StatusName,
+                default: true
+            },
+            {
+                label: "Use format 'artist - song'",
+                value: NameFormat.ArtistFirst
+            },
+            {
+                label: "Use format 'song - artist'",
+                value: NameFormat.SongFirst
+            }
+        ],
     },
     useListeningStatus: {
         description: 'show "Listening to" status instead of "Playing"',
@@ -140,13 +165,13 @@ const settings = definePluginSettings({
                 value: "placeholder"
             }
         ],
-    }
+    },
 });
 
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD],
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip],
 
     settingsAboutComponent: () => (
         <>
@@ -267,9 +292,20 @@ export default definePlugin({
                 url: `https://www.last.fm/user/${settings.store.username}`,
             });
 
+        const statusName = (() => {
+            switch (settings.store.nameFormat) {
+                case NameFormat.ArtistFirst:
+                    return trackData.artist + " - " + trackData.name;
+                case NameFormat.SongFirst:
+                    return trackData.name + " - " + trackData.artist;
+                default:
+                    return settings.store.statusName;
+            }
+        })();
+
         return {
             application_id: applicationId,
-            name: settings.store.statusName,
+            name: statusName,
 
             details: trackData.name,
             state: trackData.artist,
