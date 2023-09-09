@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
 
 interface Props {
@@ -85,7 +85,9 @@ export function PreviewButton(chatBoxProps: Props) {
     const { isEmpty, attachments } = chatBoxProps.type;
 
     const channelId = SelectedChannelStore.getChannelId();
-    const draft = getDraft(channelId);
+    const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
+
+    if (chatBoxProps.type.analyticsName !== "normal") return null;
 
     const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
