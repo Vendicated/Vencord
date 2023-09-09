@@ -74,7 +74,7 @@ async function embedDidMount(this: Component<Props>) {
     }
 }
 
-function renderButton(component: Component<Props>) {
+function DearrowButton({ component }: { component: Component<Props>; }) {
     const { embed } = component.props;
     if (!embed?.dearrow) return null;
 
@@ -137,7 +137,7 @@ export default definePlugin({
     renderButton(component: Component<Props>) {
         return (
             <ErrorBoundary noop>
-                {renderButton(component)}
+                <DearrowButton component={component} />
             </ErrorBoundary>
         );
     },
