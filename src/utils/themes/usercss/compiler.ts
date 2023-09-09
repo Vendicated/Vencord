@@ -75,6 +75,14 @@ export async function compileUsercss(fileName: string) {
 
     for (const [k, v] of Object.entries(vars)) {
         varsToPass[k] = Settings.userCssVars[id]?.[k] ?? v.default;
+        if (v.type === "checkbox" && ["less", "stylus"].includes(preprocessor)) {
+            // For Less and Stylus, we convert from 0/1 to false/true as it works with their if statement equivalents.
+            // Stylus doesn't really need this to be fair (0/1 are falsy/truthy), but for consistency's sake it's best
+            // if we do.
+            //
+            // In default and USO, it has no special meaning, so we'll just leave it as a number.
+            varsToPass[k] = varsToPass[k] === "1" ? "true" : "false";
+        }
     }
 
     try {
