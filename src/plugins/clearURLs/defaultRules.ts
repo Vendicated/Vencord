@@ -136,4 +136,5 @@ export const defaultRules = [
     "utm_term",
     "si@open.spotify.com",
     "igshid",
+    "share_id@reddit.com",
 ];
