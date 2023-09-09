@@ -141,7 +141,7 @@ interface UserCSSSettingsModalProps {
 
 function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) {
     // @ts-expect-error UseSettings<> can't determine this is a valid key
-    const themeSettings = useSettings(["userCssVars"]).userCssVars[theme.id];
+    const themeSettings = useSettings(["userCssVars"], false).userCssVars[theme.id];
 
     const controls: ReactNode[] = [];
 
