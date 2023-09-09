@@ -56,6 +56,7 @@ const InviteActions = findByPropsLazy("resolveInvite");
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const CogWheel = findByCodeLazy("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
+const EditPencil = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064", '["color","height","width"]');
 // TinyColor is completely unmangled and it's duplicated in two modules! Fun!
 const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
@@ -114,6 +115,8 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
 function ColorPicker(props: ColorPickerProps) {
     const [color, setColor] = useState(props.value);
 
+    const correctedColor = color ? `#${color.toString(16).padStart(6, "0")}` : "#000000";
+
     return (
         <Popout
             renderPopout={() => (
@@ -121,14 +124,15 @@ function ColorPicker(props: ColorPickerProps) {
             )}
         >
             {popoutProps => (
-                <div {...popoutProps} style={{
-                    width: "2em",
-                    height: "2em",
-                    cursor: "pointer",
-                    backgroundColor: color ? `#${color.toString(16).padStart(6, "0")}` : "var(--background-secondary)",
-                    borderRadius: ".125em",
-                    border: "1px solid var(--background-tertiary)",
-                }}></div>
+                <div {...popoutProps} className={cl("usercss-swatch")} style={{
+                    backgroundColor: correctedColor,
+                    borderColor: correctedColor
+                }}>
+                    <EditPencil
+                        className={cl("usercss-swatch-pencil")}
+                        color={TinyColor(correctedColor).isLight() ? "var(--primary-530)" : "var(--white-500)"}
+                    />
+                </div>
             )}
         </Popout>
     );
