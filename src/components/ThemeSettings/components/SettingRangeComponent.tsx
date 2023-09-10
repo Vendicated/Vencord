@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Slider, useState } from "@webpack/common";
+import { Forms, Slider, useMemo, useState } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -27,12 +27,16 @@ export function SettingRangeComponent({ label, name, default: def, min, max, ste
         themeSettings[name] = corrected;
     }
 
-    const markers: number[] = [];
+    const markers = useMemo(() => {
+        const markers: number[] = [];
 
-    // defaults taken from https://github.com/openstyles/stylus/wiki/Writing-UserCSS#default-value
-    for (let i = (min ?? 0); i <= (max ?? 10); i += (step ?? 1)) {
-        markers.push(i);
-    }
+        // defaults taken from https://github.com/openstyles/stylus/wiki/Writing-UserCSS#default-value
+        for (let i = (min ?? 0); i <= (max ?? 10); i += (step ?? 1)) {
+            markers.push(i);
+        }
+
+        return markers;
+    }, [min, max, step]);
 
     return (
         <Forms.FormSection>

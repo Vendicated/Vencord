@@ -9,7 +9,7 @@ import "./colorStyles.css";
 import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/react";
 import { find, findByCodeLazy } from "@webpack";
-import { Forms, Popout, useState } from "@webpack/common";
+import { Forms, Popout, useMemo, useState } from "@webpack/common";
 
 interface ColorPickerProps {
     value: number | null;
@@ -69,14 +69,14 @@ export function SettingColorComponent({ label, name, themeSettings }: Props) {
         themeSettings[name] = corrected;
     }
 
-    const normalizedValue = TinyColor(value).toHex();
+    const normalizedValue = useMemo(() => parseInt(TinyColor(value).toHex(), 16), [value]);
 
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <ColorPicker
                 key={name}
-                value={parseInt(normalizedValue, 16)}
+                value={normalizedValue}
                 onChange={handleChange}
             />
         </Forms.FormSection>

@@ -5,7 +5,7 @@
  */
 
 import { identity } from "@utils/misc";
-import { ComponentTypes, Forms, Select, useState } from "@webpack/common";
+import { ComponentTypes, Forms, Select, useMemo, useState } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -28,14 +28,14 @@ export function SettingSelectComponent({ label, name, options, default: def, the
         themeSettings[name] = value;
     }
 
-    const opts = options.map(option => ({
+    const opts = useMemo(() => options.map(option => ({
         disabled: false,
 
         key: option.name,
         value: option.value,
         default: def === option.name,
         label: option.label
-    } as ComponentTypes.SelectOption));
+    } satisfies ComponentTypes.SelectOption)), [options, def]);
 
     return (
         <Forms.FormSection>
