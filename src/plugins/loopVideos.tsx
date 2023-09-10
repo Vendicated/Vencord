@@ -8,14 +8,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Tooltip, useEffect, useRef } from "@webpack/common";
+import { Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
 
 const settings = definePluginSettings({
     loop: {
         description: "Whether to enable looping by default or not",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         restartNeeded: false
     }
 });
@@ -37,19 +37,15 @@ export default definePlugin({
     ],
 
     renderLoopButton: ErrorBoundary.wrap(() => {
+        const [isEnabled, setIsEnabled] = useState(false);
         const elementRef = useRef<HTMLDivElement>(null);
-        let set = false;
         useEffect(() => {
-            if (elementRef.current && !set) {
+            if (elementRef.current) {
                 const elt = elementRef.current;
-                const video = elt.parentNode!.parentNode!.querySelector("video");
-                if (video) video.loop = settings.store.loop;
-                (document.querySelector(":root") as HTMLElement)!.style.setProperty("--vc-loop-btn", settings.store.loop ? "var(--green-300)" : "var(--interactive-active)");
-                set = true;
+                const video = elt.parentNode!.parentNode!.querySelector("video")!;
+                video.loop = settings.store.loop;
+                setIsEnabled(settings.store.loop);
             }
-            return () => {
-                set = false;
-            };
         }, []);
         return <div ref={elementRef}>
             <Tooltip text="Toggle Loop">
@@ -66,11 +62,11 @@ export default definePlugin({
                         onClick={e => {
                             const video = e.currentTarget.parentNode!.parentNode!.parentNode!.querySelector("video")!;
                             video.loop = !video.loop;
-                            (document.querySelector(":root") as HTMLElement)!.style.setProperty("--vc-loop-btn", video.loop ? "var(--green-300)" : "var(--interactive-active)");
+                            setIsEnabled(video.loop);
                         }}
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M18.1078 7.49995H15.75C14.9203 7.49995 14.25 8.17026 14.25 8.99995C14.25 9.82964 14.9203 10.5 15.75 10.5H21.75C22.5796 10.5 23.25 9.82964 23.25 8.99995V2.99995C23.25 2.17026 22.5796 1.49995 21.75 1.49995C20.9203 1.49995 20.25 2.17026 20.25 2.99995V5.39995L19.425 4.57495C15.3234 0.473389 8.67651 0.473389 4.57495 4.57495C0.473389 8.67651 0.473389 15.3234 4.57495 19.425C8.67651 23.5265 15.3234 23.5265 19.425 19.425C20.0109 18.839 20.0109 17.8875 19.425 17.3015C18.839 16.7156 17.8875 16.7156 17.3015 17.3015C14.3718 20.2312 9.62339 20.2312 6.6937 17.3015C3.76401 14.3718 3.76401 9.62339 6.6937 6.6937C9.62339 3.76401 14.3718 3.76401 17.3015 6.6937L18.1078 7.49995Z" fill="var(--vc-loop-btn)" />
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill={isEnabled ? "#98C379" : "#A0A0A1"}>
+                            <path d="M14.3353 5.93745H12.4687C11.8119 5.93745 11.2812 6.46811 11.2812 7.12495C11.2812 7.78179 11.8119 8.31245 12.4687 8.31245H17.2187C17.8755 8.31245 18.4062 7.78179 18.4062 7.12495V2.37495C18.4062 1.71812 17.8755 1.18745 17.2187 1.18745C16.5619 1.18745 16.0312 1.71812 16.0312 2.37495V4.27495L15.3781 3.62183C12.131 0.374756 6.8689 0.374756 3.62183 3.62183C0.374756 6.8689 0.374756 12.131 3.62183 15.3781C6.8689 18.6251 12.131 18.6251 15.3781 15.3781C15.8419 14.9142 15.8419 14.1609 15.3781 13.697C14.9142 13.2332 14.1609 13.2332 13.697 13.697C11.3777 16.0164 7.61851 16.0164 5.29917 13.697C2.97983 11.3777 2.97983 7.61851 5.29917 5.29917C7.61851 2.97983 11.3777 2.97983 13.697 5.29917L14.3353 5.93745Z" />
                         </svg>
                     </div>
                 )
