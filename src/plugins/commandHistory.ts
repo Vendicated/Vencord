@@ -46,7 +46,7 @@ var commandHistoryPositions: Map<string, number> = new Map();
 
 export default definePlugin({
     name: "CommandHistory",
-    description: "Use Ctrl+Up/Down to cycle through previously sent messages like in a terminal instead of editing the previous message",
+    description: "Use Shift+Up/Down to cycle through previously sent messages like in a terminal",
     authors: [Devs.Hexo],
     patches: [
         {
