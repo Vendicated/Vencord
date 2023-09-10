@@ -27,24 +27,3 @@
 .vc-settings-theme-author::before {
     content: "by ";
 }
-
-.vc-settings-theme-usercss-swatch {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 69px;
-    height: 50px;
-    box-sizing: border-box;
-    position: relative;
-    border: 1px solid;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.vc-settings-theme-usercss-swatch-pencil {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 14px;
-    height: 14px;
-}

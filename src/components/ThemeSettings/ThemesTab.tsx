@@ -16,25 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./themesStyles.css";
+
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
+import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { Margins } from "@utils/margins";
-import { classes, identity } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
-import { LazyComponent, useAwaiter } from "@utils/react";
+import { useAwaiter } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
-import { find, findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, ComponentTypes, FluxDispatcher, Forms, Popout, React, Select, showToast, Slider, Switch, TabBar, Text, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
-import type { ComponentType, ReactNode, Ref, SyntheticEvent } from "react";
+import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
 
-import { AddonCard } from "./AddonCard";
-import { SettingsTab, wrapTab } from "./shared";
+import { UserCSSSettingsModal } from "./UserCSSModal";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -43,22 +46,13 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-interface ColorPickerProps {
-    value: number | null;
-    showEyeDropper?: boolean;
-    onChange(value: number | null): void;
-    onClose?(): void;
-}
 
-const ColorPickerModal = LazyComponent<ColorPickerProps>(() => find(m => m?.type?.toString?.().includes(".showEyeDropper")));
 
 const InviteActions = findByPropsLazy("resolveInvite");
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const CogWheel = findByCodeLazy("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
-const EditPencil = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064", '["color","height","width"]');
-// TinyColor is completely unmangled and it's duplicated in two modules! Fun!
-const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");
+
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
@@ -109,194 +103,6 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                 ))}
             </div>
         </>
-    );
-}
-
-function ColorPicker(props: ColorPickerProps) {
-    const [color, setColor] = useState(props.value);
-
-    const correctedColor = color ? `#${color.toString(16).padStart(6, "0")}` : "#000000";
-
-    return (
-        <Popout
-            renderPopout={() => (
-                <ColorPickerModal value={props.value} onChange={value => { setColor(value); props.onChange(value); }} showEyeDropper={props.showEyeDropper} />
-            )}
-        >
-            {popoutProps => (
-                <div {...popoutProps} className={cl("usercss-swatch")} style={{
-                    backgroundColor: correctedColor,
-                    borderColor: correctedColor
-                }}>
-                    <EditPencil
-                        className={cl("usercss-swatch-pencil")}
-                        color={TinyColor(correctedColor).isLight() ? "var(--primary-530)" : "var(--white-500)"}
-                    />
-                </div>
-            )}
-        </Popout>
-    );
-}
-
-interface UserCSSSettingsModalProps {
-    modalProps: ModalProps;
-    theme: UserstyleHeader;
-}
-
-function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) {
-    // @ts-expect-error UseSettings<> can't determine this is a valid key
-    const themeSettings = useSettings(["userCssVars"], false).userCssVars[theme.id];
-
-    const controls: ReactNode[] = [];
-
-    function updateSetting(key: string, value: string, setValue: (value: string) => void) {
-        themeSettings[key] = value;
-        setValue(value);
-    }
-
-    for (const [name, varInfo] of Object.entries(theme.vars)) {
-        switch (varInfo.type) {
-            case "text": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">{varInfo.label}</Forms.FormTitle>
-                        <TextInput
-                            key={name}
-                            value={value}
-                            onChange={v => updateSetting(name, v, setValue)}
-                        />
-                    </Forms.FormSection>
-                );
-                break;
-            }
-
-            case "checkbox": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Switch
-                            key={name}
-                            value={value === "1"}
-                            onChange={value => updateSetting(name, value ? "1" : "0", setValue)}
-                            hideBorder
-                            style={{ marginBottom: "0.5em" }}
-                        >
-                            {varInfo.label}
-                        </Switch>
-                    </Forms.FormSection>
-                );
-                break;
-            }
-
-            case "color": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                const normalizedValue = TinyColor(value).toHex();
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">{varInfo.label}</Forms.FormTitle>
-                        <ColorPicker
-                            key={name}
-                            value={parseInt(normalizedValue, 16)}
-                            onChange={v => updateSetting(name, "#" + (v?.toString(16).padStart(6, "0") ?? "000000"), setValue)}
-                        />
-                    </Forms.FormSection>
-                );
-                break;
-            }
-
-            case "number": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">{varInfo.label}</Forms.FormTitle>
-                        <TextInput
-                            type="number"
-                            pattern="-?[0-9]+"
-                            key={name}
-                            value={value}
-                            onChange={v => updateSetting(name, v, setValue)}
-                        />
-                    </Forms.FormSection>
-                );
-                break;
-            }
-
-            case "select": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                const options = varInfo.options.map(option => ({
-                    disabled: false,
-
-                    key: option.name,
-                    value: option.value,
-                    default: varInfo.default === option.name,
-                    label: option.label
-                } as ComponentTypes.SelectOption));
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">{varInfo.label}</Forms.FormTitle>
-                        <Select
-                            placeholder={varInfo.label}
-                            key={name}
-                            options={options}
-                            closeOnSelect={true}
-
-                            select={v => updateSetting(name, v, setValue)}
-                            isSelected={v => v === value}
-                            serialize={identity}
-                        />
-                    </Forms.FormSection>
-                );
-                break;
-            }
-
-            case "range": {
-                const [value, setValue] = useState(themeSettings[name]);
-
-                const markers: number[] = [];
-
-                // defaults taken from https://github.com/openstyles/stylus/wiki/Writing-UserCSS#default-value
-                for (let i = (varInfo.min ?? 0); i <= (varInfo.max ?? 10); i += (varInfo.step ?? 1)) {
-                    markers.push(i);
-                }
-
-                controls.push(
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">{varInfo.label} ({varInfo.units})</Forms.FormTitle>
-                        <Slider
-                            initialValue={parseInt(value, 10)}
-                            defaultValue={varInfo.default}
-                            onValueChange={v => updateSetting(name, v.toString(), setValue)}
-                            minValue={varInfo.min}
-                            maxValue={varInfo.max}
-
-                            markers={markers}
-                            stickToMarkers={true}
-                        />
-                    </Forms.FormSection>
-                );
-                break;
-            }
-        }
-    }
-
-    return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader separator={false}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Settings for {theme.name}</Text>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-            <ModalContent>
-                <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{controls}</Flex>
-            </ModalContent>
-        </ModalRoot>
     );
 }
 
