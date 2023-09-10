@@ -27,6 +27,15 @@ import { makeLazy } from "./lazy";
 // @ts-ignore ts mad
 export const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
 
+// https://github.com/deanm/omggif
+// easy way to read gif frames, used by ImageCaption
+export const getGifReader = makeLazy(async () => {
+    // @ts-ignore (it does exist)
+    return await fetch("https://unpkg.com/omggif@1.0.10/omggif.js")
+        .then(async res => await res.text() + ";\nreturn GifReader;")
+        .then(data => Function(data)());
+});
+
 // needed to parse APNGs in the nitroBypass plugin
 export const importApngJs = makeLazy(async () => {
     const exports = {};
