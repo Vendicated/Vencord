@@ -34,5 +34,5 @@ export async function getUserCssId(header: UserstyleHeader): Promise<string> {
 
     const idHash = await window.crypto.subtle.digest("SHA-256", new Uint8Array([...nameHash, ...namespaceHash]));
 
-    return window.btoa(String.fromCharCode(...new Uint8Array(idHash)));
+    return window.btoa(String.fromCharCode(...new Uint8Array(idHash))).substring(0, 43); // base64 adds one more padding character
 }

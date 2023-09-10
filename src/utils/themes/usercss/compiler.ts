@@ -83,6 +83,10 @@ export async function compileUsercss(fileName: string) {
             // In default and USO, it has no special meaning, so we'll just leave it as a number.
             varsToPass[k] = varsToPass[k] === "1" ? "true" : "false";
         }
+
+        if (v.type === "range") {
+            varsToPass[k] = `${varsToPass[k]}${v.units ?? "px"}`;
+        }
     }
 
     try {
