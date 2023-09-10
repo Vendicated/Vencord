@@ -38,17 +38,20 @@ export default definePlugin({
             options: [{
                 name: "Uses",
                 displayName: "Uses",
-                description: "Create a friend invite with 5 uses?",
-                displayDescription: "Create a friend invite with 5 uses?",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN
+                description: "How many uses?",
+                displayDescription: "How many uses?",
+                choices: [{ "label": "1", "name": "1", "value": "1" }, { "label": "5", "name": "5", "value": "5" }],
+                required: true,
+                type: ApplicationCommandOptionType.INTEGER
             }],
             execute: async (args, ctx) => {
-                if (!args[0]?.value && !UserStore.getCurrentUser().phone)
+                // @ts-ignore
+                if (args[0].value === 1 && !UserStore.getCurrentUser().phone)
                     return sendBotMessage(ctx.channel.id, {
                         content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
-                if (!args[0]?.value) {
+                // @ts-ignore
+                if (args[0].value === 1) {
                     const random = uuid.v4();
                     const invite = await RestAPI.post({
                         url: "/friend-finder/find-friends",
@@ -75,8 +78,9 @@ export default definePlugin({
                     `.trim().replace(/\s+/g, " ")
                     });
                 }
-                if (args[0]?.value) {
-                    const invite = FriendInvites.createFriendInvite();
+                // @ts-ignore
+                if (args[0].value === 5) {
+                    const invite = await FriendInvites.createFriendInvite();
 
                     sendBotMessage(ctx.channel.id, {
                         content: `
