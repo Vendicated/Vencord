@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./colorStyles.css";
+
 import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/react";
 import { find, findByCodeLazy } from "@webpack";
