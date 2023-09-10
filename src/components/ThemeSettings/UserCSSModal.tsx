@@ -24,10 +24,6 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
 
     const controls: ReactNode[] = [];
 
-    function updateSetting(key: string, value: string) {
-        themeSettings[key] = value;
-    }
-
     for (const [name, varInfo] of Object.entries(theme.vars)) {
         switch (varInfo.type) {
             case "text": {
