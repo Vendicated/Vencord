@@ -4,20 +4,29 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Slider } from "@webpack/common";
+import { Forms, Slider, useState } from "@webpack/common";
 
 interface Props {
     label: string;
     name: string;
-    value: string;
     default: number;
     min?: number;
     max?: number;
     step?: number;
-    onChange: (value: string) => void;
+    themeSettings: Record<string, string>;
 }
 
-export function SettingRangeComponent({ label, name, value, default: def, min, max, step, onChange }: Props) {
+export function SettingRangeComponent({ label, name, default: def, min, max, step, themeSettings }: Props) {
+    const [value, setValue] = useState(themeSettings[name]);
+
+    function handleChange(value: number) {
+        const corrected = value.toString();
+
+        setValue(corrected);
+
+        themeSettings[name] = corrected;
+    }
+
     const markers: number[] = [];
 
     // defaults taken from https://github.com/openstyles/stylus/wiki/Writing-UserCSS#default-value
@@ -31,7 +40,7 @@ export function SettingRangeComponent({ label, name, value, default: def, min, m
             <Slider
                 initialValue={parseInt(value, 10)}
                 defaultValue={def}
-                onValueChange={v => onChange(v.toString())}
+                onValueChange={handleChange}
                 minValue={min}
                 maxValue={max}
 

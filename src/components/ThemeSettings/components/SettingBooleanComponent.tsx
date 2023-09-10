@@ -4,22 +4,31 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Switch } from "@webpack/common";
+import { Forms, Switch, useState } from "@webpack/common";
 
 interface Props {
     label: string;
     name: string;
-    value: string;
-    onChange: (value: string) => void;
+    themeSettings: Record<string, string>;
 }
 
-export function SettingBooleanComponent({ label, name, value, onChange }: Props) {
+export function SettingBooleanComponent({ label, name, themeSettings }: Props) {
+    const [value, setValue] = useState(themeSettings[name]);
+
+    function handleChange(value: boolean) {
+        const corrected = value ? "1" : "0";
+
+        setValue(corrected);
+
+        themeSettings[name] = corrected;
+    }
+
     return (
         <Forms.FormSection>
             <Switch
                 key={name}
                 value={value === "1"}
-                onChange={v => onChange(v ? "1" : "0")}
+                onChange={handleChange}
                 hideBorder
                 style={{ marginBottom: "0.5em" }}
             >

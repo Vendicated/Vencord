@@ -7,7 +7,7 @@
 import { useSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Text, useState } from "@webpack/common";
+import { Text } from "@webpack/common";
 import type { ReactNode } from "react";
 import { UserstyleHeader } from "usercss-meta";
 
@@ -24,98 +24,79 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
 
     const controls: ReactNode[] = [];
 
-    function updateSetting(key: string, value: string, setValue: (value: string) => void) {
+    function updateSetting(key: string, value: string) {
         themeSettings[key] = value;
-        setValue(value);
     }
 
     for (const [name, varInfo] of Object.entries(theme.vars)) {
         switch (varInfo.type) {
             case "text": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingTextComponent
                         label={varInfo.label}
                         name={name}
-                        value={value}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;
             }
 
             case "checkbox": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingBooleanComponent
                         label={varInfo.label}
                         name={name}
-                        value={value}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;
             }
 
             case "color": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingColorComponent
                         label={varInfo.label}
                         name={name}
-                        value={value}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;
             }
 
             case "number": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingNumberComponent
                         label={varInfo.label}
                         name={name}
-                        value={value}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;
             }
 
             case "select": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingSelectComponent
                         label={varInfo.label}
                         name={name}
                         options={varInfo.options}
-                        value={value}
                         default={varInfo.default}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;
             }
 
             case "range": {
-                const [value, setValue] = useState(themeSettings[name]);
-
                 controls.push(
                     <SettingRangeComponent
                         label={varInfo.label}
                         name={name}
-                        value={value}
                         default={varInfo.default}
                         min={varInfo.min}
                         max={varInfo.max}
                         step={varInfo.step}
-                        onChange={v => updateSetting(name, v, setValue)}
+                        themeSettings={themeSettings}
                     />
                 );
                 break;

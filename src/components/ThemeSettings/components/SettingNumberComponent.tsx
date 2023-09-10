@@ -4,16 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, TextInput } from "@webpack/common";
+import { Forms, TextInput, useState } from "@webpack/common";
 
 interface Props {
     label: string;
     name: string;
-    value: string;
-    onChange: (value: string) => void;
+    themeSettings: Record<string, string>;
 }
 
-export function SettingNumberComponent({ label, name, value, onChange }: Props) {
+export function SettingNumberComponent({ label, name, themeSettings }: Props) {
+    const [value, setValue] = useState(themeSettings[name]);
+
+    function handleChange(value: string) {
+        setValue(value);
+
+        themeSettings[name] = value;
+    }
+
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
@@ -22,7 +29,7 @@ export function SettingNumberComponent({ label, name, value, onChange }: Props) 
                 pattern="-?[0-9]+"
                 key={name}
                 value={value}
-                onChange={onChange}
+                onChange={handleChange}
             />
         </Forms.FormSection>
     );

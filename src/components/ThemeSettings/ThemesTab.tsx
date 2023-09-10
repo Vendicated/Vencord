@@ -243,8 +243,10 @@ function ThemesTab() {
                     switch (varInfo.type) {
                         case "text":
                         case "color":
-                        case "select":
                             normalizedValue = varInfo.default;
+                            break;
+                        case "select":
+                            normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
                             break;
                         case "checkbox":
                             normalizedValue = varInfo.default ? "1" : "0";

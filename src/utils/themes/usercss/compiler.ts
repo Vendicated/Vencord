@@ -88,11 +88,6 @@ export async function compileUsercss(fileName: string) {
                 varsToPass[k] = `${varsToPass[k]}${v.units ?? "px"}`;
                 break;
             }
-
-            case "select": {
-                varsToPass[k] = v.options.find(opt => opt.name === varsToPass[k])!.value;
-                break;
-            }
         }
     }
 

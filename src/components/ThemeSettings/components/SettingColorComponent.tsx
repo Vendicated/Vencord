@@ -55,11 +55,20 @@ function ColorPicker(props: ColorPickerProps) {
 interface Props {
     label: string;
     name: string;
-    value: string;
-    onChange: (value: string) => void;
+    themeSettings: Record<string, string>;
 }
 
-export function SettingColorComponent({ label, name, value, onChange }: Props) {
+export function SettingColorComponent({ label, name, themeSettings }: Props) {
+    const [value, setValue] = useState(themeSettings[name]);
+
+    function handleChange(value: number) {
+        const corrected = "#" + (value?.toString(16).padStart(6, "0") ?? "000000");
+
+        setValue(corrected);
+
+        themeSettings[name] = corrected;
+    }
+
     const normalizedValue = TinyColor(value).toHex();
 
     return (
@@ -68,7 +77,7 @@ export function SettingColorComponent({ label, name, value, onChange }: Props) {
             <ColorPicker
                 key={name}
                 value={parseInt(normalizedValue, 16)}
-                onChange={v => onChange("#" + (v?.toString(16).padStart(6, "0") ?? "000000"))}
+                onChange={handleChange}
             />
         </Forms.FormSection>
     );

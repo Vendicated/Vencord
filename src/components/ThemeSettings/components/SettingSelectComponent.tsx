@@ -5,7 +5,7 @@
  */
 
 import { identity } from "@utils/misc";
-import { ComponentTypes, Forms, Select } from "@webpack/common";
+import { ComponentTypes, Forms, Select, useState } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -15,12 +15,19 @@ interface Props {
         label: string;
         value: string;
     }[];
-    value: string;
     default: string;
-    onChange: (value: string) => void;
+    themeSettings: Record<string, string>;
 }
 
-export function SettingSelectComponent({ label, name, options, value, default: def, onChange }: Props) {
+export function SettingSelectComponent({ label, name, options, default: def, themeSettings }: Props) {
+    const [value, setValue] = useState(themeSettings[name]);
+
+    function handleChange(value: string) {
+        setValue(value);
+
+        themeSettings[name] = value;
+    }
+
     const opts = options.map(option => ({
         disabled: false,
 
@@ -39,7 +46,7 @@ export function SettingSelectComponent({ label, name, options, value, default: d
                 options={opts}
                 closeOnSelect={true}
 
-                select={onChange}
+                select={handleChange}
                 isSelected={v => v === value}
                 serialize={identity}
             />
