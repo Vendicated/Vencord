@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -35,38 +35,57 @@ export default definePlugin({
             name: "create friend invite",
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
-            execute: async (_, ctx) => {
-                if (!UserStore.getCurrentUser().phone)
+            options: [{
+                name: "Uses",
+                displayName: "Uses",
+                description: "Create a friend invite with 5 uses?",
+                displayDescription: "Create a friend invite with 5 uses?",
+                required: false,
+                type: ApplicationCommandOptionType.BOOLEAN
+            }],
+            execute: async (args, ctx) => {
+                if (!args[0]?.value && !UserStore.getCurrentUser().phone)
                     return sendBotMessage(ctx.channel.id, {
-                        content: "You need to have a phone number connected to your account to create a friend invite!"
+                        content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
-
-                const random = uuid.v4();
-                const invite = await RestAPI.post({
-                    url: "/friend-finder/find-friends",
-                    body: {
-                        modified_contacts: {
-                            [random]: [1, "", ""]
-                        },
-                        phone_contact_methods_count: 1
-                    }
-                }).then(res =>
-                    FriendInvites.createFriendInvite({
-                        code: res.body.invite_suggestions[0][3],
-                        recipient_phone_number_or_email: random,
-                        contact_visibility: 1,
-                        filter_visibilities: [],
-                        filtered_invite_suggestions_index: 1
-                    })
-                );
-
-                sendBotMessage(ctx.channel.id, {
-                    content: `
+                if (!args[0]?.value) {
+                    const random = uuid.v4();
+                    const invite = await RestAPI.post({
+                        url: "/friend-finder/find-friends",
+                        body: {
+                            modified_contacts: {
+                                [random]: [1, "", ""]
+                            },
+                            phone_contact_methods_count: 1
+                        }
+                    }).then(res =>
+                        FriendInvites.createFriendInvite({
+                            code: res.body.invite_suggestions[0][3],
+                            recipient_phone_number_or_email: random,
+                            contact_visibility: 1,
+                            filter_visibilities: [],
+                            filtered_invite_suggestions_index: 1
+                        })
+                    );
+                    sendBotMessage(ctx.channel.id, {
+                        content: `
                         discord.gg/${invite.code} ·
                         Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
                         Max uses: \`${invite.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
-                });
+                    });
+                }
+                if (args[0]?.value) {
+                    const invite = FriendInvites.createFriendInvite();
+
+                    sendBotMessage(ctx.channel.id, {
+                        content: `
+                    discord.gg/${invite.code} ·
+                    Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
+                    Max uses: \`${invite.max_uses}\`
+                `.trim().replace(/\s+/g, " ")
+                    });
+                }
             },
         },
         {
