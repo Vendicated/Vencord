@@ -343,6 +343,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Rini",
         id: 1079479184478441643n
     },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n
+    },
     Arrow: {
         name: "arrow",
         id: 958158495302176778n
@@ -354,6 +358,22 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     MrDiamond: {
         name: "MrDiamond",
         id: 523338295644782592n
+    },
+    Lumap: {
+        name: "lumap",
+        id: 635383782576357407n
+    },
+    Dolfies: {
+        name: "Dolfies",
+        id: 852892297661906993n,
+    },
+    RuukuLada: {
+        name: "RuukuLada",
+        id: 119705748346241027n,
+    },
+    blahajZip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n,
     }
 } satisfies Record<string, Dev>);
 

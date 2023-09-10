@@ -75,6 +75,16 @@ export function isObject(obj: unknown): obj is object {
 }
 
 /**
+ * Check if an object is empty or in other words has no own properties
+ */
+export function isObjectEmpty(obj: object) {
+    for (const k in obj)
+        if (Object.hasOwn(obj, k)) return false;
+
+    return true;
+}
+
+/**
  * Returns null if value is not a URL, otherwise return URL object.
  * Avoids having to wrap url checks in a try/catch
  */

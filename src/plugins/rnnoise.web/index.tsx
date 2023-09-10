@@ -145,7 +145,7 @@ export default definePlugin({
             find: "window.webkitAudioContext",
             replacement: {
                 match: /(?<=\i\.acquire=function\((\i)\)\{return )navigator\.mediaDevices\.getUserMedia\(\1\)(?=\})/,
-                replace: m => `${m}.then(stream => $self.connectRnnoise(stream))`
+                replace: "$&.then(stream => $self.connectRnnoise(stream, $1.audio))"
             },
         },
         {
@@ -182,7 +182,8 @@ export default definePlugin({
 
     setEnabled,
     isEnabled: () => settings.store.isEnabled,
-    async connectRnnoise(stream: MediaStream): Promise<MediaStream> {
+    async connectRnnoise(stream: MediaStream, isAudio: boolean): Promise<MediaStream> {
+        if (!isAudio) return stream;
         if (!settings.store.isEnabled) return stream;
 
         const audioCtx = new AudioContext();
