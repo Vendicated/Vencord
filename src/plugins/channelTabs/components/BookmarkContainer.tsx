@@ -18,7 +18,7 @@
 
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
-import { Avatar, ChannelStore, ContextMenu, GuildStore, showToast, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
 import { QuestionIcon } from "./ChannelTab";
@@ -65,7 +65,27 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
     return <QuestionIcon height={16} width={16} />;
 }
 
-function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+function BookmarkFolderOpenMenu(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+    const bookmark = props.bookmarks[props.index] as BookmarkFolder;
+
+    return <Menu.Menu
+        navId="bookmark-folder-menu"
+        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+        aria-label="Bookmark Folder Menu"
+    >
+        {bookmark.bookmarks.map(bkm => <Menu.MenuItem
+            key={`bookmark-folder-entry-${bkm.channelId}`}
+            id={`bookmark-folder-entry-${bkm.channelId}`}
+            label={bkm.name}
+            icon={() => <BookmarkIcon bookmark={bkm} />}
+            showIconFirst={true}
+            action={() => switchChannel(bkm)}
+        />)}
+    </Menu.Menu>;
+}
+
+function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+    const { bookmarks, index, methods } = props;
     const bookmark = bookmarks[index];
 
     const ref = useRef<HTMLDivElement>(null);
@@ -106,12 +126,12 @@ function Bookmark({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: 
     return <div
         className={cl("bookmark")}
         ref={ref}
-        onClick={() => "bookmarks" in bookmark
-            ? showToast(bookmark.bookmarks.map(b => b.name).join(", ") || "TODO")
+        onClick={e => "bookmarks" in bookmark
+            ? ContextMenu.open(e, () => <BookmarkFolderOpenMenu {...props} />)
             : switchChannel(bookmark)
         }
         onContextMenu={e => ContextMenu.open(e, () =>
-            <BookmarkContextMenu index={index} bookmarks={bookmarks} methods={methods} />
+            <BookmarkContextMenu {...props} />
         )}
     >
         <BookmarkIcon bookmark={bookmark} />

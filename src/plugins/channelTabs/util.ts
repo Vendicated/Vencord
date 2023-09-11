@@ -67,7 +67,7 @@ export const bookmarkFolderColors = {
     "Blue": "var(--blue-500)",
     "Yellow": "var(--yellow-300)",
     "Green": "var(--green-400)",
-    "Black": "var(--background-primary)",
+    "Black": "var(--black-500)",
     "White": "var(--white-500)",
     "Orange": "var(--orange-400)",
     "Pink": "var(--guild-boosting-pink)"
