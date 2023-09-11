@@ -25,17 +25,20 @@ let stateChanged: (() => void) | null;
 
 export function ServersWrapper({ Component, props }: { Component: React.ElementType<any>; props: React.HTMLAttributes<any>; }) {
     const updater = useForceUpdater();
-    useEffect(() => {
-        stateChanged = updater;
-        return () => { stateChanged = null; };
-    });
-
     const [revealed, setRevealed] = useState(false);
 
     useEffect(() => {
-        const mouseEvent = (event: MouseEvent) => setRevealed(settings.store.reveal && event.x <= (revealed ? 68 : 6));
+        stateChanged = updater;
+
+        const mouseEvent = (event: MouseEvent) => {
+            if (settings.store.reveal && !revealed)
+                setRevealed(event.x <= 6);
+        };
         document.addEventListener("mousemove", mouseEvent);
-        return () => document.removeEventListener("mousemove", mouseEvent);
+        return () => {
+            stateChanged = null;
+            document.removeEventListener("mousemove", mouseEvent);
+        };
     });
 
     const classes = [props.className, "vc-guilds"];
@@ -45,7 +48,7 @@ export function ServersWrapper({ Component, props }: { Component: React.ElementT
             classes.push("vc-revealed");
     }
 
-    return <Component {...props} className={classes.join(" ")} />;
+    return <span style={{ display: "contents" }} onMouseLeave={() => setRevealed(false)}><Component {...props} className={classes.join(" ")} /></span>;
 }
 
 export function ToggleServersButton() {
