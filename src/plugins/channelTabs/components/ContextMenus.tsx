@@ -105,16 +105,16 @@ function AddToFolderModal({ modalProps, bookmarks, onSave }: {
         <ModalContent>
             <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
             <Select
-                options={[{
-                    label: "Create one",
-                    value: -1,
-                    default: true
-                }, ...Object.entries(bookmarks).map(([index, bookmark]) => ({
+                options={[...Object.entries(bookmarks).map(([index, bookmark]) => ({
                     label: bookmark.name,
                     value: parseInt(index, 10),
                     _isFolder: "bookmarks" in bookmark
-                })).filter(v => v._isFolder).map(({ label, value }) => ({ label, value }))
-                ]}
+                })).filter(v => v._isFolder).map(({ label, value }) => ({ label, value })),
+                {
+                    label: "Create one",
+                    value: -1,
+                    default: true
+                }]}
                 isSelected={v => v === folderIndex}
                 select={setIndex}
                 serialize={String}
