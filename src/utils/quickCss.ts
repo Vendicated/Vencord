@@ -27,8 +27,12 @@ export async function toggle(isEnabled: boolean) {
         if (isEnabled) {
             style = document.createElement("style");
             style.id = "vencord-custom-css";
-            document.head.appendChild(style);
-            VencordNative.quickCss.addChangeListener(css => style.textContent = css);
+            document.documentElement.appendChild(style);
+            VencordNative.quickCss.addChangeListener(css => {
+                style.textContent = css;
+                // At the time of writing this, changing textContent resets the disabled state
+                style.disabled = !Settings.useQuickCss;
+            });
             style.textContent = await VencordNative.quickCss.get();
         }
     } else
@@ -39,18 +43,37 @@ async function initThemes() {
     if (!themesStyle) {
         themesStyle = document.createElement("style");
         themesStyle.id = "vencord-themes";
-        document.head.appendChild(themesStyle);
+        document.documentElement.appendChild(themesStyle);
     }
 
-    const { themeLinks } = Settings;
-    const links = themeLinks.map(link => `@import url("${link.trim()}");`).join("\n");
-    themesStyle.textContent = links;
+    const { themeLinks, enabledThemes } = Settings;
+
+    const links: string[] = [...themeLinks];
+
+    if (IS_WEB) {
+        for (const theme of enabledThemes) {
+            const themeData = await VencordNative.themes.getThemeData(theme);
+            if (!themeData) continue;
+            const blob = new Blob([themeData], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
+    } else {
+        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
+        links.push(...localThemes);
+    }
+
+    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initThemes();
+
     toggle(Settings.useQuickCss);
     addSettingsListener("useQuickCss", toggle);
 
-    initThemes();
     addSettingsListener("themeLinks", initThemes);
+    addSettingsListener("enabledThemes", initThemes);
+
+    if (!IS_WEB)
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
 });

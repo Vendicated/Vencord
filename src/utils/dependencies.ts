@@ -37,7 +37,7 @@ export const importApngJs = makeLazy(async () => {
 });
 
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
-export enum ApngDisposeOp {
+export const enum ApngDisposeOp {
     /**
      * no disposal is done on this frame before rendering the next; the contents of the output buffer are left as is.
      */
@@ -53,7 +53,7 @@ export enum ApngDisposeOp {
 }
 
 // TODO: Might need to somehow implement this
-export enum ApngBlendOp {
+export const enum ApngBlendOp {
     SOURCE,
     OVER
 }
@@ -78,6 +78,10 @@ export interface ApngFrameData {
 const shikiWorkerDist = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
 export const shikiWorkerSrc = `${shikiWorkerDist}/${IS_DEV ? "index.js" : "index.min.js"}`;
 export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
+
+export const rnnoiseDist = "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
+export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
+export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
 
 // @ts-expect-error SHUT UP
 export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));

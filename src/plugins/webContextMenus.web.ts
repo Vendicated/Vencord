@@ -39,17 +39,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Add back the Discord context menus for images, links and the chat input bar",
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
-        // so disable this by default. Vencord Desktop just doesn't, so enable by default
-        default: IS_VENCORD_DESKTOP,
+        // so disable this by default. Vesktop just doesn't, so enable by default
+        default: IS_VESKTOP,
         restartNeeded: true
     }
 });
 
 export default definePlugin({
     name: "WebContextMenus",
-    description: "Re-adds context menus missing in the web version of Discord: Images, ChatInputBar, Links, 'Copy Link', 'Open Link', 'Copy Image', 'Save Image'",
+    description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
     authors: [Devs.Ven],
     enabledByDefault: true,
+    required: IS_VESKTOP,
 
     settings,
 
@@ -85,7 +86,7 @@ export default definePlugin({
                 },
                 // Fix silly Discord calling the non web support copy
                 {
-                    match: /\w\.default\.copy/,
+                    match: /\i\.\i\.copy/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
                 }
             ]
@@ -101,7 +102,7 @@ export default definePlugin({
                     replace: "if(null=="
                 },
                 {
-                    match: /return\s*?\[\i\.default\.canCopyImage\(\)/,
+                    match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
                     replace: "return [true"
                 },
                 {
@@ -146,36 +147,30 @@ export default definePlugin({
             }
         },
         {
-            find: ':"command-suggestions"',
+            find: 'navId:"textarea-context"',
+            all: true,
             predicate: () => settings.store.addBack,
             replacement: [
-                {
-                    // desktopOnlyEntries = makeEntries(), spellcheckChildren = desktopOnlyEntries[0], languageChildren = desktopOnlyEntries[1]
-                    match: /\i=.{0,30}text:\i,target:\i,onHeightUpdate:\i\}\),2\),(\i)=\i\[0\],(\i)=\i\[1\]/,
-                    // set spellcheckChildren & languageChildren to empty arrays, so just in case patch 3 fails, we don't
-                    // reference undefined variables
-                    replace: "$1=[],$2=[]",
-                },
                 {
                     // if (!IS_DESKTOP) return null;
                     match: /if\(!\i\.\i\)return null;/,
                     replace: ""
                 },
                 {
-                    // do not add menu items for entries removed in patch 1. Using a lookbehind for group 1 is slow,
-                    // so just capture and add back
-                    match: /("submit-button".+?)(\(0,\i\.jsx\)\(\i\.MenuGroup,\{children:\i\}\),){2}/,
-                    replace: "$1"
-                },
-                {
                     // Change calls to DiscordNative.clipboard to us instead
-                    match: /\b\i\.default\.(copy|cut|paste)/g,
+                    match: /\b\i\.\i\.(copy|cut|paste)/g,
                     replace: "$self.$1"
                 }
             ]
+        },
+        {
+            find: '"add-to-dictionary"',
+            predicate: () => settings.store.addBack,
+            replacement: {
+                match: /var \i=\i\.text,/,
+                replace: "return [null,null];$&"
+            }
         }
-
-        // TODO: Maybe add spellcheck for VencordDesktop
     ],
 
     async copyImage(url: string) {

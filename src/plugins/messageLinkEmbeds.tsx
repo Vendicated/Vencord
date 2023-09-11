@@ -18,6 +18,7 @@
 
 import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -92,6 +93,26 @@ const settings = definePluginSettings({
                 default: true
             }
         ]
+    },
+    listMode: {
+        description: "Whether to use ID list as blacklist or whitelist",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Blacklist",
+                value: "blacklist",
+                default: true
+            },
+            {
+                label: "Whitelist",
+                value: "whitelist"
+            }
+        ]
+    },
+    idList: {
+        description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
+        type: OptionType.STRING,
+        default: ""
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
@@ -217,6 +238,13 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             continue;
         }
 
+        const { listMode, idList } = settings.store;
+
+        const isListed = [guildID, channelID, message.author.id].some(id => id && idList.includes(id));
+
+        if (listMode === "blacklist" && isListed) continue;
+        if (listMode === "whitelist" && !isListed) continue;
+
         let linkedMessage = messageCache.get(messageID)?.message;
         if (!linkedMessage) {
             linkedMessage ??= MessageStore.getMessage(channelID, messageID);
@@ -291,9 +319,10 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
     />;
 }
 
+const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")!;
+
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
-
     const isDM = guildID === "@me";
     const images = getImages(message);
     const { parse } = Parser;
@@ -309,7 +338,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={false}
+        compact={compactModeEnabled.getSetting()}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
@@ -335,8 +364,8 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
-    authors: [Devs.TheSun, Devs.Ven],
-    dependencies: ["MessageAccessoriesAPI"],
+    authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
+    dependencies: ["MessageAccessoriesAPI", "SettingsStoreAPI"],
     patches: [
         {
             find: ".embedCard",
@@ -363,7 +392,9 @@ export default definePlugin({
 
             return (
                 <ErrorBoundary>
-                    <MessageEmbedAccessory message={props.message} />
+                    <MessageEmbedAccessory
+                        message={props.message}
+                    />
                 </ErrorBoundary>
             );
         }, 4 /* just above rich embeds */);

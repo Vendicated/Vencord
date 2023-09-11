@@ -30,6 +30,9 @@ const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
+const sharedIntlNumberFormat = new Intl.NumberFormat();
+const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
+
 function MemberCount() {
     const { id: channelId, guild_id: guildId } = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
     const { groups } = useStateFromStores(
@@ -52,13 +55,12 @@ function MemberCount() {
     return (
         <Flex id="vc-membercount" style={{
             marginTop: "1em",
-            marginBottom: "-.5em",
             paddingInline: "1em",
             justifyContent: "center",
             alignContent: "center",
             gap: 0
         }}>
-            <Tooltip text={`${online} Online in this Channel`} position="bottom">
+            <Tooltip text={`${numberFormat(online)} online in this channel`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -71,11 +73,11 @@ function MemberCount() {
                                 marginRight: "0.5em"
                             }}
                         />
-                        <span style={{ color: "var(--green-360)" }}>{online}</span>
+                        <span style={{ color: "var(--green-360)" }}>{numberFormat(online)}</span>
                     </div>
                 )}
             </Tooltip>
-            <Tooltip text={`${total} Total Server Members`} position="bottom">
+            <Tooltip text={`${numberFormat(total)} total server members`} position="bottom">
                 {props => (
                     <div {...props}>
                         <span
@@ -89,7 +91,7 @@ function MemberCount() {
                                 marginLeft: "1em"
                             }}
                         />
-                        <span style={{ color: "var(--primary-400)" }}>{total}</span>
+                        <span style={{ color: "var(--primary-400)" }}>{numberFormat(total)}</span>
                     </div>
                 )}
             </Tooltip>
@@ -106,7 +108,7 @@ export default definePlugin({
         find: ".isSidebarVisible,",
         replacement: {
             match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: "$1:[$2.startsWith('members')?$self.render():null,$3"
+            replace: "$1:[$2?.startsWith('members')?$self.render():null,$3"
         }
     }],
 

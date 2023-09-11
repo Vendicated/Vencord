@@ -171,7 +171,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex,
+                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
                     error: cause
                 });
                 break;
@@ -263,7 +263,7 @@ function runTime(token: string) {
             for (const id in ids) {
                 const isWasm = await fetch(wreq.p + wreq.u(id))
                     .then(r => r.text())
-                    .then(t => t.includes(".module.wasm"));
+                    .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
                 if (!isWasm)
                     await wreq.e(id as any);

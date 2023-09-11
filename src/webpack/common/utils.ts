@@ -77,12 +77,23 @@ export const Toasts = {
     }
 };
 
+/**
+ * Show a simple toast. If you need more options, use Toasts.show manually
+ */
+export function showToast(message: string, type = ToastType.MESSAGE) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type
+    });
+}
+
 export const UserUtils = {
     fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
 };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".default.copy("),
+    copy: filters.byCode(".copy("),
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 

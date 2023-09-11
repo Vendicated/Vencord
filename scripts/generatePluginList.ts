@@ -21,6 +21,8 @@ import { access, readFile } from "fs/promises";
 import { join } from "path";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
+import { getPluginTarget } from "./utils.mjs";
+
 interface Dev {
     name: string;
     id: string;
@@ -151,28 +153,30 @@ async function parseFile(fileName: string) {
                 case "required":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
-                    if (!data[key] && value.kind !== SyntaxKind.FalseKeyword) throw fail(`${key} is not a boolean literal`);
                     break;
             }
         }
 
         if (!data.name || !data.description || !data.authors) throw fail("name, description or authors are missing");
 
-        const fileBits = fileName.split(".");
-        if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1)!)) {
-            const mod = fileBits.at(-2)!;
-            if (!["web", "discordDesktop", "vencordDesktop", "dev"].includes(mod)) throw fail(`invalid target ${fileBits.at(-2)}`);
-            data.target = mod as any;
+        const target = getPluginTarget(fileName);
+        if (target) {
+            if (!["web", "discordDesktop", "vencordDesktop", "desktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
+            data.target = target as any;
         }
 
-        return data;
+        let readme = "";
+        try {
+            readme = readFileSync(join(fileName, "..", "README.md"), "utf-8");
+        } catch { }
+        return [data, readme] as const;
     }
 
     throw fail("no default export called 'definePlugin' found");
 }
 
-async function getEntryPoint(dirent: Dirent) {
-    const base = join("./src/plugins", dirent.name);
+async function getEntryPoint(dir: string, dirent: Dirent) {
+    const base = join(dir, dirent.name);
     if (!dirent.isDirectory()) return base;
 
     for (const name of ["index.ts", "index.tsx"]) {
@@ -186,16 +190,32 @@ async function getEntryPoint(dirent: Dirent) {
     throw new Error(`${dirent.name}: Couldn't find entry point`);
 }
 
+function isPluginFile({ name }: { name: string; }) {
+    if (name === "index.ts") return false;
+    return !name.startsWith("_") && !name.startsWith(".");
+}
+
 (async () => {
     parseDevs();
-    const plugins = readdirSync("./src/plugins", { withFileTypes: true }).filter(d => d.name !== "index.ts");
 
-    const promises = plugins.map(async dirent => parseFile(await getEntryPoint(dirent)));
+    const plugins = [] as PluginData[];
+    const readmes = {} as Record<string, string>;
 
-    const data = JSON.stringify(await Promise.all(promises));
+    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
+        readdirSync(dir, { withFileTypes: true })
+            .filter(isPluginFile)
+            .map(async dirent => {
+                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
+                plugins.push(data);
+                if (readme) readmes[data.name] = readme;
+            })
+    ));
 
-    if (process.argv.length > 2) {
+    const data = JSON.stringify(plugins);
+
+    if (process.argv.length > 3) {
         writeFileSync(process.argv[2], data);
+        writeFileSync(process.argv[3], JSON.stringify(readmes));
     } else {
         console.log(data);
     }

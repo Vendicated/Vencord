@@ -21,7 +21,7 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { SelectedChannelStore, UserStore } from "@webpack/common";
+import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, ReactionEmoji } from "discord-types/general";
 
 interface IMessageCreate {
@@ -37,6 +37,7 @@ interface IReactionAdd {
     optimistic: boolean;
     channelId: string;
     messageId: string;
+    messageAuthorId: string;
     userId: "195136840355807232";
     emoji: ReactionEmoji;
 }
@@ -53,6 +54,8 @@ interface IVoiceChannelEffectSendEvent {
 const MOYAI = "🗿";
 const MOYAI_URL =
     "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
+const MOYAI_URL_HD =
+    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai_hd.wav";
 
 const settings = definePluginSettings({
     volume: {
@@ -62,6 +65,14 @@ const settings = definePluginSettings({
         default: 0.5,
         stickToMarkers: false
     },
+    quality: {
+        description: "Quality of the 🗿🗿🗿",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Normal", value: "Normal", default: true },
+            { label: "HD", value: "HD" }
+        ],
+    },
     triggerWhenUnfocused: {
         description: "Trigger the 🗿 even when the window is unfocused",
         type: OptionType.BOOLEAN,
@@ -69,6 +80,11 @@ const settings = definePluginSettings({
     },
     ignoreBots: {
         description: "Ignore bots",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    ignoreBlocked: {
+        description: "Ignore blocked users",
         type: OptionType.BOOLEAN,
         default: true
     }
@@ -85,6 +101,7 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (settings.store.ignoreBots && message.author?.bot) return;
+            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author?.id)) return;
             if (!message.content) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -96,9 +113,10 @@ export default definePlugin({
             }
         },
 
-        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, emoji }: IReactionAdd) {
+        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
             if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
             if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
+            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(messageAuthorId)) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
             const name = emoji.name.toLowerCase();
@@ -149,7 +167,11 @@ function getMoyaiCount(message: string) {
 function boom() {
     if (!settings.store.triggerWhenUnfocused && !document.hasFocus()) return;
     const audioElement = document.createElement("audio");
-    audioElement.src = MOYAI_URL;
+
+    audioElement.src = settings.store.quality === "HD"
+        ? MOYAI_URL_HD
+        : MOYAI_URL;
+
     audioElement.volume = settings.store.volume;
     audioElement.play();
 }

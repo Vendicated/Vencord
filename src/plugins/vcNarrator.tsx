@@ -59,17 +59,20 @@ function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
     speechSynthesis.speak(speech);
 }
 
-function clean(str: string, fallback: string) {
+function clean(str: string) {
+    const replacer = Settings.plugins.VcNarrator.latinOnly
+        ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
+        : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
+
     return str.normalize("NFKC")
-        .replace(/[^\w ]/g, "")
-        .trim()
-        || fallback;
+        .replace(replacer, "")
+        .trim();
 }
 
 function formatText(str: string, user: string, channel: string) {
     return str
-        .replaceAll("{{USER}}", clean(user, user ? "Someone" : ""))
-        .replaceAll("{{CHANNEL}}", clean(channel, "channel"));
+        .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
+        .replaceAll("{{CHANNEL}}", clean(channel) || "channel");
 }
 
 /*
@@ -153,6 +156,8 @@ export default definePlugin({
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
 
+            if (ChannelStore.getChannel(myChanId!)?.type === 13 /* Stage Channel */) return;
+
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
                 const isMe = userId === myId;
@@ -232,6 +237,11 @@ export default definePlugin({
             },
             sayOwnName: {
                 description: "Say own name",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            latinOnly: {
+                description: "Strip non latin characters from names before saying them",
                 type: OptionType.BOOLEAN,
                 default: false
             },

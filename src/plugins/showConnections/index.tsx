@@ -27,13 +27,12 @@ import { copyWithToast } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { i18n, Text, Tooltip } from "@webpack/common";
+import { i18n, Text, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
 const Section = LazyComponent(() => findByCode("().lastSection"));
-const UserProfileStore = findStoreLazy("UserProfileStore");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
@@ -147,6 +146,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         className="vc-user-connection"
                         href={url}
                         target="_blank"
+                        onClick={e => {
+                            if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
+                                const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
+                                // handleLink will .preventDefault() if applicable
+                                OpenInApp.handleLink(e.currentTarget, e);
+                            }
+                        }}
                     >
                         {img}
                     </a>

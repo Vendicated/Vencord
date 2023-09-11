@@ -20,11 +20,13 @@ import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-enum Methods {
+const enum Methods {
     Random,
     Consistent,
     Timestamp,
 }
+
+const tarExtMatcher = /\.tar\.\w+$/;
 
 export default definePlugin({
     name: "AnonymiseFileNames",
@@ -67,7 +69,8 @@ export default definePlugin({
 
     anonymise(file: string) {
         let name = "image";
-        const extIdx = file.lastIndexOf(".");
+        const tarMatch = tarExtMatcher.exec(file);
+        const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
         const ext = extIdx !== -1 ? file.slice(extIdx) : "";
 
         switch (Settings.plugins.AnonymiseFileNames.method) {

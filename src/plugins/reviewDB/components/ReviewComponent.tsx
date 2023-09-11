@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
@@ -24,7 +25,7 @@ import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, cl, openUserProfileModal, showToast } from "../utils";
+import { canDeleteReview, cl, showToast } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
@@ -32,7 +33,7 @@ export default LazyComponent(() => {
     // this is terrible, blame mantika
     const p = filters.byProps;
     const [
-        { cozyMessage, buttons, message, groupStart },
+        { cozyMessage, buttons, message, buttonsInner, groupStart },
         { container, isHeader },
         { avatar, clickable, username, messageContent, wrapper, cozy },
         buttonClasses,
@@ -49,7 +50,7 @@ export default LazyComponent(() => {
 
     return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
         function openModal() {
-            openUserProfileModal(review.sender.discordID);
+            openUserProfile(review.sender.discordID);
         }
 
         function delReview() {
@@ -133,7 +134,7 @@ export default LazyComponent(() => {
                     <div className={classes(container, isHeader, buttons)} style={{
                         padding: "0px",
                     }}>
-                        <div className={buttonClasses.wrapper} >
+                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                             <ReportButton onClick={reportRev} />
 
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (
