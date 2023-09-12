@@ -76,8 +76,8 @@ const enum NameFormat {
     StatusName = "status-name",
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
-    ArtistOnly = "artist-name-only",
-    SongOnly = "song-title-only"
+    ArtistOnly = "artist",
+    SongOnly = "song"
 }
 
 const applicationId = "1108588077900898414";
