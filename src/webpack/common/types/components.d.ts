@@ -398,12 +398,18 @@ export type Paginator = ComponentType<{
     hideMaxPage?: boolean;
 }>;
 
-export type MaskedLink = ComponentType<{
-    onClick(): void;
-    trusted: boolean;
-    title: string,
+export type MaskedLink = ComponentType<PropsWithChildren<{
     href: string;
-}>;
+    rel?: string;
+    target?: string;
+    title?: string,
+    className?: string;
+    tabIndex?: number;
+    onClick?(): void;
+    trusted?: boolean;
+    messageId?: string;
+    channelId?: string;
+}>>;
 
 export type ScrollerThin = ComponentType<PropsWithChildren<{
     className?: string;

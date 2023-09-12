@@ -171,7 +171,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex,
+                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
                     error: cause
                 });
                 break;

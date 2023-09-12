@@ -49,6 +49,7 @@ export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: Stores.GuildStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
+export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
@@ -87,6 +88,7 @@ export const useStateFromStores: <T>(
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
+waitForStore("UserProfileStore", m => UserProfileStore = m);
 waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);

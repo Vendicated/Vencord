@@ -63,7 +63,7 @@ Then fully close Discord from your taskbar or task manager, and restart it. Venc
 
 If you're using Discord already, go into the `Updater` tab in settings.
 
-Sometimes it may be neccessary to manually update if the GUI updater fails.
+Sometimes it may be necessary to manually update if the GUI updater fails.
 
 To pull latest changes:
 

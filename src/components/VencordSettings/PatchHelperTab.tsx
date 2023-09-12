@@ -17,6 +17,7 @@
 */
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { CodeBlock } from "@components/CodeBlock";
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
@@ -299,7 +300,7 @@ function PatchHelper() {
             {!!(find && match && replacement) && (
                 <>
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
-                    <div style={{ userSelect: "text" }}>{Parser.parse(makeCodeblock(code, "ts"))}</div>
+                    <CodeBlock lang="js" content={code} />
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}
