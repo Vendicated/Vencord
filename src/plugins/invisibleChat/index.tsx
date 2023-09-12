@@ -225,8 +225,8 @@ export function encrypt(secret: string, password: string, cover: string): string
     return steggo.hide(secret + "\u200b", password, cover);
 }
 
-export function decrypt(secret: string, password: string, removeIndicator: boolean): string {
-    const decrypted = steggo.reveal(secret, password);
+export function decrypt(encrypted: string, password: string, removeIndicator: boolean): string {
+    const decrypted = steggo.reveal(encrypted, password);
     return removeIndicator ? decrypted.replace("\u200b", "") : decrypted;
 }
 

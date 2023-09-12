@@ -28,7 +28,7 @@ import { Button, Forms, React, TextInput } from "@webpack/common";
 import { decrypt } from "../index";
 
 export function DecModal(props: any) {
-    const secret: string = props?.message?.content;
+    const encryptedMessage: string = props?.message?.content;
     const [password, setPassword] = React.useState("password");
 
     return (
@@ -38,9 +38,9 @@ export function DecModal(props: any) {
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Secret</Forms.FormTitle>
-                <TextInput defaultValue={secret} disabled={true}></TextInput>
-                <Forms.FormTitle tag="h5">Password</Forms.FormTitle>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Message with Encryption</Forms.FormTitle>
+                <TextInput defaultValue={encryptedMessage} disabled={true}></TextInput>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     onChange={setPassword}
@@ -51,7 +51,7 @@ export function DecModal(props: any) {
                 <Button
                     color={Button.Colors.GREEN}
                     onClick={() => {
-                        const toSend = decrypt(secret, password, true);
+                        const toSend = decrypt(encryptedMessage, password, true);
                         if (!toSend || !props?.message) return;
                         // @ts-expect-error
                         Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
