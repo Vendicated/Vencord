@@ -76,6 +76,8 @@ const enum NameFormat {
     StatusName = "status-name",
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
+    ArtistOnly = "artist",
+    SongOnly = "song"
 }
 
 const applicationId = "1108588077900898414";
@@ -143,6 +145,14 @@ const settings = definePluginSettings({
             {
                 label: "Use format 'song - artist'",
                 value: NameFormat.SongFirst
+            },
+            {
+                label: "Use artist name only",
+                value: NameFormat.ArtistOnly
+            },
+            {
+                label: "Use song name only",
+                value: NameFormat.SongOnly
             }
         ],
     },
@@ -171,7 +181,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip],
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settingsAboutComponent: () => (
         <>
@@ -298,6 +308,10 @@ export default definePlugin({
                     return trackData.artist + " - " + trackData.name;
                 case NameFormat.SongFirst:
                     return trackData.name + " - " + trackData.artist;
+                case NameFormat.ArtistOnly:
+                    return trackData.artist;
+                case NameFormat.SongOnly:
+                    return trackData.name;
                 default:
                     return settings.store.statusName;
             }
