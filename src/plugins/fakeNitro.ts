@@ -220,7 +220,7 @@ export default definePlugin({
                 "(?:canStreamQuality|canStreamHighQuality|canStreamMidQuality)",
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`),
+                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
                     replace: "$&return true;"
                 };
             })
