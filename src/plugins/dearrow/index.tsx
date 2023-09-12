@@ -74,8 +74,8 @@ async function embedDidMount(this: Component<Props>) {
     }
 }
 
-function renderButton(this: Component<Props>) {
-    const { embed } = this.props;
+function DearrowButton({ component }: { component: Component<Props>; }) {
+    const { embed } = component.props;
     if (!embed?.dearrow) return null;
 
     return (
@@ -97,7 +97,7 @@ function renderButton(this: Component<Props>) {
                             embed.thumbnail.proxyURL = oldThumb;
                         }
 
-                        this.forceUpdate();
+                        component.forceUpdate();
                     }}
                 >
                     {/* Dearrow Icon, taken from https://dearrow.ajay.app/logo.svg (and optimised) */}
@@ -134,7 +134,13 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     embedDidMount,
-    renderButton: ErrorBoundary.wrap(renderButton, { noop: true }),
+    renderButton(component: Component<Props>) {
+        return (
+            <ErrorBoundary noop>
+                <DearrowButton component={component} />
+            </ErrorBoundary>
+        );
+    },
 
     patches: [{
         find: "this.renderInlineMediaEmbed",
@@ -148,7 +154,7 @@ export default definePlugin({
             // add dearrow button
             {
                 match: /children:\[(?=null!=\i\?\i\.renderSuppressButton)/,
-                replace: "children:[$self.renderButton.call(this),"
+                replace: "children:[$self.renderButton(this),"
             }
         ]
     }],
