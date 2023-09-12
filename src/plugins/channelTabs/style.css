@@ -80,6 +80,7 @@
 
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
     margin-left: 0.25rem;
+    margin-right: 0.25rem;
 }
 
 .vc-channeltabs-bookmark-icon {
@@ -88,6 +89,11 @@
     border-radius: 50%;
     background-color: var(--background-primary);
     text-align: center;
+}
+
+.vc-channeltabs-bookmark-notification {
+    height: 1rem;
+    width: 1rem;
 }
 
 .vc-channeltabs-channel-info {

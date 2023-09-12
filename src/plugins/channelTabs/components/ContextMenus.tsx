@@ -130,6 +130,7 @@ function AddToFolderModal({ modalProps, bookmarks, onSave }: {
 export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
     const bookmark = bookmarks[index];
+    const isFolder = "bookmarks" in bookmark;
 
     return <Menu.Menu
         navId="channeltabs-bookmark-context"
@@ -159,7 +160,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
             <Menu.MenuItem
                 key="delete-bookmark"
                 id="delete-bookmark"
-                label="Delete Bookmark"
+                label={"Delete Bookmark" + (isFolder ? " Folder" : "")}
                 action={() => methods.deleteBookmark(index)}
             />
             <Menu.MenuItem

@@ -67,7 +67,7 @@ function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
         : null;
 }
 
-const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
+export const NotificationDot = ({ unreadCount, mentionCount }: { unreadCount: number, mentionCount: number; }) => {
     return unreadCount > 0 ?
         <div
             data-has-mention={!!mentionCount}
