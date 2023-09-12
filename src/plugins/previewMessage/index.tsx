@@ -16,37 +16,96 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { sendBotMessage } from "@api/Commands";
+import { generateId, sendBotMessage } from "@api/Commands";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { MessageAttachment } from "discord-types/general";
 
 interface Props {
     type: {
         analyticsName: string;
+        isEmpty: boolean;
+        attachments: boolean;
     };
 }
 
+const UploadStore = findByPropsLazy("getUploads");
+
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
 
+
+const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
+    new Promise(res => {
+        const img = new Image();
+        img.onload = () =>
+            res({ width: img.width, height: img.height });
+
+        img.onerror = () =>
+            res(null);
+
+        img.src = url;
+    });
+
+
+const getAttachments = async (channelId: string) =>
+    await Promise.all(
+        UploadStore.getUploads(channelId, DraftType.ChannelMessage)
+            .map(async (upload: any) => {
+                const { isImage, filename, spoiler, item: { file } } = upload;
+                const url = URL.createObjectURL(file);
+                const attachment: MessageAttachment = {
+                    id: generateId(),
+                    filename: spoiler ? "SPOILER_" + filename : filename,
+                    // weird eh? if i give it the normal content type the preview doenst work
+                    content_type: undefined,
+                    size: await upload.getSize(),
+                    spoiler,
+                    // discord adds query params to the url, so we need to add a hash to prevent that
+                    url: url + "#",
+                    proxy_url: url + "#",
+                };
+
+                if (isImage) {
+                    const box = await getImageBox(url);
+                    if (!box) return attachment;
+
+                    attachment.width = box.width;
+                    attachment.height = box.height;
+                }
+
+                return attachment;
+            })
+    );
+
+
 export function PreviewButton(chatBoxProps: Props) {
+    const { isEmpty, attachments } = chatBoxProps.type;
+
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
+
     if (chatBoxProps.type.analyticsName !== "normal") return null;
-    if (!draft) return null;
+
+    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
+    const hasContent = !isEmpty && draft?.length > 0;
+
+    if (!hasContent && !hasAttachments) return null;
 
     return (
         <Tooltip text="Preview Message">
             {tooltipProps => (
                 <Button
                     {...tooltipProps}
-                    onClick={() =>
+                    onClick={async () =>
                         sendBotMessage(
                             channelId,
                             {
                                 content: getDraft(channelId),
-                                author: UserStore.getCurrentUser()
+                                author: UserStore.getCurrentUser(),
+                                attachments: hasAttachments ? await getAttachments(channelId) : undefined,
                             }
                         )}
                     size=""
@@ -66,7 +125,7 @@ export function PreviewButton(chatBoxProps: Props) {
 
 export default definePlugin({
     name: "PreviewMessage",
-    description: "Lets you preview your message before sending it",
+    description: "Lets you preview your message before sending it.",
     authors: [Devs.Aria],
     patches: [
         {
