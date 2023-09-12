@@ -64,7 +64,8 @@ const report = {
 const IGNORED_DISCORD_ERRORS = [
     /(?:%\w)?\[KeybindsStore\].{0,100}KeybindStore: Looking for callback action.*?(?:\n|$)/gs,
     /(?:%\w)?\[FetchBlockedDomain\].{0,115}Unable to process domain list delta: Client revision number is null.*?(?:\n|$)/gs,
-    /(?:%\w)?\[FetchBlockedDomain\].{0,85}Downloading the full bad domains file.*?(?:\n|$)/gs
+    /(?:%\w)?\[FetchBlockedDomain\].{0,85}Downloading the full bad domains file.*?(?:\n|$)/gs,
+    /(?:%\w)?\[GatewaySocket\].{0,110}Cannot access '.{1,5}' before initialization.*?(?:\n|$)/gs
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {
