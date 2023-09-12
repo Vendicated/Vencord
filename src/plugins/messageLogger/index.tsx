@@ -326,14 +326,14 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: "[\"className\",\"attachment\",\"inlineMedia\"",
+            find: "().removeAttachmentHoverButton",
             replacement: [
                 {
                     match: /((\w)\.className,\w=\2\.attachment),/,
                     replace: "$1,deleted=$2.attachment?.deleted,"
                 },
                 {
-                    match: /\["className","attachment","inlineMedia".+?className:/,
+                    match: /\["className","attachment".+?className:/,
                     replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
                 }
             ]
