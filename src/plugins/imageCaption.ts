@@ -51,14 +51,14 @@ function loadImage(source: File | string) {
     });
 }
 
-function canvasToFile(canvas: HTMLCanvasElement) {
+function canvasToFile(canvas: HTMLCanvasElement, fileName: string) {
     return new Promise<File>((resolve, reject) => {
         canvas.toBlob(blob => {
             if (!blob) {
                 reject("Failed to create blob");
                 return;
             }
-            resolve(new File([blob], "caption.png"));
+            resolve(new File([blob], `${fileName}.png`));
         });
     });
 }
@@ -77,16 +77,17 @@ async function loadGifFrameList(blob: Blob): Promise<FrameData[]> {
 
     const info = reader.frameInfo(0);
     let prevData: ImageData | null = null;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
+    canvas.width = info.width;
+    canvas.height = info.height;
+
     return new Array(reader.numFrames()).fill(0).map((_, k) => {
         const image = prevData || new ImageData(info.width, info.height);
 
         reader.decodeAndBlitFrameRGBA(k, image.data);
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-
-        canvas.width = info.width;
-        canvas.height = info.height;
 
         ctx.putImageData(image, 0, 0);
 
@@ -124,7 +125,7 @@ export default definePlugin({
                 },
                 {
                     name: "text",
-                    description: "Text to caption the image with",
+                    description: "Text to caption the image with (Use \\n for newlines)",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
@@ -158,11 +159,21 @@ export default definePlugin({
                 const position = findOption(opts, "position", "top");
                 const fontSize = findOption(opts, "size", 60);
                 const file = await resolveImage(opts, ctx);
+                let fileName = "caption";
 
                 if (!file)
                     return void sendBotMessage(ctx.channel.id, { content: "No image provided" });
 
-                const image = await loadImage(file);
+                if (file instanceof File)
+                    fileName = file.name.split(".")[0];
+
+                const image = await loadImage(file).catch(err => {
+                    console.error(err);
+                    return null;
+                });
+
+                if (!image)
+                    return void sendBotMessage(ctx.channel.id, { content: "Failed to load image/gif" });
 
                 const canvas = document.createElement("canvas");
                 const ctx2d = canvas.getContext("2d")!;
@@ -197,14 +208,15 @@ export default definePlugin({
                     }
 
                     gif.finish();
-                    const gifFile = new File([gif.bytesView()], "caption.gif", { type: "image/gif" });
-                    promptUpload(gifFile, ctx.channel);
+                    const gifFile = new File([gif.bytesView()], `${fileName}.gif`, { type: "image/gif" });
+                    return void promptUpload(gifFile, ctx.channel);
                 }
 
                 ctx2d.drawImage(image, 0, 0);
                 drawText(ctx2d, image, text, fontSize, position);
 
-                const outputFile = await canvasToFile(canvas);
+                const outputFile = await canvasToFile(canvas, fileName);
+
                 promptUpload(outputFile, ctx.channel);
             }
         }
@@ -219,7 +231,7 @@ function drawText(ctx: CanvasRenderingContext2D, image: HTMLImageElement, text: 
     ctx.textAlign = "center";
     ctx.textBaseline = position === "top" ? "top" : "bottom";
 
-    const lines = text.split("\n");
+    const lines = text.split("\\n");
     const lineHeight = 40;
     const y = position === "top" ? 15 : image.height - 15;
     for (let i = 0; i < lines.length; i++) {
