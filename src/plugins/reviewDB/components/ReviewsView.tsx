@@ -30,7 +30,7 @@ import ReviewComponent from "./ReviewComponent";
 const Editor = findByPropsLazy("start", "end", "addMark");
 const Transform = findByPropsLazy("unwrapNodes");
 const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
-const InputComponent = LazyComponent(() => find(m => m?.Z?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")).Z);
+const InputComponent = LazyComponent(() => find(m => m?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")));
 
 interface UserProps {
     discordId: string;
@@ -120,9 +120,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
     const { token } = settings.store;
     let editorRef = null;
 
-    const inputType = InputTypes.FORM;
-    inputType.disableAutoFocus = true;
-
     const channel = {
         flags_: 256,
         guild_id_: null,
@@ -147,14 +144,15 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
             }}>
                 <InputComponent
                     className={cl("input")}
-                    channel={channel} placeholder={
+                    channel={channel}
+                    placeholder={
                         !token
                             ? "You need to authorize to review users!"
                             : isAuthor
                                 ? `Update review for @${name}`
                                 : `Review @${name}`
                     }
-                    type={inputType}
+                    type={{ ...InputTypes.FORM, disableAutoFocus: true }}
                     disableThemedBackground={true}
                     setEditorRef={r => {
                         if (!r) return;
@@ -162,31 +160,31 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     }}
                     textValue=""
                     onSubmit={
-                        res => {
-                            return addReview({
+                        async res => {
+                            const response = await addReview({
                                 userid: discordId,
                                 comment: res.value,
-                            }).then(res => {
-                                if (res?.success) {
-                                    refetch();
-
-                                    // clear editor
-                                    Transform.delete(editorRef, {
-                                        at: {
-                                            anchor: Editor.start(editorRef, []),
-                                            focus: Editor.end(editorRef, []),
-                                        }
-                                    });
-                                } else if (res?.message) {
-                                    showToast(res.message);
-                                }
-
-                                // even tho we need to return this, it doesnt do anything
-                                return {
-                                    shouldClear: false,
-                                    shouldRefocus: true,
-                                };
                             });
+
+                            if (response?.success) {
+                                refetch();
+
+                                // clear editor
+                                Transform.delete(editorRef, {
+                                    at: {
+                                        anchor: Editor.start(editorRef, []),
+                                        focus: Editor.end(editorRef, []),
+                                    }
+                                });
+                            } else if (response?.message) {
+                                showToast(response.message);
+                            }
+
+                            // even tho we need to return this, it doesnt do anything
+                            return {
+                                shouldClear: false,
+                                shouldRefocus: true,
+                            };
                         }
                     }
                 />

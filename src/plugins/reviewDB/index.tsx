@@ -99,7 +99,8 @@ export default definePlugin({
                             user.notification.content,
                             false
                         )
-                    ), ...props
+                    ),
+                    ...props
                 });
 
                 readNotification(user.notification.id);
