@@ -18,7 +18,7 @@
 
 import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { Forms, React, RelationshipStore, UserStore } from "@webpack/common";
+import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
@@ -30,6 +30,7 @@ import ReviewComponent from "./ReviewComponent";
 const Editor = findByPropsLazy("start", "end", "addMark");
 const Transform = findByPropsLazy("unwrapNodes");
 const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
+
 const InputComponent = LazyComponent(() => find(m => m?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")));
 
 interface UserProps {
@@ -118,7 +119,9 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
 
 export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
     const { token } = settings.store;
-    let editorRef = null;
+    const editorRef = useRef<any>(null);
+    const inputType = InputTypes.FORM;
+    inputType.disableAutoFocus = true;
 
     const channel = {
         flags_: 256,
@@ -152,12 +155,9 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                                 ? `Update review for @${name}`
                                 : `Review @${name}`
                     }
-                    type={{ ...InputTypes.FORM, disableAutoFocus: true }}
+                    type={inputType}
                     disableThemedBackground={true}
-                    setEditorRef={r => {
-                        if (!r) return;
-                        editorRef = r.ref.current.getSlateEditor();
-                    }}
+                    setEditorRef={ref => editorRef.current = ref}
                     textValue=""
                     onSubmit={
                         async res => {
@@ -169,11 +169,14 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                             if (response?.success) {
                                 refetch();
 
+                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
+
+                                console.log(editorRef);
                                 // clear editor
-                                Transform.delete(editorRef, {
+                                Transform.delete(slateEditor, {
                                     at: {
-                                        anchor: Editor.start(editorRef, []),
-                                        focus: Editor.end(editorRef, []),
+                                        anchor: Editor.start(slateEditor, []),
+                                        focus: Editor.end(slateEditor, []),
                                     }
                                 });
                             } else if (response?.message) {
