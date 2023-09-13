@@ -156,7 +156,7 @@ export default definePlugin({
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                match: /;(.{0,10}?\._loadingText)=.+?random\(.+?;/s,
+                match: /;(.{0,10}\._loadingText)=.+?random\(.+?;/s,
                 replace: ";$self.quote().then(quoteText => $1 = quoteText);",
             },
         },
