@@ -94,9 +94,12 @@ export default definePlugin({
                     return sendBotMessage(ctx.channel.id, { content: "No results given" });
                 }
                 let wikiQuote = data.query.pages[0].extract;
-                while (wikiQuote.indexOf("may refer to") > -1) {
-                    data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json());
-                    wikiQuote = data.query.pages[0].extract;
+                // Retry if the wiki random fact ends with ":" which means it is incomplete. Max 5 retries.
+                for (let retryIndex=0; retryIndex < 5; retryIndex++) {
+                    if (wikiQuote.indexOf(":") === wikiQuote.length - 1) {
+                        data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json());
+                        wikiQuote = data.query.pages[0].extract;
+                    }
                 }
                 return sendBotMessage(ctx.channel.id, { content: wikiQuote });
             },
@@ -138,18 +141,32 @@ export default definePlugin({
 
     async quote() {
         const url = settings.store.apiURL;
-        return fetch(url).then(res => res.json()).then(json => {
+        try {
+            const json = await fetch(url).then(res => res.json());
             if (url.indexOf("wiki") > -1) {
                 currentQuote = json.query.pages[0].extract;
-                while (currentQuote.indexOf("may refer to") > -1){
-                    this.quote().then(returnedQuote => currentQuote = returnedQuote);
+            }
+            else { currentQuote = json.text; }
+        }
+        catch(error) {
+            console.log(error);
+            currentQuote = "";
+        }
+        for (let retryIndex=0; retryIndex < 5; retryIndex++) {
+            // Retry (max 5 retries) in the following cases:
+            // currentQuote is empty which means no quote was fetched.
+            // Wikipedia quote ends with ":" which means it is incomplete.
+            if (currentQuote === "" || url.indexOf("wiki") > -1 && currentQuote.indexOf(":") === currentQuote.length - 1) {
+                try {
+                    const data = await fetch(url).then(response => response.json());
+                    currentQuote = data.query.pages[0].extract;
                 }
-                return currentQuote;
+                catch (error) {
+                    console.log(error);
+                    currentQuote = "";
+                }
             }
-            else {
-                currentQuote = json.text;
-                return currentQuote;
-            }
-        });
+        }
+        return currentQuote;
     }
 });
