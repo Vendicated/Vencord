@@ -13,6 +13,7 @@ const settings = definePluginSettings({
     apiURL: {
         description: "Choose the API endpoint to use.",
         type: OptionType.SELECT,
+        dependencies: ["CommandsAPI"],
         options: [
             {
                 label: "Useless facts API. Gives you random useless but short facts.",
