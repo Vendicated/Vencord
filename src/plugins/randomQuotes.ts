@@ -109,20 +109,6 @@ export default definePlugin({
             description: "Gets a useless random fact.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
-
-                const dataSearchParams = new URLSearchParams({
-                    action: "query",
-                    prop: "extracts",
-                    format: "json",
-                    formatversion: "2",
-                    exsentences: "2",
-                    exsectionformat: "plain",
-                    generator: "random",
-                    grnnamespace: "0",
-                    explaintext: "1",
-                    origin: "*",
-                });
-
                 const data = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random?language=en").then(response => response.json())
                     .catch(err => {
                         console.log(err);
