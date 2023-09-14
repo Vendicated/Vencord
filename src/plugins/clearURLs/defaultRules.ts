@@ -127,6 +127,7 @@ export const defaultRules = [
     "redircnt@yandex.*",
     "feature@youtube.com",
     "kw@youtube.com",
+    "si@youtube.com",
     "si@youtu.be",
     "wt_zmc",
     "utm_source",
