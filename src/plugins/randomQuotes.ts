@@ -17,43 +17,52 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 let currentQuote = "";
-
+const settings = definePluginSettings({
+    apiURL: {
+        description: "Choose the API endpoint to use.",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Useless facts API. Gives you random useless but short facts.",
+                value: "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en",
+                default: true
+            },
+            {
+                label: "Wikipedia API. Gives you random facts from all topics but these could be long.",
+                value: "https://en.wikipedia.org/w/api.php?" + new URLSearchParams({
+                    action: "query",
+                    prop: "extracts",
+                    format: "json",
+                    formatversion: "2",
+                    exsentences: "2",
+                    exsectionformat: "plain",
+                    generator: "random",
+                    grnnamespace: "0",
+                    explaintext: "1",
+                    origin: "*",
+                })
+            }
+        ]
+    }
+});
 export default definePlugin({
     name: "RandomQuotes",
     description: "Replaces Discord's default loading quotes with random facts, don't enable it with any other plugin that modifies loading quotes like LoadingQuotes! Also adds slash commands: /wikirandomfact to get a random fact from wikipedia, /uselessrandomfact to get a random useless fact, and /currentrandomfact to get the fact that was shown in the loading quote in case you want to re-read it.",
     authors: [Devs.DarkRedTitan],
-    options: {
-        apiURL: {
-            type: OptionType.SELECT,
-            description: "The timer format. This can be any valid moment.js format",
-            options: [
-                {
-                    label: "Useless facts API. Gives you random useless but short facts.",
-                    value: "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en",
-                    default: true
-                },
-                {
-                    label: "Wikipedia API. Gives you random facts from all topics but these could be long.",
-                    value: "https://en.wikipedia.org/w/api.php?" + new URLSearchParams({
-                        action: "query",
-                        prop: "extracts",
-                        format: "json",
-                        formatversion: "2",
-                        exsentences: "2",
-                        exsectionformat: "plain",
-                        generator: "random",
-                        grnnamespace: "0",
-                        explaintext: "1",
-                        origin: "*",
-                    })
-                }
-            ]
-        }
-    },
+    settings,
+    patches: [
+        {
+            find: ".LOADING_DID_YOU_KNOW",
+            replacement: {
+                match: /;(.{0,10}\._loadingText)=.+?random\(.+?;/s,
+                replace: ";$self.quote().then(quoteText => $1 = quoteText);",
+            },
+        },
+    ],
     commands: [
         {
             name: "wikirandomfact",
@@ -138,18 +147,9 @@ export default definePlugin({
             }
         }
     ],
-    patches: [
-        {
-            find: ".LOADING_DID_YOU_KNOW",
-            replacement: {
-                match: /;(.{0,10}\._loadingText)=.+?random\(.+?;/s,
-                replace: ";$self.quote().then(quoteText => $1 = quoteText);",
-            },
-        },
-    ],
 
     async quote() {
-        const url = Settings.plugins.RandomQuotes.apiURL;
+        const url = settings.store.apiURL;
         return fetch(url).then(res => res.json()).then(json => {
             if (url.indexOf("wiki") > -1) {
                 currentQuote = json.query.pages[0].extract;
