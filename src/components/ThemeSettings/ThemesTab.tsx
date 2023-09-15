@@ -106,7 +106,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
     );
 }
 
-interface BDThemeCardProps {
+interface OtherThemeCardProps {
     theme: UserThemeHeader;
     enabled: boolean;
     onChange: (enabled: boolean) => void;
@@ -156,7 +156,7 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
     );
 }
 
-function BDThemeCard({ theme, enabled, onChange, onDelete }: BDThemeCardProps) {
+function OtherThemeCard({ theme, enabled, onChange, onDelete }: OtherThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -264,7 +264,7 @@ function ThemesTab() {
             } else {
                 // presumably BD but could also be plain css
                 themeInfo.push({
-                    type: "bd",
+                    type: "other",
                     header: getThemeInfo(stripBOM(content), fileName)
                 });
             }
@@ -365,8 +365,8 @@ function ThemesTab() {
 
                     <div className={cl("grid")}>
                         {userThemes?.map(({ type, header: theme }: ThemeHeader) => (
-                            type === "bd" ? (
-                                <BDThemeCard
+                            type === "other" ? (
+                                <OtherThemeCard
                                     key={theme.fileName}
                                     enabled={settings.enabledThemes.includes(theme.fileName)}
                                     onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}

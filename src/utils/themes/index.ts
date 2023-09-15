@@ -9,7 +9,7 @@ import type { UserstyleHeader } from "usercss-meta";
 import type { UserThemeHeader } from "./bd";
 
 export type ThemeHeader = {
-    type: "bd";
+    type: "other";
     header: UserThemeHeader;
 } | {
     type: "usercss";
