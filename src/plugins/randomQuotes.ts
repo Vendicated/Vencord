@@ -97,7 +97,7 @@ export default definePlugin({
                 let wikiQuote = data.query.pages[0].extract;
                 // Retry if the wiki random fact ends with ":" which means it is incomplete. Max 5 retries.
                 for (let retryIndex=0; retryIndex < 5; retryIndex++) {
-                    if (wikiQuote.indexOf(":") === wikiQuote.length - 1) {
+                    if (wikiQuote.endsWith(":")) {
                         data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json());
                         wikiQuote = data.query.pages[0].extract;
                     }
@@ -157,7 +157,7 @@ export default definePlugin({
             // Retry (max 5 retries) in the following cases:
             // currentQuote is empty which means no quote was fetched.
             // Wikipedia quote ends with ":" which means it is incomplete.
-            if (currentQuote === "" || url.indexOf("wiki") > -1 && currentQuote.indexOf(":") === currentQuote.length - 1) {
+            if (currentQuote === "" || url.indexOf("wiki") > -1 && currentQuote.endsWith(":")) {
                 try {
                     const data = await fetch(url).then(response => response.json());
                     currentQuote = data.query.pages[0].extract;
