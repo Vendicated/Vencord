@@ -20,7 +20,7 @@ import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
 
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, ChannelTabsUtils, UseBookmark } from "../util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 import { NotificationDot, QuestionIcon } from "./ChannelTab";
 import { BookmarkContextMenu } from "./ContextMenus";
 
@@ -138,10 +138,10 @@ function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBook
     >
         <BookmarkIcon bookmark={bookmark} />
         <Text variant="text-sm/normal" className={cl("name-text")}>{bookmark.name}</Text>
-        <NotificationDot channelIds={"bookmarks" in bookmark
+        {settings.store.bookmarkNotificationDot && <NotificationDot channelIds={"bookmarks" in bookmark
             ? bookmark.bookmarks.map(b => b.channelId)
             : [bookmark.channelId]
-        } />
+        } />}
     </div>;
 }
 

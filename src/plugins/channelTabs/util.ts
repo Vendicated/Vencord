@@ -110,6 +110,11 @@ export const channelTabsSettings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    bookmarkNotificationDot: {
+        description: "Show notification dot for bookmarks",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     showChannelEmojis: {
         description: "",
         type: OptionType.BOOLEAN,
