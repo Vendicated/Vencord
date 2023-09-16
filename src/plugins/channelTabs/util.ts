@@ -63,14 +63,14 @@ export type UseBookmark = [Bookmarks | undefined, {
 const logger = new Logger("ChannelTabs");
 
 export const bookmarkFolderColors = {
-    "Red": "var(--red-400)",
-    "Blue": "var(--blue-500)",
-    "Yellow": "var(--yellow-300)",
-    "Green": "var(--green-400)",
-    "Black": "var(--black-500)",
-    "White": "var(--white-500)",
-    "Orange": "var(--orange-400)",
-    "Pink": "var(--guild-boosting-pink)"
+    "Red": "var(--channeltabs-red)",
+    "Blue": "var(--channeltabs-blue)",
+    "Yellow": "var(--channeltabs-yellow)",
+    "Green": "var(--channeltabs-green)",
+    "Black": "var(--channeltabs-black)",
+    "White": "var(--channeltabs-white)",
+    "Orange": "var(--channeltabs-orange)",
+    "Pink": "var(--channeltabs-pink)"
 } as const;
 
 export const channelTabsSettings = definePluginSettings({

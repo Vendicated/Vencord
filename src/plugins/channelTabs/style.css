@@ -42,6 +42,15 @@
 }
 
 .vc-channeltabs-container {
+    --channeltabs-red: #f23f42;
+    --channeltabs-blue: #0052b6;
+    --channeltabs-yellow: #f0b132;
+    --channeltabs-green: #24934f;
+    --channeltabs-black: #000;
+    --channeltabs-white: #fff;
+    --channeltabs-orange: #e67e22;
+    --channeltabs-pink: #ff73fa;
+
     padding: 0.35rem;
     display: flex;
     flex-direction: column;
