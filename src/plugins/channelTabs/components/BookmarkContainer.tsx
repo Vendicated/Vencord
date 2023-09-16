@@ -87,6 +87,7 @@ function BookmarkFolderOpenMenu(props: { bookmarks: Bookmarks, index: number, me
 function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const { bookmarks, index, methods } = props;
     const bookmark = bookmarks[index];
+    const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -138,7 +139,7 @@ function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBook
     >
         <BookmarkIcon bookmark={bookmark} />
         <Text variant="text-sm/normal" className={cl("name-text")}>{bookmark.name}</Text>
-        {settings.store.bookmarkNotificationDot && <NotificationDot channelIds={"bookmarks" in bookmark
+        {bookmarkNotificationDot && <NotificationDot channelIds={"bookmarks" in bookmark
             ? bookmark.bookmarks.map(b => b.channelId)
             : [bookmark.channelId]
         } />}

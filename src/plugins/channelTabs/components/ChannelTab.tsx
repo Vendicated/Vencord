@@ -125,6 +125,11 @@ function ChannelTabContent(props: ChannelTabsProps &
     const { guild, guildId, channel, channelId, compact } = props;
     const userId = UserStore.getCurrentUser()?.id;
     const recipients = channel?.recipients;
+    const {
+        noPomeloNames,
+        showChannelEmojis,
+        showStatusIndicators
+    } = settings.use(["noPomeloNames", "showChannelEmojis", "showStatusIndicators"]);
 
     const [isTyping, status, isMobile] = useStateFromStores(
         [TypingStore, PresenceStore],
@@ -137,12 +142,13 @@ function ChannelTabContent(props: ChannelTabsProps &
         // is this necessary?
         (o, n) => o.every((v, i) => v === n[i])
     );
+
     if (guild) {
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
                 {/* @ts-ignore */}
-                {!compact && settings.store.showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
+                {!compact && showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
                 {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
                 <NotificationDot channelIds={[channel.id]} />
                 <TypingIndicator isTyping={isTyping} />
@@ -173,7 +179,7 @@ function ChannelTabContent(props: ChannelTabsProps &
     if (channel && recipients?.length) {
         if (channel.type === ChannelTypes.DM) {
             const user = UserStore.getUser(recipients[0]) as User & { globalName: string, isPomelo(): boolean; };
-            const username = settings.store.noPomeloNames
+            const username = noPomeloNames
                 ? user.globalName ?? user.username
                 : user.isPomelo() ? user.username : user.tag;
 
@@ -181,7 +187,7 @@ function ChannelTabContent(props: ChannelTabsProps &
                 <Avatar
                     size="SIZE_24"
                     src={user.getAvatarURL(guildId, 128)}
-                    status={settings.store.showStatusIndicators ? status : undefined}
+                    status={showStatusIndicators ? status : undefined}
                     isTyping={isTyping}
                     isMobile={isMobile}
                 />
@@ -189,7 +195,7 @@ function ChannelTabContent(props: ChannelTabsProps &
                     {username}
                 </Text>}
                 <NotificationDot channelIds={[channel.id]} />
-                {!settings.store.showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
+                {!showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
             </>;
         } else { // Group DM
             return <>
