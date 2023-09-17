@@ -99,6 +99,15 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                     ContextMenu.close();
                 }}
             />
+            <Menu.MenuCheckboxItem
+                id="vc-nearest-neighbour"
+                label="Nearset Neighbour"
+                checked={settings.store.nearestNeighbour}
+                action={() => {
+                    settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
+                    ContextMenu.close();
+                }}
+            />
             <Menu.MenuControlItem
                 id="vc-zoom"
                 label="Zoom"

@@ -206,6 +206,7 @@ export default definePlugin({
             ignoreSelf && message.author?.id === myId ||
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
+            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
@@ -325,14 +326,14 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: "[\"className\",\"attachment\",\"inlineMedia\"",
+            find: "().removeAttachmentHoverButton",
             replacement: [
                 {
                     match: /((\w)\.className,\w=\2\.attachment),/,
                     replace: "$1,deleted=$2.attachment?.deleted,"
                 },
                 {
-                    match: /\["className","attachment","inlineMedia".+?className:/,
+                    match: /\["className","attachment".+?className:/,
                     replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
                 }
             ]
