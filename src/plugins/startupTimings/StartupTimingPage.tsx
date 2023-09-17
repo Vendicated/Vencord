@@ -149,7 +149,7 @@ function ServerTrace({ trace }: ServerTraceProps) {
 
 function TTIAnalytics() {
     const analytics = TTITracker.serializeTTITracker();
-    const filteredAnalytics = Object.entries(analytics).filter(([key, value]) => !/_start|_end$/.test(key) && value !== null && value !== undefined);
+    const filteredAnalytics = Object.entries(analytics).filter(([key, value]) => !/_start$|_end$/.test(key) && value !== null && value !== undefined);
 
     return (
         <ErrorBoundary>
