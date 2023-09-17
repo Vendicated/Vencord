@@ -1,0 +1,56 @@
+.remix-modal-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--modal-background);
+}
+
+#remix-controls {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--modal-footer-background);
+}
+
+#remix-controls-left {
+    display: flex;
+    align-items: center;
+}
+
+#remix-controls-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 10px;
+    gap: 10px;
+}
+
+#remix-pen-size {
+    width: 100%;
+}
+
+.remix-control {
+    width: 40px;
+    height: 40px;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.remix-control.active {
+    background-color: var(--brand-experiment-560) !important;
+}
+
+#remix-canvas-container {
+    position: relative;
+    width: 100%;
+}
+
+#remix-canvas {
+    width: 100%;
+    height: 100%;
+}
