@@ -18,8 +18,26 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
+
+interface ITTITrackerEvent {
+    emoji: string;
+    name: string;
+    start: number;
+    end: number;
+    hasData(): boolean;
+}
+
+interface ITTITracker {
+    serializeTTITracker(): Record<string, string | number | boolean | null | undefined>;
+    [event: string]: ITTITrackerEvent | string | boolean | null | any;
+}
+
+/** Time-To-Interactive Tracker */
+const TTITracker: ITTITracker = findByPropsLazy("serializeTTITracker");
 
 interface AppStartPerformance {
     prefix: string;
@@ -129,6 +147,78 @@ function ServerTrace({ trace }: ServerTraceProps) {
     );
 }
 
+function TTIAnalytics() {
+    const analytics = TTITracker.serializeTTITracker();
+    const filteredAnalytics = Object.entries(analytics).filter(([key, value]) => !/_start|_end$/.test(key) && value !== null && value !== undefined);
+
+    return (
+        <ErrorBoundary>
+            <Forms.FormSection title="TTI Analytics" tag="h2">
+                <code>
+                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                        {filteredAnalytics.map(([key, value]) => (
+                            <React.Fragment>
+                                <span><pre>{key}</pre></span>
+                                <span><pre>{`${value}`}</pre></span>
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </code>
+            </Forms.FormSection>
+        </ErrorBoundary>
+    );
+}
+
+function TTITimings() {
+    const records: [string, ITTITrackerEvent][] = (Object.entries(TTITracker) as [string, ITTITrackerEvent][])
+        .filter(([, value]) => value instanceof Object && value.hasData?.()) as any;
+
+    return (
+        <ErrorBoundary>
+            <Forms.FormSection title="Registered TTI Timings" tag="h2">
+                <code>
+                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(2, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
+                        <span>Duration</span>
+                        <span>Key</span>
+                        <span style={{ marginBottom: 5 }}>Event</span>
+                        {records.map(([key, event]) => (
+                            <React.Fragment>
+                                <span><pre>{event.end - event.start}ms</pre></span>
+                                <span><pre>{key}</pre></span>
+                                <span><pre>{event.emoji} {event.name}</pre></span>
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </code>
+            </Forms.FormSection>
+        </ErrorBoundary>
+    );
+}
+
+function UnregisteredTimings() {
+    const records: [string, ITTITrackerEvent][] = (Object.entries(TTITracker) as [string, ITTITrackerEvent][])
+        .filter(([, value]) => value instanceof Object && value.hasData && !value.hasData()) as any;
+
+    return (
+        <ErrorBoundary>
+            <Forms.FormSection title="Unregistered TTI Timings" tag="h2">
+                <code>
+                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                        <span>Key</span>
+                        <span>Name</span>
+                        {records.map(([key, event]) => (
+                            <React.Fragment>
+                                <span><pre>{key}</pre></span>
+                                <span><pre>{event.emoji} {event.name}</pre></span>
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </code>
+            </Forms.FormSection>
+        </ErrorBoundary>
+    );
+}
+
 function StartupTimingPage() {
     if (!AppStartPerformance?.logs) return <div>Loading...</div>;
 
@@ -141,9 +231,18 @@ function StartupTimingPage() {
                 logs={AppStartPerformance.logs}
                 traceEnd={AppStartPerformance.endTime_}
             />
-            {/* Lazy Divider */}
-            <div style={{ marginTop: 5 }}>&nbsp;</div>
+            <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
+
             {serverTrace && <ServerTrace trace={serverTrace} />}
+            <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
+
+            <TTIAnalytics />
+            <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
+
+            <TTITimings />
+            <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
+
+            <UnregisteredTimings />
         </React.Fragment>
     );
 }
