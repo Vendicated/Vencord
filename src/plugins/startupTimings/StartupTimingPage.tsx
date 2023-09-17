@@ -16,12 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./StartupTimingPage.css";
+
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
+
+
+export const cl = classNameFactory("vc-startuptimings-");
 
 interface ITTITrackerEvent {
     emoji: string;
@@ -109,11 +115,11 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
         <Forms.FormSection title={title} tag="h1">
             <code>
                 {traceEnd && (
-                    <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
+                    <div className={cl("server-trace")} style={{ marginBottom: 5 }}>
                         Trace ended at: {(new Date(traceEnd)).toTimeString()}
                     </div>
                 )}
-                <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
+                <div className={classes(cl("grid"), cl("4-cols"))}>
                     <span>Start</span>
                     <span>Interval</span>
                     <span>Delta</span>
@@ -137,25 +143,25 @@ function ServerTrace({ trace }: ServerTraceProps) {
     return (
         <Forms.FormSection title="Server Trace" tag="h2">
             <code>
-                <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
+                <Flex flexDirection="column" className={cl("server-trace")} style={{ gap: 5 }}>
                     {lines.map(line => (
                         <span>{line}</span>
                     ))}
                 </Flex>
             </code>
-        </Forms.FormSection>
+        </Forms.FormSection >
     );
 }
 
 function TTIAnalytics() {
     const analytics = TTITracker.serializeTTITracker();
-    const filteredAnalytics = Object.entries(analytics).filter(([key, value]) => !/_start$|_end$/.test(key) && value !== null && value !== undefined);
+    const filteredAnalytics = Object.entries(analytics).filter(([key, value]) => value != null && !/_start$|_end$/.test(key));
 
     return (
         <ErrorBoundary>
             <Forms.FormSection title="TTI Analytics" tag="h2">
                 <code>
-                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 10px", userSelect: "text" }}>
+                    <div className={classes(cl("grid"), cl("2-cols"))}>
                         {filteredAnalytics.map(([key, value]) => (
                             <React.Fragment>
                                 <span><pre>{key}</pre></span>
@@ -169,45 +175,26 @@ function TTIAnalytics() {
     );
 }
 
-function TTITimings() {
-    const records: [string, ITTITrackerEvent][] = (Object.entries(TTITracker) as [string, ITTITrackerEvent][])
-        .filter(([, value]) => value instanceof Object && value.hasData?.()) as any;
+interface TTITimingsProps {
+    records: [string, ITTITrackerEvent][];
+    title: string;
+    type: "registered" | "unregistered";
+}
+
+function TTITimings({ records, title, type }: TTITimingsProps) {
+    const isRegistered = type === "registered";
 
     return (
         <ErrorBoundary>
-            <Forms.FormSection title="Registered TTI Timings" tag="h2">
+            <Forms.FormSection title={title} tag="h2">
                 <code>
-                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(2, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
-                        <span>Duration</span>
+                    <div className={classes(cl("grid"), cl(isRegistered ? "3-cols" : "2-cols"))}>
+                        {isRegistered && <span>Duration</span>}
                         <span>Key</span>
                         <span style={{ marginBottom: 5 }}>Event</span>
                         {records.map(([key, event]) => (
-                            <React.Fragment>
-                                <span><pre>{event.end - event.start}ms</pre></span>
-                                <span><pre>{key}</pre></span>
-                                <span><pre>{event.emoji} {event.name}</pre></span>
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </code>
-            </Forms.FormSection>
-        </ErrorBoundary>
-    );
-}
-
-function UnregisteredTimings() {
-    const records: [string, ITTITrackerEvent][] = (Object.entries(TTITracker) as [string, ITTITrackerEvent][])
-        .filter(([, value]) => value instanceof Object && value.hasData && !value.hasData()) as any;
-
-    return (
-        <ErrorBoundary>
-            <Forms.FormSection title="Unregistered TTI Timings" tag="h2">
-                <code>
-                    <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 10px", userSelect: "text" }}>
-                        <span>Key</span>
-                        <span>Name</span>
-                        {records.map(([key, event]) => (
-                            <React.Fragment>
+                            <React.Fragment key={key}>
+                                {isRegistered && <span><pre>{event.end - event.start}ms</pre></span>}
                                 <span><pre>{key}</pre></span>
                                 <span><pre>{event.emoji} {event.name}</pre></span>
                             </React.Fragment>
@@ -224,6 +211,12 @@ function StartupTimingPage() {
 
     const serverTrace = AppStartPerformance.logGroups.find(g => g.serverTrace)?.serverTrace;
 
+    const registeredTTITimings: [string, ITTITrackerEvent][] = (Object.entries(TTITracker))
+        .filter(([, value]) => value?.hasData?.());
+
+    const unregisteredTTITimings: [string, ITTITrackerEvent][] = (Object.entries(TTITracker))
+        .filter(([, value]) => value?.hasData && !value.hasData());
+
     return (
         <React.Fragment>
             <TimingSection
@@ -239,10 +232,18 @@ function StartupTimingPage() {
             <TTIAnalytics />
             <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <TTITimings />
+            <TTITimings
+                title="Registered TTI Timings"
+                records={registeredTTITimings}
+                type="registered"
+            />
             <Forms.FormDivider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <UnregisteredTimings />
+            <TTITimings
+                title="Unregistered TTI Timings"
+                records={unregisteredTTITimings}
+                type="unregistered"
+            />
         </React.Fragment>
     );
 }

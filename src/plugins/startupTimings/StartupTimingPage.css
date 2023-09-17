@@ -1,0 +1,23 @@
+.vc-startuptimings-server-trace {
+    color: var(--header-primary);
+    user-select: text;
+}
+
+.vc-startuptimings-grid {
+    color: var(--header-primary);
+    display: grid;
+    gap: 2px 10px;
+    user-select: text;
+}
+
+.vc-startuptimings-4-cols {
+    grid-template-columns: repeat(3, auto) 1fr;
+}
+
+.vc-startuptimings-3-cols {
+    grid-template-columns: repeat(2, auto) 1fr;
+}
+
+.vc-startuptimings-2-cols {
+    grid-template-columns: auto 1fr;
+}
