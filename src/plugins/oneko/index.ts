@@ -25,11 +25,17 @@ import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     speed: {
-        description: "Speed of cat",
-        type: OptionType.SLIDER, // "y566666666444t" - My cat Coraline, stepping on my keyboard -- Korbo
+        description: "Cat speed",
+        type: OptionType.SLIDER, // "y566666666444t" -- Korbo's cat Coraline, stepping on their keyboard
         restartNeeded: true,
         markers: makeRange(10, 50, 5),
         default: 10,
+    },
+    skin: {
+        description: "Cat skin",
+        type: OptionType.STRING, // "y566666666444t" -- Korbo's cat Coraline, stepping on their keyboard
+        restartNeeded: true,
+        default: "s",
     },
 });
 
@@ -45,6 +51,7 @@ export default definePlugin({
         nekoEl.setAttribute("speed", settings.store.speed.toString());
         nekoEl.setAttribute("x", String(Math.random() * window.innerWidth));
         nekoEl.setAttribute("y", String(Math.random() * window.innerHeight));
+        nekoEl.style.backgroundImage = `url(${settings.store.skin})`;
         document.body.appendChild(nekoEl);
     },
 
