@@ -144,13 +144,11 @@ export default definePlugin({
                 },
                 parse(capture, parse, state) {
                     state.vc_highlight = true;
-                    const node = [
-                        {
-                            content: parse(capture[1], state),
-                            type: "vc_highlight",
-                            originalMatch: capture[0],
-                        },
-                    ];
+                    const node = {
+                        content: parse(capture[1], state),
+                        type: "vc_highlight",
+                        originalMatch: capture[0],
+                    };
                     delete state.vc_highlight;
                     return node;
                 },
