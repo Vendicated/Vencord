@@ -17,11 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import esbuild from "esbuild";
 import { zip } from "fflate";
 import { readFileSync } from "fs";
-import { appendFile, mkdir, readFile, rm, writeFile } from "fs/promises";
+import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
@@ -52,8 +51,31 @@ const commonOptions = {
     }
 };
 
+const MonacoWorkerEntryPoints = [
+    "vs/language/css/css.worker.js",
+    "vs/editor/editor.worker.js"
+];
+
 await Promise.all(
     [
+        esbuild.build({
+            entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
+            bundle: true,
+            minify: true,
+            format: "iife",
+            outbase: "node_modules/monaco-editor/esm/",
+            outdir: "dist/monaco"
+        }),
+        esbuild.build({
+            entryPoints: ["browser/monaco.ts"],
+            bundle: true,
+            minify: true,
+            format: "iife",
+            outfile: "dist/monaco/index.js",
+            loader: {
+                ".ttf": "file"
+            }
+        }),
         esbuild.build({
             ...commonOptions,
             outfile: "dist/browser.js",
@@ -79,12 +101,34 @@ await Promise.all(
 );
 
 /**
+ * @type {(dir: string) => Promise<string[]>}
+ */
+async function globDir(dir) {
+    const files = [];
+
+    for (const child of await readdir(dir, { withFileTypes: true })) {
+        const p = join(dir, child.name);
+        if (child.isDirectory())
+            files.push(...await globDir(p));
+        else
+            files.push(p);
+    }
+
+    return files;
+}
+
+/**
   * @type {(target: string, files: string[], shouldZip: boolean) => Promise<void>}
  */
 async function buildPluginZip(target, files, shouldZip) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/browser.js"),
         "dist/Vencord.css": await readFile("dist/browser.css"),
+        ...Object.fromEntries(await Promise.all(
+            (await globDir("dist/monaco")).map(async f =>
+                [f.replace("dist/", ""), await readFile(f)]
+            ))
+        ),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
