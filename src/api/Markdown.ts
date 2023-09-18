@@ -207,16 +207,12 @@ export function __getSlateDecorator(rule: string): string | null | undefined {
 }
 
 let slateOverrides: Record<string, MarkdownRule>;
-export function __setSlateOverrides(overrides: Record<string, MarkdownRule>): Record<string, MarkdownRule> {
+export function __setSlateOverrides(overrides: Record<string, MarkdownRule>) {
     slateOverrides = overrides;
-
-    return overrides;
 }
 let normalSlateRules: Record<string, SlateRule>;
-export function __setSlateRules(rules: Record<string, SlateRule>): Record<string, SlateRule> {
+export function __setSlateRules(rules: Record<string, SlateRule>) {
     normalSlateRules = rules;
-
-    return rules;
 }
 
 function __createSlateParser(rule: MarkdownRule) {

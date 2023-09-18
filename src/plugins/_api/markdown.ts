@@ -31,14 +31,14 @@ export default definePlugin({
             replacement: [
                 // grab slate rules
                 {
-                    match: /=({link:{type:.{0,1240}type:"inlineObject"}}),/,
-                    replace: (_, rules) => `=Vencord.Api.Markdown.__setSlateRules(${rules}),`,
+                    match: /(?<=,\i={};)(for\(var \i in \i\.\i\.RULES\){if\(!\(\i in (\i)\)\))/,
+                    replace: (_, ruleParserLoop, rules) => `Vencord.Api.Markdown.__setSlateRules(${rules});${ruleParserLoop}`,
                 },
 
                 // grab slate overrides
                 {
-                    match: /=({url:{parse:.{0,620}originalMatch:\i}}}}),/,
-                    replace: (_, rules) => `=Vencord.Api.Markdown.__setSlateOverrides(${rules}),`,
+                    match: /,(\i=\(0,\i\.\i\)\(\[\i,(\i)]\),)/,
+                    replace: (_, parser, rules) => `;Vencord.Api.Markdown.__setSlateOverrides(${rules});var ${parser}`,
                 },
 
                 // replace parsers with ones with new rules

@@ -119,7 +119,7 @@ export default definePlugin({
         if (words === "") return false;
         if (message.author?.id === AuthenticationStore.getId()) return false;
 
-        const wordsRegex = new RegExp(`(?:^|\\W)(${words})(?:\\W|$)`, "gi");
+        const wordsRegex = new RegExp(`\\b(${words})\\b`, "gi");
         const blacklistRegex = new RegExp(`(${words})`, "gi");
 
         return wordsRegex.test(message.content) && (blacklist !== "" ? !blacklistRegex.test(message.content) : true);
@@ -140,7 +140,7 @@ export default definePlugin({
                     const words = self.getKeywordsForRegex();
                     if (state.vc_highlight || words === "") return null;
 
-                    return new RegExp(`^(${words})((?:\\W|$))`, "i").exec(text);
+                    return new RegExp(`^(${words})\\b`, "i").exec(text);
                 },
                 parse(capture, parse, state) {
                     state.vc_highlight = true;
@@ -149,11 +149,6 @@ export default definePlugin({
                             content: parse(capture[1], state),
                             type: "vc_highlight",
                             originalMatch: capture[0],
-                        },
-                        {
-                            content: capture[2],
-                            type: "text",
-                            originalMatch: capture[0]
                         },
                     ];
                     delete state.vc_highlight;
