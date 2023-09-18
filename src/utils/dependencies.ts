@@ -66,14 +66,17 @@ export interface ApngFrameData {
     playTime: number;
 }
 
+// On web (extensions), use extension uri as basepath (load files from extension)
+// On desktop (electron), load from cdn
 export const rnnoiseDist = IS_WEB
     ? (() => {
         const script = document.querySelector("#vencord-script") as HTMLScriptElement;
-        return new URL("/third-party/rnnoise", script.dataset.monacoUrl).toString();
+        return new URL("/third-party/rnnoise", script.dataset.extensionBaseUrl).toString();
     })()
     : "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
 export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
 export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
+
 
 // The below code is only used on the Desktop (electron) build of Vencord.
 // Browser (extension) builds do not contain these remote imports.

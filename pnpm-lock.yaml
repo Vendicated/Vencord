@@ -42,6 +42,9 @@ dependencies:
     version: 1.0.1
 
 devDependencies:
+  '@types/chrome':
+    specifier: ^0.0.246
+    version: 0.0.246
   '@types/diff':
     specifier: ^5.0.3
     version: 5.0.3
@@ -530,8 +533,29 @@ packages:
     resolution: {integrity: sha512-gAC33DCXYwNTI/k1PxOVHmbbzakUSMbb/DHpoV6rn4pKZtPI1dduULSmAAm/y1ipgIlArnk2JcnQzw4n2tCZHw==}
     dev: false
 
+  /@types/chrome@0.0.246:
+    resolution: {integrity: sha512-MxGxEomGxsJiL9xe/7ZwVgwdn8XVKWbPvxpVQl3nWOjrS0Ce63JsfzxUc4aU3GvRcUPYsfufHmJ17BFyKxeA4g==}
+    dependencies:
+      '@types/filesystem': 0.0.33
+      '@types/har-format': 1.2.13
+    dev: true
+
   /@types/diff@5.0.3:
     resolution: {integrity: sha512-amrLbRqTU9bXMCc6uX0sWpxsQzRIo9z6MJPkH1pkez/qOxuqSZVuryJAWoBRq94CeG8JxY+VK4Le9HtjQR5T9A==}
+    dev: true
+
+  /@types/filesystem@0.0.33:
+    resolution: {integrity: sha512-2KedRPzwu2K528vFkoXnnWdsG0MtUwPjuA7pRy4vKxlxHEe8qUDZibYHXJKZZr2Cl/ELdCWYqyb/MKwsUuzBWw==}
+    dependencies:
+      '@types/filewriter': 0.0.30
+    dev: true
+
+  /@types/filewriter@0.0.30:
+    resolution: {integrity: sha512-lB98tui0uxc7erbj0serZfJlHKLNJHwBltPnbmO1WRpL5T325GOHRiQfr2E29V2q+S1brDO63Fpdt6vb3bES9Q==}
+    dev: true
+
+  /@types/har-format@1.2.13:
+    resolution: {integrity: sha512-PwBsCBD3lDODn4xpje3Y1di0aDJp4Ww7aSfMRVw6ysnxD4I7Wmq2mBkSKaDtN403hqH5sp6c9xQUvFYY3+lkBg==}
     dev: true
 
   /@types/json-schema@7.0.11:

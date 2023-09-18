@@ -9,7 +9,7 @@ import "./patch-worker";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
 
 declare global {
-    const monacoUrl: string;
+    const baseUrl: string;
     const getCurrentCss: () => Promise<string>;
     const setCss: (css: string) => void;
     const getTheme: () => string;
@@ -20,7 +20,7 @@ const BASE = "/dist/monaco/vs";
 self.MonacoEnvironment = {
     getWorkerUrl(_moduleId: unknown, label: string) {
         const path = label === "css" ? "/language/css/css.worker.js" : "/editor/editor.worker.js";
-        return new URL(BASE + path, monacoUrl).toString();
+        return new URL(BASE + path, baseUrl).toString();
     }
 };
 

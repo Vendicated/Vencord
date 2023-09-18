@@ -5,7 +5,10 @@ if (typeof browser === "undefined") {
 const script = document.createElement("script");
 script.src = browser.runtime.getURL("dist/Vencord.js");
 script.id = "vencord-script";
-script.dataset.monacoUrl = browser.runtime.getURL("dist/monaco/index.js");
+Object.assign(script.dataset, {
+    extensionBaseUrl: browser.runtime.getURL(""),
+    version: browser.runtime.getManifest().version
+});
 
 const style = document.createElement("link");
 style.type = "text/css";
