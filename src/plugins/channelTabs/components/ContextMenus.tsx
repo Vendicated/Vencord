@@ -18,7 +18,7 @@
 
 import { Margins } from "@utils/margins.js";
 import { classes } from "@utils/misc.jsx";
-import { closeModal, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
@@ -127,6 +127,34 @@ function AddToFolderModal({ modalProps, bookmarks, onSave }: {
     </ModalRoot>;
 }
 
+function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
+    return <ModalRoot {...modalProps}>
+        <ModalHeader>
+            <Text variant="heading-lg/semibold">Are you sure?</Text>
+        </ModalHeader>
+        <ModalContent>
+            <Forms.FormText className={Margins.top16}>
+                Deleting a bookmark folder will also delete all bookmarks within it.
+            </Forms.FormText>
+        </ModalContent>
+        <ModalFooter>
+            <Button
+                color={Button.Colors.RED}
+                onClick={onConfirm}
+            >
+                Yes
+            </Button>
+            <Button
+                color={Button.Colors.TRANSPARENT}
+                look={Button.Looks.LINK}
+                onClick={() => closeModal(modalKey)}
+            >
+                No
+            </Button>
+        </ModalFooter>
+    </ModalRoot>;
+}
+
 export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
     const bookmark = bookmarks[index];
@@ -160,8 +188,21 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
             <Menu.MenuItem
                 key="delete-bookmark"
                 id="delete-bookmark"
-                label={"Delete Bookmark" + (isFolder ? " Folder" : "")}
-                action={() => methods.deleteBookmark(index)}
+                label={"Delete Bookmark"}
+                action={() => {
+                    if (isFolder) {
+                        const key = openModal(modalProps =>
+                            <DeleteFolderConfirmationModal
+                                modalProps={modalProps}
+                                modalKey={key}
+                                onConfirm={() => {
+                                    methods.deleteBookmark(index);
+                                    closeModal(key);
+                                }}
+                            />);
+                    }
+                    else methods.deleteBookmark(index);
+                }}
             />
             <Menu.MenuItem
                 key="add-to-folder"
