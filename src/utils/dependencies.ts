@@ -22,18 +22,9 @@ import { makeLazy } from "./lazy";
     Add dynamically loaded dependencies for plugins here.
  */
 
-// https://github.com/mattdesl/gifenc
-// this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
-// @ts-ignore ts mad
-export const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
-
 // needed to parse APNGs in the nitroBypass plugin
-export const importApngJs = makeLazy(async () => {
-    const exports = {};
-    const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
-    Function("self", await fetch("https://cdnjs.cloudflare.com/ajax/libs/apng-canvas/2.1.1/apng-canvas.min.js").then(r => r.text()))(winProxy);
-    // @ts-ignore
-    return exports.APNG as { parseURL(url: string): Promise<ApngFrameData>; };
+export const importApngJs = makeLazy(() => {
+    return require("./apng-canvas") as { parseURL(url: string): Promise<ApngFrameData>; };
 });
 
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
@@ -74,6 +65,9 @@ export interface ApngFrameData {
     frames: ApngFrame[];
     playTime: number;
 }
+
+// The below code is only used on the Desktop (electron) build of Vencord.
+// Browser (extension) builds do not contain these remote imports.
 
 const shikiWorkerDist = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
 export const shikiWorkerSrc = `${shikiWorkerDist}/${IS_DEV ? "index.js" : "index.min.js"}`;
