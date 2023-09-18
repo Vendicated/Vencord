@@ -118,17 +118,22 @@ async function globDir(dir) {
 }
 
 /**
+ * @type {(dir: string) => Promise<Record<string, string>>}
+ */
+async function loadDir(dir, basePath = "") {
+    const files = await globDir(dir);
+    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+}
+
+/**
   * @type {(target: string, files: string[], shouldZip: boolean) => Promise<void>}
  */
 async function buildPluginZip(target, files, shouldZip) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/browser.js"),
         "dist/Vencord.css": await readFile("dist/browser.css"),
-        ...Object.fromEntries(await Promise.all(
-            (await globDir("dist/monaco")).map(async f =>
-                [f.replace("dist/", ""), await readFile(f)]
-            ))
-        ),
+        ...await loadDir("dist/monaco"),
+        ...await loadDir("browser/third-party", "browser/"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {

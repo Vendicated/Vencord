@@ -28,7 +28,7 @@
 
     "web_accessible_resources": [
         {
-            "resources": ["dist/*", "dist/monaco/*"],
+            "resources": ["dist/*", "third-party/*"],
             "matches": ["*://*.discord.com/*"]
         }
     ],

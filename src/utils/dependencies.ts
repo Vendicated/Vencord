@@ -66,16 +66,21 @@ export interface ApngFrameData {
     playTime: number;
 }
 
+export const rnnoiseDist = IS_WEB
+    ? (() => {
+        const script = document.querySelector("#vencord-script") as HTMLScriptElement;
+        return new URL("/third-party/rnnoise", script.dataset.monacoUrl).toString();
+    })()
+    : "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
+export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
+export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
+
 // The below code is only used on the Desktop (electron) build of Vencord.
 // Browser (extension) builds do not contain these remote imports.
 
-const shikiWorkerDist = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
-export const shikiWorkerSrc = `${shikiWorkerDist}/${IS_DEV ? "index.js" : "index.min.js"}`;
+const SHIKI_BASE = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
+export const shikiWorkerSrc = `${SHIKI_BASE}/${IS_DEV ? "index.js" : "index.min.js"}`;
 export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
-
-export const rnnoiseDist = "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
-export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
-export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
 
 // @ts-expect-error SHUT UP
 export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
