@@ -49,7 +49,7 @@ export default definePlugin({
         await this.buildCss();
 
         addButton("HideAttachments", msg => {
-            if (!msg.attachments.length && !msg.embeds.length) return null;
+            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
 
             const isHidden = hiddenMessages.has(msg.id);
 
@@ -72,7 +72,7 @@ export default definePlugin({
     async buildCss() {
         const elements = [...hiddenMessages].map(id => `#message-accessories-${id}`).join(",");
         style.textContent = `
-        :is(${elements}) [class*="embedWrapper"] {
+        :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
             /* important is not necessary, but add it to make sure bad themes won't break it */
             display: none !important;
         }

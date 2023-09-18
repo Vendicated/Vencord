@@ -18,17 +18,16 @@
 
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
@@ -41,7 +40,7 @@ import {
     SettingSliderComponent,
     SettingTextComponent
 } from "./components";
-import hideBotTagStyle from "./userPopoutHideBotTag.css?managed";
+import { openContributorModal } from "./ContributorModal";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
@@ -89,30 +88,19 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
-    const hasSettings = Boolean(pluginSettings && plugin.options);
+    const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
     React.useEffect(() => {
-        enableStyle(hideBotTagStyle);
-
-        let originalUser: User;
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id
                     ? await UserUtils.fetchUser(`${user.id}`)
-                        // only show name & pfp and no actions so users cannot harass plugin devs for support (send dms, add as friend, etc)
-                        .then(u => (originalUser = u, makeDummyUser(u)))
                         .catch(() => makeDummyUser({ username: user.name }))
                     : makeDummyUser({ username: user.name });
 
                 setAuthors(a => [...a, author]);
             }
         })();
-
-        return () => {
-            disableStyle(hideBotTagStyle);
-            if (originalUser)
-                FluxDispatcher.dispatch({ type: "USER_UPDATE", user: originalUser });
-        };
     }, []);
 
     async function saveAndClose() {
@@ -214,6 +202,19 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             showDefaultAvatarsForNullUsers
                             showUserPopout
                             renderMoreUsers={renderMoreUsers}
+                            renderUser={(user: User) => (
+                                <Clickable
+                                    className={AvatarStyles.clickableAvatar}
+                                    onClick={() => openContributorModal(user)}
+                                >
+                                    <img
+                                        className={AvatarStyles.avatar}
+                                        src={user.getAvatarURL(void 0, 80, true)}
+                                        alt={user.username}
+                                        title={user.username}
+                                    />
+                                </Clickable>
+                            )}
                         />
                     </div>
                 </Forms.FormSection>
