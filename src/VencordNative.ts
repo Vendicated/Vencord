@@ -44,7 +44,14 @@ export default {
         set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
 
         addChangeListener(cb: (newCss: string) => void) {
-            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => cb(css));
+            const listener = (_: any, css: string) => cb(css);
+            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, listener);
+
+            return {
+                remove: () => {
+                    ipcRenderer.removeListener(IpcEvents.QUICK_CSS_UPDATE, listener);
+                },
+            };
         },
 
         addThemeChangeListener(cb: () => void) {
