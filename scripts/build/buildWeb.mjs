@@ -18,10 +18,10 @@
 */
 
 import esbuild from "esbuild";
-import { zip } from "fflate";
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
+import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
 
@@ -118,7 +118,7 @@ async function globDir(dir) {
 }
 
 /**
- * @type {(dir: string) => Promise<Record<string, string>>}
+ * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
  */
 async function loadDir(dir, basePath = "") {
     const files = await globDir(dir);
@@ -126,9 +126,9 @@ async function loadDir(dir, basePath = "") {
 }
 
 /**
-  * @type {(target: string, files: string[], shouldZip: boolean) => Promise<void>}
+  * @type {(target: string, files: string[]) => Promise<void>}
  */
-async function buildPluginZip(target, files, shouldZip) {
+async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/browser.js"),
         "dist/Vencord.css": await readFile("dist/browser.css"),
@@ -149,31 +149,15 @@ async function buildPluginZip(target, files, shouldZip) {
         }))),
     };
 
-    if (shouldZip) {
-        return new Promise((resolve, reject) => {
-            zip(entries, {}, (err, data) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    const out = join("dist", target);
-                    writeFile(out, data).then(() => {
-                        console.info("Extension written to " + out);
-                        resolve();
-                    }).catch(reject);
-                }
-            });
-        });
-    } else {
-        await rm(target, { recursive: true, force: true });
-        await Promise.all(Object.entries(entries).map(async ([file, content]) => {
-            const dest = join("dist", target, file);
-            const parentDirectory = join(dest, "..");
-            await mkdir(parentDirectory, { recursive: true });
-            await writeFile(dest, content);
-        }));
+    await rm(target, { recursive: true, force: true });
+    await Promise.all(Object.entries(entries).map(async ([file, content]) => {
+        const dest = join("dist", target, file);
+        const parentDirectory = join(dest, "..");
+        await mkdir(parentDirectory, { recursive: true });
+        await writeFile(dest, content);
+    }));
 
-        console.info("Unpacked Extension written to dist/" + target);
-    }
+    console.info("Unpacked Extension written to dist/" + target);
 }
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
@@ -191,8 +175,9 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 
 await Promise.all([
     appendCssRuntime,
-    buildPluginZip("extension.zip", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], true),
-    buildPluginZip("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"], false),
-    buildPluginZip("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"], false),
+    buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
+    buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
 ]);
 
+Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension.zip");
+console.info("Packed Chromium Extension written to dist/extension.zip");
