@@ -34,8 +34,8 @@ declare module "~git-remote" {
 }
 
 declare module "~fileContent/*" {
-    const content: string;
-    export default content;
+    const monacoHtmlLocal: string;
+    export default monacoHtmlLocal;
 }
 
 declare module "*.css";

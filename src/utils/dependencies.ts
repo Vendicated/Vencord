@@ -68,7 +68,7 @@ export interface ApngFrameData {
 
 // On web (extensions), use extension uri as basepath (load files from extension)
 // On desktop (electron), load from cdn
-export const rnnoiseDist = IS_WEB
+export const rnnoiseDist = IS_EXTENSION
     ? (() => {
         const script = document.querySelector("#vencord-script") as HTMLScriptElement;
         return new URL("/third-party/rnnoise", script.dataset.extensionBaseUrl).toString();

@@ -41,6 +41,7 @@ const commonOptions = {
     target: ["esnext"],
     define: {
         IS_WEB: "true",
+        IS_EXTENSION: "false",
         IS_STANDALONE: "true",
         IS_DEV: JSON.stringify(watch),
         IS_DISCORD_DESKTOP: "false",
@@ -83,10 +84,19 @@ await Promise.all(
         }),
         esbuild.build({
             ...commonOptions,
+            outfile: "dist/extension.js",
+            define: {
+                ...commonOptions?.define,
+                IS_EXTENSION: "true",
+            },
+            footer: { js: "//# sourceURL=VencordWeb" },
+        }),
+        esbuild.build({
+            ...commonOptions,
             inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
             define: {
-                "window": "unsafeWindow",
-                ...(commonOptions?.define)
+                ...(commonOptions?.define),
+                window: "unsafeWindow",
             },
             outfile: "dist/Vencord.user.js",
             banner: {
@@ -130,8 +140,8 @@ async function loadDir(dir, basePath = "") {
  */
 async function buildExtension(target, files) {
     const entries = {
-        "dist/Vencord.js": await readFile("dist/browser.js"),
-        "dist/Vencord.css": await readFile("dist/browser.css"),
+        "dist/Vencord.js": await readFile("dist/extension.js"),
+        "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/monaco"),
         ...await loadDir("browser/third-party", "browser/"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {

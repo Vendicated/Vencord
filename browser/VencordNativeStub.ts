@@ -19,7 +19,8 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
-import monacoHtml from "~fileContent/monacoWin.html";
+import monacoHtmlLocal from "~fileContent/monacoWin.html";
+import monacoHtmlCdn from "~fileContent/../src/main/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { getTheme, Theme } from "../src/utils/discord";
@@ -87,7 +88,7 @@ window.VencordNative = {
                     ? "vs-light"
                     : "vs-dark";
 
-            win.document.write(monacoHtml);
+            win.document.write(IS_EXTENSION ? monacoHtmlLocal : monacoHtmlCdn);
         },
     },
 
