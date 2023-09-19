@@ -19,9 +19,11 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
-import monacoHtml from "~fileContent/../src/components/monacoWin.html";
+import monacoHtmlLocal from "~fileContent/monacoWin.html";
+import monacoHtmlCdn from "~fileContent/../src/main/monacoWin.html";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
+import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
 
@@ -80,6 +82,7 @@ window.VencordNative = {
                 return;
             }
 
+            win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
             win.getCurrentCss = () => VencordNative.quickCss.get();
             win.getTheme = () =>
@@ -87,7 +90,7 @@ window.VencordNative = {
                     ? "vs-light"
                     : "vs-dark";
 
-            win.document.write(monacoHtml);
+            win.document.write(IS_EXTENSION ? monacoHtmlLocal : monacoHtmlCdn);
         },
     },
 

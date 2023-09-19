@@ -17,23 +17,15 @@
 */
 
 import { makeLazy } from "./lazy";
+import { EXTENSION_BASE_URL } from "./web-metadata";
 
 /*
     Add dynamically loaded dependencies for plugins here.
  */
 
-// https://github.com/mattdesl/gifenc
-// this lib is way better than gif.js and all other libs, they're all so terrible but this one is nice
-// @ts-ignore ts mad
-export const getGifEncoder = makeLazy(() => import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js"));
-
 // needed to parse APNGs in the nitroBypass plugin
-export const importApngJs = makeLazy(async () => {
-    const exports = {};
-    const winProxy = new Proxy(window, { set: (_, k, v) => exports[k] = v });
-    Function("self", await fetch("https://cdnjs.cloudflare.com/ajax/libs/apng-canvas/2.1.1/apng-canvas.min.js").then(r => r.text()))(winProxy);
-    // @ts-ignore
-    return exports.APNG as { parseURL(url: string): Promise<ApngFrameData>; };
+export const importApngJs = makeLazy(() => {
+    return require("./apng-canvas").APNG as { parseURL(url: string): Promise<ApngFrameData>; };
 });
 
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
@@ -75,13 +67,20 @@ export interface ApngFrameData {
     playTime: number;
 }
 
-const shikiWorkerDist = "https://unpkg.com/@vap/shiki-worker@0.0.8/dist";
-export const shikiWorkerSrc = `${shikiWorkerDist}/${IS_DEV ? "index.js" : "index.min.js"}`;
-export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
-
-export const rnnoiseDist = "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
+// On web (extensions), use extension uri as basepath (load files from extension)
+// On desktop (electron), load from cdn
+export const rnnoiseDist = IS_EXTENSION
+    ? new URL("/third-party/rnnoise", EXTENSION_BASE_URL).toString()
+    : "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
 export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
 export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
 
-// @ts-expect-error SHUT UP
-export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+
+// The below code is only used on the Desktop (electron) build of Vencord.
+// Browser (extension) builds do not contain these remote imports.
+
+export const shikiWorkerSrc = `https://unpkg.com/@vap/shiki-worker@0.0.8/dist/${IS_DEV ? "index.js" : "index.min.js"}`;
+export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
+
+// @ts-expect-error
+export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));

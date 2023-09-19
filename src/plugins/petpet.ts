@@ -18,10 +18,10 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { getGifEncoder } from "@utils/dependencies";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DRAFT_TYPE = 0;
 const DEFAULT_DELAY = 20;
@@ -124,7 +124,6 @@ export default definePlugin({
                 }
             ],
             execute: async (opts, cmdCtx) => {
-                const { GIFEncoder, quantize, applyPalette } = await getGifEncoder();
                 const frames = await getFrames();
 
                 const noServerPfp = findOption(opts, "no-server-pfp", false);
@@ -143,7 +142,7 @@ export default definePlugin({
                 const delay = findOption(opts, "delay", DEFAULT_DELAY);
                 const resolution = findOption(opts, "resolution", DEFAULT_RESOLUTION);
 
-                const gif = new GIFEncoder();
+                const gif = GIFEncoder();
 
                 const canvas = document.createElement("canvas");
                 canvas.width = canvas.height = resolution;
