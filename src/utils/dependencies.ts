@@ -17,6 +17,7 @@
 */
 
 import { makeLazy } from "./lazy";
+import { EXTENSION_BASE_URL } from "./web-metadata";
 
 /*
     Add dynamically loaded dependencies for plugins here.
@@ -69,10 +70,7 @@ export interface ApngFrameData {
 // On web (extensions), use extension uri as basepath (load files from extension)
 // On desktop (electron), load from cdn
 export const rnnoiseDist = IS_EXTENSION
-    ? (() => {
-        const script = document.querySelector("#vencord-script") as HTMLScriptElement;
-        return new URL("/third-party/rnnoise", script.dataset.extensionBaseUrl).toString();
-    })()
+    ? new URL("/third-party/rnnoise", EXTENSION_BASE_URL).toString()
     : "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
 export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
 export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;

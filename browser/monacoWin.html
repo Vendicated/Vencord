@@ -23,11 +23,6 @@
         <div id="container"></div>
 
         <script>
-            window.baseUrl =
-                opener.document.querySelector(
-                    "#vencord-script"
-                ).dataset.extensionBaseUrl;
-
             const script = document.createElement("script");
             script.src = new URL("/dist/monaco/index.js", baseUrl);
 
