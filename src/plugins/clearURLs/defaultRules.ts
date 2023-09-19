@@ -128,6 +128,7 @@ export const defaultRules = [
     "feature@youtube.com",
     "kw@youtube.com",
     "si@youtube.com",
+    "pp@youtube.com",
     "si@youtu.be",
     "wt_zmc",
     "utm_source",
