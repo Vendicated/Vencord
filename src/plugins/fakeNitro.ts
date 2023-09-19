@@ -19,7 +19,7 @@
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
+import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
@@ -27,6 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
@@ -650,15 +651,11 @@ export default definePlugin({
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
-        const [{ parseURL }, {
-            GIFEncoder,
-            quantize,
-            applyPalette
-        }] = await Promise.all([importApngJs(), getGifEncoder()]);
+        const { parseURL } = importApngJs();
 
         const { frames, width, height } = await parseURL(stickerLink);
 
-        const gif = new GIFEncoder();
+        const gif = GIFEncoder();
         const resolution = Settings.plugins.FakeNitro.stickerSize;
 
         const canvas = document.createElement("canvas");
