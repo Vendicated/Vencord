@@ -23,22 +23,33 @@ import { request } from "https";
 import { basename, normalize } from "path";
 
 import { getSettings } from "./ipcMain";
+import { AdGuardBlockScript } from "./utils/adGuardBlockScript";
 
-// FixSpotifyEmbeds
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
         frame.once("dom-ready", () => {
+            // FixSpotifyEmbeds
             if (frame.url.startsWith("https://open.spotify.com/embed/")) {
                 const settings = getSettings().plugins?.FixSpotifyEmbeds;
-                if (!settings?.enabled) return;
 
-                frame.executeJavaScript(`
-                    const original = Audio.prototype.play;
-                    Audio.prototype.play = function() {
-                        this.volume = ${(settings.volume / 100) || 0.1};
-                        return original.apply(this, arguments);
-                    }
-                `);
+                if (settings?.enabled) {
+                    frame.executeJavaScript(`
+                        const original = Audio.prototype.play;
+                        Audio.prototype.play = function() {
+                            this.volume = ${(settings.volume / 100) || 0.1};
+                            return original.apply(this, arguments);
+                        }
+                    `);
+                }
+            }
+
+            // WatchTogetherActivityAdblock
+            if (frame.url.startsWith("https://www.youtube.com/")) {
+                const settings = getSettings().plugins?.WatchTogetherActivityAdblock;
+
+                if (settings?.enabled) {
+                    frame.executeJavaScript(AdGuardBlockScript);
+                }
             }
         });
     });
