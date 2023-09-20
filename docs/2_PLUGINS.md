@@ -40,9 +40,9 @@ Replace `12345n` with your user ID ending in `n` (e.g., `545581357812678656n`). 
 ## How Plugins Work In Vencord
 
 Vencord uses a different way of making mods than you're used to.
-Instead of monkeypatching webpack, we directly modify the code before Discord loads it.
+Instead of monkey-patching webpack, we directly modify the code before Discord loads it.
 
-This is _significantly_ more efficient than monkeypatching webpack, and is surprisingly easy, but it may be confusing at first.
+This is _significantly_ more efficient than monkey-patching webpack, and is surprisingly easy, but it may be confusing at first.
 
 ## Making your patch
 
