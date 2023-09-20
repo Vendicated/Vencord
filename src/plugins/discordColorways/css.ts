@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Plugins } from "Vencord";
+
 import { HexToHSL } from "./utils";
 
 export const colorVariables: string[] = [
@@ -213,7 +215,7 @@ export const colorVariables: string[] = [
 
 
 export function generateCss(primaryColor: string, secondaryColor: string, tertiaryColor: string, accentColor: string, tintedText: boolean) {
-    const colorwayCss = `/*Automatically Generated - Colorway Creator V${(Vencord.Plugins.plugins.DiscordColorways as any).creatorVersion}*/
+    const colorwayCss = `/*Automatically Generated - Colorway Creator V${(Plugins.plugins.DiscordColorways as any).creatorVersion}*/
     :root {
         --brand-100-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.min(Math.round(HexToHSL("#" + accentColor)[2] + (3.6 * 13)), 100)}%;
         --brand-130-hsl: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${Math.min(Math.round(HexToHSL("#" + accentColor)[2] + (3.6 * 12)), 100)}%;

@@ -24,7 +24,8 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Flex, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Text } from "@webpack/common";
+import { Flex, FluxDispatcher, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Text } from "@webpack/common";
+import { FluxEvents } from "@webpack/types";
 
 import ColorwaysButton from "./components/colorwaysButton";
 import { SwatchIcon } from "./components/icons";
@@ -84,6 +85,70 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     );
 };
 
+export var ws = new WebSocket("ws://127.0.0.1:5682");
+
+interface WSMessage {
+    type: string;
+    [x: string]: string;
+}
+
+type FluxEventsWithColorways = FluxEvents | "SET_COLORWAY";
+
+function connect() {
+    ws.onopen = function () {
+        ws.send('{ "type": "CLIENT_CONNECTED", "client_type": "CLIENT" }');
+    };
+
+    ws.onmessage = function (e) {
+        e.data.text().then(msg => {
+            const data: WSMessage = JSON.parse(msg);
+            switch (data.type) {
+                case "SET_COLORWAY":
+                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                        if (actveColorwayID === data.id) {
+                            DataStore.set("actveColorwayID", null);
+                            DataStore.set("actveColorway", null);
+                            ColorwayCSS.remove();
+                            FluxDispatcher.dispatch({
+                                id: null,
+                                css: null,
+                                type: "SET_COLORWAY",
+                            });
+                        } else {
+                            DataStore.set("actveColorwayID", data.id);
+                            DataStore.set("actveColorway", data.css);
+                            ColorwayCSS.set(data.css || "");
+                            FluxDispatcher.dispatch({
+                                id: data.id,
+                                css: data.css,
+                                type: "SET_COLORWAY",
+                            });
+                        }
+                    });
+                    break;
+            }
+        });
+    };
+
+    ws.onclose = function (e) {
+        ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+        console.log("Socket is closed. Reconnect will be attempted in 1 second.", e.reason);
+        setTimeout(function () {
+            connect();
+        }, 1000);
+    };
+
+    ws.onerror = function (err) {
+        ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+        console.error("Socket encountered error: ", err, "Closing socket");
+        ws.close();
+    };
+}
+
+connect();
+
+onbeforeunload = () => ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+
 export default definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord.",
@@ -112,6 +177,9 @@ export default definePlugin({
 
         DataStore.get("actveColorway").then(activeColorway => {
             ColorwayCSS.set(activeColorway);
+            DataStore.get("actveColorwayID").then(activeColorwayID => {
+                ws.send(`{ "type": "SET_HELPER_COLOR", "id": "${activeColorwayID}", "css": "${activeColorway}" }`);
+            });
         });
         addContextMenuPatch("channel-attach", ctxMenuPatch);
         addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
@@ -121,5 +189,6 @@ export default definePlugin({
         removeServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
         ColorwayCSS.remove();
         removeContextMenuPatch("channel-attach", ctxMenuPatch);
+        ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
     }
 });
