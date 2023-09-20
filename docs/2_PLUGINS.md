@@ -48,9 +48,9 @@ This is _significantly_ more efficient than monkey-patching webpack, and is surp
 
 For an in-depth guide into patching code, see [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-in the `index.ts` file we made earlier, you'll see a `patches` array.
+in the `index.ts` file we made earlier, you will see a `patches` array.
 
-> You'll see examples of how patches are used in all the existing plugins, and it'll be easier to understand by looking at those examples, so do that first, and then return here!
+> You will see examples of how patches are used in all the existing plugins, and it will be easier to understand by looking at those examples, so do that first, and then return here!
 
 > For a good example of a plugin using code patches AND runtime patching, check `src/plugins/unindent.ts`, which uses code patches to run custom runtime code.
 
@@ -79,7 +79,7 @@ abc.isStaff=function(){return!1;}
 
 You can find these snippets by opening the devtools (`ctrl+shift+i`) and pressing `ctrl+shift+f`, searching for what you're looking to modify in there, and beautifying the file to make it more readable.
 
-In the `match` regex in the example shown above, you'll notice at the start there is a `(\w+)`.
+In the `match` regex in the example shown above, you will notice at the start there is a `(\w+)`.
 Anything in the brackets will be accessible in the `replace` string using `$<number>`. e.g., the first pair of brackets will be `$1`, the second will be `$2`, etc.
 
 The replacement string we used is:
