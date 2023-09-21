@@ -20,7 +20,7 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
@@ -30,12 +30,12 @@ import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame mantika
+    // this is terrible, blame ven
     const p = filters.byProps;
     const [
         { cozyMessage, buttons, message, buttonsInner, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, wrapper, cozy },
         buttonClasses,
         botTag
     ] = findBulk(
@@ -124,12 +124,10 @@ export default LazyComponent(() => {
                         </Timestamp>)
                 }
 
-                <p
-                    className={classes(messageContent)}
-                    style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
-                >
-                    {review.comment}
-                </p>
+                <div className={cl("review-comment")}>
+                    {Parser.parseGuildEventDescription(review.comment)}
+                </div>
+
                 {review.id !== 0 && (
                     <div className={classes(container, isHeader, buttons)} style={{
                         padding: "0px",

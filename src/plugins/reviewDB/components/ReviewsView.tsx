@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes } from "@utils/misc";
-import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
-import { Forms, React, RelationshipStore, UserStore } from "@webpack/common";
-import type { KeyboardEvent } from "react";
+import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
+import { find, findByPropsLazy } from "@webpack";
+import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
@@ -28,7 +26,12 @@ import { settings } from "../settings";
 import { authorize, cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findByPropsLazy("inputDefault", "editable");
+
+const Editor = findByPropsLazy("start", "end", "addMark");
+const Transform = findByPropsLazy("unwrapNodes");
+const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
+
+const InputComponent = LazyComponent(() => find(m => m?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")));
 
 interface UserProps {
     discordId: string;
@@ -113,48 +116,82 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
     );
 }
 
+
 export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
     const { token } = settings.store;
+    const editorRef = useRef<any>(null);
+    const inputType = InputTypes.FORM;
+    inputType.disableAutoFocus = true;
 
-    function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
-        if (key === "Enter") {
-            addReview({
-                userid: discordId,
-                comment: (target as HTMLInputElement).value,
-                star: -1
-            }).then(res => {
-                if (res?.success) {
-                    (target as HTMLInputElement).value = ""; // clear the input
-                    refetch();
-                } else if (res?.message) {
-                    showToast(res.message);
-                }
-            });
-        }
-    }
+    const channel = {
+        flags_: 256,
+        guild_id_: null,
+        id: "0",
+        getGuildId: () => null,
+        isPrivate: () => true,
+        isActiveThread: () => false,
+        isArchivedLockedThread: () => false,
+        isDM: () => true,
+        roles: { "0": { permissions: 0n } },
+        getRecipientId: () => "0",
+        hasFlag: () => false,
+    };
 
     return (
-        <textarea
-            className={classes(Classes.inputDefault, "enter-comment", cl("input"))}
-            onKeyDownCapture={e => {
-                if (e.key === "Enter") {
-                    e.preventDefault(); // prevent newlines
-                }
-            }}
-            placeholder={
-                !token
-                    ? "You need to authorize to review users!"
-                    : isAuthor
-                        ? `Update review for @${name}`
-                        : `Review @${name}`
-            }
-            onKeyDown={onKeyPress}
-            onClick={() => {
+        <>
+            <div onClick={() => {
                 if (!token) {
                     showToast("Opening authorization window...");
                     authorize();
                 }
-            }}
-        />
+            }}>
+                <InputComponent
+                    className={cl("input")}
+                    channel={channel}
+                    placeholder={
+                        !token
+                            ? "You need to authorize to review users!"
+                            : isAuthor
+                                ? `Update review for @${name}`
+                                : `Review @${name}`
+                    }
+                    type={inputType}
+                    disableThemedBackground={true}
+                    setEditorRef={ref => editorRef.current = ref}
+                    textValue=""
+                    onSubmit={
+                        async res => {
+                            const response = await addReview({
+                                userid: discordId,
+                                comment: res.value,
+                            });
+
+                            if (response?.success) {
+                                refetch();
+
+                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
+
+                                // clear editor
+                                Transform.delete(slateEditor, {
+                                    at: {
+                                        anchor: Editor.start(slateEditor, []),
+                                        focus: Editor.end(slateEditor, []),
+                                    }
+                                });
+                            } else if (response?.message) {
+                                showToast(response.message);
+                            }
+
+                            // even tho we need to return this, it doesnt do anything
+                            return {
+                                shouldClear: false,
+                                shouldRefocus: true,
+                            };
+                        }
+                    }
+                />
+            </div>
+
+        </>
     );
 }
