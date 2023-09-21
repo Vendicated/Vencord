@@ -371,6 +371,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "blahaj.zip",
         id: 683954422241427471n,
     },
+    archeruwu: {
+        name: "archer_uwu",
+        id: 160068695383736320n
+    },
     Johannes7k75: {
         name: "Johannes7k75",
         id: 587701169103699994n,
@@ -385,3 +389,5 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
+
+export const IsFirefox = IS_EXTENSION && navigator.userAgent.toLowerCase().includes("firefox");
