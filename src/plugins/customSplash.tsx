@@ -35,7 +35,7 @@ export default definePlugin({
             find: "\"data-testid\":\"app-spinner\"",
             replacement: {
                 match: /("data-testid":"app-spinner",)children:(\i)/,
-                replace: "$1children: $self.isSourceAvailable() ? [$self.LoadingSource()] : $2"
+                replace: "$1children: $self.isSourceAvailable() ? $self.LoadingSource() : $2"
             }
         },
         {
@@ -48,6 +48,6 @@ export default definePlugin({
     ],
     settings,
     isSourceAvailable: () => settings.store.source.length > 0,
-    getTextStyle: () => ({ top: settings.store.overrideTextOffset && settings.store.textOffset }),
+    getTextStyle: () => ({ top: settings.store.overrideTextOffset ? settings.store.textOffset : void 0 }),
     LoadingSource: () => <source src={settings.store.source} />
 });
