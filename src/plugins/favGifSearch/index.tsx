@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader", "gutterSize");
+const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader", "searchInput");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -87,7 +87,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "FavoriteGifSearch",
     authors: [Devs.Aria],
-    description: "Adds a search bar for favorite gifs",
+    description: "Adds a search bar to favorite gifs.",
 
     patches: [
         {

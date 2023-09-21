@@ -38,11 +38,11 @@ jobs:
               run: pnpm build --standalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/plugins.json
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
             - name: Clean up obsolete files
               run: |
-                  rm -rf dist/*-unpacked Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
               id: release_values

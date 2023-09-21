@@ -178,12 +178,12 @@ export default definePlugin({
     start() {
         addContextMenuPatch("user-context", this.userContextMenuPatch);
         addContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        addContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        addContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("user-context", this.userContextMenuPatch);
         removeContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        removeContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        removeContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 });
