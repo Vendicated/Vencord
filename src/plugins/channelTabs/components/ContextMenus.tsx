@@ -52,7 +52,7 @@ export function BasicContextMenu() {
     </Menu.Menu>;
 }
 
-function EditModal({ modalProps, bookmark, onSave }) {
+export function EditModal({ modalProps, bookmark, onSave }) {
     const [name, setName] = useState(bookmark.name);
     const [color, setColor] = useState(bookmark.iconColor);
     const placeholder = bookmarkPlaceholderName(bookmark);
@@ -188,7 +188,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
             <Menu.MenuItem
                 key="delete-bookmark"
                 id="delete-bookmark"
-                label={"Delete Bookmark"}
+                label="Delete Bookmark"
                 action={() => {
                     if (isFolder) {
                         const key = openModal(modalProps =>
@@ -208,7 +208,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 key="add-to-folder"
                 id="add-to-folder"
                 label="Add Bookmark to Folder"
-                disabled={"bookmarks" in bookmark}
+                disabled={isFolder}
                 action={() => {
                     const key = openModal(modalProps =>
                         <AddToFolderModal

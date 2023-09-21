@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { closeModal, openModal } from "@utils/modal.jsx";
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 import { NotificationDot, QuestionIcon } from "./ChannelTab";
-import { BookmarkContextMenu } from "./ContextMenus";
+import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
 const { switchChannel, useBookmarks } = ChannelTabsUtils;
 const cl = (name: string) => `vc-channeltabs-${name}`;
@@ -66,20 +67,63 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
 }
 
 function BookmarkFolderOpenMenu(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
-    const bookmark = props.bookmarks[props.index] as BookmarkFolder;
+    const { bookmarks, index, methods } = props;
+    const bookmark = bookmarks[index] as BookmarkFolder;
 
     return <Menu.Menu
         navId="bookmark-folder-menu"
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="Bookmark Folder Menu"
     >
-        {bookmark.bookmarks.map(bkm => <Menu.MenuItem
+        {bookmark.bookmarks.map((bkm, i) => <Menu.MenuItem
             key={`bookmark-folder-entry-${bkm.channelId}`}
             id={`bookmark-folder-entry-${bkm.channelId}`}
-            label={[bkm.name, <NotificationDot channelIds={[bkm.channelId]} />]}
+            label={<span style={{ display: "flex", flexDirection: "row", gap: "0.25rem" }}>
+                {bkm.name}<NotificationDot channelIds={[bkm.channelId]} />
+            </span>}
             icon={() => <BookmarkIcon bookmark={bkm} />}
             showIconFirst={true}
             action={() => switchChannel(bkm)}
+
+            children={[<Menu.MenuItem
+                key="edit-bookmark"
+                id="edit-bookmark"
+                label="Edit Bookmark"
+                action={() => {
+                    const key = openModal(modalProps =>
+                        <EditModal
+                            modalProps={modalProps}
+                            bookmark={bkm}
+                            onSave={name => {
+                                const newBookmarks = [...bookmark.bookmarks];
+                                newBookmarks[i].name = name;
+                                methods.editBookmark(index, { bookmarks: newBookmarks });
+                                closeModal(key);
+                            }}
+                        />
+                    );
+                }}
+            />,
+            <Menu.MenuItem
+                key="delete-bookmark"
+                id="delete-bookmark"
+                label="Delete Bookmark"
+                action={() => {
+                    methods.deleteBookmark(i, index);
+                }}
+            />,
+            <Menu.MenuItem
+                key="remove-bookmark-from-folder"
+                id="remove-bookmark-from-folder"
+                label="Remove Bookmark from Folder"
+                action={() => {
+                    const newBookmarks = [...bookmark.bookmarks];
+                    newBookmarks.splice(i, 1);
+
+                    methods.addBookmark(bkm);
+                    methods.editBookmark(index, { bookmarks: newBookmarks });
+                }}
+            />]}
         />)}
     </Menu.Menu>;
 }

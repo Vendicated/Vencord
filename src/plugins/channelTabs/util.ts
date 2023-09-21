@@ -53,7 +53,7 @@ export interface BookmarkFolder {
 }
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmark = [Bookmarks | undefined, {
-    addBookmark: (bookmark: Omit<Bookmark, "name">, folderIndex?: number) => void;
+    addBookmark: (bookmark: Omit<Bookmark, "name"> & { name?: string; }, folderIndex?: number) => void;
     addFolder: () => number;
     deleteBookmark: (index: number, folderIndex?: number) => void;
     editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
@@ -396,7 +396,7 @@ function useBookmarks(userId: string): UseBookmark {
             if (typeof folderIndex === "number" && !("bookmarks" in bookmarks[userId][folderIndex]))
                 return logger.error("Attempted to add bookmark to non-folder " + folderIndex, bookmarks);
 
-            const name = bookmarkPlaceholderName(bookmark);
+            const name = bookmark.name ?? bookmarkPlaceholderName(bookmark);
             if (typeof folderIndex === "number")
                 (bookmarks[userId][folderIndex] as BookmarkFolder).bookmarks.push({ ...bookmark, name });
             else bookmarks[userId].push({ ...bookmark, name });
