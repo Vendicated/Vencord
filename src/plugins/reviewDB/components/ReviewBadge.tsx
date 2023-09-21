@@ -28,8 +28,8 @@ export default function ReviewBadge(badge: Badge) {
             {({ onMouseEnter, onMouseLeave }) => (
                 <img
                     className={cl("badge")}
-                    width="24px"
-                    height="24px"
+                    width="22px"
+                    height="22px"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     src={badge.icon}

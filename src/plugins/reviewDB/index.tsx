@@ -24,13 +24,13 @@ import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, useState } from "@webpack/common";
+import { Alerts, Menu, Parser, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { openReviewsModal } from "./components/ReviewModal";
 import ReviewsView from "./components/ReviewsView";
-import { UserType } from "./entities";
-import { getCurrentUserInfo } from "./reviewDbApi";
+import { NotificationType } from "./entities";
+import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
@@ -78,40 +78,33 @@ export default definePlugin({
 
             addContextMenuPatch("guild-header-popout", guildPopoutPatch);
 
-            if (user.banInfo) {
-                const endDate = new Date(user.banInfo.banEndDate);
-                if (endDate.getTime() > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate.getTime()) {
-                    Alerts.show({
-                        title: "You have been banned from ReviewDB",
-                        body: (
-                            <>
-                                <p>
-                                    You are banned from ReviewDB {
-                                        user.type === UserType.Banned
-                                            ? "permanently"
-                                            : "until " + endDate.toLocaleString()
-                                    }
-                                </p>
-                                {user.banInfo.reviewContent && (
-                                    <p>Offending Review: {user.banInfo.reviewContent}</p>
-                                )}
-                                <p>Continued offenses will result in a permanent ban.</p>
-                            </>
-                        ),
-                        cancelText: "Appeal",
-                        confirmText: "Ok",
-                        onCancel: () =>
-                            VencordNative.native.openExternal(
-                                "https://reviewdb.mantikafasi.dev/api/redirect?"
-                                + new URLSearchParams({
-                                    token: settings.store.token!,
-                                    page: "dashboard/appeal"
-                                })
-                            )
-                    });
-                }
-            }
+            if (user.notification) {
+                const props = user.notification.type === NotificationType.Ban ? {
+                    cancelText: "Appeal",
+                    confirmText: "Ok",
+                    onCancel: () =>
+                        VencordNative.native.openExternal(
+                            "https://reviewdb.mantikafasi.dev/api/redirect?"
+                            + new URLSearchParams({
+                                token: settings.store.token!,
+                                page: "dashboard/appeal"
+                            })
+                        )
+                } : {};
 
+                Alerts.show({
+                    title: user.notification.title,
+                    body: (
+                        Parser.parse(
+                            user.notification.content,
+                            false
+                        )
+                    ),
+                    ...props
+                });
+
+                readNotification(user.notification.id);
+            }
             s.user = user;
         }, 4000);
     },
