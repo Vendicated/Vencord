@@ -185,7 +185,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
     settings,
     patches: [
         // add tags to the tag list
@@ -232,9 +232,8 @@ export default definePlugin({
         {
             find: ".renderBot=function(){",
             replacement: {
-                match: /this.props.user;return null!=(\i)&&.{0,10}\?(.{0,50})\.botTag/,
-                replace: "this.props.user;var type=$self.getTag({...this.props,origType:$1.bot?0:null,location:'not-chat'});\
-return type!==null?$2.botTag,type"
+                match: /\.BOT;return null!=(\i)&&.{0,10}\?(.{0,50})\.botTag,type:\i/,
+                replace: ".BOT;var type=$self.getTag({...this.props,origType:$1.bot?0:null,location:'not-chat'});return type!==null?$2.botTag,type"
             }
         },
         // pass channel id down props to be used in profiles
