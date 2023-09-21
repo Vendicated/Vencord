@@ -374,6 +374,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     archeruwu: {
         name: "archer_uwu",
         id: 160068695383736320n
+    },
+    matiq: {
+        name: "matiq",
+        id: 257118451892617217n
     }
 } satisfies Record<string, Dev>);
 
