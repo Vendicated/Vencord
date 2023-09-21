@@ -171,7 +171,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
 
                                 const slateEditor = editorRef.current.ref.current.getSlateEditor();
 
-                                console.log(editorRef);
                                 // clear editor
                                 Transform.delete(slateEditor, {
                                     at: {
