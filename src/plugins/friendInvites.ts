@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -37,21 +37,17 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BOT,
             options: [{
                 name: "Uses",
-                displayName: "Uses",
                 description: "How many uses?",
-                displayDescription: "How many uses?",
                 choices: [{ "label": "1", "name": "1", "value": "1" }, { "label": "5", "name": "5", "value": "5" }],
-                required: true,
+                required: false,
                 type: ApplicationCommandOptionType.INTEGER
             }],
             execute: async (args, ctx) => {
-                // @ts-ignore
-                if (args[0].value === 1 && !UserStore.getCurrentUser().phone)
+                if (findOption(args, "Uses") === 1 && !UserStore.getCurrentUser().phone)
                     return sendBotMessage(ctx.channel.id, {
                         content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
-                // @ts-ignore
-                if (args[0].value === 1) {
+                if (findOption(args, "Uses") === 1) {
                     const random = uuid.v4();
                     const invite = await RestAPI.post({
                         url: "/friend-finder/find-friends",
@@ -78,8 +74,7 @@ export default definePlugin({
                     `.trim().replace(/\s+/g, " ")
                     });
                 }
-                // @ts-ignore
-                if (args[0].value === 5) {
+                if (findOption(args, "Uses") === 5) {
                     const invite = await FriendInvites.createFriendInvite();
 
                     sendBotMessage(ctx.channel.id, {
@@ -90,7 +85,18 @@ export default definePlugin({
                 `.trim().replace(/\s+/g, " ")
                     });
                 }
-            },
+                if (!findOption(args, "Uses")) {
+                    const invite = await FriendInvites.createFriendInvite();
+
+                    sendBotMessage(ctx.channel.id, {
+                        content: `
+                    discord.gg/${invite.code} ·
+                    Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
+                    Max uses: \`${invite.max_uses}\`
+                `.trim().replace(/\s+/g, " ")
+                    });
+                }
+            }
         },
         {
             name: "view friend invites",
