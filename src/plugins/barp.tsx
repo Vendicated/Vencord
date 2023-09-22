@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -48,12 +49,27 @@ async function sendToBurn(body, oneUse = true, expiration = 0, settings: any = S
                 insertTextIntoChatInputBox(`${data.url}`);
             } else {
                 console.error("Error creating paste:", data.error);
+                showNotification({
+                    title: "Error creating paste",
+                    body: data.error,
+                    color: "var(--red-360)",
+                });
             }
         } else {
             console.error("Proxy request failed with status:", response.status);
+            showNotification({
+                title: "Error creating paste",
+                body: `Proxy request failed with status: ${response.status}`,
+                color: "var(--red-360)",
+            });
         }
     } catch (error) {
         console.error("Proxy request failed:", error);
+        showNotification({
+            title: "Error creating paste",
+            body: error,
+            color: "var(--red-360)",
+        });
     }
 }
 
