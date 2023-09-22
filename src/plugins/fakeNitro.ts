@@ -103,6 +103,11 @@ interface StickerPack {
     stickers: Sticker[];
 }
 
+const enum FakeNoticeType {
+    Sticker,
+    Emoji
+}
+
 const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
@@ -306,16 +311,24 @@ export default definePlugin({
                 },
                 {
                     match: /(emojiSection.{0,50}description:)(\i)(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice("STICKER",${reactNode},!!${props}.renderableSticker?.fake)`
+                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice(${FakeNoticeType.Sticker},${reactNode},!!${props}.renderableSticker?.fake)`
                 }
             ]
         },
         {
-            find: ".Messages.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION",
+            find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /((\i)=\i\.node,\i=\i\.expressionSourceGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
+                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<=(\i)=\i\.node.+?)/,
+                replace: (m, node) => `${m}fakeNitroNode:${node},`
+            }
+        },
+        {
+            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
+            predicate: () => settings.store.transformEmojis,
+            replacement: {
+                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return )(.{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(}\({)/,
+                replace: (_, reactNode, rest) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)${rest}fakeNitroNode:arguments[0]?.fakeNitroNode,`
             }
         }
     ],
@@ -611,18 +624,18 @@ export default definePlugin({
         return link.target && fakeNitroEmojiRegex.test(link.target);
     },
 
-    addFakeNotice(type: "STICKER" | "EMOJI", node: Array<ReactNode>, fake: boolean) {
+    addFakeNotice(type: FakeNoticeType, node: Array<ReactNode>, fake: boolean) {
         if (!fake) return node;
 
         node = Array.isArray(node) ? node : [node];
 
         switch (type) {
-            case "STICKER": {
+            case FakeNoticeType.Sticker: {
                 node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
-            case "EMOJI": {
+            case FakeNoticeType.Emoji: {
                 node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
