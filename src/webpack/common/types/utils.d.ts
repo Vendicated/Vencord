@@ -51,12 +51,17 @@ export type Parser = Record<
     | "parseForumPostGuidelines"
     | "parseForumPostMostRecentMessage",
     ReactParser
-> & Record<"defaultRules" | "guildEventRules", MarkdownRules>
-& Record<"defaultReactRuleOptions", Record<"enableBuildOverrides", false>>
-& Record<"reactParserFor", (rules: MarkdownRules) => ReactParser>
-& Record<"astParserFor", (rules: MarkdownRules) => ASTParser>
-& Record<"createReactRules", (options: Record<string, any>) => Record<string, Record<"react", () => ReactNode[]>>>
-& Record<"combineAndInjectMentionRule", (rules: MarkdownRules, options: Record<string, any>[]) => MarkdownRules>;
+> & {
+    defaultRules: MarkdownRules;
+    guildEventRules: MarkdownRules;
+    defaultReactRuleOptions: {
+        enableBuildOverrides: false;
+    };
+    reactParserFor(rules: MarkdownRules): ReactParser;
+    astParserFor(rules: MarkdownRules): ASTParser;
+    createReactRules(options: Record<string, any>): Record<string, { react: () => ReactNode[] }>;
+    combineAndInjectMentionRule(rules: MarkdownRules, options: Record<string, any>[]): MarkdownRules;
+};
 
 export interface Alerts {
     show(alert: {
