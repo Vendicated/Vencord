@@ -19,5 +19,6 @@
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ]
+    ],
+    "nuxt.isNuxtApp": false
 }
