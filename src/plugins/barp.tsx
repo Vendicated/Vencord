@@ -26,7 +26,7 @@ import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Tooltip, useState } f
 
 const cl = classNameFactory("vc-st-");
 
-async function sendToBurn(body, oneUse = false, expiration = 0, settings: any = Settings.plugins.BARP) {
+async function sendToBurn(body, oneUse = true, expiration = 0, settings: any = Settings.plugins.BARP) {
     const requestData = {
         body,
         oneUse,
