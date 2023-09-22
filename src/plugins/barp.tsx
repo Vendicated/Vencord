@@ -67,7 +67,7 @@ async function sendToBurn(body, oneUse = true, expiration = 0, settings: any = S
         console.error("Proxy request failed:", error);
         showNotification({
             title: "Error creating paste",
-            body: error,
+            body: `Error creating paste: ${error}`,
             color: "var(--red-360)",
         });
     }
