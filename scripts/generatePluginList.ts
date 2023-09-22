@@ -18,7 +18,8 @@
 
 import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
-import { join } from "path";
+import { join, sep } from "path";
+import { normalize as posixNormalize, sep as posixSep } from "path/posix";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
@@ -39,6 +40,7 @@ interface PluginData {
     required: boolean;
     enabledByDefault: boolean;
     target: "discordDesktop" | "vencordDesktop" | "web" | "dev";
+    filePath: string;
 }
 
 const devs = {} as Record<string, Dev>;
@@ -164,6 +166,12 @@ async function parseFile(fileName: string) {
             if (!["web", "discordDesktop", "vencordDesktop", "desktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
             data.target = target as any;
         }
+
+        data.filePath = posixNormalize(fileName)
+            .split(sep)
+            .join(posixSep)
+            .replace(/\/index\.([jt]sx?)$/, "")
+            .replace(/^src\/plugins\//, "");
 
         let readme = "";
         try {
