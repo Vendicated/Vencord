@@ -111,7 +111,7 @@ function MessageModal({ rootProps, close }: { rootProps: ModalProps, close(): vo
 
 export default definePlugin({
     name: "BARP",
-    description: "This is a Function that Burns the Message after it is Read. By Default you can use my Public Instance but in Settings you can also set your own Instance.",
+    description: "This is Plugin that Burns the Message after it is Read. By Default you can use my Public Instance but in Settings you can also set your own Instance.",
     authors: [Devs.Wuemeli],
     dependencies: ["MessageEventsAPI"],
 
