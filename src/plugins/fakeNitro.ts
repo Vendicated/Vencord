@@ -327,8 +327,8 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return )(.{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(}\({)/,
-                replace: (_, reactNode, rest) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)${rest}fakeNitroNode:arguments[0]?.fakeNitroNode,`
+                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
+                replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
             }
         }
     ],
