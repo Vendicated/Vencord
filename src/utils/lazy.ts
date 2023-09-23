@@ -16,9 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function makeLazy<T>(factory: () => T): () => T {
+export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
+    let tries = 0;
     let cache: T;
-    return () => cache ?? (cache = factory());
+    return () => {
+        if (!cache && attempts > tries++) {
+            cache = factory();
+            if (!cache && attempts === tries)
+                console.error("Lazy factory failed:", factory);
+        }
+        return cache;
+    };
 }
 
 // Proxies demand that these properties be unmodified, so proxyLazy
@@ -85,6 +93,8 @@ export function proxyLazy<T>(factory: () => T, attempts = 5): T {
         [kGET]() {
             if (!proxyDummy[kCACHE] && attempts > tries++) {
                 proxyDummy[kCACHE] = factory();
+                if (!proxyDummy[kCACHE] && attempts === tries)
+                    console.error("Lazy factory failed:", factory);
             }
             return proxyDummy[kCACHE];
         }
