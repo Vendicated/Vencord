@@ -16,6 +16,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
+    },
+    replaceStreams: {
+        description: "Whether to replace discord's shitty stream pip with electron's or not",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false
     }
 });
 
@@ -33,6 +39,22 @@ export default definePlugin({
                 replace: "$&$1&&$2&&$self.renderPiPButton(),"
             },
         },
+        {
+            find: ".pictureInPictureVideo,",
+            predicate: () => settings.store.replaceStreams,
+            replacement: {
+                match: /onMouseLeave:\i,/,
+                replace: "$&style:{display:\"none\"},"
+            }
+        },
+        {
+            find: ".pictureInPictureVideo,",
+            predicate: () => settings.store.replaceStreams,
+            replacement: {
+                match: /"innerClassName"\]\);/,
+                replace: "$&setTimeout($self.enableStreamPiP,100);"
+            }
+        }
     ],
 
     renderPiPButton: ErrorBoundary.wrap(() => {
@@ -79,5 +101,24 @@ export default definePlugin({
                 )}
             </Tooltip>
         );
-    }, { noop: true })
+    }, { noop: true }),
+    enableStreamPiP: () => {
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                const removedNode = (Array.from(mutation.removedNodes)[0]) as HTMLElement;
+                console.log(removedNode);
+                if (removedNode?.classList?.[0]?.startsWith("pictureInPictureWindow-") || removedNode?.classList?.[0]?.startsWith("video-") && removedNode.querySelector(".media-engine-video")) {
+                    document.exitPictureInPicture();
+                    observer.disconnect();
+                }
+            });
+        });
+        observer.observe(document, { childList: true, subtree: true });
+
+        const video = document.querySelector(".media-engine-video")!.querySelector("video")!;
+        if (video.readyState === 4)
+            video.requestPictureInPicture();
+        else
+            video.onloadedmetadata = () => video.requestPictureInPicture();
+    }
 });
