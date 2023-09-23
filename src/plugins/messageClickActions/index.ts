@@ -28,11 +28,12 @@ const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed 
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
 const MANAGE_CHANNELS = 1n << 4n;
+const SEND_MESSAGES = 1n << 11n;
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
         type: OptionType.BOOLEAN,
-        description: "Enable delete on click",
+        description: "Enable delete on click while holding backspace",
         default: true
     },
     enableDoubleClickToEdit: {
@@ -55,7 +56,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MessageClickActions",
     description: "Hold Backspace and click to delete, double click to edit/reply",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Lumap],
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -72,6 +73,7 @@ export default definePlugin({
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
+                if (!PermissionStore.can(SEND_MESSAGES, channel)) return;
 
                 if (isMe) {
                     if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
