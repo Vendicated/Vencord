@@ -22,6 +22,7 @@ import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { CogWheel, InfoIcon } from "@components/Icons";
 import PluginModal from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
@@ -30,9 +31,9 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
-import { LazyComponent, useAwaiter } from "@utils/react";
+import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
@@ -46,8 +47,6 @@ const logger = new Logger("PluginSettings", "#a6d189");
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
-const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -163,7 +162,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
                     {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel />
-                        : <InfoIcon width="24" height="24" />}
+                        : <InfoIcon />}
                 </button>
             }
         />
