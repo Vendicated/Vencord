@@ -34,14 +34,14 @@ export default definePlugin({
         {
             find: "\"data-testid\":\"app-spinner\"",
             replacement: {
-                match: /("data-testid":"app-spinner",)children:(\i)/,
-                replace: "$1children: $self.isSourceAvailable() ? $self.LoadingSource() : $2"
+                match: /(?<="data-testid":"app-spinner",children:)\i/,
+                replace: "$self.isSourceAvailable() ? $self.LoadingSource() : $&"
             }
         },
         {
             find: "\"UPDATED_QUOTES\"",
             replacement: {
-                match: /\("div",{className:\i\(\)\.text,(?=children:\[null!=\i\?null:\(0,\i.jsx\)\("div",{className:\i\(\)\.tipTitle)/,
+                match: /\("div",{className:\i\(\)\.text,(?=children:.{0,100}\.tipTitle)/,
                 replace: "$&style: $self.getTextStyle(),"
             }
         }
