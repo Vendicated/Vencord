@@ -23,7 +23,7 @@ import { Clipboard, Toasts } from "@webpack/common";
 
 export default definePlugin({
     name: "BetterRoleDot",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.AutumnVN],
     description:
         "Copy role colour on RoleDot (accessibility setting) click. Also allows using both RoleDot and coloured names simultaneously",
 
@@ -43,6 +43,23 @@ export default definePlugin({
                 match: /"(?:username|dot)"===\i(?!\.\i)/g,
                 replace: "true",
             },
+        },
+
+        {
+            find: ".ADD_ROLE_A11Y_LABEL",
+            predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
+            replacement: {
+                match: /"dot"===\i/,
+                replace: "true"
+            }
+        },
+        {
+            find: ".roleVerifiedIcon",
+            predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
+            replacement: {
+                match: /"dot"===\i/,
+                replace: "true"
+            }
         }
     ],
 
@@ -50,7 +67,14 @@ export default definePlugin({
         bothStyles: {
             type: OptionType.BOOLEAN,
             description: "Show both role dot and coloured names",
+            restartNeeded: true,
             default: false,
+        },
+        copyRoleColorInProfilePopout: {
+            type: OptionType.BOOLEAN,
+            description: "Allow click on role dot in profile popout to copy role color",
+            restartNeeded: true,
+            default: false
         }
     },
 

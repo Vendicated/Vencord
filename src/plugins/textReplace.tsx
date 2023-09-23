@@ -213,15 +213,12 @@ function applyRules(content: string): string {
     if (content.length === 0)
         return content;
 
-    // pad so that rules can use " word " to only match whole "word"
-    content = " " + content + " ";
-
     if (stringRules) {
         for (const rule of stringRules) {
             if (!rule.find || !rule.replace) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            content = content.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n"));
+            content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
         }
     }
 

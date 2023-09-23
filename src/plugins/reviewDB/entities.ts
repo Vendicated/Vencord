@@ -29,6 +29,13 @@ export const enum ReviewType {
     System = 3
 }
 
+export const enum NotificationType {
+    Info = 0,
+    Ban = 1,
+    Unban = 2,
+    Warning = 3
+}
+
 export interface Badge {
     name: string;
     description: string;
@@ -45,6 +52,13 @@ export interface BanInfo {
     banEndDate: number;
 }
 
+export interface Notification {
+    id: number;
+    title: string;
+    content: string;
+    type: NotificationType;
+}
+
 export interface ReviewDBUser {
     ID: number;
     discordID: string;
@@ -54,6 +68,7 @@ export interface ReviewDBUser {
     warningCount: number;
     badges: any[];
     banInfo: BanInfo | null;
+    notification: Notification | null;
     lastReviewID: number;
     type: UserType;
 }
