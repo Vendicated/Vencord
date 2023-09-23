@@ -17,26 +17,26 @@
 */
 
 import { closeModal, openModal } from "@utils/modal.jsx";
-import { LazyComponent } from "@utils/react";
-import { findByCode } from "@webpack";
 import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
 
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, findSVGLazy, UseBookmark } from "../util";
 import { NotificationDot, QuestionIcon } from "./ChannelTab";
 import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
 const { switchChannel, useBookmarks } = ChannelTabsUtils;
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-const Star = LazyComponent(() => findByCode("M21.924 8.61789C21.77 8.24489"));
-const FolderIcon = LazyComponent(() => findByCode("M20 7H12L10.553 5.106C10.214"));
+const Star = findSVGLazy("M21.924 8.61789C21.77 8.24489");
 
 function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
-    if ("bookmarks" in bookmark) return <FolderIcon
+    if ("bookmarks" in bookmark) return <svg
         height={16}
         width={16}
-        color={bookmark.iconColor}
-    />;
+        viewBox="0 0 24 24"
+    >
+        {/* folder icon */}
+        <path fill={bookmark.iconColor} d="M20 7H12L10.553 5.106C10.214 4.428 9.521 4 8.764 4H3C2.447 4 2 4.447 2 5V19C2 20.104 2.895 21 4 21H20C21.104 21 22 20.104 22 19V9C22 7.896 21.104 7 20 7Z" />
+    </svg>;
 
     const channel = ChannelStore.getChannel(bookmark.channelId);
     const guild = GuildStore.getGuild(bookmark.guildId);

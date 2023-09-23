@@ -18,9 +18,11 @@
 
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
+import { findModuleId, wreq } from "@webpack";
 import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, UserStore, useState } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components/ChannelTabsContainer";
@@ -121,6 +123,15 @@ export const channelTabsSettings = definePluginSettings({
         default: true
     }
 });
+
+export function findSVGLazy(path: string) {
+    return proxyLazy(() => {
+        const moduleId = findModuleId(path);
+        if (!moduleId) return null;
+        const module = wreq(moduleId);
+        return module.Z ?? module.default ?? null;
+    });
+}
 
 function replaceArray<T>(array: T[], ...values: T[]) {
     const len = array.length;

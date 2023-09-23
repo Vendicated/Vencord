@@ -17,11 +17,10 @@
 */
 
 import { classes } from "@utils/misc";
-import { LazyComponent, useForceUpdater } from "@utils/react";
-import { findByCode } from "@webpack";
+import { useForceUpdater } from "@utils/react";
 import { Button, ContextMenu, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, findSVGLazy } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
@@ -31,8 +30,8 @@ const {
     moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
 } = ChannelTabsUtils;
 
-const PlusIcon = LazyComponent(() => findByCode("15 10 10 10"));
-const XIcon = LazyComponent(() => findByCode("M18.4 4L12 10.4L5.6 4L4"));
+const PlusIcon = findSVGLazy("15 10 10 10");
+const XIcon = findSVGLazy("M18.4 4L12 10.4L5.6 4L4");
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 

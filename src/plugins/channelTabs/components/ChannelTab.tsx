@@ -22,7 +22,7 @@ import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, findSVGLazy } from "../util";
 
 const { moveDraggedTabs } = ChannelTabsUtils;
 
@@ -35,8 +35,8 @@ const dotStyles = findByPropsLazy("numberBadge");
 const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy("themeColor:null==");
 
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
-const FriendsIcon = LazyComponent(() => findByCode("M0.5,0 L0.5,1.5 C0.5,5.65"));
-export const QuestionIcon = LazyComponent(() => findByCode("M12 2C6.486 2 2 6.487"));
+const FriendsIcon = findSVGLazy("M0.5,0 L0.5,1.5 C0.5,5.65");
+export const QuestionIcon = findSVGLazy("13.875V15H11V12H12C13.104");
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
