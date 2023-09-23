@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -35,30 +35,47 @@ export default definePlugin({
             name: "create friend invite",
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
-            execute: async (_, ctx) => {
-                if (!UserStore.getCurrentUser().phone)
+            options: [{
+                name: "Uses",
+                description: "How many uses?",
+                choices: [
+                    { label: "1", name: "1", value: "1" },
+                    { label: "5", name: "5", value: "5" }
+                ],
+                required: false,
+                type: ApplicationCommandOptionType.INTEGER
+            }],
+
+            execute: async (args, ctx) => {
+                const uses = findOption<number>(args, "Uses", 5);
+
+                if (uses === 1 && !UserStore.getCurrentUser().phone)
                     return sendBotMessage(ctx.channel.id, {
-                        content: "You need to have a phone number connected to your account to create a friend invite!"
+                        content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
 
-                const random = uuid.v4();
-                const invite = await RestAPI.post({
-                    url: "/friend-finder/find-friends",
-                    body: {
-                        modified_contacts: {
-                            [random]: [1, "", ""]
-                        },
-                        phone_contact_methods_count: 1
-                    }
-                }).then(res =>
-                    FriendInvites.createFriendInvite({
-                        code: res.body.invite_suggestions[0][3],
+                let invite: any;
+                if (uses === 1) {
+                    const random = uuid.v4();
+                    const { body: { invite_suggestions } } = await RestAPI.post({
+                        url: "/friend-finder/find-friends",
+                        body: {
+                            modified_contacts: {
+                                [random]: [1, "", ""]
+                            },
+                            phone_contact_methods_count: 1
+                        }
+                    });
+                    invite = await FriendInvites.createFriendInvite({
+                        code: invite_suggestions[0][3],
                         recipient_phone_number_or_email: random,
                         contact_visibility: 1,
                         filter_visibilities: [],
                         filtered_invite_suggestions_index: 1
-                    })
-                );
+                    });
+                } else {
+                    invite = await FriendInvites.createFriendInvite();
+                }
 
                 sendBotMessage(ctx.channel.id, {
                     content: `
@@ -67,7 +84,7 @@ export default definePlugin({
                         Max uses: \`${invite.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
                 });
-            },
+            }
         },
         {
             name: "view friend invites",
@@ -95,7 +112,7 @@ export default definePlugin({
             execute: async (_, ctx) => {
                 await FriendInvites.revokeFriendInvites();
 
-                return void sendBotMessage(ctx.channel.id, {
+                sendBotMessage(ctx.channel.id, {
                     content: "All friend invites have been revoked."
                 });
             },
