@@ -2,4 +2,4 @@
 
 Adds a loop button next to the volume slider on embedded videos.
 
-![image](https://cdn.discordapp.com/attachments/1020339327831658629/1154446995633737778/image.png)
+![image](https://github.com/Vendicated/Vencord/assets/55940580/04b82169-1458-487a-847a-716f0ba0ec4f)
