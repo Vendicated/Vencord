@@ -38,18 +38,26 @@ export default definePlugin({
             options: [{
                 name: "Uses",
                 description: "How many uses?",
-                choices: [{ "label": "1", "name": "1", "value": "1" }, { "label": "5", "name": "5", "value": "5" }],
+                choices: [
+                    { label: "1", name: "1", value: "1" },
+                    { label: "5", name: "5", value: "5" }
+                ],
                 required: false,
                 type: ApplicationCommandOptionType.INTEGER
             }],
+
             execute: async (args, ctx) => {
-                if (findOption(args, "Uses") === 1 && !UserStore.getCurrentUser().phone)
+                const uses = findOption<number>(args, "Uses", 5);
+
+                if (uses === 1 && !UserStore.getCurrentUser().phone)
                     return sendBotMessage(ctx.channel.id, {
                         content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
-                if (findOption(args, "Uses") === 1) {
+
+                let invite: any;
+                if (uses === 1) {
                     const random = uuid.v4();
-                    const invite = await RestAPI.post({
+                    const { body: { invite_suggestions } } = await RestAPI.post({
                         url: "/friend-finder/find-friends",
                         body: {
                             modified_contacts: {
@@ -57,45 +65,25 @@ export default definePlugin({
                             },
                             phone_contact_methods_count: 1
                         }
-                    }).then(res =>
-                        FriendInvites.createFriendInvite({
-                            code: res.body.invite_suggestions[0][3],
-                            recipient_phone_number_or_email: random,
-                            contact_visibility: 1,
-                            filter_visibilities: [],
-                            filtered_invite_suggestions_index: 1
-                        })
-                    );
-                    sendBotMessage(ctx.channel.id, {
-                        content: `
+                    });
+                    invite = await FriendInvites.createFriendInvite({
+                        code: invite_suggestions[0][3],
+                        recipient_phone_number_or_email: random,
+                        contact_visibility: 1,
+                        filter_visibilities: [],
+                        filtered_invite_suggestions_index: 1
+                    });
+                } else {
+                    invite = await FriendInvites.createFriendInvite();
+                }
+
+                sendBotMessage(ctx.channel.id, {
+                    content: `
                         discord.gg/${invite.code} ·
                         Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
                         Max uses: \`${invite.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
-                    });
-                }
-                if (findOption(args, "Uses") === 5) {
-                    const invite = await FriendInvites.createFriendInvite();
-
-                    sendBotMessage(ctx.channel.id, {
-                        content: `
-                    discord.gg/${invite.code} ·
-                    Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
-                    Max uses: \`${invite.max_uses}\`
-                `.trim().replace(/\s+/g, " ")
-                    });
-                }
-                if (!findOption(args, "Uses")) {
-                    const invite = await FriendInvites.createFriendInvite();
-
-                    sendBotMessage(ctx.channel.id, {
-                        content: `
-                    discord.gg/${invite.code} ·
-                    Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
-                    Max uses: \`${invite.max_uses}\`
-                `.trim().replace(/\s+/g, " ")
-                    });
-                }
+                });
             }
         },
         {
@@ -124,7 +112,7 @@ export default definePlugin({
             execute: async (_, ctx) => {
                 await FriendInvites.revokeFriendInvites();
 
-                return void sendBotMessage(ctx.channel.id, {
+                sendBotMessage(ctx.channel.id, {
                     content: "All friend invites have been revoked."
                 });
             },
