@@ -51,8 +51,8 @@ export default definePlugin({
             find: ".pictureInPictureVideo,",
             predicate: () => settings.store.replaceStreams,
             replacement: {
-                match: /"innerClassName"\]\);/,
-                replace: "$&setTimeout($self.enableStreamPiP,100);"
+                match: /(\i)=\i\.onJumpToChannel,.{0,500}"innerClassName"\]\);/,
+                replace: "$&setTimeout($self.enableStreamPiP,100,$1);"
             }
         }
     ],
@@ -102,7 +102,7 @@ export default definePlugin({
             </Tooltip>
         );
     }, { noop: true }),
-    enableStreamPiP: () => {
+    enableStreamPiP: (jumpToChannel: any) => {
         const observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 const removedNode = (Array.from(mutation.removedNodes)[0]) as HTMLElement;
@@ -116,6 +116,9 @@ export default definePlugin({
         observer.observe(document, { childList: true, subtree: true });
 
         const video = document.querySelector(".media-engine-video")!.querySelector("video")!;
+        video.onleavepictureinpicture = () => {
+            jumpToChannel();
+        };
         if (video.readyState === 4)
             video.requestPictureInPicture();
         else
