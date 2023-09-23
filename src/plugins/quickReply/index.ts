@@ -20,7 +20,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const Kangaroo = findByPropsLazy("jumpToMessage");
@@ -28,6 +28,7 @@ const Kangaroo = findByPropsLazy("jumpToMessage");
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
 let editIdx = -1;
+const SEND_MESSAGES = 1n << 11n;
 
 
 const enum MentionOptions {
@@ -54,7 +55,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "QuickReply",
-    authors: [Devs.obscurity, Devs.Ven, Devs.pylix],
+    authors: [Devs.obscurity, Devs.Ven, Devs.pylix, Devs.Lumap],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
     settings,
 
@@ -172,6 +173,7 @@ function shouldMention(message) {
 
 // handle next/prev reply
 function nextReply(isUp: boolean) {
+    if (!PermissionStore.can(SEND_MESSAGES, ChannelStore.getChannel(SelectedChannelStore.getChannelId()))) return;
     const message = getNextMessage(isUp, true);
 
     if (!message)
@@ -179,7 +181,6 @@ function nextReply(isUp: boolean) {
             type: "DELETE_PENDING_REPLY",
             channelId: SelectedChannelStore.getChannelId(),
         });
-
     const channel = ChannelStore.getChannel(message.channel_id);
     const meId = UserStore.getCurrentUser().id;
 
@@ -196,21 +197,20 @@ function nextReply(isUp: boolean) {
 
 // handle next/prev edit
 function nextEdit(isUp: boolean) {
+    if (!PermissionStore.can(SEND_MESSAGES, ChannelStore.getChannel(SelectedChannelStore.getChannelId()))) return;
     const message = getNextMessage(isUp, false);
 
     if (!message)
-        Dispatcher.dispatch({
+        return Dispatcher.dispatch({
             type: "MESSAGE_END_EDIT",
             channelId: SelectedChannelStore.getChannelId()
         });
-    else {
-        Dispatcher.dispatch({
-            type: "MESSAGE_START_EDIT",
-            channelId: message.channel_id,
-            messageId: message.id,
-            content: message.content,
-            _isQuickEdit: true
-        });
-        jumpIfOffScreen(message.channel_id, message.id);
-    }
+    Dispatcher.dispatch({
+        type: "MESSAGE_START_EDIT",
+        channelId: message.channel_id,
+        messageId: message.id,
+        content: message.content,
+        _isQuickEdit: true
+    });
+    jumpIfOffScreen(message.channel_id, message.id);
 }

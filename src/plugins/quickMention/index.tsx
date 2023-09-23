@@ -20,21 +20,26 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { ChannelStore, PermissionStore } from "@webpack/common";
+
+const SEND_MESSAGES = 1n << 11n;
 
 export default definePlugin({
     name: "QuickMention",
-    authors: [Devs.kemo],
+    authors: [Devs.kemo, Devs.Lumap],
     description: "Adds a quick mention button to the message actions bar",
     dependencies: ["MessagePopoverAPI"],
 
     start() {
         addButton("QuickMention", msg => {
+            const channel = ChannelStore.getChannel(msg.channel_id);
+            if (!PermissionStore.can(SEND_MESSAGES, channel)) return null;
+
             return {
                 label: "Quick Mention",
                 icon: this.Icon,
                 message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
+                channel,
                 onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         });
