@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Tooltip } from "@webpack/common";
+import { React, Tooltip, useEffect } from "@webpack/common";
 
 const settings = definePluginSettings({
     loop: {
@@ -43,16 +43,16 @@ export default definePlugin({
             find: ".pictureInPictureVideo,",
             predicate: () => settings.store.replaceStreams,
             replacement: {
-                match: /onMouseLeave:\i,/,
-                replace: "$&style:{display:\"none\"},"
+                match: /className:.{0,10}pictureInPictureVideo/,
+                replace: "style:{display:\"none\"},$&"
             }
         },
         {
             find: ".pictureInPictureVideo,",
             predicate: () => settings.store.replaceStreams,
             replacement: {
-                match: /(\i)=\i\.onJumpToChannel,.{0,500}"innerClassName"\]\);/,
-                replace: "$&setTimeout($self.enableStreamPiP,100,$1);"
+                match: /(\i)(=\i\.onJumpToChannel,.{0,500}"innerClassName".{0,4})return/,
+                replace: "$1$2$self.enableStreamPiP($1);return"
             }
         }
     ],
@@ -103,25 +103,17 @@ export default definePlugin({
         );
     }, { noop: true }),
     enableStreamPiP: (jumpToChannel: any) => {
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                const removedNode = (Array.from(mutation.removedNodes)[0]) as HTMLElement;
-                console.log(removedNode);
-                if (removedNode?.classList?.[0]?.startsWith("pictureInPictureWindow-") || removedNode?.classList?.[0]?.startsWith("video-") && removedNode.querySelector(".media-engine-video")) {
-                    document.exitPictureInPicture();
-                    observer.disconnect();
-                }
-            });
-        });
-        observer.observe(document, { childList: true, subtree: true });
-
-        const video = document.querySelector(".media-engine-video")!.querySelector("video")!;
-        video.onleavepictureinpicture = () => {
-            jumpToChannel();
-        };
-        if (video.readyState === 4)
-            video.requestPictureInPicture();
-        else
-            video.onloadedmetadata = () => video.requestPictureInPicture();
+        useEffect(() => {
+            const video = document.querySelector(".media-engine-video")?.querySelector("video");
+            if (!video) return;
+            video.onleavepictureinpicture = () => { if (document.querySelector(".media-engine-video")?.querySelector("video")) jumpToChannel(); };
+            if (video.readyState === 4)
+                video.requestPictureInPicture();
+            else
+                video.onloadedmetadata = () => video.requestPictureInPicture();
+            return () => {
+                if (document.pictureInPictureElement) document.exitPictureInPicture();
+            };
+        }, []);
     }
 });
