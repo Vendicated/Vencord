@@ -104,9 +104,9 @@ export default definePlugin({
     }, { noop: true }),
     enableStreamPiP: (jumpToChannel: any) => {
         useEffect(() => {
-            const video = document.querySelector(".media-engine-video")?.querySelector("video");
+            const video = document.querySelector(".media-engine-video video") as HTMLVideoElement | null;
             if (!video) return;
-            video.onleavepictureinpicture = () => { if (document.querySelector(".media-engine-video")?.querySelector("video")) jumpToChannel(); };
+            video.onleavepictureinpicture = () => { if (document.querySelector(".media-engine-video video")) jumpToChannel(); };
             if (video.readyState === 4)
                 video.requestPictureInPicture();
             else
