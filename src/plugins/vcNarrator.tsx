@@ -66,6 +66,7 @@ function clean(str: string) {
 
     return str.normalize("NFKC")
         .replace(replacer, "")
+        .replace(/_{2,}/g, "_")
         .trim();
 }
 
