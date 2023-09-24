@@ -20,7 +20,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { ChannelStore, PermissionsBits, PermissionStore } from "@webpack/common";
 
 export default definePlugin({
     name: "QuickMention",
@@ -30,11 +30,14 @@ export default definePlugin({
 
     start() {
         addButton("QuickMention", msg => {
+            const channel = ChannelStore.getChannel(msg.channel_id);
+            if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
+
             return {
                 label: "Quick Mention",
                 icon: this.Icon,
                 message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
+                channel,
                 onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         });
