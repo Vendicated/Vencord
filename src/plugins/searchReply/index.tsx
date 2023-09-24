@@ -21,10 +21,8 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode, findByCodeLazy } from "@webpack";
-import { ChannelStore, i18n, Menu, PermissionStore, SelectedChannelStore } from "@webpack/common";
+import { ChannelStore, i18n, Menu, PermissionsBits, PermissionStore, SelectedChannelStore } from "@webpack/common";
 import { Message } from "discord-types/general";
-
-const SEND_MESSAGES = 1n << 11n;
 
 const ReplyIcon = LazyComponent(() => findByCode("M10 8.26667V4L3 11.4667L10 18.9333V14.56C15 14.56 18.5 16.2667 21 20C20 14.6667 17 9.33333 10 8.26667Z"));
 
@@ -35,7 +33,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
     const channel = ChannelStore.getChannel(message?.channel_id);
     if (!channel) return;
-    if (!PermissionStore.can(SEND_MESSAGES, channel)) return;
+    if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
 
     // dms and group chats
     const dmGroup = findGroupChildrenByChildId("pin", children);
@@ -69,7 +67,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
 export default definePlugin({
     name: "SearchReply",
     description: "Adds a reply button to search results",
-    authors: [Devs.Aria, Devs.Lumap],
+    authors: [Devs.Aria],
 
     start() {
         addContextMenuPatch("message", messageContextMenuPatch);
