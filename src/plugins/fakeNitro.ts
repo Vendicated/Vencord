@@ -19,7 +19,7 @@
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { ApngBlendOp, ApngDisposeOp, getGifEncoder, importApngJs } from "@utils/dependencies";
+import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
@@ -27,6 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
@@ -100,6 +101,11 @@ interface StickerPack {
     cover_sticker_id: string;
     banner_asset_id: string;
     stickers: Sticker[];
+}
+
+const enum FakeNoticeType {
+    Sticker,
+    Emoji
 }
 
 const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
@@ -305,16 +311,24 @@ export default definePlugin({
                 },
                 {
                     match: /(emojiSection.{0,50}description:)(\i)(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice("STICKER",${reactNode},!!${props}.renderableSticker?.fake)`
+                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice(${FakeNoticeType.Sticker},${reactNode},!!${props}.renderableSticker?.fake)`
                 }
             ]
         },
         {
-            find: ".Messages.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION",
+            find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /((\i)=\i\.node,\i=\i\.expressionSourceGuild)(.+?return )(.{0,450}Messages\.EMOJI_POPOUT_PREMIUM_JOINED_GUILD_DESCRIPTION.+?}\))/,
-                replace: (_, rest1, node, rest2, reactNode) => `${rest1},fakeNitroNode=${node}${rest2}$self.addFakeNotice("EMOJI",${reactNode},fakeNitroNode.fake)`
+                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<=(\i)=\i\.node.+?)/,
+                replace: (m, node) => `${m}fakeNitroNode:${node},`
+            }
+        },
+        {
+            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
+            predicate: () => settings.store.transformEmojis,
+            replacement: {
+                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
+                replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
             }
         }
     ],
@@ -610,18 +624,18 @@ export default definePlugin({
         return link.target && fakeNitroEmojiRegex.test(link.target);
     },
 
-    addFakeNotice(type: "STICKER" | "EMOJI", node: Array<ReactNode>, fake: boolean) {
+    addFakeNotice(type: FakeNoticeType, node: Array<ReactNode>, fake: boolean) {
         if (!fake) return node;
 
         node = Array.isArray(node) ? node : [node];
 
         switch (type) {
-            case "STICKER": {
+            case FakeNoticeType.Sticker: {
                 node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
-            case "EMOJI": {
+            case FakeNoticeType.Emoji: {
                 node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
@@ -650,15 +664,11 @@ export default definePlugin({
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
-        const [{ parseURL }, {
-            GIFEncoder,
-            quantize,
-            applyPalette
-        }] = await Promise.all([importApngJs(), getGifEncoder()]);
+        const { parseURL } = importApngJs();
 
         const { frames, width, height } = await parseURL(stickerLink);
 
-        const gif = new GIFEncoder();
+        const gif = GIFEncoder();
         const resolution = Settings.plugins.FakeNitro.stickerSize;
 
         const canvas = document.createElement("canvas");

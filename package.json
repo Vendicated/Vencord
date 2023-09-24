@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.4.7",
+    "version": "1.5.2",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -36,10 +36,13 @@
         "@vap/shiki": "0.10.5",
         "eslint-plugin-simple-header": "^1.0.2",
         "fflate": "^0.7.4",
+        "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
+        "monaco-editor": "^0.43.0",
         "nanoid": "^4.0.2",
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
+        "@types/chrome": "^0.0.246",
         "@types/diff": "^5.0.3",
         "@types/lodash": "^4.14.194",
         "@types/node": "^18.16.3",
@@ -64,7 +67,8 @@
         "stylelint-config-standard": "^33.0.0",
         "tsx": "^3.12.7",
         "type-fest": "^3.9.0",
-        "typescript": "^5.0.4"
+        "typescript": "^5.0.4",
+        "zip-local": "^0.3.5"
     },
     "packageManager": "pnpm@8.1.1",
     "pnpm": {

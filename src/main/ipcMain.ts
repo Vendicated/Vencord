@@ -27,7 +27,7 @@ import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
 import { join, normalize } from "path";
 
-import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
+import monacoHtml from "~fileContent/monacoWin.html;base64";
 
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
