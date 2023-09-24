@@ -24,7 +24,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { find, findLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
-import { buildSeveralUsers } from "./typingTweaks";
+import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
 
