@@ -118,7 +118,7 @@ function getGuildCandidates(data: Data) {
 
     return Object.values(GuildStore.getGuilds()).filter(g => {
         const canCreate = g.ownerId === meId ||
-            BigInt(PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
+            (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
 
         if (data.t === "Sticker") return true;
