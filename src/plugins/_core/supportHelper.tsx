@@ -17,7 +17,7 @@
 */
 
 import { DataStore } from "@api/index";
-import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { Devs, IsFirefox, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
@@ -27,9 +27,10 @@ import { Alerts, Forms, UserStore } from "@webpack/common";
 import gitHash from "~git-hash";
 import plugins from "~plugins";
 
-import settings from "./_core/settings";
+import settings from "./settings";
 
 const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
+const FIREFOX_DISMISS_KEY = "Vencord-Firefox-Warning-Dismiss";
 
 const AllowedChannelIds = [
     SUPPORT_CHANNEL_ID,
@@ -48,7 +49,7 @@ export default definePlugin({
         name: "vencord-debug",
         description: "Send Vencord Debug info",
         predicate: ctx => AllowedChannelIds.includes(ctx.channel.id),
-        execute() {
+        async execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
             const client = (() => {
@@ -74,6 +75,10 @@ export default definePlugin({
                 Outdated: isOutdated,
                 OpenAsar: "openasar" in window,
             };
+
+            if (IS_DISCORD_DESKTOP) {
+                info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash())?.rendererCrashReason ?? "N/A";
+            }
 
             const debugInfo = `
 **Vencord Debug Info**
@@ -106,6 +111,22 @@ ${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "
                             Please first update using the Updater Page in Settings, or use the VencordInstaller (Update Vencord Button)
                             to do so, in case you can't access the Updater page.
                         </Forms.FormText>
+                    </div>,
+                    onCancel: rememberDismiss,
+                    onConfirm: rememberDismiss
+                });
+            }
+
+            if (IsFirefox) {
+                const rememberDismiss = () => DataStore.set(FIREFOX_DISMISS_KEY, true);
+
+                Alerts.show({
+                    title: "Hold on!",
+                    body: <div>
+                        <Forms.FormText>You are using Firefox.</Forms.FormText>
+                        <Forms.FormText>Due to Firefox's stupid extension guidelines, most themes and many plugins will not function correctly.</Forms.FormText>
+                        <Forms.FormText>Do not report bugs. Do not ask for help with broken plugins.</Forms.FormText>
+                        <Forms.FormText>Instead, use a chromium browser, Discord Desktop, or Vesktop.</Forms.FormText>
                     </div>,
                     onCancel: rememberDismiss,
                     onConfirm: rememberDismiss
