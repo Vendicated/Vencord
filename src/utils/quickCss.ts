@@ -60,13 +60,12 @@ export async function toggle(isEnabled: boolean) {
 async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
-    const { themeLinks, enabledThemes, userCssVars } = Settings;
+    const { themeLinks, enabledThemes } = Settings;
 
     const links: string[] = [...themeLinks];
 
     if (IS_WEB) {
-        // UserCSS handled separately
-        for (const theme of enabledThemes) if (!theme.endsWith(".user.css")) {
+        for (const theme of enabledThemes) {
             const themeData = await VencordNative.themes.getThemeData(theme);
             if (!themeData) continue;
 
@@ -79,24 +78,26 @@ async function initThemes() {
         }
     }
 
-    for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
-        // UserCSS goes through a compile step first
-        const css = await compileUsercss(theme);
-        if (!css) {
-            // let's not leave the user in the dark about this and point them to where they can find the error
-            Toasts.show({
-                message: `Failed to compile ${theme}, check the console for more info.`,
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId(),
-                options: {
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-            continue;
-        }
+    if (!IS_WEB || "armcord" in window) {
+        for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
+            // UserCSS goes through a compile step first
+            const css = await compileUsercss(theme);
+            if (!css) {
+                // let's not leave the user in the dark about this and point them to where they can find the error
+                Toasts.show({
+                    message: `Failed to compile ${theme}, check the console for more info.`,
+                    type: Toasts.Type.FAILURE,
+                    id: Toasts.genId(),
+                    options: {
+                        position: Toasts.Position.BOTTOM
+                    }
+                });
+                continue;
+            }
 
-        const blob = new Blob([css], { type: "text/css" });
-        links.push(URL.createObjectURL(blob));
+            const blob = new Blob([css], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
