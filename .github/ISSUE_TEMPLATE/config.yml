@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Vencord Support Server
     url: https://discord.gg/D9uwnFnqmd
