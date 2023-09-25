@@ -221,3 +221,18 @@ export function CogWheel(props: IconProps) {
         </Icon>
     );
 }
+
+export function ReplyIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-reply-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M10 8.26667V4L3 11.4667L10 18.9333V14.56C15 14.56 18.5 16.2667 21 20C20 14.6667 17 9.33333 10 8.26667Z"
+            />
+        </Icon>
+    );
+}
