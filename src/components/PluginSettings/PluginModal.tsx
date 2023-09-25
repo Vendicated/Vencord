@@ -238,7 +238,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Button
                             onClick={onClose}
                             size={Button.Sizes.SMALL}
-                            color={Button.Colors.WHITE}
+                            color={Button.Colors.PRIMARY}
                             look={Button.Looks.LINK}
                         >
                             Cancel
