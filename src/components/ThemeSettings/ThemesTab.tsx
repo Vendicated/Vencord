@@ -24,6 +24,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
+import { IsFirefox } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
@@ -354,12 +355,14 @@ function ThemesTab() {
                             >
                                 Load missing Themes
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.quickCss.openEditor()}
-                                size={Button.Sizes.SMALL}
-                            >
-                                Edit QuickCSS
-                            </Button>
+                            {!IsFirefox && (
+                                <Button
+                                    onClick={() => VencordNative.quickCss.openEditor()}
+                                    size={Button.Sizes.SMALL}
+                                >
+                                    Edit QuickCSS
+                                </Button>
+                            )}
                         </>
                     </Card>
 
