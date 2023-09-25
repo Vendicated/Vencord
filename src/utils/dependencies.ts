@@ -87,8 +87,6 @@ export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wa
 
 // @ts-expect-error
 export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
-// @ts-expect-error SHUT UP
-export const getStegCloak = makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
 
 export const getStylus = makeLazy(async () => {
     const stylusScript = await fetch("https://unpkg.com/stylus-lang-bundle@0.58.1/dist/stylus-renderer.min.js").then(r => r.text());
