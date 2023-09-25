@@ -22,6 +22,7 @@ import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { CogWheel } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
@@ -52,7 +53,6 @@ type FileInput = ComponentType<{
 
 const InviteActions = findByPropsLazy("resolveInvite");
 const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
-const CogWheel = findByCodeLazy("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");

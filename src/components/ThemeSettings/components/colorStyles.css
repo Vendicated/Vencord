@@ -18,3 +18,27 @@
     width: 14px;
     height: 14px;
 }
+
+.vc-usercss-settings-color-swatch-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+}
+
+.vc-usercss-settings-color-swatch-row > span {
+    display: block;
+    flex: 1;
+    overflow: hidden;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--header-primary);
+    line-height: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    word-wrap: break-word;
+}
+
+.vc-usercss-settings-color-swatch-row > .vc-usercss-settings-color-swatch {
+    flex: 0 0 auto;
+}
