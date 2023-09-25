@@ -86,8 +86,8 @@ export function SettingColorComponent({ label, name, themeSettings }: Props) {
             <div className={cl("swatch-row")}>
                 <span>{label}</span>
                 <ColorPicker
-                    width={40} /* same as a switch */
-                    height={24}
+                    width={80} /* same as a switch */
+                    height={48}
                     key={name}
                     value={normalizedValue}
                     onChange={handleChange}
