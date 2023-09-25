@@ -34,7 +34,7 @@ function EditPencil({ className, color }) {
     );
 }
 
-function ColorPicker(props: ColorPickerProps) {
+function ColorPicker(props: ColorPickerProps & { width: number; height: number; }) {
     const [color, setColor] = useState(props.value);
 
     const correctedColor = color ? `#${color.toString(16).padStart(6, "0")}` : "#000000";
@@ -48,7 +48,9 @@ function ColorPicker(props: ColorPickerProps) {
             {popoutProps => (
                 <div {...popoutProps} className={cl("swatch")} style={{
                     backgroundColor: correctedColor,
-                    borderColor: correctedColor
+                    borderColor: correctedColor,
+                    width: props.width,
+                    height: props.height
                 }}>
                     <EditPencil
                         className={cl("swatch-pencil")}
@@ -84,6 +86,8 @@ export function SettingColorComponent({ label, name, themeSettings }: Props) {
             <div className={cl("swatch-row")}>
                 <span>{label}</span>
                 <ColorPicker
+                    width={40} /* same as a switch */
+                    height={24}
                     key={name}
                     value={normalizedValue}
                     onChange={handleChange}
