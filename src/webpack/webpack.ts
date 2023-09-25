@@ -75,10 +75,19 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
+function handleModuleNotFound(method: string, ...filter: unknown[]) {
+    const err = new Error(`webpack.${method} found no module`);
+    logger.error(err, "Filter:", filter);
+
+    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+    if (IS_DEV && !devToolsOpen)
+        throw err;
+}
+
 /**
  * Find the first module that matches the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
+export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -93,7 +102,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         if (typeof mod.exports !== "object") continue;
 
         if (mod.exports.default && filter(mod.exports.default)) {
-            const found = getDefault ? mod.exports.default : mod.exports;
+            const found = mod.exports.default;
             return isWaitFor ? [found, Number(key)] : found;
         }
 
@@ -106,17 +115,8 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         }
     }
 
-    if (!isWaitFor) {
-        const err = new Error("Didn't find module matching this filter");
-        if (IS_DEV) {
-            logger.error(err);
-            logger.error(filter);
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
-        } else {
-            logger.warn(err);
-        }
+    if (!isIndirect) {
+        handleModuleNotFound("find", filter);
     }
 
     return isWaitFor ? [null, null] : null;
@@ -125,11 +125,11 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
 /**
  * find but lazy
  */
-export function findLazy(filter: FilterFn, getDefault = true) {
-    return proxyLazy(() => find(filter, getDefault));
+export function findLazy(filter: FilterFn) {
+    return proxyLazy(() => find(filter));
 }
 
-export function findAll(filter: FilterFn, getDefault = true) {
+export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -144,7 +144,7 @@ export function findAll(filter: FilterFn, getDefault = true) {
             continue;
 
         if (mod.exports.default && filter(mod.exports.default))
-            ret.push(getDefault ? mod.exports.default : mod.exports);
+            ret.push(mod.exports.default);
         else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
@@ -304,42 +304,51 @@ export function mapMangledModuleLazy<S extends string>(code: string, mappers: Re
  * Find the first module that has the specified properties
  */
 export function findByProps(...props: string[]) {
-    return find(filters.byProps(...props));
+    const res = find(filters.byProps(...props), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByProps", ...props);
+    return res;
 }
 
 /**
  * findByProps but lazy
  */
 export function findByPropsLazy(...props: string[]) {
-    return findLazy(filters.byProps(...props));
+    return proxyLazy(() => findByProps(...props));
 }
 
 /**
  * Find a function by its code
  */
 export function findByCode(...code: string[]) {
-    return find(filters.byCode(...code));
+    const res = find(filters.byCode(...code), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByCode", ...code);
+    return res;
 }
 
 /**
  * findByCode but lazy
  */
 export function findByCodeLazy(...code: string[]) {
-    return findLazy(filters.byCode(...code));
+    return proxyLazy(() => findByCode(...code));
 }
 
 /**
  * Find a store by its displayName
  */
 export function findStore(name: string) {
-    return find(filters.byStoreName(name));
+    const res = find(filters.byStoreName(name), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findStore", name);
+    return res;
 }
 
 /**
  * findByDisplayName but lazy
  */
 export function findStoreLazy(name: string) {
-    return findLazy(filters.byStoreName(name));
+    return proxyLazy(() => findStore(name));
 }
 
 /**
@@ -354,7 +363,7 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const [existing, id] = find(filter!, true, true);
+    const [existing, id] = find(filter!, { isIndirect: true, isWaitFor: true });
     if (existing) return void callback(existing, id);
 
     subscriptions.set(filter, callback);
