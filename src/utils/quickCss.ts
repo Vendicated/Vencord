@@ -22,12 +22,27 @@ import { addSettingsListener, Settings } from "@api/Settings";
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
 
+function createStyle(id: string) {
+    const style = document.createElement("style");
+    style.id = id;
+    document.documentElement.append(style);
+    return style;
+}
+
+async function initSystemValues() {
+    const values = await VencordNative.themes.getSystemValues();
+    const variables = Object.entries(values)
+        .filter(([, v]) => v !== "#")
+        .map(([k, v]) => `--${k}: ${v};`)
+        .join("");
+
+    createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
+}
+
 export async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
-            style = document.createElement("style");
-            style.id = "vencord-custom-css";
-            document.documentElement.appendChild(style);
+            style = createStyle("vencord-custom-css");
             VencordNative.quickCss.addChangeListener(css => {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
@@ -40,11 +55,7 @@ export async function toggle(isEnabled: boolean) {
 }
 
 async function initThemes() {
-    if (!themesStyle) {
-        themesStyle = document.createElement("style");
-        themesStyle.id = "vencord-themes";
-        document.documentElement.appendChild(themesStyle);
-    }
+    themesStyle ??= createStyle("vencord-themes");
 
     const { themeLinks, enabledThemes } = Settings;
 
@@ -66,6 +77,7 @@ async function initThemes() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initSystemValues();
     initThemes();
 
     toggle(Settings.useQuickCss);

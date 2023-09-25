@@ -48,7 +48,8 @@ window.VencordNative = {
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
             entries.map(([name, css]) => getThemeInfo(css, name.toString()))
         ),
-        getThemeData: (fileName: string) => DataStore.get(fileName, themeStore)
+        getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
+        getSystemValues: async () => ({}),
     },
 
     native: {
