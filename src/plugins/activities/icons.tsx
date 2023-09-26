@@ -13,11 +13,29 @@ interface IconProps {
     height: number;
     color?: string;
 }
-
-export const HeadsetIcon: React.FC<IconProps> = LazyComponent(() => findByCode("M12 2.00305C6.486 2.00305 2 6.48805 2 12.0031V20.0031C2"));
-
-export const ActivityIcon: React.FC<IconProps> = LazyComponent(() => findByCode("M5.79335761,5 L18.2066424,5 C19.7805584,5 21.0868816,6.21634264"));
 export const RichActivityIcon: React.FC<IconProps> = LazyComponent(() => findByCode("M6,7 L2,7 L2,6 L6,6 L6,7 Z M8,5 L2,5 L2,4 L8,4"));
+
+export const HeadsetIcon: React.FC<IconProps> = ({ width, height, color }: IconProps) => {
+    return (
+        <svg width={width} height={height} viewBox="0 0 24 24">
+            <path
+                d="M12 2.00305C6.486 2.00305 2 6.48805 2 12.0031V20.0031C2 21.1071 2.895 22.0031 4 22.0031H6C7.104 22.0031 8 21.1071 8 20.0031V17.0031C8 15.8991 7.104 15.0031 6 15.0031H4V12.0031C4 7.59105 7.589 4.00305 12 4.00305C16.411 4.00305 20 7.59105 20 12.0031V15.0031H18C16.896 15.0031 16 15.8991 16 17.0031V20.0031C16 21.1071 16.896 22.0031 18 22.0031H20C21.104 22.0031 22 21.1071 22 20.0031V12.0031C22 6.48805 17.514 2.00305 12 2.00305Z"
+                fill={color || "currentColor"}
+            />
+        </svg>
+    );
+};
+
+export const ActivityIcon: React.FC<IconProps> = ({ width, height, color }: IconProps) => {
+    return (
+        <svg width={width} height={height} viewBox="0 0 24 24">
+            <path
+                d="M5.79335761,5 L18.2066424,5 C19.7805584,5 21.0868816,6.21634264 21.1990185,7.78625885 L21.8575059,17.0050826 C21.9307825,18.0309548 21.1585512,18.9219909 20.132679,18.9952675 C20.088523,18.9984215 20.0442685,19 20,19 C18.8245863,19 17.8000084,18.2000338 17.5149287,17.059715 L17,15 L7,15 L6.48507125,17.059715 C6.19999155,18.2000338 5.1754137,19 4,19 C2.97151413,19 2.13776159,18.1662475 2.13776159,17.1377616 C2.13776159,17.0934931 2.1393401,17.0492386 2.1424941,17.0050826 L2.80098151,7.78625885 C2.91311838,6.21634264 4.21944161,5 5.79335761,5 Z M14.5,10 C15.3284271,10 16,9.32842712 16,8.5 C16,7.67157288 15.3284271,7 14.5,7 C13.6715729,7 13,7.67157288 13,8.5 C13,9.32842712 13.6715729,10 14.5,10 Z M18.5,13 C19.3284271,13 20,12.3284271 20,11.5 C20,10.6715729 19.3284271,10 18.5,10 C17.6715729,10 17,10.6715729 17,11.5 C17,12.3284271 17.6715729,13 18.5,13 Z M6,9 L4,9 L4,11 L6,11 L6,13 L8,13 L8,11 L10,11 L10,9 L8,9 L8,7 L6,7 L6,9 Z"
+                fill={color || "currentColor"}
+            />
+        </svg>
+    );
+};
 
 export const MobileIcon: React.FC<IconProps> = ({ width, height, color }) => {
     return <svg width={width} height={height} viewBox="0 0 1000 1500">
