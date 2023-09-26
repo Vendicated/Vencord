@@ -140,3 +140,12 @@ export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
         method: "POST",
     }).then(r => r.json());
 }
+
+export function readNotification(id: number) {
+    return fetch(API_URL + `/api/reviewdb/notifications?id=${id}`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": settings.store.token || "",
+        },
+    });
+}
