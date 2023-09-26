@@ -24,10 +24,8 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
-
-const MANAGE_EMOJIS_AND_STICKERS = 1n << 30n;
 
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS(");
@@ -120,7 +118,7 @@ function getGuildCandidates(data: Data) {
 
     return Object.values(GuildStore.getGuilds()).filter(g => {
         const canCreate = g.ownerId === meId ||
-            BigInt(PermissionStore.getGuildPermissions({ id: g.id }) & MANAGE_EMOJIS_AND_STICKERS) === MANAGE_EMOJIS_AND_STICKERS;
+            (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
 
         if (data.t === "Sticker") return true;

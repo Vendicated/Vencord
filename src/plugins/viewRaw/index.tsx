@@ -119,7 +119,7 @@ const settings = definePluginSettings({
 
 function MakeContextCallback(name: string) {
     const callback: NavContextMenuPatchCallback = (children, props) => () => {
-        if (name === "Guild" && !props.guild) return;
+        if ((name === "Guild" && !props.guild) || (name === "User" && !props.user)) return;
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
             const p = lastChild.props;

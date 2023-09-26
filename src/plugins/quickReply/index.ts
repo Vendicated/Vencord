@@ -20,7 +20,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const Kangaroo = findByPropsLazy("jumpToMessage");
@@ -172,6 +172,8 @@ function shouldMention(message) {
 
 // handle next/prev reply
 function nextReply(isUp: boolean) {
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, true);
 
     if (!message)
@@ -179,7 +181,6 @@ function nextReply(isUp: boolean) {
             type: "DELETE_PENDING_REPLY",
             channelId: SelectedChannelStore.getChannelId(),
         });
-
     const channel = ChannelStore.getChannel(message.channel_id);
     const meId = UserStore.getCurrentUser().id;
 
@@ -196,21 +197,21 @@ function nextReply(isUp: boolean) {
 
 // handle next/prev edit
 function nextEdit(isUp: boolean) {
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, false);
 
     if (!message)
-        Dispatcher.dispatch({
+        return Dispatcher.dispatch({
             type: "MESSAGE_END_EDIT",
             channelId: SelectedChannelStore.getChannelId()
         });
-    else {
-        Dispatcher.dispatch({
-            type: "MESSAGE_START_EDIT",
-            channelId: message.channel_id,
-            messageId: message.id,
-            content: message.content,
-            _isQuickEdit: true
-        });
-        jumpIfOffScreen(message.channel_id, message.id);
-    }
+    Dispatcher.dispatch({
+        type: "MESSAGE_START_EDIT",
+        channelId: message.channel_id,
+        messageId: message.id,
+        content: message.content,
+        _isQuickEdit: true
+    });
+    jumpIfOffScreen(message.channel_id, message.id);
 }

@@ -21,18 +21,17 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionStore, UserStore } from "@webpack/common";
+import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
 
-const MANAGE_CHANNELS = 1n << 4n;
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
         type: OptionType.BOOLEAN,
-        description: "Enable delete on click",
+        description: "Enable delete on click while holding backspace",
         default: true
     },
     enableDoubleClickToEdit: {
@@ -72,6 +71,7 @@ export default definePlugin({
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
+                if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
 
                 if (isMe) {
                     if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
@@ -89,7 +89,7 @@ export default definePlugin({
                         showMentionToggle: channel.guild_id !== null
                     });
                 }
-            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(MANAGE_CHANNELS, channel))) {
+            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
                 if (msg.deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
