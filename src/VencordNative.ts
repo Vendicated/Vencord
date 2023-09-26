@@ -23,7 +23,8 @@ export default {
         deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
         getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
         getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
-        getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName)
+        getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
+        getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
     },
 
     updater: {
@@ -48,7 +49,7 @@ export default {
         },
 
         addThemeChangeListener(cb: () => void) {
-            ipcRenderer.on(IpcEvents.THEME_UPDATE, cb);
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
         },
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
