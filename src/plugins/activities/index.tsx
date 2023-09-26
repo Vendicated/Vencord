@@ -46,6 +46,7 @@ export default definePlugin({
     name: "Activities",
     description: "A combination of the ActivityIcons and ShowAllActivities BD plugins.",
     authors: [Devs.Arjix, Devs.AutumnVN],
+    tags: ["ActivityIcons", "ShowAllActivities"],
     settings,
 
     patches: [
