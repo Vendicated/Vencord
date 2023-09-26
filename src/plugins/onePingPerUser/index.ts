@@ -16,7 +16,7 @@ enum ChannelType {
 
 export default definePlugin({
     name: "OnePingPerUser",
-    description: "Limits the ping audio notification from playing more than once per user until messages are marked as read to prevent audio spam and hearing multiple notifications as a cue that more than one user may have messaged you",
+    description: "If unread messages are sent by a user in DMs multiple times, you'll only receive one audio ping",
     authors: [Devs.ProffDea],
     patches: [{
         find: ".getDesktopType()===",
