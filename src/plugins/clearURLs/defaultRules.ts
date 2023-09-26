@@ -127,6 +127,9 @@ export const defaultRules = [
     "redircnt@yandex.*",
     "feature@youtube.com",
     "kw@youtube.com",
+    "si@youtube.com",
+    "pp@youtube.com",
+    "si@youtu.be",
     "wt_zmc",
     "utm_source",
     "utm_content",
@@ -135,4 +138,5 @@ export const defaultRules = [
     "utm_term",
     "si@open.spotify.com",
     "igshid",
+    "share_id@reddit.com",
 ];

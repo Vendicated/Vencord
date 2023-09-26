@@ -19,13 +19,16 @@
 
 import esbuild from "esbuild";
 
-import { commonOpts, globPlugins, isStandalone, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone,
     IS_DEV: JSON.stringify(watch),
+    IS_UPDATER_DISABLED: updaterDisabled,
+    IS_WEB: false,
+    IS_EXTENSION: false,
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP: Date.now(),
+    BUILD_TIMESTAMP,
 };
 if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimise
@@ -76,7 +79,6 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_WEB: false,
             IS_DISCORD_DESKTOP: true,
             IS_VESKTOP: false
         }
@@ -122,7 +124,6 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_WEB: false,
             IS_DISCORD_DESKTOP: false,
             IS_VESKTOP: true
         }
