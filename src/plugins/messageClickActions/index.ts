@@ -71,7 +71,7 @@ export default definePlugin({
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
-                if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+                if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
 
                 if (isMe) {
                     if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;

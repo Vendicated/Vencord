@@ -172,7 +172,8 @@ function shouldMention(message) {
 
 // handle next/prev reply
 function nextReply(isUp: boolean) {
-    if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, ChannelStore.getChannel(SelectedChannelStore.getChannelId()))) return;
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, true);
 
     if (!message)
@@ -196,7 +197,8 @@ function nextReply(isUp: boolean) {
 
 // handle next/prev edit
 function nextEdit(isUp: boolean) {
-    if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, ChannelStore.getChannel(SelectedChannelStore.getChannelId()))) return;
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, false);
 
     if (!message)

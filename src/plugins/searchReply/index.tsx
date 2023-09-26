@@ -32,7 +32,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
     const channel = ChannelStore.getChannel(message?.channel_id);
     if (!channel) return;
-    if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+    if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
 
     // dms and group chats
     const dmGroup = findGroupChildrenByChildId("pin", children);
