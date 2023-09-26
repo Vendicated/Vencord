@@ -22,7 +22,7 @@ export default definePlugin({
         find: ".getDesktopType()===",
         replacement: [{
             match: /if\((\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\){/,
-            replace: "if($1&&$self.isPrivateChannelRead(arguments[0]?.message)){"
+            replace: "if($1){if(!$self.isPrivateChannelRead(arguments[0]?.message))return;"
         },
         {
             match: /sound:(\i\?\i:void 0,volume:\i,onClick:)/,
