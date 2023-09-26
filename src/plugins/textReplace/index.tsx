@@ -28,6 +28,7 @@ import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
+const PLUGIN_NAME = "TextReplace";
 
 type Rule = Record<"find" | "replace" | "onlyIfIncludes", string>;
 
@@ -36,6 +37,11 @@ interface TextReplaceProps {
     rulesArray: Rule[];
     rulesKey: string;
     update: () => void;
+}
+
+interface AllRules {
+    TextReplace_rulesString: Rule[];
+    TextReplace_rulesRegex: Rule[];
 }
 
 const makeEmptyRule: () => Rule = () => ({
@@ -69,6 +75,7 @@ const settings = definePluginSettings({
                         update={update}
                     />
                     <TextReplaceTesting />
+                    <TextReplaceImportExport update={update} />
                 </>
             );
         }
@@ -209,6 +216,56 @@ function TextReplaceTesting() {
     );
 }
 
+function TextReplaceImportExport({ update }) {
+    async function onClickImport() {
+        stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY];
+        regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY];
+
+        DataStore.set(STRING_RULES_KEY, stringRules).then(() => {
+            DataStore.set(REGEX_RULES_KEY, regexRules).then(() => {
+                update();
+            });
+        });
+        alert("Import executed!");
+    }
+
+    async function onClickExport() {
+        if (stringRules || regexRules) {
+            const RULES: AllRules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
+            Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
+            // Vencord.Settings.plugins.textReplace.rules = data;
+            // const exportFile = writeFile(join(SETTINGS_DIR, "textReplace_export.json"), data, "utf-8");
+            alert("Export executed!");
+        } else {
+            alert("No rules available for export!");
+        }
+    }
+
+    return (
+        <>
+            <Forms.FormTitle tag="h4">Import/Export Rules</Forms.FormTitle>
+            <Flex flexDirection="row" style={{ gap: 0 }}>
+                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        onClick={() => onClickImport()}
+                        style={{}}
+                    >
+                        Import
+                    </Button>
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        onClick={() => onClickExport()}
+                        style={{}}
+                    >
+                        Export
+                    </Button>
+                </Flex>
+            </Flex>
+        </>
+    );
+}
+
 function applyRules(content: string): string {
     if (content.length === 0)
         return content;
@@ -249,6 +306,7 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     settings,
+    rules: {},
 
     async start() {
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
