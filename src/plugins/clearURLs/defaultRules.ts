@@ -139,4 +139,7 @@ export const defaultRules = [
     "si@open.spotify.com",
     "igshid",
     "share_id@reddit.com",
+    "ex@*.discordapp.*",
+    "is@*.discordapp.*",
+    "hm@*.discordapp.*",
 ];
