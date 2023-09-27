@@ -25,20 +25,45 @@ import { LazyComponent } from "@utils/react";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, PermissionStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
+import { PropsWithChildren, SVGProps } from "react";
 
 import { settings } from "..";
 
 const CONNECT = 1n << 20n;
 
+interface BaseIconProps extends SVGProps<SVGSVGElement> {
+    viewBox?: string;
+    className?: string;
+    height?: string | number;
+    width?: string | number;
+}
+
+function SvgIcon({ height = 24, width = 24, className, path, children, viewBox="0 0 24 24", ...svgProps }: PropsWithChildren<BaseIconProps>) {
+    return (
+        <svg
+            className={VoiceActivityClassFactory(className, "vc-icon")}
+            width={width}
+            height={height}
+            viewBox={viewBox}
+            {...svgProps}
+        >
+            <path fill="currentColor" d={path}></path>
+        </svg>
+    );
+}
+
+
 const Icons = {
-    CallJoin: findByCodeLazy("M11 5V3C16.515 3 21 7.486"),
-    People: findByCodeLazy("M14 8.00598C14 10.211 12.206 12.006"),
-    Speaker: findByCodeLazy("M11.383 3.07904C11.009 2.92504 10.579 3.01004"),
-    Muted: findByCodeLazy("M6.7 11H5C5 12.19 5.34 13.3"),
-    Deafened: findByCodeLazy("M6.16204 15.0065C6.10859 15.0022 6.05455 15"),
-    Video: findByCodeLazy("M21.526 8.149C21.231 7.966 20.862 7.951"),
-    Stage: findByCodeLazy("M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5"),
+    CallJoin: "M11 5V3C16.515 3 21 7.486 21 13H19C19 8.589 15.411 5 11 5ZM17 13H15C15 10.795 13.206 9 11 9V7C14.309 7 17 9.691 17 13ZM11 11V13H13C13 11.896 12.105 11 11 11ZM14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16Z", // M11 5V3C16.515 3 21 7.486
+    People: ("M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z"), // M14 8.00598C14 10.211 12.206 12.006
+    Speaker: ("M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6 8.00204H3C2.45 8.00204 2 8.45304 2 9.00204V15.002C2 15.552 2.45 16.002 3 16.002H6L10.293 20.71C10.579 20.996 11.009 21.082 11.383 20.927C11.757 20.772 12 20.407 12 20.002V4.00204C12 3.59904 11.757 3.23204 11.383 3.07904ZM14 5.00195V7.00195C16.757 7.00195 19 9.24595 19 12.002C19 14.759 16.757 17.002 14 17.002V19.002C17.86 19.002 21 15.863 21 12.002C21 8.14295 17.86 5.00195 14 5.00195ZM14 9.00195C15.654 9.00195 17 10.349 17 12.002C17 13.657 15.654 15.002 14 15.002V13.002C14.551 13.002 15 12.553 15 12.002C15 11.451 14.551 11.002 14 11.002V9.00195Z"), // M11.383 3.07904C11.009 2.92504 10.579 3.01004
+    Muted: ("M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z"), // M6.7 11H5C5 12.19 5.34 13.3
+    Deafened: ("M6.16204 15.0065C6.10859 15.0022 6.05455 15 6 15H4V12C4 7.588 7.589 4 12 4C13.4809 4 14.8691 4.40439 16.0599 5.10859L17.5102 3.65835C15.9292 2.61064 14.0346 2 12 2C6.486 2 2 6.485 2 12V19.1685L6.16204 15.0065Z"), // M6.16204 15.0065C6.10859 15.0022 6.05455 15
+    Video: ("M21.526 8.149C21.231 7.966 20.862 7.951 20.553 8.105L18 9.382V7C18 5.897 17.103 5 16 5H4C2.897 5 2 5.897 2 7V17C2 18.104 2.897 19 4 19H16C17.103 19 18 18.104 18 17V14.618L20.553 15.894C20.694 15.965 20.847 16 21 16C21.183 16 21.365 15.949 21.526 15.851C21.82 15.668 22 15.347 22 15V9C22 8.653 21.82 8.332 21.526 8.149Z"), // M21.526 8.149C21.231 7.966 20.862 7.951
+    Stage: ("M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5 17.8 9.94 16.5 12 16.5C14.06 16.5 15.5 17.8 15.5 19.5V20H8.5ZM7 13C7 10.24 9.24 8 12 8C14.76 8 17 10.24 17 13C17 13.91 16.74 14.75 16.31 15.49L17.62 16.25C18.17 15.29 18.5 14.19 18.5 13C18.5 9.42 15.58 6.5 12 6.5C8.42 6.5 5.5 9.42 5.5 13C5.5 14.18 5.82 15.29 6.38 16.25L7.69 15.49C7.26 14.75 7 13.91 7 13ZM2.5 13C2.5 7.75 6.75 3.5 12 3.5C17.25 3.5 21.5 7.75 21.5 13C21.5 14.73 21.03 16.35 20.22 17.75L21.51 18.5C22.45 16.88 23 15 23 13C23 6.93 18.07 2 12 2C5.93 2 1 6.93 1 13C1 15 1.55 16.88 2.48 18.49L3.77 17.74C2.97 16.35 2.5 14.73 2.5 13Z"), // M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5
 };
+
+
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const transitionTo: (path: string) => null = findByCodeLazy("transitionTo -");
@@ -97,7 +122,7 @@ export default ({ user }: VoiceActivityIconProps) => {
     let channelPath: string;
     let text: string;
     let subtext: string;
-    let TooltipIcon: React.FunctionComponent<{ width: string; height: string; className: string; }>;
+    let TooltipIcon: string;
     let className = cl("icon");
     let voiceChannelUsers: User[] | undefined;
 
@@ -145,7 +170,7 @@ export default ({ user }: VoiceActivityIconProps) => {
             TooltipIcon = Icons.Stage;
     }
 
-    let Icon = Icons.Speaker;
+    let Icon: string = Icons.Speaker;
     if ((voiceState.selfDeaf || voiceState.deaf)) Icon = Icons.Deafened;
     else if ((voiceState.selfMute || voiceState.mute)) Icon = Icons.Muted;
     else if (voiceState.selfVideo) Icon = Icons.Video;
@@ -168,7 +193,7 @@ export default ({ user }: VoiceActivityIconProps) => {
                     <div className={cl("subtext")}>
                         <div style={{ fontWeight: "400" }}>{subtext}</div>
                         {voiceChannelUsers && <div style={{ width: "fit-content", marginTop: 6, display: "flex", alignItems: "center" }}>
-                            <TooltipIcon className={cl("tooltipIcon")} width="18" height="18" />
+                            <SvgIcon className={cl("tooltipIcon")} width="18" height="18" path={TooltipIcon}></SvgIcon>
                             <UserSummaryItem
                                 users={voiceChannelUsers}
                                 guildId={guild.id}
@@ -182,7 +207,7 @@ export default ({ user }: VoiceActivityIconProps) => {
                 </div>
             }>
 
-                {tooltipProps => !voiceState.selfStream ? <Icon {...tooltipProps} width="14" height="14" /> : <div {...tooltipProps}>Live</div>}
+                {tooltipProps => !voiceState.selfStream ? <SvgIcon {...tooltipProps} width="14" height="14" path={Icon}/> : <div {...tooltipProps}>Live</div>}
             </Tooltip>
         </div>
     );
