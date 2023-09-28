@@ -43,7 +43,7 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
-        p("botTag")
+        p("botTag", "botTagRegular")
     );
 
     const dateFormat = new Intl.DateTimeFormat();

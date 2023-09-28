@@ -20,5 +20,5 @@ import { findByPropsLazy } from "@webpack";
 
 import * as t from "./types/classes";
 
-export const ModalImageClasses: t.ImageModalClasses = findByPropsLazy("image", "modal");
+export const ModalImageClasses: t.ImageModalClasses = findByPropsLazy("image", "modal", "responsiveWidthMobile");
 export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");
