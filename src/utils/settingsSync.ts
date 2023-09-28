@@ -23,6 +23,7 @@ import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
+import { relaunch } from "./native";
 import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
@@ -229,7 +230,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch(),
+                onClick: IS_WEB ? () => location.reload() : relaunch,
                 noPersist: true
             });
 
