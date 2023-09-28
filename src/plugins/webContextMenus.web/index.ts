@@ -218,10 +218,19 @@ export default definePlugin({
     },
 
     async paste() {
-        const text = await navigator.clipboard.readText();
+        const clip = (await navigator.clipboard.read())[0];
+        if (!clip) return;
 
         const data = new DataTransfer();
-        data.setData("text/plain", text);
+        for (const type of clip.types) {
+            if (type === "image/png") {
+                const file = new File([await clip.getType(type)], "unknown.png", { type });
+                data.items.add(file);
+            } else if (type === "text/plain") {
+                const blob = await clip.getType(type);
+                data.setData(type, await blob.text());
+            }
+        }
 
         document.dispatchEvent(
             new ClipboardEvent("paste", {
