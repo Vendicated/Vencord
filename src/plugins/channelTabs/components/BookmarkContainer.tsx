@@ -17,7 +17,7 @@
 */
 
 import { closeModal, openModal } from "@utils/modal.jsx";
-import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -207,6 +207,7 @@ function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBook
 export default function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { guildId, channelId, userId } = props;
     const [bookmarks, methods] = useBookmarks(userId);
+    const ref = useRef<HTMLDivElement>(null);
 
     let isCurrentChannelBookmarked = false, currentChannelFolderIndex = -1;
     bookmarks?.forEach((bookmark, i) => {
@@ -218,6 +219,13 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         }
         else if (bookmark.channelId === channelId) isCurrentChannelBookmarked = true;
     });
+
+    useEffect(() => {
+        ref.current!.addEventListener("wheel", e => {
+            e.preventDefault();
+            ref.current!.scrollLeft += e.deltaY;
+        });
+    }, []);
 
     return <div className={cl("inner-container")}>
         <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
@@ -239,17 +247,19 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                 foreground={isCurrentChannelBookmarked ? cl("bookmark-star-checked") : cl("bookmark-star")}
             />
         </button>
-        {bookmarks
-            ? bookmarks.length
-                ? bookmarks.map((_, i) =>
-                    <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
-                )
+        <div className={cl("scroller")} ref={ref}>
+            {bookmarks
+                ? bookmarks.length
+                    ? bookmarks.map((_, i) =>
+                        <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
+                    )
+                    : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
+                        You have no bookmarks. You can add an open tab or hide this by right clicking it
+                    </Text>
                 : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                    You have no bookmarks. You can add an open tab or hide this by right clicking it
+                    Loading bookmarks...
                 </Text>
-            : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                Loading bookmarks...
-            </Text>
-        }
+            }
+        </div>
     </div>;
 }
