@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 import { ChannelStore, ReadStateStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-enum ChannelType {
+const enum ChannelType {
     DM = 1,
     GROUP_DM = 3
 }
