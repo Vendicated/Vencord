@@ -39,7 +39,7 @@ interface TextReplaceProps {
     update: () => void;
 }
 
-interface AllRules {
+interface Rules {
     TextReplace_rulesString: Rule[];
     TextReplace_rulesRegex: Rule[];
 }
@@ -55,32 +55,33 @@ let stringRules = makeEmptyRuleArray();
 let regexRules = makeEmptyRuleArray();
 
 const settings = definePluginSettings({
-    replace: {
+    rules: {
         type: OptionType.COMPONENT,
-        description: "",
-        component: () => {
-            const update = useForceUpdater();
-            return (
-                <>
-                    <TextReplace
-                        title="Using String"
-                        rulesArray={stringRules}
-                        rulesKey={STRING_RULES_KEY}
-                        update={update}
-                    />
-                    <TextReplace
-                        title="Using Regex"
-                        rulesArray={regexRules}
-                        rulesKey={REGEX_RULES_KEY}
-                        update={update}
-                    />
-                    <TextReplaceTesting />
-                    <TextReplaceImportExport update={update} />
-                </>
-            );
-        }
-    },
+        description: "Allows the user to define two different kinds of rule sets (string based and regex based).",
+        component: RulesComponent
+    }
 });
+
+function RulesComponent() {
+    const update = useForceUpdater();
+    return (
+        <>
+            <TextReplace
+                title="Using String"
+                rulesArray={stringRules}
+                rulesKey={STRING_RULES_KEY}
+                update={update}
+            />
+            <TextReplace
+                title="Using Regex"
+                rulesArray={regexRules}
+                rulesKey={REGEX_RULES_KEY}
+                update={update}
+            />
+            <TextReplaceTesting />
+        </>
+    );
+}
 
 function stringToRegex(str: string) {
     const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
@@ -147,6 +148,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
             rulesArray.splice(index, 1);
 
         await DataStore.set(rulesKey, rulesArray);
+        await exportRulesToJson();
         update();
     }
 
@@ -216,54 +218,25 @@ function TextReplaceTesting() {
     );
 }
 
-function TextReplaceImportExport({ update }) {
-    async function onClickImport() {
-        stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY];
-        regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY];
+async function importRulesFromJson() {
+    stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY];
+    regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY];
 
-        DataStore.set(STRING_RULES_KEY, stringRules).then(() => {
-            DataStore.set(REGEX_RULES_KEY, regexRules).then(() => {
-                update();
-            });
+    DataStore.set(STRING_RULES_KEY, stringRules).then(() => {
+        DataStore.set(REGEX_RULES_KEY, regexRules).then(() => {
+            console.log("[Vencord Plugin TextReplace] Settings import executed!");
         });
-        alert("Import executed!");
-    }
+    });
+}
 
-    async function onClickExport() {
-        if (stringRules || regexRules) {
-            const RULES: AllRules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
-            Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
-            // Vencord.Settings.plugins.textReplace.rules = data;
-            // const exportFile = writeFile(join(SETTINGS_DIR, "textReplace_export.json"), data, "utf-8");
-            alert("Export executed!");
-        } else {
-            alert("No rules available for export!");
-        }
+async function exportRulesToJson() {
+    if (stringRules || regexRules) {
+        const RULES: Rules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
+        Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
+        console.log("[Vencord Plugin TextReplace] Settings export executed!");
+    } else {
+        console.log("[Vencord Plugin TextReplace] No rules available for export!");
     }
-
-    return (
-        <>
-            <Forms.FormTitle tag="h4">Import/Export Rules</Forms.FormTitle>
-            <Flex flexDirection="row" style={{ gap: 0 }}>
-                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        onClick={() => onClickImport()}
-                        style={{}}
-                    >
-                        Import
-                    </Button>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        onClick={() => onClickExport()}
-                        style={{}}
-                    >
-                        Export
-                    </Button>
-                </Flex>
-            </Flex>
-        </>
-    );
 }
 
 function applyRules(content: string): string {
@@ -306,9 +279,9 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     settings,
-    rules: {},
 
     async start() {
+        importRulesFromJson();
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
         regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
 
