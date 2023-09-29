@@ -32,7 +32,7 @@ export default definePlugin({
     isPrivateChannelRead(message: Message) {
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
         if (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) {
-            return undefined;
+            return false;
         }
         return ReadStateStore.getOldestUnreadMessageId(message.channel_id) === message.id;
     },
