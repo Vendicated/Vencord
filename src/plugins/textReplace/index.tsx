@@ -136,6 +136,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         rulesArray.splice(index, 1);
 
         await DataStore.set(rulesKey, rulesArray);
+        exportRulesToJson();
         update();
     }
 
@@ -272,7 +273,7 @@ const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
+    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server. If you want your rule changes to get imported from the settings.json, you need to reload Discord (CTRL + R).",
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
     dependencies: ["MessageEventsAPI"],
 
@@ -282,6 +283,10 @@ export default definePlugin({
         importRulesFromJson();
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
         regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
+        if (!("rules" in Vencord.Settings.plugins[PLUGIN_NAME])) {
+            // If the "rules" key doesn't exist in the settings.json yet, create it at startup so users can directly start defining their rules in the settings.json using a blank template.
+            exportRulesToJson();
+        }
 
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
