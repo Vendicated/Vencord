@@ -4,8 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    lockout: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: 'Bypass the permission lockout prevention ("Pretty sure you don\'t want to do this")',
+        restartNeeded: true
+    },
+    onboarding: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: 'Bypass the onboarding requirements ("Making this change will make your server incompatible [...]")',
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "PermissionFreeWill",
@@ -21,7 +37,8 @@ export default definePlugin({
                     match: /"Unexpected boolean action".{5,20}allow.{5,20}.{80,100}if\(/,
                     replace: "$&true||"
                 }
-            ]
+            ],
+            predicate: () => settings.store.lockout
         },
         // Onboarding, same thing but we need to prevent the check
         {
@@ -31,7 +48,9 @@ export default definePlugin({
                     match: /case 1:if\((?=!\i\.sent)/,
                     replace: "$&false&&"
                 }
-            ]
+            ],
+            predicate: () => settings.store.onboarding
         }
-    ]
+    ],
+    settings
 });
