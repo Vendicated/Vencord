@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
@@ -135,8 +134,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         if (index === rulesArray.length - 1) return;
         rulesArray.splice(index, 1);
 
-        await DataStore.set(rulesKey, rulesArray);
-        exportRulesToJson();
+        saveRulesInSettingsJson();
         update();
     }
 
@@ -149,8 +147,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1)
             rulesArray.splice(index, 1);
 
-        await DataStore.set(rulesKey, rulesArray);
-        await exportRulesToJson();
+        saveRulesInSettingsJson();
         update();
     }
 
@@ -217,25 +214,20 @@ function TextReplaceTesting() {
     );
 }
 
-async function importRulesFromJson() {
-    stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY];
-    regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY];
-
-    DataStore.set(STRING_RULES_KEY, stringRules).then(() => {
-        DataStore.set(REGEX_RULES_KEY, regexRules).then(() => {
-            console.log("[Vencord Plugin TextReplace] Settings import executed!");
-        });
-    });
+function getRulesFromSettingsJson() {
+    stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY] ?? makeEmptyRuleArray();
+    regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY] ?? makeEmptyRuleArray();
+    if (stringRules[stringRules.length - 1].find !== "") {
+        stringRules.push(makeEmptyRule());
+    }
+    if (regexRules[regexRules.length - 1].find !== "") {
+        regexRules.push(makeEmptyRule());
+    }
 }
 
-async function exportRulesToJson() {
-    if (stringRules || regexRules) {
-        const RULES: Rules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
-        Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
-        console.log("[Vencord Plugin TextReplace] Settings export executed!");
-    } else {
-        console.log("[Vencord Plugin TextReplace] No rules available for export!");
-    }
+function saveRulesInSettingsJson() {
+    const RULES: Rules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
+    Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
 }
 
 function applyRules(content: string): string {
@@ -280,12 +272,10 @@ export default definePlugin({
     settings,
 
     async start() {
-        importRulesFromJson();
-        stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
-        regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
+        getRulesFromSettingsJson();
         if (!("rules" in Vencord.Settings.plugins[PLUGIN_NAME])) {
             // If the "rules" key doesn't exist in the settings.json yet, create it at startup so users can directly start defining their rules in the settings.json using a blank template.
-            exportRulesToJson();
+            saveRulesInSettingsJson();
         }
 
         this.preSend = addPreSendListener((channelId, msg) => {
