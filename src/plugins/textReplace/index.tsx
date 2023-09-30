@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
@@ -28,7 +29,6 @@ import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
-const PLUGIN_NAME = "TextReplace";
 
 type Rule = Record<"find" | "replace" | "onlyIfIncludes", string>;
 
@@ -215,8 +215,8 @@ function TextReplaceTesting() {
 }
 
 function getRulesFromSettingsJson() {
-    stringRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[STRING_RULES_KEY] ?? makeEmptyRuleArray();
-    regexRules = Vencord.Settings.plugins[PLUGIN_NAME].rules[REGEX_RULES_KEY] ?? makeEmptyRuleArray();
+    stringRules = settings.store.rules[STRING_RULES_KEY] ?? makeEmptyRuleArray();
+    regexRules = settings.store.rules[REGEX_RULES_KEY] ?? makeEmptyRuleArray();
     if (stringRules[stringRules.length - 1].find !== "") {
         stringRules.push(makeEmptyRule());
     }
@@ -227,7 +227,7 @@ function getRulesFromSettingsJson() {
 
 function saveRulesInSettingsJson() {
     const RULES: Rules = { TextReplace_rulesString: stringRules, TextReplace_rulesRegex: regexRules };
-    Vencord.Settings.plugins[PLUGIN_NAME].rules = RULES;
+    settings.store.rules = RULES;
 }
 
 function applyRules(content: string): string {
@@ -272,11 +272,14 @@ export default definePlugin({
     settings,
 
     async start() {
-        getRulesFromSettingsJson();
-        if (!("rules" in Vencord.Settings.plugins[PLUGIN_NAME])) {
-            // If the "rules" key doesn't exist in the settings.json yet, create it at startup so users can directly start defining their rules in the settings.json using a blank template.
+        // Try to migrate data from earlier version of TextReplace where rules were stored in DataStore.
+        if (!("rules" in settings.store)) {
+            stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
+            regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
             saveRulesInSettingsJson();
         }
+
+        getRulesFromSettingsJson();
 
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
