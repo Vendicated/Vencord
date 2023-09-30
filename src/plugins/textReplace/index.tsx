@@ -266,7 +266,7 @@ const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 export default definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server. If you want your rule changes to get imported from the settings.json, you need to reload Discord (CTRL + R).",
-    authors: [Devs.AutumnVN, Devs.TheKodeToad],
+    authors: [Devs.AutumnVN, Devs.TheKodeToad, Devs.hendrik3812],
     dependencies: ["MessageEventsAPI"],
 
     settings,
