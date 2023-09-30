@@ -227,33 +227,6 @@ function handleChannelSwitch(ch: BasicChannelTabsProps) {
     if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
 }
 
-function handleKeybinds(e: KeyboardEvent) {
-    if (e.key === "Tab" && e.ctrlKey) {
-        const currentIndex = openTabs.findIndex(c => c.id === currentlyOpenTab);
-        const direction = e.shiftKey ? -1 : 1;
-        const maybeNewTab = currentIndex + direction;
-
-        const newTab = maybeNewTab < 0
-            ? openTabs.length + direction
-            : maybeNewTab > openTabs.length - 1
-                ? maybeNewTab - openTabs.length
-                : maybeNewTab;
-        if (!openTabs[newTab]) return logger.error("Cannot move to nonexistent tab with index " + newTab, openTabs);
-
-        moveToTab(openTabs[newTab].id);
-    }
-    // Ctrl+T is taken by discord
-    else if (["N", "n"].includes(e.key) && e.ctrlKey) {
-        createTab(openTabs.find(t => t.id === currentlyOpenTab)!);
-    }
-    else if (["W", "w"].includes(e.key) && e.ctrlKey) {
-        closeTab(currentlyOpenTab);
-    }
-    else if (["T", "t"].includes(e.key) && e.ctrlKey && e.shiftKey) {
-        reopenClosedTab();
-    }
-}
-
 function isTabSelected(id: number) {
     return id === currentlyOpenTab;
 }
@@ -453,6 +426,6 @@ function useBookmarks(userId: string): UseBookmark {
 
 export const ChannelTabsUtils = {
     bookmarkPlaceholderName, closeOtherTabs, closeTab, closedTabs, closeTabsToTheRight, createTab,
-    handleChannelSwitch, handleKeybinds, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
+    handleChannelSwitch, isTabSelected, moveDraggedTabs, moveToTab, openTabHistory, openTabs,
     openStartupTabs, reopenClosedTab, saveTabs, setUpdaterFunction, switchChannel, toggleCompactTab, useBookmarks
 };

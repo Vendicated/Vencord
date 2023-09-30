@@ -17,7 +17,7 @@
 */
 
 import { closeModal, openModal } from "@utils/modal.jsx";
-import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -228,25 +228,27 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
     }, []);
 
     return <div className={cl("inner-container")}>
-        <button className={cl("button")} onClick={() => isCurrentChannelBookmarked
-            ? currentChannelFolderIndex === -1
-                ? methods.deleteBookmark(
-                    bookmarks!.findIndex(b => !("bookmarks" in b) && b.channelId === channelId)
-                )
-                : methods.deleteBookmark(
-                    (bookmarks![currentChannelFolderIndex] as BookmarkFolder).bookmarks
-                        .findIndex(b => b.channelId === channelId),
-                    currentChannelFolderIndex
-                )
-            : methods.addBookmark({
-                guildId,
-                channelId
-            })}
-        >
-            <Star
-                foreground={isCurrentChannelBookmarked ? cl("bookmark-star-checked") : cl("bookmark-star")}
-            />
-        </button>
+        <Tooltip text={isCurrentChannelBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"} position="right" >
+            {p => <button className={cl("button")} {...p} onClick={() => isCurrentChannelBookmarked
+                ? currentChannelFolderIndex === -1
+                    ? methods.deleteBookmark(
+                        bookmarks!.findIndex(b => !("bookmarks" in b) && b.channelId === channelId)
+                    )
+                    : methods.deleteBookmark(
+                        (bookmarks![currentChannelFolderIndex] as BookmarkFolder).bookmarks
+                            .findIndex(b => b.channelId === channelId),
+                        currentChannelFolderIndex
+                    )
+                : methods.addBookmark({
+                    guildId,
+                    channelId
+                })}
+            >
+                <Star
+                    foreground={isCurrentChannelBookmarked ? cl("bookmark-star-checked") : cl("bookmark-star")}
+                />
+            </button>}
+        </Tooltip>
         <div className={cl("scroller")} ref={ref}>
             {bookmarks
                 ? bookmarks.length
