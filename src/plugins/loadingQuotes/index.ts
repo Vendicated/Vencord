@@ -62,7 +62,7 @@ const quotes = [
 
 export default definePlugin({
     name: "LoadingQuotes",
-    description: "Replace Discords loading quotes",
+    description: "Replace Discord's loading quotes",
     authors: [Devs.Ven, Devs.KraXen72],
     patches: [
         {
