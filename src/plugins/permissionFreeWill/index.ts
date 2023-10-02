@@ -45,7 +45,7 @@ export default definePlugin({
             find: "Messages.ONBOARDING_CHANNEL_THRESHOLD_WARNING",
             replacement: [
                 {
-                    match: /case 1:if\((?=!\i\.sent)/,
+                    match: /case 1:if\((?=!\i\.sent.{20,30}Messages\.CANNOT_CHANGE_CHANNEL_PERMS)/,
                     replace: "$&false&&"
                 }
             ],
