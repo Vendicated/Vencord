@@ -32,7 +32,7 @@ const enum ChannelTypes {
 }
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
-const useEmojiBackgroundColor: (emoji: string, channelId: string) => string = findByCodeLazy("themeColor:null==");
+const useChannelEmoji: (channel: Channel) => { emoji, color; } = findByCodeLazy('"user_channel_emoji_overrides"),');
 
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 const FriendsIcon = () => <svg
@@ -101,38 +101,20 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
         </div> : null;
 };
 
-function ChannelEmoji({ channel }: {
-    channel: Channel & {
-        // see comments in ChannelTabContent
-        iconEmoji: {
-            id?: string,
-            name: string;
-        },
-        themeColor?: number;
-    };
-}) {
-    const backgroundColor = useEmojiBackgroundColor(channel.iconEmoji.name, channel.id);
+function ChannelEmoji({ channel }: { channel: Channel; }) {
+    const { emoji, color } = useChannelEmoji(channel);
 
-    return <div className={classes("channelEmoji-soSnippetsHideIt", cl("emoji-container"))} style={{ backgroundColor }}>
-        {channel.iconEmoji.id
-            ? <img src={`https://${window.GLOBAL_ENV.CDN_HOST}/emojis/${channel.iconEmoji.id}.png`} className={cl("emoji")} />
-            : <Emoji emojiName={channel.iconEmoji.name} className={cl("emoji")} />
+    return <div className={cl("emoji-container")} style={{ backgroundColor: color }}>
+        {emoji.id
+            ? <img src={emoji.url} className={cl("emoji")} />
+            : <Emoji emojiName={emoji.name} className={cl("emoji")} />
         }
     </div>;
 }
 
-function ChannelTabContent(props: ChannelTabsProps &
-{
+function ChannelTabContent(props: ChannelTabsProps & {
     guild?: Guild,
-    channel?: Channel & {
-        iconEmoji?: {
-            id?: string,
-            name: string; // unicode emoji if it's not a custom one
-        },
-        // background color for channel emoji, undefined if it's from an auto generated emoji
-        // and not explicitly set
-        themeColor?: number;
-    };
+    channel?: Channel;
 }) {
     const { guild, guildId, channel, channelId, compact } = props;
     const userId = UserStore.getCurrentUser()?.id;
