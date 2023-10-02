@@ -63,6 +63,10 @@
     margin-bottom: 8px;
 }
 
+.vc-rdb-review .avatar-2e8lTP {
+    z-index: 0;
+}
+
 .vc-rdb-review-comment img {
     vertical-align: text-top;
 }
