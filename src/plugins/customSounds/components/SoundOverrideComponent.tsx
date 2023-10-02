@@ -45,16 +45,6 @@ export function SoundOverrideComponent({ type, override }: { type: SoundType; ov
                 className={Margins.bottom16}
                 disabled={!override.enabled}
             />
-            <Button
-                color={Button.Colors.PRIMARY}
-                className={Margins.bottom16}
-                size={Button.Sizes.MEDIUM}
-                onClick={() => {
-                }}
-                disabled={!override.enabled}
-            >
-                Preview
-            </Button>
             <Forms.FormTitle>Volume</Forms.FormTitle>
             <Slider
                 markers={makeRange(0, 100, 10)}

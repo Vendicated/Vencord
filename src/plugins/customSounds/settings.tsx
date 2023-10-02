@@ -7,8 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import { SoundOverride, soundTypes } from "./types";
 import { SoundOverrideComponent } from "./components/SoundOverrideComponent";
+import { SoundOverride, soundTypes } from "./types";
 
 export const settings = definePluginSettings({
     overrides: {
