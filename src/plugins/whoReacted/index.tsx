@@ -95,8 +95,8 @@ export default definePlugin({
     patches: [{
         find: ",reactionRef:",
         replacement: {
-            match: /(?<=(\i)=(\i)\.hideCount,)(.+?reactionCount.+?\}\))/,
-            replace: (_, hideCount, props, rest) => `whoReactedProps=${props},${rest},${hideCount}?null:$self.renderUsers(whoReactedProps)`
+            match: /(?<=(?<hideCount>\i)=(?<props>\i)\.hideCount,)(?<rest>.+?reactionCount.+?\}\))/,
+            replace: "whoReactedProps=$<props>,$<rest>,$<hideCount>?null:$self.renderUsers(whoReactedProps)"
         }
     }, {
         find: ".displayName=\"MessageReactionsStore\";",
