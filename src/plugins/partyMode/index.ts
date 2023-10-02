@@ -19,10 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { GenericStore } from "@webpack/common";
-
-const PoggerModeSettingsStore: GenericStore = findStoreLazy("PoggermodeSettingsStore");
+import { FluxDispatcher } from "@webpack/common";
 
 const enum Intensity {
     Normal,
@@ -61,9 +58,12 @@ export default definePlugin({
 });
 
 function setPoggerState(state: boolean) {
-    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, {
-        enabled: state,
-        settingsVisible: state
+    FluxDispatcher.dispatch({
+        type: "POGGERMODE_SETTINGS_UPDATE",
+        settings: {
+            enabled: state,
+            settingsVisible: state
+        }
     });
 }
 
@@ -101,5 +101,8 @@ function setSettings(intensity: Intensity) {
         }
     }
 
-    Object.assign(PoggerModeSettingsStore.__getLocalVars().state, state);
+    FluxDispatcher.dispatch({
+        type: "POGGERMODE_SETTINGS_UPDATE",
+        settings: state
+    });
 }
