@@ -34,7 +34,7 @@ export default definePlugin({
             find: "Messages.SELF_DENY_PERMISSION_BODY",
             replacement: [
                 {
-                    match: /case "DENY":.{0,50}if\(\i\.\i\.can/,
+                    match: /case"DENY":.{0,50}if\((?=\i\.\i\.can)/,
                     replace: "$&true||"
                 }
             ],
