@@ -112,7 +112,12 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
                 }}
                 onContextMenu={e => ContextMenu.open(e, () => <TabContextMenu tab={tab} />)}
             >
-                <ChannelTab {...tab} index={i} onClick={() => moveToTab(tab.id)} />
+                <button
+                    className={classes(cl("button"), cl("channel-info"))}
+                    onClick={() => moveToTab(tab.id)}
+                >
+                    <ChannelTab {...tab} index={i} />
+                </button>
 
                 {openTabs.length > 1 && (tab.compact || isTabSelected(tab.id)) && <button
                     className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}

@@ -90,7 +90,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
             data-has-mention={!!mentionCount}
             className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
-                backgroundColor: mentionCount ? "var(--status-danger) !important" : "var(--brand-experiment) !important",
+                backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
                 width: getDotWidth(mentionCount || unreadCount)
             }}
         >
@@ -207,7 +207,7 @@ function ChannelTabContent(props: ChannelTabsProps & {
     </>;
 }
 
-export default function ChannelTab(props: ChannelTabsProps & { index: number, onClick: () => any; }) {
+export default function ChannelTab(props: ChannelTabsProps & { index: number; }) {
     const { channelId, guildId, id, index } = props;
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
@@ -250,7 +250,6 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number, on
     const tab = <div
         ref={ref}
         className={cl("tab-inner")}
-        onClick={props.onClick}
         data-compact={props.compact}
     >
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
