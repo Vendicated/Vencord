@@ -24,13 +24,14 @@ import { LazyComponent, useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByCode, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
-import { ReactionEmoji, User } from "discord-types/general";
+import { CustomEmoji } from "@webpack/types";
+import { Message, ReactionEmoji, User } from "discord-types/general";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
 const queue = new Queue();
-let reactions: Record<string, any>;
+let reactions: Record<string, ReactionCacheEntry>;
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -89,17 +90,17 @@ function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
 
 export default definePlugin({
     name: "WhoReacted",
-    description: "Renders the Avatars of reactors",
+    description: "Renders the avatars of users who reacted to a message",
     authors: [Devs.Ven, Devs.KannaDev],
 
     patches: [{
         find: ",reactionRef:",
         replacement: {
-            match: /(?<=(?<hideCount>\i)=(?<props>\i)\.hideCount,)(?<rest>.+?reactionCount.+?\}\))/,
-            replace: "whoReactedProps=$<props>,$<rest>,$<hideCount>?null:$self.renderUsers(whoReactedProps)"
+            match: /(?<=(\i)=(\i)\.hideCount,)(.+?reactionCount.+?\}\))/,
+            replace: (_, hideCount, props, rest) => `whoReactedProps=${props},${rest},${hideCount}?null:$self.renderUsers(whoReactedProps)`
         }
     }, {
-        find: ".displayName=\"MessageReactionsStore\";",
+        find: '.displayName="MessageReactionsStore";',
         replacement: {
             match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
             replace: "$&;$self.reactions=$1"
@@ -160,103 +161,18 @@ export default definePlugin({
     }
 });
 
-
-export interface GuildMemberAvatar { }
-
-export interface Author {
-    id: string;
-    username: string;
-    discriminator: string;
-    avatar: string;
-    avatarDecoration?: any;
-    email: string;
-    verified: boolean;
-    bot: boolean;
-    system: boolean;
-    mfaEnabled: boolean;
-    mobile: boolean;
-    desktop: boolean;
-    premiumType: number;
-    flags: number;
-    publicFlags: number;
-    purchasedFlags: number;
-    premiumUsageFlags: number;
-    phone: string;
-    nsfwAllowed: boolean;
-    guildMemberAvatars: GuildMemberAvatar;
+interface ReactionCacheEntry {
+    fetched: boolean;
+    users: Record<string, User>;
 }
 
-export interface Emoji {
-    id: string;
-    name: string;
-}
-
-export interface Reaction {
-    emoji: Emoji;
-    count: number;
-    burst_user_ids: any[];
-    burst_count: number;
-    burst_colors: any[];
-    burst_me: boolean;
-    me: boolean;
-}
-
-export interface Message {
-    id: string;
-    type: number;
-    channel_id: string;
-    author: Author;
-    content: string;
-    deleted: boolean;
-    editHistory: any[];
-    attachments: any[];
-    embeds: any[];
-    mentions: any[];
-    mentionRoles: any[];
-    mentionChannels: any[];
-    mentioned: boolean;
-    pinned: boolean;
-    mentionEveryone: boolean;
-    tts: boolean;
-    codedLinks: any[];
-    giftCodes: any[];
-    timestamp: string;
-    editedTimestamp?: any;
-    state: string;
-    nonce?: any;
-    blocked: boolean;
-    call?: any;
-    bot: boolean;
-    webhookId?: any;
-    reactions: Reaction[];
-    applicationId?: any;
-    application?: any;
-    activity?: any;
-    messageReference?: any;
-    flags: number;
-    isSearchHit: boolean;
-    stickers: any[];
-    stickerItems: any[];
-    components: any[];
-    loggingName?: any;
-    interaction?: any;
-    interactionData?: any;
-    interactionError?: any;
-}
-
-export interface Emoji {
-    id: string;
-    name: string;
-    animated: boolean;
-}
-
-export interface RootObject {
+interface RootObject {
     message: Message;
     readOnly: boolean;
     isLurking: boolean;
     isPendingMember: boolean;
     useChatFontScaling: boolean;
-    emoji: Emoji;
+    emoji: CustomEmoji;
     count: number;
     burst_user_ids: any[];
     burst_count: number;
