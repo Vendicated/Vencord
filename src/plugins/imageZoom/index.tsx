@@ -165,7 +165,7 @@ export default definePlugin({
         {
             find: '"renderLinkComponent","maxWidth"',
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
+                match: /(return\(.{1,100}\(\)\.wrapper.{1,200})(src)/,
                 replace: `$1id: '${ELEMENT_ID}',$2`
             }
         },
