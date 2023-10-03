@@ -4,104 +4,97 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
+import "./components/styles.css";
 
-import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
+import { openModal } from "@utils/modal";
+import { Button, TextInput, useState } from "@webpack/common";
+import { DEFAULT_SOUNDS, EmojiSound, classFactory, settings } from ".";
+import { EmojiModal, EmojiModalMode } from "./components/EmojiModal";
+import { NoEmojiSounds } from "./components/NoEmojiSounds";
 import { LazyComponent } from "@utils/react";
-import { find, findByPropsLazy } from "@webpack";
-import { Button, Menu, Switch, TextInput, useState } from "@webpack/common";
+import { find } from "@webpack";
+import { CogWheel, DeleteIcon } from "@components/Icons";
 
-
-type EmojiSound = {
-    emoji: string;
-    sound: string;
-    caseSensitive: boolean;
-};
 
 interface EmojiSoundboardEntryProps {
     index: number;
     entry: EmojiSound;
-    onChange(index: number, emojiSound: EmojiSound): void;
 }
 
-const cl = classNameFactory("vc-es-");
+const InputComponent = LazyComponent(() => find(m => m?.id?.includes("delete")));
+
+const openEmojiModal = (mode: EmojiModalMode, onsubmit: (emoji: string, soundUrl: string, caseSensitive: boolean) => void) => (
+    openModal(modalProps => (
+        <EmojiModal
+            {...modalProps}
+            mode={mode}
+            onSubmit={onsubmit}
+        />
+    ))
+);
 
 function EmojiSoundboardEntry(props: EmojiSoundboardEntryProps) {
     const {
         entry: { emoji, sound, caseSensitive },
         index,
-        onChange
     } = props;
-    return (
-        <Flex flexDirection="column">
-            <Flex className={cl("emoji-entry")}>
-                <TextInput
-                    type="text"
-                    value={emoji}
-                    placeholder="Emoji"
-                    onChange={v => onChange(index, { emoji: v, sound, caseSensitive })}
-                    style={{ flex: 1 }}
-                />
-                <TextInput
-                    type="text"
-                    value={sound}
-                    placeholder="Sound"
-                    onChange={v => onChange(index, { emoji, sound: v, caseSensitive })}
-                    style={{ flex: 1 }}
-                />
-            </Flex>
-            <Flex>
-                <Switch
-                    value={caseSensitive}
-                    onChange={v => onChange(index, { emoji, sound, caseSensitive: v })}
-                    hideBorder
-                >
-                    Case Sensitive
-                </Switch>
-                {/* <Button */}
 
+    return (
+        <Flex flexDirection="row" className={classFactory("fields-row")}>
+            <TextInput
+                type="text"
+                value={emoji}
+                placeholder="Emoji"
+            />
+            <TextInput
+                type="text"
+                value={sound}
+                placeholder="Sound"
+            />
+            <Flex flexDirection="row">
+                <Button
+                    onClick={() => openEmojiModal("edit", (emoji, sound, cs) => {
+
+                    })}
+                >
+                    <CogWheel width={16} height={16} />
+                </Button>
+                <Button
+                    color={Button.Colors.RED}
+                >
+                    <DeleteIcon width={16} height={16} />
+                </Button>
             </Flex>
-            <Menu.MenuSeparator />
         </Flex>
+
     );
 }
 
-const EMPTY_SOUND = { emoji: "", sound: "", caseSensitive: false };
-
-const DEFAULT_SOUNDS: EmojiSound[] = [
-    // {
-    //     emoji: "skull",
-    //     sound: "ooga",
-    //     caseSensitive: false
-    // }
-    EMPTY_SOUND
-];
-
 export function EmojiSoundboardSettings() {
-    const [sounds, setSounds] = useState<EmojiSound[]>(DEFAULT_SOUNDS);
-
-    const updateSounds = (i: number, sound: EmojiSound) => {
-        const newSounds = [...sounds];
-        newSounds[i] = sound;
-        setSounds(newSounds);
-    };
+    console.log(settings.store.emojiSounds);
+    const [sounds] = useState<EmojiSound[]>(settings.store.emojiSounds ?? DEFAULT_SOUNDS);
 
     return (
         <Flex flexDirection="column">
+            {sounds.length > 0
+                ? sounds.map((sound, i) => (
+                    <EmojiSoundboardEntry
+                        key={i}
+                        index={i}
+                        entry={sound}
+
+                    />
+                ))
+                : <NoEmojiSounds />
+            }
             <Button
-                onClick={() => setSounds([...sounds, { ...EMPTY_SOUND }])}
+                onClick={() => openEmojiModal("create", (emoji, sound, caseSensitive) => {
+                    settings.store.emojiSounds.push({ emoji, sound, caseSensitive });
+                })}
             >
-                Add Emoji Sound
+                Create New Sound Trigger
             </Button>
-            {sounds.map((sound, i) => (
-                <EmojiSoundboardEntry
-                    key={i}
-                    index={i}
-                    entry={sound}
-                    onChange={updateSounds}
-                />
-            ))}
         </Flex>
     );
 }

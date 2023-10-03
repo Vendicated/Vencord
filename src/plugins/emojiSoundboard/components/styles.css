@@ -1,0 +1,20 @@
+.vc-fields-row {
+    display: flex;
+}
+
+.vc-es-emoji-picker {
+    margin: 10px 0;
+    background-color: var(--input-background);
+    border: 1px solid var(--deprecated-text-input-border);
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.vc-es-emoji-picker>div {
+    padding-right: 8px;
+    overflow: hidden;
+}
+
+.vc-es-modal-footer {
+    column-gap: 10px;
+}

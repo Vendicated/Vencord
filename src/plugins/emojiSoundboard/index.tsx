@@ -8,8 +8,20 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { EmojiSoundboardSettings } from "./EmojiSoundboardSettings";
+import { classNameFactory } from "@api/Styles";
 
-const settings = definePluginSettings({
+export type EmojiSound = {
+    emoji: string;
+    sound: string;
+    caseSensitive: boolean;
+};
+
+export const EMPTY_SOUND = { emoji: "", sound: "", caseSensitive: false };
+export const DEFAULT_SOUNDS: EmojiSound[] = [EMPTY_SOUND];
+
+export const classFactory = classNameFactory("vc-es-");
+
+export const settings = definePluginSettings({
     emojiSounds: {
         type: OptionType.COMPONENT,
         component: EmojiSoundboardSettings,
@@ -29,6 +41,12 @@ export default definePlugin({
     patches: [],
     settings,
     // Delete these two below if you are only using code patches
-    start() { },
+    start() {
+        if (settings.store.emojiSounds) {
+            console.log(settings.store.emojiSounds);
+            return;
+        }
+        settings.store.emojiSounds = DEFAULT_SOUNDS;
+    },
     stop() { },
 });
