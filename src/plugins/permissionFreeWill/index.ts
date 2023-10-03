@@ -50,6 +50,17 @@ export default definePlugin({
                 }
             ],
             predicate: () => settings.store.onboarding
+        },
+        // Onboarding deletion
+        {
+            find: "Messages.DELETE_DEFAULT_CHANNEL_BODY",
+            replacement: [
+                {
+                    match: /if\((?=null!=\i.{5,20}Messages.DELETE_DEFAULT_CHANNEL_BODY)/,
+                    replace: "$&false&&"
+                }
+            ],
+            predicate: () => settings.store.onboarding
         }
     ],
     settings
