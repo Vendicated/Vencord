@@ -119,7 +119,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
                     <ChannelTab {...tab} index={i} />
                 </button>
 
-                {openTabs.length > 1 && (tab.compact || isTabSelected(tab.id)) && <button
+                {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
                     className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
                     onClick={() => closeTab(tab.id)}
                 >
