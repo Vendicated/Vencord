@@ -135,7 +135,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         </div >
         {showBookmarkBar && <>
             <div className={cl("separator")} />
-            <BookmarkContainer {...props} />
+            <BookmarkContainer {...props} userId={userId} />
         </>}
     </div>;
 }

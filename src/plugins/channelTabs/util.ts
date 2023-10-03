@@ -352,13 +352,18 @@ function useBookmarks(userId: string): UseBookmark {
             ...old,
             [userId]: bookmarks[userId]
         }));
-    }, []);
+    }, [userId]);
 
     useAwaiter(() => DataStore.get("ChannelTabs_bookmarks"), {
         fallbackValue: undefined,
         onSuccess(bookmarks: { [k: string]: Bookmarks; }) {
-            if (!bookmarks) DataStore.set("ChannelTabs_bookmarks", { [userId]: [] });
-            setBookmarks(bookmarks || { [userId]: [] });
+            if (!bookmarks) {
+                bookmarks = { [userId]: [] };
+                DataStore.set("ChannelTabs_bookmarks", { [userId]: [] });
+            }
+            if (!bookmarks[userId]) bookmarks[userId] = [];
+
+            setBookmarks(bookmarks);
         },
     });
 
