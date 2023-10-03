@@ -28,7 +28,7 @@ import { Channel, Message } from "discord-types/general/index.js";
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
 import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util";
 
-const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
     () => {
         if (!props) return;
         const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
@@ -43,25 +43,6 @@ const channelMentionContextMenuPatch: NavContextMenuPatchCallback = (children, p
                         guildId: channel.guild_id,
                         channelId: channel.id
                     }, true, messageId)}
-                />
-            );
-    };
-
-const channelContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
-    () => {
-        if (!props) return;
-        const { channel }: { channel: Channel; } = props;
-        const group = findGroupChildrenByChildId("channel-copy-link", children);
-        if (group)
-            group.push(
-                <Menu.MenuItem
-                    label="Open in New Tab"
-                    id="open-link-in-tab"
-                    key="open-link-in-tab"
-                    action={() => ChannelTabsUtils.createTab({
-                        guildId: channel.guild_id,
-                        channelId: channel.id
-                    }, true)}
                 />
             );
     };
@@ -117,20 +98,20 @@ export default definePlugin({
     settings: channelTabsSettings,
 
     start() {
-        addContextMenuPatch("channel-mention-context", channelMentionContextMenuPatch);
-        addContextMenuPatch("channel-context", channelContextMenuPatch);
+        addContextMenuPatch("channel-mention-context", contextMenuPatch);
+        addContextMenuPatch("channel-context", contextMenuPatch);
     },
 
     stop() {
-        removeContextMenuPatch("channel-mention-context", channelContextMenuPatch);
-        removeContextMenuPatch("channel-context", channelContextMenuPatch);
+        removeContextMenuPatch("channel-mention-context", contextMenuPatch);
+        removeContextMenuPatch("channel-context", contextMenuPatch);
     },
 
     containerHeight: 0,
 
     render({ currentChannel, children }: {
         currentChannel: BasicChannelTabsProps,
-        children: JSX.Element; // original children passed by discord
+        children: JSX.Element;
     }) {
         const id = UserStore.getCurrentUser()?.id;
         return <>

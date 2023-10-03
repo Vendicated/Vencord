@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getUniqueUsername } from "@utils/discord.jsx";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react.jsx";
 import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -26,10 +27,6 @@ import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } f
 
 const { moveDraggedTabs } = ChannelTabsUtils;
 
-const enum ChannelTypes {
-    DM = 1,
-    GROUP_DM = 3
-}
 const getDotWidth = findByCodeLazy("<10?16:");
 const dotStyles = findByPropsLazy("numberBadge");
 const useChannelEmoji: (channel: Channel) => { emoji, color; } = findByCodeLazy('"user_channel_emoji_overrides"),');
@@ -93,7 +90,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
             data-has-mention={!!mentionCount}
             className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
-                backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
+                backgroundColor: mentionCount ? "var(--status-danger) !important" : "var(--brand-experiment) !important",
                 width: getDotWidth(mentionCount || unreadCount)
             }}
         >
@@ -103,6 +100,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
 
 function ChannelEmoji({ channel }: { channel: Channel; }) {
     const { emoji, color } = useChannelEmoji(channel);
+    if (!emoji?.name) return null;
 
     return <div className={cl("emoji-container")} style={{ backgroundColor: color }}>
         {emoji.id
@@ -131,18 +129,14 @@ function ChannelTabContent(props: ChannelTabsProps & {
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
             PresenceStore.getStatus(recipients?.[0]) as string,
             PresenceStore.isMobileOnline(recipients?.[0]) as boolean
-        ],
-        null,
-        // is this necessary?
-        (o, n) => o.every((v, i) => v === n[i])
+        ]
     );
 
     if (guild) {
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
-                {/* @ts-ignore */}
-                {!compact && showChannelEmojis && channel?.iconEmoji && <ChannelEmoji channel={channel} />}
+                {!compact && showChannelEmojis && <ChannelEmoji channel={channel} />}
                 {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
                 <NotificationDot channelIds={[channel.id]} />
                 <TypingIndicator isTyping={isTyping} />
@@ -171,11 +165,11 @@ function ChannelTabContent(props: ChannelTabsProps & {
     }
 
     if (channel && recipients?.length) {
-        if (channel.type === ChannelTypes.DM) {
+        if (recipients.length === 1) {
             const user = UserStore.getUser(recipients[0]) as User & { globalName: string, isPomelo(): boolean; };
             const username = noPomeloNames
-                ? user.globalName ?? user.username
-                : user.isPomelo() ? user.username : user.tag;
+                ? user.globalName || user.username
+                : getUniqueUsername(user);
 
             return <>
                 <Avatar
@@ -213,7 +207,7 @@ function ChannelTabContent(props: ChannelTabsProps & {
     </>;
 }
 
-export default function ChannelTab(props: ChannelTabsProps & { index: number; }) {
+export default function ChannelTab(props: ChannelTabsProps & { index: number, onClick: () => any; }) {
     const { channelId, guildId, id, index } = props;
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
@@ -253,7 +247,12 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }), []);
     drag(drop(ref));
 
-    const tab = <div className={cl("tab-inner")} data-compact={props.compact} ref={ref}>
+    const tab = <div
+        ref={ref}
+        className={cl("tab-inner")}
+        onClick={props.onClick}
+        data-compact={props.compact}
+    >
         <ChannelTabContent {...props} guild={guild} channel={channel as any} />
     </div>;
     return tab;

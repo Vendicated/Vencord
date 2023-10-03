@@ -60,9 +60,11 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     }, [userId]);
 
     useEffect(() => {
-        // the first render is really early so the user isnt loaded and the id shouldn't exist
-        // so if it's there it means stuff is already ready and the component got destroyed (ex. by app directory)
-        // TODO: see if its possible to do this in a less scuffed way
+        // for some reason, the app directory is it's own page instead of a layer, so when it's opened
+        // everything behind it is destroyed, including our container. when it's closed, this is recreated
+        // since the first render of this is extremely early, it's pretty safe to assume that the user id
+        // will only be present if the component was recreated, not on startup
+        // TODO: maybe find a less scuffed way to do this
         if (props.userId) {
             setReady(true);
             update(false);
@@ -102,22 +104,17 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     >
         <div className={cl("inner-container")}>
             {openTabs.map((tab, i) => <div
-                className={classes(cl("tab"), tab.compact ? cl("tab-compact") : null, isTabSelected(tab.id) ? cl("tab-selected") : null)}
+                className={classes(cl("tab"), tab.compact && cl("tab-compact"), isTabSelected(tab.id) && cl("tab-selected"))}
                 key={i}
                 onAuxClick={e => {
-                    if (e.button === 1 /* middle click */) {
+                    if (e.button === 1 /* middle click */)
                         closeTab(tab.id);
-                    }
                 }}
                 onContextMenu={e => ContextMenu.open(e, () => <TabContextMenu tab={tab} />)}
             >
-                <button
-                    className={classes(cl("button"), cl("channel-info"))}
-                    onClick={() => moveToTab(tab.id)}
-                >
-                    <ChannelTab {...tab} index={i} />
-                </button>
-                {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                <ChannelTab {...tab} index={i} onClick={() => moveToTab(tab.id)} />
+
+                {openTabs.length > 1 && (tab.compact || isTabSelected(tab.id)) && <button
                     className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
                     onClick={() => closeTab(tab.id)}
                 >
@@ -146,6 +143,7 @@ export function ChannelTabsPreview(p) {
 
     const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
     const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = settings.use(["tabSet"]);
+
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
 

@@ -19,7 +19,7 @@
 import { closeModal, openModal } from "@utils/modal.jsx";
 import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, Bookmarks, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import { NotificationDot } from "./ChannelTab";
 import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
@@ -80,7 +80,7 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
     return <QuestionIcon />;
 }
 
-function BookmarkFolderOpenMenu(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+function BookmarkFolderOpenMenu(props: BookmarkProps) {
     const { bookmarks, index, methods } = props;
     const bookmark = bookmarks[index] as BookmarkFolder;
 
@@ -142,7 +142,7 @@ function BookmarkFolderOpenMenu(props: { bookmarks: Bookmarks, index: number, me
     </Menu.Menu>;
 }
 
-function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+function Bookmark(props: BookmarkProps) {
     const { bookmarks, index, methods } = props;
     const bookmark = bookmarks[index];
     const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
@@ -204,10 +204,24 @@ function Bookmark(props: { bookmarks: Bookmarks, index: number, methods: UseBook
     </div>;
 }
 
+function HorizontallyScrolling({ children }: React.PropsWithChildren) {
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        ref.current!.addEventListener("wheel", e => {
+            e.preventDefault();
+            ref.current!.scrollLeft += e.deltaY;
+        });
+    }, []);
+
+    return <div className={cl("scroller")} ref={ref}>
+        {children}
+    </div>;
+}
+
 export default function BookmarkContainer(props: BasicChannelTabsProps & { userId: string; }) {
     const { guildId, channelId, userId } = props;
     const [bookmarks, methods] = useBookmarks(userId);
-    const ref = useRef<HTMLDivElement>(null);
+
 
     let isCurrentChannelBookmarked = false, currentChannelFolderIndex = -1;
     bookmarks?.forEach((bookmark, i) => {
@@ -219,13 +233,6 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         }
         else if (bookmark.channelId === channelId) isCurrentChannelBookmarked = true;
     });
-
-    useEffect(() => {
-        ref.current!.addEventListener("wheel", e => {
-            e.preventDefault();
-            ref.current!.scrollLeft += e.deltaY;
-        });
-    }, []);
 
     return <div className={cl("inner-container")}>
         <Tooltip text={isCurrentChannelBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"} position="right" >
@@ -249,7 +256,8 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                 />
             </button>}
         </Tooltip>
-        <div className={cl("scroller")} ref={ref}>
+
+        <HorizontallyScrolling>
             {bookmarks
                 ? bookmarks.length
                     ? bookmarks.map((_, i) =>
@@ -262,6 +270,6 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                     Loading bookmarks...
                 </Text>
             }
-        </div>
+        </HorizontallyScrolling>
     </div>;
 }
