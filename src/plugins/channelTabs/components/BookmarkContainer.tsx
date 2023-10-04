@@ -17,11 +17,11 @@
 */
 
 import { closeModal, openModal } from "@utils/modal.jsx";
-import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, Menu, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import { NotificationDot } from "./ChannelTab";
-import { BookmarkContextMenu, EditModal } from "./ContextMenus";
+import { BookmarkContextMenu, EditModal, ReadStateUtils } from "./ContextMenus";
 
 const { switchChannel, useBookmarks } = ChannelTabsUtils;
 const cl = (name: string) => `vc-channeltabs-${name}`;
@@ -83,6 +83,7 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
 function BookmarkFolderOpenMenu(props: BookmarkProps) {
     const { bookmarks, index, methods } = props;
     const bookmark = bookmarks[index] as BookmarkFolder;
+    const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
 
     return <Menu.Menu
         navId="bookmark-folder-menu"
@@ -99,45 +100,57 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
             showIconFirst={true}
             action={() => switchChannel(bkm)}
 
-            children={[<Menu.MenuItem
-                key="edit-bookmark"
-                id="edit-bookmark"
-                label="Edit Bookmark"
-                action={() => {
-                    const key = openModal(modalProps =>
-                        <EditModal
-                            modalProps={modalProps}
-                            bookmark={bkm}
-                            onSave={name => {
-                                const newBookmarks = [...bookmark.bookmarks];
-                                newBookmarks[i].name = name;
-                                methods.editBookmark(index, { bookmarks: newBookmarks });
-                                closeModal(key);
-                            }}
-                        />
-                    );
-                }}
-            />,
-            <Menu.MenuItem
-                key="delete-bookmark"
-                id="delete-bookmark"
-                label="Delete Bookmark"
-                action={() => {
-                    methods.deleteBookmark(i, index);
-                }}
-            />,
-            <Menu.MenuItem
-                key="remove-bookmark-from-folder"
-                id="remove-bookmark-from-folder"
-                label="Remove Bookmark from Folder"
-                action={() => {
-                    const newBookmarks = [...bookmark.bookmarks];
-                    newBookmarks.splice(i, 1);
+            children={[
+                (bookmarkNotificationDot && <Menu.MenuGroup>
+                    <Menu.MenuItem
+                        key="mark-as-read"
+                        id="mark-as-read"
+                        label={i18n.Messages.MARK_AS_READ}
+                        disabled={!ReadStateStore.hasUnread(bkm.channelId)}
+                        action={() => ReadStateUtils.markAsRead(ChannelStore.getChannel(bkm.channelId))}
+                    />
+                </Menu.MenuGroup>),
+                <Menu.MenuGroup>
+                    <Menu.MenuItem
+                        key="edit-bookmark"
+                        id="edit-bookmark"
+                        label="Edit Bookmark"
+                        action={() => {
+                            const key = openModal(modalProps =>
+                                <EditModal
+                                    modalProps={modalProps}
+                                    bookmark={bkm}
+                                    onSave={name => {
+                                        const newBookmarks = [...bookmark.bookmarks];
+                                        newBookmarks[i].name = name;
+                                        methods.editBookmark(index, { bookmarks: newBookmarks });
+                                        closeModal(key);
+                                    }}
+                                />
+                            );
+                        }}
+                    />
+                    <Menu.MenuItem
+                        key="delete-bookmark"
+                        id="delete-bookmark"
+                        label="Delete Bookmark"
+                        action={() => {
+                            methods.deleteBookmark(i, index);
+                        }}
+                    />
+                    <Menu.MenuItem
+                        key="remove-bookmark-from-folder"
+                        id="remove-bookmark-from-folder"
+                        label="Remove Bookmark from Folder"
+                        action={() => {
+                            const newBookmarks = [...bookmark.bookmarks];
+                            newBookmarks.splice(i, 1);
 
-                    methods.addBookmark(bkm);
-                    methods.editBookmark(index, { bookmarks: newBookmarks });
-                }}
-            />]}
+                            methods.addBookmark(bkm);
+                            methods.editBookmark(index, { bookmarks: newBookmarks });
+                        }}
+                    />
+                </Menu.MenuGroup>]}
         />)}
     </Menu.Menu>;
 }

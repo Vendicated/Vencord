@@ -26,7 +26,7 @@ import { Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTab
 
 const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab, reopenClosedTab } = ChannelTabsUtils;
 
-const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
+export const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
     markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
 });
 
@@ -156,7 +156,7 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
 }
 
 export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
-    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+    const { showBookmarkBar, bookmarkNotificationDot } = settings.use(["showBookmarkBar", "bookmarkNotificationDot"]);
     const bookmark = bookmarks[index];
     const isFolder = "bookmarks" in bookmark;
 
@@ -165,6 +165,15 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
         aria-label="ChannelTabs Bookmark Context Menu"
     >
+        {bookmarkNotificationDot && !isFolder && <Menu.MenuGroup>
+            <Menu.MenuItem
+                key="mark-as-read"
+                id="mark-as-read"
+                label={i18n.Messages.MARK_AS_READ}
+                disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
+                action={() => ReadStateUtils.markAsRead(ChannelStore.getChannel(bookmark.channelId))}
+            />
+        </Menu.MenuGroup>}
         <Menu.MenuGroup>
             <Menu.MenuItem
                 key="edit-bookmark"
