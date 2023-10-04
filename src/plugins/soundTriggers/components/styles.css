@@ -1,5 +1,5 @@
-.vc-fields-row {
-    display: flex;
+.vc-es-trigger-entry {
+    justify-content: space-between;
 }
 
 .vc-es-emoji-picker {
@@ -17,4 +17,16 @@
 
 .vc-es-modal-footer {
     column-gap: 10px;
+}
+
+.vc-es-modal-body-text-card {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    row-gap: 10px;
+}
+
+.vc-es-modal-body-text-entry {
+    justify-content: space-between;
+    align-items: center;
 }
