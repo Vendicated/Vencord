@@ -126,7 +126,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => () => {
-        if (!props) return children;
+        if (!props || (type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild)) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
@@ -178,12 +178,12 @@ export default definePlugin({
     start() {
         addContextMenuPatch("user-context", this.userContextMenuPatch);
         addContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        addContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        addContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("user-context", this.userContextMenuPatch);
         removeContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        removeContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        removeContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 });

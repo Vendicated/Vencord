@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { ErrorCard } from "@components/ErrorCard";
+import { IsFirefox } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
@@ -110,12 +110,14 @@ function VencordSettings() {
                                 Restart Client
                             </Button>
                         )}
-                        <Button
-                            onClick={() => VencordNative.quickCss.openEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
-                        </Button>
+                        {!IsFirefox && (
+                            <Button
+                                onClick={() => VencordNative.quickCss.openEditor()}
+                                size={Button.Sizes.SMALL}
+                                disabled={settingsDir === "Loading..."}>
+                                Open QuickCSS File
+                            </Button>
+                        )}
                         {!IS_WEB && (
                             <Button
                                 onClick={() => showItemInFolder(settingsDir)}
@@ -258,7 +260,11 @@ function DonateCard({ image }: DonateCardProps) {
                 src={image}
                 alt=""
                 height={128}
-                style={{ marginLeft: "auto", transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : "" }}
+                style={{
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    marginLeft: "auto",
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                }}
             />
         </Card>
     );

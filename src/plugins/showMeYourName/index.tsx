@@ -21,13 +21,14 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "discord-types/general";
+import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
     author: { nick: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
+    userOverride?: User;
 }
 
 const settings = definePluginSettings({
@@ -40,6 +41,11 @@ const settings = definePluginSettings({
             { label: "Username only", value: "user" },
         ],
     },
+    displayNames: {
+        type: OptionType.BOOLEAN,
+        description: "Use display names in place of usernames",
+        default: false
+    },
     inReplies: {
         type: OptionType.BOOLEAN,
         default: false,
@@ -50,7 +56,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.dzshn],
+    authors: [Devs.dzshn, Devs.TheKodeToad],
     patches: [
         {
             find: ".withMentionPrefix",
@@ -62,10 +68,13 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
-        if (message.interaction) return author?.nick;
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            const { username } = message.author;
+            const user = userOverride ?? message.author;
+            let { username } = user;
+            if (settings.store.displayNames)
+                username = (user as any).globalName || username;
+
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
             if (username === nick || isRepliedMessage && !settings.store.inReplies)

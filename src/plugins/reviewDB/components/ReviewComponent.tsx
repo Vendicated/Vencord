@@ -20,7 +20,7 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
@@ -30,12 +30,12 @@ import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame mantika
+    // this is terrible, blame ven
     const p = filters.byProps;
     const [
-        { cozyMessage, buttons, message, groupStart },
+        { cozyMessage, buttons, message, buttonsInner, groupStart },
         { container, isHeader },
-        { avatar, clickable, username, messageContent, wrapper, cozy },
+        { avatar, clickable, username, wrapper, cozy },
         buttonClasses,
         botTag
     ] = findBulk(
@@ -43,7 +43,7 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
-        p("botTag")
+        p("botTag", "botTagRegular")
     );
 
     const dateFormat = new Intl.DateTimeFormat();
@@ -94,7 +94,7 @@ export default LazyComponent(() => {
                     className={classes(avatar, clickable)}
                     onClick={openModal}
                     src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                    style={{ left: "0px" }}
+                    style={{ left: "0px", zIndex: 0 }}
                 />
                 <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
                     <span
@@ -124,17 +124,15 @@ export default LazyComponent(() => {
                         </Timestamp>)
                 }
 
-                <p
-                    className={classes(messageContent)}
-                    style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
-                >
-                    {review.comment}
-                </p>
+                <div className={cl("review-comment")}>
+                    {Parser.parseGuildEventDescription(review.comment)}
+                </div>
+
                 {review.id !== 0 && (
                     <div className={classes(container, isHeader, buttons)} style={{
                         padding: "0px",
                     }}>
-                        <div className={buttonClasses.wrapper} >
+                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                             <ReportButton onClick={reportRev} />
 
                             {canDeleteReview(review, UserStore.getCurrentUser().id) && (

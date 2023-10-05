@@ -1,0 +1,97 @@
+.vc-gp-root {
+    height: 100%;
+    user-select: text;
+}
+
+.vc-gp-banner {
+    width: 100%;
+    cursor: pointer;
+}
+
+.vc-gp-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.5em;
+}
+
+.vc-gp-header img {
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+}
+
+.vc-gp-name-and-description {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.vc-gp-name {
+    margin: 0;
+}
+
+.vc-gp-tab-bar {
+    border-bottom: 2px solid var(--background-modifier-accent);
+    margin: 20px 12px 0;
+    display: flex;
+    gap: 40px;
+    align-items: stretch;
+    flex-direction: row;
+}
+
+.vc-gp-tab {
+    border-bottom: 2px solid transparent;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    height: 39px;
+    line-height: 14px;
+}
+
+.vc-gp-tab-content {
+    margin: 1em;
+}
+
+.vc-gp-tab:where(.vc-gp-selected, :hover, :focus) {
+    border-bottom-color: var(--interactive-active);
+}
+
+.vc-gp-info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1em;
+}
+
+.vc-gp-server-info-pair {
+    color: var(--text-normal);
+}
+
+.vc-gp-server-info-pair [class^="timestamp"] {
+    margin-left: 0;
+}
+
+.vc-gp-owner {
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+}
+
+.vc-gp-owner img {
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.vc-gp-scroller {
+    width: 100%;
+    max-height: 500px;
+}
+
+.vc-gp-scroller [class^="listRow"] {
+    margin: 1px 0;
+}
+
+.vc-gp-scroller [class^="listRow"]:hover {
+    background-color: var(--background-modifier-hover);
+}

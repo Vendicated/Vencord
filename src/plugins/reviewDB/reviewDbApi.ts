@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Review, ReviewDBUser } from "./entities";
 import { settings } from "./settings";
 import { authorize, showToast } from "./utils";
@@ -140,4 +139,13 @@ export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
         body: JSON.stringify({ token }),
         method: "POST",
     }).then(r => r.json());
+}
+
+export function readNotification(id: number) {
+    return fetch(API_URL + `/api/reviewdb/notifications?id=${id}`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": settings.store.token || "",
+        },
+    });
 }
