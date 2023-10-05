@@ -9,6 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, Tooltip } from "@webpack/common";
+import "./styles.css";
 
 const settings = definePluginSettings({
     loop: {
@@ -41,6 +42,7 @@ export default definePlugin({
                 {tooltipProps => (
                     <div
                         {...tooltipProps}
+                        className="vc-pip-button"
                         role="button"
                         style={{
                             cursor: "pointer",
@@ -71,7 +73,7 @@ export default definePlugin({
                     >
                         <svg width="24px" height="24px" viewBox="0 0 24 24">
                             <path
-                                fill="var(--interactive-normal)"
+                                fill="currentColor"
                                 d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"
                             />
                         </svg>
