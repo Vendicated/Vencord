@@ -1,5 +1,16 @@
+.vc-es-trigger-table {
+    gap: 6px;
+}
+
 .vc-es-trigger-entry {
+    border-radius: 3px;
     justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}
+
+.vc-es-trigger-entry:hover {
+    background-color: var(--background-modifier-hover);
 }
 
 .vc-es-emoji-picker {
@@ -29,4 +40,23 @@
 .vc-es-modal-body-text-entry {
     justify-content: space-between;
     align-items: center;
+}
+
+.vc-es-rounded-button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    min-width: auto;
+    min-height: auto;
+    border-radius: 50%;
+}
+
+.vc-es-more-button {
+    background-color: var(--background-secondary);
+    color: var(--header-secondary);
+}
+
+.vc-es-more-button:hover {
+    background-color: var(--background-primary);
+    color: var(--interactive-active);
 }

@@ -9,9 +9,10 @@ import { DeleteIcon } from "@components/Icons";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Button, Card, Forms, Text, TextInput, useState } from "@webpack/common";
 
-import { classFactory, EMPTY_TRIGGER, SoundTrigger } from "..";
-import { EmojiTextInput, formatEmojiTextInput } from "./EmojiTextInput";
-import { NoTriggers } from "./NoTriggers";
+import { classFactory, EMPTY_TRIGGER, settings, SoundTrigger } from "..";
+import { failToast, successToast, triggersAreUnique, validateAndFormatTrigger } from "../util";
+import { EmojiTextInput } from "./EmojiTextInput";
+import { EmptyState } from "./EmptyState";
 
 export type SoundTriggerModalMode = "create" | "edit";
 
@@ -42,15 +43,6 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
     const [trigger, setTrigger] = useState(props.data ?? EMPTY_TRIGGER);
     const [emojiTextInput, setEmojiTextInput] = useState("");
 
-    const handleSubmit = () => {
-        const formatted = formatEmojiTextInput(emojiTextInput);
-        if (formatted === "" || trigger.patterns.includes(formatted)) {
-            return;
-        }
-        setTrigger({ ...trigger, patterns: [...trigger.patterns, formatted] });
-        setEmojiTextInput("");
-    };
-
     return (
         <ModalRoot {...props}>
             <ModalHeader>
@@ -58,25 +50,24 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
             </ModalHeader>
 
             <ModalContent>
-                <Flex flexDirection="row" style={{ alignItems: "center" }}>
-                    <EmojiTextInput
-                        value={emojiTextInput}
-                        onChange={setEmojiTextInput}
-                        onSubmit={() => handleSubmit()} />
-                    <Button onClick={() => handleSubmit()}>
-                        Add
-                    </Button>
-                </Flex>
+                <EmojiTextInput
+                    value={emojiTextInput}
+                    onChange={setEmojiTextInput}
+                    onSubmit={() => {
+                        setTrigger({ ...trigger, patterns: [...trigger.patterns, emojiTextInput] });
+                        setEmojiTextInput("");
+                    }}
+                />
                 {trigger.patterns.length > 0
                     ? (
                         <Card className={classFactory("modal-body-text-card")}>
-                            {trigger.patterns.map(t => (
+                            {trigger.patterns.map((t, i) => (
                                 <Flex flexDirection="row" className={classFactory("modal-body-text-entry")}>
                                     <Text style={{ overflowWrap: "anywhere" }}>{t}</Text>
                                     <Button
                                         color={Button.Colors.RED}
                                         size={Button.Sizes.SMALL}
-                                        onClick={() => setTrigger({ ...trigger, patterns: trigger.patterns.filter(ft => t !== ft) })}
+                                        onClick={() => setTrigger({ ...trigger, patterns: trigger.patterns.filter((_, idx) => i !== idx) })}
                                     >
                                         <DeleteIcon width={16} height={16} />
                                     </Button>
@@ -84,7 +75,7 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                             ))}
                         </Card>
                     )
-                    : <NoTriggers text="No text patterns defined." />}
+                    : <EmptyState text="No text patterns defined." />}
                 <TextInput
                     type="text"
                     style={{ marginTop: "10px", marginBottom: "10px" }}
@@ -96,10 +87,24 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
 
             <ModalFooter className={classFactory("modal-footer")}>
                 <Button
-                    disabled={trigger.patterns.length === 0 || trigger.sound === ""}
+                    disabled={trigger.patterns.length === 0 || trigger.sound.trim() === ""}
                     color={Button.Colors.GREEN}
                     onClick={() => {
+                        const validationResult = validateAndFormatTrigger(trigger);
+                        if (validationResult.error) {
+                            failToast(validationResult.message);
+                            return;
+                        }
+                        if (!triggersAreUnique([...settings.store.soundTriggers, trigger])) {
+                            failToast("Duplicate sound trigger.");
+                            return;
+                        }
                         props.onSubmit(trigger);
+                        successToast(
+                            props.mode === "create"
+                                ? "Created new sound trigger."
+                                : "Sound trigger saved."
+                        );
                         props.onClose();
                     }}>
                     {props.mode === "create" ? "Create" : "Save"}

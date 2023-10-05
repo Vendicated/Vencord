@@ -7,102 +7,69 @@
 import "./styles.css";
 
 import { Flex } from "@components/Flex";
-import { CogWheel, DeleteIcon } from "@components/Icons";
 import { openModal } from "@utils/modal";
-import { Button, Card, Text, useState } from "@webpack/common";
+import { Button, Clipboard, Forms } from "@webpack/common";
 
-import { classFactory, DEFAULT_TRIGGERS, settings, SoundTrigger } from "..";
-import { ConfirmationModal } from "./ConfirmationModal";
-import { NoTriggers } from "./NoTriggers";
+import { classFactory, settings } from "..";
+import { successToast } from "../util";
+import { EmptyState } from "./EmptyState";
+import { ImportModal } from "./ImportModal";
+import { SoundTriggerEntry } from "./SoundTriggerEntry";
 import { openTriggerModal } from "./SoundTriggerModal";
 
-const updateSettings = (newTriggers: SoundTrigger[]) => {
-    settings.store.soundTriggers = newTriggers;
-};
 
-interface SoundTriggerEntryProps {
-    index: number;
-    entry: SoundTrigger;
-    onDelete(index: number): void;
-}
-
-function SoundTriggerEntry(props: SoundTriggerEntryProps) {
-    const {
-        entry: { patterns, sound },
-        index,
-    } = props;
-
+export function SoundTriggerSettings() {
     return (
-        <Card style={{ padding: "10px" }}>
-            <Flex flexDirection="row" className={classFactory("trigger-entry")}>
-                <Flex flexDirection="column" style={{ gap: "6px" }}>
-                    <Text><b>Patterns: </b>{patterns.join(", ")}</Text>
-                    <Text><b>Sound URL: </b>{sound}</Text>
-                </Flex>
+        <Flex flexDirection="column">
+            <Flex flexDirection="row">
+                <Button
+                    style={{ flexGrow: 1 }}
+                    onClick={() => openTriggerModal({
+                        mode: "create",
+                        onSubmit(trigger) {
+                            settings.store.soundTriggers = [...settings.store.soundTriggers, trigger];
+                        }
+                    })}
+                >
+                    New
+                </Button>
                 <Flex flexDirection="row">
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        onClick={() => openTriggerModal({
-                            mode: "edit",
-                            onSubmit(trigger) {
-                                settings.store.soundTriggers[index] = trigger;
-                            },
-                            data: { patterns, sound }
-                        })}
-                    >
-                        <CogWheel width={16} height={16} />
+                    <Button onClick={() => openModal(modalProps => <ImportModal {...modalProps} />)}>
+                        Import
                     </Button>
                     <Button
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.RED}
                         onClick={() => {
-                            openModal(modalProps =>
-                                <ConfirmationModal
-                                    {...modalProps}
-                                    message="Are you sure you want to delete this trigger?"
-                                    onConfirm={() => props.onDelete(index)}
-                                />
-                            );
-                        }}
-                    >
-                        <DeleteIcon width={16} height={16} />
+                            const json = JSON.stringify(settings.store.soundTriggers);
+                            Clipboard.copy(json);
+                            successToast("Sound triggers exported and copied to clipboard.");
+                        }}>
+                        Export
                     </Button>
                 </Flex>
             </Flex>
-        </Card>
-    );
-}
-
-export function SoundTriggerSettings() {
-    const [triggers, setTriggers] = useState<SoundTrigger[]>(settings.store.soundTriggers ?? DEFAULT_TRIGGERS);
-    console.log(settings.store.soundTriggers.length);
-    return (
-        <Flex flexDirection="column">
-            {triggers.length > 0
-                ? triggers.map((sound, i) => (
-                    <SoundTriggerEntry
-                        key={i}
-                        index={i}
-                        entry={sound}
-                        onDelete={i => {
-                            const newTriggers = triggers.filter((_, idx) => idx !== i);
-                            setTriggers(newTriggers);
-                            updateSettings(newTriggers);
-                        }}
-                    />
-                ))
-                : <NoTriggers />
-            }
-            <Button
-                onClick={() => openTriggerModal({
-                    mode: "create",
-                    onSubmit(trigger) {
-                        settings.store.soundTriggers.push(trigger);
-                    }
-                })}
-            >
-                Create Sound Trigger
-            </Button>
+            <Flex flexDirection="column" style={{ gap: "6px" }}>
+                <Flex flexDirection="row" style={{ justifyContent: "space-evenly", alignItems: "center" }}>
+                    <Forms.FormTitle tag="h4">Pattern</Forms.FormTitle>
+                    <Forms.FormTitle tag="h4">Sound</Forms.FormTitle>
+                    <div className={classFactory("rounded-button")} />
+                </Flex>
+                <Forms.FormDivider />
+                {settings.store.soundTriggers.length > 0
+                    ? settings.store.soundTriggers.map((trigger, i) => (
+                        <SoundTriggerEntry
+                            key={i}
+                            index={i}
+                            trigger={trigger}
+                            onDelete={i => {
+                                const newTriggers = settings.store.soundTriggers.filter((_, idx) => idx !== i);
+                                settings.store.soundTriggers = newTriggers;
+                            }}
+                        />
+                    ))
+                    : <EmptyState text="No triggers." />
+                }
+            </Flex>
         </Flex>
+
     );
 }

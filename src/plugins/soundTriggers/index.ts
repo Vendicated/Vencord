@@ -33,7 +33,6 @@ export default definePlugin({
     name: "!SoundTriggers",
     description: "chaos!!!",
     authors: [Devs.battlesqui_d],
-    patches: [],
     settings,
     start() {
         if (settings.store.soundTriggers) {

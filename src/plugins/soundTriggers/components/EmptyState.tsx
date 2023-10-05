@@ -6,14 +6,14 @@
 
 import { Card, Text } from "@webpack/common";
 
-interface NoTriggersProps {
-    text?: string;
+interface EmptyStateProps {
+    text: string;
 }
 
-export function NoTriggers(props: NoTriggersProps) {
+export function EmptyState(props: EmptyStateProps) {
     return (
         <Card style={{ padding: "36px", display: "flex", justifyContent: "center" }}>
-            <Text>{props.text ?? "No triggers."}</Text>
+            <Text>{props.text}</Text>
         </Card>
     );
 }
