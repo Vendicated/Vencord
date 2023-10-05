@@ -120,7 +120,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
                 </button>
 
                 {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
-                    className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : null)}
+                    className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : cl("hoverable"))}
                     onClick={() => closeTab(tab.id)}
                 >
                     <XIcon />
@@ -130,7 +130,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
 
             <button
                 onClick={() => createTab(props, true)}
-                className={classes(cl("button"), cl("new-button"))}
+                className={classes(cl("button"), cl("new-button"), cl("hoverable"))}
             >
                 <PlusIcon />
             </button>

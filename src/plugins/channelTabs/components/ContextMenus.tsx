@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Margins } from "@utils/margins.js";
-import { classes } from "@utils/misc.jsx";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal.jsx";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 

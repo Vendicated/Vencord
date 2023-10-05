@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { closeModal, openModal } from "@utils/modal.jsx";
+import { classes } from "@utils/misc";
+import { closeModal, openModal } from "@utils/modal";
 import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
@@ -199,7 +200,7 @@ function Bookmark(props: BookmarkProps) {
     drag(drop(ref));
 
     return <div
-        className={cl("bookmark")}
+        className={classes(cl("bookmark"), cl("hoverable"))}
         ref={ref}
         onClick={e => "bookmarks" in bookmark
             ? ContextMenu.open(e, () => <BookmarkFolderOpenMenu {...props} />)
@@ -218,7 +219,7 @@ function Bookmark(props: BookmarkProps) {
     </div>;
 }
 
-function HorizontallyScrolling({ children }: React.PropsWithChildren) {
+function HorizontallyScrolling({ children, className }: React.PropsWithChildren<{ className?: string; }>) {
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
         ref.current!.addEventListener("wheel", e => {
@@ -227,7 +228,7 @@ function HorizontallyScrolling({ children }: React.PropsWithChildren) {
         });
     }, []);
 
-    return <div className={cl("scroller")} ref={ref}>
+    return <div className={classes(cl("scroller"), className)} ref={ref}>
         {children}
     </div>;
 }
@@ -249,7 +250,22 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
     });
 
     return <div className={cl("inner-container")}>
-        <Tooltip text={isCurrentChannelBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"} position="right" >
+        <HorizontallyScrolling className={cl("bookmarks-container")}>
+            {bookmarks
+                ? bookmarks.length
+                    ? bookmarks.map((_, i) =>
+                        <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
+                    )
+                    : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
+                        You have no bookmarks. You can add an open tab or hide this by right clicking it
+                    </Text>
+                : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
+                    Loading bookmarks...
+                </Text>
+            }
+        </HorizontallyScrolling>
+
+        <Tooltip text={isCurrentChannelBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"} position="left" >
             {p => <button className={cl("button")} {...p} onClick={() => isCurrentChannelBookmarked
                 ? currentChannelFolderIndex === -1
                     ? methods.deleteBookmark(
@@ -270,20 +286,5 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                 />
             </button>}
         </Tooltip>
-
-        <HorizontallyScrolling>
-            {bookmarks
-                ? bookmarks.length
-                    ? bookmarks.map((_, i) =>
-                        <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
-                    )
-                    : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                        You have no bookmarks. You can add an open tab or hide this by right clicking it
-                    </Text>
-                : <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                    Loading bookmarks...
-                </Text>
-            }
-        </HorizontallyScrolling>
     </div>;
 }

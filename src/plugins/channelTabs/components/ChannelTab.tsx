@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getUniqueUsername } from "@utils/discord.jsx";
+import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { LazyComponent } from "@utils/react.jsx";
+import { LazyComponent } from "@utils/react";
 import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";

@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu, UserStore } from "@webpack/common";
-import { Channel, Message } from "discord-types/general/index.js";
+import { Channel, Message } from "discord-types/general";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
 import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util";
