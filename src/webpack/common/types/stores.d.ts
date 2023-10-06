@@ -172,3 +172,27 @@ export class DraftStore extends FluxStore {
     getThreadDraftWithParentMessageId?(arg: any): any;
     getThreadSettings(channelId: string): any | null;
 }
+
+type PackEmoji = Omit<CustomEmoji, "guildId" | "managed" | "originalName" | "roles"> & { packId: string, type: "PACK_EMOJI"; };
+type Pack = {
+    name: string,
+    id: string,
+    icon: string,
+    author: {
+        id: string,
+        type: number,
+    },
+    emojis: PackEmoji[];
+    emojiById: Record<string, PackEmoji>;
+};
+export class InventoryStore extends FluxStore {
+    countPacksCollected(): number;
+    getHasPackAddedNotification(): boolean;
+    getIsFetching(): boolean;
+    getPackByPackId(packId: string): Pack | undefined;
+    getPackEmojisTTL(): number;
+    getPacksById(): Map<string, Pack>;
+    getPacksForUser(): Pack[];
+    getSortedPackIds(): string[];
+    _isADuplicateGuildPack(guildId: string): boolean;
+}
