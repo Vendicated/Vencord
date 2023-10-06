@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Logger } from "@utils/Logger";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Button, Forms, TextArea, useState } from "@webpack/common";
 
@@ -43,7 +44,7 @@ export function ImportModal(props: ModalProps) {
                         successToast("Sound triggers successfully imported.");
                         props.onClose();
                     } catch (e) {
-                        console.error(e);
+                        new Logger("SoundTriggers").error(e);
                         failToast("Invalid JSON, please try again.");
                     }
                 }}>
@@ -65,7 +66,7 @@ export function ImportModal(props: ModalProps) {
                             successToast("Sound triggers successfully imported.");
                             props.onClose();
                         } catch (e) {
-                            console.error(e);
+                            new Logger("SoundTriggers").error(e);
                             failToast("Invalid JSON, please try again.");
                         }
                     }}

@@ -91,7 +91,7 @@ export function SoundTriggerEntry(props: SoundTriggerEntryProps) {
 
     return (
         // <Card style={{ padding: "10px" }}>
-        <Flex flexDirection="row" className={classFactory("trigger-entry")}>
+        <Flex flexDirection="row" className={classFactory("trigger-entry", "section", "hoverable-section")}>
             <Flex flexDirection="row" style={{ flexGrow: 1 }}>
                 <Text style={{ flex: 1 }}>{trigger.patterns.join(", ")}</Text>
                 <Text style={{ flex: 1 }}>{trigger.sound}</Text>

@@ -37,7 +37,7 @@ export const clearEmojiTextInput = (ref: React.MutableRefObject<any>) => {
 export function EmojiTextInput(props: EmojiTextInputProps) {
     const editorRef = useRef<any>(null);
     return (
-        <Flex flexDirection="row" style={{ alignItems: "center" }}>
+        <Flex flexDirection="row" style={{ alignItems: "center", gap: "10px" }}>
             <InputComponent
                 className={classFactory("emoji-picker")}
                 style={{ margin: "10px" }}
@@ -57,7 +57,7 @@ export function EmojiTextInput(props: EmojiTextInputProps) {
                 }}
                 textValue={props.value}
                 setEditorRef={ref => editorRef.current = ref}
-                placeholder="Pattern"
+                placeholder="Add pattern"
                 onSubmit={async res => {
                     props.onSubmit(res.value);
                     clearEmojiTextInput(editorRef);

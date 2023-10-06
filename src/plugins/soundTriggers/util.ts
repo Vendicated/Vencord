@@ -45,12 +45,13 @@ export const validateAndFormatTrigger = (trigger: SoundTrigger): SoundTriggerVal
         error: false,
         formattedTrigger: {
             patterns: trigger.patterns,
-            sound: formattedSound
+            sound: formattedSound,
+            volume: trigger.volume
         }
     };
 };
 
-const triggersEqual = (triggerOne: SoundTrigger, triggerTwo: SoundTrigger) => {
+export const triggersEqual = (triggerOne: SoundTrigger, triggerTwo: SoundTrigger) => {
     const sortedOne = triggerOne.patterns.toSorted();
     const sortedTwo = triggerTwo.patterns.toSorted();
     const matchingPatterns = sortedOne.every((p, i) => sortedTwo.indexOf(p) === i);
@@ -66,7 +67,7 @@ export const triggersAreUnique = (triggers: SoundTrigger[]) => {
 };
 
 export const getUniqueTriggers = (triggers: SoundTrigger[]) => {
-    return triggers.filter((t, i) => !triggers.find((t1, i1) => i === i1 && triggersEqual(t, t1)));
+    return triggers.filter((t, i) => !triggers.find((t1, i1) => i !== i1 && triggersEqual(t, t1)));
 };
 
 export const failToast = (message: string) => {

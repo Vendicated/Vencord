@@ -14,12 +14,13 @@ import { SoundTriggerSettings } from "./components/SoundTriggerSettings";
 export type SoundTrigger = {
     patterns: string[];
     sound: string;
+    volume: number;
 };
 
-export const EMPTY_TRIGGER: SoundTrigger = { patterns: [], sound: "" };
-export const DEFAULT_TRIGGERS: SoundTrigger[] = [EMPTY_TRIGGER];
+export const EMPTY_TRIGGER: SoundTrigger = { patterns: [], sound: "", volume: 50 };
+export const DEFAULT_SETTINGS = [EMPTY_TRIGGER];
 
-export const classFactory = classNameFactory("vc-es-");
+export const classFactory = classNameFactory("vc-st-");
 
 export const settings = definePluginSettings({
     soundTriggers: {
@@ -38,7 +39,7 @@ export default definePlugin({
         if (settings.store.soundTriggers) {
             return;
         }
-        settings.store.soundTriggers = DEFAULT_TRIGGERS;
+        settings.store.soundTriggers = DEFAULT_SETTINGS;
     },
     stop() { },
 });

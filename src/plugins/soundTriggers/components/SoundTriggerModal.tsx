@@ -7,10 +7,10 @@
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Button, Card, Forms, Text, TextInput, useState } from "@webpack/common";
+import { Button, Card, Forms, Slider, Text, TextInput, useEffect, useState } from "@webpack/common";
 
 import { classFactory, EMPTY_TRIGGER, settings, SoundTrigger } from "..";
-import { failToast, successToast, triggersAreUnique, validateAndFormatTrigger } from "../util";
+import { failToast, successToast, triggersAreUnique, triggersEqual, validateAndFormatTrigger } from "../util";
 import { EmojiTextInput } from "./EmojiTextInput";
 import { EmptyState } from "./EmptyState";
 
@@ -40,8 +40,18 @@ interface SoundTriggerModalProps extends ModalProps {
 }
 
 export function SoundTriggerModal(props: SoundTriggerModalProps) {
-    const [trigger, setTrigger] = useState(props.data ?? EMPTY_TRIGGER);
+    const initialTrigger = props.data ?? EMPTY_TRIGGER;
+    const [trigger, setTrigger] = useState(initialTrigger);
+    const [dirty, setDirty] = useState(false);
     const [emojiTextInput, setEmojiTextInput] = useState("");
+
+    useEffect(() => {
+        const validationResult = validateAndFormatTrigger(trigger);
+        if (validationResult.error) {
+            return;
+        }
+        setDirty(!triggersEqual(initialTrigger, validationResult.formattedTrigger));
+    }, [trigger]);
 
     return (
         <ModalRoot {...props}>
@@ -49,18 +59,21 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                 <Forms.FormTitle tag="h4">{props.mode} Sound Trigger</Forms.FormTitle>
             </ModalHeader>
 
-            <ModalContent>
-                <EmojiTextInput
-                    value={emojiTextInput}
-                    onChange={setEmojiTextInput}
-                    onSubmit={() => {
-                        setTrigger({ ...trigger, patterns: [...trigger.patterns, emojiTextInput] });
-                        setEmojiTextInput("");
-                    }}
-                />
-                {trigger.patterns.length > 0
-                    ? (
-                        <Card className={classFactory("modal-body-text-card")}>
+            <ModalContent className={classFactory("modal-content")}>
+                <Flex flexDirection="column" style={{ gap: "10px" }}>
+                    <div>
+                        <Forms.FormTitle tag="h5">Patterns</Forms.FormTitle>
+                        <EmojiTextInput
+                            value={emojiTextInput}
+                            onChange={setEmojiTextInput}
+                            onSubmit={() => {
+                                setTrigger({ ...trigger, patterns: [...trigger.patterns, emojiTextInput] });
+                                setEmojiTextInput("");
+                            }}
+                        />
+                    </div>
+                    {trigger.patterns.length > 0
+                        ? (<Card className={classFactory("modal-body-text-card")}>
                             {trigger.patterns.map((t, i) => (
                                 <Flex flexDirection="row" className={classFactory("modal-body-text-entry")}>
                                     <Text style={{ overflowWrap: "anywhere" }}>{t}</Text>
@@ -73,16 +86,31 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                                     </Button>
                                 </Flex>
                             ))}
-                        </Card>
-                    )
-                    : <EmptyState text="No text patterns defined." />}
-                <TextInput
-                    type="text"
-                    style={{ marginTop: "10px", marginBottom: "10px" }}
-                    value={trigger.sound}
-                    placeholder="Sound URL"
-                    onChange={v => setTrigger({ ...trigger, sound: v })}
-                />
+                        </Card>)
+                        : <EmptyState text="No text patterns defined." />}
+                    <div>
+                        <Forms.FormTitle tag="h5">Sound URL</Forms.FormTitle>
+                        <TextInput
+                            type="text"
+                            placeholder="Enter URL"
+                            label="URL"
+                            width={"100%"}
+                            value={trigger.sound}
+                            onChange={v => setTrigger({ ...trigger, sound: v })}
+                            style={{ margin: 0 }}
+                        />
+                    </div>
+                    <div>
+                        <Forms.FormTitle tag="h5">Volume</Forms.FormTitle>
+                        <Slider
+                            minValue={0}
+                            maxValue={100}
+                            initialValue={trigger.volume}
+                            onValueChange={v => setTrigger({ ...trigger, volume: v })}
+                        />
+                    </div>
+                </Flex>
+
             </ModalContent>
 
             <ModalFooter className={classFactory("modal-footer")}>
@@ -95,16 +123,18 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                             failToast(validationResult.message);
                             return;
                         }
-                        if (!triggersAreUnique([...settings.store.soundTriggers, trigger])) {
+                        if (dirty && !triggersAreUnique([...settings.store.soundTriggers, trigger])) {
                             failToast("Duplicate sound trigger.");
                             return;
                         }
-                        props.onSubmit(trigger);
+                        props.onSubmit(validationResult.formattedTrigger);
+
                         successToast(
                             props.mode === "create"
                                 ? "Created new sound trigger."
                                 : "Sound trigger saved."
                         );
+
                         props.onClose();
                     }}>
                     {props.mode === "create" ? "Create" : "Save"}
@@ -113,6 +143,6 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                     Cancel
                 </Button>
             </ModalFooter>
-        </ModalRoot>
+        </ModalRoot >
     );
 }

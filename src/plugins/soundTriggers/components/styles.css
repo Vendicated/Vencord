@@ -1,48 +1,56 @@
-.vc-es-trigger-table {
+.vc-st-trigger-table {
     gap: 6px;
 }
 
-.vc-es-trigger-entry {
-    border-radius: 3px;
+.vc-st-trigger-entry {
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
 }
 
-.vc-es-trigger-entry:hover {
+.vc-st-hoverable-section:hover {
     background-color: var(--background-modifier-hover);
 }
 
-.vc-es-emoji-picker {
-    margin: 10px 0;
-    background-color: var(--input-background);
-    border: 1px solid var(--deprecated-text-input-border);
+.vc-st-section {
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.vc-st-emoji-picker {
     border-radius: 3px;
     box-sizing: border-box;
 }
 
-.vc-es-emoji-picker>div {
+.vc-st-emoji-picker>div {
     padding-right: 8px;
     overflow: hidden;
 }
 
-.vc-es-modal-footer {
+.vc-st-modal-content {
+    padding: 10px;
+}
+
+.vc-st-modal-content input {
+    width: 100%;
+}
+
+.vc-st-modal-footer {
     column-gap: 10px;
 }
 
-.vc-es-modal-body-text-card {
+.vc-st-modal-body-text-card {
     display: flex;
     flex-direction: column;
     padding: 10px;
     row-gap: 10px;
 }
 
-.vc-es-modal-body-text-entry {
+.vc-st-modal-body-text-entry {
     justify-content: space-between;
     align-items: center;
 }
 
-.vc-es-rounded-button {
+.vc-st-rounded-button {
     width: 36px;
     height: 36px;
     padding: 0;
@@ -51,12 +59,12 @@
     border-radius: 50%;
 }
 
-.vc-es-more-button {
+.vc-st-more-button {
     background-color: var(--background-secondary);
     color: var(--header-secondary);
 }
 
-.vc-es-more-button:hover {
+.vc-st-more-button:hover {
     background-color: var(--background-primary);
     color: var(--interactive-active);
 }
