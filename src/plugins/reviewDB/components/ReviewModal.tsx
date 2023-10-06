@@ -21,8 +21,8 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, Mo
 import { useForceUpdater } from "@utils/react";
 import { Paginator, Text, useRef, useState } from "@webpack/common";
 
+import { Auth } from "../auth";
 import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
-import { settings } from "../settings";
 import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
@@ -35,7 +35,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
     const ref = useRef<HTMLDivElement>(null);
 
     const reviewCount = data?.reviewCount;
-    const ownReview = data?.reviews.find(r => r.sender.discordID === settings.store.user?.discordID);
+    const ownReview = data?.reviews.find(r => r.sender.discordID === Auth.user?.discordID);
 
     return (
         <ErrorBoundary>
@@ -68,6 +68,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             <ReviewComponent
                                 refetch={refetch}
                                 review={ownReview}
+                                profileId={discordId}
                             />
                         )}
                         <ReviewsInputComponent

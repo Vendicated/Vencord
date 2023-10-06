@@ -20,8 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
-import { ReviewDBUser } from "./entities";
-import { authorize } from "./utils";
+import { authorize, getToken } from "./auth";
 
 export const settings = definePluginSettings({
     authorize: {
@@ -57,10 +56,11 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "ReviewDB website",
         component: () => (
-            <Button onClick={() => {
+            <Button onClick={async () => {
                 let url = "https://reviewdb.mantikafasi.dev/";
-                if (settings.store.token)
-                    url += "/api/redirect?token=" + encodeURIComponent(settings.store.token);
+                const token = await getToken();
+                if (token)
+                    url += "/api/redirect?token=" + encodeURIComponent(token);
 
                 VencordNative.native.openExternal(url);
             }}>
@@ -80,8 +80,6 @@ export const settings = definePluginSettings({
         )
     }
 }).withPrivateSettings<{
-    token?: string;
-    user?: ReviewDBUser;
     lastReviewId?: number;
     reviewsDropdownState?: boolean;
 }>();

@@ -23,16 +23,17 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, Parser, useState } from "@webpack/common";
+import { Alerts, Menu, Parser, showToast, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
+import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
 import ReviewsView from "./components/ReviewsView";
 import { NotificationType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
-import { showToast } from "./utils";
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
     children.push(
@@ -62,31 +63,48 @@ export default definePlugin({
         }
     ],
 
-    async start() {
-        const s = settings.store;
-        const { token, lastReviewId, notifyReviews } = s;
+    flux: {
+        CONNECTION_OPEN: initAuth,
+    },
 
-        if (!notifyReviews || !token) return;
+    async start() {
+        addContextMenuPatch("guild-header-popout", guildPopoutPatch);
+
+        const s = settings.store;
+        const { lastReviewId, notifyReviews } = s;
+
+        const legacy = s as any as { token?: string; };
+        if (legacy.token) {
+            await updateAuth({ token: legacy.token });
+            legacy.token = undefined;
+            new Logger("ReviewDB").info("Migrated legacy settings");
+        }
+
+        await initAuth();
 
         setTimeout(async () => {
-            const user = await getCurrentUserInfo(token);
-            if (lastReviewId && lastReviewId < user.lastReviewID) {
-                s.lastReviewId = user.lastReviewID;
-                if (user.lastReviewID !== 0)
-                    showToast("You have new reviews on your profile!");
-            }
+            if (!Auth.token) return;
 
-            addContextMenuPatch("guild-header-popout", guildPopoutPatch);
+            const user = await getCurrentUserInfo(Auth.token);
+            updateAuth({ user });
+
+            if (notifyReviews) {
+                if (lastReviewId && lastReviewId < user.lastReviewID) {
+                    s.lastReviewId = user.lastReviewID;
+                    if (user.lastReviewID !== 0)
+                        showToast("You have new reviews on your profile!");
+                }
+            }
 
             if (user.notification) {
                 const props = user.notification.type === NotificationType.Ban ? {
                     cancelText: "Appeal",
                     confirmText: "Ok",
-                    onCancel: () =>
+                    onCancel: async () =>
                         VencordNative.native.openExternal(
                             "https://reviewdb.mantikafasi.dev/api/redirect?"
                             + new URLSearchParams({
-                                token: settings.store.token!,
+                                token: Auth.token!,
                                 page: "dashboard/appeal"
                             })
                         )
@@ -105,7 +123,6 @@ export default definePlugin({
 
                 readNotification(user.notification.id);
             }
-            s.user = user;
         }, 4000);
     },
 

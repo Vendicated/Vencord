@@ -20,12 +20,12 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Parser, Timestamp } from "@webpack/common";
+import { Alerts, moment, Parser, showToast, Timestamp } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, cl, showToast } from "../utils";
+import { canDeleteReview, cl } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
