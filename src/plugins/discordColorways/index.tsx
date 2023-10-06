@@ -29,8 +29,9 @@ import { FluxEvents } from "@webpack/types";
 
 import ColorwaysButton from "./components/colorwaysButton";
 import { SwatchIcon } from "./components/icons";
-import { ToolboxModal } from "./components/toolbox";
+import SelectorModal from "./components/selectorModal";
 import style from "./style.css?managed";
+import { Colorway } from "./types";
 
 export let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>;
 
@@ -156,7 +157,33 @@ export default definePlugin({
     dependencies: ["ServerListAPI"],
     creatorVersion: "1.14",
     toolboxActions: {
-        "Open Toolbox": () => openModal(props => <ToolboxModal modalProps={props} />)
+        "Open Toolbox": () => {
+            var colorways: Colorway[] = [];
+            DataStore.get("colorwaySourceFiles").then(
+                colorwaySourceFiles => {
+                    colorwaySourceFiles.forEach(
+                        (colorwayList: string, i: number) => {
+                            fetch(colorwayList)
+                                .then(response => response.json())
+                                .then((data: { colorways: Colorway[]; }) => {
+                                    if (!data) return;
+                                    if (!data.colorways?.length) return;
+                                    data.colorways.map((color: Colorway) => colorways.push(color));
+                                    if (++i === colorwaySourceFiles.length) {
+                                        DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                        }));
+                                    }
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    return null;
+                                });
+                        }
+                    );
+                }
+            );
+        }
     },
     patches: [
         {

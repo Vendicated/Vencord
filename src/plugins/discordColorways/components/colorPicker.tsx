@@ -23,7 +23,20 @@ import {
 } from "@webpack/common";
 
 import { ColorPicker } from "..";
-import { ColorVarItems, ToolboxItem } from "./toolbox";
+import { colorVariables } from "../css";
+import { ToolboxItem } from "../types";
+
+const ColorVarItems: ToolboxItem[] = colorVariables.map((colorVariable: string) => {
+    return {
+        title: "Copy " + colorVariable,
+        onClick: () => {
+            function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
+            Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--" + colorVariable)));
+            Toasts.show({ message: "Color " + colorVariable + " copied to clipboard", id: "toolbox-color-var-copied", type: 1 });
+        },
+        id: colorVariable
+    };
+});
 
 export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
     const [accentColor, setAccentColor] = useState<string>("5865f2");

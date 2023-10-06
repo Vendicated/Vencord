@@ -98,6 +98,7 @@
     border-radius: 12px;
     border: 1px solid var(--background-tertiary);
     box-shadow: var(--dark-elevation-high) !important;
+    min-width: 596px;
 }
 
 .colorwaySelectorModalContent {
@@ -701,6 +702,85 @@
 .theme-dark .colorwaySelector-pill_selected,
 .theme-dark .colorwaySelector-pill:hover,
 .theme-dark .colorwaySelector-searchInput:focus {
+    border-color: var(--brand-500);
+    background-color: var(--brand-experiment-15a);
+}
+
+.colorwaysTooltip-tooltipPreviewRow {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.colorwaysTooltip-header {
+    background-color: var(--background-primary);
+    padding: 2px 8px;
+    border-radius: 16px;
+    height: min-content;
+    color: var(--header-primary);
+    margin-bottom: 2px;
+    display: inline-flex;
+    margin-left: -4px;
+}
+
+.colorwaySelector-pillSeparator {
+    height: 24px;
+    width: 1px;
+    background-color: var(--primary-400);
+}
+
+.colorwaysSelector-infoRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    flex-direction: column;
+}
+
+.colorwaysSelector-changelog {
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--header-secondary);
+    margin-bottom: 4px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    padding: 8px 12px;
+    margin-top: 4px;
+}
+
+.colorwaysChangelog-li {
+    list-style: disc;
+    margin-inline-start: 16px;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-list {
+    width: 100%;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem {
+    border-radius: 20px;
+    background-color: var(--background-tertiary);
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    height: 32px;
+    overflow: hidden;
+    color: var(--text-normal);
+    cursor: pointer;
+    transition: .15s ease;
+    margin-bottom: 4px;
+    width: 100%;
+    margin-left: 0;
+    min-height: 42px;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-itemList {
+    padding: 0;
+    overflow: visible !important;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem:hover {
     border-color: var(--brand-500);
     background-color: var(--brand-experiment-15a);
 }

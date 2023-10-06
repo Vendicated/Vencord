@@ -17,3 +17,9 @@ export interface Colorway {
     colors?: string[],
     isGradient?: boolean;
 }
+
+export interface ToolboxItem {
+    title: string,
+    onClick: () => void,
+    id?: string;
+}
