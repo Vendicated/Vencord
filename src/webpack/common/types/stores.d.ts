@@ -182,7 +182,7 @@ type Pack = {
         id: string,
         type: number,
     },
-    emojis: PackEmoji[];
+    content: { emojis: PackEmoji[]; },
     emojiById: Record<string, PackEmoji>;
 };
 export class InventoryStore extends FluxStore {

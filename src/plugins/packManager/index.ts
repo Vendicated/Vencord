@@ -115,6 +115,21 @@ export default definePlugin({
                     });
                 }
             },
+        },
+        {
+            name: "pack list",
+            description: "List all packs in your inventory",
+            inputType: ApplicationCommandInputType.BOT,
+
+            async execute(_, ctx) {
+                const content = InventoryStore.getPacksForUser().map(pack => {
+                    return `${pack.name} (\`${pack.id}\`): ${pack.content.emojis.length} emojis`;
+                }).join("\n");
+
+                return sendBotMessage(ctx.channel.id, {
+                    content,
+                });
+            },
         }
     ]
 });
