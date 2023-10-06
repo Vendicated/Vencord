@@ -95,6 +95,7 @@ export interface UnicodeEmoji {
 export class EmojiStore extends FluxStore {
     getCustomEmojiById(id?: string | null): CustomEmoji;
     getUsableCustomEmojiById(id?: string | null): CustomEmoji;
+    getUsableGuildEmoji(id?: string | null): CustomEmoji[];
     getGuilds(): Record<string, {
         id: string;
         _emojiMap: Record<string, CustomEmoji>;

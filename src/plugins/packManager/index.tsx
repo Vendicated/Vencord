@@ -6,9 +6,11 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { isNonNullish, isTruthy } from "@utils/guards";
 import definePlugin from "@utils/types";
-import { InventoryStore, RestAPI, UserStore } from "@webpack/common";
+import { InventoryStore } from "@webpack/common";
+
+import * as PackManager from "./packManager";
+import TabComponent from "./TabComponent";
 
 export default definePlugin({
     name: "PackManager",
@@ -23,10 +25,31 @@ export default definePlugin({
         {
             find: "InventoryStore",
             replacement: {
-                match: /(?<=_isADuplicateGuildPack=\s*function\s*\(\i\)\s*\{)/,
+                match: /(?<=_isADuplicateGuildPack=function\(\i\)\{)/,
                 replace: "return false;"
             }
-        }
+        },
+        // Add "Packs" tab in the gif/sticker/emoji/sound picker tab
+        {
+            find: ".Messages.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,",
+            replacement: [
+                {
+                    match: /(?<=(\(0,\i\.jsx\)\(\i,{id:\i\.\i,"aria-controls":\i\.\i),"aria-selected":(\i)===.+?,children:\i.\i.Messages.EXPRESSION_PICKER_EMOJI}\))/,
+                    replace(original, template, currentTab) {
+                        const tabId = "PACKS";
+                        const condition = `${currentTab} === "${tabId}"`;
+                        // Replace ID (a11y)
+                        const templateFixed = template.replace(/(?<=id:)\i.\i/, "packs-picker-tab");
+
+                        return `${original}, ${templateFixed}, "aria-selected": ${condition}, isActive: ${condition}, viewType: "${tabId}", children: "Packs"})`;
+                    }
+                },
+                {
+                    match: /(?<=null,)(?=(\i)===\i.\i.SOUNDBOARD)/,
+                    replace: "$1===\"PACKS\" ? $self.TabComponent() : null,"
+                }
+            ]
+        },
     ],
     commands: [
         {
@@ -43,35 +66,12 @@ export default definePlugin({
             async execute(args, ctx) {
                 const guildId = findOption<string>(args, "Guild ID")!;
 
-                const { premiumType } = UserStore.getCurrentUser();
-                const packLimit = isTruthy(premiumType) ? 100 : 1;
-
-                if (InventoryStore.countPacksCollected() >= packLimit) {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "You have reached the pack limit, you'll have to remove a pack before adding another!"
-                    });
-                }
-
-                if (isNonNullish(InventoryStore.getPackByPackId(guildId))) {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "This pack is already in your inventory."
-                    });
-                }
-
                 try {
-                    const { body: { name } } = await RestAPI.put({
-                        url: "/users/@me/inventory/packs/add",
-                        body: {
-                            pack_id: guildId,
-                        }
-                    });
-
+                    const content = await PackManager.addPack(guildId);
+                    return sendBotMessage(ctx.channel.id, { content });
+                } catch (e) {
                     return sendBotMessage(ctx.channel.id, {
-                        content: `Pack ${name} added to inventory.`
-                    });
-                } catch {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "An error occured while adding the pack..."
+                        content: (e as Error).message
                     });
                 }
             },
@@ -90,28 +90,12 @@ export default definePlugin({
             async execute(args, ctx) {
                 const guildId = findOption<string>(args, "Guild ID")!;
 
-                const hasCollected = isNonNullish(InventoryStore.getPackByPackId(guildId));
-
-                if (!hasCollected) {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "You haven't added this pack to your inventory!"
-                    });
-                }
-
                 try {
-                    await RestAPI.put({
-                        url: "/users/@me/inventory/packs/remove",
-                        body: {
-                            pack_id: guildId,
-                        }
-                    });
-
+                    const content = await PackManager.removePack(guildId);
+                    return sendBotMessage(ctx.channel.id, { content });
+                } catch (e) {
                     return sendBotMessage(ctx.channel.id, {
-                        content: "Pack removed from inventory."
-                    });
-                } catch {
-                    return sendBotMessage(ctx.channel.id, {
-                        content: "An error occured while removing the pack..."
+                        content: (e as Error).message
                     });
                 }
             },
@@ -131,5 +115,9 @@ export default definePlugin({
                 });
             },
         }
-    ]
+    ],
+
+    TabComponent() {
+        return <TabComponent></TabComponent>;
+    }
 });
