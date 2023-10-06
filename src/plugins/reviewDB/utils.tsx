@@ -20,7 +20,7 @@ import { classNameFactory } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { React, Toasts } from "@webpack/common";
+import { React, Toasts, UserStore } from "@webpack/common";
 
 import { Review, UserType } from "./entities";
 import { settings } from "./settings";
@@ -73,9 +73,11 @@ export function showToast(text: string) {
     });
 }
 
-export function canDeleteReview(review: Review, userId: string) {
+export function canDeleteReview(profileId: string, review: Review) {
+    const myId = UserStore.getCurrentUser().id;
     return (
-        review.sender.discordID === userId
+        myId === profileId
+        || review.sender.discordID === profileId
         || settings.store.user?.type === UserType.Admin
     );
 }

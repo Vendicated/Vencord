@@ -79,6 +79,7 @@ export default function ReviewsView({
                 refetch={refetch}
                 reviews={reviewData!.reviews}
                 hideOwnReview={hideOwnReview}
+                profileId={discordId}
             />
 
             {showInput && (
@@ -93,7 +94,7 @@ export default function ReviewsView({
     );
 }
 
-function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; }) {
+function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
     const myId = UserStore.getCurrentUser().id;
 
     return (
@@ -104,6 +105,7 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
                     key={review.id}
                     review={review}
                     refetch={refetch}
+                    profileId={profileId}
                 />
             )}
 
