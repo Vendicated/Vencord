@@ -64,12 +64,14 @@ function GuildEntry({
     id,
     icon,
     emojiCount,
+    animatedCount,
     remove
 }: {
     name: string,
     id: string,
     icon: string | undefined,
     emojiCount: number,
+    animatedCount: number,
     remove: boolean;
 }) {
     return <>
@@ -81,7 +83,7 @@ function GuildEntry({
             <Flex style={{ justifyContent: "space-between" }}>
                 <Flex flexDirection="column" style={{ justifyContent: "space-between", gap: "0" }}>
                     <div className={ProfileListClasses.listName}>{name}</div>
-                    <div className={GuildLabelClasses.guildNick}>{emojiCount} Emojis</div>
+                    <div className={GuildLabelClasses.guildNick}>{emojiCount} Emojis · {animatedCount} Animated</div>
                 </Flex>
                 {
                     remove ?
@@ -124,6 +126,7 @@ export default function () {
                                         id={pack.id}
                                         icon={pack.icon}
                                         emojiCount={pack.content.emojis.length}
+                                        animatedCount={pack.content.emojis.filter(e => e.animated).length}
                                         remove={true}
                                     />
                                 </li>
@@ -144,6 +147,7 @@ export default function () {
                                     id={guild.id}
                                     icon={guild.icon}
                                     emojiCount={EmojiStore.getUsableGuildEmoji(guild.id).length}
+                                    animatedCount={EmojiStore.getUsableGuildEmoji(guild.id).filter(e => e.animated).length}
                                     remove={isNonNullish(InventoryStore.getPackByPackId(guild.id))}
                                 />
                             </li>
