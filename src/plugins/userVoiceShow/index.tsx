@@ -152,15 +152,15 @@ export default definePlugin({
             find: "PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP.",
             replacement: {
                 match: /\w{2}\(\{selected:\w/,
-                replace: "$&,children:[$self.patchMemberList(this.props)]",
+                replace: "$&,children:[$self.patchMemberList(arguments[0])]",
             }
         },
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /(\w)=this\.props.*\w\?\(0,\w\.jsx\)\(\w{2},\{\}\):null,/,
-                replace: "$&$self.patchDmList($1.props),",
-            }
-        }
+        // {
+        //     find: "PrivateChannel.renderAvatar",
+        //     replacement: {
+        //         match: /children:\[\(.+:null\]\}\)\]/,
+        //         replace: "$&.concat($self.patchDmList(e))",
+        //     }
+        // }
     ],
 });
