@@ -26,7 +26,7 @@ export default definePlugin({
     patches: [
         // obtain BUILT_IN_COMMANDS instance
         {
-            find: '"giphy","tenor"',
+            find: ',"tenor"',
             replacement: [
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is
@@ -34,7 +34,7 @@ export default definePlugin({
                     // patch simpler
 
                     // textCommands = builtInCommands.filter(...)
-                    match: /(?<=\w=)(\w)(\.filter\(.{0,30}giphy)/,
+                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tenor)/,
                     replace: "Vencord.Api.Commands._init($1)$2",
                 }
             ],
