@@ -145,7 +145,7 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
 
-    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general", UserStore.getCurrentUser().globalName ?? UserStore.getCurrentUser().username), settings);
+    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general", (UserStore.getCurrentUser() as any as string).globalName ?? UserStore.getCurrentUser().username), settings);
 }
 
 export default definePlugin({
@@ -173,7 +173,7 @@ export default definePlugin({
 
                 const template = Settings.plugins.VcNarrator[type + "Message"];
                 const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
-                const displayName = user && (UserStore.getUser(userId).globalName ?? user);
+                const displayName = user && ((UserStore.getUser(userId) as any as string).globalName ?? user);
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel, displayName));
