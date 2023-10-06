@@ -251,7 +251,7 @@ export default definePlugin({
         },
         // in profiles
         {
-            find: ",botType:",
+            find: "showStreamerModeTooltip:",
             replacement: {
                 match: /,botType:(\i\((\i)\)),/g,
                 replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
