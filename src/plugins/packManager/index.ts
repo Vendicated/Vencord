@@ -54,7 +54,7 @@ export default definePlugin({
 
                 if (isNonNullish(InventoryStore.getPackByPackId(guildId))) {
                     return sendBotMessage(ctx.channel.id, {
-                        content: "This pack is already in your inventory..."
+                        content: "This pack is already in your inventory."
                     });
                 }
 
