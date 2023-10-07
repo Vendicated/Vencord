@@ -105,7 +105,7 @@ export default definePlugin({
 
         // OP 8 Request Guild Members allows 100 user IDs at a time
         const ignore = new Set(toRequest);
-        const { relationships } = RelationshipStore.__getLocalVars();
+        const relationships = RelationshipStore.getRelationships();
         const callback = ({ nonce, members }) => {
             if (nonce !== sentNonce) return;
             members.forEach(member => {
