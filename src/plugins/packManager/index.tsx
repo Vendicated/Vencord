@@ -36,7 +36,7 @@ export default definePlugin({
                 {
                     match: /(?<=(\(0,\i\.jsx\)\(\i,{id:\i\.\i,"aria-controls":\i\.\i),"aria-selected":(\i)===.+?,children:\i.\i.Messages.EXPRESSION_PICKER_EMOJI}\))/,
                     replace(original, template, currentTab) {
-                        const tabId = "PACKS";
+                        const tabId = "packs";
                         const condition = `${currentTab} === "${tabId}"`;
                         // Replace ID (a11y)
                         const templateFixed = template.replace(/(?<=id:)\i.\i/, "packs-picker-tab");
@@ -46,7 +46,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=null,)(?=(\i)===\i.\i.SOUNDBOARD)/,
-                    replace: "$1===\"PACKS\" ? $self.TabComponent() : null,"
+                    replace: "$1===\"packs\" ? $self.TabComponent() : null,"
                 }
             ]
         },
@@ -106,17 +106,24 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BOT,
 
             async execute(_, ctx) {
+                const packsCount = InventoryStore.countPacksCollected();
+
+                if (packsCount === 0) {
+                    return sendBotMessage(ctx.channel.id, {
+                        content: "You dont have any packs yet."
+                    });
+                }
+
                 const content = InventoryStore.getPacksForUser().map(pack => {
-                    return `${pack.name} (\`${pack.id}\`): ${pack.content.emojis.length} emojis`;
+                    return `- ${pack.name} (\`${pack.id}\`): ${pack.content.emojis.length} emojis`;
                 }).join("\n");
 
                 return sendBotMessage(ctx.channel.id, {
-                    content,
+                    content: `Here's a list of your ${packsCount > 1 ? packsCount + " " : ""}packs:\n${content}`,
                 });
             },
         }
     ],
-
     TabComponent() {
         return <TabComponent></TabComponent>;
     }
