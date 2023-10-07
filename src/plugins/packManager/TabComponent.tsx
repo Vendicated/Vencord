@@ -116,10 +116,11 @@ export default function () {
                 null
                 : <CategorySection heading="Your Packs">
                     <ul>
-                        {packs.map(pack => {
+                        {packs.map((pack, i) => {
                             return (
                                 <li
                                     className={ProfileListClasses.listRow}
+                                    key={i}
                                 >
                                     <GuildEntry
                                         name={pack.name}
@@ -137,10 +138,11 @@ export default function () {
             }
             <CategorySection heading="Your Servers">
                 <ul>
-                    {eligibleGuilds.map(guild => {
+                    {eligibleGuilds.map((guild, i) => {
                         return (
                             <li
                                 className={ProfileListClasses.listRow}
+                                key={i}
                             >
                                 <GuildEntry
                                     name={guild.name}

@@ -115,7 +115,7 @@ export default definePlugin({
                 }
 
                 const content = InventoryStore.getPacksForUser().map(pack => {
-                    return `- ${pack.name} (\`${pack.id}\`): ${pack.content.emojis.length} emojis`;
+                    return `- ${pack.name} (\`${pack.id}\`): ${pack.content.emojis.length} emojis · ${pack.content.emojis.filter(e => e.animated).length} animated`;
                 }).join("\n");
 
                 return sendBotMessage(ctx.channel.id, {
