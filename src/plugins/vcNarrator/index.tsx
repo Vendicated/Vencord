@@ -144,13 +144,15 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
 
-    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general"), settings);
+    const user = UserStore.getCurrentUser();
+    const name = Settings.plugins.VcNarrator.useDisplayName ? (user as any).globalName : user.username;
+    speak(formatText(settings[type + "Message"], name, "general"), settings);
 }
 
 export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Lifix],
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
@@ -171,7 +173,9 @@ export default definePlugin({
                 if (!type) continue;
 
                 const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
+                const userObject = UserStore.getUser(userId);
+                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" :
+                    Settings.plugins.VcNarrator.useDisplayName ? (userObject as any).globalName : userObject.username;
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel));
@@ -238,6 +242,11 @@ export default definePlugin({
             },
             sayOwnName: {
                 description: "Say own name",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            useDisplayName: {
+                description: "Use display names instead of usernames",
                 type: OptionType.BOOLEAN,
                 default: false
             },

@@ -379,6 +379,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    Lifix: {
+        name: "Lifix",
+        id: 180430713873498113n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
