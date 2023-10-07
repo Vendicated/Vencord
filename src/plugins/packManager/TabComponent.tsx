@@ -148,7 +148,7 @@ export default function () {
                                     icon={guild.icon}
                                     emojiCount={EmojiStore.getUsableGuildEmoji(guild.id).length}
                                     animatedCount={EmojiStore.getUsableGuildEmoji(guild.id).filter(e => e.animated).length}
-                                    remove={isNonNullish(InventoryStore.getPackByPackId(guild.id))}
+                                    remove={isNonNullish(InventoryStore.getPackByPackId({ packId: guild.id }))}
                                 />
                             </li>
                         );

@@ -190,7 +190,7 @@ export class InventoryStore extends FluxStore {
     countPacksCollected(): number;
     getHasPackAddedNotification(): boolean;
     getIsFetching(): boolean;
-    getPackByPackId(packId: string): Pack | undefined;
+    getPackByPackId({ packId: string }): Pack | undefined;
     getPackEmojisTTL(): number;
     getPacksById(): Map<string, Pack>;
     getPacksForUser(): Pack[];

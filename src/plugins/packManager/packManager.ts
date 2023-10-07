@@ -11,7 +11,7 @@ export async function addPack(packId: string) {
     const { premiumType } = UserStore.getCurrentUser();
     const packLimit = isTruthy(premiumType) ? 100 : 1;
 
-    if (isNonNullish(InventoryStore.getPackByPackId(packId))) {
+    if (isNonNullish(InventoryStore.getPackByPackId({ packId }))) {
         throw new Error("This pack is already in your inventory.");
     }
 
@@ -34,7 +34,7 @@ export async function addPack(packId: string) {
 }
 
 export async function removePack(packId: string) {
-    const hasCollected = isNonNullish(InventoryStore.getPackByPackId(packId));
+    const hasCollected = isNonNullish(InventoryStore.getPackByPackId({ packId }));
 
     if (!hasCollected) {
         throw new Error("You haven't added this pack to your inventory!");
