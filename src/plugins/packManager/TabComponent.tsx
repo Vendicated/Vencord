@@ -116,7 +116,7 @@ export default function () {
     >
         <div style={{ paddingLeft: "16px", paddingRight: "8px" }}>
             <CategorySection heading="Add Pack">
-                <Flex style={{ paddingBottom: "4px" }} className={FlexClasses.flex}>
+                <Flex style={{ padding: "4px" }} className={FlexClasses.flex}>
                     <TextInput
                         className={FlexClasses.flexChild}
                         placeholder="Enter Guild ID here."
@@ -125,6 +125,7 @@ export default function () {
                         disabled={PackManager.hasReachedLimit()}
                         value={input}
                         onChange={value => setInput(value.trim())}
+                        style={{ fontSize: "14px", height: "var(--custom-button-button-md-height)" }}
                     />
                     <Button
                         disabled={input.length === 0 || !(/^\d+$/.test(input))}
