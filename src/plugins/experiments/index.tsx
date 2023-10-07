@@ -33,12 +33,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
-    },
-    forceStagingBanner: {
-        description: "Whether to force Staging banner under user area.",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
     }
 });
 
@@ -83,12 +77,13 @@ export default definePlugin({
                 }
             ]
         },
+        // Fix search history being disabled / broken with isStaff
         {
-            find: ".Messages.DEV_NOTICE_STAGING",
-            predicate: () => settings.store.forceStagingBanner,
+            find: 'get("disable_new_search")',
+            predicate: () => settings.store.enableIsStaff,
             replacement: {
-                match: /"staging"===window\.GLOBAL_ENV\.RELEASE_CHANNEL/,
-                replace: "true"
+                match: /(?<=showNewSearch"\);return)\s?!/,
+                replace: "!1&&!"
             }
         },
         {
