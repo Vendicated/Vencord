@@ -1,4 +1,6 @@
 /* stylelint-disable selector-class-pattern */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+
 .colorwaySelectorIcon {
     height: 24px;
     width: 24px;
@@ -740,47 +742,131 @@
     font-weight: 400;
     font-size: 20px;
     color: var(--header-secondary);
-    margin-bottom: 4px;
     border-radius: 4px;
     background-color: var(--background-secondary);
     padding: 8px 12px;
-    margin-top: 4px;
 }
 
 .colorwaysChangelog-li {
-    list-style: disc;
-    margin-inline-start: 16px;
+    position: relative;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.colorwaysChangelog-li::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -15px;
+    width: 6px;
+    height: 6px;
+    margin-top: -4px;
+    margin-left: -3px;
+    border-radius: 50%;
+    opacity: .3;
+}
+
+.theme-dark .colorwaysChangelog-li::before {
+    background-color: hsl(216deg calc(var(--saturation-factor, 1)*9.8%) 90%);
+}
+
+.theme-light .colorwaysChangelog-li::before {
+    background-color: hsl(223deg calc(var(--saturation-factor, 1)*5.8%) 52.9%);
 }
 
 .ColorwaySelectorWrapper .colorwayToolbox-list {
     width: 100%;
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem {
+.ColorwaySelectorWrapper .colorwayToolbox-list .colorwaysToolbox-label {
     border-radius: 20px;
-    background-color: var(--background-tertiary);
-    border: 1px solid transparent;
     box-sizing: border-box;
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    height: 32px;
-    overflow: hidden;
     color: var(--text-normal);
-    cursor: pointer;
     transition: .15s ease;
-    margin-bottom: 4px;
     width: 100%;
     margin-left: 0;
-    min-height: 42px;
+    height: fit-content;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: wrap;
+    cursor: default;
+    max-height: 2rem;
+    padding: 0 8px;
 }
 
 .ColorwaySelectorWrapper .colorwayToolbox-itemList {
     padding: 0;
     overflow: visible !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 0;
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem:hover {
+.ColorwaySelectorWrapper .colorwayToolbox-listItem {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: transparent !important;
+    width: calc(564px / 4);
+    cursor: default;
+    float: left;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-listItem .bi {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background-color: var(--background-tertiary);
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .15s ease;
+    cursor: pointer;
+    color: var(--interactive-normal);
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-listItem:hover {
+    color: var(--interactive-normal) !important;
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem .bi:hover {
     border-color: var(--brand-500);
     background-color: var(--brand-experiment-15a);
+    color: var(--interactive-hover) !important;
+}
+
+.colorwaysSelector-changelogHeader {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 20px;
+    text-transform: uppercase;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.colorwaysSelector-changelogHeader::after {
+    content: "";
+    height: 1px;
+    flex: 1 1 auto;
+    margin-left: 4px;
+    opacity: .6;
+    background-color: currentcolor;
+}
+
+.colorwaysSelector-changelogHeader_added {
+    color: var(--text-positive);
+}
+
+.colorwaysSelector-changelogHeader_fixed {
+    color: hsl(359deg calc(var(--saturation-factor, 1)*87.3%) 59.8%);
+}
+
+.colorwaysSelector-changelogHeader_changed {
+    color: var(--text-warning);
 }

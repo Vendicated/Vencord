@@ -23,3 +23,10 @@ export interface ToolboxItem {
     onClick: () => void,
     id?: string;
 }
+
+export interface WSMessage {
+    type: string;
+    [x: string]: string;
+}
+
+export type SettingsType = "text" | "select" | "list";

@@ -12,25 +12,31 @@ function Cli({ ...props }: HTMLProps<HTMLLIElement>) {
 }
 
 
-export function Changelog({ added = ["Nothing new"], changed = ["Nothing new"], fixed = ["Nothing new"] }: { added?: String[], changed?: String[], fixed?: String[]; }) {
+export function Changelog({ added = [], changed = [], fixed = [] }: { added?: String[], changed?: String[], fixed?: String[]; }) {
     return <div className="colorwaysSelector-changelog">
-        <Forms.FormTitle style={{ marginBottom: 0 }}>Added:</Forms.FormTitle>
-        <ul>
-            {added.map(t => {
-                return <Cli>{t}</Cli>;
-            })}
-        </ul>
-        <Forms.FormTitle style={{ marginBottom: 0 }}>Changed:</Forms.FormTitle>
-        <ul>
-            {changed.map(t => {
-                return <Cli>{t}</Cli>;
-            })}
-        </ul>
-        <Forms.FormTitle style={{ marginBottom: 0 }}>Fixed:</Forms.FormTitle>
-        <ul>
-            {fixed.map(t => {
-                return <Cli>{t}</Cli>;
-            })}
-        </ul>
+        {added.length > 0 ? <>
+            <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-changelogHeader colorwaysSelector-changelogHeader_added">Added</Forms.FormTitle>
+            <ul style={{ margin: "4px 0 8px 20px" }}>
+                {added.map(t => {
+                    return <Cli>{t}</Cli>;
+                })}
+            </ul>
+        </> : <></>}
+        {changed.length > 0 ? <>
+            <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-changelogHeader colorwaysSelector-changelogHeader_changed">Changed</Forms.FormTitle>
+            <ul style={{ margin: "4px 0 8px 20px" }}>
+                {changed.map(t => {
+                    return <Cli>{t}</Cli>;
+                })}
+            </ul>
+        </> : <></>}
+        {fixed.length > 0 ? <>
+            <Forms.FormTitle style={{ marginBottom: 0 }} className="colorwaysSelector-changelogHeader colorwaysSelector-changelogHeader_fixed">Fixed</Forms.FormTitle>
+            <ul style={{ margin: "4px 0 8px 20px" }}>
+                {fixed.map(t => {
+                    return <Cli>{t}</Cli>;
+                })}
+            </ul>
+        </> : <></>}
     </div>;
 }

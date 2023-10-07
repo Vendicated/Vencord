@@ -8,11 +8,10 @@
 
 import * as DataStore from "@api/DataStore";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Clipboard, FluxDispatcher, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
-import { HTMLProps } from "react";
+import { Clipboard, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
 
-import { ColorwayCSS, LazySwatchLoaded, ws } from "..";
-import { Colorway } from "../types";
+import { ColorwayCSS, connect, LazySwatchLoaded, ws } from "..";
+import { Colorway, WSMessage } from "../types";
 import { Changelog } from "./changelog";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
@@ -22,10 +21,17 @@ import ColorwayInfoModal from "./infoModal";
 interface ToolboxItem {
     title: string,
     onClick: () => void,
-    id?: string;
+    id?: string,
+    iconClassName?: string;
 }
 
 const ToolboxItems: ToolboxItem[] = [
+    {
+        title: "Settings",
+        onClick: () => { },
+        id: "colorways-toolbox_settings",
+        iconClassName: "gear-wide-connected"
+    },
     {
         title: "Color Picker",
         onClick: () => {
@@ -34,7 +40,8 @@ const ToolboxItems: ToolboxItem[] = [
             }
             openModal(props => <ColorPickerModal modalProps={props} />);
         },
-        id: "colorways-toolbox_colorpicker"
+        id: "colorways-toolbox_colorpicker",
+        iconClassName: "palette"
     },
     {
         title: "Copy Accent Color",
@@ -43,7 +50,8 @@ const ToolboxItems: ToolboxItem[] = [
             Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--brand-experiment")));
             Toasts.show({ message: "Accent color copied to clipboard", id: "toolbox-accent-color-copied", type: 1 });
         },
-        id: "colorways-toolbox_copy-accent"
+        id: "colorways-toolbox_copy-accent",
+        iconClassName: "copy"
     },
     {
         title: "Copy Primary Color",
@@ -52,7 +60,8 @@ const ToolboxItems: ToolboxItem[] = [
             Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")));
             Toasts.show({ message: "Primary color copied to clipboard", id: "toolbox-primary-color-copied", type: 1 });
         },
-        id: "colorways-toolbox_copy-primary"
+        id: "colorways-toolbox_copy-primary",
+        iconClassName: "copy"
     },
     {
         title: "Copy Secondary Color",
@@ -61,7 +70,8 @@ const ToolboxItems: ToolboxItem[] = [
             Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")));
             Toasts.show({ message: "Secondary color copied to clipboard", id: "toolbox-secondary-color-copied", type: 1 });
         },
-        id: "colorways-toolbox_copy-secondary"
+        id: "colorways-toolbox_copy-secondary",
+        iconClassName: "copy"
     },
     {
         title: "Copy Tertiary Color",
@@ -70,12 +80,14 @@ const ToolboxItems: ToolboxItem[] = [
             Clipboard.copy(getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")));
             Toasts.show({ message: "Tertiary color copied to clipboard", id: "toolbox-tertiary-color-copied", type: 1 });
         },
-        id: "colorways-toolbox_copy-tertiary"
+        id: "colorways-toolbox_copy-tertiary",
+        iconClassName: "copy"
     },
     {
         title: "Copy Other Colors",
         onClick: () => openModal(props => <ColorStealerModal modalProps={props} />),
-        id: "colorways-toolbox_copy-other"
+        id: "colorways-toolbox_copy-other",
+        iconClassName: "copy"
     }
 ];
 
@@ -104,10 +116,6 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
             break;
     }
 
-    function Cli({ ...props }: HTMLProps<HTMLLIElement>) {
-        return <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px", marginBottom: 0 }}><li className="colorwaysChangelog-li">{props.children}</li></Text>;
-    }
-
     function searchColorways(e: string) {
         results = [];
         colorwayProps.find((Colorway: Colorway) => {
@@ -125,9 +133,28 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
         setCustomColorways(results);
     }
 
-    FluxDispatcher.subscribe("SET_COLORWAY", (e: { id: string, css: string, type: string; }) => {
-        setCurrentColorway(e.id);
-    });
+    ws.onmessage = function (e) {
+        e.data.text().then((msg: string) => {
+            const data: WSMessage = JSON.parse(msg);
+            switch (data.type) {
+                case "SET_COLORWAY":
+                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                        if (actveColorwayID === data.id) {
+                            DataStore.set("actveColorwayID", null);
+                            DataStore.set("actveColorway", null);
+                            ColorwayCSS.remove();
+                            setCurrentColorway("");
+                        } else {
+                            DataStore.set("actveColorwayID", data.id);
+                            DataStore.set("actveColorway", data.css);
+                            ColorwayCSS.set(data.css || "");
+                            setCurrentColorway(data.id);
+                        }
+                    });
+                    break;
+            }
+        });
+    };
 
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
@@ -205,6 +232,10 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
+                                            const closedStates: number[] = [ws.CLOSED, ws.CLOSING];
+                                            if (closedStates.includes(ws.readyState)) {
+                                                connect();
+                                            }
                                             var colorwaysArr = new Array<Colorway>();
                                             DataStore.get("colorwaySourceFiles").then((colorwaySourceFiles) => {
                                                 colorwaySourceFiles.forEach((colorwayList, i) => {
@@ -334,6 +365,9 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                                         DataStore.set("actveColorway", color.import);
                                                         ColorwayCSS.set(color.import);
                                                         ws.send(JSON.stringify({ "type": "SET_HELPER_COLOR", "id": color.name, "css": color.import }));
+                                                        if (customColorways.includes(color)) {
+                                                            ws.send(JSON.stringify({ "type": "SEND_CUSTOM_COLORWAY", "colorway": color }));
+                                                        }
                                                     }
                                                     DataStore.get("actveColorwayID").then((actveColorwayID: string) => setCurrentColorway(actveColorwayID));
                                                 }}>
@@ -356,7 +390,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
                                 Plugin Version:
                             </Forms.FormTitle>
-                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>5.0.0 (Official) (Vencord)</Text>
+                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>5.0.1 (Official) (Vencord)</Text>
                         </div>
                         <div className="colorwaysSelector-infoRow">
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
@@ -372,12 +406,11 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                         </div>
                         <div className="colorwaysSelector-infoRow">
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                Changelog for 5.0.0:
+                                Changelog for 5.0.1:
                             </Forms.FormTitle>
                             <Changelog
-                                added={['New "Info" tab in Selector modal', 'Changelog section in Selector "Info" tab', "Experimental WS backend for connection with official client"]}
-                                changed={["Toolbox was moved to selector modal", "Selector swatch rendering process"]}
-                                fixed={["Various bugs"]}
+                                added={['"Settings" placeholder icon in Toolbox']}
+                                changed={["Revamped the changelog component"]}
                             />
                         </div>
                     </> : <></>}
@@ -385,7 +418,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                         <div className="colorwayToolbox-list">
                             <div className="colorwayToolbox-itemList">
                                 {ToolboxItems.map((toolboxItem: ToolboxItem, i: number) => {
-                                    return <div id={toolboxItem.id || "colorways-toolbox_item-" + i} className="colorwayToolbox-listItem" onClick={toolboxItem.onClick}>{toolboxItem.title}</div>;
+                                    return <div id={toolboxItem.id || "colorways-toolbox_item-" + i} className="colorwayToolbox-listItem"><i onClick={toolboxItem.onClick} className={"bi bi-" + (toolboxItem.iconClassName || "question-circle")}></i><span className="colorwaysToolbox-label">{toolboxItem.title}</span></div>;
                                 })}
                             </div>
                         </div>

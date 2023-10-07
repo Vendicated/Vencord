@@ -16,7 +16,6 @@ function ColorwaysTooltip({ activeColorwayID = "None", colorwayLen = 0 }: { acti
     return (<>
         <span>Colorways</span>
         <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorwayID}</Text>
-        <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{colorwayLen + " custom colorways ready"}</Text>
     </>);
 }
 

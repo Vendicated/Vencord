@@ -24,8 +24,7 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Flex, FluxDispatcher, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Text } from "@webpack/common";
-import { FluxEvents } from "@webpack/types";
+import { Flex, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Text } from "@webpack/common";
 
 import ColorwaysButton from "./components/colorwaysButton";
 import { SwatchIcon } from "./components/icons";
@@ -88,18 +87,13 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
 
 export var ws = new WebSocket("ws://127.0.0.1:5682");
 
-interface WSMessage {
-    type: string;
-    [x: string]: string;
-}
-
-type FluxEventsWithColorways = FluxEvents | "SET_COLORWAY";
-
-function connect() {
+export function connect() {
+    ws = new WebSocket("ws://127.0.0.1:5682");
     ws.onopen = function () {
         ws.send('{ "type": "CLIENT_CONNECTED", "client_type": "CLIENT" }');
     };
 
+    /*
     ws.onmessage = function (e) {
         e.data.text().then(msg => {
             const data: WSMessage = JSON.parse(msg);
@@ -110,26 +104,19 @@ function connect() {
                             DataStore.set("actveColorwayID", null);
                             DataStore.set("actveColorway", null);
                             ColorwayCSS.remove();
-                            FluxDispatcher.dispatch({
-                                id: null,
-                                css: null,
-                                type: "SET_COLORWAY",
-                            });
+                            // eventEmitter.emit("SET_COLORWAY", { id: null, css: null });
                         } else {
                             DataStore.set("actveColorwayID", data.id);
                             DataStore.set("actveColorway", data.css);
                             ColorwayCSS.set(data.css || "");
-                            FluxDispatcher.dispatch({
-                                id: data.id,
-                                css: data.css,
-                                type: "SET_COLORWAY",
-                            });
+                            // eventEmitter.emit("SET_COLORWAY", { id: data.id, css: data.css });
                         }
                     });
                     break;
             }
         });
     };
+    */
 
     ws.onclose = function (e) {
         ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
@@ -146,7 +133,7 @@ function connect() {
     };
 }
 
-connect();
+// connect();
 
 onbeforeunload = () => ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
 
