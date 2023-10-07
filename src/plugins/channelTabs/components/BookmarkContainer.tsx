@@ -94,10 +94,14 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
         {bookmark.bookmarks.map((bkm, i) => <Menu.MenuItem
             key={`bookmark-folder-entry-${bkm.channelId}`}
             id={`bookmark-folder-entry-${bkm.channelId}`}
-            label={[
-                bkm.name,
-                bookmarkNotificationDot && <NotificationDot channelIds={[bkm.channelId]} />
-            ]}
+            label={
+                <div style={{ display: "flex", alignItems: "center", "gap": "0.25rem" }}>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {bkm.name}
+                    </span>
+                    {bookmarkNotificationDot && <NotificationDot channelIds={[bkm.channelId]} />}
+                </div>
+            }
             icon={() => <BookmarkIcon bookmark={bkm} />}
             showIconFirst={true}
             action={() => switchChannel(bkm)}
