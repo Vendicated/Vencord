@@ -7,7 +7,7 @@
 import { Flex } from "@components/Flex";
 import { isNonNullish } from "@utils/guards";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, Button, EmojiStore, GuildStore, InventoryStore, ScrollerThin, Toasts, useStateFromStores } from "@webpack/common";
+import { Avatar, Button, EmojiStore, GuildStore, InventoryStore, ScrollerThin, TextInput, Toasts, useState, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import * as PackManager from "./packManager";
@@ -17,6 +17,7 @@ const HeadingWrapperClasses = findByPropsLazy("categorySection", "header");
 const HeadingTextClasses = findByPropsLazy("headerLabel", "headerIcon");
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const FlexClasses = findByPropsLazy("flex", "flexChild", "flexGutterSmall");
 
 async function addPack(packId: string) {
     try {
@@ -44,7 +45,7 @@ async function removePack(packId: string) {
 
 function CategorySection({ heading, children }: PropsWithChildren & { heading: string; }) {
     return <div className={HeadingWrapperClasses.categorySection}>
-        <div className={[HeadingTextClasses.wrapper, HeadingTextClasses.header].join(" ")}>
+        <div className={[HeadingTextClasses.wrapper, HeadingWrapperClasses.header, HeadingTextClasses.header].join(" ")}>
             <span className={HeadingTextClasses.headerLabel}>{heading}</span>
         </div>
         {children}
@@ -106,12 +107,37 @@ export default function () {
             })
     );
 
+    const [input, setInput] = useState("");
+
     return <ScrollerThin
         className={ScrollerClasses.scroller}
         paddingFix={true}
         fade={true}
     >
         <div style={{ paddingLeft: "16px", paddingRight: "8px" }}>
+            <CategorySection heading="Add Pack">
+                <Flex style={{ paddingBottom: "4px" }} className={FlexClasses.flex}>
+                    <TextInput
+                        className={FlexClasses.flexChild}
+                        placeholder="Enter Guild ID here."
+                        type="number"
+                        pattern="[0-9]+"
+                        disabled={PackManager.hasReachedLimit()}
+                        value={input}
+                        onChange={value => setInput(value.trim())}
+                    />
+                    <Button
+                        disabled={input.length === 0 || !(/^\d+$/.test(input))}
+                        color={Button.Colors.GREEN}
+                        onClick={async () => {
+                            await addPack(input);
+                            setInput("");
+                        }}
+                    >
+                        Add
+                    </Button>
+                </Flex>
+            </CategorySection>
             {InventoryStore.getIsFetching() || InventoryStore.countPacksCollected() === 0 ?
                 null
                 : <CategorySection heading="Your Packs">

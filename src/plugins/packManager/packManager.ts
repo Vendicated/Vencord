@@ -7,15 +7,19 @@
 import { isNonNullish, isTruthy } from "@utils/guards";
 import { InventoryStore, RestAPI, UserStore } from "@webpack/common";
 
-export async function addPack(packId: string) {
+export function hasReachedLimit() {
     const { premiumType } = UserStore.getCurrentUser();
     const packLimit = isTruthy(premiumType) ? 100 : 1;
 
+    return InventoryStore.countPacksCollected() >= packLimit;
+}
+
+export async function addPack(packId: string) {
     if (isNonNullish(InventoryStore.getPackByPackId({ packId }))) {
         throw new Error("This pack is already in your inventory.");
     }
 
-    if (InventoryStore.countPacksCollected() >= packLimit) {
+    if (hasReachedLimit()) {
         throw new Error("You have reached the pack limit, you'll have to remove a pack before adding another!");
     }
 
