@@ -26,11 +26,7 @@
         }
     ],
 
-    "background": {
-        "scripts": ["background.js"]
-    },
-
-    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
+    "web_accessible_resources": ["dist/*", "third-party/*"],
 
     "browser_specific_settings": {
         "gecko": {
