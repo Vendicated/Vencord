@@ -170,7 +170,7 @@ function ServerInfoTab({ guild }: GuildProps) {
     const Fields = {
         "Server Owner": owner ? Owner(guild.id, owner) : "Loading...",
         "Created At": renderTimestamp(SnowflakeUtils.extractTimestamp(guild.id)),
-        "Joined At": renderTimestamp(guild.joinedAt.getTime()),
+        "Joined At": guild.joinedAt ? renderTimestamp(guild.joinedAt.getTime()) : "-", // Not available in lurked guild
         "Vanity Link": guild.vanityURLCode ? (<a>{`discord.gg/${guild.vanityURLCode}`}</a>) : "-", // Making the anchor href valid would cause Discord to reload
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",

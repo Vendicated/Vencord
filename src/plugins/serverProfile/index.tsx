@@ -18,7 +18,7 @@ const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild;
     group?.push(
         <Menu.MenuItem
             id="vc-server-profile"
-            label="Server Profile"
+            label="Server Info"
             action={() => openGuildProfileModal(guild)}
         />
     );
