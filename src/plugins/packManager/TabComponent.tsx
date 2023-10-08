@@ -82,7 +82,7 @@ function GuildEntry({
         />
         <div className={ProfileListClasses.listRowContent}>
             <Flex style={{ justifyContent: "space-between" }}>
-                <Flex flexDirection="column" style={{ justifyContent: "space-between", gap: "0" }}>
+                <Flex flexDirection="column" style={{ justifyContent: "space-between", gap: "0", minWidth: "0", textOverflow: "ellipsis" }}>
                     <div className={ProfileListClasses.listName}>{name}</div>
                     <div className={GuildLabelClasses.guildNick}>{emojiCount} Emojis · {animatedCount} Animated</div>
                 </Flex>
