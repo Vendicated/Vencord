@@ -7,7 +7,7 @@
 import { Flex } from "@components/Flex";
 import { isNonNullish } from "@utils/guards";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, Button, EmojiStore, GuildStore, InventoryStore, ScrollerThin, TextInput, Toasts, useState, useStateFromStores } from "@webpack/common";
+import { Avatar, Button, EmojiStore, GuildStore, InventoryStore, ScrollerThin, SortedGuildStore, TextInput, Toasts, useState, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import * as PackManager from "./packManager";
@@ -99,8 +99,9 @@ function GuildEntry({
 export default function () {
     const packs = useStateFromStores([InventoryStore], () => InventoryStore.getPacksForUser());
     const eligibleGuilds = useStateFromStores(
-        [GuildStore],
-        () => Object.values(GuildStore.getGuilds())
+        [SortedGuildStore, GuildStore],
+        () => SortedGuildStore.getFlattenedGuildIds()
+            .map(id => GuildStore.getGuild(id))
             .filter(g => {
                 // @ts-ignore discord-types doesn't have this prop yet
                 return g.inventorySettings?.isEmojiPackCollectible;
