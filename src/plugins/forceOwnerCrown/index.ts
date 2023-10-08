@@ -29,7 +29,7 @@ export default definePlugin({
             // This is the logic where it decides whether to render the owner crown or not
             find: ".MULTIPLE_AVATAR",
             replacement: {
-                match: /(\w)=(\w).isOwner,/,
+                match: /(\i)=(\i)\.isOwner,/,
                 replace: "$1=$self.isGuildOwner($2),"
             }
         }
