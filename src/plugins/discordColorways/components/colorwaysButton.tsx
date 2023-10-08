@@ -39,8 +39,20 @@ export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnCo
                                             fetch(colorwayList)
                                                 .then(response => response.json())
                                                 .then((data: { colorways: Colorway[]; }) => {
-                                                    if (!data) return;
-                                                    if (!data.colorways?.length) return;
+                                                    if (!data) {
+                                                        DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                            setLoading(false);
+                                                            onClick();
+                                                        }));
+                                                    }
+                                                    if (!data.colorways?.length) {
+                                                        DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                            setLoading(false);
+                                                            onClick();
+                                                        }));
+                                                    }
                                                     data.colorways.map((color: Colorway) => colorways.push(color));
                                                     if (++i === colorwaySourceFiles.length) {
                                                         DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
@@ -52,7 +64,11 @@ export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnCo
                                                 })
                                                 .catch(err => {
                                                     console.log(err);
-                                                    return null;
+                                                    DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                        openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                        setLoading(false);
+                                                        onClick();
+                                                    }));
                                                 });
                                         }
                                     );

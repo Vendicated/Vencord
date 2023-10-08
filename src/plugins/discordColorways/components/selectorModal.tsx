@@ -9,8 +9,9 @@
 import * as DataStore from "@api/DataStore";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Clipboard, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
+import { Plugins } from "Vencord";
 
-import { ColorwayCSS, connect, LazySwatchLoaded, ws } from "..";
+import { ColorwayCSS, LazySwatchLoaded, ws } from "..";
 import { Colorway, WSMessage } from "../types";
 import { Changelog } from "./changelog";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
@@ -133,28 +134,30 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
         setCustomColorways(results);
     }
 
-    ws.onmessage = function (e) {
-        e.data.text().then((msg: string) => {
-            const data: WSMessage = JSON.parse(msg);
-            switch (data.type) {
-                case "SET_COLORWAY":
-                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                        if (actveColorwayID === data.id) {
-                            DataStore.set("actveColorwayID", null);
-                            DataStore.set("actveColorway", null);
-                            ColorwayCSS.remove();
-                            setCurrentColorway("");
-                        } else {
-                            DataStore.set("actveColorwayID", data.id);
-                            DataStore.set("actveColorway", data.css);
-                            ColorwayCSS.set(data.css || "");
-                            setCurrentColorway(data.id);
-                        }
-                    });
-                    break;
-            }
-        });
-    };
+    if (ws) {
+        ws.onmessage = function (e) {
+            e.data.text().then((msg: string) => {
+                const data: WSMessage = JSON.parse(msg);
+                switch (data.type) {
+                    case "SET_COLORWAY":
+                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                            if (actveColorwayID === data.id) {
+                                DataStore.set("actveColorwayID", null);
+                                DataStore.set("actveColorway", null);
+                                ColorwayCSS.remove();
+                                setCurrentColorway("");
+                            } else {
+                                DataStore.set("actveColorwayID", data.id);
+                                DataStore.set("actveColorway", data.css);
+                                ColorwayCSS.set(data.css || "");
+                                setCurrentColorway(data.id);
+                            }
+                        });
+                        break;
+                }
+            });
+        };
+    }
 
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
@@ -232,10 +235,6 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
-                                            const closedStates: number[] = [ws.CLOSED, ws.CLOSING];
-                                            if (closedStates.includes(ws.readyState)) {
-                                                connect();
-                                            }
                                             var colorwaysArr = new Array<Colorway>();
                                             DataStore.get("colorwaySourceFiles").then((colorwaySourceFiles) => {
                                                 colorwaySourceFiles.forEach((colorwayList, i) => {
@@ -329,6 +328,9 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                     </div>
                 </div>
                 <div className="ColorwaySelectorWrapper">
+                    {visibleColorwayArray.length === 0 ? <>
+                        <Forms.FormTitle style={{ marginBottom: 0, width: "100%", textAlign: "center" }}>No colorways...</Forms.FormTitle>
+                    </> : <></>}
                     {["all", "official", "custom"].includes(visibility) ? visibleColorwayArray.map((color, ind) => {
                         var colors: Array<string> = color.colors || ["accent", "primary", "secondary", "tertiary"];
                         return (
@@ -359,15 +361,10 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                                         DataStore.set("actveColorwayID", null);
                                                         DataStore.set("actveColorway", null);
                                                         ColorwayCSS.remove();
-                                                        ws.send('{ "type": "SET_HELPER_COLOR", "id": "", "css": "" }');
                                                     } else {
                                                         DataStore.set("actveColorwayID", color.name);
                                                         DataStore.set("actveColorway", color.import);
                                                         ColorwayCSS.set(color.import);
-                                                        ws.send(JSON.stringify({ "type": "SET_HELPER_COLOR", "id": color.name, "css": color.import }));
-                                                        if (customColorways.includes(color)) {
-                                                            ws.send(JSON.stringify({ "type": "SEND_CUSTOM_COLORWAY", "colorway": color }));
-                                                        }
                                                     }
                                                     DataStore.get("actveColorwayID").then((actveColorwayID: string) => setCurrentColorway(actveColorwayID));
                                                 }}>
@@ -390,13 +387,13 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
                                 Plugin Version:
                             </Forms.FormTitle>
-                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>5.0.1 (Official) (Vencord)</Text>
+                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>{(Plugins.plugins.DiscordColorways as any).pluginVersion} (Official) (Vencord)</Text>
                         </div>
                         <div className="colorwaysSelector-infoRow">
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
                                 Creator Version:
                             </Forms.FormTitle>
-                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>1.14 (Stable)</Text>
+                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>{(Plugins.plugins.DiscordColorways as any).creatorVersion} (Stable)</Text>
                         </div>
                         <div className="colorwaysSelector-infoRow">
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
@@ -406,11 +403,11 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                         </div>
                         <div className="colorwaysSelector-infoRow">
                             <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                Changelog for 5.0.1:
+                                Changelog for {(Plugins.plugins.DiscordColorways as any).pluginVersion}:
                             </Forms.FormTitle>
                             <Changelog
-                                added={['"Settings" placeholder icon in Toolbox']}
-                                changed={["Revamped the changelog component"]}
+                                changed={["Colorway Creator v1.14.1: Fixed Discord's hardcoded colors"]}
+                                fixed={["The selector can now open even without any official colorways, or if the fetching process fails"]}
                             />
                         </div>
                     </> : <></>}

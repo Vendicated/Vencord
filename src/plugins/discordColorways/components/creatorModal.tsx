@@ -206,34 +206,23 @@ export default function CreatorModal({
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
                         };
-                        const customColorwaysArray: Colorway[] = [
-                            customColorway,
-                        ];
+                        const customColorwaysArray: Colorway[] = [customColorway];
                         DataStore.get("customColorways").then(
                             customColorways => {
                                 customColorways.forEach(
                                     (color: Colorway, i: number) => {
-                                        if (
-                                            color.name !== customColorway.name
-                                        ) {
+                                        if (color.name !== customColorway.name) {
                                             customColorwaysArray.push(color);
                                         }
                                     }
                                 );
-                                DataStore.set(
-                                    "customColorways",
-                                    customColorwaysArray
-                                );
+                                DataStore.set("customColorways", customColorwaysArray);
                             }
                         );
                         modalProps.onClose();
-                        document
-                            .getElementById("colorway-refreshcolorway")
-                            ?.click();
+                        document.getElementById("colorway-refreshcolorway")?.click();
                     }}
-                >
-                    Finish
-                </Button>
+                >Finish</Button>
                 <Button
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}

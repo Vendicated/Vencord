@@ -30,11 +30,20 @@ import ColorwaysButton from "./components/colorwaysButton";
 import { SwatchIcon } from "./components/icons";
 import SelectorModal from "./components/selectorModal";
 import style from "./style.css?managed";
-import { Colorway } from "./types";
+import { Colorway, WSMessage } from "./types";
 
 export let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>;
 
 export let LazySwatchLoaded = false;
+
+let helperClientID: string = "";
+function setHelperClientID(id) {
+    helperClientID = id;
+    if (helperClientID) {
+        connect();
+    }
+}
+
 DataStore.get("colorwaySourceFiles").then(e => { if (!e) DataStore.set("colorwaySourceFiles", ["https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json"]); });
 DataStore.get("customColorways").then(e => { if (!e) DataStore.set("customColorways", []); });
 
@@ -85,12 +94,33 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     );
 };
 
-export var ws = new WebSocket("ws://127.0.0.1:5682");
+export var ws: WebSocket;
 
 export function connect() {
-    ws = new WebSocket("ws://127.0.0.1:5682");
+    ws = new WebSocket("ws://127.0.0.1:5682/colorways-helper-" + helperClientID);
     ws.onopen = function () {
         ws.send('{ "type": "CLIENT_CONNECTED", "client_type": "CLIENT" }');
+    };
+
+    ws.onmessage = function (e) {
+        e.data.text().then((msg: string) => {
+            const data: WSMessage = JSON.parse(msg);
+            switch (data.type) {
+                case "SET_COLORWAY":
+                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                        if (actveColorwayID === data.id) {
+                            DataStore.set("actveColorwayID", null);
+                            DataStore.set("actveColorway", null);
+                            ColorwayCSS.remove();
+                        } else {
+                            DataStore.set("actveColorwayID", data.id);
+                            DataStore.set("actveColorway", data.css);
+                            ColorwayCSS.set(data.css || "");
+                        }
+                    });
+                    break;
+            }
+        });
     };
 
     /*
@@ -133,16 +163,17 @@ export function connect() {
     };
 }
 
-// connect();
-
-onbeforeunload = () => ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+onbeforeunload = () => {
+    ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+};
 
 export default definePlugin({
     name: "DiscordColorways",
     description: "The definitive way to style Discord.",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI"],
-    creatorVersion: "1.14",
+    pluginVersion: "5.1.0",
+    creatorVersion: "1.14.1",
     toolboxActions: {
         "Open Toolbox": () => {
             var colorways: Colorway[] = [];
@@ -192,7 +223,9 @@ export default definePlugin({
         DataStore.get("actveColorway").then(activeColorway => {
             ColorwayCSS.set(activeColorway);
             DataStore.get("actveColorwayID").then(activeColorwayID => {
-                ws.send(`{ "type": "SET_HELPER_COLOR", "id": "${activeColorwayID}", "css": "${activeColorway}" }`);
+                if (ws) {
+                    ws.send(`{ "type": "SET_HELPER_COLOR", "id": "${activeColorwayID}", "css": "${activeColorway}" }`);
+                }
             });
         });
         addContextMenuPatch("channel-attach", ctxMenuPatch);
@@ -203,6 +236,8 @@ export default definePlugin({
         removeServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
         ColorwayCSS.remove();
         removeContextMenuPatch("channel-attach", ctxMenuPatch);
-        ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+        if (ws) {
+            ws.send('{ "type": "CLIENT_DISCONNECTED", "client_type": "CLIENT" }');
+        }
     }
 });
