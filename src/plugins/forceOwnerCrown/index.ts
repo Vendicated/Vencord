@@ -27,12 +27,12 @@ export default definePlugin({
     patches: [
         {
             // This is the logic where it decides whether to render the owner crown or not
-            find: ".renderOwner=",
+            find: ".MULTIPLE_AVATAR",
             replacement: {
-                match: /isOwner;return null!=(\w+)?&&/g,
-                replace: "isOwner;if($self.isGuildOwner(this.props)){$1=true;}return null!=$1&&"
+                match: /(\i)=(\i)\.isOwner,/,
+                replace: "$1=$self.isGuildOwner($2),"
             }
-        },
+        }
     ],
     isGuildOwner(props) {
         // Check if channel is a Group DM, if so return false
