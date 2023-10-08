@@ -20,17 +20,17 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, moment, Parser, showToast, Timestamp } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, cl, showToast } from "../utils";
+import { canDeleteReview, cl } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame ven
+    // this is terrible, blame mantika
     const p = filters.byProps;
     const [
         { cozyMessage, buttons, message, buttonsInner, groupStart },
@@ -48,7 +48,7 @@ export default LazyComponent(() => {
 
     const dateFormat = new Intl.DateTimeFormat();
 
-    return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
+    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
         function openModal() {
             openUserProfile(review.sender.discordID);
         }
@@ -135,7 +135,7 @@ export default LazyComponent(() => {
                         <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                             <ReportButton onClick={reportRev} />
 
-                            {canDeleteReview(review, UserStore.getCurrentUser().id) && (
+                            {canDeleteReview(profileId, review) && (
                                 <DeleteButton onClick={delReview} />
                             )}
                         </div>

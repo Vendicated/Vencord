@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { showToast, Toasts } from "@webpack/common";
+
+import { authorize, getToken } from "./auth";
 import { Review, ReviewDBUser } from "./entities";
 import { settings } from "./settings";
-import { authorize, showToast } from "./utils";
 
 const API_URL = "https://manti.vendicated.dev";
 
@@ -57,7 +59,7 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
         };
 
     if (!res.success) {
-        showToast(res.message);
+        showToast(res.message, Toasts.Type.FAILURE);
         return {
             ...res,
             reviews: [
@@ -82,7 +84,7 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
 }
 
 export async function addReview(review: any): Promise<Response | null> {
-    review.token = settings.store.token;
+    review.token = await getToken();
 
     if (!review.token) {
         showToast("Please authorize to add a review.");
@@ -104,7 +106,7 @@ export async function addReview(review: any): Promise<Response | null> {
         });
 }
 
-export function deleteReview(id: number): Promise<Response> {
+export async function deleteReview(id: number): Promise<Response> {
     return fetch(API_URL + `/api/reviewdb/users/${id}/reviews`, {
         method: "DELETE",
         headers: new Headers({
@@ -112,7 +114,7 @@ export function deleteReview(id: number): Promise<Response> {
             Accept: "application/json",
         }),
         body: JSON.stringify({
-            token: settings.store.token,
+            token: await getToken(),
             reviewid: id
         })
     }).then(r => r.json());
@@ -127,7 +129,7 @@ export async function reportReview(id: number) {
         }),
         body: JSON.stringify({
             reviewid: id,
-            token: settings.store.token
+            token: await getToken()
         })
     }).then(r => r.json()) as Response;
 
@@ -141,11 +143,11 @@ export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
     }).then(r => r.json());
 }
 
-export function readNotification(id: number) {
+export async function readNotification(id: number) {
     return fetch(API_URL + `/api/reviewdb/notifications?id=${id}`, {
         method: "PATCH",
         headers: {
-            "Authorization": settings.store.token || "",
+            "Authorization": await getToken() || "",
         },
     });
 }

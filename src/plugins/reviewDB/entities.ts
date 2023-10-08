@@ -36,6 +36,11 @@ export const enum NotificationType {
     Warning = 3
 }
 
+export interface ReviewDBAuth {
+    token?: string;
+    user?: ReviewDBUser;
+}
+
 export interface Badge {
     name: string;
     description: string;
