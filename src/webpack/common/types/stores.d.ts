@@ -175,7 +175,8 @@ export class DraftStore extends FluxStore {
 }
 
 type PackEmoji = Omit<CustomEmoji, "guildId" | "managed" | "originalName" | "roles"> & { packId: string, type: "PACK_EMOJI"; };
-type Pack = {
+
+interface Pack {
     name: string,
     id: string,
     icon: string,
@@ -185,7 +186,8 @@ type Pack = {
     },
     content: { emojis: PackEmoji[]; },
     emojiById: Record<string, PackEmoji>;
-};
+}
+
 export class InventoryStore extends FluxStore {
     countPacksCollected(): number;
     getHasPackAddedNotification(): boolean;
@@ -196,4 +198,20 @@ export class InventoryStore extends FluxStore {
     getPacksForUser(): Pack[];
     getSortedPackIds(): string[];
     _isADuplicateGuildPack(guildId: string): boolean;
+}
+
+interface GuildFolder {
+    folderId: number | undefined,
+    guildIds: string[],
+    expanded?: boolean;
+    folderColor?: number;
+    folderName?: string;
+}
+
+export class SortedGuildStore extends FluxStore {
+    getCompatibleGuildFolders(): GuildFolder[];
+    getFlattenedGuildIds(): string[];
+    getGuildFolderById(id: number): GuildFolder;
+    getGuildFolders(): GuildFolder[];
+    // getGuildsTree();
 }

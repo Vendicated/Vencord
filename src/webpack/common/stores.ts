@@ -62,6 +62,7 @@ export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 export let InventoryStore: t.InventoryStore;
+export let SortedGuildStore: t.SortedGuildStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
@@ -103,3 +104,4 @@ waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("InventoryStore", m => InventoryStore = m);
+waitForStore("SortedGuildStore", m => SortedGuildStore = m);
