@@ -18,12 +18,13 @@
 
 import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { Forms, React, RelationshipStore, showToast, useRef, UserStore } from "@webpack/common";
 
+import { Auth, authorize } from "../auth";
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { authorize, cl, showToast } from "../utils";
+import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 
@@ -79,6 +80,7 @@ export default function ReviewsView({
                 refetch={refetch}
                 reviews={reviewData!.reviews}
                 hideOwnReview={hideOwnReview}
+                profileId={discordId}
             />
 
             {showInput && (
@@ -93,7 +95,7 @@ export default function ReviewsView({
     );
 }
 
-function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; }) {
+function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
     const myId = UserStore.getCurrentUser().id;
 
     return (
@@ -104,6 +106,7 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
                     key={review.id}
                     review={review}
                     refetch={refetch}
+                    profileId={profileId}
                 />
             )}
 
@@ -118,7 +121,7 @@ function ReviewList({ refetch, reviews, hideOwnReview }: { refetch(): void; revi
 
 
 export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
-    const { token } = settings.store;
+    const { token } = Auth;
     const editorRef = useRef<any>(null);
     const inputType = InputTypes.FORM;
     inputType.disableAutoFocus = true;

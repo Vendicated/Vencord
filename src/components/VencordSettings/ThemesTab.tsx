@@ -20,6 +20,7 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { IsFirefox } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -42,7 +43,6 @@ type FileInput = ComponentType<{
 }>;
 
 const InviteActions = findByPropsLazy("resolveInvite");
-const TrashIcon = findByCodeLazy("M5 6.99902V18.999C5 20.101 5.897 20.999");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
@@ -114,7 +114,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
             infoButton={
                 IS_WEB && (
                     <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
-                        <TrashIcon />
+                        <DeleteIcon />
                     </div>
                 )
             }

@@ -20,17 +20,17 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { Alerts, moment, Parser, showToast, Timestamp } from "@webpack/common";
 
 import { Review, ReviewType } from "../entities";
 import { deleteReview, reportReview } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canDeleteReview, cl, showToast } from "../utils";
+import { canDeleteReview, cl } from "../utils";
 import { DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame ven
+    // this is terrible, blame mantika
     const p = filters.byProps;
     const [
         { cozyMessage, buttons, message, buttonsInner, groupStart },
@@ -43,12 +43,12 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
-        p("botTag")
+        p("botTag", "botTagRegular")
     );
 
     const dateFormat = new Intl.DateTimeFormat();
 
-    return function ReviewComponent({ review, refetch }: { review: Review; refetch(): void; }) {
+    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
         function openModal() {
             openUserProfile(review.sender.discordID);
         }
@@ -94,7 +94,7 @@ export default LazyComponent(() => {
                     className={classes(avatar, clickable)}
                     onClick={openModal}
                     src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                    style={{ left: "0px" }}
+                    style={{ left: "0px", zIndex: 0 }}
                 />
                 <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
                     <span
@@ -135,7 +135,7 @@ export default LazyComponent(() => {
                         <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                             <ReportButton onClick={reportRev} />
 
-                            {canDeleteReview(review, UserStore.getCurrentUser().id) && (
+                            {canDeleteReview(profileId, review) && (
                                 <DeleteButton onClick={delReview} />
                             )}
                         </div>
