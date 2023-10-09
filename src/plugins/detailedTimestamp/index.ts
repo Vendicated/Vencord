@@ -5,17 +5,13 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "DetailedTimestamp",
     description: "Show detailed timestamp of messages with customizable format",
-    authors: [
-        {
-            id: 586808226058862623n,
-            name: "UlyssesZhan",
-        },
-    ],
+    authors: [Devs.UlyssesZhan],
     settings: definePluginSettings({
         timestampAlwaysOn: {
             type: OptionType.BOOLEAN,
