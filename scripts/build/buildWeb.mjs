@@ -198,5 +198,8 @@ await Promise.all([
     buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
 ]);
 
-Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension.zip");
-console.info("Packed Chromium Extension written to dist/extension.zip");
+Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
+console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+
+Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
+console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
