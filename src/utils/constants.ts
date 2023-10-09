@@ -389,5 +389,3 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
-
-export const IsFirefox = IS_EXTENSION && navigator.userAgent.toLowerCase().includes("firefox");

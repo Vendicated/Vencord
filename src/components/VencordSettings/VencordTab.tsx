@@ -21,7 +21,6 @@ import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { ErrorCard } from "@components/ErrorCard";
-import { IsFirefox } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
@@ -110,14 +109,12 @@ function VencordSettings() {
                                 Restart Client
                             </Button>
                         )}
-                        {!IsFirefox && (
-                            <Button
-                                onClick={() => VencordNative.quickCss.openEditor()}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDir === "Loading..."}>
-                                Open QuickCSS File
-                            </Button>
-                        )}
+                        <Button
+                            onClick={() => VencordNative.quickCss.openEditor()}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDir === "Loading..."}>
+                            Open QuickCSS File
+                        </Button>
                         {!IS_WEB && (
                             <Button
                                 onClick={() => showItemInFolder(settingsDir)}
