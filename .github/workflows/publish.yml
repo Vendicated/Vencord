@@ -42,13 +42,6 @@ jobs:
                   # Chrome
                   cd dist/chromium-unpacked
                   pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish || EXIT_CODE=$?
-
-                  # Firefox
-                  cd ../firefox-unpacked
-                  npm i -g web-ext@7.4.0 web-ext-submit@7.4.0
-                  web-ext-submit || EXIT_CODE=$?
-
-                  exit $EXIT_CODE
               env:
                   # Chrome
                   EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
