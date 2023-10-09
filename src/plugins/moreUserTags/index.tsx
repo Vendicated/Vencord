@@ -230,8 +230,8 @@ export default definePlugin({
         {
             find: ".Messages.GUILD_OWNER,",
             replacement: {
-                match: /(.USE_EXTERNAL_EMOJIS,.{0,50}(?<channel>\i)\),\(0,.{0,350})(?<type>\i)=\(null==(?<user>\i).{0,50}\.BOT,(.{0,10})&&\i.bot/,
-                replace: "$1$<type> = $self.getTag({user: $<user>, channel: $<channel>, origType: $<user>.bot ? 0 : null, location: 'not-chat' }),$5&&typeof $<type> === 'number'"
+                match: /(?<type>\i)=\(null==.{0,50}\.BOT,null!=(?<user>\i)&&\i\.bot/,
+                replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }), typeof $<type> === 'number'"
             }
         },
         // pass channel id down props to be used in profiles
@@ -345,6 +345,8 @@ export default definePlugin({
         origType?: number;
         location: "chat" | "not-chat";
     }): number | null {
+        if (!user)
+            return null;
         if (location === "chat" && user.id === "1")
             return Tag.Types.OFFICIAL;
         if (user.isClyde())
