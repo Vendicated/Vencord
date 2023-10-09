@@ -144,8 +144,9 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+    const currentUser = UserStore.getCurrentUser();
 
-    speak(formatText(settings[type + "Message"], UserStore.getCurrentUser().username, "general", (UserStore.getCurrentUser() as any as string).globalName ?? UserStore.getCurrentUser().username), settings);
+    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username), settings);
 }
 
 export default definePlugin({
