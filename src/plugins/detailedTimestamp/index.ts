@@ -32,6 +32,11 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Time format of days (Discord default: LL)",
             default: "YYYY-MM-DD",
+        },
+        callFormat: {
+            type: OptionType.STRING,
+            description: "Time format of calling events (Discord default: L LT)",
+            default: "HH:mm:ss",
         }
     }),
     patches: [
@@ -49,18 +54,25 @@ export default definePlugin({
                 replace: "$self.settings.store.messageFormat"
             }
         },
-        { // Time format of time tooltip of message
+        {
             find: "\"LLLL\"),",
             replacement: {
                 match: /"LLLL"/,
                 replace: "$self.settings.store.tooltipFormat"
             }
         },
-        { // Time format of day
+        {
             find: "].startId),",
             replacement: {
                 match: /"LL"/,
                 replace: "$self.settings.store.dayFormat"
+            }
+        },
+        {
+            find: "().localeData(),",
+            replacement: {
+                match: /"L LT"/,
+                replace: "$self.settings.store.callFormat"
             }
         }
     ]
