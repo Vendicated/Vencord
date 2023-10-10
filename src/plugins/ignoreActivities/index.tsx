@@ -106,7 +106,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".overlayBadge",
+            find: ".Messages.EMBEDDED_ACTIVITIES_HAVE_PLAYED_ONE_KNOWN",
             replacement: [
                 {
                     match: /(?<=\(\)\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
