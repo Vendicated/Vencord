@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import moment from "moment";
 
 export default definePlugin({
     name: "DetailedTimestamp",
@@ -37,6 +38,11 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Time format of calling events (Discord default: L LT)",
             default: "HH:mm:ss",
+        },
+        memberSinceFormat: {
+            type: OptionType.STRING,
+            description: "Time format of member since (Discord default: ll (lowercase))",
+            default: "YYYY-MM-DD",
         }
     }),
     patches: [
@@ -74,6 +80,19 @@ export default definePlugin({
                 match: /"L LT"/,
                 replace: "$self.settings.store.callFormat"
             }
+        },
+
+        {
+            find: "USER_PROFILE_DISCORD_MEMBER_SINCE}",
+            replacement: {
+                // (0, a.FI)(u.Z.extractTimestamp(t), p) ... (0, a.FI)(g.joinedAt, p)
+                // where `t` is user id, extracted timestamp is milliseconds unix timestamp, `p` is locale (I think)
+                match: /\(0,\i\.\i\)\((\i\.\i\.extractTimestamp\(\i\)),\i\)(.{0,800})\(0,\i\.\i\)\((\i\.joinedAt),\i\)/,
+                replace: "$self.formatTime($1, $self.settings.store.memberSinceFormat) $2 $self.formatTime($3, $self.settings.store.memberSinceFormat)"
+            }
         }
-    ]
+    ],
+    formatTime(time: number, format: string) {
+        return moment(time).format(format);
+    }
 });
