@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import {
     addPreEditListener,
     addPreSendListener,
@@ -5,19 +11,14 @@ import {
     removePreEditListener,
     removePreSendListener
 } from "@api/MessageEvents";
-
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
     name: "Fix Twitter Embeds",
     description: "Fixes embeds using fxtwitter or vxtwitter",
-    authors: [
-        {
-            id: 0n,
-            name: "Cyrene",
-        },
-    ],
+    authors: [Devs.Cyrene],
 
     settings: definePluginSettings({
         service: {
