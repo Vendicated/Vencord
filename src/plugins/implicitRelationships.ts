@@ -16,12 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
+import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+
+interface UserAffinity {
+    user_id: string;
+    affinity: number;
+}
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -57,6 +65,16 @@ export default definePlugin({
                     // This relationship fetch is actually completely useless, but whatevs
                     replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
                 },
+                // Modify sort -- thanks megu for the patch (from sortFriendRequests)
+                {
+                    predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
+                    match: /\.sortBy\(\(function\((\w)\){return \w{1,3}\.comparator}\)\)/,
+                    replace: (_, row) => `.sortBy((function(${row}) {
+                        return ${row}.type === 5
+                            ? -Vencord.Plugins.plugins.ImplicitRelationships.getAffinity(${row}.user)
+                            : ${row}.comparator
+                    }))`
+                }
             ],
         },
 
@@ -79,6 +97,21 @@ export default definePlugin({
             ]
         }
     ],
+    settings: definePluginSettings(
+        {
+            sortByAffinity: {
+                type: OptionType.BOOLEAN,
+                default: false,
+                description: "Whether to sort implicit relationships by their affinity to you.",
+                restartNeeded: true
+            },
+        }
+    ),
+
+    getAffinity(user: User): number {
+        const affinities: UserAffinity[] = UserAffinitiesStore.getUserAffinities();
+        return affinities.find(affinity => affinity.user_id === user.id)?.affinity ?? 0;
+    },
 
     hasDM(userId: string): boolean {
         return Object.values(ChannelStore.getSortedPrivateChannels()).some(channel => channel.recipients.includes(userId));
