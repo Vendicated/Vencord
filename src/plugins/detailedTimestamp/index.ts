@@ -50,8 +50,8 @@ export default definePlugin({
         {
             find: "\"LT\"):(",
             replacement: {
-                match: /"LT"/,
-                replace: "$self.settings.store.messageFormat"
+                match: /\i\?(\(0,.*?)"LT"\):\(0,.*?\)\(\i\),/,
+                replace: "$1$self.settings.store.messageFormat),"
             }
         },
         {
