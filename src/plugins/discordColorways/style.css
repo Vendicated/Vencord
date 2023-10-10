@@ -389,7 +389,13 @@
     background-color: var(--background-modifier-hover);
 }
 
-.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingItm:not(.colorwaysCreator-settingHeader) {
+.colorwaysCreator-settingsList .colorwaysCreator-settingItm {
+    justify-content: start;
+    gap: 8px;
+}
+
+.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingItm:not(.colorwaysCreator-settingHeader),
+.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingsList {
     display: none;
 }
 

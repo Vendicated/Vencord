@@ -11,8 +11,8 @@ import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Clipboard, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
 import { Plugins } from "Vencord";
 
-import { ColorwayCSS, LazySwatchLoaded, ws } from "..";
-import { Colorway, WSMessage } from "../types";
+import { ColorwayCSS, fallbackColorways, LazySwatchLoaded } from "..";
+import { Colorway } from "../types";
 import { Changelog } from "./changelog";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
@@ -134,31 +134,6 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
         setCustomColorways(results);
     }
 
-    if (ws) {
-        ws.onmessage = function (e) {
-            e.data.text().then((msg: string) => {
-                const data: WSMessage = JSON.parse(msg);
-                switch (data.type) {
-                    case "SET_COLORWAY":
-                        DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                            if (actveColorwayID === data.id) {
-                                DataStore.set("actveColorwayID", null);
-                                DataStore.set("actveColorway", null);
-                                ColorwayCSS.remove();
-                                setCurrentColorway("");
-                            } else {
-                                DataStore.set("actveColorwayID", data.id);
-                                DataStore.set("actveColorway", data.css);
-                                ColorwayCSS.set(data.css || "");
-                                setCurrentColorway(data.id);
-                            }
-                        });
-                        break;
-                }
-            });
-        };
-    }
-
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
             <ModalContent className="colorwaySelectorModalContent">
@@ -258,7 +233,15 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                                         })
                                                         .catch((err) => {
                                                             console.log(err);
-                                                            return null;
+                                                            if (i + 1 === colorwaySourceFiles.length) {
+                                                                DataStore.get("customColorways").then((customColorways) => {
+                                                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                                                        setColorways(fallbackColorways);
+                                                                        setCustomColorways(customColorways);
+                                                                        setCurrentColorway(actveColorwayID);
+                                                                    });
+                                                                });
+                                                            }
                                                         });
                                                 });
                                             });
@@ -406,8 +389,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                 Changelog for {(Plugins.plugins.DiscordColorways as any).pluginVersion}:
                             </Forms.FormTitle>
                             <Changelog
-                                changed={["Colorway Creator v1.14.1: Fixed Discord's hardcoded colors"]}
-                                fixed={["The selector can now open even without any official colorways, or if the fetching process fails"]}
+                                added={["Colorway Creator v1.15: Added Presets", 'Fallback Colorways (Ported from "Universal" variant, Work in Progress...)']}
                             />
                         </div>
                     </> : <></>}

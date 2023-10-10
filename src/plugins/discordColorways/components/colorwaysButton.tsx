@@ -8,6 +8,7 @@ import * as DataStore from "@api/DataStore";
 import { openModal } from "@utils/modal";
 import { Text, Tooltip, useState } from "@webpack/common";
 
+import { fallbackColorways } from "..";
 import { Colorway } from "../types";
 import SelectorModal from "./selectorModal";
 import Spinner from "./spinner";
@@ -41,14 +42,14 @@ export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnCo
                                                 .then((data: { colorways: Colorway[]; }) => {
                                                     if (!data) {
                                                         DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={fallbackColorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
                                                             setLoading(false);
                                                             onClick();
                                                         }));
                                                     }
                                                     if (!data.colorways?.length) {
                                                         DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={fallbackColorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
                                                             setLoading(false);
                                                             onClick();
                                                         }));
@@ -65,7 +66,7 @@ export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnCo
                                                 .catch(err => {
                                                     console.log(err);
                                                     DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                        openModal(props => <SelectorModal modalProps={props} colorwayProps={[]} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
+                                                        openModal(props => <SelectorModal modalProps={props} colorwayProps={fallbackColorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
                                                         setLoading(false);
                                                         onClick();
                                                     }));

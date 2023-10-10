@@ -24,7 +24,7 @@ import {
 } from "@webpack/common";
 
 import { ColorPicker } from "..";
-import { generateCss } from "../css";
+import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
 import { ThemePreviewCategory } from "./themePreview";
 export default function CreatorModal({
@@ -39,6 +39,8 @@ export default function CreatorModal({
     const [colorwayName, setColorwayName] = useState<string>("");
     const [tintedText, setTintedText] = useState<boolean>(true);
     const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
+    const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
+    const [preset, setPreset] = useState<string>("default");
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
             <ModalHeader>
@@ -54,7 +56,7 @@ export default function CreatorModal({
                     placeholder="Give your Colorway a name"
                     value={colorwayName}
                     onChange={setColorwayName}
-                ></TextInput>
+                />
                 <Forms.FormTitle style={{ marginBottom: 0 }}>
                     Colors:
                 </Forms.FormTitle>
@@ -128,59 +130,54 @@ export default function CreatorModal({
                         ]}
                     />
                 </div>
-                <div
-                    className={`colorwaysCreator-settingCat${collapsedSettings
-                        ? " colorwaysCreator-settingCat-collapsed" : ""}`}
-                >
+                <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
                         className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                        onClick={() =>
-                            collapsedSettings === true
-                                ? setCollapsedSettings(false)
-                                : setCollapsedSettings(true)
-                        }
-                    >
-                        <Forms.FormTitle style={{ marginBottom: 0 }}>
-                            Settings
-                        </Forms.FormTitle>
-                        <svg
-                            className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                            role="img"
-                        >
-                            <path
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M7 10L12 15 17 10"
-                                aria-hidden="true"
-                            ></path>
+                        onClick={() => collapsedSettings ? setCollapsedSettings(false) : setCollapsedSettings(true)}>
+                        <Forms.FormTitle style={{ marginBottom: 0 }}>Settings</Forms.FormTitle>
+                        <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
+                            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
                         </svg>
                     </div>
                     <div className="colorwaysCreator-settingItm">
-                        <Text variant="eyebrow" tag="h5">
-                            Use colored text
-                        </Text>
-                        <Switch
-                            value={tintedText}
-                            onChange={setTintedText}
-                            hideBorder={true}
-                            style={{ marginBottom: 0 }}
-                        ></Switch>
+                        <Text variant="eyebrow" tag="h5">Use colored text</Text>
+                        <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
                     </div>
                 </div>
-                <ThemePreviewCategory
-                    isCollapsed={false}
-                    accent={"#" + accentColor}
-                    primary={"#" + primaryColor}
-                    secondary={"#" + secondaryColor}
-                    tertiary={"#" + tertiaryColor}
-                ></ThemePreviewCategory>
+                <div className={`colorwaysCreator-settingCat${collapsedPresets ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
+                    <div
+                        className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
+                        onClick={() => collapsedPresets ? setCollapsedPresets(false) : setCollapsedPresets(true)}>
+                        <Forms.FormTitle style={{ marginBottom: 0 }}>Presets</Forms.FormTitle>
+                        <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
+                            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
+                        </svg>
+                    </div>
+                    <div className="colorwaysCreator-settingsList">
+                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("default")}>
+                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                                {preset === "default" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                            </svg>
+                            <Text variant="eyebrow" tag="h5">Default</Text>
+                        </div>
+                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("cyan")}>
+                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                                {preset === "cyan" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                            </svg>
+                            <Text variant="eyebrow" tag="h5">Cyan</Text>
+                        </div>
+                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("virtualBoy")}>
+                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                                {preset === "virtualBoy" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                            </svg>
+                            <Text variant="eyebrow" tag="h5">Virtual Boy</Text>
+                        </div>
+                    </div>
+                </div>
+                <ThemePreviewCategory isCollapsed={false} accent={"#" + accentColor} primary={"#" + primaryColor} secondary={"#" + secondaryColor} tertiary={"#" + tertiaryColor} />
             </ModalContent>
             <ModalFooter>
                 <Button
@@ -189,15 +186,25 @@ export default function CreatorModal({
                     size={Button.Sizes.MEDIUM}
                     look={Button.Looks.FILLED}
                     onClick={e => {
-                        const customColorwayCSS = generateCss(
-                            primaryColor,
-                            secondaryColor,
-                            tertiaryColor,
-                            accentColor,
-                            tintedText
-                        );
+                        var customColorwayCSS: string = "";
+                        if (preset === "default") {
+                            customColorwayCSS = generateCss(
+                                primaryColor,
+                                secondaryColor,
+                                tertiaryColor,
+                                accentColor,
+                                tintedText
+                            );
+                        } else {
+                            customColorwayCSS = getPreset(
+                                primaryColor,
+                                secondaryColor,
+                                tertiaryColor,
+                                accentColor
+                            )[preset].preset();
+                        }
                         const customColorway: Colorway = {
-                            name: colorwayName || "Colorway",
+                            name: (colorwayName || "Colorway") + (preset === "default" ? "" : ": Made for " + getPreset()[preset].name),
                             import: customColorwayCSS,
                             accent: "#" + accentColor,
                             primary: "#" + primaryColor,

@@ -400,3 +400,32 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
 /*End Accent*/`: ""}`;
     return colorwayCss;
 }
+
+export function getPreset(primaryColor?: string, secondaryColor?: string, tertiaryColor?: string, accentColor?: string) {
+    function cyan() {
+        return `:root {
+    --cyan-accent-color: ${"#" + accentColor};
+    --cyan-background-primary: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%/40%);
+    --cyan-background-secondary: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%);
+}`;
+    }
+
+    function virtualBoy() {
+        return `:root {
+    --VBaccent: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${HexToHSL("#" + accentColor)[2]}%;
+    --VBaccent-muted: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(((HexToHSL("#" + tertiaryColor)[2]) - 10), 0)}%;
+    --VBaccent-dimmest: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min((HexToHSL("#" + tertiaryColor)[2] + (3.6 * 5) - 3), 100)}%;
+}`;
+    }
+
+    return {
+        cyan: {
+            name: "Cyan",
+            preset: cyan
+        },
+        virtualBoy: {
+            name: "Virtual Boy",
+            preset: virtualBoy
+        }
+    };
+}
