@@ -67,3 +67,37 @@ export function _buildPopoverElements(
 
     return items;
 }
+
+export const hiddenButtons = new Map<string, getButtonItem>();
+
+export function addHiddenButton(
+    identifier: string,
+    item: getButtonItem,
+) {
+    hiddenButtons.set(identifier, item);
+}
+
+export function removeHiddenButton(identifier: string) {
+    hiddenButtons.delete(identifier);
+}
+
+export function _buildHiddenPopoverElements(
+    msg: Message,
+    makeButton: (item: ButtonItem) => React.ComponentType
+) {
+    const items = [] as React.ComponentType[];
+
+    for (const [identifier, getItem] of hiddenButtons.entries()) {
+        try {
+            const item = getItem(msg);
+            if (item) {
+                item.key ??= identifier;
+                items.push(makeButton(item));
+            }
+        } catch (err) {
+            logger.error(`[${identifier}]`, err);
+        }
+    }
+
+    return items;
+}

@@ -17,7 +17,7 @@
 */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addButton, addHiddenButton, removeButton, removeHiddenButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -114,6 +114,15 @@ const settings = definePluginSettings({
             { label: "Left Click to view the raw content.", value: "Left", default: true },
             { label: "Right click to view the raw content.", value: "Right" }
         ]
+    },
+    hidden: {
+        description: "Whether the button is hidden (hold shift to show).",
+        type: OptionType.BOOLEAN,
+        default: false,
+        onChange: value => {
+            stop();
+            start();
+        }
     }
 });
 
@@ -140,59 +149,63 @@ function MakeContextCallback(name: string) {
     return callback;
 }
 
+let lastAddedWasHidden = false;
+
+function start() {
+    lastAddedWasHidden = settings.store.hidden;
+    (lastAddedWasHidden ? addHiddenButton : addButton)("ViewRaw", msg => {
+        const handleClick = () => {
+            if (settings.store.clickMethod === "Right") {
+                copyWithToast(msg.content);
+            } else {
+                openViewRawModalMessage(msg);
+            }
+        };
+
+        const handleContextMenu = e => {
+            if (settings.store.clickMethod === "Left") {
+                e.preventDefault();
+                e.stopPropagation();
+                copyWithToast(msg.content);
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                openViewRawModalMessage(msg);
+            }
+        };
+
+        const label = settings.store.clickMethod === "Right"
+            ? "Copy Raw (Left Click) / View Raw (Right Click)"
+            : "View Raw (Left Click) / Copy Raw (Right Click)";
+
+        return {
+            label,
+            icon: CopyIcon,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: handleClick,
+            onContextMenu: handleContextMenu
+        };
+    });
+
+    addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
+    addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
+    addContextMenuPatch("user-context", MakeContextCallback("User"));
+}
+
+function stop() {
+    (lastAddedWasHidden ? removeHiddenButton : removeButton)("ViewRaw");
+    removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
+    removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
+    removeContextMenuPatch("user-context", MakeContextCallback("User"));
+}
 
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
-    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.UlyssesZhan],
     dependencies: ["MessagePopoverAPI"],
     settings,
-
-    start() {
-        addButton("ViewRaw", msg => {
-            const handleClick = () => {
-                if (settings.store.clickMethod === "Right") {
-                    copyWithToast(msg.content);
-                } else {
-                    openViewRawModalMessage(msg);
-                }
-            };
-
-            const handleContextMenu = e => {
-                if (settings.store.clickMethod === "Left") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    copyWithToast(msg.content);
-                } else {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openViewRawModalMessage(msg);
-                }
-            };
-
-            const label = settings.store.clickMethod === "Right"
-                ? "Copy Raw (Left Click) / View Raw (Right Click)"
-                : "View Raw (Left Click) / Copy Raw (Right Click)";
-
-            return {
-                label,
-                icon: CopyIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: handleClick,
-                onContextMenu: handleContextMenu
-            };
-        });
-
-        addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        addContextMenuPatch("user-context", MakeContextCallback("User"));
-    },
-
-    stop() {
-        removeButton("CopyRawMessage");
-        removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        removeContextMenuPatch("user-context", MakeContextCallback("User"));
-    }
+    start,
+    stop
 });
