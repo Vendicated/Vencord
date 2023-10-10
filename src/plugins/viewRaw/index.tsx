@@ -150,6 +150,9 @@ function MakeContextCallback(name: string) {
 }
 
 let lastAddedWasHidden = false;
+let guildCallback: NavContextMenuPatchCallback;
+let channelCallback: NavContextMenuPatchCallback;
+let userCallback: NavContextMenuPatchCallback;
 
 function start() {
     lastAddedWasHidden = settings.store.hidden;
@@ -188,16 +191,16 @@ function start() {
         };
     });
 
-    addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-    addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-    addContextMenuPatch("user-context", MakeContextCallback("User"));
+    addContextMenuPatch("guild-context", guildCallback = MakeContextCallback("Guild"));
+    addContextMenuPatch("channel-context", channelCallback = MakeContextCallback("Channel"));
+    addContextMenuPatch("user-context", userCallback = MakeContextCallback("User"));
 }
 
 function stop() {
     (lastAddedWasHidden ? removeHiddenButton : removeButton)("ViewRaw");
-    removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-    removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-    removeContextMenuPatch("user-context", MakeContextCallback("User"));
+    removeContextMenuPatch("guild-context", guildCallback);
+    removeContextMenuPatch("channel-context", channelCallback);
+    removeContextMenuPatch("user-context", userCallback);
 }
 
 export default definePlugin({
