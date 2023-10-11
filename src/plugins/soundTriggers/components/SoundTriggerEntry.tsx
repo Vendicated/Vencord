@@ -90,7 +90,6 @@ export function SoundTriggerEntry(props: SoundTriggerEntryProps) {
     const { trigger, index, onDelete } = props;
 
     return (
-        // <Card style={{ padding: "10px" }}>
         <Flex flexDirection="row" className={classFactory("trigger-entry", "section", "hoverable-section")}>
             <Flex flexDirection="row" style={{ flexGrow: 1 }}>
                 <Text style={{ flex: 1, overflowWrap: "anywhere" }}>{trigger.patterns.join(", ")}</Text>
@@ -112,6 +111,5 @@ export function SoundTriggerEntry(props: SoundTriggerEntryProps) {
                 </Button>
             </Flex>
         </Flex>
-        // </Card >
     );
 }

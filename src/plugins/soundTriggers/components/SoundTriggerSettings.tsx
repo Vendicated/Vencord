@@ -19,11 +19,13 @@ import { openTriggerModal } from "./SoundTriggerModal";
 
 
 export function SoundTriggerSettings() {
+    const settingsExist = Array.isArray(settings.store.soundTriggers);
     return (
         <Flex flexDirection="column">
             <Flex flexDirection="row">
                 <Button
                     style={{ flexGrow: 1 }}
+                    disabled={!settingsExist}
                     onClick={() => openTriggerModal({
                         mode: "create",
                         onSubmit(trigger) {
@@ -34,10 +36,14 @@ export function SoundTriggerSettings() {
                     New
                 </Button>
                 <Flex flexDirection="row">
-                    <Button onClick={() => openModal(modalProps => <ImportModal {...modalProps} />)}>
+                    <Button
+                        disabled={!settingsExist}
+                        onClick={() => openModal(modalProps => <ImportModal {...modalProps} />)}
+                    >
                         Import
                     </Button>
                     <Button
+                        disabled={!settingsExist}
                         onClick={() => {
                             const json = JSON.stringify(settings.store.soundTriggers);
                             Clipboard.copy(json);
@@ -54,7 +60,7 @@ export function SoundTriggerSettings() {
                     <div className={classFactory("rounded-button")} />
                 </Flex>
                 <Forms.FormDivider />
-                {settings.store.soundTriggers.length > 0
+                {settingsExist && settings.store.soundTriggers.length > 0
                     ? settings.store.soundTriggers.map((trigger, i) => (
                         <SoundTriggerEntry
                             key={i}
@@ -66,7 +72,7 @@ export function SoundTriggerSettings() {
                             }}
                         />
                     ))
-                    : <EmptyState text="No triggers." />
+                    : <EmptyState text={settingsExist ? "No Triggers." : "Enable to get started."} />
                 }
             </Flex>
         </Flex>

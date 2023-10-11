@@ -30,7 +30,7 @@ export type SoundTrigger = {
 };
 
 export const EMPTY_TRIGGER: SoundTrigger = { patterns: [], sound: "", volume: 0.5, caseSensitive: false };
-export const DEFAULT_SETTINGS = [EMPTY_TRIGGER];
+export const DEFAULT_SETTINGS = [];
 
 export const classFactory = classNameFactory("vc-st-");
 
@@ -43,12 +43,12 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "!SoundTriggers",
+    name: "SoundTriggers",
     description: "Chaotic plugin for mapping text/emojis to sound.",
     authors: [Devs.battlesqui_d],
     settings,
     start() {
-        if (settings.store.soundTriggers) {
+        if (Array.isArray(settings.store.soundTriggers)) {
             return;
         }
         settings.store.soundTriggers = DEFAULT_SETTINGS;
