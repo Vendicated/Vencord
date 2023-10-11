@@ -19,17 +19,17 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Button } from "@webpack/common";
+import { Button, Toasts } from "@webpack/common";
 
 import { initAuth } from "./lib/auth";
 import { BASE_URL, CDN_URL, SKU_ID } from "./lib/constants";
-import { useBearStore } from "./lib/stores/AuthorizationStore";
+import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
+import { setCreate } from "./lib/zustand";
 
 let users: Map<string, string>;
 const fetchUsers = async (cache: RequestCache = "default") => users = new Map(Object.entries(await fetch(BASE_URL + "/api/users", { cache }).then(c => c.json())));
 
 let CustomizationSection;
-export let zustandCreate: typeof import("zustand").default;
 
 export default definePlugin({
     name: "Decor",
@@ -82,20 +82,14 @@ export default definePlugin({
     },
 
     set zustandCreate(e: any) {
-        zustandCreate = e;
+        setCreate(e);
     },
-
-    get zustandCreate() {
-        return zustandCreate;
-    },
-
     set CustomizationSection(e: any) {
         CustomizationSection = e;
     },
 
     async start() {
         await fetchUsers();
-        await initAuth();
     },
 
     patchGetUser(user) {
@@ -119,21 +113,13 @@ export default definePlugin({
     },
 
     DecorSection: ErrorBoundary.wrap(() => {
-        const bearStore = useBearStore();
+        const authorization = useAuthorizationStore();
         return <CustomizationSection
             title="Decor Avatar Decoration"
             hasBackground={true}
         >
             <div style={{ display: "flex" }}>
-                <Button
-                    onClick={() => {
-                        bearStore.increase(1);
-                    }}
-                    size={Button.Sizes.SMALL}
-                >
-                    {bearStore.bears}
-                </Button>
-                {/* isAuthorized() ? <>
+                {authorization.token ? <>
                     <Button
                         onClick={() => {
                             Toasts.show({
@@ -162,11 +148,11 @@ export default definePlugin({
                     </Button>
                 </> :
                     <Button
-                        onClick={authorize}
+                        onClick={authorization.authorize}
                     >
                         Authorize
                     </Button>
-                    */}
+                }
             </div>
         </CustomizationSection>;
     })
