@@ -35,6 +35,7 @@ export default definePlugin({
     description: "Custom avatar decorations",
     authors: [Devs.FieryFlames],
     patches: [
+        // Patch UserStore to include Decor avatar decorations when getting users
         {
             find: "getUserStoreVersion",
             replacement: {
@@ -42,6 +43,7 @@ export default definePlugin({
                 replace: "$1$self.patchGetUser($2)"
             }
         },
+        // Patch MediaResolver to return correct URL for Decor avatar decorations
         {
             find: "getAvatarDecorationURL:",
             replacement: {
@@ -49,6 +51,7 @@ export default definePlugin({
                 replace: "$&const vcDecorDecoration=$self.patchGetAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
+        // Patch profile customization settings to include Decor section
         {
             find: "DefaultCustomizationSections",
             replacement: {
@@ -56,6 +59,7 @@ export default definePlugin({
                 replace: "$&$self.DecorSection(),"
             }
         },
+        // Obtain CustomizationSection component
         {
             find: "e.titleIcon",
             replacement: {
@@ -86,6 +90,7 @@ export default definePlugin({
     },
 
     patchGetAvatarDecorationURL({ avatarDecoration, canAnimate }) {
+        // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");
             if (!canAnimate && parts[0] === "a") parts.shift();
@@ -94,19 +99,38 @@ export default definePlugin({
     },
 
     DecorSection: ErrorBoundary.wrap(() => {
-        return <CustomizationSection title="Decor Avatar Decoration">
-            <Button
-                onClick={() => {
-                    Toasts.show({
-                        id: Toasts.genId(),
-                        message: "Hello from Decor!",
-                        type: Toasts.Type.SUCCESS
-                    });
-                }}
-                size={Button.Sizes.SMALL}
-            >
-                Change Decoration
-            </Button>
+        return <CustomizationSection
+            title="Decor Avatar Decoration"
+            hasBackground={true}
+        >
+            <div style={{ display: "flex" }}>
+                <Button
+                    onClick={() => {
+                        Toasts.show({
+                            id: Toasts.genId(),
+                            message: "Hello from Decor!",
+                            type: Toasts.Type.SUCCESS
+                        });
+                    }}
+                    size={Button.Sizes.SMALL}
+                >
+                    Change Decor Decoration
+                </Button>
+                <Button
+                    onClick={() => {
+                        Toasts.show({
+                            id: Toasts.genId(),
+                            message: "Goodbye from Decor!",
+                            type: Toasts.Type.FAILURE
+                        });
+                    }}
+                    color={Button.Colors.PRIMARY}
+                    size={Button.Sizes.SMALL}
+                    look={Button.Looks.LINK}
+                >
+                    Remove Decor Decoration
+                </Button>
+            </div>
         </CustomizationSection>;
     })
 });
