@@ -44,9 +44,8 @@ export const validateAndFormatTrigger = (trigger: SoundTrigger): SoundTriggerVal
     return {
         error: false,
         formattedTrigger: {
-            patterns: trigger.patterns,
+            ...trigger,
             sound: formattedSound,
-            volume: trigger.volume
         }
     };
 };

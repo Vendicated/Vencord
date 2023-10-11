@@ -48,9 +48,9 @@ export function SoundTriggerSettings() {
                 </Flex>
             </Flex>
             <Flex flexDirection="column" style={{ gap: "6px" }}>
-                <Flex flexDirection="row" style={{ justifyContent: "space-evenly", alignItems: "center" }}>
-                    <Forms.FormTitle tag="h5">Pattern</Forms.FormTitle>
-                    <Forms.FormTitle tag="h5">Sound</Forms.FormTitle>
+                <Flex flexDirection="row" style={{ flexGrow: 1, alignItems: "center" }}>
+                    <Forms.FormTitle tag="h5" style={{ flex: 1 }}>Pattern</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5" style={{ flex: 1 }}>Sound</Forms.FormTitle>
                     <div className={classFactory("rounded-button")} />
                 </Flex>
                 <Forms.FormDivider />

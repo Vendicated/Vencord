@@ -7,7 +7,7 @@
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Button, Card, Forms, Slider, Text, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, Card, Forms, Slider, Switch, Text, TextInput, useEffect, useState } from "@webpack/common";
 
 import { classFactory, EMPTY_TRIGGER, settings, SoundTrigger } from "..";
 import { failToast, successToast, triggersAreUnique, triggersEqual, validateAndFormatTrigger } from "../util";
@@ -88,6 +88,12 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                             ))}
                         </Card>)
                         : <EmptyState text="No text patterns defined." />}
+                    <Switch
+                        value={trigger.caseSensitive}
+                        onChange={() => setTrigger({ ...trigger, caseSensitive: !trigger.caseSensitive })}
+                    >
+                        Case Sensitive
+                    </Switch>
                     <div>
                         <Forms.FormTitle tag="h5">Sound URL</Forms.FormTitle>
                         <TextInput
@@ -104,7 +110,8 @@ export function SoundTriggerModal(props: SoundTriggerModalProps) {
                         <Forms.FormTitle tag="h5">Volume</Forms.FormTitle>
                         <Slider
                             minValue={0}
-                            maxValue={100}
+                            maxValue={1}
+                            onValueRender={v => `${Math.round(v * 100)}%`}
                             initialValue={trigger.volume}
                             onValueChange={v => setTrigger({ ...trigger, volume: v })}
                         />
