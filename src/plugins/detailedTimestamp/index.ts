@@ -148,14 +148,69 @@ export default definePlugin({
                     `;
                 }
             }
+        },
+        {
+            find: ".connectedAccount,",
+            replacement: {
+                match: re`
+                    # formatted time
+                    # show metadata?
+                    (\i)=(\i)\?
+                    # timestamp
+                    \(0,\i\.\i\)\((\i\[\i\.\i\.CREATED_AT\]),\i\)
+                    # unmodified
+                    (.{0,2500})
+                    # createElement
+                    (\(0,\i\.\i\))\(
+                        # component type namespace
+                        (\i)\.Text,
+                        # options
+                        (\{.{0,200}\})
+                    \):null
+                `,
+                replace: (matched, formattedTime, showMetadata, timestamp, unmodified, createElement, componentTypes, options) => {
+                    return `
+                        ${formattedTime} = ${showMetadata} ? $self.formatTime(${timestamp}, $self.settings.store.memberSinceFormat)
+                        ${unmodified}
+                        $self.wrapTooltip(${createElement}, ${componentTypes}, ${timestamp}, ${options}) : null
+                    `;
+                }
+            }
+        },
+        {
+            find: ".connectionAccountLabelContainer,",
+            replacement: {
+                match: re`
+                    # formatted time
+                    (\i)=
+                    # timestamp
+                    \(0,\i\.\i\)\((\i\[\i\.\i\.CREATED_AT\]),\i\)
+                    # unmodified
+                    (.{0,2000})
+                    # createElement
+                    (\(0,\i\.\i\))\(
+                        # component type namespace
+                        (\i)\.Text,
+                        # options and key
+                        (\{.{0,500}\},"member-since")
+                    \)
+                `,
+                replace: (matched, formattedTime, timestamp, unmodified, createElement, componentTypes, optionsAndKey) => {
+                    return `
+                        ${formattedTime} = $self.formatTime(${timestamp}, $self.settings.store.memberSinceFormat)
+                        ${unmodified}
+                        $self.wrapTooltip(${createElement}, ${componentTypes}, ${timestamp}, ${optionsAndKey})
+                    `;
+                }
+            }
         }
     ],
 
-    formatTime(time: number, format: string) {
-        return moment(time).format(format);
+    formatTime(time: number | string | undefined, format: string) {
+        return time == null ? null : moment(time).format(format);
     },
-    wrapTooltip(createElement: (type: ComponentType, options: any) => ComponentClass, componentTypes: any, timestamp: number, componentOptions: any) {
-        componentOptions.children = this.formatTime(timestamp, this.settings.store.memberSinceFormat);
+    wrapTooltip(createElement: (type: ComponentType, options: any, key?: string) => ComponentClass, componentTypes: any, timestamp: number, componentOptions: any, key?: string) {
+        componentOptions.children ??= this.formatTime(timestamp, this.settings.store.memberSinceFormat);
         if (!this.settings.store.memberSinceTooltips) {
             return createElement(componentTypes.Text, componentOptions);
         }
@@ -164,6 +219,6 @@ export default definePlugin({
             tooltipClassName: classNames,
             delay: 750,
             children: (e: any) => createElement(componentTypes.Text, Object.assign(componentOptions, e))
-        });
+        }, key);
     }
 });
