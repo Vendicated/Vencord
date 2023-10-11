@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.5.5",
+    "version": "1.5.6",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -94,7 +94,7 @@
         "build": {
             "overwriteDest": true
         },
-        "sourceDir": "./dist/extension-v2-unpacked"
+        "sourceDir": "./dist/firefox-unpacked"
     },
     "engines": {
         "node": ">=18",

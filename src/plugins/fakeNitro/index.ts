@@ -222,8 +222,7 @@ export default definePlugin({
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: [
                 "canUseHighVideoUploadQuality",
-                // TODO: Remove the last two when they get removed from stable
-                "(?:canStreamQuality|canStreamHighQuality|canStreamMidQuality)",
+                "canStreamQuality",
             ].map(func => {
                 return {
                     match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
