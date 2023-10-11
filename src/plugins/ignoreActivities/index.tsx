@@ -1,27 +1,17 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import * as DataStore from "@api/DataStore";
+import { definePluginSettings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { Tooltip } from "webpack/common";
 
 const enum ActivitiesTypes {
@@ -31,203 +21,154 @@ const enum ActivitiesTypes {
 
 interface IgnoredActivity {
     id: string;
+    name: string;
     type: ActivitiesTypes;
 }
 
-const RegisteredGamesClasses = findByPropsLazy("overlayToggleIconOff", "overlayToggleIconOn");
-const TryItOutClasses = findByPropsLazy("tryItOutBadge", "tryItOutBadgeIcon");
-const BaseShapeRoundClasses = findByPropsLazy("baseShapeRound", "baseShapeRoundLeft", "baseShapeRoundRight");
 const RunningGameStore = findStoreLazy("RunningGameStore");
+const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame");
 
-function ToggleIconOff() {
-    return (
-        <svg
-            className={RegisteredGamesClasses.overlayToggleIconOff}
-            height="24"
-            width="24"
-            viewBox="0 2.2 32 26"
-            aria-hidden={true}
-            role="img"
-        >
-            <g
-                fill="none"
-                fillRule="evenodd"
-            >
-                <path
-                    className={RegisteredGamesClasses.fill}
-                    fill="currentColor"
-                    d="M 16 8 C 7.664063 8 1.25 15.34375 1.25 15.34375 L 0.65625 16 L 1.25 16.65625 C 1.25 16.65625 7.097656 23.324219 14.875 23.9375 C 15.246094 23.984375 15.617188 24 16 24 C 16.382813 24 16.753906 23.984375 17.125 23.9375 C 24.902344 23.324219 30.75 16.65625 30.75 16.65625 L 31.34375 16 L 30.75 15.34375 C 30.75 15.34375 24.335938 8 16 8 Z M 16 10 C 18.203125 10 20.234375 10.601563 22 11.40625 C 22.636719 12.460938 23 13.675781 23 15 C 23 18.613281 20.289063 21.582031 16.78125 21.96875 C 16.761719 21.972656 16.738281 21.964844 16.71875 21.96875 C 16.480469 21.980469 16.242188 22 16 22 C 15.734375 22 15.476563 21.984375 15.21875 21.96875 C 11.710938 21.582031 9 18.613281 9 15 C 9 13.695313 9.351563 12.480469 9.96875 11.4375 L 9.9375 11.4375 C 11.71875 10.617188 13.773438 10 16 10 Z M 16 12 C 14.34375 12 13 13.34375 13 15 C 13 16.65625 14.34375 18 16 18 C 17.65625 18 19 16.65625 19 15 C 19 13.34375 17.65625 12 16 12 Z M 7.25 12.9375 C 7.09375 13.609375 7 14.285156 7 15 C 7 16.753906 7.5 18.394531 8.375 19.78125 C 5.855469 18.324219 4.105469 16.585938 3.53125 16 C 4.011719 15.507813 5.351563 14.203125 7.25 12.9375 Z M 24.75 12.9375 C 26.648438 14.203125 27.988281 15.507813 28.46875 16 C 27.894531 16.585938 26.144531 18.324219 23.625 19.78125 C 24.5 18.394531 25 16.753906 25 15 C 25 14.285156 24.90625 13.601563 24.75 12.9375 Z"
-                />
-                <rect
-                    className={RegisteredGamesClasses.fill}
-                    x="3"
-                    y="26"
-                    width="26"
-                    height="2"
-                    transform="rotate(-45 2 20)"
-                />
-            </g>
-        </svg>
-    );
-}
-
-function ToggleIconOn({ forceWhite }: { forceWhite?: boolean; }) {
-    return (
-        <svg
-            className={RegisteredGamesClasses.overlayToggleIconOn}
-            height="24"
-            width="24"
-            viewBox="0 2.2 32 26"
-        >
-            <path
-                className={forceWhite ? "" : RegisteredGamesClasses.fill}
-                fill={forceWhite ? "var(--white-500)" : ""}
-                d="M 16 8 C 7.664063 8 1.25 15.34375 1.25 15.34375 L 0.65625 16 L 1.25 16.65625 C 1.25 16.65625 7.097656 23.324219 14.875 23.9375 C 15.246094 23.984375 15.617188 24 16 24 C 16.382813 24 16.753906 23.984375 17.125 23.9375 C 24.902344 23.324219 30.75 16.65625 30.75 16.65625 L 31.34375 16 L 30.75 15.34375 C 30.75 15.34375 24.335938 8 16 8 Z M 16 10 C 18.203125 10 20.234375 10.601563 22 11.40625 C 22.636719 12.460938 23 13.675781 23 15 C 23 18.613281 20.289063 21.582031 16.78125 21.96875 C 16.761719 21.972656 16.738281 21.964844 16.71875 21.96875 C 16.480469 21.980469 16.242188 22 16 22 C 15.734375 22 15.476563 21.984375 15.21875 21.96875 C 11.710938 21.582031 9 18.613281 9 15 C 9 13.695313 9.351563 12.480469 9.96875 11.4375 L 9.9375 11.4375 C 11.71875 10.617188 13.773438 10 16 10 Z M 16 12 C 14.34375 12 13 13.34375 13 15 C 13 16.65625 14.34375 18 16 18 C 17.65625 18 19 16.65625 19 15 C 19 13.34375 17.65625 12 16 12 Z M 7.25 12.9375 C 7.09375 13.609375 7 14.285156 7 15 C 7 16.753906 7.5 18.394531 8.375 19.78125 C 5.855469 18.324219 4.105469 16.585938 3.53125 16 C 4.011719 15.507813 5.351563 14.203125 7.25 12.9375 Z M 24.75 12.9375 C 26.648438 14.203125 27.988281 15.507813 28.46875 16 C 27.894531 16.585938 26.144531 18.324219 23.625 19.78125 C 24.5 18.394531 25 16.753906 25 15 C 25 14.285156 24.90625 13.601563 24.75 12.9375 Z"
-            />
-        </svg>
-    );
-}
-
-function ToggleActivityComponent({ activity, forceWhite, forceLeftMargin }: { activity: IgnoredActivity; forceWhite?: boolean; forceLeftMargin?: boolean; }) {
+function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     const forceUpdate = useForceUpdater();
 
     return (
-        <Tooltip text="Toggle activity">
-            {({ onMouseLeave, onMouseEnter }) => (
-                <div
-                    onMouseLeave={onMouseLeave}
-                    onMouseEnter={onMouseEnter}
-                    className={RegisteredGamesClasses.overlayToggleIcon}
-                    role="button"
-                    aria-label="Toggle activity"
-                    tabIndex={0}
-                    style={forceLeftMargin ? { marginLeft: "2px" } : undefined}
+        <Tooltip text={tooltipText}>
+            {tooltipProps => (
+                <button
+                    {...tooltipProps}
                     onClick={e => handleActivityToggle(e, activity, forceUpdate)}
+                    style={{ all: "unset", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center" }}
                 >
-                    {
-                        ignoredActivitiesCache.has(activity.id)
-                            ? <ToggleIconOff />
-                            : <ToggleIconOn forceWhite={forceWhite} />
-                    }
-                </div>
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 -960 960 960"
+                    >
+                        <path fill={fill} d={path} />
+                    </svg>
+                </button>
             )}
         </Tooltip>
     );
 }
 
-function ToggleActivityComponentWithBackground({ activity }: { activity: IgnoredActivity; }) {
-    return (
-        <div
-            className={`${TryItOutClasses.tryItOutBadge} ${BaseShapeRoundClasses.baseShapeRound}`}
-            style={{ padding: "0px 2px", height: 28 }}
-        >
-            <ToggleActivityComponent activity={activity} forceWhite={true} />
-        </div>
-    );
+const ToggleIconOn = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Disable Activity", "M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z", fill);
+const ToggleIconOff = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Enable Activity", "m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-41 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z", fill);
+
+function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
+    if (getIgnoredActivities().some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
+    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--primary-400)");
 }
 
-function handleActivityToggle(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activity: IgnoredActivity, forceUpdateComponent: () => void) {
+function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: IgnoredActivity, forceUpdateButton: () => void) {
     e.stopPropagation();
-    if (ignoredActivitiesCache.has(activity.id)) ignoredActivitiesCache.delete(activity.id);
-    else ignoredActivitiesCache.set(activity.id, activity);
-    forceUpdateComponent();
-    saveCacheToDatastore();
+
+    const ignoredActivityIndex = getIgnoredActivities().findIndex(act => act.id === activity.id);
+    if (ignoredActivityIndex === -1) settings.store.ignoredActivities = getIgnoredActivities().concat(activity);
+    else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
+
+    // Trigger activities recalculation
+    ShowCurrentGame?.updateSetting(old => old);
+    forceUpdateButton();
 }
 
-async function saveCacheToDatastore() {
-    await DataStore.set("IgnoreActivities_ignoredActivities", ignoredActivitiesCache);
-}
+const settings = definePluginSettings({}).withPrivateSettings<{
+    ignoredActivities: IgnoredActivity[];
+}>();
 
-let ignoredActivitiesCache = new Map<IgnoredActivity["id"], IgnoredActivity>();
+function getIgnoredActivities() {
+    return settings.store.ignoredActivities ??= [];
+}
 
 export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
-    description: "Ignore certain activities (like games and actual activities) from showing up on your status. You can configure which ones are ignored from the Registered Games and Activities tabs.",
+    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are ignored from the Registered Games and Activities tabs.",
+
+    dependencies: ["SettingsStoreAPI"],
+    settings,
+
     patches: [
+        {
+            find: '.displayName="LocalActivityStore"',
+            replacement: [
+                {
+                    match: /LISTENING.+?\)\);(?<=(\i)\.push.+?)/,
+                    replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
+                }
+            ]
+        },
         {
             find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
             replacement: {
-                match: /!(\i)(\)return null;var \i=(\i)\.overlay.+?children:)(\[.{0,70}overlayStatusText.+?\])(?=}\)}\(\))/,
-                replace: (_, platformCheck, restWithoutPlatformCheck, props, children) => "false"
-                    + `${restWithoutPlatformCheck}`
-                    + `(${platformCheck}?${children}:[])`
-                    + `.concat(Vencord.Plugins.plugins.IgnoreActivities.renderToggleGameActivityButton(${props}))`
+                match: /\(\)\.removeGame.+?null(?<=(\i)\?\i=\i\.\i\.Messages\.SETTINGS_GAMES_NOW_PLAYING_STATE.+?=(\i)\.overlay.+?)/,
+                replace: (m, nowPlaying, props) => `${m},$self.renderToggleGameActivityButton(${props},${nowPlaying})`
             }
         },
         {
             find: ".overlayBadge",
             replacement: [
                 {
-                    match: /(?<=\(\)\.badgeContainer,children:).{0,50}?name:(\i)\.name.+?null/,
-                    replace: (m, props) => `[${m},$self.renderToggleActivityButton(${props})]`
+                    match: /(?<=\(\)\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
+                    replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
                 },
                 {
-                    match: /(?<=\(\)\.badgeContainer,children:).{0,50}?name:(\i\.application)\.name.+?null/,
-                    replace: (m, props) => `${m},$self.renderToggleActivityButton(${props})`
+                    match: /(?<=\(\)\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),)/,
+                    replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
                 }
             ]
-        },
-        {
-            find: '.displayName="LocalActivityStore"',
-            replacement: {
-                match: /LISTENING.+?\)\);(?<=(\i)\.push.+?)/,
-                replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
-            }
         }
     ],
 
     async start() {
-        const ignoredActivitiesData = await DataStore.get<string[] | Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities") ?? new Map<IgnoredActivity["id"], IgnoredActivity>();
-        /** Migrate old data */
-        if (Array.isArray(ignoredActivitiesData)) {
-            for (const id of ignoredActivitiesData) {
-                ignoredActivitiesCache.set(id, { id, type: ActivitiesTypes.Game });
-            }
+        const oldIgnoredActivitiesData = await DataStore.get<Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities");
 
-            await saveCacheToDatastore();
-        } else ignoredActivitiesCache = ignoredActivitiesData;
+        if (oldIgnoredActivitiesData != null) {
+            settings.store.ignoredActivities = Array.from(oldIgnoredActivitiesData.values())
+                .map(activity => ({ ...activity, name: "Unknown Name" }));
 
-        if (ignoredActivitiesCache.size !== 0) {
-            const gamesSeen: { id?: string; exePath: string; }[] = RunningGameStore.getGamesSeen();
+            DataStore.del("IgnoreActivities_ignoredActivities");
+        }
 
-            for (const ignoredActivity of ignoredActivitiesCache.values()) {
+        if (getIgnoredActivities().length !== 0) {
+            const gamesSeen = RunningGameStore.getGamesSeen() as { id?: string; exePath: string; }[];
+
+            for (const [index, ignoredActivity] of getIgnoredActivities().entries()) {
                 if (ignoredActivity.type !== ActivitiesTypes.Game) continue;
 
                 if (!gamesSeen.some(game => game.id === ignoredActivity.id || game.exePath === ignoredActivity.id)) {
-                    /** Custom added game which no longer exists */
-                    ignoredActivitiesCache.delete(ignoredActivity.id);
+                    getIgnoredActivities().splice(index, 1);
                 }
             }
-
-            await saveCacheToDatastore();
         }
-    },
-
-    renderToggleGameActivityButton(props: { id?: string; exePath: string; }) {
-        return (
-            <ErrorBoundary noop>
-                <ToggleActivityComponent activity={{ id: props.id ?? props.exePath, type: ActivitiesTypes.Game }} forceLeftMargin={true} />
-            </ErrorBoundary>
-        );
-    },
-
-    renderToggleActivityButton(props: { id: string; }) {
-        return (
-            <ErrorBoundary noop>
-                <ToggleActivityComponentWithBackground activity={{ id: props.id, type: ActivitiesTypes.Embedded }} />
-            </ErrorBoundary>
-        );
     },
 
     isActivityNotIgnored(props: { type: number; application_id?: string; name?: string; }) {
-        if (props.type === 0) {
-            if (props.application_id !== undefined) return !ignoredActivitiesCache.has(props.application_id);
+        if (props.type === 0 || props.type === 3) {
+            if (props.application_id != null) return !getIgnoredActivities().some(activity => activity.id === props.application_id);
             else {
                 const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
-                if (exePath) return !ignoredActivitiesCache.has(exePath);
+                if (exePath) return !getIgnoredActivities().some(activity => activity.id === exePath);
             }
         }
         return true;
+    },
+
+    renderToggleGameActivityButton(props: { id?: string; name: string, exePath: string; }, nowPlaying: boolean) {
+        return (
+            <ErrorBoundary noop>
+                <div style={{ marginLeft: 12, zIndex: 0 }}>
+                    {ToggleActivityComponent({ id: props.id ?? props.exePath, name: props.name, type: ActivitiesTypes.Game }, nowPlaying)}
+                </div>
+            </ErrorBoundary>
+        );
+    },
+
+    renderToggleActivityButton(props: { id: string; name: string; }) {
+        return (
+            <ErrorBoundary noop>
+                {ToggleActivityComponent({ id: props.id, name: props.name, type: ActivitiesTypes.Embedded })}
+            </ErrorBoundary>
+        );
     }
 });
