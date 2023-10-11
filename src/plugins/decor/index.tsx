@@ -19,16 +19,17 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Button, Toasts } from "@webpack/common";
+import { Button } from "@webpack/common";
 
-const BASE_URL = "https://decor.fieryflames.dev";
-const CDN_URL = "https://decorcdn.fieryflames.dev";
-const SKU_ID = "100101099111114"; // decor in ascii numbers
+import { initAuth } from "./lib/auth";
+import { BASE_URL, CDN_URL, SKU_ID } from "./lib/constants";
+import { useBearStore } from "./lib/stores/AuthorizationStore";
 
 let users: Map<string, string>;
 const fetchUsers = async (cache: RequestCache = "default") => users = new Map(Object.entries(await fetch(BASE_URL + "/api/users", { cache }).then(c => c.json())));
 
 let CustomizationSection;
+export let zustandCreate: typeof import("zustand").default;
 
 export default definePlugin({
     name: "Decor",
@@ -66,9 +67,27 @@ export default definePlugin({
                 match: /function (\i)\(\i\){var \i,\i=\i\.title/,
                 replace: "$self.CustomizationSection=$1;$&"
             }
+        },
+        {
+            find: "will be removed in v4",
+            replacement: {
+                match: /function (\i)\(\i\){var \i="function"/,
+                replace: "$self.zustandCreate=$1;$&"
+            }
         }
-
     ],
+
+    flux: {
+        CONNECTION_OPEN: initAuth
+    },
+
+    set zustandCreate(e: any) {
+        zustandCreate = e;
+    },
+
+    get zustandCreate() {
+        return zustandCreate;
+    },
 
     set CustomizationSection(e: any) {
         CustomizationSection = e;
@@ -76,6 +95,7 @@ export default definePlugin({
 
     async start() {
         await fetchUsers();
+        await initAuth();
     },
 
     patchGetUser(user) {
@@ -99,6 +119,7 @@ export default definePlugin({
     },
 
     DecorSection: ErrorBoundary.wrap(() => {
+        const bearStore = useBearStore();
         return <CustomizationSection
             title="Decor Avatar Decoration"
             hasBackground={true}
@@ -106,30 +127,46 @@ export default definePlugin({
             <div style={{ display: "flex" }}>
                 <Button
                     onClick={() => {
-                        Toasts.show({
-                            id: Toasts.genId(),
-                            message: "Hello from Decor!",
-                            type: Toasts.Type.SUCCESS
-                        });
+                        bearStore.increase(1);
                     }}
                     size={Button.Sizes.SMALL}
                 >
-                    Change Decor Decoration
+                    {bearStore.bears}
                 </Button>
-                <Button
-                    onClick={() => {
-                        Toasts.show({
-                            id: Toasts.genId(),
-                            message: "Goodbye from Decor!",
-                            type: Toasts.Type.FAILURE
-                        });
-                    }}
-                    color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.SMALL}
-                    look={Button.Looks.LINK}
-                >
-                    Remove Decor Decoration
-                </Button>
+                {/* isAuthorized() ? <>
+                    <Button
+                        onClick={() => {
+                            Toasts.show({
+                                id: Toasts.genId(),
+                                message: "Hello from Decor!",
+                                type: Toasts.Type.SUCCESS
+                            });
+                        }}
+                        size={Button.Sizes.SMALL}
+                    >
+                        Change Decor Decoration
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            Toasts.show({
+                                id: Toasts.genId(),
+                                message: "Goodbye from Decor!",
+                                type: Toasts.Type.FAILURE
+                            });
+                        }}
+                        color={Button.Colors.PRIMARY}
+                        size={Button.Sizes.SMALL}
+                        look={Button.Looks.LINK}
+                    >
+                        Remove Decor Decoration
+                    </Button>
+                </> :
+                    <Button
+                        onClick={authorize}
+                    >
+                        Authorize
+                    </Button>
+                    */}
             </div>
         </CustomizationSection>;
     })

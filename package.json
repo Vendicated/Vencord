@@ -68,7 +68,8 @@
         "tsx": "^3.12.7",
         "type-fest": "^3.9.0",
         "typescript": "^5.0.4",
-        "zip-local": "^0.3.5"
+        "zip-local": "^0.3.5",
+        "zustand": "^4.4.3"
     },
     "packageManager": "pnpm@8.1.1",
     "pnpm": {
