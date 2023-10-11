@@ -157,7 +157,7 @@ export default definePlugin({
     },
 
     ActivitiesComponent(props: ActivityProps) {
-        const botActivityKeys = ["created_at", "id", "name", "type", "url"];
+        const botActivityKeys = ["type", "name", "id", "created_at"];
         const isBot = props.activities.length === 1 && Object.keys(props.activities[0]).every((value, i) => value === botActivityKeys[i]);
         if (!props.activities.length || (isBot && settings.store.ignoreBotsIcon)) return null;
         const gameActivities: Activity[] = [];
