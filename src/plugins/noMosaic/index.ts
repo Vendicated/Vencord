@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import style from "./styles.css?managed";
-
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { enableStyle } from "@api/Styles";
 import definePlugin from "@utils/types";
+
+import style from "./styles.css?managed";
 
 export default definePlugin({
     name: "NoMosaic",
@@ -31,12 +31,15 @@ export default definePlugin({
                 replace: '"INVALID"',
             },
             {
-                match: /\i\.length>1/,
-                replace: "false",
+                match: /(\.type\},\i=)\i\.length>1/,
+                replace: "$1false",
             },
         ],
     }],
     start() {
         enableStyle(style);
+    },
+    stop() {
+        disableStyle(style);
     }
 });
