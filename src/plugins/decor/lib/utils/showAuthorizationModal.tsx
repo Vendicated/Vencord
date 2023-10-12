@@ -15,11 +15,6 @@ import { useAuthorizationStore } from "../stores/AuthorizationStore";
 const AUTHORIZE_URL = API_URL + "/authorize";
 const OAuth = findByPropsLazy("OAuth2AuthorizeModal");
 
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 export default () => openModal(props =>
     <OAuth.OAuth2AuthorizeModal
         {...props}
