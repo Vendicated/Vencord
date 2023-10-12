@@ -9,6 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, Tooltip, useEffect } from "@webpack/common";
+import { React, Tooltip } from "@webpack/common";
 
 const settings = definePluginSettings({
     loop: {
@@ -63,6 +64,7 @@ export default definePlugin({
                 {tooltipProps => (
                     <div
                         {...tooltipProps}
+                        className="vc-pip-button"
                         role="button"
                         style={{
                             cursor: "pointer",
@@ -101,7 +103,9 @@ export default definePlugin({
                 )}
             </Tooltip>
         );
-    }, { noop: true }),
+    }, { 
+        noop: true 
+    }),
     enableStreamPiP: (jumpToChannel: any) => {
         useEffect(() => {
             const video = document.querySelector(".media-engine-video video") as HTMLVideoElement | null;

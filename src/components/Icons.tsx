@@ -221,3 +221,37 @@ export function CogWheel(props: IconProps) {
         </Icon>
     );
 }
+
+export function ReplyIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-reply-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M10 8.26667V4L3 11.4667L10 18.9333V14.56C15 14.56 18.5 16.2667 21 20C20 14.6667 17 9.33333 10 8.26667Z"
+            />
+        </Icon>
+    );
+}
+
+export function DeleteIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-delete-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"
+            />
+            <path
+                fill="currentColor"
+                d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"
+            />
+        </Icon>
+    );
+}
