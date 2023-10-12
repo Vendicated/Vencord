@@ -18,18 +18,15 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByCode, wreq } from "@webpack";
 import { Button } from "@webpack/common";
 
-import { BASE_URL, CDN_URL, SKU_ID } from "./lib/constants";
+import { getUsers, users } from "./lib/api";
+import { CDN_URL, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
-import { setDecorationGridItem } from "./ui/components";
-import ChangeDecorationModal from "./ui/modals/ChangeDecorationModal";
-
-let users: Map<string, string>;
-const fetchUsers = async (cache: RequestCache = "default") => users = new Map(Object.entries(await fetch(BASE_URL + "/api/users", { cache }).then(c => c.json())));
+import { useUserDecorationsStore } from "./lib/stores/UserDecorationsStore";
+import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
+import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
 
 let CustomizationSection;
 
@@ -70,45 +67,53 @@ export default definePlugin({
                 replace: "$self.CustomizationSection=$1;$&"
             }
         },
+        // Decoration modal module
         {
             find: ".decorationGridItem",
-            replacement: {
+            replacement: [{
                 match: /(?:,)((\i)=function\(.\){var \i=\i\.children)/,
-                replace: ";var $2;$self.DecorationGridItem=$2=$1"
-            }
+                replace: ";var $2;$self.DecorationGridItem=$1"
+            },
+            {
+                match: /const (\i)=(function\(\i\){var \i=\i\.user,\i=\i\.avatarDecorationOverride,\i=\i\.className)/,
+                replace: "let $1;$1=$self.AvatarDecorationPreview=$2"
+            },
+            {
+                match: /,(\i)=(function\(\i\){var \i=\i\.user,\i=\i\.avatarDecoration,)/,
+                replace: ";var $1;$self.DecorationGridDecoration=$1=$2"
+            }]
         }
     ],
 
     flux: {
-        CONNECTION_OPEN: () => useAuthorizationStore.getState().init()
+        CONNECTION_OPEN: () => {
+            useAuthorizationStore.getState().init();
+            useUserDecorationsStore.getState().clear();
+        }
     },
 
     set CustomizationSection(e: any) {
         CustomizationSection = e;
     },
 
-    requireDecorationModules() {
-        // TODO: clean this up lol
-        // Alternatively we could replace `n` with `wreq` and eval it ..?
-        let modules = findByCode("isTryItOutFlow;").toString().match(/(Promise.all.+?\)\))/)?.[1].matchAll(/[0-9]+/g);
-        if (modules) {
-            modules = Array.from(modules);
-            const last = modules.pop();
-            Promise.all(modules.map(m => wreq.e(m[0]))).then(wreq.bind(wreq, last[0]));
-        }
-
+    set AvatarDecorationPreview(e: any) {
+        setAvatarDecorationPreview(e);
     },
 
     set DecorationGridItem(e: any) {
         setDecorationGridItem(e);
     },
 
+    set DecorationGridDecoration(e: any) {
+        setDecorationGridDecoration(e);
+    },
+
     async start() {
-        await fetchUsers();
+        await getUsers();
     },
 
     patchGetUser(user) {
-        if (user && users?.has(user.id)) {
+        if (user && users?.has(user.id) && user.avatarDecoration?.skuId !== SKU_ID) {
             user.avatarDecoration = {
                 asset: users.get(user.id),
                 skuId: SKU_ID
@@ -130,6 +135,7 @@ export default definePlugin({
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
 
+        // Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection
             title="Decor Avatar Decoration"
             hasBackground={true}
@@ -137,7 +143,7 @@ export default definePlugin({
             <div style={{ display: "flex" }}>
                 {authorization.isAuthorized() ? <>
                     <Button
-                        onClick={() => openModal(props => <ChangeDecorationModal {...props} />)}
+                        onClick={openChangeDecorationModal}
                         size={Button.Sizes.SMALL}
                     >
                         Change Decor Decoration
@@ -158,6 +164,6 @@ export default definePlugin({
                     </Button>
                 }
             </div>
-        </CustomizationSection >;
+        </CustomizationSection>;
     })
 });

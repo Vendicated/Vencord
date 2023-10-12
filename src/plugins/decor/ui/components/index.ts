@@ -6,3 +6,7 @@
 
 export let DecorationGridItem;
 export const setDecorationGridItem = v => DecorationGridItem = v;
+export let AvatarDecorationPreview;
+export const setAvatarDecorationPreview = v => AvatarDecorationPreview = v;
+export let DecorationGridDecoration;
+export const setDecorationGridDecoration = v => DecorationGridDecoration = v;

@@ -8,11 +8,9 @@ import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 
-import { API_URL } from "../api";
-import { CLIENT_ID } from "../constants";
+import { AUTHORIZE_URL, CLIENT_ID } from "../constants";
 import { useAuthorizationStore } from "../stores/AuthorizationStore";
 
-const AUTHORIZE_URL = API_URL + "/authorize";
 const OAuth = findByPropsLazy("OAuth2AuthorizeModal");
 
 export default () => openModal(props =>

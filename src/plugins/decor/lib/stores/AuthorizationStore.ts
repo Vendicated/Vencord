@@ -22,13 +22,13 @@ interface AuthorizationState {
 }
 
 const indexedDBStorage: StateStorage = {
-    getItem: async (name: string): Promise<string | null> => {
+    async getItem(name: string): Promise<string | null> {
         return DataStore.get(name).then(v => v ?? null);
     },
-    setItem: async (name: string, value: string): Promise<void> => {
+    async setItem(name: string, value: string): Promise<void> {
         await DataStore.set(name, value);
     },
-    removeItem: async (name: string): Promise<void> => {
+    async removeItem(name: string): Promise<void> {
         await DataStore.del(name);
     },
 };
