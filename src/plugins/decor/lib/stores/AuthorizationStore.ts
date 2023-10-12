@@ -12,8 +12,6 @@ import type { StateStorage } from "zustand/middleware";
 import showAuthorizationModal from "../utils/showAuthorizationModal";
 import { create, persist } from "../zustand";
 
-// TODO: Persist token in DataStore
-
 interface AuthorizationState {
     token: string | null;
     tokens: Record<string, string>;
