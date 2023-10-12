@@ -18,11 +18,15 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Toasts } from "@webpack/common";
+import { findByCode, wreq } from "@webpack";
+import { Button } from "@webpack/common";
 
 import { BASE_URL, CDN_URL, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
+import { setDecorationGridItem } from "./ui/components";
+import ChangeDecorationModal from "./ui/modals/ChangeDecorationModal";
 
 let users: Map<string, string>;
 const fetchUsers = async (cache: RequestCache = "default") => users = new Map(Object.entries(await fetch(BASE_URL + "/api/users", { cache }).then(c => c.json())));
@@ -65,6 +69,13 @@ export default definePlugin({
                 match: /function (\i)\(\i\){var \i,\i=\i\.title/,
                 replace: "$self.CustomizationSection=$1;$&"
             }
+        },
+        {
+            find: ".decorationGridItem",
+            replacement: {
+                match: /(?:,)((\i)=function\(.\){var \i=\i\.children)/,
+                replace: ";var $2;$self.DecorationGridItem=$2=$1"
+            }
         }
     ],
 
@@ -74,6 +85,22 @@ export default definePlugin({
 
     set CustomizationSection(e: any) {
         CustomizationSection = e;
+    },
+
+    requireDecorationModules() {
+        // TODO: clean this up lol
+        // Alternatively we could replace `n` with `wreq` and eval it ..?
+        let modules = findByCode("isTryItOutFlow;").toString().match(/(Promise.all.+?\)\))/)?.[1].matchAll(/[0-9]+/g);
+        if (modules) {
+            modules = Array.from(modules);
+            const last = modules.pop();
+            Promise.all(modules.map(m => wreq.e(m[0]))).then(wreq.bind(wreq, last[0]));
+        }
+
+    },
+
+    set DecorationGridItem(e: any) {
+        setDecorationGridItem(e);
     },
 
     async start() {
@@ -110,25 +137,13 @@ export default definePlugin({
             <div style={{ display: "flex" }}>
                 {authorization.isAuthorized() ? <>
                     <Button
-                        onClick={() => {
-                            Toasts.show({
-                                id: Toasts.genId(),
-                                message: "Hello from Decor!",
-                                type: Toasts.Type.SUCCESS
-                            });
-                        }}
+                        onClick={() => openModal(props => <ChangeDecorationModal {...props} />)}
                         size={Button.Sizes.SMALL}
                     >
                         Change Decor Decoration
                     </Button>
                     <Button
-                        onClick={() => {
-                            Toasts.show({
-                                id: Toasts.genId(),
-                                message: "Goodbye from Decor!",
-                                type: Toasts.Type.FAILURE
-                            });
-                        }}
+                        onClick={() => { }}
                         color={Button.Colors.PRIMARY}
                         size={Button.Sizes.SMALL}
                         look={Button.Looks.LINK}
@@ -143,6 +158,6 @@ export default definePlugin({
                     </Button>
                 }
             </div>
-        </CustomizationSection>;
+        </CustomizationSection >;
     })
 });
