@@ -79,8 +79,8 @@ export default definePlugin({
                     replace: "$1$self.roleGroupColor($2)]"
                 },
                 {
-                    match: /(function \i\((\i)\).{250,500}CHANNEL_MEMBERS_A11Y_LABEL.{50,200}roleIcon.{5,20}null,.{30,50},children:\[).," \u2014 ",.\]/,
-                    replace: "$1$self.roleGroupColor($2)]"
+                    match: /children:\[.," \u2014 ",.\]/,
+                    replace: "children:[$self.roleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList,
