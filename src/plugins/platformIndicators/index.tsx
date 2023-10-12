@@ -30,7 +30,7 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip, addSize = 0 }: { color: string; tooltip: string; addSize: number; }) => (
+    return ({ color, tooltip, addSize }: { color: string; tooltip: string; addSize: number; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
