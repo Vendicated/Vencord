@@ -48,7 +48,7 @@ export default definePlugin({
         },
         dayFormat: {
             type: OptionType.STRING,
-            description: "Time format of days (Discord default: LL)",
+            description: "Time format of dates of messages (Discord default: LL)",
             default: "YYYY-MM-DD",
         },
         callFormat: {
@@ -70,6 +70,16 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Time format of member since tooltips (only useful when the previous option is enabled)",
             default: "YYYY-MM-DDTHH:mm:ss.SSSZ (x)",
+        },
+        newMessagesFormat: {
+            type: OptionType.STRING,
+            description: "Time format of new messages since (Discord default: \"LT\" or \"LT [on] LL\")",
+            default: "HH:mm:ss [on] YYYY-MM-DD",
+        },
+        integrationFormat: {
+            type: OptionType.STRING,
+            description: "Time format of webhook creation etc. (Discord default: ll)",
+            default: "HH:mm:ss [on] YYYY-MM-DD",
         }
     }),
     patches: [
@@ -203,6 +213,55 @@ export default definePlugin({
                     `;
                 }
             }
+        },
+        {
+            find: "\"INTEGRATION_ADDED_USER\"",
+            replacement: [
+                {
+                    match: /("INTEGRATION_ADDED_DATE",.{0,30}){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}/,
+                    replace: "$1{timestamp}$2{timestamp}$3{timestamp}$4{timestamp}"
+                },
+                {
+                    match: /("WEBHOOK_CREATED_ON".{0,50}?){timestamp.{0,20}}/,
+                    replace: "$1{timestamp}"
+                },
+                {
+                    match: /("NEW_MESSAGES".{0,80}?){timestamp.{0,20}}(.{0,300}?){timestamp.{0,50}}(.{0,200}?){timestamp.{0,20}}(.{0,200}?){timestamp.{0,50}}/,
+                    replace: "$1{timestamp}$2{timestamp}$3{timestamp}$4{timestamp}"
+                }
+            ]
+        },
+        {
+            find: "\"has-more-after\"));",
+            replacement: {
+                match: /(format\({.{0,20}?,timestamp:)(\i)(}\).{0,1000}?format\({.{0,20}?,timestamp:)(\i)(\}\))/,
+                replace: "$1 $self.formatTime($2, $self.settings.store.newMessagesFormat) $3 $self.formatTime($4, $self.settings.store.newMessagesFormat) $5"
+            }
+        },
+        {
+            find: ".integration.id);",
+            replacement: [
+                {
+                    match: /(name]\).{0,150}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,50}?push.{0,80}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
+                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
+                },
+                {
+                    match: /(useMemo.{0,100}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
+                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat)"
+                },
+                {
+                    match: /datetime:(.{0,40}?).calendar\(\)/,
+                    replace: "datetime: $self.formatTime($1, $self.integrationFormat)"
+                },
+                {
+                    match: /(emoticons.{0,300}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,100}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
+                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
+                },
+                {
+                    match: /(\i\.integration,.{0,150}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,50}?push.{0,80}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
+                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
+                }
+            ]
         }
     ],
 
