@@ -21,10 +21,8 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Button, Toasts } from "@webpack/common";
 
-import { initAuth } from "./lib/auth";
 import { BASE_URL, CDN_URL, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
-import { setCreate } from "./lib/zustand";
 
 let users: Map<string, string>;
 const fetchUsers = async (cache: RequestCache = "default") => users = new Map(Object.entries(await fetch(BASE_URL + "/api/users", { cache }).then(c => c.json())));
@@ -67,23 +65,13 @@ export default definePlugin({
                 match: /function (\i)\(\i\){var \i,\i=\i\.title/,
                 replace: "$self.CustomizationSection=$1;$&"
             }
-        },
-        {
-            find: "will be removed in v4",
-            replacement: {
-                match: /function (\i)\(\i\){var \i="function"/,
-                replace: "$self.zustandCreate=$1;$&"
-            }
         }
     ],
 
     flux: {
-        CONNECTION_OPEN: initAuth
+        CONNECTION_OPEN: () => useAuthorizationStore.getState().init()
     },
 
-    set zustandCreate(e: any) {
-        setCreate(e);
-    },
     set CustomizationSection(e: any) {
         CustomizationSection = e;
     },
@@ -114,12 +102,13 @@ export default definePlugin({
 
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
+
         return <CustomizationSection
             title="Decor Avatar Decoration"
             hasBackground={true}
         >
             <div style={{ display: "flex" }}>
-                {authorization.token ? <>
+                {authorization.isAuthorized() ? <>
                     <Button
                         onClick={() => {
                             Toasts.show({

@@ -38,7 +38,7 @@ export default () => openModal(props =>
 
                 if (req?.ok) {
                     const token = await req.text();
-                    useAuthorizationStore.setState({ token });
+                    useAuthorizationStore.getState().setToken(token);
                 } else {
                     throw new Error("Request not OK");
                 }

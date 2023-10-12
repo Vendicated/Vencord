@@ -4,5 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export let create: typeof import("zustand").default;
-export const setCreate = (e: any) => { create = e; };
+import { findByCodeLazy } from "@webpack";
+
+export const create: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
+export const persist: typeof import("zustand/middleware").persist = findByCodeLazy("zustand persist middleware");
