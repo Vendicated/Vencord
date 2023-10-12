@@ -8,32 +8,30 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+const settings = definePluginSettings({
+    shownEmojis: {
+        description: "The types of emojis to show in the autocomplete menu.",
+        type: OptionType.SELECT,
+        default: "onlyUnicode",
+        options: [
+            { label: "Only unicode emojis", value: "onlyUnicode" },
+            { label: "Unicode emojis and server emojis from current server", value: "currentServer" },
+            { label: "Unicode emojis and all server emojis (Discord default)", value: "all" }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "NoServerEmojis",
     authors: [Devs.UlyssesZhan],
     description: "Do not show server emojis in the autocomplete menu.",
-    settings: definePluginSettings({
-        includeGuilds: {
-            description: "If disabled, server emojis will not be shown in the autocomplete menu at all.",
-            type: OptionType.BOOLEAN,
-            default: false
-        },
-        includeExternalGuilds: {
-            description: "If disabled, emojis from external servers will not be shown in the autocomplete menu. " +
-                "This setting has no effect if \"Include guild emojis\" is disabled. " +
-                "Enabling both makes Discord's default behavior.",
-            type: OptionType.BOOLEAN,
-            default: false
-        }
-    }),
+    settings,
     patches: [
         {
             find: "queryEmojiResults:",
             replacement: {
                 match: /searchWithoutFetchingLatest\(\{/,
-                replace: "$&" +
-                    "includeExternalGuilds:$self.settings.store.includeExternalGuilds," +
-                    "includeGuilds:$self.settings.store.includeGuilds,"
+                replace: "$&...$self.getExtraProps(),"
             }
         },
         {
@@ -43,5 +41,11 @@ export default definePlugin({
                 replace: "$1 var includeGuilds = $3.includeGuilds ?? true; $2 if ($5.type === 'GUILD_EMOJI' && !includeGuilds) { return $4; }"
             }
         }
-    ]
+    ],
+    getExtraProps() {
+        return {
+            includeExternalGuilds: this.settings.store.shownEmojis === "all",
+            includeGuilds: this.settings.store.shownEmojis === "currentServer" || this.settings.store.shownEmojis === "all"
+        };
+    }
 });
