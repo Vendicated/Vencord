@@ -30,13 +30,13 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip }: { color: string; tooltip: string; }) => (
+    return ({ color, tooltip, addSize = 0 }: { color: string; tooltip: string; addSize: number; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height={opts?.height ?? 17}
-                    width={opts?.width ?? 17}
+                    height={(opts?.height ?? 17) + addSize}
+                    width={(opts?.width ?? 17) + addSize}
                     viewBox={opts?.viewBox ?? "0 0 24 24"}
                     fill={color}
                 >
@@ -57,16 +57,19 @@ type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
-const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
+const PlatformIcon = ({ platform, status, large }: { platform: Platform, status: string; large?: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
+    let addSize = 0;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
+    if (large == true) addSize = 3;
+
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} addSize={addSize} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, large = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; large?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -99,6 +102,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false }: {
             key={platform}
             platform={platform as Platform}
             status={status}
+            large={large}
         />
     ));
 
@@ -126,7 +130,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false }: {
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} wantMargin={false} />,
+    component: p => <PlatformIndicator {...p} wantMargin={false} large={true} />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
