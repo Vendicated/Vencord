@@ -26,7 +26,7 @@ The cutest Discord client mod
 
 Visit https://vencord.dev/download
 
-## Join Vencord's Support/Community Server
+## Join our Support/Community Server
 
 https://discord.gg/D9uwnFnqmd
 
