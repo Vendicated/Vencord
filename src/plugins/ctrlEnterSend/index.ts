@@ -8,31 +8,34 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-let compiledSubmitRule: ((event: KeyboardEvent, codeblock: boolean) => boolean) | null = null;
-let compiledNewlineRule: ((event: KeyboardEvent, codeblock: boolean) => boolean) | null = null;
-
-const plugin = definePlugin({
+export default definePlugin({
     name: "CtrlEnterSend",
     authors: [Devs.UlyssesZhan],
     description: "Use Ctrl+Enter to send messages (customizable)",
     settings: definePluginSettings({
         submitRule: {
-            description: "The condition on sending message, supported variables: 'shift', 'ctrl', 'codeblock' (all lowercase) " +
-                "(Discord default: !shift && !codeblock)",
-            type: OptionType.STRING,
-            default: "ctrl",
-            isValid(value: string): boolean {
-                return plugin.compileSubmitRule(value);
-            }
+            description: "The way to send a message",
+            type: OptionType.SELECT,
+            options: [
+                {
+                    label: "Ctrl+Enter",
+                    value: "ctrl+enter"
+                },
+                {
+                    label: "Shift+Enter",
+                    value: "shift+enter"
+                },
+                {
+                    label: "Enter (Discord default)",
+                    value: "enter"
+                }
+            ],
+            default: "ctrl+enter"
         },
-        newlineRule: {
-            description: "The condition on inserting newline (if the previous condition fails) " +
-                "(Discord default: !ctrl)",
-            type: OptionType.STRING,
-            default: "true",
-            isValid(value: string): boolean {
-                return plugin.compileNewlineRule(value);
-            }
+        sendMessageInTheMiddleOfACodeBlock: {
+            description: "Whether to send a message in the middle of a code block (otherwise insert a newline)",
+            type: OptionType.BOOLEAN,
+            default: true,
         }
     }),
     patches: [
@@ -45,55 +48,31 @@ const plugin = definePlugin({
         }
     ],
     shouldSubmit(event: KeyboardEvent, codeblock: boolean): boolean {
-        return compiledSubmitRule?.(event, codeblock) ?? (!event.shiftKey && !codeblock);
-    },
-    shouldNewline(event: KeyboardEvent, codeblock: boolean): boolean {
-        return compiledNewlineRule?.(event, codeblock) ?? (!event.ctrlKey && !event.altKey);
+        let result = false;
+        switch (this.settings.store.submitRule) {
+            case "shift+enter":
+                result = event.shiftKey;
+                break;
+            case "ctrl+enter":
+                result = event.ctrlKey;
+                break;
+            case "enter":
+                result = true;
+                break;
+        }
+        if (!this.settings.store.sendMessageInTheMiddleOfACodeBlock) {
+            result &&= !codeblock;
+        }
+        return result;
     },
     handleEnter(event: KeyboardEvent, codeblock: boolean, props: any): void {
-        console.log(event, codeblock, props);
         event.preventDefault();
         if (this.shouldSubmit(event, codeblock)) {
             props.onSubmit(props.value);
-        } else if (this.shouldNewline(event, codeblock)) {
+        } else {
             const textArea = event.target as HTMLTextAreaElement;
             textArea.value += "\r\n";
             textArea.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
         }
-    },
-    start() {
-        this.compileSubmitRule(this.settings.store.submitRule);
-    },
-    compileSubmitRule(rule: string): boolean {
-        try {
-            compiledSubmitRule = new Function("event", "codeblock", `
-                const { shiftKey: shift, ctrlKey: ctrl, altKey: alt } = event;
-                return !!(${rule});
-            `) as (event: KeyboardEvent, codeblock: boolean) => boolean;
-        } catch (e) {
-            if (e instanceof SyntaxError) {
-                return false;
-            } else {
-                throw e;
-            }
-        }
-        return true;
-    },
-    compileNewlineRule(rule: string): boolean {
-        try {
-            compiledNewlineRule = new Function("event", "codeblock", `
-                const { shiftKey: shift, ctrlKey: ctrl, altKey: alt } = event;
-                return !!(${rule});
-            `) as (event: KeyboardEvent, codeblock: boolean) => boolean;
-        } catch (e) {
-            if (e instanceof SyntaxError) {
-                return false;
-            } else {
-                throw e;
-            }
-        }
-        return true;
     }
 });
-
-export default plugin;
