@@ -10,12 +10,12 @@ import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
-import { RAW_SKU_ID } from "plugins/decor/lib/constants";
-import { useUserDecorationsStore } from "plugins/decor/lib/stores/UserDecorationsStore";
-import requireCreateStickerModal from "plugins/decor/lib/utils/requireCreateStickerModal";
 
+import { RAW_SKU_ID } from "../../lib/constants";
+import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
+import requireCreateStickerModal from "../../lib/utils/requireCreateStickerModal";
 import { AvatarDecorationPreview } from "../components";
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
@@ -26,7 +26,7 @@ export default function CreateDecorationModal(props) {
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
 
-    const { create: createDecoration } = useUserDecorationsStore();
+    const { create: createDecoration } = useCurrentUserDecorationsStore();
 
     const decoration = file ? { asset: URL.createObjectURL(file), skuId: RAW_SKU_ID } : null;
 

@@ -24,7 +24,7 @@ import { Button } from "@webpack/common";
 import { getUsers, users } from "./lib/api";
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
-import { useUserDecorationsStore } from "./lib/stores/UserDecorationsStore";
+import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
 import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
@@ -104,7 +104,7 @@ export default definePlugin({
     flux: {
         CONNECTION_OPEN: () => {
             useAuthorizationStore.getState().init();
-            useUserDecorationsStore.getState().clear();
+            useCurrentUserDecorationsStore.getState().clear();
         }
     },
 
@@ -158,7 +158,7 @@ export default definePlugin({
 
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
-        const { selectedDecoration, select: selectDecoration } = useUserDecorationsStore();
+        const { selectedDecoration, select: selectDecoration } = useCurrentUserDecorationsStore();
 
         // TODO: Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection

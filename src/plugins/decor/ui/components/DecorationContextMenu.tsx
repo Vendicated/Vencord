@@ -10,12 +10,12 @@ import { classNameFactory } from "@api/Styles";
 import { DeleteIcon } from "@components/Icons";
 import { Alerts, ContextMenu, Menu } from "webpack/common";
 
-import { useUserDecorationsStore } from "../..//lib/stores/UserDecorationsStore";
+import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 
 const cl = classNameFactory("vc-decor-");
 
 export default function DecorationContextMenu({ decoration }) {
-    const { delete: deleteDecoration } = useUserDecorationsStore();
+    const { delete: deleteDecoration } = useCurrentUserDecorationsStore();
     return <Menu.Menu
         navId={cl("decoration-context-menu")}
         onClose={ContextMenu.close}

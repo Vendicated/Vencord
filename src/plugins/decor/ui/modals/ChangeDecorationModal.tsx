@@ -8,10 +8,10 @@ import { NoneIcon, PlusIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, waitFor } from "@webpack";
 import { Button, ContextMenu, Forms, i18n, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
-import discordifyDecoration from "plugins/decor/lib/utils/discordifyDecoration";
 
 import { Decoration } from "../../lib/api";
-import { useUserDecorationsStore } from "../../lib/stores/UserDecorationsStore";
+import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
+import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import { AvatarDecorationPreview, DecorationGridDecoration, DecorationGridItem } from "../components";
 import DecorationContextMenu from "../components/DecorationContextMenu";
@@ -34,7 +34,7 @@ export default function ChangeDecorationModal(props: any) {
         selectedDecoration,
         fetch: fetchUserDecorations,
         select: selectDecoration
-    } = useUserDecorationsStore();
+    } = useCurrentUserDecorationsStore();
 
     useEffect(() => {
         fetchUserDecorations();

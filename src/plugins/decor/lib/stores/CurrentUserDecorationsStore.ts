@@ -31,7 +31,7 @@ function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
     users.set(user.id, user);
 }
 
-export const useUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
+export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
     decorations: [],
     selectedDecoration: null,
     async fetch() {
