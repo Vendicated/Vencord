@@ -51,6 +51,36 @@ export default definePlugin({
             description: "Time format of dates of messages (Discord default: LL)",
             default: "YYYY-MM-DD",
         },
+        timestampLowerT: {
+            type: OptionType.STRING,
+            description: "Timestamp format 't' (lowercase) (Discord default: LT)",
+            default: "HH:mm",
+        },
+        timestampUpperT: {
+            type: OptionType.STRING,
+            description: "Timestamp format 'T' (uppercase) (Discord default: LTS)",
+            default: "HH:mm:ss",
+        },
+        timestampLowerD: {
+            type: OptionType.STRING,
+            description: "Timestamp format 'd' (lowercase) (Discord default: L)",
+            default: "YYYY-MM-DD",
+        },
+        timestampUpperD: {
+            type: OptionType.STRING,
+            description: "Timestamp format 'D' (uppercase) (Discord default: LL)",
+            default: "YYYY-MM-DD",
+        },
+        timestampLowerF: {
+            type: OptionType.STRING,
+            description: "Timestamp format 'f' (lowercase) (Discord default: LLL)",
+            default: "YYYY-MM-DDTHH:mm:ss",
+        },
+        timestampUpperF: {
+            type: OptionType.STRING,
+            description: "Timestamp format 'F' (uppercase) (Discord default: LLLL)",
+            default: "YYYY-MM-DDTHH:mm:ss.SSSZ (x)",
+        },
         callFormat: {
             type: OptionType.STRING,
             description: "Time format of calling events before today (Discord default: L LT)",
@@ -262,6 +292,18 @@ export default definePlugin({
                     replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
                 }
             ]
+        },
+        {
+            find: "relativeTimeThreshold(\"s\");",
+            replacement: {
+                match: /(t:.{0,30})"LT"(\)},T:.{0,30})"LTS"(\)},d:.{0,30})"L"(\)},D:.{0,30})"LL"(\)},f:.{0,30})"LLL"(\)},F:.{0,30})"LLLL"/,
+                replace: "$1 $self.settings.store.timestampLowerT " +
+                    "$2 $self.settings.store.timestampUpperT " +
+                    "$3 $self.settings.store.timestampLowerD " +
+                    "$4 $self.settings.store.timestampUpperD " +
+                    "$5 $self.settings.store.timestampLowerF " +
+                    "$6 $self.settings.store.timestampUpperF"
+            }
         }
     ],
 
