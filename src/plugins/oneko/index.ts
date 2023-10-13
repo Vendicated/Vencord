@@ -31,12 +31,6 @@ const settings = definePluginSettings({
         markers: makeRange(10, 50, 5),
         default: 10,
     },
-    skin: {
-        description: "Cat skin URL",
-        type: OptionType.STRING, // "y566666666444t" -- Korbo's cat Coraline, stepping on their keyboard
-        restartNeeded: true,
-        default: "https://raw.githubusercontent.com/adryd325/oneko.js/a593b1d4759d6ae79b6706353ab618b8a7c11557/oneko.gif",
-    },
 });
 
 export default definePlugin({
@@ -51,7 +45,6 @@ export default definePlugin({
         nekoEl.setAttribute("speed", settings.store.speed.toString());
         nekoEl.setAttribute("x", String(Math.random() * window.innerWidth));
         nekoEl.setAttribute("y", String(Math.random() * window.innerHeight));
-        nekoEl.style.backgroundImage = `url(${settings.store.skin})`;
         document.body.appendChild(nekoEl);
     },
 
