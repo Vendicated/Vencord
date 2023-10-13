@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
 // don't worry about it :P
@@ -63,7 +64,30 @@ const quotes = [
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
-    authors: [Devs.Ven, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
+
+    settings: definePluginSettings({
+        enablePluginPresetQuotes: {
+            description: "Enable the quotes preset by this plugin",
+            type: OptionType.BOOLEAN,
+            default: true
+        },
+        enableDiscordPresetQuotes: {
+            description: "Enable the quotes preset by Discord",
+            type: OptionType.BOOLEAN,
+            default: false
+        },
+        additionalQuotes: {
+            description: "Additional custom quotes to possibly appear",
+            type: OptionType.STRING,
+            default: "",
+        },
+        additionalQuotesDelimiter: {
+            description: "Delimiter for additional quotes",
+            type: OptionType.STRING,
+            default: "|",
+        },
+    }),
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
