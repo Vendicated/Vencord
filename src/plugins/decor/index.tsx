@@ -81,6 +81,14 @@ export default definePlugin({
             {
                 match: /,(\i)=(function\(\i\){var \i=\i\.user,\i=\i\.avatarDecoration,)/,
                 replace: ";var $1;$self.DecorationGridDecoration=$1=$2"
+            },
+            {
+                match: /\i\.\i\.isItemViewed\((\i)\)/,
+                replace: "$1.skuId !== $self.SKU_ID ? $& : true"
+            },
+            {
+                match: /((\i)\.label}\),)(\i===\i\.PURCHASE\|\|\i===\i\.PREMIUM_PURCHASE&&\i)/,
+                replace: "$1t.skuId === $self.SKU_ID || ($3)"
             }]
         }
     ],
@@ -108,6 +116,8 @@ export default definePlugin({
         setDecorationGridDecoration(e);
     },
 
+    SKU_ID,
+
     async start() {
         await getUsers();
     },
@@ -134,6 +144,7 @@ export default definePlugin({
 
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
+        const { selectedDecoration, select: selectDecoration } = useUserDecorationsStore();
 
         // Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection
@@ -148,22 +159,23 @@ export default definePlugin({
                     >
                         Change Decor Decoration
                     </Button>
-                    <Button
-                        onClick={() => { }}
+                    {selectedDecoration && <Button
+                        onClick={() => selectDecoration(null)}
                         color={Button.Colors.PRIMARY}
                         size={Button.Sizes.SMALL}
                         look={Button.Looks.LINK}
                     >
                         Remove Decor Decoration
-                    </Button>
+                    </Button>}
                 </> :
                     <Button
                         onClick={authorization.authorize}
+                        size={Button.Sizes.SMALL}
                     >
                         Authorize
                     </Button>
                 }
             </div>
-        </CustomizationSection>;
+        </CustomizationSection >;
     })
 });
