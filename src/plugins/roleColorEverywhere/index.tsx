@@ -44,7 +44,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN],
     description: "Adds the top role color anywhere possible",
     patches: [
         // Chat Mentions
@@ -78,6 +78,10 @@ export default definePlugin({
                     match: /(memo\(\(function\((\i)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
                     replace: "$1$self.roleGroupColor($2)]"
                 },
+                {
+                    match: /children:\[.," \u2014 ",.\]/,
+                    replace: "children:[$self.roleGroupColor(arguments[0])]"
+                },
             ],
             predicate: () => settings.store.memberList,
         },
@@ -105,7 +109,7 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId }: { id: string; count: number; title: string; guildId: string; }) {
+    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id];
 
@@ -113,7 +117,7 @@ export default definePlugin({
             color: role?.colorString,
             fontWeight: "unset",
             letterSpacing: ".05em"
-        }}>{title} &mdash; {count}</span>;
+        }}>{title ?? label} &mdash; {count}</span>;
     },
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
