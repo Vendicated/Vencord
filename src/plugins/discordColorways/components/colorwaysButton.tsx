@@ -5,6 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { PalleteIcon } from "@components/Icons";
 import { openModal } from "@utils/modal";
 import { Text, Tooltip, useState } from "@webpack/common";
 
@@ -121,7 +122,7 @@ export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnCo
                             );
                         }}
                     >
-                        {!isLoading ? (<div className="colorwaySelectorIcon"></div>) : (<Spinner />)}
+                        {!isLoading ? (<PalleteIcon />) : (<Spinner />)}
                     </div>
                 </div>
             );

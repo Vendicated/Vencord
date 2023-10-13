@@ -7,6 +7,7 @@
 /* eslint-disable arrow-parens */
 
 import * as DataStore from "@api/DataStore";
+import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Clipboard, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
 import { Plugins } from "Vencord";
@@ -16,7 +17,6 @@ import { Colorway } from "../types";
 import { Changelog } from "./changelog";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
-import { CloseIcon, SearchIcon } from "./icons";
 import ColorwayInfoModal from "./infoModal";
 
 interface ToolboxItem {
@@ -284,7 +284,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                 {({ onMouseEnter, onMouseLeave }) => {
                                     return (
                                         <div className="colorwaySelector-pill" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={() => setSearchBarVisibility(true)}>
-                                            <SearchIcon width={14} height={14} viewboxX={24} viewboxY={24} />
+                                            <SearchIcon width={14} height={14} />
                                         </div>
                                     );
                                 }}
@@ -302,7 +302,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                                 setSearchString("");
                                                 setSearchBarVisibility(false);
                                             }}>
-                                            <CloseIcon width={14} height={14} viewboxX={24} viewboxY={24} />
+                                            <CloseIcon width={14} height={14} />
                                         </div>
                                     );
                                 }}
@@ -319,7 +319,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                         onClick={() => {
                                             modalProps.onClose();
                                         }}>
-                                        <CloseIcon width={14} height={14} viewboxX={24} viewboxY={24} />
+                                        <CloseIcon width={14} height={14} />
                                     </div>
                                 );
                             }}

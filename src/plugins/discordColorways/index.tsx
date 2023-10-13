@@ -20,6 +20,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import * as DataStore from "@api/DataStore";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { SwatchIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { openModal } from "@utils/modal";
@@ -27,7 +28,6 @@ import definePlugin from "@utils/types";
 import { Flex, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Text } from "@webpack/common";
 
 import ColorwaysButton from "./components/colorwaysButton";
-import { SwatchIcon } from "./components/icons";
 import SelectorModal from "./components/selectorModal";
 import style from "./style.css?managed";
 import { Colorway } from "./types";
@@ -61,7 +61,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
             label={
                 <>
                     <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
-                        <SwatchIcon viewboxX={16} viewboxY={16} style={{ scale: "0.8" }} />
+                        <SwatchIcon style={{ scale: "0.8" }} />
                         Share Colorway via ID
                     </Flex>
                 </>

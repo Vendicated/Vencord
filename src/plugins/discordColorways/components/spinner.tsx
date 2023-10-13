@@ -5,12 +5,12 @@
  */
 
 export default function Spinner() {
-    return <div className="spinner-2ID8f1 spinningCircle-3aZig-" role="img" aria-label="Loading">
-        <div className="spinningCircleInner-YCEeSc inner-MGEKwh">
-            <svg className="circular-2aZ0P_" viewBox="25 25 50 50">
-                <circle className="path-_o_4bT path3-3TAamH" cx="50" cy="50" r="20" style={{ stroke: "currentColor", opacity: .3 }} />
-                <circle className="path-_o_4bT path2-6i8gUh" cx="50" cy="50" r="20" style={{ stroke: "currentColor", opacity: .6 }} />
-                <circle className="path-_o_4bT" cx="50" cy="50" r="20" style={{ stroke: "currentColor" }} />
+    return <div className="colorwaysBtn-spinner" role="img" aria-label="Loading">
+        <div className="colorwaysBtn-spinnerInner">
+            <svg className="colorwaysBtn-spinnerCircular" viewBox="25 25 50 50">
+                <circle className="colorwaysBtn-spinnerBeam colorwaysBtn-spinnerBeam3" cx="50" cy="50" r="20" />
+                <circle className="colorwaysBtn-spinnerBeam colorwaysBtn-spinnerBeam2" cx="50" cy="50" r="20" />
+                <circle className="colorwaysBtn-spinnerBeam" cx="50" cy="50" r="20" />
             </svg>
         </div>
     </div>;
