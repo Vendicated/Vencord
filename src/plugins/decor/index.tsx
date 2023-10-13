@@ -25,6 +25,7 @@ import { getUsers, users } from "./lib/api";
 import { CDN_URL, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useUserDecorationsStore } from "./lib/stores/UserDecorationsStore";
+import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
 import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
 
@@ -90,6 +91,13 @@ export default definePlugin({
                 match: /((\i)\.label}\),)(\i===\i\.PURCHASE\|\|\i===\i\.PREMIUM_PURCHASE&&\i)/,
                 replace: "$1t.skuId === $self.SKU_ID || ($3)"
             }]
+        },
+        {
+            find: "GUILD_STICKER_SETTINGS_REMAINING_SLOTS_AVAILABLE.format",
+            replacement: {
+                match: /(numTotal:.+?),(\i)=(function\(\i\){var \i=\i\.guildId)/,
+                replace: "$1;var $2;$self.openCreateStickerModalLazy=$2=$3"
+            }
         }
     ],
 
@@ -114,6 +122,10 @@ export default definePlugin({
 
     set DecorationGridDecoration(e: any) {
         setDecorationGridDecoration(e);
+    },
+
+    set openCreateStickerModalLazy(e: any) {
+        setOpenCreateStickerModalLazy(e);
     },
 
     SKU_ID,

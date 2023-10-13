@@ -8,17 +8,22 @@ import "../styles.css";
 
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
+import requireCreateStickerModal from "plugins/decor/lib/utils/requireCreateStickerModal";
 
-import requireDecorationModules from "../..//lib/utils/requireDecorationModule";
 import cl from "../../lib/utils/cl";
+import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import { AvatarDecorationPreview } from "../components";
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
+const FileUpload = findByCodeLazy("fileUploadInput,");
+
 export default function CreateDecorationModal(props) {
     const [name, setName] = useState("");
+    const [file, setFile] = useState<File | null>(null);
+
     return <ModalRoot
         {...props}
         size={ModalSize.MEDIUM}
@@ -42,12 +47,14 @@ export default function CreateDecorationModal(props) {
             >
                 <div className={cl("create-decoration-modal-form")}>
                     <Forms.FormSection title="File">
-                        <TextInput
-                            placeholder="FILE INPUT WILL GO HERE"
-                            onChange={() => { }}
+                        <FileUpload
+                            filename={file?.name}
+                            placeholder="Choose a file"
+                            buttonText="Browse"
+                            onSelectFile={setFile}
                         />
                         <Forms.FormText type="description" className={Margins.top8}>
-                            Animated PNG or PNG, max 1MB
+                            File should be APNG or PNG (1MB max)
                         </Forms.FormText>
                     </Forms.FormSection>
                     <Forms.FormSection title="Name">
@@ -89,4 +96,5 @@ export default function CreateDecorationModal(props) {
 }
 
 export const openCreateDecorationModal = () =>
-    requireDecorationModules().then(() => openModal(props => <CreateDecorationModal {...props} />));
+    Promise.all([requireAvatarDecorationModal(), requireCreateStickerModal()])
+        .then(() => openModal(props => <CreateDecorationModal {...props} />));

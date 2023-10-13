@@ -12,7 +12,7 @@ import discordifyDecoration from "plugins/decor/lib/utils/discordifyDecoration";
 
 import { Decoration } from "../../lib/api";
 import { useUserDecorationsStore } from "../../lib/stores/UserDecorationsStore";
-import requireDecorationModules from "../../lib/utils/requireDecorationModule";
+import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import { AvatarDecorationPreview, DecorationGridDecoration, DecorationGridItem } from "../components";
 import DecorationContextMenu from "../components/DecorationContextMenu";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
@@ -191,4 +191,4 @@ export default function ChangeDecorationModal(props: any) {
 }
 
 export const openChangeDecorationModal = () =>
-    requireDecorationModules().then(() => openModal(props => <ChangeDecorationModal {...props} />));
+    requireAvatarDecorationModal().then(() => openModal(props => <ChangeDecorationModal {...props} />));
