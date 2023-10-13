@@ -147,7 +147,6 @@ export default definePlugin({
 
     patchGetAvatarDecorationURL({ avatarDecoration, canAnimate }) {
         // Only Decor avatar decorations have this SKU ID
-        console.log(avatarDecoration?.asset);
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");
             if (!canAnimate && parts[0] === "a") parts.shift();
