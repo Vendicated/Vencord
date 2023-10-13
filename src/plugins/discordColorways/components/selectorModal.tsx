@@ -14,7 +14,6 @@ import { Plugins } from "Vencord";
 
 import { ColorwayCSS, fallbackColorways, LazySwatchLoaded } from "..";
 import { Colorway } from "../types";
-import { Changelog } from "./changelog";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
