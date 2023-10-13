@@ -41,6 +41,10 @@
     align-items: flex-start;
 }
 
+.platform-osx .vc-channeltabs-tab-container {
+    padding-left: 72px;
+}
+
 .vc-channeltabs-container {
     --channeltabs-red: #f23f42;
     --channeltabs-blue: #0052b6;
