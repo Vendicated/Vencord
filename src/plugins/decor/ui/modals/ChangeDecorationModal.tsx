@@ -92,6 +92,7 @@ export default function ChangeDecorationModal(props: any) {
                     renderItem={(section, index, style) => {
                         const item = masonryListData[section].items[index];
 
+                        // TODO: this can probably be way less duplicated
                         if (typeof item === "string") {
                             switch (item) {
                                 case "none":
@@ -110,21 +111,38 @@ export default function ChangeDecorationModal(props: any) {
                                     </DecorationGridItem>;
                                 case "create":
                                     // TODO: Only allow creation when no pending decorations
-                                    return <DecorationGridItem
-                                        onSelect={openCreateDecorationModal}
-                                        style={style}
-                                    >
-                                        <PlusIcon style={{ padding: "3px" }} />
-                                        <Text
-                                            variant="text-xs/normal"
-                                            color="header-primary"
+                                    if (decorations.some(d => d.reviewed === false)) {
+                                        return <Tooltip text="You already have a decoration pending review">
+                                            {tooltipProps => <DecorationGridItem
+                                                {...tooltipProps}
+                                                style={style}
+                                            >
+                                                <PlusIcon style={{ padding: "3px" }} />
+                                                <Text
+                                                    variant="text-xs/normal"
+                                                    color="header-primary"
+                                                >
+                                                    Create
+                                                </Text>
+                                            </DecorationGridItem>
+                                            }
+                                        </Tooltip>;
+                                    } else {
+                                        return <DecorationGridItem
+                                            onSelect={openCreateDecorationModal}
+                                            style={style}
                                         >
-                                            Create
-                                        </Text>
-                                    </DecorationGridItem>;
+                                            <PlusIcon style={{ padding: "3px" }} />
+                                            <Text
+                                                variant="text-xs/normal"
+                                                color="header-primary"
+                                            >
+                                                Create
+                                            </Text>
+                                        </DecorationGridItem>;
+                                    }
                             }
                         } else {
-                            // TODO: this can probably be way less duplicated
                             if (item.reviewed === false) {
                                 return <Tooltip text={"Pending review"}>
                                     {tooltipProps => (
