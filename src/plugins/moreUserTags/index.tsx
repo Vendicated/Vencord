@@ -53,8 +53,6 @@ interface TagSettings {
     [k: string]: TagSetting;
 }
 
-const CLYDE_ID = "1081004946872352958";
-
 // PermissionStore.computePermissions is not the same function and doesn't work here
 const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
@@ -215,7 +213,7 @@ export default definePlugin({
                 },
                 // add HTML data attributes (for easier theming)
                 {
-                    match: /children:\[(?=\i,\(0,\i\.jsx\)\("span",{className:\i\(\)\.botText,children:(\i)}\)\])/,
+                    match: /children:\[(?=\i\?null:\i,\i,\(0,\i\.jsx\)\("span",{className:\i\(\)\.botText,children:(\i)}\)\])/,
                     replace: "'data-tag':$1.toLowerCase(),children:["
                 }
             ],
@@ -230,10 +228,10 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: ".renderBot=function(){",
+            find: ".Messages.GUILD_OWNER,",
             replacement: {
-                match: /\.BOT;return null!=(\i)&&.{0,10}\?(.{0,50})\.botTag,type:\i/,
-                replace: ".BOT;var type=$self.getTag({...this.props,origType:$1.bot?0:null,location:'not-chat'});return type!==null?$2.botTag,type"
+                match: /(?<type>\i)=\(null==.{0,50}\.BOT,null!=(?<user>\i)&&\i\.bot/,
+                replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }), typeof $<type> === 'number'"
             }
         },
         // pass channel id down props to be used in profiles
@@ -253,7 +251,7 @@ export default definePlugin({
         },
         // in profiles
         {
-            find: ",botType:",
+            find: "showStreamerModeTooltip:",
             replacement: {
                 match: /,botType:(\i\((\i)\)),/g,
                 replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
@@ -341,15 +339,17 @@ export default definePlugin({
         message, user, channelId, origType, location, channel
     }: {
         message?: Message,
-        user: User,
+        user: User & { isClyde(): boolean; },
         channel?: Channel & { isForumPost(): boolean; },
         channelId?: string;
         origType?: number;
         location: "chat" | "not-chat";
     }): number | null {
+        if (!user)
+            return null;
         if (location === "chat" && user.id === "1")
             return Tag.Types.OFFICIAL;
-        if (user.id === CLYDE_ID)
+        if (user.isClyde())
             return Tag.Types.AI;
 
         let type = typeof origType === "number" ? origType : null;
