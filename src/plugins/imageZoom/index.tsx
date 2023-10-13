@@ -175,7 +175,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /showThumbhashPlaceholder:/,
-                    replace: "...$self.makeProps(),$&"
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
