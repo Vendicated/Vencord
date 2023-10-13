@@ -1,0 +1,4 @@
+.vc-decor-delete-decoration-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}

@@ -7,14 +7,14 @@
 import { NoneIcon, PlusIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, waitFor } from "@webpack";
-import { Button, Forms, i18n, Text, useEffect, UserStore, useState } from "@webpack/common";
-import { SKU_ID } from "plugins/decor/lib/constants";
-import decorationToString from "plugins/decor/lib/utils/decorationToString";
+import { Button, ContextMenu, Forms, i18n, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import discordifyDecoration from "plugins/decor/lib/utils/discordifyDecoration";
 
 import { Decoration } from "../../lib/api";
 import { useUserDecorationsStore } from "../../lib/stores/UserDecorationsStore";
 import requireDecorationModules from "../../lib/utils/requireDecorationModule";
 import { AvatarDecorationPreview, DecorationGridDecoration, DecorationGridItem } from "../components";
+import DecorationContextMenu from "../components/DecorationContextMenu";
 
 let MasonryList;
 waitFor("MasonryList", m => {
@@ -122,12 +122,40 @@ export default function ChangeDecorationModal(props: any) {
                                     </DecorationGridItem>;
                             }
                         } else {
-                            return <DecorationGridDecoration
-                                style={style}
-                                onSelect={() => setTryingDecoration(item)}
-                                isSelected={activeSelectedDecoration?.hash === item.hash}
-                                avatarDecoration={{ asset: decorationToString(item), skuId: SKU_ID }}
-                            />;
+                            // TODO: this can probably be way less duplicated
+                            if (item.reviewed === false) {
+                                return <Tooltip text={"Pending review"}>
+                                    {tooltipProps => (
+                                        <DecorationGridDecoration
+                                            {...tooltipProps}
+                                            onContextMenu={e => {
+                                                ContextMenu.open(e, () => (
+                                                    <DecorationContextMenu
+                                                        decoration={item}
+                                                    />
+                                                ));
+                                            }}
+                                            style={style}
+                                            isSelected={activeSelectedDecoration?.hash === item.hash}
+                                            avatarDecoration={discordifyDecoration(item)}
+                                        />
+                                    )}
+                                </Tooltip>;
+                            } else {
+                                return <DecorationGridDecoration
+                                    onContextMenu={e => {
+                                        ContextMenu.open(e, () => (
+                                            <DecorationContextMenu
+                                                decoration={item}
+                                            />
+                                        ));
+                                    }}
+                                    style={style}
+                                    onSelect={() => setTryingDecoration(item)}
+                                    isSelected={activeSelectedDecoration?.hash === item.hash}
+                                    avatarDecoration={discordifyDecoration(item)}
+                                />;
+                            }
                         }
                     }}
                     renderSection={section => <Forms.FormTitle>{masonryListData[section].title}</Forms.FormTitle>}
@@ -135,7 +163,7 @@ export default function ChangeDecorationModal(props: any) {
                 />
                 <AvatarDecorationPreview
                     className={DecorationModalStyles.modalPreview}
-                    avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? { asset: decorationToString(tryingDecoration), skuId: SKU_ID } : null : undefined}
+                    avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
                     user={UserStore.getCurrentUser()}
                 />
             </ModalContent>
