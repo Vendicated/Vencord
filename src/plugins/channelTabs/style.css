@@ -35,7 +35,7 @@
     gap: 0.25rem;
 }
 
-.vc-channeltabs-inner-container {
+.vc-channeltabs-tab-container, .vc-channeltabs-bookmark-container  {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -76,7 +76,7 @@
     display: none;
 }
 
-.vc-channeltabs-bookmarks-container {
+.vc-channeltabs-bookmarks {
     flex-grow: 1;
     overflow: hidden;
 }

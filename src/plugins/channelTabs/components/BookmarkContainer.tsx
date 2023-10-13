@@ -253,8 +253,8 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         else if (bookmark.channelId === channelId) isCurrentChannelBookmarked = true;
     });
 
-    return <div className={cl("inner-container")}>
-        <HorizontallyScrolling className={cl("bookmarks-container")}>
+    return <div className={cl("bookmark-container")}>
+        <HorizontallyScrolling className={cl("bookmarks")}>
             {bookmarks
                 ? bookmarks.length
                     ? bookmarks.map((_, i) =>

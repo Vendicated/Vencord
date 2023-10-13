@@ -102,7 +102,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
         ref={ref}
         onContextMenu={e => ContextMenu.open(e, () => <BasicContextMenu />)}
     >
-        <div className={cl("inner-container")}>
+        <div className={cl("tab-container")}>
             {openTabs.map((tab, i) => <div
                 className={classes(cl("tab"), tab.compact && cl("tab-compact"), isTabSelected(tab.id) && cl("tab-selected"))}
                 key={i}
