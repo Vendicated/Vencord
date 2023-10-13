@@ -92,8 +92,8 @@ export default definePlugin({
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                match: /\._loadingText=.+?random\(.+?;/s,
-                replace: "._loadingText=$self.quote;",
+                match: /(\._loadingText=\(\i=)(\[.{0,4000}\])(\)\[.{0,10}random\(.+?;)/s,
+                replace: "$1 $self.quotes($2)$3"
             },
         },
     ],
@@ -104,7 +104,15 @@ export default definePlugin({
         return String.fromCharCode(...codes);
     },
 
-    get quote() {
-        return this.xor(quotes[Math.floor(Math.random() * quotes.length)]);
+    quotes(preset: string[]) {
+        let result: string[] = this.settings.store.enableDiscordPresetQuotes ? preset : [];
+        if (this.settings.store.enablePluginPresetQuotes) {
+            result = result.concat(quotes.map(this.xor));
+        }
+        result = result.concat(this.settings.store.additionalQuotes.split(this.settings.store.additionalQuotesDelimiter));
+        if (result.length === 0) {
+            result = ["Loading"];
+        }
+        return result;
     }
 });
