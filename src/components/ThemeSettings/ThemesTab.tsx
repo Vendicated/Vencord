@@ -20,13 +20,11 @@ import "./themesStyles.css";
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { CogWheel, DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
-import { IsFirefox } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
@@ -353,14 +351,12 @@ function ThemesTab() {
                             >
                                 Load missing Themes
                             </Button>
-                            {!IsFirefox && (
-                                <Button
-                                    onClick={() => VencordNative.quickCss.openEditor()}
-                                    size={Button.Sizes.SMALL}
-                                >
-                                    Edit QuickCSS
-                                </Button>
-                            )}
+                            <Button
+                                onClick={() => VencordNative.quickCss.openEditor()}
+                                size={Button.Sizes.SMALL}
+                            >
+                                Edit QuickCSS
+                            </Button>
                         </>
                     </Card>
 
@@ -435,15 +431,6 @@ function ThemesTab() {
 
     return (
         <SettingsTab title="Themes">
-            {IsFirefox && (
-                <ErrorCard>
-                    <Forms.FormTitle tag="h5">Warning</Forms.FormTitle>
-                    <Forms.FormText>
-                        You are using Firefox. Expect the vast majority of themes to not work.
-                        If this is a problem, use a chromium browser or Discord Desktop / Vesktop.
-                    </Forms.FormText>
-                </ErrorCard>
-            )}
             <TabBar
                 type="top"
                 look="brand"

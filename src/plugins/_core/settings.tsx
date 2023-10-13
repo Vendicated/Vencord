@@ -39,8 +39,9 @@ export default definePlugin({
         addContextMenuPatch("user-settings-cog", children => () => {
             const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
             section?.forEach(c => {
-                if (c?.props?.id?.startsWith("Vencord")) {
-                    c.props.action = () => SettingsRouter.open(c.props.id);
+                const id = c?.props?.id;
+                if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
+                    c.props.action = () => SettingsRouter.open(id);
                 }
             });
         });
