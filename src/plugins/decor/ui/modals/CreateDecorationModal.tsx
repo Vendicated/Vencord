@@ -10,6 +10,8 @@ import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
+import { RAW_SKU_ID } from "plugins/decor/lib/constants";
+import { useUserDecorationsStore } from "plugins/decor/lib/stores/UserDecorationsStore";
 import requireCreateStickerModal from "plugins/decor/lib/utils/requireCreateStickerModal";
 
 import cl from "../../lib/utils/cl";
@@ -23,6 +25,10 @@ const FileUpload = findByCodeLazy("fileUploadInput,");
 export default function CreateDecorationModal(props) {
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+
+    const { create: createDecoration } = useUserDecorationsStore();
+
+    const decoration = file ? { asset: URL.createObjectURL(file), skuId: RAW_SKU_ID } : null;
 
     return <ModalRoot
         {...props}
@@ -51,7 +57,8 @@ export default function CreateDecorationModal(props) {
                             filename={file?.name}
                             placeholder="Choose a file"
                             buttonText="Browse"
-                            onSelectFile={setFile}
+                            filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
+                            onFileSelect={setFile}
                         />
                         <Forms.FormText type="description" className={Margins.top8}>
                             File should be APNG or PNG (1MB max)
@@ -72,14 +79,16 @@ export default function CreateDecorationModal(props) {
                     </Forms.FormText>
                 </div>
                 <AvatarDecorationPreview
-                    avatarDecorationOverride={null}
+                    avatarDecorationOverride={decoration}
                     user={UserStore.getCurrentUser()}
                 />
             </ModalContent>
             <ModalFooter className={DecorationModalStyles.modalFooter}>
                 <Button
                     onClick={() => {
+                        createDecoration({ alt: name, file: file! }).then(props.onClose);
                     }}
+                    disabled={!file || !name}
                 >
                     Create
                 </Button>

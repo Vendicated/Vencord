@@ -51,7 +51,7 @@ export const setUserDecoration = async (decoration: Decoration | NewDecoration |
         formData.append("hash", decoration.hash);
     } else if (!decoration) {
         formData.append("hash", "null");
-    } else if (decoration && Object.hasOwn(decoration, "uri")) {
+    } else if (decoration && Object.hasOwn(decoration, "file")) {
         decoration = decoration as NewDecoration;
         formData.append("image", decoration.file);
         formData.append("alt", decoration.alt ?? "null");

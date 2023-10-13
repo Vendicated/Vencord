@@ -21,10 +21,24 @@ interface UserDecorationsState {
     clear: () => void;
 }
 
+function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
+    const user = UserStore.getCurrentUser() as any;
+    user.avatarDecoration = decoration ? discordifyDecoration(decoration) : null;
+    user.avatarDecorationData = user.avatarDecoration;
+    FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
+}
+
 export const useUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
     decorations: [],
     selectedDecoration: null,
-    fetch: async () => set({ decorations: await getUserDecorations(), selectedDecoration: await getUserDecoration() }),
+    async fetch() {
+        const decorations = await getUserDecorations();
+        const selectedDecoration = await getUserDecoration();
+
+        if (get().selectedDecoration?.hash !== selectedDecoration?.hash) updateCurrentUserAvatarDecoration(selectedDecoration);
+
+        set({ decorations, selectedDecoration });
+    },
     async create(newDecoration: NewDecoration) {
         const decoration = (await setUserDecoration(newDecoration)) as Decoration;
         set({ decorations: [...get().decorations, decoration] });
@@ -46,10 +60,7 @@ export const useUserDecorationsStore = proxyLazy(() => create<UserDecorationsSta
         set({ selectedDecoration: decoration });
         setUserDecoration(decoration);
 
-        const user = UserStore.getCurrentUser() as any;
-        user.avatarDecoration = decoration ? discordifyDecoration(decoration) : null;
-        user.avatarDecorationData = user.avatarDecoration;
-        FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
+        updateCurrentUserAvatarDecoration(decoration);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })
 })));

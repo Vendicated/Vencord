@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 import { Button } from "@webpack/common";
 
 import { getUsers, users } from "./lib/api";
-import { CDN_URL, SKU_ID } from "./lib/constants";
+import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useUserDecorationsStore } from "./lib/stores/UserDecorationsStore";
 import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
@@ -95,8 +95,8 @@ export default definePlugin({
         {
             find: "GUILD_STICKER_SETTINGS_REMAINING_SLOTS_AVAILABLE.format",
             replacement: {
-                match: /(numTotal:.+?),(\i)=(function\(\i\){var \i=\i\.guildId)/,
-                replace: "$1;var $2;$self.openCreateStickerModalLazy=$2=$3"
+                match: /(numTotal:.+?,)(\i)=(function\(\i\){var \i=\i\.guildId)/,
+                replace: "$1$2=$self.openCreateStickerModalLazy=$3"
             }
         }
     ],
@@ -147,10 +147,13 @@ export default definePlugin({
 
     patchGetAvatarDecorationURL({ avatarDecoration, canAnimate }) {
         // Only Decor avatar decorations have this SKU ID
+        console.log(avatarDecoration?.asset);
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");
             if (!canAnimate && parts[0] === "a") parts.shift();
             return CDN_URL + `/${parts.join("_")}.png`;
+        } else if (avatarDecoration?.skuId === RAW_SKU_ID) {
+            return avatarDecoration.asset;
         }
     },
 
