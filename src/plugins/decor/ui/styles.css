@@ -2,3 +2,17 @@
     color: var(--white-500);
     background-color: var(--button-danger-background);
 }
+
+.vc-decor-create-decoration-modal-content {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    padding: 0;
+}
+
+.vc-decor-create-decoration-modal-form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 16px;
+}

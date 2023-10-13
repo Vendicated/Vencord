@@ -15,6 +15,7 @@ import { useUserDecorationsStore } from "../../lib/stores/UserDecorationsStore";
 import requireDecorationModules from "../../lib/utils/requireDecorationModule";
 import { AvatarDecorationPreview, DecorationGridDecoration, DecorationGridItem } from "../components";
 import DecorationContextMenu from "../components/DecorationContextMenu";
+import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 let MasonryList;
 waitFor("MasonryList", m => {
@@ -108,8 +109,9 @@ export default function ChangeDecorationModal(props: any) {
                                         </Text>
                                     </DecorationGridItem>;
                                 case "create":
+                                    // TODO: Only allow creation when no pending decorations
                                     return <DecorationGridItem
-                                        onSelect={() => { }}
+                                        onSelect={openCreateDecorationModal}
                                         style={style}
                                     >
                                         <PlusIcon style={{ padding: "3px" }} />

@@ -8,8 +8,9 @@ import "../styles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { DeleteIcon } from "@components/Icons";
-import { useUserDecorationsStore } from "plugins/decor/lib/stores/UserDecorationsStore";
 import { Alerts, ContextMenu, Menu } from "webpack/common";
+
+import { useUserDecorationsStore } from "../..//lib/stores/UserDecorationsStore";
 
 const cl = classNameFactory("vc-decor-");
 
