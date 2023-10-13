@@ -22,12 +22,12 @@ import "./ipcPlugins";
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
-import { BrowserWindow, ipcMain, shell } from "electron";
+import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
 import { join, normalize } from "path";
 
-import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
+import monacoHtml from "~fileContent/monacoWin.html;base64";
 
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
@@ -112,6 +112,10 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
 ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
+ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
+    // win & mac only
+    "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
+}));
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
