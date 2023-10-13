@@ -400,15 +400,6 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                             </Forms.FormTitle>
                             <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: "14px" }}>{[...colorways, ...customColorways].length}</Text>
                         </div>
-                        <div className="colorwaysSelector-infoRow">
-                            <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                Changelog for {(Plugins.plugins.DiscordColorways as any).pluginVersion}:
-                            </Forms.FormTitle>
-                            <Changelog
-                                added={["Colorway Creator v1.15: Added Presets", 'Fallback Colorways (Ported from "Universal" variant, Work in Progress...)']}
-                                changed={["Better mobile UI support"]}
-                            />
-                        </div>
                     </> : <></>}
                     {visibility === "toolbox" ? <>
                         <div className="colorwayToolbox-list">
