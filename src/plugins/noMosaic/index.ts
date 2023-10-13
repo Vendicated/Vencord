@@ -30,10 +30,6 @@ export default definePlugin({
                 match: /null!==\(\i=\i\.get\(\i\)\)&&void 0!==\i\?\i:"INVALID"/,
                 replace: '"INVALID"',
             },
-            {
-                match: /(\.type\},\i=)\i\.length>1/,
-                replace: "$1false",
-            },
         ],
     }],
     start() {
