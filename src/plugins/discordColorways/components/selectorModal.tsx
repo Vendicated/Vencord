@@ -308,6 +308,22 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                 }}
                             </Tooltip>
                         )}
+                        <Tooltip text="Close">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return (
+                                    <div
+                                        className="colorwaySelector-pill"
+                                        id="colorwaySelector-pill_closeSelector"
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            modalProps.onClose();
+                                        }}>
+                                        <CloseIcon width={14} height={14} viewboxX={24} viewboxY={24} />
+                                    </div>
+                                );
+                            }}
+                        </Tooltip>
                     </div>
                 </div>
                 <div className="ColorwaySelectorWrapper">
@@ -390,6 +406,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                             </Forms.FormTitle>
                             <Changelog
                                 added={["Colorway Creator v1.15: Added Presets", 'Fallback Colorways (Ported from "Universal" variant, Work in Progress...)']}
+                                changed={["Better mobile UI support"]}
                             />
                         </div>
                     </> : <></>}
@@ -403,7 +420,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                         </div>
                     </> : <></>}
                 </div>
-            </ModalContent>
-        </ModalRoot>
+            </ModalContent >
+        </ModalRoot >
     );
 }

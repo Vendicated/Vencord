@@ -108,65 +108,29 @@ export default function ColorwayInfoModal({
                         size={Button.Sizes.MEDIUM}
                         look={Button.Looks.FILLED}
                         onClick={() => {
-                            DataStore.get("customColorways").then(
-                                (customColorways: Colorway[]) => {
-                                    if (customColorways.length > 0) {
-                                        const customColorwaysArray: Colorway[] =
-                                            [];
-                                        DataStore.get("customColorways").then(
-                                            customColorways => {
-                                                customColorways.forEach(
-                                                    (
-                                                        color: Colorway,
-                                                        i: number
-                                                    ) => {
-                                                        if (
-                                                            color.name !==
-                                                            colorwayProps.name
-                                                        ) {
-                                                            customColorwaysArray.push(
-                                                                color
-                                                            );
-                                                        }
-                                                        if (
-                                                            i + 1 ===
-                                                            customColorways.length
-                                                        ) {
-                                                            DataStore.set(
-                                                                "customColorways",
-                                                                customColorwaysArray
-                                                            );
-                                                        }
-                                                    }
-                                                );
+                            DataStore.get("customColorways").then((customColorways: Colorway[]) => {
+                                if (customColorways.length > 0) {
+                                    const customColorwaysArray: Colorway[] = [];
+                                    DataStore.get("customColorways").then(customColorways => {
+                                        customColorways.forEach((color: Colorway, i: number) => {
+                                            if (color.name !== colorwayProps.name) {
+                                                customColorwaysArray.push(color);
                                             }
-                                        );
-                                        DataStore.get("actveColorwayID").then(
-                                            (actveColorwayID: string) => {
-                                                if (
-                                                    actveColorwayID ===
-                                                    colorwayProps.name
-                                                ) {
-                                                    DataStore.set(
-                                                        "actveColorway",
-                                                        null
-                                                    );
-                                                    DataStore.set(
-                                                        "actveColorwayID",
-                                                        null
-                                                    );
-                                                }
+                                            if (i + 1 === customColorways.length) {
+                                                DataStore.set("customColorways", customColorwaysArray);
                                             }
-                                        );
-                                        modalProps.onClose();
-                                        document
-                                            .getElementById(
-                                                "colorway-refreshcolorway"
-                                            )
-                                            ?.click();
-                                    }
+                                        });
+                                    });
+                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
+                                        if (actveColorwayID === colorwayProps.name) {
+                                            DataStore.set("actveColorway", null);
+                                            DataStore.set("actveColorwayID", null);
+                                        }
+                                    });
+                                    modalProps.onClose();
+                                    document.getElementById("colorway-refreshcolorway")?.click();
                                 }
-                            );
+                            });
                         }}
                     >
                         Delete Colorway

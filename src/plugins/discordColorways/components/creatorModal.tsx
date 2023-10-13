@@ -133,7 +133,7 @@ export default function CreatorModal({
                 <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
                         className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                        onClick={() => collapsedSettings ? setCollapsedSettings(false) : setCollapsedSettings(true)}>
+                        onClick={() => setCollapsedSettings(!collapsedSettings)}>
                         <Forms.FormTitle style={{ marginBottom: 0 }}>Settings</Forms.FormTitle>
                         <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
                             <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
@@ -147,7 +147,7 @@ export default function CreatorModal({
                 <div className={`colorwaysCreator-settingCat${collapsedPresets ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
                         className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                        onClick={() => collapsedPresets ? setCollapsedPresets(false) : setCollapsedPresets(true)}>
+                        onClick={() => setCollapsedPresets(!collapsedPresets)}>
                         <Forms.FormTitle style={{ marginBottom: 0 }}>Presets</Forms.FormTitle>
                         <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
                             <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
@@ -297,22 +297,10 @@ export default function CreatorModal({
                         };
                         openModal(props => {
                             return (
-                                <ModalRoot
-                                    {...props}
-                                    className="colorwaysCreator-noMinHeight"
-                                >
+                                <ModalRoot {...props} className="colorwaysCreator-noMinHeight">
                                     <ModalContent className="colorwaysCreator-noHeader colorwaysCreator-noMinHeight">
-                                        <Forms.FormTitle>
-                                            Colorway ID:
-                                        </Forms.FormTitle>
-                                        <TextInput
-                                            placeholder="Enter Colorway ID"
-                                            onInput={e => {
-                                                setColorwayID(
-                                                    e.currentTarget.value
-                                                );
-                                            }}
-                                        ></TextInput>
+                                        <Forms.FormTitle>Colorway ID:</Forms.FormTitle>
+                                        <TextInput placeholder="Enter Colorway ID" onInput={e => setColorwayID(e.currentTarget.value)} />
                                     </ModalContent>
                                     <ModalFooter>
                                         <Button
@@ -321,75 +309,21 @@ export default function CreatorModal({
                                             size={Button.Sizes.MEDIUM}
                                             look={Button.Looks.FILLED}
                                             onClick={() => {
-                                                const allEqual = (arr: any[]) =>
-                                                    arr.every(
-                                                        v => v === arr[0]
-                                                    );
+                                                const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
                                                 if (!colorwayID) {
-                                                    throw new Error(
-                                                        "Please enter a Colorway ID"
-                                                    );
-                                                } else if (
-                                                    colorwayID.length < 62
-                                                ) {
-                                                    throw new Error(
-                                                        "Invalid Colorway ID"
-                                                    );
-                                                } else if (
-                                                    !hexToString(
-                                                        colorwayID
-                                                    ).includes(",")
-                                                ) {
-                                                    throw new Error(
-                                                        "Invalid Colorway ID"
-                                                    );
-                                                } else if (
-                                                    !allEqual(
-                                                        hexToString(colorwayID)
-                                                            .split(",")
-                                                            .map(
-                                                                (e: string) =>
-                                                                    e.match(
-                                                                        "#"
-                                                                    )!.length
-                                                            )
-                                                    ) &&
-                                                    hexToString(colorwayID)
-                                                        .split(",")
-                                                        .map(
-                                                            (e: string) =>
-                                                                e.match("#")!
-                                                                    .length
-                                                        )[0] !== 1
-                                                ) {
-                                                    throw new Error(
-                                                        "Invalid Colorway ID"
-                                                    );
+                                                    throw new Error("Please enter a Colorway ID");
+                                                } else if (colorwayID.length < 62) {
+                                                    throw new Error("Invalid Colorway ID");
+                                                } else if (!hexToString(colorwayID).includes(",")) {
+                                                    throw new Error("Invalid Colorway ID");
+                                                } else if (!allEqual(hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)) && hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)[0] !== 1) {
+                                                    throw new Error("Invalid Colorway ID");
                                                 } else {
-                                                    const colorArray: string[] =
-                                                        hexToString(
-                                                            colorwayID
-                                                        ).split(",");
-                                                    setAccentColor(
-                                                        colorArray[0].split(
-                                                            "#"
-                                                        )[1]
-                                                    );
-                                                    setPrimaryColor(
-                                                        colorArray[1].split(
-                                                            "#"
-                                                        )[1]
-                                                    );
-                                                    setSecondaryColor(
-                                                        colorArray[2].split(
-                                                            "#"
-                                                        )[1]
-                                                    );
-                                                    setTertiaryColor(
-                                                        colorArray[3].split(
-                                                            "#"
-                                                        )[1]
-                                                    );
+                                                    const colorArray: string[] = hexToString(colorwayID).split(",");
+                                                    setAccentColor(colorArray[0].split("#")[1]);
+                                                    setPrimaryColor(colorArray[1].split("#")[1]);
+                                                    setSecondaryColor(colorArray[2].split("#")[1]);
+                                                    setTertiaryColor(colorArray[3].split("#")[1]);
                                                     props.onClose();
                                                 }
                                             }}
