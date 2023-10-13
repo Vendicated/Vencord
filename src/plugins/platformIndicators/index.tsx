@@ -30,13 +30,13 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip, addSize }: { color: string; tooltip: string; addSize: number; }) => (
+    return ({ color, tooltip, large }: { color: string; tooltip: string; large: boolean; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height={(opts?.height ?? 17) + addSize}
-                    width={(opts?.width ?? 17) + addSize}
+                    height={(opts?.height ?? 17) + (large ? 3 : 0)}
+                    width={(opts?.width ?? 17) + (large ? 3 : 0)}
                     viewBox={opts?.viewBox ?? "0 0 24 24"}
                     fill={color}
                 >
@@ -57,14 +57,11 @@ type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
-const PlatformIcon = ({ platform, status, large }: { platform: Platform, status: string; large?: boolean; }) => {
+const PlatformIcon = ({ platform, status, large }: { platform: Platform, status: string; large: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
-    let addSize = 0;
 
-    if (large == true) addSize = 3;
-
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} addSize={addSize} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} large={large} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
