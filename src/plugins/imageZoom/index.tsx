@@ -174,8 +174,8 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(:void 0,)onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /showThumbhashPlaceholder:/,
+                    replace: "...$self.makeProps(),$&"
                 },
 
                 {
