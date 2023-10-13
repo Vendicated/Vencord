@@ -146,7 +146,7 @@ export default definePlugin({
         const authorization = useAuthorizationStore();
         const { selectedDecoration, select: selectDecoration } = useUserDecorationsStore();
 
-        // Change title to just "Decor" when profile effects are implemented
+        // TODO: Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection
             title="Decor Avatar Decoration"
             hasBackground={true}
