@@ -174,8 +174,8 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /showThumbhashPlaceholder:/,
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
@@ -189,7 +189,6 @@ export default definePlugin({
                 }
             ]
         },
-
         {
             find: ".carouselModal,",
             replacement: {
