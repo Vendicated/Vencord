@@ -10,7 +10,7 @@ import { findByPropsLazy, waitFor } from "@webpack";
 import { Button, ContextMenu, Forms, i18n, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import cl from "plugins/decor/lib/utils/cl";
 
-import { Decoration } from "../../lib/api";
+import { Decoration, getPresets, Preset } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
@@ -44,14 +44,23 @@ export default function ChangeDecorationModal(props: any) {
 
     const activeSelectedDecoration = isTryingDecoration ? tryingDecoration : selectedDecoration;
 
+    const [presets, setPresets] = useState<Preset[]>([]);
+
+    useEffect(() => { getPresets().then(setPresets); }, []);
+
     const masonryListData = [
         {
             title: "Your Decor Decorations",
             height: 20,
             itemKeyPrefix: "ownDecorations",
             items: ["none", ...decorations, "create"]
-        }
-        // TODO: Add presets
+        },
+        ...presets.map(preset => ({
+            title: preset.name,
+            height: 20,
+            itemKeyPrefix: `preset-${preset.id}`,
+            items: preset.decorations
+        }))
     ];
 
     return <ModalRoot

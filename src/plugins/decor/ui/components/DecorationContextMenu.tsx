@@ -7,8 +7,8 @@
 import "../styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { DeleteIcon } from "@components/Icons";
-import { Alerts, ContextMenu, Menu } from "webpack/common";
+import { CopyIcon, DeleteIcon } from "@components/Icons";
+import { Alerts, Clipboard, ContextMenu, Menu } from "webpack/common";
 
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 
@@ -22,10 +22,15 @@ export default function DecorationContextMenu({ decoration }) {
         aria-label="Decoration Options"
     >
         <Menu.MenuItem
+            id={cl("decoration-context-menu-copy-hash")}
+            label="Copy Decoration Hash"
+            icon={CopyIcon}
+            action={() => Clipboard.copy(decoration.hash)}
+        />
+        <Menu.MenuItem
             id={cl("decoration-context-menu-delete")}
             label="Delete Decoration"
             icon={DeleteIcon}
-            color="danger"
             action={() => Alerts.show({
                 title: "Delete Decoration",
                 body: `Are you sure you want to delete ${decoration.alt}?`,
