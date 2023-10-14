@@ -29,7 +29,8 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
 
         set({ fetchQueue: new Set() });
 
-        const fetchedUsersDecorations = await getUsersDecorations(Array.from(fetchQueue));
+        const fetchIds = Array.from(fetchQueue);
+        const fetchedUsersDecorations = await getUsersDecorations(fetchIds);
 
         const newUsersDecorations = new Map(usersDecorations);
 
@@ -43,6 +44,10 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
 
                 FluxDispatcher.dispatch({ type: "USER_UPDATE", user });
             }
+        }
+
+        for (const fetchedId of fetchIds) {
+            if (!newUsersDecorations.has(fetchedId)) newUsersDecorations.set(fetchedId, null);
         }
 
         set({ usersDecorations: newUsersDecorations });
