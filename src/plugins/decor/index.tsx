@@ -109,7 +109,7 @@ export default definePlugin({
             useCurrentUserDecorationsStore.getState().clear();
             useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
         },
-        USER_PROFILE_FETCH_START: data => {
+        USER_PROFILE_MODAL_OPEN: data => {
             useUsersDecorationsStore.getState().fetch(data.userId, true);
         },
         MESSAGE_CREATE: data => {

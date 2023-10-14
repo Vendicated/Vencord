@@ -8,7 +8,7 @@ import "../styles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { CopyIcon, DeleteIcon } from "@components/Icons";
-import { Alerts, Clipboard, ContextMenu, Menu } from "webpack/common";
+import { Alerts, Clipboard, ContextMenu, Menu, UserStore } from "webpack/common";
 
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 
@@ -27,20 +27,23 @@ export default function DecorationContextMenu({ decoration }) {
             icon={CopyIcon}
             action={() => Clipboard.copy(decoration.hash)}
         />
-        <Menu.MenuItem
-            id={cl("decoration-context-menu-delete")}
-            label="Delete Decoration"
-            icon={DeleteIcon}
-            action={() => Alerts.show({
-                title: "Delete Decoration",
-                body: `Are you sure you want to delete ${decoration.alt}?`,
-                confirmText: "Delete",
-                confirmColor: cl("delete-decoration-danger-btn"),
-                cancelText: "Cancel",
-                onConfirm() {
-                    deleteDecoration(decoration);
-                }
-            })}
-        />
+        {decoration.authorId === UserStore.getCurrentUser().id &&
+            <Menu.MenuItem
+                id={cl("decoration-context-menu-delete")}
+                label="Delete Decoration"
+                color="danger"
+                icon={DeleteIcon}
+                action={() => Alerts.show({
+                    title: "Delete Decoration",
+                    body: `Are you sure you want to delete ${decoration.alt}?`,
+                    confirmText: "Delete",
+                    confirmColor: cl("delete-decoration-danger-btn"),
+                    cancelText: "Cancel",
+                    onConfirm() {
+                        deleteDecoration(decoration);
+                    }
+                })}
+            />
+        }
     </Menu.Menu>;
 }
