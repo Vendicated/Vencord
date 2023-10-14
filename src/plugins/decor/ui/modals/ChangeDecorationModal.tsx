@@ -26,6 +26,12 @@ const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 const DecorationComponentStyles = findByPropsLazy("decorationGridItemChurned");
 const ModalStyles = findByPropsLazy("closeWithCircleBackground");
 
+interface Section {
+    title: string;
+    subtitle?: string;
+    itemKeyPrefix: string;
+    items: ("none" | "create" | Decoration)[];
+}
 export default function ChangeDecorationModal(props: any) {
     // undefined = not trying, null = none, Decoration = selected
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
@@ -55,17 +61,16 @@ export default function ChangeDecorationModal(props: any) {
     const masonryListData = [
         {
             title: "Your Decor Decorations",
-            height: 20,
             itemKeyPrefix: "ownDecorations",
             items: ["none", ...ownDecorations, "create"]
         },
         ...presets.map(preset => ({
             title: preset.name,
-            height: 20,
+            subtitle: preset.description || undefined,
             itemKeyPrefix: `preset-${preset.id}`,
             items: preset.decorations
         }))
-    ];
+    ] as Section[];
 
     return <ModalRoot
         {...props}
@@ -98,7 +103,7 @@ export default function ChangeDecorationModal(props: any) {
                     const item = sectionData.items[index];
                     return `${sectionData.itemKeyPrefix}-${typeof item === "string" ? item : item.hash}`;
                 }}
-                getSectionHeight={section => masonryListData[section].height}
+                getSectionHeight={section => masonryListData[section].subtitle ? 60 : 16}
                 itemGutter={12}
                 paddingHorizontal={12}
                 paddingVertical={0}
@@ -192,7 +197,14 @@ export default function ChangeDecorationModal(props: any) {
                         }
                     }
                 }}
-                renderSection={section => <Forms.FormTitle>{masonryListData[section].title}</Forms.FormTitle>}
+                renderSection={section => <div>
+                    <Forms.FormTitle>{masonryListData[section].title}</Forms.FormTitle>
+                    {typeof masonryListData[section].subtitle !== "undefined" &&
+                        <Forms.FormText type="description">
+                            {masonryListData[section].subtitle}
+                        </Forms.FormText>
+                    }
+                </div>}
                 sections={masonryListData.map(section => section.items.length)}
             />
             <div className={cl("change-decoration-modal-preview")}>
