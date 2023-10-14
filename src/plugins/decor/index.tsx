@@ -27,6 +27,7 @@ import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
 import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
+import showAuthorizationModal from "./lib/utils/showAuthorizationModal";
 import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
 
@@ -200,29 +201,24 @@ export default definePlugin({
             hasBackground={true}
         >
             <div style={{ display: "flex" }}>
-                {authorization.isAuthorized() ? <>
-                    <Button
-                        onClick={openChangeDecorationModal}
-                        size={Button.Sizes.SMALL}
-                    >
-                        Change Decor Decoration
-                    </Button>
-                    {selectedDecoration && <Button
-                        onClick={() => selectDecoration(null)}
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.SMALL}
-                        look={Button.Looks.LINK}
-                    >
-                        Remove Decor Decoration
-                    </Button>}
-                </> :
-                    <Button
-                        onClick={authorization.authorize}
-                        size={Button.Sizes.SMALL}
-                    >
-                        Authorize
-                    </Button>
-                }
+                <Button
+                    onClick={() => {
+                        if (!authorization.isAuthorized()) {
+                            showAuthorizationModal().then(openChangeDecorationModal);
+                        } else openChangeDecorationModal();
+                    }}
+                    size={Button.Sizes.SMALL}
+                >
+                    Change Decor Decoration
+                </Button>
+                {selectedDecoration && <Button
+                    onClick={() => selectDecoration(null)}
+                    color={Button.Colors.PRIMARY}
+                    size={Button.Sizes.SMALL}
+                    look={Button.Looks.LINK}
+                >
+                    Remove Decor Decoration
+                </Button>}
             </div>
         </CustomizationSection >;
     })

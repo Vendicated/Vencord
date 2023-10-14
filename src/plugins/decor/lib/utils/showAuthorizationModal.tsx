@@ -13,7 +13,7 @@ import { useAuthorizationStore } from "../stores/AuthorizationStore";
 
 const OAuth = findByPropsLazy("OAuth2AuthorizeModal");
 
-export default () => openModal(props =>
+export default async () => new Promise(r => openModal(props =>
     <OAuth.OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
@@ -35,9 +35,10 @@ export default () => openModal(props =>
                 } else {
                     throw new Error("Request not OK");
                 }
+                r(void 0);
             } catch (e) {
                 new Logger("Decor").error("Failed to authorize", e);
             }
         }}
     />
-);
+));
