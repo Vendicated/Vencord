@@ -122,8 +122,11 @@ export default definePlugin({
             if (channel && data.channelId === channel.id) {
                 useUsersDecorationsStore.getState().fetch(data.userId);
             }
-        }
-        // Still need to fetch for member list and loading into a channel
+        },
+        LOAD_MESSAGES_SUCCESS: ({ messages }) => {
+            useUsersDecorationsStore.getState().fetchMany(messages.map(m => m.author.id));
+        },
+        // Still need to fetch for member list
     },
 
     set CustomizationSection(e: any) {

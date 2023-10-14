@@ -17,6 +17,7 @@ interface UsersDecorationsState {
     fetchQueue: Set<string>;
     bulkFetch: () => Promise<void>;
     fetch: (userId: string, force?: boolean) => Promise<void>;
+    fetchMany: (userIds: string[]) => Promise<void>;
     get: (userId: string) => string | null | undefined;
     has: (userId: string) => boolean;
 }
@@ -58,6 +59,17 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         if (!force && usersDecorations.has(userId)) return;
 
         set({ fetchQueue: new Set(fetchQueue).add(userId) });
+        bulkFetch();
+    },
+    async fetchMany(userIds) {
+        const { usersDecorations, fetchQueue, bulkFetch } = get();
+
+        const newFetchQueue = new Set(fetchQueue);
+        for (const userId of userIds) {
+            if (!usersDecorations.has(userId)) newFetchQueue.add(userId);
+        }
+
+        set({ fetchQueue: newFetchQueue });
         bulkFetch();
     },
     get(userId: string) { return get().usersDecorations.get(userId); },
