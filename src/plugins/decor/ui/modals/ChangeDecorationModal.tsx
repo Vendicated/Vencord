@@ -106,7 +106,12 @@ export default function ChangeDecorationModal(props: any) {
                     const item = sectionData.items[index];
                     return `${sectionData.itemKeyPrefix}-${typeof item === "string" ? item : item.hash}`;
                 }}
-                getSectionHeight={section => masonryListData[section].subtitle ? 60 : 16}
+                getSectionHeight={section => {
+                    const data = masonryListData[section];
+                    if (data.subtitle) {
+                        return data.subtitle.length > 32 ? 60 : 40;
+                    } else return 16;
+                }}
                 itemGutter={12}
                 paddingHorizontal={12}
                 paddingVertical={0}
