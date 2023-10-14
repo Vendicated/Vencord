@@ -41,6 +41,7 @@ export default function CreatorModal({
     const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
     const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
+    const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
             <ModalHeader>
@@ -61,74 +62,82 @@ export default function CreatorModal({
                     Colors:
                 </Forms.FormTitle>
                 <div className="colorwayCreator-colorPreviews">
-                    <ColorPicker
-                        color={parseInt(primaryColor, 16)}
-                        onChange={(color: number) => {
-                            let hexColor = color.toString(16);
-                            while (hexColor.length < 6) {
-                                hexColor = "0" + hexColor;
-                            }
-                            setPrimaryColor(hexColor);
-                        }}
-                        showEyeDropper={true}
-                        suggestedColors={[
-                            "#313338",
-                            "#2b2d31",
-                            "#1e1f22",
-                            "#5865f2",
-                        ]}
-                    />
-                    <ColorPicker
-                        color={parseInt(secondaryColor, 16)}
-                        onChange={(color: number) => {
-                            let hexColor = color.toString(16);
-                            while (hexColor.length < 6) {
-                                hexColor = "0" + hexColor;
-                            }
-                            setSecondaryColor(hexColor);
-                        }}
-                        showEyeDropper={true}
-                        suggestedColors={[
-                            "#313338",
-                            "#2b2d31",
-                            "#1e1f22",
-                            "#5865f2",
-                        ]}
-                    />
-                    <ColorPicker
-                        color={parseInt(tertiaryColor, 16)}
-                        onChange={(color: number) => {
-                            let hexColor = color.toString(16);
-                            while (hexColor.length < 6) {
-                                hexColor = "0" + hexColor;
-                            }
-                            setTertiaryColor(hexColor);
-                        }}
-                        showEyeDropper={true}
-                        suggestedColors={[
-                            "#313338",
-                            "#2b2d31",
-                            "#1e1f22",
-                            "#5865f2",
-                        ]}
-                    />
-                    <ColorPicker
-                        color={parseInt(accentColor, 16)}
-                        onChange={(color: number) => {
-                            let hexColor = color.toString(16);
-                            while (hexColor.length < 6) {
-                                hexColor = "0" + hexColor;
-                            }
-                            setAccentColor(hexColor);
-                        }}
-                        showEyeDropper={true}
-                        suggestedColors={[
-                            "#313338",
-                            "#2b2d31",
-                            "#1e1f22",
-                            "#5865f2",
-                        ]}
-                    />
+                    {presetColorArray.includes("primary") ?
+                        <ColorPicker
+                            label={<Text className="colorwaysPicker-colorLabel">Primary</Text>}
+                            color={parseInt(primaryColor, 16)}
+                            onChange={(color: number) => {
+                                let hexColor = color.toString(16);
+                                while (hexColor.length < 6) {
+                                    hexColor = "0" + hexColor;
+                                }
+                                setPrimaryColor(hexColor);
+                            }}
+                            showEyeDropper={true}
+                            suggestedColors={[
+                                "#313338",
+                                "#2b2d31",
+                                "#1e1f22",
+                                "#5865f2",
+                            ]}
+                        /> : <></>}
+                    {presetColorArray.includes("secondary") ?
+                        <ColorPicker
+                            label={<Text className="colorwaysPicker-colorLabel">Secondary</Text>}
+                            color={parseInt(secondaryColor, 16)}
+                            onChange={(color: number) => {
+                                let hexColor = color.toString(16);
+                                while (hexColor.length < 6) {
+                                    hexColor = "0" + hexColor;
+                                }
+                                setSecondaryColor(hexColor);
+                            }}
+                            showEyeDropper={true}
+                            suggestedColors={[
+                                "#313338",
+                                "#2b2d31",
+                                "#1e1f22",
+                                "#5865f2",
+                            ]}
+                        /> : <></>}
+                    {presetColorArray.includes("tertiary") ?
+                        <ColorPicker
+                            label={<Text className="colorwaysPicker-colorLabel">Tertiary</Text>}
+                            color={parseInt(tertiaryColor, 16)}
+                            onChange={(color: number) => {
+                                let hexColor = color.toString(16);
+                                while (hexColor.length < 6) {
+                                    hexColor = "0" + hexColor;
+                                }
+                                setTertiaryColor(hexColor);
+                            }}
+                            showEyeDropper={true}
+                            suggestedColors={[
+                                "#313338",
+                                "#2b2d31",
+                                "#1e1f22",
+                                "#5865f2",
+                            ]}
+                        /> : <></>}
+                    {presetColorArray.includes("accent") ?
+                        <ColorPicker
+                            label={<Text className="colorwaysPicker-colorLabel">Accent</Text>}
+                            color={parseInt(accentColor, 16)}
+                            onChange={(color: number) => {
+                                let hexColor = color.toString(16);
+                                while (hexColor.length < 6) {
+                                    hexColor = "0" + hexColor;
+                                }
+                                setAccentColor(hexColor);
+                            }}
+                            showEyeDropper={true}
+                            suggestedColors={[
+                                "#313338",
+                                "#2b2d31",
+                                "#1e1f22",
+                                "#5865f2",
+                            ]}
+                        /> : <></>}
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
@@ -154,21 +163,30 @@ export default function CreatorModal({
                         </svg>
                     </div>
                     <div className="colorwaysCreator-settingsList">
-                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("default")}>
+                        <div className="colorwaysCreator-settingItm" onClick={() => {
+                            setPreset("default");
+                            setPresetColorArray(["primary", "secondary", "tertiary", "accent"]);
+                        }}>
                             <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
                                 {preset === "default" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
                             </svg>
                             <Text variant="eyebrow" tag="h5">Default</Text>
                         </div>
-                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("cyan")}>
+                        <div className="colorwaysCreator-settingItm" onClick={() => {
+                            setPreset("cyan");
+                            setPresetColorArray(["primary", "secondary", "accent"]);
+                        }}>
                             <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
                                 {preset === "cyan" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
                             </svg>
                             <Text variant="eyebrow" tag="h5">Cyan</Text>
                         </div>
-                        <div className="colorwaysCreator-settingItm" onClick={() => setPreset("virtualBoy")}>
+                        <div className="colorwaysCreator-settingItm" onClick={() => {
+                            setPreset("virtualBoy");
+                            setPresetColorArray(["tertiary", "accent"]);
+                        }}>
                             <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
                                 {preset === "virtualBoy" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}

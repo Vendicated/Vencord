@@ -1,3 +1,4 @@
+/* stylelint-disable selector-id-pattern */
 /* stylelint-disable selector-class-pattern */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
 
@@ -217,6 +218,11 @@
     max-height: unset !important;
 }
 
+.colorways-creator-module-warning {
+    width: 100%;
+    text-align: center;
+}
+
 .colorways-creator-module-warning~.colorways-creator-module-warning {
     display: none;
 }
@@ -228,36 +234,19 @@
     position: relative;
 }
 
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG::before {
-    content: "";
-    display: flex;
+.colorwaysPicker-colorLabel {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    justify-content: center;
+    display: flex;
     align-items: center;
-    z-index: +1;
-    color: var(--white-500);
+    justify-content: center;
     pointer-events: none;
 }
 
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(1)::before {
-    content: "Primary";
-}
-
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(2)::before {
-    content: "Secondary";
-}
-
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(3)::before {
-    content: "Tertiary";
-}
-
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:nth-child(4)::before {
-    content: "Accent";
-}
-
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has(.editPencilIcon-22tRaH>path[fill="var(--primary-530)"])::before {
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has([fill="var(--primary-530)"])>.colorwaysPicker-colorLabel {
     color: var(--primary-530);
 }
 
@@ -926,7 +915,6 @@
     justify-content: space-around;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     display: none;
 }

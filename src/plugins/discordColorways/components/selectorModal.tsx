@@ -9,11 +9,13 @@
 import * as DataStore from "@api/DataStore";
 import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Clipboard, Forms, SettingsRouter, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
+import { findByCode } from "@webpack";
+import { Clipboard, Forms, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
 import { Plugins } from "Vencord";
 
 import { ColorwayCSS, fallbackColorways, LazySwatchLoaded } from "..";
 import { Colorway } from "../types";
+import extractAndRequireModuleIds from "../util/requireModule";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
@@ -36,7 +38,7 @@ const ToolboxItems: ToolboxItem[] = [
         title: "Color Picker",
         onClick: () => {
             if (LazySwatchLoaded === false) {
-                SettingsRouter.open("Appearance");
+                extractAndRequireModuleIds(findByCode("Promise.all", "openModalLazy", "location_page"));
             }
             openModal(props => <ColorPickerModal modalProps={props} />);
         },
@@ -268,7 +270,9 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
-                                            if (!LazySwatchLoaded) SettingsRouter.open("Appearance");
+                                            if (LazySwatchLoaded === false) {
+                                                extractAndRequireModuleIds(findByCode("Promise.all", "openModalLazy", "location_page"));
+                                            }
                                             openModal((props) => <CreatorModal modalProps={props} />);
                                         }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="14" height="14" viewBox="0 0 24 24">

@@ -32,7 +32,7 @@ import SelectorModal from "./components/selectorModal";
 import style from "./style.css?managed";
 import { Colorway } from "./types";
 
-export let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is lazyloaded, open Settings first</Text>;
+export let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is loading, please wait...</Text>;
 
 export let LazySwatchLoaded = false;
 
