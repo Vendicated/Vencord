@@ -18,13 +18,14 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Button } from "@webpack/common";
+import { Button, UserStore } from "@webpack/common";
 
-import { getUsers, users } from "./lib/api";
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
+import { useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
 import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
 import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
@@ -105,7 +106,24 @@ export default definePlugin({
         CONNECTION_OPEN: () => {
             useAuthorizationStore.getState().init();
             useCurrentUserDecorationsStore.getState().clear();
+            useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
+        },
+        USER_PROFILE_FETCH_START: data => {
+            useUsersDecorationsStore.getState().fetch(data.userId, true);
+        },
+        MESSAGE_CREATE: data => {
+            const channel = getCurrentChannel();
+            if (channel && data.channelId === channel.id) {
+                useUsersDecorationsStore.getState().fetch(data.message.author.id);
+            }
+        },
+        TYPING_START: data => {
+            const channel = getCurrentChannel();
+            if (channel && data.channelId === channel.id) {
+                useUsersDecorationsStore.getState().fetch(data.userId);
+            }
         }
+        // Still need to fetch for member list and loading into a channel
     },
 
     set CustomizationSection(e: any) {
@@ -131,15 +149,24 @@ export default definePlugin({
     SKU_ID,
 
     async start() {
-        await getUsers();
+        useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 
     patchGetUser(user) {
-        if (user && users?.has(user.id) && user.avatarDecoration?.skuId !== SKU_ID) {
-            user.avatarDecoration = {
-                asset: users.get(user.id),
-                skuId: SKU_ID
-            };
+        const store = useUsersDecorationsStore.getState();
+
+        if (user && store.has(user.id)) {
+            const decoration = store.get(user.id);
+
+            if (decoration && user.avatarDecoration?.skuId !== SKU_ID) {
+                user.avatarDecoration = {
+                    asset: decoration,
+                    skuId: SKU_ID
+                };
+            } else if (!decoration && user.avatarDecoration && user.avatarDecoration?.skuId === SKU_ID) {
+                user.avatarDecoration = null;
+            }
+
             user.avatarDecorationData = user.avatarDecoration;
         }
         return user;

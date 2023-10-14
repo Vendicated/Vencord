@@ -27,15 +27,17 @@ export interface NewDecoration {
     alt: string | null;
 }
 
-export let users: Map<string, string>;
-
 export const cFetch = (url: RequestInfo, options?: RequestInit) =>
     fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${useAuthorizationStore.getState().token}` } }).then(c =>
         c.ok ? c : Promise.reject(c)
     );
 
-export const getUsers = async (cache: RequestCache = "default") =>
-    (users = new Map(Object.entries(await fetch(API_URL + "/users", { cache }).then(c => c.json()))));
+export const getUsersDecorations = async (ids: string[] | undefined = undefined) => {
+    const url = new URL(API_URL + "/users");
+    if (ids && ids.length !== 0) url.searchParams.set("ids", JSON.stringify(ids));
+
+    return (await fetch(url).then(c => c.json())) as Record<string, string | null>;
+};
 
 export const getUserDecorations = async (id: string = "@me"): Promise<Decoration[]> =>
     cFetch(API_URL + `/users/${id}/decorations`).then(c => c.json());

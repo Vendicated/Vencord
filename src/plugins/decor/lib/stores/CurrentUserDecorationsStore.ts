@@ -7,7 +7,7 @@
 import { proxyLazy } from "@utils/lazy";
 import { FluxDispatcher, UserStore } from "@webpack/common";
 
-import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration, users } from "../api";
+import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
 import discordifyDecoration from "../utils/discordifyDecoration";
 import { create } from "../zustand";
 
@@ -26,9 +26,6 @@ function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
     user.avatarDecoration = decoration ? discordifyDecoration(decoration) : null;
     user.avatarDecorationData = user.avatarDecoration;
     FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
-
-    // HACK: Update user cache
-    users.set(user.id, user);
 }
 
 export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
