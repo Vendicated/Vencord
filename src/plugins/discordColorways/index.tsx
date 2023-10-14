@@ -30,7 +30,6 @@ import { Flex, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, Tex
 import ColorwaysButton from "./components/colorwaysButton";
 import SelectorModal from "./components/selectorModal";
 import style from "./style.css?managed";
-import { Colorway } from "./types";
 
 export let ColorPicker: React.ComponentType<any> = () => <Text variant="heading-md/semibold" tag="h2" className="colorways-creator-module-warning">Module is loading, please wait...</Text>;
 
@@ -58,14 +57,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     children.push(
         <Menu.MenuItem
             id="colorways-send-id"
-            label={
-                <>
-                    <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
-                        <SwatchIcon style={{ scale: "0.8" }} />
-                        Share Colorway via ID
-                    </Flex>
-                </>
-            }
+            label={<Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}><SwatchIcon style={{ scale: "0.8" }} />Share Colorway via ID</Flex>}
             action={() => {
                 function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
                 const stringToHex = (str: string) => {
@@ -349,39 +341,13 @@ export const fallbackColorways = [
 
 export default definePlugin({
     name: "DiscordColorways",
-    description: "The definitive way to style Discord.",
+    description: "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI"],
     pluginVersion: "5.2.0",
     creatorVersion: "1.15",
     toolboxActions: {
-        "Open Toolbox": () => {
-            var colorways: Colorway[] = [];
-            DataStore.get("colorwaySourceFiles").then(
-                colorwaySourceFiles => {
-                    colorwaySourceFiles.forEach(
-                        (colorwayList: string, i: number) => {
-                            fetch(colorwayList)
-                                .then(response => response.json())
-                                .then((data: { colorways: Colorway[]; }) => {
-                                    if (!data) return;
-                                    if (!data.colorways?.length) return;
-                                    data.colorways.map((color: Colorway) => colorways.push(color));
-                                    if (++i === colorwaySourceFiles.length) {
-                                        DataStore.get("customColorways").then(customColorways => DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                            openModal(props => <SelectorModal modalProps={props} colorwayProps={colorways} customColorwayProps={customColorways} activeColorwayProps={actveColorwayID} visibleTabProps="toolbox" />);
-                                        }));
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log(err);
-                                    return null;
-                                });
-                        }
-                    );
-                }
-            );
-        }
+        "Open Toolbox": () => openModal(props => <SelectorModal modalProps={props} visibleTabProps="toolbox" />)
     },
     patches: [
         {
@@ -399,16 +365,16 @@ export default definePlugin({
     start: () => {
         enableStyle(style);
 
-
-        DataStore.get("actveColorway").then(activeColorway => {
-            ColorwayCSS.set(activeColorway);
-        });
+        async function ApplyCSS() {
+            ColorwayCSS.set(await DataStore.get("actveColorway") || "");
+        }
+        ApplyCSS();
         addContextMenuPatch("channel-attach", ctxMenuPatch);
-        addServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
+        addServerListElement(ServerListRenderPosition.In, () => <ColorwaysButton />);
     },
     stop: () => {
         disableStyle(style);
-        removeServerListElement(ServerListRenderPosition.Above, () => <ColorwaysButton />);
+        removeServerListElement(ServerListRenderPosition.In, () => <ColorwaysButton />);
         ColorwayCSS.remove();
         removeContextMenuPatch("channel-attach", ctxMenuPatch);
     }

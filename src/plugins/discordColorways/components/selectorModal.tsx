@@ -10,7 +10,7 @@ import * as DataStore from "@api/DataStore";
 import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { findByCode } from "@webpack";
-import { Clipboard, Forms, Text, TextInput, Toasts, Tooltip, useState } from "@webpack/common";
+import { Clipboard, Forms, Text, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 import { Plugins } from "Vencord";
 
 import { ColorwayCSS, fallbackColorways, LazySwatchLoaded } from "..";
@@ -93,11 +93,10 @@ const ToolboxItems: ToolboxItem[] = [
     }
 ];
 
-export default function SelectorModal({ modalProps, colorwayProps, customColorwayProps, activeColorwayProps, visibleTabProps = "all" }: { modalProps: ModalProps; colorwayProps: Colorway[]; customColorwayProps: Colorway[]; activeColorwayProps: string; visibleTabProps?: string; }): JSX.Element | any {
-    let results: Colorway[];
-    const [currentColorway, setCurrentColorway] = useState<string>(activeColorwayProps);
-    const [colorways, setColorways] = useState<Colorway[]>(colorwayProps);
-    const [customColorways, setCustomColorways] = useState<Colorway[]>(customColorwayProps);
+export default function SelectorModal({ modalProps, visibleTabProps = "all" }: { modalProps: ModalProps; visibleTabProps?: string; }): JSX.Element | any {
+    const [currentColorway, setCurrentColorway] = useState<string>("");
+    const [colorways, setColorways] = useState<Colorway[]>([]);
+    const [customColorways, setCustomColorways] = useState<Colorway[]>([]);
     const [searchBarVisibility, setSearchBarVisibility] = useState<boolean>(false);
     const [searchString, setSearchString] = useState<string>("");
     const [visibility, setVisibility] = useState<string>(visibleTabProps);
@@ -118,22 +117,46 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
             break;
     }
 
-    function searchColorways(e: string) {
-        results = [];
-        colorwayProps.find((Colorway: Colorway) => {
-            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) {
-                results.push(Colorway);
-            }
+    async function searchColorways(e: string) {
+        if (!e) {
+            const colorwaySourceFiles = await DataStore.get("colorwaySourceFiles");
+            const data = await Promise.all(colorwaySourceFiles.map((url: string) => fetch(url).then(res => res.json())));
+            const colorways = data.flatMap(json => json.colorways);
+            const baseData = await DataStore.get("customColorways");
+            setColorways(colorways || fallbackColorways);
+            setCustomColorways(baseData);
+            return;
+        }
+        const colorwaySourceFiles = await DataStore.get("colorwaySourceFiles");
+        const data = await Promise.all(colorwaySourceFiles.map((url: string) => fetch(url).then(res => res.json())));
+        const colorways = data.flatMap(json => json.colorways);
+        const baseData = await DataStore.get("customColorways");
+        var results: Colorway[] = [];
+        (colorways || fallbackColorways).find((Colorway: Colorway) => {
+            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) results.push(Colorway);
+        });
+        var customResults: Colorway[] = [];
+        baseData.find((Colorway: Colorway) => {
+            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) customResults.push(Colorway);
         });
         setColorways(results);
-        results = [];
-        customColorwayProps.find((Colorway: Colorway) => {
-            if (Colorway.name.toLowerCase().includes(e.toLowerCase())) {
-                results.push(Colorway);
-            }
-        });
-        setCustomColorways(results);
+        setCustomColorways(customResults);
     }
+
+    useEffect(() => {
+        async function loadUI() {
+            const colorwaySourceFiles = await DataStore.get("colorwaySourceFiles");
+            const data = await Promise.all(colorwaySourceFiles.map((url: string) => fetch(url).then(res => res.json())));
+            const colorways = data.flatMap(json => json.colorways);
+            const baseData = await DataStore.getMany(["customColorways", "actveColorwayID"]);
+            setColorways(colorways || fallbackColorways);
+            setCustomColorways(baseData[0]);
+            setCurrentColorway(baseData[1]);
+        }
+        if (!searchString) {
+            loadUI();
+        }
+    });
 
     return (
         <ModalRoot {...modalProps} className="colorwaySelectorModal">
@@ -165,38 +188,7 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                             <div className={`colorwaySelector-pill${visibility === "toolbox" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => setVisibility("toolbox")}>
                                 Toolbox
                             </div>
-                            <div className={`colorwaySelector-pill${visibility === "info" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => {
-                                (() => {
-                                    var colorwaysArr = new Array<Colorway>();
-                                    DataStore.get("colorwaySourceFiles").then((colorwaySourceFiles) => {
-                                        colorwaySourceFiles.forEach((colorwayList, i) => {
-                                            fetch(colorwayList)
-                                                .then((response) => response.json())
-                                                .then((data) => {
-                                                    if (!data) return;
-                                                    if (!data.colorways?.length) return;
-                                                    data.colorways.map((color: Colorway) => {
-                                                        colorwaysArr.push(color);
-                                                    });
-                                                    if (i + 1 === colorwaySourceFiles.length) {
-                                                        DataStore.get("customColorways").then((customColorways) => {
-                                                            DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                                setColorways(colorwaysArr);
-                                                                setCustomColorways(customColorways);
-                                                                setCurrentColorway(actveColorwayID);
-                                                                setVisibility("info");
-                                                            });
-                                                        });
-                                                    }
-                                                })
-                                                .catch((err) => {
-                                                    console.log(err);
-                                                    return null;
-                                                });
-                                        });
-                                    });
-                                })();
-                            }}>
+                            <div className={`colorwaySelector-pill${visibility === "info" ? " colorwaySelector-pill_selected" : " "}`} onClick={() => setVisibility("info")}>
                                 Info
                             </div>
                         </div>
@@ -210,42 +202,14 @@ export default function SelectorModal({ modalProps, colorwayProps, customColorwa
                                         id="colorway-refreshcolorway"
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
-                                        onClick={() => {
-                                            var colorwaysArr = new Array<Colorway>();
-                                            DataStore.get("colorwaySourceFiles").then((colorwaySourceFiles) => {
-                                                colorwaySourceFiles.forEach((colorwayList, i) => {
-                                                    fetch(colorwayList)
-                                                        .then((response) => response.json())
-                                                        .then((data) => {
-                                                            if (!data) return;
-                                                            if (!data.colorways?.length) return;
-                                                            data.colorways.map((color: Colorway) => {
-                                                                colorwaysArr.push(color);
-                                                            });
-                                                            if (i + 1 === colorwaySourceFiles.length) {
-                                                                DataStore.get("customColorways").then((customColorways) => {
-                                                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                                        setColorways(colorwaysArr);
-                                                                        setCustomColorways(customColorways);
-                                                                        setCurrentColorway(actveColorwayID);
-                                                                    });
-                                                                });
-                                                            }
-                                                        })
-                                                        .catch((err) => {
-                                                            console.log(err);
-                                                            if (i + 1 === colorwaySourceFiles.length) {
-                                                                DataStore.get("customColorways").then((customColorways) => {
-                                                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                                                        setColorways(fallbackColorways);
-                                                                        setCustomColorways(customColorways);
-                                                                        setCurrentColorway(actveColorwayID);
-                                                                    });
-                                                                });
-                                                            }
-                                                        });
-                                                });
-                                            });
+                                        onClick={async () => {
+                                            const colorwaySourceFiles = await DataStore.get("colorwaySourceFiles");
+                                            const data = await Promise.all(colorwaySourceFiles.map((url: string) => fetch(url).then(res => res.json())));
+                                            const colorways = data.flatMap(json => json.colorways);
+                                            const baseData = await DataStore.getMany(["customColorways", "actveColorwayID"]);
+                                            setColorways(colorways || fallbackColorways);
+                                            setCustomColorways(baseData[0]);
+                                            setCurrentColorway(baseData[1]);
                                         }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                             <g id="Frame_-_24px">
