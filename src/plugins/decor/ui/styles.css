@@ -3,11 +3,26 @@
     background-color: var(--button-danger-background);
 }
 
+.vc-decor-change-decoration-modal-content {
+    position: relative;
+    display: flex;
+    border-radius: 5px 5px 0 0;
+    padding: 0 16px;
+}
+
 .vc-decor-create-decoration-modal-content {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    padding: 0;
+    padding: 0 16px;
+}
+
+.vc-decor-modal-header {
+    padding: 16px;
+}
+
+.vc-decor-modal-footer {
+    padding: 16px;
 }
 
 .vc-decor-create-decoration-modal-form {
