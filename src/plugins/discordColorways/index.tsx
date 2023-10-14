@@ -57,7 +57,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
     children.push(
         <Menu.MenuItem
             id="colorways-send-id"
-            label={<Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}><SwatchIcon />Share Colorway via ID</Flex>}
+            label={<Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}><SwatchIcon height={16} width={16} />Share Colorway via ID</Flex>}
             action={() => {
                 function getHex(str: string): string { return Object.assign(document.createElement("canvas").getContext("2d") as {}, { fillStyle: str }).fillStyle; }
                 const stringToHex = (str: string) => {
