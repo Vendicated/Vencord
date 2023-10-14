@@ -10,6 +10,14 @@
     padding: 0 16px;
 }
 
+.vc-decor-change-decoration-modal-preview {
+    display: flex;
+    flex-direction: column;
+    margin-top: 24px;
+    gap: 16px;
+}
+
+
 .vc-decor-create-decoration-modal-content {
     display: flex;
     flex-direction: row;

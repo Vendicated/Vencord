@@ -20,6 +20,7 @@ interface UsersDecorationsState {
     fetchMany: (userIds: string[]) => Promise<void>;
     get: (userId: string) => string | null | undefined;
     has: (userId: string) => boolean;
+    set: (userId: string, decoration: string | null) => void;
 }
 
 export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsState>((set, get) => ({
@@ -74,5 +75,12 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         bulkFetch();
     },
     get(userId: string) { return get().usersDecorations.get(userId); },
-    has(userId: string) { return get().usersDecorations.has(userId); }
+    has(userId: string) { return get().usersDecorations.has(userId); },
+    set(userId: string, decoration: string | null) {
+        const { usersDecorations } = get();
+        const newUsersDecorations = new Map(usersDecorations);
+
+        newUsersDecorations.set(userId, decoration);
+        set({ usersDecorations: newUsersDecorations });
+    }
 })));

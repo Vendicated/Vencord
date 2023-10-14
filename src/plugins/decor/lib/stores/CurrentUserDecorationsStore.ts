@@ -10,6 +10,7 @@ import { FluxDispatcher, UserStore } from "@webpack/common";
 import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
 import discordifyDecoration from "../utils/discordifyDecoration";
 import { create } from "../zustand";
+import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
 interface UserDecorationsState {
     decorations: Decoration[];
@@ -25,6 +26,8 @@ function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
     const user = UserStore.getCurrentUser() as any;
     user.avatarDecoration = decoration ? discordifyDecoration(decoration) : null;
     user.avatarDecorationData = user.avatarDecoration;
+
+    useUsersDecorationsStore.getState().set(user.id, decoration?.hash ?? null);
     FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
 }
 

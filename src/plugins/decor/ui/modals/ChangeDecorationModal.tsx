@@ -48,12 +48,16 @@ export default function ChangeDecorationModal(props: any) {
 
     useEffect(() => { getPresets().then(setPresets); }, []);
 
+    const presetDecorations = presets.flatMap(preset => preset.decorations);
+
+    const ownDecorations = decorations.filter(d => !presetDecorations.some(p => p.hash === d.hash));
+
     const masonryListData = [
         {
             title: "Your Decor Decorations",
             height: 20,
             itemKeyPrefix: "ownDecorations",
-            items: ["none", ...decorations, "create"]
+            items: ["none", ...ownDecorations, "create"]
         },
         ...presets.map(preset => ({
             title: preset.name,
@@ -191,11 +195,20 @@ export default function ChangeDecorationModal(props: any) {
                 renderSection={section => <Forms.FormTitle>{masonryListData[section].title}</Forms.FormTitle>}
                 sections={masonryListData.map(section => section.items.length)}
             />
-            <AvatarDecorationPreview
-                className={DecorationModalStyles.modalPreview}
-                avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
-                user={UserStore.getCurrentUser()}
-            />
+            <div className={cl("change-decoration-modal-preview")}>
+                <AvatarDecorationPreview
+                    avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
+                    user={UserStore.getCurrentUser()}
+                />
+                {typeof activeSelectedDecoration === "object" &&
+                    <Text
+                        variant="text-sm/semibold"
+                        color="header-primary"
+                    >
+                        {activeSelectedDecoration?.alt}
+                    </Text>
+                }
+            </div>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
             <Button
