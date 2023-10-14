@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Button, UserStore } from "@webpack/common";
+import { Button, useEffect, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
@@ -188,7 +188,11 @@ export default definePlugin({
 
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
-        const { selectedDecoration, select: selectDecoration } = useCurrentUserDecorationsStore();
+        const { selectedDecoration, select: selectDecoration, fetch } = useCurrentUserDecorationsStore();
+
+        useEffect(() => {
+            if (authorization.isAuthorized()) fetch();
+        }, [authorization.token]);
 
         // TODO: Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection
