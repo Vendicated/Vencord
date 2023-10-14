@@ -155,12 +155,12 @@ export default definePlugin({
                 replace: "$&,children:[$self.patchMemberList(arguments[0])]",
             }
         },
-        // {
-        //     find: "PrivateChannel.renderAvatar",
-        //     replacement: {
-        //         match: /children:\[\(.+:null\]\}\)\]/,
-        //         replace: "$&.concat($self.patchDmList(e))",
-        //     }
-        // }
+        {
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /(\w{1})=\w{1}\.user,.+avatar:\w{1,2}.+selected.+decorators.+\]\}\)\}\)\)/,
+                replace: "$&,$self.patchDmList({user:$1})",
+            }
+        }
     ],
 });
