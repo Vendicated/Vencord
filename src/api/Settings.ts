@@ -237,7 +237,8 @@ type ResolvePropDeep<T, P> = P extends "" ? T :
 export function addSettingsListener<Path extends keyof Settings>(path: Path, onUpdate: (newValue: Settings[Path], path: Path) => void): void;
 export function addSettingsListener<Path extends string>(path: Path, onUpdate: (newValue: Path extends "" ? any : ResolvePropDeep<Settings, Path>, path: Path extends "" ? string : Path) => void): void;
 export function addSettingsListener(path: string, onUpdate: (newValue: any, path: string) => void) {
-    ((onUpdate as SubscriptionCallback)._paths ??= []).push(path);
+    if (path)
+        ((onUpdate as SubscriptionCallback)._paths ??= []).push(path);
     subscriptions.add(onUpdate);
 }
 
