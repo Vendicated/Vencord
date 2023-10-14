@@ -6,6 +6,7 @@
 
 import "../styles.css";
 
+import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -74,7 +75,7 @@ export default function CreateDecorationModal(props) {
                     </Forms.FormText>
                 </Forms.FormSection>
                 <Forms.FormText type="description" className={Margins.bottom16}>
-                    Make sure your decoration does not violate Decor's Guidelines before creating your decoration.
+                    Make sure your decoration does not violate the <Link href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md">guidelines</Link> before creating your decoration.
                 </Forms.FormText>
             </div>
             <AvatarDecorationPreview
