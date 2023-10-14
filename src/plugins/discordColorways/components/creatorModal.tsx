@@ -29,8 +29,10 @@ import { Colorway } from "../types";
 import { ThemePreviewCategory } from "./themePreview";
 export default function CreatorModal({
     modalProps,
+    loadUIProps
 }: {
     modalProps: ModalProps;
+    loadUIProps: () => Promise<void>;
 }) {
     const [accentColor, setAccentColor] = useState<string>("5865f2");
     const [primaryColor, setPrimaryColor] = useState<string>("313338");
@@ -148,7 +150,7 @@ export default function CreatorModal({
                             <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
                         </svg>
                     </div>
-                    <div className="colorwaysCreator-settingItm">
+                    <div className="colorwaysCreator-settingItm" onClick={() => setTintedText(!tintedText)}>
                         <Text variant="eyebrow" tag="h5">Use colored text</Text>
                         <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
                     </div>
@@ -245,7 +247,7 @@ export default function CreatorModal({
                             }
                         );
                         modalProps.onClose();
-                        document.getElementById("colorway-refreshcolorway")?.click();
+                        loadUIProps();
                     }}
                 >Finish</Button>
                 <Button

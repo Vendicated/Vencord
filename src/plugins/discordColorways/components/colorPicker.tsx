@@ -56,6 +56,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                 </Forms.FormTitle>
                 <div className="colorwayCreator-colorPreviews">
                     <ColorPicker
+                        label={<Text className="colorwaysPicker-colorLabel">Primary</Text>}
                         color={parseInt(primaryColor, 16)}
                         onChange={(color: number) => {
                             let hexColor = color.toString(16);
@@ -73,6 +74,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                         ]}
                     />
                     <ColorPicker
+                        label={<Text className="colorwaysPicker-colorLabel">Secondary</Text>}
                         color={parseInt(secondaryColor, 16)}
                         onChange={(color: number) => {
                             let hexColor = color.toString(16);
@@ -90,6 +92,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                         ]}
                     />
                     <ColorPicker
+                        label={<Text className="colorwaysPicker-colorLabel">Tertiary</Text>}
                         color={parseInt(tertiaryColor, 16)}
                         onChange={(color: number) => {
                             let hexColor = color.toString(16);
@@ -107,6 +110,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                         ]}
                     />
                     <ColorPicker
+                        label={<Text className="colorwaysPicker-colorLabel">Accent</Text>}
                         color={parseInt(accentColor, 16)}
                         onChange={(color: number) => {
                             let hexColor = color.toString(16);

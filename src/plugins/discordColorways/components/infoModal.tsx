@@ -15,6 +15,7 @@ import {
 } from "@utils/modal";
 import { Button, Clipboard, Forms, Text, Toasts } from "@webpack/common";
 
+import { ColorwayCSS } from "..";
 import { Colorway } from "../types";
 import { ThemePreviewCategory } from "./themePreview";
 
@@ -22,10 +23,12 @@ export default function ColorwayInfoModal({
     modalProps,
     colorwayProps,
     discrimProps = false,
+    loadUIProps
 }: {
     modalProps: ModalProps;
     colorwayProps: Colorway;
     discrimProps?: boolean;
+    loadUIProps: () => Promise<void>;
 }) {
     const colors: string[] = colorwayProps.colors || [
         "accent",
@@ -107,28 +110,25 @@ export default function ColorwayInfoModal({
                         color={Button.Colors.RED}
                         size={Button.Sizes.MEDIUM}
                         look={Button.Looks.FILLED}
-                        onClick={() => {
-                            DataStore.get("customColorways").then((customColorways: Colorway[]) => {
+                        onClick={async () => {
+                            const customColorways = await DataStore.get("customColorways");
+                            const actveColorwayID = await DataStore.get("actveColorwayID");
+                            const customColorwaysArray: Colorway[] = [];
+                            customColorways.map((color: Colorway, i: number) => {
                                 if (customColorways.length > 0) {
-                                    const customColorwaysArray: Colorway[] = [];
-                                    DataStore.get("customColorways").then(customColorways => {
-                                        customColorways.forEach((color: Colorway, i: number) => {
-                                            if (color.name !== colorwayProps.name) {
-                                                customColorwaysArray.push(color);
-                                            }
-                                            if (i + 1 === customColorways.length) {
-                                                DataStore.set("customColorways", customColorwaysArray);
-                                            }
-                                        });
-                                    });
-                                    DataStore.get("actveColorwayID").then((actveColorwayID: string) => {
-                                        if (actveColorwayID === colorwayProps.name) {
-                                            DataStore.set("actveColorway", null);
-                                            DataStore.set("actveColorwayID", null);
-                                        }
-                                    });
+                                    if (color.name !== colorwayProps.name) {
+                                        customColorwaysArray.push(color);
+                                    }
+                                    if (++i === customColorways.length) {
+                                        DataStore.set("customColorways", customColorwaysArray);
+                                    }
+                                    if (actveColorwayID === colorwayProps.name) {
+                                        DataStore.set("actveColorway", null);
+                                        DataStore.set("actveColorwayID", null);
+                                        ColorwayCSS.set("");
+                                    }
                                     modalProps.onClose();
-                                    document.getElementById("colorway-refreshcolorway")?.click();
+                                    loadUIProps();
                                 }
                             });
                         }}

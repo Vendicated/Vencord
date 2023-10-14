@@ -985,3 +985,58 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     opacity: 0.3;
     animation-delay: .23s;
 }
+
+.colorwaysSettings-colorwaySource {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 8px 16px;
+    gap: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    box-sizing: border-box;
+    min-height: 51px;
+    align-items: center;
+}
+
+.colorwaysSettings-colorwaySource:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.colorwaysSettings-colorwaySources {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 5px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    overflow: hidden overlay;
+    margin-bottom: 4px;
+}
+
+.colorwaysSettings-modalRoot {
+    min-width: 520px;
+}
+
+.colorwaysSettings-colorwaySourceLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.colorwaysSettings-iconButton {
+    background-color: transparent !important;
+    border-radius: 0;
+}
+
+.colorwaysSettings-iconButtonInner {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.colorwaysSettings-modalContent {
+    margin: 8px 0;
+}
