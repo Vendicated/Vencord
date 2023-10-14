@@ -56,6 +56,9 @@ export default function ChangeDecorationModal(props: any) {
 
     const presetDecorations = presets.flatMap(preset => preset.decorations);
 
+    const activeDecorationPreset = presets.find(preset => preset.id === activeSelectedDecoration?.presetId);
+    const isActiveDecorationPreset = typeof activeDecorationPreset !== "undefined";
+
     const ownDecorations = decorations.filter(d => !presetDecorations.some(p => p.hash === d.hash));
 
     const masonryListData = [
@@ -219,6 +222,16 @@ export default function ChangeDecorationModal(props: any) {
                     >
                         {activeSelectedDecoration?.alt}
                     </Text>
+                }
+                {isActiveDecorationPreset &&
+                    <div>
+                        <Forms.FormTitle>Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>
+                        {activeDecorationPreset?.description !== null &&
+                            <Forms.FormText type="description">
+                                {activeDecorationPreset?.description}
+                            </Forms.FormText>
+                        }
+                    </div>
                 }
             </div>
         </ModalContent>
