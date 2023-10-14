@@ -62,6 +62,7 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         bulkFetch();
     },
     async fetchMany(userIds) {
+        if (!userIds.length) return;
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
         const newFetchQueue = new Set(fetchQueue);
