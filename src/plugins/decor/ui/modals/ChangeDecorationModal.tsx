@@ -132,7 +132,6 @@ export default function ChangeDecorationModal(props: any) {
                                     </Text>
                                 </DecorationGridItem>;
                             case "create":
-                                // TODO: Only allow creation when no pending decorations
                                 if (decorations.some(d => d.reviewed === false)) {
                                     return <Tooltip text="You already have a decoration pending review">
                                         {tooltipProps => <DecorationGridItem
