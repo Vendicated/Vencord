@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy, waitFor } from "@webpack";
-import { Button, Forms, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { LazyComponent } from "@utils/react";
+import { findByCode, findByPropsLazy, waitFor } from "@webpack";
+import { Button, Forms, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import cl from "plugins/decor/lib/utils/cl";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
@@ -23,6 +25,8 @@ let MasonryList;
 waitFor("MasonryList", m => {
     ({ MasonryList } = m);
 });
+
+const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 const DecorationComponentStyles = findByPropsLazy("decorationGridItemChurned");
 const ModalStyles = findByPropsLazy("closeWithCircleBackground");
@@ -32,6 +36,7 @@ interface Section {
     subtitle?: string;
     itemKeyPrefix: string;
     items: ("none" | "create" | Decoration)[];
+    authorIds?: string[];
 }
 export default function ChangeDecorationModal(props: any) {
     // undefined = not trying, null = none, Decoration = selected
@@ -50,6 +55,7 @@ export default function ChangeDecorationModal(props: any) {
     }, []);
 
     const activeSelectedDecoration = isTryingDecoration ? tryingDecoration : selectedDecoration;
+    const activeDecorationHasAuthor = typeof activeSelectedDecoration?.authorId !== "undefined";
     const hasPendingReview = decorations.some(d => d.reviewed === false);
 
     const [presets, setPresets] = useState<Preset[]>([]);
@@ -71,7 +77,8 @@ export default function ChangeDecorationModal(props: any) {
             title: preset.name,
             subtitle: preset.description || undefined,
             itemKeyPrefix: `preset-${preset.id}`,
-            items: preset.decorations
+            items: preset.decorations,
+            authorIds: preset.authorIds
         }))
     ] as Section[];
 
@@ -169,9 +176,23 @@ export default function ChangeDecorationModal(props: any) {
                 renderSection={section => {
                     const sectionData = masonryListData[section];
                     const hasSubtitle = typeof sectionData.subtitle !== "undefined";
+                    const hasAuthorIds = typeof sectionData.authorIds !== "undefined";
 
                     return <div>
-                        <Forms.FormTitle>{sectionData.title}</Forms.FormTitle>
+                        <div style={{ display: "flex" }}>
+                            <Forms.FormTitle style={{ flexGrow: 1 }}>{sectionData.title}</Forms.FormTitle>
+                            {hasAuthorIds && <UserSummaryItem
+                                users={sectionData.authorIds?.map(id => UserStore.getUser(id))}
+                                guildId={undefined}
+                                renderIcon={false}
+                                max={5}
+                                showDefaultAvatarsForNullUsers
+                                size={16}
+                                showUserPopout
+                                className={Margins.bottom8}
+                            />
+                            }
+                        </div>
                         {hasSubtitle &&
                             <Forms.FormText type="description">
                                 {sectionData.subtitle}
@@ -204,6 +225,7 @@ export default function ChangeDecorationModal(props: any) {
                         }
                     </div>
                 }
+                {activeDecorationHasAuthor && <Text>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
             </div>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>

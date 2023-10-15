@@ -11,6 +11,7 @@ export interface Preset {
     name: string;
     description: string | null;
     decorations: Decoration[];
+    authorIds: string[];
 }
 
 export interface Decoration {
