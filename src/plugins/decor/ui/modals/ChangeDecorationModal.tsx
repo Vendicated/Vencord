@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NoneIcon, PlusIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, waitFor } from "@webpack";
-import { Button, ContextMenu, Forms, i18n, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, Forms, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import cl from "plugins/decor/lib/utils/cl";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
-import { AvatarDecorationPreview, DecorationGridDecoration, DecorationGridItem } from "../components";
-import DecorationContextMenu from "../components/DecorationContextMenu";
+import { AvatarDecorationPreview } from "../components";
+import DecorationGridCreate from "../components/DecorationGridCreate";
+import DecorationGridNone from "../components/DecorationGridNone";
+import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 let MasonryList;
@@ -49,11 +50,10 @@ export default function ChangeDecorationModal(props: any) {
     }, []);
 
     const activeSelectedDecoration = isTryingDecoration ? tryingDecoration : selectedDecoration;
+    const hasPendingReview = decorations.some(d => d.reviewed === false);
 
     const [presets, setPresets] = useState<Preset[]>([]);
-
     useEffect(() => { getPresets().then(setPresets); }, []);
-
     const presetDecorations = presets.flatMap(preset => preset.decorations);
 
     const activeDecorationPreset = presets.find(preset => preset.id === activeSelectedDecoration?.presetId);
@@ -119,87 +119,49 @@ export default function ChangeDecorationModal(props: any) {
                 renderItem={(section, index, style) => {
                     const item = masonryListData[section].items[index];
 
-                    // TODO: this can probably be way less duplicated
                     if (typeof item === "string") {
                         switch (item) {
                             case "none":
-                                return <DecorationGridItem
+                                return <DecorationGridNone
                                     isSelected={activeSelectedDecoration === null}
                                     onSelect={() => setTryingDecoration(null)}
                                     style={style}
-                                >
-                                    <NoneIcon />
-                                    <Text
-                                        variant="text-xs/normal"
-                                        color="header-primary"
-                                    >
-                                        {i18n.Messages.NONE}
-                                    </Text>
-                                </DecorationGridItem>;
+                                />;
                             case "create":
                                 if (decorations.some(d => d.reviewed === false)) {
                                     return <Tooltip text="You already have a decoration pending review">
-                                        {tooltipProps => <DecorationGridItem
+                                        {tooltipProps => <DecorationGridCreate
                                             {...tooltipProps}
+                                            onSelect={() => { }}
                                             style={style}
-                                        >
-                                            <PlusIcon style={{ padding: "3px" }} />
-                                            <Text
-                                                variant="text-xs/normal"
-                                                color="header-primary"
-                                            >
-                                                Create
-                                            </Text>
-                                        </DecorationGridItem>
-                                        }
+                                        />}
                                     </Tooltip>;
                                 } else {
-                                    return <DecorationGridItem
+                                    return <DecorationGridCreate
                                         onSelect={openCreateDecorationModal}
                                         style={style}
-                                    >
-                                        <PlusIcon style={{ padding: "3px" }} />
-                                        <Text
-                                            variant="text-xs/normal"
-                                            color="header-primary"
-                                        >
-                                            Create
-                                        </Text>
-                                    </DecorationGridItem>;
+                                    />;
                                 }
                         }
                     } else {
                         if (item.reviewed === false) {
                             return <Tooltip text={"Pending review"}>
                                 {tooltipProps => (
-                                    <DecorationGridDecoration
+                                    <DecorDecorationGridDecoration
                                         {...tooltipProps}
-                                        onContextMenu={e => {
-                                            ContextMenu.open(e, () => (
-                                                <DecorationContextMenu
-                                                    decoration={item}
-                                                />
-                                            ));
-                                        }}
                                         style={style}
+                                        onSelect={() => { }}
                                         isSelected={activeSelectedDecoration?.hash === item.hash}
-                                        avatarDecoration={discordifyDecoration(item)}
+                                        decoration={item}
                                     />
                                 )}
                             </Tooltip>;
                         } else {
-                            return <DecorationGridDecoration
-                                onContextMenu={e => {
-                                    ContextMenu.open(e, () => (
-                                        <DecorationContextMenu
-                                            decoration={item}
-                                        />
-                                    ));
-                                }}
+                            return <DecorDecorationGridDecoration
                                 style={style}
                                 onSelect={() => setTryingDecoration(item)}
                                 isSelected={activeSelectedDecoration?.hash === item.hash}
-                                avatarDecoration={discordifyDecoration(item)}
+                                decoration={item}
                             />;
                         }
                     }
