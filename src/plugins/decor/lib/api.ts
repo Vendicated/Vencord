@@ -60,7 +60,7 @@ export const setUserDecoration = async (decoration: Decoration | NewDecoration |
     }
 
     return cFetch(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData }).then(c =>
-        decoration && Object.hasOwn(decoration, "uri") ? c.json() : c.text()
+        decoration && Object.hasOwn(decoration, "file") ? c.json() : c.text()
     );
 };
 
