@@ -24,6 +24,7 @@ const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 const FileUpload = findByCodeLazy("fileUploadInput,");
 
 export default function CreateDecorationModal(props) {
+    const [submitting, setSubmitting] = useState(false);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
 
@@ -78,17 +79,21 @@ export default function CreateDecorationModal(props) {
                     Make sure your decoration does not violate the <Link href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md">guidelines</Link> before creating your decoration.
                 </Forms.FormText>
             </div>
-            <AvatarDecorationPreview
-                avatarDecorationOverride={decoration}
-                user={UserStore.getCurrentUser()}
-            />
+            <div>
+                <AvatarDecorationPreview
+                    avatarDecorationOverride={decoration}
+                    user={UserStore.getCurrentUser()}
+                />
+            </div>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
             <Button
                 onClick={() => {
-                    createDecoration({ alt: name, file: file! }).then(props.onClose);
+                    setSubmitting(true);
+                    createDecoration({ alt: name, file: file! }).then(props.onClose).catch(e => { setSubmitting(false); });
                 }}
                 disabled={!file || !name}
+                submitting={submitting}
             >
                 Create
             </Button>
