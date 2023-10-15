@@ -166,14 +166,19 @@ export default function ChangeDecorationModal(props: any) {
                         }
                     }
                 }}
-                renderSection={section => <div>
-                    <Forms.FormTitle>{masonryListData[section].title}</Forms.FormTitle>
-                    {typeof masonryListData[section].subtitle !== "undefined" &&
-                        <Forms.FormText type="description">
-                            {masonryListData[section].subtitle}
-                        </Forms.FormText>
-                    }
-                </div>}
+                renderSection={section => {
+                    const sectionData = masonryListData[section];
+                    const hasSubtitle = typeof sectionData.subtitle !== "undefined";
+
+                    return <div>
+                        <Forms.FormTitle>{sectionData.title}</Forms.FormTitle>
+                        {hasSubtitle &&
+                            <Forms.FormText type="description">
+                                {sectionData.subtitle}
+                            </Forms.FormText>
+                        }
+                    </div>;
+                }}
                 sections={masonryListData.map(section => section.items.length)}
             />
             <div className={cl("change-decoration-modal-preview")}>
