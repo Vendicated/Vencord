@@ -4,27 +4,39 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import {
     addServerListElement,
     removeServerListElement,
     ServerListRenderPosition,
 } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { SwatchIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { sendMessage } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
+    Button,
+    Flex,
+    Menu,
+    PermissionsBits,
+    PermissionStore,
+    SelectedChannelStore,
     Text,
 } from "@webpack/common";
 
 import ColorwaysButton from "./components/colorwaysButton";
+import CreatorModal from "./components/creatorModal";
 import Selector from "./components/selector";
 import SelectorModal from "./components/selectorModal";
 import { SettingsPage } from "./components/settingsPage";
 import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
 import { ColorPickerProps } from "./types";
+import { getHex, stringToHex } from "./utils";
 
 export let LazySwatchLoaded = false;
 
@@ -72,12 +84,31 @@ export const ColorwayCSS = {
     remove: () => document.getElementById("activeColorwayCSS")!.remove(),
 };
 
+const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
+    children.push(
+        <Menu.MenuItem
+            id="colorways-send-id"
+            label={<Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
+                <SwatchIcon width={16} height={16} style={{ scale: "0.8" }} />
+                Share Colorway via ID
+            </Flex>}
+            action={() => {
+                const colorwayIDArray = `#${getHex(getComputedStyle(document.body).getPropertyValue("--brand-experiment")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")).split("#")[1]}`;
+                const colorwayID = stringToHex(colorwayIDArray);
+                const channelId = SelectedChannelStore.getChannelId();
+                sendMessage(channelId, { content: `\`colorway:${colorwayID}\`` });
+            }}
+        />
+    );
+};
+
 export default definePlugin({
     name: "DiscordColorways",
     description:
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
-    dependencies: ["ServerListAPI"],
+    dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: "5.2.0",
     creatorVersion: "1.15",
     toolboxActions: {
@@ -142,11 +173,27 @@ export default definePlugin({
 
         enableStyle(style);
         ColorwayCSS.set((await DataStore.get("actveColorway")) || "");
+
+        addAccessory("colorways-btn", props => {
+            if (String(props.message.content).match(/colorway:[0-9a-f]{0,71}/))
+                return <Button onClick={() => {
+                    openModal(propss => (
+                        <CreatorModal
+                            modalProps={propss}
+                            colorwayID={String(props.message.content).match(/colorway:[0-9a-f]{0,71}/)![0]}
+                        />
+                    ));
+                }} size={Button.Sizes.SMALL}>Add this Colorway...</Button>;
+            return null;
+        });
+        addContextMenuPatch("channel-attach", ctxMenuPatch);
     },
     stop() {
         removeServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
 
         disableStyle(style);
         ColorwayCSS.remove();
+        removeAccessory("colorways-btn");
+        removeContextMenuPatch("channel-attach", ctxMenuPatch);
     },
 });

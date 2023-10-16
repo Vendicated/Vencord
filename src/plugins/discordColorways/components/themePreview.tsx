@@ -94,9 +94,6 @@ export function ThemePreview({
     tertiary: string,
     previewCSS?: string;
 }) {
-    const [back1, setBack1] = useState<string>(primary);
-    const [back2, setBack2] = useState<string>(primary);
-    const [back3, setBack3] = useState<string>(primary);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     return (
         <div
@@ -115,9 +112,9 @@ export function ThemePreview({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: back1 }}
-                                onMouseEnter={() => setBack1(accent)}
-                                onMouseLeave={() => setBack1(primary)}
+                                style={{ backgroundColor: primary }}
+                                onMouseEnter={e => e.currentTarget.style.backgroundColor = accent}
+                                onMouseLeave={e => e.currentTarget.style.backgroundColor = primary}
                                 onClick={e => {
                                     if (!document.fullscreenElement) {
                                         e.currentTarget
@@ -130,8 +127,7 @@ export function ThemePreview({
                                         document.exitFullscreen();
                                     }
                                     setIsFullscreen(!isFullscreen);
-                                }
-                                }
+                                }}
                             >
                                 {isFullscreen ? <CloseIcon /> : <svg
                                     aria-hidden="true"
@@ -165,17 +161,17 @@ export function ThemePreview({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: back2 }}
-                                onMouseEnter={() => setBack2(accent)}
-                                onMouseLeave={() => setBack2(primary)}
+                                style={{ backgroundColor: primary }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
                             />
                         </div>
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: back3 }}
-                                onMouseEnter={() => setBack3(accent)}
-                                onMouseLeave={() => setBack3(primary)}
+                                style={{ backgroundColor: primary }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
                             />
                         </div>
                     </div>

@@ -13,6 +13,7 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
+import { findByCode } from "@webpack";
 import {
     Button,
     Forms,
@@ -20,20 +21,25 @@ import {
     Switch,
     Text,
     TextInput,
+    useEffect,
     UserStore,
     useState,
 } from "@webpack/common";
 
-import { ColorPicker } from "..";
+import { ColorPicker, LazySwatchLoaded } from "..";
 import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
+import extractAndRequireModuleIds from "../util/requireModule";
+import { hexToString } from "../utils";
 import { ThemePreviewCategory } from "./themePreview";
 export default function CreatorModal({
     modalProps,
-    loadUIProps
+    loadUIProps,
+    colorwayID
 }: {
     modalProps: ModalProps;
-    loadUIProps: () => Promise<void>;
+    loadUIProps?: () => Promise<void>;
+    colorwayID?: string;
 }) {
     const [accentColor, setAccentColor] = useState<string>("5865f2");
     const [primaryColor, setPrimaryColor] = useState<string>("313338");
@@ -45,6 +51,38 @@ export default function CreatorModal({
     const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
     const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
+
+    useEffect(() => {
+        if (!LazySwatchLoaded) {
+            extractAndRequireModuleIds(
+                findByCode(
+                    "Promise.all",
+                    "openModalLazy",
+                    "location_page"
+                )
+            );
+        }
+        const parsedID = colorwayID?.split("colorway:")[1];
+        if (parsedID) {
+            const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
+            if (!parsedID) {
+                throw new Error("Please enter a Colorway ID");
+            } else if (parsedID.length < 62) {
+                throw new Error("Invalid Colorway ID");
+            } else if (!hexToString(parsedID).includes(",")) {
+                throw new Error("Invalid Colorway ID");
+            } else if (!allEqual(hexToString(parsedID).split(",").map((e: string) => e.match("#")!.length)) && hexToString(parsedID).split(",").map((e: string) => e.match("#")!.length)[0] !== 1) {
+                throw new Error("Invalid Colorway ID");
+            } else {
+                const colorArray: string[] = hexToString(parsedID).split(",");
+                setAccentColor(colorArray[0].split("#")[1]);
+                setPrimaryColor(colorArray[1].split("#")[1]);
+                setSecondaryColor(colorArray[2].split("#")[1]);
+                setTertiaryColor(colorArray[3].split("#")[1]);
+            }
+        }
+    });
+
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
             <ModalHeader>
@@ -242,7 +280,7 @@ export default function CreatorModal({
                             }
                         );
                         modalProps.onClose();
-                        loadUIProps();
+                        loadUIProps!();
                     }}
                 >Finish</Button>
                 <Button
@@ -301,15 +339,6 @@ export default function CreatorModal({
                         function setColorwayID(e: string) {
                             colorwayID = e;
                         }
-                        const hexToString = (hex: string) => {
-                            let str = "";
-                            for (let i = 0; i < hex.length; i += 2) {
-                                const hexValue = hex.substr(i, 2);
-                                const decimalValue = parseInt(hexValue, 16);
-                                str += String.fromCharCode(decimalValue);
-                            }
-                            return str;
-                        };
                         openModal(props => {
                             return (
                                 <ModalRoot {...props} className="colorwaysCreator-noMinHeight">

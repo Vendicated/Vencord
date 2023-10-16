@@ -12,6 +12,7 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
+import { findByCode } from "@webpack";
 import {
     Button,
     Clipboard,
@@ -19,12 +20,14 @@ import {
     Text,
     TextInput,
     Toasts,
+    useEffect,
     useState,
 } from "@webpack/common";
 
-import { ColorPicker } from "..";
+import { ColorPicker, LazySwatchLoaded } from "..";
 import { colorVariables } from "../css";
 import { ToolboxItem } from "../types";
+import extractAndRequireModuleIds from "../util/requireModule";
 
 const ColorVarItems: ToolboxItem[] = colorVariables.map((colorVariable: string) => {
     return {
@@ -43,6 +46,19 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
     const [primaryColor, setPrimaryColor] = useState<string>("313338");
     const [secondaryColor, setSecondaryColor] = useState<string>("2b2d31");
     const [tertiaryColor, setTertiaryColor] = useState<string>("1e1f22");
+
+    useEffect(() => {
+        if (!LazySwatchLoaded) {
+            extractAndRequireModuleIds(
+                findByCode(
+                    "Promise.all",
+                    "openModalLazy",
+                    "location_page"
+                )
+            );
+        }
+    });
+
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
             <ModalHeader>

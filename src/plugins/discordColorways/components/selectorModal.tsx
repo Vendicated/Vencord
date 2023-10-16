@@ -9,7 +9,7 @@
 import * as DataStore from "@api/DataStore";
 import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { filters, findByCode, findByCodeLazy, waitFor } from "@webpack";
+import { filters, findByCodeLazy, waitFor } from "@webpack";
 import {
     Clipboard,
     Forms,
@@ -23,10 +23,9 @@ import {
 } from "@webpack/common";
 import { Plugins } from "Vencord";
 
-import { ColorwayCSS, LazySwatchLoaded } from "..";
+import { ColorwayCSS } from "..";
 import { fallbackColorways } from "../constants";
 import { Colorway } from "../types";
-import extractAndRequireModuleIds from "../util/requireModule";
 import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
@@ -55,15 +54,6 @@ const ToolboxItems: ToolboxItem[] = [
     {
         title: "Color Picker",
         onClick: () => {
-            if (!LazySwatchLoaded) {
-                extractAndRequireModuleIds(
-                    findByCode(
-                        "Promise.all",
-                        "openModalLazy",
-                        "location_page"
-                    )
-                );
-            }
             openModal((props) => <ColorPickerModal modalProps={props} />);
         },
         id: "colorways-toolbox_colorpicker",
@@ -370,15 +360,6 @@ export default function SelectorModal({
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
-                                            if (!LazySwatchLoaded) {
-                                                extractAndRequireModuleIds(
-                                                    findByCode(
-                                                        "Promise.all",
-                                                        "openModalLazy",
-                                                        "location_page"
-                                                    )
-                                                );
-                                            }
                                             openModal((props) => (
                                                 <CreatorModal
                                                     modalProps={props}
