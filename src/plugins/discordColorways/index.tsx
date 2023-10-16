@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {
-    addContextMenuPatch,
-    NavContextMenuPatchCallback,
-    removeContextMenuPatch,
-} from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
 import {
     addServerListElement,
@@ -16,24 +11,19 @@ import {
     ServerListRenderPosition,
 } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { SwatchIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { sendMessage } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
-    Flex,
-    Menu,
-    PermissionsBits,
-    PermissionStore,
-    SelectedChannelStore,
     Text,
 } from "@webpack/common";
 
 import ColorwaysButton from "./components/colorwaysButton";
+import Selector from "./components/selector";
 import SelectorModal from "./components/selectorModal";
+import { SettingsPage } from "./components/settingsPage";
+import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
-import { canonicalizeHex, stringToHex } from "./utils";
 
 export let LazySwatchLoaded = false;
 
@@ -57,18 +47,17 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     );
 };
 
-// prettier-ignore
-const defaultColorwaySource = "https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json";
-
 (async function () {
-    const [customColorways, colorwaySourcesFiles] = await DataStore.getMany([
+    const [customColorways, colorwaySourcesFiles, showColorwaysButton] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
+        "showColorwaysButton"
     ]);
 
     if (!customColorways) DataStore.set("customColorways", []);
     if (!colorwaySourcesFiles)
         DataStore.set("colorwaySourceFiles", [defaultColorwaySource]);
+    if (!showColorwaysButton) DataStore.set("showColorwaysButton", false);
 })();
 
 export const ColorwayCSS = {
@@ -83,46 +72,6 @@ export const ColorwayCSS = {
         } else document.getElementById("activeColorwayCSS")!.textContent = e;
     },
     remove: () => document.getElementById("activeColorwayCSS")!.remove(),
-};
-
-const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (
-        props.channel.guild_id &&
-        !PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)
-    )
-        return;
-    children.push(
-        <Menu.MenuItem
-            id="colorways-send-id"
-            label={
-                <Flex
-                    flexDirection="row"
-                    style={{ alignItems: "center", gap: 8 }}
-                >
-                    <SwatchIcon />
-                    Share Colorway via ID
-                </Flex>
-            }
-            action={() => {
-                const cs = getComputedStyle(document.body);
-
-                const colorwayIDArray = [
-                    "--brand-experiment",
-                    "--background-primary",
-                    "--background-secondary",
-                    "--background-tertiary",
-                ]
-                    .map(p => canonicalizeHex(cs.getPropertyValue(p)))
-                    .join(",");
-
-                const colorwayID = stringToHex(colorwayIDArray);
-                const channelId = SelectedChannelStore.getChannelId();
-                sendMessage(channelId, {
-                    content: `\`colorway:${colorwayID}\``,
-                });
-            }}
-        />
-    );
 };
 
 export default definePlugin({
@@ -147,22 +96,56 @@ export default definePlugin({
                 replace: "$self.ColorPicker=$1;$&",
             },
         },
+        {
+            find: "Messages.ACTIVITY_SETTINGS",
+            replacement: {
+                match: /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/,
+                replace: "...$self.makeSettingsCategories($1),$&"
+            }
+        }
     ],
     set ColorPicker(e) {
         ColorPicker = e;
         LazySwatchLoaded = true;
     },
 
+    customSections: [] as ((ID: Record<string, unknown>) => any)[],
+
+    makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
+        return [
+            {
+                section: ID.HEADER,
+                label: "Discord Colorways",
+                className: "vc-settings-header"
+            },
+            {
+                section: "ColorwaysSelector",
+                label: "Colors",
+                element: Selector,
+                className: "dc-colorway-selector"
+            },
+            {
+                section: "ColorwaysSettings",
+                label: "Settings & Tools",
+                element: SettingsPage,
+                className: "dc-colorway-settings"
+            },
+            ...this.customSections.map(func => func(ID)),
+            {
+                section: ID.DIVIDER
+            }
+        ].filter(Boolean);
+    },
+
     ColorwaysButton: () => <ColorwaysButton />,
+
     async start() {
-        addContextMenuPatch("channel-attach", ctxMenuPatch);
         addServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
 
         enableStyle(style);
         ColorwayCSS.set((await DataStore.get("actveColorway")) || "");
     },
     stop() {
-        removeContextMenuPatch("channel-attach", ctxMenuPatch);
         removeServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
 
         disableStyle(style);

@@ -1,3 +1,5 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable declaration-block-no-redundant-longhand-properties */
 /* stylelint-disable selector-id-pattern */
 /* stylelint-disable selector-class-pattern */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
@@ -100,7 +102,7 @@
 .colorwaySelectorModalContent {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     width: 100%;
     max-width: 596px;
     overflow: visible !important;
@@ -371,12 +373,16 @@
     background-color: var(--background-modifier-hover);
 }
 
-.colorwaysCreator-settingsList .colorwaysCreator-settingItm {
+.colorwaysCreator-settingsList .colorwaysCreator-preset {
     justify-content: start;
     gap: 8px;
 }
 
-.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingItm:not(.colorwaysCreator-settingHeader),
+.colorwaysCreator-settingsList {
+    overflow: auto;
+    max-height: 185px;
+}
+
 .colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingsList {
     display: none;
 }
@@ -1039,4 +1045,120 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
 
 .colorwaysSettings-modalContent {
     margin: 8px 0;
+}
+
+@keyframes loading-bar {
+    0% {
+        left: 0;
+        right: 100%;
+        width: 0;
+    }
+
+    10% {
+        left: 0;
+        right: 75%;
+        width: 25%;
+    }
+
+    90% {
+        right: 0;
+        left: 75%;
+        width: 25%;
+    }
+
+    100% {
+        left: 100%;
+        right: 0;
+        width: 0;
+    }
+}
+
+.colorwaysLoader-barContainer {
+    width: 100%;
+    border-radius: var(--radius-round);
+    border: 0;
+    position: relative;
+    padding: 0;
+}
+
+.colorwaysLoader-bar {
+    position: absolute;
+    border-radius: var(--radius-round);
+    top: 0;
+    right: 100%;
+    bottom: 0;
+    left: 0;
+    background: var(--brand-500);
+    width: 0;
+    animation: loading-bar 2s linear infinite;
+    transition: .2s ease;
+}
+
+.colorwaysSettingsSelector-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.colorwaysSettingsPage-wrapper .colorwayToolbox-listItem {
+    gap: 8px;
+    border-radius: 50px;
+    padding: 12px 16px;
+    background-color: var(--background-tertiary);
+    transition: .15s ease;
+    border: 1px solid transparent;
+    color: var(--interactive-normal);
+}
+
+.colorwaysSettingsPage-wrapper .colorwayToolbox-listItem:hover {
+    border-color: var(--brand-500);
+    background-color: var(--brand-experiment-15a);
+    color: var(--interactive-hover);
+}
+
+.colorwaysSettingsSelector-wrapper .ColorwaySelectorWrapper {
+    justify-content: space-between;
+}
+
+.colorwaysSettingsSelector-infoWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.colorwaysSettingsPage-wrapper .colorwayToolbox-itemList {
+    padding: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.colorwaysSettings-label {
+    flex: 1;
+    display: block;
+    overflow: hidden;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--header-primary);
+    line-height: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    word-wrap: break-word;
+    cursor: pointer;
+}
+
+.colorwaysSettingsPage-settingsRow {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+}
+
+.colorwaysSettingsPage-divider {
+    width: 100%;
+    height: 1px;
+    border-top: thin solid var(--background-modifier-accent);
+    margin-top: var(--custom-margin-margin-medium);
+    margin-bottom: 20px;
 }

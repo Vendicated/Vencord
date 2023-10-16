@@ -16,6 +16,7 @@ import {
 import {
     Button,
     Forms,
+    ScrollerThin,
     Switch,
     Text,
     TextInput,
@@ -150,10 +151,12 @@ export default function CreatorModal({
                             <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
                         </svg>
                     </div>
-                    <div className="colorwaysCreator-settingItm" onClick={() => setTintedText(!tintedText)}>
-                        <Text variant="eyebrow" tag="h5">Use colored text</Text>
-                        <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
-                    </div>
+                    <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList" paddingFix>
+                        <div className="colorwaysCreator-settingItm" onClick={() => setTintedText(!tintedText)}>
+                            <Text variant="eyebrow" tag="h5">Use colored text</Text>
+                            <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
+                        </div>
+                    </ScrollerThin>
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedPresets ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
@@ -164,8 +167,8 @@ export default function CreatorModal({
                             <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
                         </svg>
                     </div>
-                    <div className="colorwaysCreator-settingsList">
-                        <div className="colorwaysCreator-settingItm" onClick={() => {
+                    <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList">
+                        <div className="colorwaysCreator-settingItm colorwaysCreator-preset" onClick={() => {
                             setPreset("default");
                             setPresetColorArray(["primary", "secondary", "tertiary", "accent"]);
                         }}>
@@ -175,27 +178,19 @@ export default function CreatorModal({
                             </svg>
                             <Text variant="eyebrow" tag="h5">Default</Text>
                         </div>
-                        <div className="colorwaysCreator-settingItm" onClick={() => {
-                            setPreset("cyan");
-                            setPresetColorArray(["primary", "secondary", "accent"]);
-                        }}>
-                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                {preset === "cyan" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
-                            </svg>
-                            <Text variant="eyebrow" tag="h5">Cyan</Text>
-                        </div>
-                        <div className="colorwaysCreator-settingItm" onClick={() => {
-                            setPreset("virtualBoy");
-                            setPresetColorArray(["tertiary", "accent"]);
-                        }}>
-                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                {preset === "virtualBoy" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
-                            </svg>
-                            <Text variant="eyebrow" tag="h5">Virtual Boy</Text>
-                        </div>
-                    </div>
+                        {Object.values(getPreset()).map(pre => {
+                            return <div className="colorwaysCreator-settingItm colorwaysCreator-preset" onClick={() => {
+                                setPreset(pre.id);
+                                setPresetColorArray(pre.colors);
+                            }}>
+                                <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                                    {preset === pre.id ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                                </svg>
+                                <Text variant="eyebrow" tag="h5">{pre.name}</Text>
+                            </div>;
+                        })}
+                    </ScrollerThin>
                 </div>
                 <ThemePreviewCategory isCollapsed={false} accent={"#" + accentColor} primary={"#" + primaryColor} secondary={"#" + secondaryColor} tertiary={"#" + tertiaryColor} />
             </ModalContent>

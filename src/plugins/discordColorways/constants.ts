@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+export const defaultColorwaySource = "https://raw.githubusercontent.com/DaBluLite/DiscordColorways/master/index.json";
+
 export const fallbackColorways = [
     {
         name: "Keyboard Purple",
