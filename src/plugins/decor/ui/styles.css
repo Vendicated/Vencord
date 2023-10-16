@@ -21,9 +21,14 @@
 
 .vc-decor-create-decoration-modal-content {
     display: flex;
-    flex-direction: row;
-    gap: 16px;
+    flex-direction: column;
+    gap: 20px;
     padding: 0 16px;
+}
+
+.vc-decor-create-decoration-modal-form-preview-container {
+    display: flex;
+    gap: 16px;
 }
 
 .vc-decor-modal-header {

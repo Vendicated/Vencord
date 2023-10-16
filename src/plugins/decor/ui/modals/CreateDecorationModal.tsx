@@ -55,57 +55,59 @@ export default function CreateDecorationModal(props) {
             className={cl("create-decoration-modal-content")}
             scrollbarType="none"
         >
-            <div className={cl("create-decoration-modal-form")}>
-                <Forms.FormSection title="File">
-                    <FileUpload
-                        filename={file?.name}
-                        placeholder="Choose a file"
-                        buttonText="Browse"
-                        filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
-                        onFileSelect={setFile}
+            <div className={cl("create-decoration-modal-form-preview-container")}>
+                <div className={cl("create-decoration-modal-form")}>
+                    <Forms.FormSection title="File">
+                        <FileUpload
+                            filename={file?.name}
+                            placeholder="Choose a file"
+                            buttonText="Browse"
+                            filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
+                            onFileSelect={setFile}
+                        />
+                        <Forms.FormText type="description" className={Margins.top8}>
+                            File should be APNG or PNG (1MB max)
+                        </Forms.FormText>
+                    </Forms.FormSection>
+                    <Forms.FormSection title="Name">
+                        <TextInput
+                            placeholder="Companion Cube"
+                            value={name}
+                            onChange={setName}
+                        />
+                        <Forms.FormText type="description" className={Margins.top8}>
+                            This name will be used when referring to this decoration.
+                        </Forms.FormText>
+                    </Forms.FormSection>
+                </div>
+                <div>
+                    <AvatarDecorationPreview
+                        avatarDecorationOverride={decoration}
+                        user={UserStore.getCurrentUser()}
                     />
-                    <Forms.FormText type="description" className={Margins.top8}>
-                        File should be APNG or PNG (1MB max)
-                    </Forms.FormText>
-                </Forms.FormSection>
-                <Forms.FormSection title="Name">
-                    <TextInput
-                        placeholder="Companion Cube"
-                        value={name}
-                        onChange={setName}
-                    />
-                    <Forms.FormText type="description" className={Margins.top8}>
-                        This name will be used when referring to this decoration.
-                    </Forms.FormText>
-                </Forms.FormSection>
-                <Forms.FormText type="description" className={Margins.bottom16}>
-                    Make sure your decoration does not violate <Link
-                        href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md"
-                    >
-                        the guidelines
-                    </Link> before creating your decoration.<br /><br />You can recieve updates on your decoration's review by joining <Link
-                        href={`https://discord.gg/${INVITE_KEY}}`}
-                        onClick={async e => {
-                            e.preventDefault();
-                            const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
+                </div>
+            </div>
+            <Forms.FormText type="description" className={Margins.bottom16}>
+                Make sure your decoration does not violate <Link
+                    href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md"
+                >
+                    the guidelines
+                </Link> before creating your decoration.<br /><br />You can recieve updates on your decoration's review by joining <Link
+                    href={`https://discord.gg/${INVITE_KEY}}`}
+                    onClick={async e => {
+                        e.preventDefault();
+                        const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
 
-                            FluxDispatcher.dispatch({
-                                type: "INVITE_MODAL_OPEN",
-                                invite,
-                                code: INVITE_KEY,
-                                context: "APP"
-                            });
-                        }}
-                    >Decor's Discord server
-                    </Link>.
-                </Forms.FormText>
-            </div>
-            <div>
-                <AvatarDecorationPreview
-                    avatarDecorationOverride={decoration}
-                    user={UserStore.getCurrentUser()}
-                />
-            </div>
+                        FluxDispatcher.dispatch({
+                            type: "INVITE_MODAL_OPEN",
+                            invite,
+                            code: INVITE_KEY,
+                            context: "APP"
+                        });
+                    }}
+                >Decor's Discord server
+                </Link>.
+            </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
             <Button
