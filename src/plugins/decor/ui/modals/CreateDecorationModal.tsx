@@ -10,18 +10,21 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
 
-import { RAW_SKU_ID } from "../../lib/constants";
+import { INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import requireCreateStickerModal from "../../lib/utils/requireCreateStickerModal";
 import { AvatarDecorationPreview } from "../components";
 
+
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 const FileUpload = findByCodeLazy("fileUploadInput,");
+
+const InviteActions = findByPropsLazy("resolveInvite");
 
 export default function CreateDecorationModal(props) {
     const [submitting, setSubmitting] = useState(false);
@@ -76,7 +79,25 @@ export default function CreateDecorationModal(props) {
                     </Forms.FormText>
                 </Forms.FormSection>
                 <Forms.FormText type="description" className={Margins.bottom16}>
-                    Make sure your decoration does not violate the <Link href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md">guidelines</Link> before creating your decoration.
+                    Make sure your decoration does not violate <Link
+                        href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md"
+                    >
+                        the guidelines
+                    </Link> before creating your decoration.<br /><br />You can recieve updates on your decoration's review by joining <Link
+                        href={`https://discord.gg/${INVITE_KEY}}`}
+                        onClick={async e => {
+                            e.preventDefault();
+                            const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
+
+                            FluxDispatcher.dispatch({
+                                type: "INVITE_MODAL_OPEN",
+                                invite,
+                                code: INVITE_KEY,
+                                context: "APP"
+                            });
+                        }}
+                    >Decor's Discord server
+                    </Link>.
                 </Forms.FormText>
             </div>
             <div>

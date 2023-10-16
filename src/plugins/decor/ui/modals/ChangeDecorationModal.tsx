@@ -225,7 +225,7 @@ export default function ChangeDecorationModal(props: any) {
                         }
                     </div>
                 }
-                {activeDecorationHasAuthor && <Text>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
+                {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
             </div>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
