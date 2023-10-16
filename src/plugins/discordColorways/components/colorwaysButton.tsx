@@ -7,17 +7,22 @@
 import * as DataStore from "@api/DataStore";
 import { PalleteIcon } from "@components/Icons";
 import { openModal } from "@utils/modal";
-import { Text, Tooltip, useEffect, useState } from "@webpack/common";
+import { Text, Tooltip, useCallback, useEffect, useState } from "@webpack/common";
 
 import SelectorModal from "./selectorModal";
 
 export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnContainer", listItemWrapperClass = "", listItemTooltipClass = "colorwaysBtn-tooltipContent", }: { listItemClass?: string; listItemWrapperClass?: string; listItemTooltipClass?: string; }) {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
+    async function setButtonVisibility() {
+        const showColorwaysButton = await DataStore.get("showColorwaysButton");
+        setVisibility(showColorwaysButton);
+    }
+
+    const cached_setButtonVisibility = useCallback(setButtonVisibility, []);
+
     useEffect(() => {
-        DataStore.get("showColorwaysButton").then((showColorwaysButton: boolean) => {
-            setVisibility(showColorwaysButton);
-        });
+        cached_setButtonVisibility();
     });
     return (<Tooltip text={<>
         <span>Colorways</span>

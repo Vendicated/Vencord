@@ -190,16 +190,6 @@ export function SettingsPage() {
 
     return <SettingsTab title="Settings & Tools">
         <div className="colorwaysSettingsPage-wrapper">
-            <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
-                setColorsButtonVisibility(!colorsButtonVisibility);
-                const showColorwaysButton = await DataStore.get("showColorwaysButton");
-                DataStore.set("showColorwaysButton", !showColorwaysButton);
-            }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
-                <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
-                    setColorsButtonVisibility(e);
-                    DataStore.set("showColorwaysButton", e);
-                }}></Switch></div>
-            <div className="colorwaysSettingsPage-divider" />
             <Forms.FormTitle>
                 Colorways Source Files:
             </Forms.FormTitle>
@@ -273,6 +263,16 @@ export function SettingsPage() {
                     </div>;
                 })}
             </div>
+            <div className="colorwaysSettingsPage-divider" />
+            <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                setColorsButtonVisibility(!colorsButtonVisibility);
+                const showColorwaysButton = await DataStore.get("showColorwaysButton");
+                DataStore.set("showColorwaysButton", !showColorwaysButton);
+            }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
+                <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
+                    setColorsButtonVisibility(e);
+                    DataStore.set("showColorwaysButton", e);
+                }}></Switch></div>
             <div className="colorwaysSettingsPage-divider" />
             <Forms.FormTitle>
                 Tools:
