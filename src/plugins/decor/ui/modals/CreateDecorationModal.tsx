@@ -10,9 +10,9 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, Text, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, GuildStore, Text, TextInput, UserStore, useState } from "@webpack/common";
 
-import { INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
@@ -92,21 +92,24 @@ export default function CreateDecorationModal(props) {
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                 >
                     the guidelines
-                </Link> before creating your decoration.<br />You can recieve updates on your decoration's review by joining <Link
-                    href={`https://discord.gg/${INVITE_KEY}}`}
-                    onClick={async e => {
-                        e.preventDefault();
-                        const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
+                </Link> before creating your decoration.
+                {typeof GuildStore.getGuild(GUILD_ID) === "undefined" && <>
+                    <br />You can recieve updates on your decoration's review by joining <Link
+                        href={`https://discord.gg/${INVITE_KEY}}`}
+                        onClick={async e => {
+                            e.preventDefault();
+                            const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
 
-                        FluxDispatcher.dispatch({
-                            type: "INVITE_MODAL_OPEN",
-                            invite,
-                            code: INVITE_KEY,
-                            context: "APP"
-                        });
-                    }}
-                >Decor's Discord server
-                </Link>.
+                            FluxDispatcher.dispatch({
+                                type: "INVITE_MODAL_OPEN",
+                                invite,
+                                code: INVITE_KEY,
+                                context: "APP"
+                            });
+                        }}
+                    >Decor's Discord server
+                    </Link>.
+                </>}
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
