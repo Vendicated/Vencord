@@ -10,16 +10,22 @@ import { parse as originalParse, UserstyleHeader } from "usercss-meta";
 const UserCSSLogger = new Logger("UserCSS", "#d2acf5");
 
 export async function usercssParse(text: string, fileName: string): Promise<UserstyleHeader> {
-    var { metadata, errors } = originalParse(text.replace(/\r/g, ""), { allowErrors: true });
+    const { metadata, errors } = originalParse(text.replace(/\r/g, ""), {
+        allowErrors: true,
+        unknownKey: "assign"
+    });
 
     if (errors.length) {
         UserCSSLogger.warn("Parsed", fileName, "with errors:", errors);
     }
 
+    const requiredPlugins = metadata["vc-requiredPlugins"]?.split(",").map(p => p.trim());
+
     return {
         ...metadata,
         fileName,
-        id: await getUserCssId(metadata)
+        id: await getUserCssId(metadata),
+        requiredPlugins
     };
 }
 

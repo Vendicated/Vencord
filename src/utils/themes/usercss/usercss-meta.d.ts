@@ -56,6 +56,14 @@ declare module "usercss-meta" {
         fileName: string;
 
         /**
+         * The required plugins for this style.
+         *
+         * @vencord Specific to Vencord, not part of the original module.
+         * @see {@link vc-requiredPlugins}
+         */
+        requiredPlugins?: string[];
+
+        /**
          * The name of your style.
          *
          * The combination of {@link name} and {@link namespace} must be unique.
@@ -107,7 +115,20 @@ declare module "usercss-meta" {
          * A list of variables the style defines.
          */
         vars: Record<string, UserCSSVariable>;
+
+        /**
+         * Required plugins for this style to work. Comma-separated list of plugin names.
+         *
+         * @vencord This is a Vencord-specific extension, however we wish for this to become a standard for client mods
+         *          to implement, hence the more generic namespaced name.
+         */
+        "vc-requiredPlugins"?: string;
     }
 
-    export function parse(text: string, options: { allowErrors: boolean; }): { metadata: UserstyleHeader; errors: { code: string; args: any; }[]; };
+    type UserCSSParseOptions = {
+        allowErrors: boolean;
+        unknownKey: "assign";
+    };
+
+    export function parse(text: string, options: UserCSSParseOptions): { metadata: UserstyleHeader; errors: { code: string; args: any; }[]; };
 }

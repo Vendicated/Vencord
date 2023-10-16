@@ -21,7 +21,7 @@ import "./themesStyles.css";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { CogWheel, DeleteIcon } from "@components/Icons";
+import { CogWheel, DeleteIcon, PluginIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
@@ -34,10 +34,11 @@ import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import type { ComponentType, Ref, SyntheticEvent } from "react";
+import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { type ComponentType, type Ref, type SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
 
+import { isPluginEnabled } from "../../plugins";
 import { UserCSSSettingsModal } from "./UserCSSModal";
 
 type FileInput = ComponentType<{
@@ -118,6 +119,9 @@ interface UserCSSCardProps {
 }
 
 function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardProps) {
+    const missingPlugins = useMemo(() =>
+        theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
+
     return (
         <AddonCard
             name={theme.name ?? "Unknown"}
@@ -127,6 +131,19 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
             setEnabled={onChange}
             infoButton={
                 <>
+                    {missingPlugins && missingPlugins.length > 0 && (
+                        <Tooltip text={"The following plugins are required, but aren't enabled: " + missingPlugins.join(", ")}>
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <div
+                                    style={{ color: "var(--status-warning" }}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                >
+                                    <PluginIcon />
+                                </div>
+                            )}
+                        </Tooltip>
+                    )}
                     {theme.vars && (
                         <div style={{ cursor: "pointer" }} onClick={
                             () => openModal(modalProps =>
