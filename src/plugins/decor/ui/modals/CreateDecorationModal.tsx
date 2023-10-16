@@ -89,7 +89,7 @@ export default function CreateDecorationModal(props) {
             </div>
             <Forms.FormText type="description" className={Margins.bottom16}>
                 Make sure your decoration does not violate <Link
-                    href="https://gist.github.com/FieryFlames/00a618ca0d5f67f40a243e6d297fcadb#file-guidelines-md"
+                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                 >
                     the guidelines
                 </Link> before creating your decoration.<br /><br />You can recieve updates on your decoration's review by joining <Link
