@@ -92,7 +92,7 @@ export default function CreateDecorationModal(props) {
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                 >
                     the guidelines
-                </Link> before creating your decoration.<br /><br />You can recieve updates on your decoration's review by joining <Link
+                </Link> before creating your decoration.<br />You can recieve updates on your decoration's review by joining <Link
                     href={`https://discord.gg/${INVITE_KEY}}`}
                     onClick={async e => {
                         e.preventDefault();
