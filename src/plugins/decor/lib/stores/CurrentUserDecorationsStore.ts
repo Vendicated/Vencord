@@ -29,6 +29,7 @@ function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
 
     useUsersDecorationsStore.getState().set(user.id, decoration?.hash ?? null);
     FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
+    FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SUBMIT_SUCCESS" });
 }
 
 export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
