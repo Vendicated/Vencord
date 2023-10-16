@@ -11,7 +11,15 @@ import { Text, Tooltip, useCallback, useEffect, useState } from "@webpack/common
 
 import SelectorModal from "./selectorModal";
 
-export default function ColorwaysButton({ listItemClass = "ColorwaySelectorBtnContainer", listItemWrapperClass = "", listItemTooltipClass = "colorwaysBtn-tooltipContent", }: { listItemClass?: string; listItemWrapperClass?: string; listItemTooltipClass?: string; }) {
+export default function ColorwaysButton({
+    listItemClass = "ColorwaySelectorBtnContainer",
+    listItemWrapperClass = "",
+    listItemTooltipClass = "colorwaysBtn-tooltipContent"
+}: {
+    listItemClass?: string;
+    listItemWrapperClass?: string;
+    listItemTooltipClass?: string;
+}) {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
     async function setButtonVisibility() {

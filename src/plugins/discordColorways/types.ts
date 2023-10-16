@@ -30,3 +30,11 @@ export interface WSMessage {
 }
 
 export type SettingsType = "text" | "select" | "list";
+
+export interface ColorPickerProps {
+    color: number;
+    showEyeDropper: boolean;
+    suggestedColors: string[];
+    label: any;
+    onChange(color: number): void;
+}

@@ -24,16 +24,9 @@ import SelectorModal from "./components/selectorModal";
 import { SettingsPage } from "./components/settingsPage";
 import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
+import { ColorPickerProps } from "./types";
 
 export let LazySwatchLoaded = false;
-
-interface ColorPickerProps {
-    color: number;
-    showEyeDropper: boolean;
-    suggestedColors: string[];
-    label: any;
-    onChange(color: number): void;
-}
 
 export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return (
@@ -54,10 +47,15 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
         "showColorwaysButton"
     ]);
 
-    if (!customColorways) DataStore.set("customColorways", []);
+    if (!customColorways)
+        DataStore.set("customColorways", []);
+
     if (!colorwaySourcesFiles)
         DataStore.set("colorwaySourceFiles", [defaultColorwaySource]);
-    if (!showColorwaysButton) DataStore.set("showColorwaysButton", false);
+
+    if (!showColorwaysButton)
+        DataStore.set("showColorwaysButton", false);
+
 })();
 
 export const ColorwayCSS = {

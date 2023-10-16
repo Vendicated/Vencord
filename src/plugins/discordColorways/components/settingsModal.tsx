@@ -6,15 +6,35 @@
 
 import { DataStore } from "@api/index";
 import { CloseIcon } from "@components/Icons";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Button, Forms, Text, TextInput, useEffect, useState } from "@webpack/common";
+import {
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalProps,
+    ModalRoot,
+    openModal
+} from "@utils/modal";
+import {
+    Button,
+    Forms,
+    Text,
+    TextInput,
+    useEffect,
+    useState
+} from "@webpack/common";
 
-export function SettingsModal({ modalProps }: { modalProps: ModalProps; }) {
+export function SettingsModal({
+    modalProps
+}: {
+    modalProps: ModalProps;
+}) {
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<string[]>();
     useEffect(() => {
         async function loadUI() {
             const colorwaySourceFilesArr = await DataStore.get("colorwaySourceFiles");
-            setColorwaySourceFiles(colorwaySourceFilesArr);
+            setColorwaySourceFiles(
+                colorwaySourceFilesArr
+            );
         }
         loadUI();
     });
