@@ -28,10 +28,12 @@ export interface NewDecoration {
     alt: string | null;
 }
 
-export const cFetch = (url: RequestInfo, options?: RequestInit) =>
-    fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${useAuthorizationStore.getState().token}` } }).then(c =>
-        c.ok ? c : Promise.reject(c)
-    );
+export async function cFetch(url: RequestInfo, options?: RequestInit) {
+    const res = await fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${useAuthorizationStore.getState().token}` } });
+
+    if (res.ok) return res;
+    else throw new Error(await res.text());
+}
 
 export const getUsersDecorations = async (ids: string[] | undefined = undefined) => {
     const url = new URL(API_URL + "/users");

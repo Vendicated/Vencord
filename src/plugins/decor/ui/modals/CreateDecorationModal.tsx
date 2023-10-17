@@ -10,7 +10,7 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, GuildStore, Text, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, GuildStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
@@ -27,9 +27,14 @@ const FileUpload = findByCodeLazy("fileUploadInput,");
 const InviteActions = findByPropsLazy("resolveInvite");
 
 export default function CreateDecorationModal(props) {
-    const [submitting, setSubmitting] = useState(false);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+
+    useEffect(() => {
+        if (error) setError(null);
+    }, [file]);
 
     const { create: createDecoration } = useCurrentUserDecorationsStore();
 
@@ -57,6 +62,7 @@ export default function CreateDecorationModal(props) {
         >
             <div className={cl("create-decoration-modal-form-preview-container")}>
                 <div className={cl("create-decoration-modal-form")}>
+                    {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
                     <Forms.FormSection title="File">
                         <FileUpload
                             filename={file?.name}
@@ -116,7 +122,8 @@ export default function CreateDecorationModal(props) {
             <Button
                 onClick={() => {
                     setSubmitting(true);
-                    createDecoration({ alt: name, file: file! }).then(props.onClose).catch(e => { setSubmitting(false); });
+                    createDecoration({ alt: name, file: file! })
+                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
                 }}
                 disabled={!file || !name}
                 submitting={submitting}
