@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, GuildMemberStore } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
 interface VoiceState {
     userId: string;
