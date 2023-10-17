@@ -42,15 +42,15 @@ export default definePlugin({
         {
             find: "getUserStoreVersion",
             replacement: {
-                match: /(getUser=.+return )(.\[.])/,
-                replace: "$1$self.patchGetUser($2)"
+                match: /(?<=getUser=.{10,50}return )(\i\[\i\])/,
+                replace: "$self.patchGetUser($1)"
             }
         },
         // Patch MediaResolver to return correct URL for Decor avatar decorations
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /avatarDecoration,.+?;/,
+                match: /avatarDecoration,.{1,100}?;/,
                 replace: "$&const vcDecorDecoration=$self.patchGetAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
@@ -58,13 +58,13 @@ export default definePlugin({
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /{user:(.)},"decoration"\),/,
+                match: /{user:\i},"decoration"\),/,
                 replace: "$&$self.DecorSection(),"
             }
         },
         // Obtain CustomizationSection component
         {
-            find: "e.titleIcon",
+            find: ".customizationSectionBackground",
             replacement: {
                 match: /function (\i)\(\i\){var \i,\i=\i\.title/,
                 replace: "$self.CustomizationSection=$1;$&"
@@ -87,18 +87,18 @@ export default definePlugin({
             },
             {
                 match: /\i\.\i\.isItemViewed\((\i)\)/,
-                replace: "$1.skuId !== $self.SKU_ID ? $& : true"
+                replace: "($1.skuId !== $self.SKU_ID ? $& : true)"
             },
             {
-                match: /((\i)\.label}\),)(\i===\i\.PURCHASE\|\|\i===\i\.PREMIUM_PURCHASE&&\i)/,
-                replace: "$1t.skuId === $self.SKU_ID || ($3)"
+                match: /(?<=(\i)\.label\}\),)(\i===\i\.PURCHASE\|\|\i===\i\.PREMIUM_PURCHASE&&\i)/,
+                replace: "($1.skuId === $self.SKU_ID || ($2))"
             }]
         },
         {
             find: "GUILD_STICKER_SETTINGS_REMAINING_SLOTS_AVAILABLE.format",
             replacement: {
-                match: /(numTotal:.+?,)(\i)=(function\(\i\){var \i=\i\.guildId)/,
-                replace: "$1$2=$self.openCreateStickerModalLazy=$3"
+                match: /(?<=numTotal:.{1,50}?,)(\i)=(function\(\i\){var \i=\i\.guildId)/,
+                replace: "$1=$self.openCreateStickerModalLazy=$2"
             }
         }
     ],
