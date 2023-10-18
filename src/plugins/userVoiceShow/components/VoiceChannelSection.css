@@ -1,4 +1,4 @@
-.vc-uvs-button > div {
+.vc-uvs-button>div {
     white-space: normal !important;
 }
 
@@ -21,6 +21,7 @@
     margin-bottom: 0 !important;
 }
 
-.vc-uvs-popout-margin > [class^="section"] {
-    margin-top: -12px;
+.vc-uvs-popout-margin-self>[class^="section"] {
+    padding-top: 0;
+    padding-bottom: 12px;
 }
