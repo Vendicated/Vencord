@@ -27,7 +27,7 @@ import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import { UserThemeHeader } from "main/themes";
+import { getThemeInfo, UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
@@ -40,58 +40,42 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
+interface OnlineTheme {
+    link: string;
+    error?: string;
+    headers?: UserThemeHeader;
+}
+
 const InviteActions = findByPropsLazy("resolveInvite");
 const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 
-function Validator({ link }: { link: string; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+/**
+ * Trims URLs like so
+ * https://whatever.example.com/whatever/whatever/whatever/whatever/index.html
+ * -> whatever/index.html
+*/
+function trimThemeUrl(url: string) {
+    return new URL(url).pathname.split("/").slice(-2).join("/");
+}
+
+async function FetchTheme(link: string) {
+    const theme: OnlineTheme = await fetch(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
+
         const contentType = res.headers.get("Content-Type");
         if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
             throw "Not a CSS file. Remember to use the raw link!";
 
-        return "Okay!";
-    }));
+        return res.text();
+    }).then(text => {
+        const headers = getThemeInfo(text, trimThemeUrl(link));
+        return { link, headers };
+    }).catch(error => ({ link: link, error: error.toString() }));
 
-    const text = pending
-        ? "Checking..."
-        : err
-            ? `Error: ${err instanceof Error ? err.message : String(err)}`
-            : "Valid!";
-
-    return <Forms.FormText style={{
-        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
-    }}>{text}</Forms.FormText>;
-}
-
-function Validators({ themeLinks }: { themeLinks: string[]; }) {
-    if (!themeLinks.length) return null;
-
-    return (
-        <>
-            <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
-            <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
-            <div>
-                {themeLinks.map(link => (
-                    <Card style={{
-                        padding: ".5em",
-                        marginBottom: ".5em",
-                        marginTop: ".5em"
-                    }} key={link}>
-                        <Forms.FormTitle tag="h5" style={{
-                            overflowWrap: "break-word"
-                        }}>
-                            {link}
-                        </Forms.FormTitle>
-                        <Validator link={link} />
-                    </Card>
-                ))}
-            </div>
-        </>
-    );
+    return theme;
 }
 
 interface ThemeCardProps {
@@ -151,7 +135,7 @@ enum ThemeTab {
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "enabledThemes"]);
+    const settings = useSettings(["themeLinks", "disabledThemeLinks", "enabledThemes"]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
@@ -159,9 +143,11 @@ function ThemesTab() {
     const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
+    const [themes, setThemes] = useState<OnlineTheme[]>([]);
+
     useEffect(() => {
         refreshLocalThemes();
-    }, []);
+    }, [settings.themeLinks]);
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
@@ -279,7 +265,7 @@ function ThemesTab() {
     }
 
     // When the user leaves the online theme textbox, update the settings
-    function onBlur() {
+    function updateThemeLinks() {
         settings.themeLinks = [...new Set(
             themeText
                 .trim()
@@ -288,6 +274,25 @@ function ThemesTab() {
                 .filter(Boolean)
         )];
     }
+
+
+    function refreshOnlineThemes() {
+        const fetches = settings.themeLinks.map(FetchTheme);
+        Promise.all(fetches).then(setThemes);
+    }
+
+    function onOnlineThemeChange(link: string, value: boolean) {
+        if (value) {
+            if (!settings.disabledThemeLinks.includes(link)) return;
+            settings.disabledThemeLinks = settings.disabledThemeLinks.filter(f => f !== link);
+        } else {
+            settings.disabledThemeLinks = [...settings.disabledThemeLinks, link];
+        }
+        setThemeText(settings.themeLinks.join("\n"));
+        updateThemeLinks();
+    }
+
+    useEffect(refreshOnlineThemes, [settings.themeLinks, settings.disabledThemeLinks]);
 
     function renderOnlineThemes() {
         return (
@@ -305,10 +310,37 @@ function ThemesTab() {
                         className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
                         placeholder="Theme Links"
                         spellCheck={false}
-                        onBlur={onBlur}
+                        onBlur={updateThemeLinks}
                         rows={10}
                     />
-                    <Validators themeLinks={settings.themeLinks} />
+                    <Forms.FormTitle className={Margins.top20} tag="h5">Themes</Forms.FormTitle>
+                    <Forms.FormText>Themes you have entered above will appear here</Forms.FormText>
+                    <div className={cl("grid")}>
+                        {themes.map(theme =>
+                            theme.error ? (
+                                <AddonCard
+                                    key={theme.link}
+                                    name={trimThemeUrl(theme.link)}
+                                    description={<Forms.FormText>{theme.error}</Forms.FormText>}
+                                    author="Nobody"
+                                    enabled={false}
+                                    setEnabled={() => { }}
+                                    disabled
+                                />
+                            ) : (
+                                <ThemeCard
+                                    key={theme.link}
+                                    enabled={!settings.disabledThemeLinks.includes(theme.link)}
+                                    onChange={value => {
+                                        onOnlineThemeChange(theme.link, value);
+                                        refreshOnlineThemes();
+                                    }}
+                                    onDelete={() => { }}
+                                    theme={theme.headers!}
+                                />
+                            )
+                        )}
+                    </div >
                 </Forms.FormSection>
             </>
         );
