@@ -98,6 +98,13 @@ export default definePlugin({
                 replace: "$1 $self.quotes($2)$3"
             },
         },
+        { // Halloween
+            find: "getLoadingTips:",
+            replacement: {
+                match: /(\i>=\i\?)(\[.+?\])(:)/,
+                replace: "$1 $self.quotes($2) $3"
+            }
+        }
     ],
 
     xor(quote: string) {
@@ -107,14 +114,11 @@ export default definePlugin({
     },
 
     quotes(preset: string[]) {
-        let result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
+        const result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
         if (settings.store.enablePluginPresetQuotes) {
             result.push(...quotes.map(this.xor));
         }
         result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter));
-        if (result.length === 0) {
-            result = ["Loading"];
-        }
-        return result;
+        return result.length > 0 ? result : ["Loading"];
     }
 });
