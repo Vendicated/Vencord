@@ -74,7 +74,7 @@ export default definePlugin({
         {
             find: ".decorationGridItem",
             replacement: [{
-                match: /(?:,)((\i)=function\(.\){var \i=\i\.children)/,
+                match: /,((\i)=function\(\i\){var \i=\i\.children)/,
                 replace: ";var $2;$self.DecorationGridItem=$1"
             },
             {
