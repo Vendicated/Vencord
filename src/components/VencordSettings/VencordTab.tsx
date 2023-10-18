@@ -257,7 +257,11 @@ function DonateCard({ image }: DonateCardProps) {
                 src={image}
                 alt=""
                 height={128}
-                style={{ marginLeft: "auto", transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : "" }}
+                style={{
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    marginLeft: "auto",
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                }}
             />
         </Card>
     );

@@ -265,7 +265,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Dziurwa: {
         name: "Dziurwa",
-        id: 1034579679526526976n
+        id: 1001086404203389018n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -359,6 +359,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "bb010g",
         id: 72791153467990016n,
     },
+    Lumap: {
+        name: "lumap",
+        id: 635383782576357407n
+    },
     Dolfies: {
         name: "Dolfies",
         id: 852892297661906993n,
@@ -366,6 +370,18 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RuukuLada: {
         name: "RuukuLada",
         id: 119705748346241027n,
+    },
+    blahajZip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n,
+    },
+    archeruwu: {
+        name: "archer_uwu",
+        id: 160068695383736320n
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
     },
 } satisfies Record<string, Dev>);
 
