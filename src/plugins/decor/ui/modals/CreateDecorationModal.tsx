@@ -72,7 +72,7 @@ export default function CreateDecorationModal(props) {
                             onFileSelect={setFile}
                         />
                         <Forms.FormText type="description" className={Margins.top8}>
-                            File should be APNG or PNG (1MB max)
+                            File should be APNG or PNG.
                         </Forms.FormText>
                     </Forms.FormSection>
                     <Forms.FormSection title="Name">
