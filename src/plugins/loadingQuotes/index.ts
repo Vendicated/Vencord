@@ -61,38 +61,40 @@ const quotes = [
     "Wdn`khc'|f*eghl{%"
 ];
 
+const settings = definePluginSettings({
+    enablePluginPresetQuotes: {
+        description: "Enable the quotes preset by this plugin",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    enableDiscordPresetQuotes: {
+        description: "Enable the quotes preset by Discord",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    additionalQuotes: {
+        description: "Additional custom quotes to possibly appear",
+        type: OptionType.STRING,
+        default: "",
+    },
+    additionalQuotesDelimiter: {
+        description: "Delimiter for additional quotes",
+        type: OptionType.STRING,
+        default: "|",
+    },
+});
+
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
     authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
 
-    settings: definePluginSettings({
-        enablePluginPresetQuotes: {
-            description: "Enable the quotes preset by this plugin",
-            type: OptionType.BOOLEAN,
-            default: true
-        },
-        enableDiscordPresetQuotes: {
-            description: "Enable the quotes preset by Discord",
-            type: OptionType.BOOLEAN,
-            default: false
-        },
-        additionalQuotes: {
-            description: "Additional custom quotes to possibly appear",
-            type: OptionType.STRING,
-            default: "",
-        },
-        additionalQuotesDelimiter: {
-            description: "Delimiter for additional quotes",
-            type: OptionType.STRING,
-            default: "|",
-        },
-    }),
+    settings,
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                match: /(\._loadingText=\(\i=)(\[.{0,4000}\])(\)\[.{0,10}random\(.+?;)/s,
+                match: /(\._loadingText=\(\i=)(\[.+?\])(\)\[.{0,10}random\(.+?;)/s,
                 replace: "$1 $self.quotes($2)$3"
             },
         },
@@ -105,11 +107,11 @@ export default definePlugin({
     },
 
     quotes(preset: string[]) {
-        let result: string[] = this.settings.store.enableDiscordPresetQuotes ? preset : [];
-        if (this.settings.store.enablePluginPresetQuotes) {
-            result = result.concat(quotes.map(this.xor));
+        let result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
+        if (settings.store.enablePluginPresetQuotes) {
+            result.push(...quotes.map(this.xor));
         }
-        result = result.concat(this.settings.store.additionalQuotes.split(this.settings.store.additionalQuotesDelimiter));
+        result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter));
         if (result.length === 0) {
             result = ["Loading"];
         }
