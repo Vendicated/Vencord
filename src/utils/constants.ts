@@ -378,6 +378,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     MrDiamond: {
         name: "MrDiamond",
         id: 523338295644782592n
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
     }
 } satisfies Record<string, Dev>);
 
@@ -389,5 +393,3 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
-
-export const IsFirefox = IS_EXTENSION && navigator.userAgent.toLowerCase().includes("firefox");
