@@ -30,7 +30,7 @@ const settings = definePluginSettings({
         description: "Receive audio pings for @mentions",
         default: false,
     },
-    "Allow @everyone": {
+    allowEveryone: {
         type: OptionType.BOOLEAN,
         description: "Receive audio pings for @everyone and @here in group DMs",
         default: false,
@@ -62,7 +62,7 @@ export default definePlugin({
             (channelType === ChannelType.DM && settings.store.channelToEffect === "group_dm") ||
             (channelType === ChannelType.GROUP_DM && settings.store.channelToEffect === "user_dm") ||
             (settings.store.allowMentions && message.mentions.find(m => m.id === UserStore.getCurrentUser().id)) ||
-            (settings.store["Allow @everyone"] && message.mention_everyone)
+            (settings.store.allowEveryone && message.mention_everyone)
         ) {
             return true;
         }
