@@ -11,6 +11,7 @@ import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, M
 import { Button, Forms, Slider, Text, useEffect, useRef, useState } from "@webpack/common";
 
 import { handleFinishRemixing } from ".";
+import { ColorPicker } from "./ColorPicker";
 import EditIcon from "./Icons/EditIcon";
 import EraserIcon from "./Icons/EraserIcon";
 import ToolButton from "./ToolButton";
@@ -27,6 +28,10 @@ function canvasToFile(canvas: HTMLCanvasElement, fileName: string) {
             resolve(new File([blob], `${fileName}.png`));
         });
     });
+}
+
+function colorStrToInt(color: string) {
+    return parseInt(color.replace("#", ""), 16);
 }
 
 function RemixModal(props: ModalProps & { image: string; modalKey: string; }) {
@@ -160,7 +165,9 @@ function RemixModal(props: ModalProps & { image: string; modalKey: string; }) {
                                 onValueChange={setPenSize}
                             />
                         </div>
-                        <input type="color" value={color} onChange={e => setColor(e.target.value)} />
+                        <ColorPicker width={50} height={50} value={colorStrToInt(color)} onChange={
+                            val => setColor(val ? `#${val.toString(16).padStart(6, "0")}` : "#000000")
+                        } />
                     </div>
                 </div>
                 <br />
