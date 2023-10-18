@@ -58,7 +58,15 @@ const cl = classNameFactory("vc-settings-theme-");
  * -> whatever/index.html
 */
 function trimThemeUrl(url: string) {
-    return new URL(url).pathname.split("/").slice(-2).join("/");
+    let urlObj: URL;
+
+    try {
+        urlObj = new URL(url);
+    } catch (e) {
+        return url;
+    }
+
+    return urlObj.pathname.split("/").slice(-2).join("/");
 }
 
 async function FetchTheme(link: string) {
