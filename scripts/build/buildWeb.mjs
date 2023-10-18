@@ -57,6 +57,13 @@ const MonacoWorkerEntryPoints = [
     "vs/editor/editor.worker.js"
 ];
 
+const RnNoiseFiles = [
+    "dist/rnnoise.wasm",
+    "dist/rnnoise_simd.wasm",
+    "dist/rnnoise/workletProcessor.js",
+    "LICENSE"
+];
+
 await Promise.all(
     [
         esbuild.build({
@@ -143,7 +150,9 @@ async function buildExtension(target, files) {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/monaco"),
-        ...await loadDir("browser/third-party", "browser/"),
+        ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
+            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
+        ))),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
@@ -189,5 +198,8 @@ await Promise.all([
     buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
 ]);
 
-Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension.zip");
-console.info("Packed Chromium Extension written to dist/extension.zip");
+Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
+console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+
+Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
+console.info("Packed Firefox Extension written to dist/extension-firefox.zip");

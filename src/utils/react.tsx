@@ -21,6 +21,8 @@ import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common
 import { makeLazy } from "./lazy";
 import { checkIntersecting } from "./misc";
 
+export const NoopComponent = () => null;
+
 /**
  * Check if an element is on screen
  * @param intersectOnly If `true`, will only update the state when the element comes into view
@@ -125,13 +127,14 @@ export function useForceUpdater(withDep?: true) {
  * A lazy component. The factory method is called on first render. For example useful
  * for const Component = LazyComponent(() => findByDisplayName("...").default)
  * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
 
-export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>) {
-    const get = makeLazy(factory);
+export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
+    const get = makeLazy(factory, attempts);
     return (props: T) => {
-        const Component = get();
+        const Component = get() ?? NoopComponent;
         return <Component {...props} />;
     };
 }
