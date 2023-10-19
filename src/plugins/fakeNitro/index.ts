@@ -348,7 +348,7 @@ export default definePlugin({
             find: "location:\"AppIconHome\"",
             predicate: () => settings.store.enableAppIcons,
             replacement: {
-                match: /\i\.\i\.isPremium\(\i\.default\.getCurrentUser\(\)\)/,
+                match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
             }
         }
