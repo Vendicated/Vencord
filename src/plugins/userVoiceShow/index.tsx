@@ -20,14 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
-const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {
@@ -88,7 +87,7 @@ export default definePlugin({
     patchPopout: ({ user }: UserProps) => {
         const isSelfUser = user.id === UserStore.getCurrentUser().id;
         return (
-            <div className={isSelfUser ? `vc-uvs-popout-margin ${UserPopoutSectionCssClasses.lastSection}` : ""}>
+            <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
                 <VoiceChannelField user={user} />
             </div>
         );
