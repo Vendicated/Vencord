@@ -25,13 +25,14 @@ import {
     PermissionsBits,
     PermissionStore,
     SelectedChannelStore,
+    SettingsRouter,
     Text,
 } from "@webpack/common";
 
+import { ColorPickerModal } from "./components/colorPicker";
 import ColorwaysButton from "./components/colorwaysButton";
 import CreatorModal from "./components/creatorModal";
 import Selector from "./components/selector";
-import SelectorModal from "./components/selectorModal";
 import { SettingsPage } from "./components/settingsPage";
 import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
@@ -112,9 +113,14 @@ export default definePlugin({
     pluginVersion: "5.2.0",
     creatorVersion: "1.15",
     toolboxActions: {
-        "Open Toolbox": () =>
+        "Change Colorway": () => SettingsRouter.open("ColorwaysSettings"),
+        "Open Colorway Creator": () =>
             openModal(props => (
-                <SelectorModal modalProps={props} visibleTabProps="toolbox" />
+                <ColorPickerModal modalProps={props} />
+            )),
+        "Open Color Stealer": () =>
+            openModal(props => (
+                <ColorPickerModal modalProps={props} />
             )),
     },
     patches: [
@@ -155,7 +161,7 @@ export default definePlugin({
             },
             {
                 section: "ColorwaysSettings",
-                label: "Settings & Tools",
+                label: "Settings",
                 element: SettingsPage,
                 className: "dc-colorway-settings"
             },

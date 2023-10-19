@@ -24,6 +24,7 @@ import { ColorwayCSS, LazySwatchLoaded } from "..";
 import { fallbackColorways } from "../constants";
 import { Colorway } from "../types";
 import extractAndRequireModuleIds from "../util/requireModule";
+import { ColorPickerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
 
@@ -156,6 +157,7 @@ export default function Selector({
                             </div>
                         </div>
                     )}
+                    <div className="colorwaySelector-pillSeparator" />
                     <div className="colorwaySelector-pillWrapper">
                         <Tooltip text="Refresh Colorways...">
                             {({ onMouseEnter, onMouseLeave }) => {
@@ -237,6 +239,25 @@ export default function Selector({
                                                 fill="currentColor"
                                                 d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z"
                                             />
+                                        </svg>
+                                    </div>
+                                );
+                            }}
+                        </Tooltip>
+                        <Tooltip text="Open Color Stealer">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return (
+                                    <div
+                                        className="colorwaySelector-pill"
+                                        id="colorway-opencolorstealer"
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            openModal((props) => <ColorPickerModal modalProps={props} />);
+                                        }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M12.433 10.07C14.133 10.585 16 11.15 16 8a8 8 0 1 0-8 8c1.996 0 1.826-1.504 1.649-3.08-.124-1.101-.252-2.237.351-2.92.465-.527 1.42-.237 2.433.07zM8 5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm.5 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                                         </svg>
                                     </div>
                                 );

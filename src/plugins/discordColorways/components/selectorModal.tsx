@@ -11,169 +11,30 @@ import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { filters, findByCodeLazy, waitFor } from "@webpack";
 import {
-    Clipboard,
     Forms,
-    Text,
+    SettingsRouter,
     TextInput,
-    Toasts,
     Tooltip,
     useCallback,
     useEffect,
     useState,
 } from "@webpack/common";
-import { Plugins } from "Vencord";
 
 import { ColorwayCSS } from "..";
 import { fallbackColorways } from "../constants";
 import { Colorway } from "../types";
-import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
+import { ColorPickerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
-import { SettingsModal } from "./settingsModal";
 
 const SelectionCircle = findByCodeLazy(".selectionCircle");
 let loader;
 waitFor(filters.byProps("loaderContainer"), (m) => loader = m);
 
-interface ToolboxItem {
-    title: string;
-    onClick: () => void;
-    id?: string;
-    iconClassName?: string;
-}
-
-const ToolboxItems: ToolboxItem[] = [
-    {
-        title: "Settings",
-        onClick: () => {
-            openModal((props) => <SettingsModal modalProps={props} />);
-        },
-        id: "colorways-toolbox_settings",
-        iconClassName: "gear-wide-connected",
-    },
-    {
-        title: "Color Picker",
-        onClick: () => {
-            openModal((props) => <ColorPickerModal modalProps={props} />);
-        },
-        id: "colorways-toolbox_colorpicker",
-        iconClassName: "palette",
-    },
-    {
-        title: "Copy Accent Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--brand-experiment"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Accent color copied to clipboard",
-                id: "toolbox-accent-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-accent",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Primary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-primary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Primary color copied to clipboard",
-                id: "toolbox-primary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-primary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Secondary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-secondary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Secondary color copied to clipboard",
-                id: "toolbox-secondary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-secondary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Tertiary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-tertiary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Tertiary color copied to clipboard",
-                id: "toolbox-tertiary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-tertiary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Other Colors",
-        onClick: () =>
-            openModal((props) => <ColorStealerModal modalProps={props} />),
-        id: "colorways-toolbox_copy-other",
-        iconClassName: "copy",
-    },
-];
-
 export default function SelectorModal({
     modalProps,
-    visibleTabProps = "all",
 }: {
     modalProps: ModalProps;
-    visibleTabProps?: string;
 }): JSX.Element | any {
     const [currentColorway, setCurrentColorway] = useState<string>("");
     const [colorways, setColorways] = useState<Colorway[]>([]);
@@ -181,7 +42,7 @@ export default function SelectorModal({
     const [searchBarVisibility, setSearchBarVisibility] = useState<boolean>(false);
     const [searchString, setSearchString] = useState<string>("");
     const [loaderHeight, setLoaderHeight] = useState<string>("2px");
-    const [visibility, setVisibility] = useState<string>(visibleTabProps);
+    const [visibility, setVisibility] = useState<string>("all");
     let visibleColorwayArray: Colorway[];
 
     switch (visibility) {
@@ -293,19 +154,6 @@ export default function SelectorModal({
                             >
                                 Custom
                             </div>
-                            <div className="colorwaySelector-pillSeparator" />
-                            <div
-                                className={["colorwaySelector-pill", visibility === "toolbox" ? "colorwaySelector-pill_selected" : ""].join(" ")}
-                                onClick={() => setVisibility("toolbox")}
-                            >
-                                Toolbox
-                            </div>
-                            <div
-                                className={["colorwaySelector-pill", visibility === "info" ? "colorwaySelector-pill_selected" : ""].join(" ")}
-                                onClick={() => setVisibility("info")}
-                            >
-                                Info
-                            </div>
                         </div>
                     )}
                     <div className="colorwaySelector-pillWrapper">
@@ -339,7 +187,7 @@ export default function SelectorModal({
                                                     fill="none"
                                                     width="24"
                                                     height="24"
-                                                ></rect>
+                                                />
                                             </g>
                                             <g id="Filled_Icons">
                                                 <g>
@@ -347,6 +195,32 @@ export default function SelectorModal({
                                                     <path d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"></path>
                                                 </g>
                                             </g>
+                                        </svg>
+                                    </div>
+                                );
+                            }}
+                        </Tooltip>
+                        <Tooltip text="Open Settings">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return (
+                                    <div
+                                        className="colorwaySelector-pill"
+                                        id="colorway-opensettings"
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            SettingsRouter.open("ColorwaysSettings");
+                                            modalProps.onClose();
+                                        }}
+                                    >
+                                        <svg
+                                            aria-hidden="true"
+                                            role="img"
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" />
                                         </svg>
                                     </div>
                                 );
@@ -380,6 +254,25 @@ export default function SelectorModal({
                                                 fill="currentColor"
                                                 d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z"
                                             />
+                                        </svg>
+                                    </div>
+                                );
+                            }}
+                        </Tooltip>
+                        <Tooltip text="Open Color Stealer">
+                            {({ onMouseEnter, onMouseLeave }) => {
+                                return (
+                                    <div
+                                        className="colorwaySelector-pill"
+                                        id="colorway-opencolorstealer"
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            openModal((props) => <ColorPickerModal modalProps={props} />);
+                                        }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M12.433 10.07C14.133 10.585 16 11.15 16 8a8 8 0 1 0-8 8c1.996 0 1.826-1.504 1.649-3.08-.124-1.101-.252-2.237.351-2.92.465-.527 1.42-.237 2.433.07zM8 5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm.5 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                                         </svg>
                                     </div>
                                 );
@@ -444,7 +337,7 @@ export default function SelectorModal({
                         </Tooltip>
                     </div>
                 </div>
-                <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }}></div></div>
+                <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }} /></div>
                 <div className="ColorwaySelectorWrapper">
                     {visibleColorwayArray.length === 0 ? (
                         <>
@@ -573,125 +466,6 @@ export default function SelectorModal({
                                 </Tooltip>
                             );
                         })
-                    ) : (
-                        <></>
-                    )}
-                    {visibility === "info" ? (
-                        <>
-                            <div className="colorwaysSelector-infoRow">
-                                <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                    Plugin Name:
-                                </Forms.FormTitle>
-                                <Text
-                                    variant="text-xs/normal"
-                                    style={{
-                                        color: "var(--text-muted)",
-                                        fontWeight: 500,
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    Discord Colorways
-                                </Text>
-                            </div>
-                            <div className="colorwaysSelector-infoRow">
-                                <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                    Plugin Version:
-                                </Forms.FormTitle>
-                                <Text
-                                    variant="text-xs/normal"
-                                    style={{
-                                        color: "var(--text-muted)",
-                                        fontWeight: 500,
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    {
-                                        (
-                                            Plugins.plugins
-                                                .DiscordColorways as any
-                                        ).pluginVersion
-                                    }{" "}
-                                    (Official) (Vencord)
-                                </Text>
-                            </div>
-                            <div className="colorwaysSelector-infoRow">
-                                <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                    Creator Version:
-                                </Forms.FormTitle>
-                                <Text
-                                    variant="text-xs/normal"
-                                    style={{
-                                        color: "var(--text-muted)",
-                                        fontWeight: 500,
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    {
-                                        (
-                                            Plugins.plugins
-                                                .DiscordColorways as any
-                                        ).creatorVersion
-                                    }{" "}
-                                    (Stable)
-                                </Text>
-                            </div>
-                            <div className="colorwaysSelector-infoRow">
-                                <Forms.FormTitle style={{ marginBottom: 0 }}>
-                                    Loaded Colorways:
-                                </Forms.FormTitle>
-                                <Text
-                                    variant="text-xs/normal"
-                                    style={{
-                                        color: "var(--text-muted)",
-                                        fontWeight: 500,
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    {[...colorways, ...customColorways].length}
-                                </Text>
-                            </div>
-                        </>
-                    ) : (
-                        <></>
-                    )}
-                    {visibility === "toolbox" ? (
-                        <>
-                            <div className="colorwayToolbox-list">
-                                <div className="colorwayToolbox-itemList">
-                                    {ToolboxItems.map(
-                                        (
-                                            toolboxItem: ToolboxItem,
-                                            i: number
-                                        ) => {
-                                            return (
-                                                <div
-                                                    id={
-                                                        toolboxItem.id ||
-                                                        "colorways-toolbox_item-" +
-                                                        i
-                                                    }
-                                                    className="colorwayToolbox-listItem"
-                                                >
-                                                    <i
-                                                        onClick={
-                                                            toolboxItem.onClick
-                                                        }
-                                                        className={
-                                                            "bi bi-" +
-                                                            (toolboxItem.iconClassName ||
-                                                                "question-circle")
-                                                        }
-                                                    ></i>
-                                                    <span className="colorwaysToolbox-label">
-                                                        {toolboxItem.title}
-                                                    </span>
-                                                </div>
-                                            );
-                                        }
-                                    )}
-                                </div>
-                            </div>
-                        </>
                     ) : (
                         <></>
                     )}

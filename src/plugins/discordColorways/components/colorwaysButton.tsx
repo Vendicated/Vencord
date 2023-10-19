@@ -37,15 +37,11 @@ export default function ColorwaysButton({
         <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>
     </>} position="right" tooltipContentClassName={listItemTooltipClass}
     >
-        {({ onMouseEnter, onMouseLeave, onClick, onContextMenu }) => {
+        {({ onMouseEnter, onMouseLeave, onClick }) => {
             return (
                 <>
                     {visibility ? <div className={listItemClass}>
                         <div
-                            onContextMenu={() => {
-                                onContextMenu();
-                                openModal(props => <SelectorModal modalProps={props} visibleTabProps="toolbox" />);
-                            }}
                             className={listItemWrapperClass + " ColorwaySelectorBtn"}
                             onMouseEnter={async () => {
                                 onMouseEnter();

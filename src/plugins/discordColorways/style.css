@@ -549,13 +549,14 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    overflow: hidden;
 }
 
 .colorwayToolbox-itemList {
-    overflow: hidden auto;
-    height: 100%;
-    padding: 12px;
-    padding-top: 0;
+    padding: 12px !important;
+    padding-top: 0 !important;
+    flex: 0 0 auto;
+    max-height: calc(720px - 65px);
 }
 
 .colorwayToolbox-search {
@@ -648,6 +649,7 @@
     border: 1px solid transparent;
     transition: .15s ease;
     padding: 0 12px;
+    width: 260px;
 }
 
 .colorwaySelector-searchInput:hover {
@@ -772,7 +774,7 @@
     width: 100%;
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-list .colorwaysToolbox-label {
+.ColorwaySelectorWrapper .colorwaysToolbox-label {
     border-radius: 20px;
     box-sizing: border-box;
     color: var(--text-normal);
@@ -789,8 +791,9 @@
     padding: 0 8px;
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-itemList {
-    padding: 0;
+.ColorwaySelectorWrapper .colorwayToolbox-itemList,
+.ColorwaySelectorWrapper.colorwayToolbox-itemList {
+    padding: 0 !important;
     overflow: visible !important;
     display: flex;
     flex-wrap: wrap;
@@ -828,7 +831,7 @@
     color: var(--interactive-normal) !important;
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-list .colorwayToolbox-listItem .bi:hover {
+.ColorwaySelectorWrapper .colorwayToolbox-listItem .bi:hover {
     border-color: var(--brand-500);
     background-color: var(--brand-experiment-15a);
     color: var(--interactive-hover) !important;
@@ -1116,8 +1119,8 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     color: var(--interactive-hover);
 }
 
-.colorwaysSettingsSelector-wrapper .ColorwaySelectorWrapper {
-    justify-content: space-between;
+.colorwaysSettingsSelector-wrapper .colorwaySelector-doublePillBar {
+    justify-content: start;
 }
 
 .colorwaysSettingsSelector-infoWrapper {

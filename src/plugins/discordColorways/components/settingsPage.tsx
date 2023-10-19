@@ -10,12 +10,10 @@ import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import {
     Button,
-    Clipboard,
     Forms,
     Switch,
     Text,
     TextInput,
-    Toasts,
     useCallback,
     useEffect,
     useState
@@ -24,132 +22,6 @@ import { Plugins } from "Vencord";
 
 import { fallbackColorways } from "../constants";
 import { Colorway } from "../types";
-import { ColorPickerModal, ColorStealerModal } from "./colorPicker";
-
-interface ToolboxItem {
-    title: string;
-    onClick: () => void;
-    id?: string;
-    iconClassName?: string;
-}
-
-const ToolboxItems: ToolboxItem[] = [
-    {
-        title: "Color Picker",
-        onClick: () => {
-            openModal(props => <ColorPickerModal modalProps={props} />);
-        },
-        id: "colorways-toolbox_colorpicker",
-        iconClassName: "palette",
-    },
-    {
-        title: "Copy Accent Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--brand-experiment"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Accent color copied to clipboard",
-                id: "toolbox-accent-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-accent",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Primary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-primary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Primary color copied to clipboard",
-                id: "toolbox-primary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-primary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Secondary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-secondary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Secondary color copied to clipboard",
-                id: "toolbox-secondary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-secondary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Tertiary Color",
-        onClick: () => {
-            function getHex(str: string): string {
-                return Object.assign(
-                    document.createElement("canvas").getContext("2d") as {},
-                    { fillStyle: str }
-                ).fillStyle;
-            }
-            Clipboard.copy(
-                getHex(
-                    getComputedStyle(document.body).getPropertyValue(
-                        "--background-tertiary"
-                    )
-                )
-            );
-            Toasts.show({
-                message: "Tertiary color copied to clipboard",
-                id: "toolbox-tertiary-color-copied",
-                type: 1,
-            });
-        },
-        id: "colorways-toolbox_copy-tertiary",
-        iconClassName: "copy",
-    },
-    {
-        title: "Copy Other Colors",
-        onClick: () =>
-            openModal(props => <ColorStealerModal modalProps={props} />),
-        id: "colorways-toolbox_copy-other",
-        iconClassName: "copy",
-    },
-];
 
 export function SettingsPage() {
     const [colorways, setColorways] = useState<Colorway[]>([]);
@@ -188,7 +60,7 @@ export function SettingsPage() {
         cached_loadUI();
     }, []);
 
-    return <SettingsTab title="Settings & Tools">
+    return <SettingsTab title="Settings">
         <div className="colorwaysSettingsPage-wrapper">
             <Forms.FormTitle>
                 Colorways Source Files:
@@ -301,43 +173,6 @@ export function SettingsPage() {
                     setColorsButtonVisibility(e);
                     DataStore.set("showColorwaysButton", e);
                 }}></Switch></div>
-            <div className="colorwaysSettingsPage-divider" />
-            <Forms.FormTitle>
-                Tools:
-            </Forms.FormTitle>
-            <div className="colorwayToolbox-itemList">
-                {ToolboxItems.map(
-                    (
-                        toolboxItem: ToolboxItem,
-                        i: number
-                    ) => {
-                        return (
-                            <div
-                                id={
-                                    toolboxItem.id ||
-                                    "colorways-toolbox_item-" +
-                                    i
-                                }
-                                className="colorwayToolbox-listItem"
-                                onClick={
-                                    toolboxItem.onClick
-                                }
-                            >
-                                <i
-                                    className={
-                                        "bi bi-" +
-                                        (toolboxItem.iconClassName ||
-                                            "question-circle")
-                                    }
-                                ></i>
-                                <span className="colorwaysToolbox-label">
-                                    {toolboxItem.title}
-                                </span>
-                            </div>
-                        );
-                    }
-                )}
-            </div>
             <div className="colorwaysSettingsPage-divider" />
             <div className="colorwaysSettingsSelector-infoWrapper">
                 <div className="colorwaysSelector-infoRow">
