@@ -13,7 +13,6 @@
 // @compatible      firefox Firefox Tampermonkey
 // @compatible      opera Opera + Tampermonkey or Violentmonkey
 // @compatible      edge Edge + Tampermonkey or Violentmonkey
-// @compatible      safari Safari + Tampermonkey or Violentmonkey
 // ==/UserScript==
 
 
