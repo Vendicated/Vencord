@@ -643,13 +643,16 @@
     height: 32px;
 }
 
+.colorwaysSettingsSelector-wrapper .colorwaySelector-search {
+    width: 260px;
+}
+
 .colorwaySelector-searchInput {
     height: 32px;
     border-radius: 50px;
     border: 1px solid transparent;
     transition: .15s ease;
     padding: 0 12px;
-    width: 260px;
 }
 
 .colorwaySelector-searchInput:hover {
@@ -1164,4 +1167,10 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     border-top: thin solid var(--background-modifier-accent);
     margin-top: var(--custom-margin-margin-medium);
     margin-bottom: 20px;
+}
+
+.colorwaysSettingsPage-settingsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }

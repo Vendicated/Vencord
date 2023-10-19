@@ -14,17 +14,22 @@ import SelectorModal from "./selectorModal";
 export default function ColorwaysButton({
     listItemClass = "ColorwaySelectorBtnContainer",
     listItemWrapperClass = "",
-    listItemTooltipClass = "colorwaysBtn-tooltipContent"
+    listItemTooltipClass = "colorwaysBtn-tooltipContent",
+    position = "top"
 }: {
     listItemClass?: string;
     listItemWrapperClass?: string;
     listItemTooltipClass?: string;
+    position?: string;
 }) {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
+    const [pos, setPos] = useState<string>("bottom");
     async function setButtonVisibility() {
         const showColorwaysButton = await DataStore.get("showColorwaysButton");
+        const colorwaysBtnPos = await DataStore.get("colorwaysBtnPos");
         setVisibility(showColorwaysButton);
+        setPos(colorwaysBtnPos);
     }
 
     const cached_setButtonVisibility = useCallback(setButtonVisibility, []);

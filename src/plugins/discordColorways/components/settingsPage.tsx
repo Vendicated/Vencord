@@ -11,6 +11,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@u
 import {
     Button,
     Forms,
+    Select,
     Switch,
     Text,
     TextInput,
@@ -28,6 +29,7 @@ export function SettingsPage() {
     const [customColorways, setCustomColorways] = useState<Colorway[]>([]);
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<string[]>();
     const [colorsButtonVisibility, setColorsButtonVisibility] = useState<boolean>(false);
+    const [colorsButtonPos, setColorsButtonPos] = useState<string>("bottom");
 
     async function loadUI() {
         const colorwaySourceFiles = await DataStore.get(
@@ -46,12 +48,14 @@ export function SettingsPage() {
         const baseData = await DataStore.getMany([
             "customColorways",
             "colorwaySourceFiles",
-            "showColorwaysButton"
+            "showColorwaysButton",
+            "colorwaysBtnPos"
         ]);
         setColorways(colorways || fallbackColorways);
         setCustomColorways(baseData[0]);
         setColorwaySourceFiles(baseData[1]);
         setColorsButtonVisibility(baseData[2]);
+        setColorsButtonPos(baseData[3]);
     }
 
     const cached_loadUI = useCallback(loadUI, [setColorways, setCustomColorways]);
@@ -164,15 +168,35 @@ export function SettingsPage() {
                 })}
             </div>
             <div className="colorwaysSettingsPage-divider" />
-            <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
-                setColorsButtonVisibility(!colorsButtonVisibility);
-                const showColorwaysButton = await DataStore.get("showColorwaysButton");
-                DataStore.set("showColorwaysButton", !showColorwaysButton);
-            }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
-                <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
-                    setColorsButtonVisibility(e);
-                    DataStore.set("showColorwaysButton", e);
-                }}></Switch></div>
+            <Forms.FormTitle>
+                Colorways Button:
+            </Forms.FormTitle>
+            <div className="colorwaysSettingsPage-settingsGroup">
+                <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                    setColorsButtonVisibility(!colorsButtonVisibility);
+                    const showColorwaysButton = await DataStore.get("showColorwaysButton");
+                    DataStore.set("showColorwaysButton", !showColorwaysButton);
+                }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
+                    <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
+                        setColorsButtonVisibility(e);
+                        DataStore.set("showColorwaysButton", e);
+                    }}></Switch>
+                </div>
+                <div className="colorwaysSettingsPage-settingsRow">
+                    <label className="colorwaysSettings-label">Colorways button position</label>
+                    <Select options={[{
+                        value: "bottom",
+                        label: "Bottom"
+                    },
+                    {
+                        value: "top",
+                        label: "Top"
+                    }]} select={value => {
+                        setColorsButtonPos(value);
+                        DataStore.set("colorwaysBtnPos", value);
+                    }} isSelected={value => colorsButtonPos === value} serialize={String}></Select>
+                </div>
+            </div>
             <div className="colorwaysSettingsPage-divider" />
             <div className="colorwaysSettingsSelector-infoWrapper">
                 <div className="colorwaysSelector-infoRow">
@@ -207,8 +231,7 @@ export function SettingsPage() {
                                 Plugins.plugins
                                     .DiscordColorways as any
                             ).pluginVersion
-                        }{" "}
-                        (Official) (Vencord)
+                        }
                     </Text>
                 </div>
                 <div className="colorwaysSelector-infoRow">

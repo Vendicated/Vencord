@@ -7,11 +7,7 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
-import {
-    addServerListElement,
-    removeServerListElement,
-    ServerListRenderPosition,
-} from "@api/ServerList";
+import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { SwatchIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -54,10 +50,11 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 (async function () {
-    const [customColorways, colorwaySourcesFiles, showColorwaysButton] = await DataStore.getMany([
+    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
-        "showColorwaysButton"
+        "showColorwaysButton",
+        "colorwaysBtnPos"
     ]);
 
     if (!customColorways)
@@ -68,6 +65,9 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 
     if (!showColorwaysButton)
         DataStore.set("showColorwaysButton", false);
+
+    if (!colorwaysBtnPos)
+        DataStore.set("colorwaysBtnPos", "bottom");
 
 })();
 
