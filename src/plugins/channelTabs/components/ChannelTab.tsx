@@ -150,6 +150,9 @@ function ChannelTabContent(props: ChannelTabsProps & {
                 case "channel-browser":
                     name = i18n.Messages.GUILD_SIDEBAR_CHANNEL_BROWSER;
                     break;
+                case "shop":
+                    name = i18n.Messages.GUILD_SHOP_CHANNEL_LABEL;
+                    break;
                 case "member-safety":
                     name = i18n.Messages.MEMBER_SAFETY_CHANNEL_TITLE;
                     break;
