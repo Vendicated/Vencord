@@ -106,7 +106,7 @@ export default definePlugin({
             replacement:
             {
                 // We add the banner as a property while we can still access the user id
-                match: /((\w)=\w\.user.+)(,avatar:function)/,
+                match: /((\i)=\i\.user.+)(,avatar:function)/,
                 replace: "$1,banner:$self.memberListBannerHook($2)$3",
             },
         },
@@ -115,7 +115,7 @@ export default definePlugin({
             replacement:
             {
                 // We cant access the user id here, so we take the banner property we set earlier
-                match: /(renderInner=function.+\w=)(\w)\.children/,
+                match: /(renderInner=function.+\i=)(\i)\.children/,
                 replace: "$1[$2.banner, $2.children]",
             }
         }
