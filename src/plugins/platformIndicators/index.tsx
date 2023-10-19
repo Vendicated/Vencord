@@ -30,13 +30,13 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip, large }: { color: string; tooltip: string; large: boolean; }) => (
+    return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height={(opts?.height ?? 17) + (large ? 3 : 0)}
-                    width={(opts?.width ?? 17) + (large ? 3 : 0)}
+                    height={(opts?.height ?? 20) - (small ? 3 : 0)}
+                    width={(opts?.width ?? 20) - (small ? 3 : 0)}
                     viewBox={opts?.viewBox ?? "0 0 24 24"}
                     fill={color}
                 >
@@ -57,16 +57,16 @@ type Platform = keyof typeof Icons;
 
 const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
 
-const PlatformIcon = ({ platform, status, large }: { platform: Platform, status: string; large: boolean; }) => {
+const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} large={large} />;
+    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, large = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; large?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -99,7 +99,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, lar
             key={platform}
             platform={platform as Platform}
             status={status}
-            large={large}
+            small={small}
         />
     ));
 
@@ -127,7 +127,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, lar
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} wantMargin={false} large={true} />,
+    component: p => <PlatformIndicator {...p} wantMargin={false} />,
     position: BadgePosition.START,
     shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
     key: "indicator"
@@ -138,7 +138,7 @@ const indicatorLocations = {
         description: "In the member list",
         onEnable: () => addDecorator("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.user} />
+                <PlatformIndicator user={props.user} small={true} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecorator("platform-indicator")
