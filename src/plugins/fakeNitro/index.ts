@@ -159,6 +159,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    enableAppIcons: {
+        description: "Allow customizing the app icon",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -328,6 +334,22 @@ export default definePlugin({
             replacement: {
                 match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
                 replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
+            }
+        },
+        {
+            find: "canUsePremiumAppIcons:function",
+            predicate: () => settings.store.enableAppIcons,
+            replacement: {
+                match: /canUsePremiumAppIcons:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
+        {
+            find: "location:\"AppIconHome\"",
+            predicate: () => settings.store.enableAppIcons,
+            replacement: {
+                match: /(,.=).\[2\]/,
+                replace: "$1true"
             }
         }
     ],
