@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
@@ -155,14 +155,14 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
     );
 }
 
-function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
+function LogModal({ modalProps }: { modalProps: ModalProps; }) {
     const [log, pending] = useLogs();
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent>
@@ -194,10 +194,9 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
 }
 
 export function openNotificationLogModal() {
-    const key = openModal(modalProps => (
+    openModal(modalProps => (
         <LogModal
             modalProps={modalProps}
-            close={() => closeModal(key)}
         />
     ));
 }
