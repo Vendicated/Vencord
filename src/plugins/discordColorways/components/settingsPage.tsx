@@ -11,7 +11,6 @@ import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@u
 import {
     Button,
     Forms,
-    Select,
     Switch,
     Text,
     TextInput,
@@ -182,6 +181,7 @@ export function SettingsPage() {
                         DataStore.set("showColorwaysButton", e);
                     }}></Switch>
                 </div>
+                {/*
                 <div className="colorwaysSettingsPage-settingsRow">
                     <label className="colorwaysSettings-label">Colorways button position</label>
                     <Select options={[{
@@ -196,6 +196,7 @@ export function SettingsPage() {
                         DataStore.set("colorwaysBtnPos", value);
                     }} isSelected={value => colorsButtonPos === value} serialize={String}></Select>
                 </div>
+                */}
             </div>
             <div className="colorwaysSettingsPage-divider" />
             <div className="colorwaysSettingsSelector-infoWrapper">
