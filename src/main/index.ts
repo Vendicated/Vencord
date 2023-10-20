@@ -92,7 +92,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
             if (header) {
                 const csp = parsePolicy(headers[header][0]);
 
-                for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
+                for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src", "frame-src"]) {
                     csp[directive] ??= [];
                     csp[directive].push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
                 }
