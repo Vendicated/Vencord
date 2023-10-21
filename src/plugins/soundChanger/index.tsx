@@ -117,7 +117,7 @@ export default definePlugin({
     getSound: (name: string) => {
         const replacement = soundReplacements.find(r => r.name === name);
 
-        if (replacement) {
+        if (replacement?.link) {
             return replacement.link;
         }
 
