@@ -16,9 +16,9 @@ const enum ChannelType {
 }
 
 const settings = definePluginSettings({
-    channelToEffect: {
+    channelToAffect: {
         type: OptionType.SELECT,
-        description: "Select the type of DM for the plugin to effect",
+        description: "Select the type of DM for the plugin to affect",
         options: [
             { label: "Both", value: "both_dms", default: true },
             { label: "User DMs", value: "user_dm" },
@@ -59,8 +59,8 @@ export default definePlugin({
             return false;
         }
         if (
-            (channelType === ChannelType.DM && settings.store.channelToEffect === "group_dm") ||
-            (channelType === ChannelType.GROUP_DM && settings.store.channelToEffect === "user_dm") ||
+            (channelType === ChannelType.DM && settings.store.channelToAffect === "group_dm") ||
+            (channelType === ChannelType.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
             (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser().id)) ||
             (settings.store.allowEveryone && message.mention_everyone)
         ) {
