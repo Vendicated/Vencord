@@ -27,8 +27,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Forms, Text, TextInput } from "@webpack/common";
 
 interface SoundReplacement {
-    name: string;
-    link: string;
+  name: string;
+  link: string;
 }
 
 let soundReplacements: SoundReplacement[] = [];
@@ -53,7 +53,7 @@ const settings = definePluginSettings({
                     <Forms.FormTitle tag="h4">Sounds</Forms.FormTitle>
                     <Flex flexDirection="column">
                         {
-                            availableSounds.map(sound => (
+                            availableSounds.length > 0 ? availableSounds.map(sound => (
                                 <Flex
                                     key={sound}
                                     flexDirection="row"
@@ -78,7 +78,7 @@ const settings = definePluginSettings({
                                         }}
                                     />
                                 </Flex>
-                            ))
+                            )) : <Text>Enable the plugin to see available sounds!</Text>
                         }
                     </Flex>
                 </>
