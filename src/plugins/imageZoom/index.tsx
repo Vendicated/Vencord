@@ -165,7 +165,7 @@ export default definePlugin({
         {
             find: '"renderLinkComponent","maxWidth"',
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
+                match: /(return\(.{1,100}\(\)\.wrapper.{1,200})(src)/,
                 replace: `$1id: '${ELEMENT_ID}',$2`
             }
         },
@@ -174,8 +174,8 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /showThumbhashPlaceholder:/,
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
@@ -189,7 +189,6 @@ export default definePlugin({
                 }
             ]
         },
-
         {
             find: ".carouselModal,",
             replacement: {
