@@ -156,22 +156,28 @@ export default definePlugin({
     },
 
     patchGetUser(user) {
+        if (!user) return user;
+
         const store = useUsersDecorationsStore.getState();
 
-        if (user && store.has(user.id)) {
-            const decoration = store.get(user.id);
+        // No decor fetched yet
+        if (!store.has(user.id)) return user;
 
-            if (decoration && user.avatarDecoration?.skuId !== SKU_ID) {
-                user.avatarDecoration = {
-                    asset: decoration,
-                    skuId: SKU_ID
-                };
-            } else if (!decoration && user.avatarDecoration && user.avatarDecoration?.skuId === SKU_ID) {
-                user.avatarDecoration = null;
-            }
+        const decoration = store.get(user.id);
 
-            user.avatarDecorationData = user.avatarDecoration;
+        // Decor decoration is not null and the user doesn't have their decor decoration yet
+        if (decoration && user.avatarDecoration?.skuId !== SKU_ID) {
+            user.avatarDecoration = {
+                asset: decoration,
+                skuId: SKU_ID
+            };
+            // if the decor decoration is null, but the user has a decor decoration, remove it
+        } else if (!decoration && user.avatarDecoration && user.avatarDecoration.skuId === SKU_ID) {
+            user.avatarDecoration = null;
         }
+
+        user.avatarDecorationData = user.avatarDecoration;
+
         return user;
     },
 
