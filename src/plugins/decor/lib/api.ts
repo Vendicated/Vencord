@@ -28,7 +28,7 @@ export interface NewDecoration {
     alt: string | null;
 }
 
-export async function cFetch(url: RequestInfo, options?: RequestInit) {
+export async function fetchApi(url: RequestInfo, options?: RequestInit) {
     const res = await fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${useAuthorizationStore.getState().token}` } });
 
     if (res.ok) return res;
@@ -43,10 +43,10 @@ export const getUsersDecorations = async (ids: string[] | undefined = undefined)
 };
 
 export const getUserDecorations = async (id: string = "@me"): Promise<Decoration[]> =>
-    cFetch(API_URL + `/users/${id}/decorations`).then(c => c.json());
+    fetchApi(API_URL + `/users/${id}/decorations`).then(c => c.json());
 
 export const getUserDecoration = async (id: string = "@me"): Promise<Decoration | null> =>
-    cFetch(API_URL + `/users/${id}/decoration`).then(c => c.json());
+    fetchApi(API_URL + `/users/${id}/decoration`).then(c => c.json());
 
 export const setUserDecoration = async (decoration: Decoration | NewDecoration | null, id: string = "@me"): Promise<string | Decoration> => {
     const formData = new FormData();
@@ -62,7 +62,7 @@ export const setUserDecoration = async (decoration: Decoration | NewDecoration |
         formData.append("alt", decoration.alt ?? "null");
     }
 
-    return cFetch(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData }).then(c =>
+    return fetchApi(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData }).then(c =>
         decoration && Object.hasOwn(decoration, "file") ? c.json() : c.text()
     );
 };
@@ -70,7 +70,7 @@ export const setUserDecoration = async (decoration: Decoration | NewDecoration |
 export const getDecoration = async (hash: string): Promise<Decoration> => fetch(API_URL + `/decorations/${hash}`).then(c => c.json());
 
 export const deleteDecoration = async (hash: string): Promise<void> => {
-    await cFetch(API_URL + `/decorations/${hash}`, { method: "DELETE" });
+    await fetchApi(API_URL + `/decorations/${hash}`, { method: "DELETE" });
 };
 
 export const getPresets = async (): Promise<Preset[]> => fetch(API_URL + "/decorations/presets").then(c => c.json());
