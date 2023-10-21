@@ -194,7 +194,7 @@ export function SettingsPage() {
                     }]} select={value => {
                         setColorsButtonPos(value);
                         DataStore.set("colorwaysBtnPos", value);
-                    }} isSelected={value => colorsButtonPos === value} serialize={String}></Select>
+                    }} isSelected={value => colorsButtonPos === value} serialize={String}/>
                 </div>
                 */}
             </div>

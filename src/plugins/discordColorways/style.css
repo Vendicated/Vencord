@@ -313,34 +313,28 @@
     box-sizing: border-box;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar,
-.colorwayToolbox-itemList::-webkit-scrollbar {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner,
-.colorwayToolbox-itemList::-webkit-scrollbar-corner {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
-.colorwayToolbox-itemList::-webkit-scrollbar-thumb {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb {
     background-color: var(--scrollbar-auto-thumb);
     min-height: 40px;
 }
 
 .colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-track,
-.colorwayToolbox-itemList::-webkit-scrollbar-thumb,
-.colorwayToolbox-itemList::-webkit-scrollbar-track {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
     border: 2px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
 }
 
-.colorwayInfo-cssCodeblock::-webkit-scrollbar-track,
-.colorwayToolbox-itemList::-webkit-scrollbar-track {
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
     margin-bottom: 8px;
 }
 
@@ -521,17 +515,42 @@
 
 .colorwayToolbox-listItem {
     align-items: center;
-    display: flex;
     border-radius: 4px;
     color: var(--interactive-normal);
-    padding: 8px;
-    margin: 0 -4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: transparent !important;
+    width: calc(564px / 4);
+    cursor: default;
+    float: left;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.colorwayToolbox-listItem .bi {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background-color: var(--background-tertiary);
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .15s ease;
+    cursor: pointer;
+    color: var(--interactive-normal);
 }
 
 .colorwayToolbox-listItem:hover {
-    background-color: var(--brand-experiment);
-    color: var(--white-500);
-    cursor: pointer;
+    color: var(--interactive-normal) !important;
+}
+
+.colorwayToolbox-listItem .bi:hover {
+    border-color: var(--brand-500);
+    background-color: var(--brand-experiment-15a);
+    color: var(--interactive-hover) !important;
 }
 
 .colorwayToolbox-title {
@@ -553,21 +572,13 @@
 }
 
 .colorwayToolbox-itemList {
-    padding: 12px !important;
-    padding-top: 0 !important;
     flex: 0 0 auto;
     max-height: calc(720px - 65px);
-}
-
-.colorwayToolbox-search {
-    margin: 12px;
-    margin-bottom: 0;
-}
-
-.colorwayToolbox-itemList::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
+    padding: 0;
+    overflow: visible !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 0;
 }
 
 .colorwayPreview-chatBox {
@@ -677,13 +688,36 @@
     overflow: hidden;
     color: var(--text-normal);
     cursor: pointer;
-    transition: .15s ease
+    transition: .15s ease;
+    gap: 12px;
+}
+
+.colorwaySelector-pillPopout {
+    background-color: var(--background-tertiary);
+    border-radius: 8px;
 }
 
 .colorwaySelector-pillWrapper {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.colorwaySelector-pillOption {
+    background-color: var(--background-tertiary) !important;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    padding: 0 12px;
+    height: 32px;
+    transition: .15s ease;
+}
+
+.colorwaySelector-pillOption:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.colorwaySelector-pillOption:nth-last-child(2) {
+    border-radius: 0 0 8px 8px;
 }
 
 .colorwaySelector-doublePillBar {
@@ -695,16 +729,20 @@
 
 .theme-light .colorwaySelector-pill_selected,
 .theme-light .colorwaySelector-pill:hover,
-.theme-light .colorwaySelector-searchInput:focus {
-    border-color: var(--brand-500);
-    background-color: var(--brand-experiment-160);
+.theme-light .colorwaySelector-searchInput:focus,
+.theme-light .colorwaySelector-pillOption:hover,
+.theme-light .colorwaySelector-pillOption[aria-selected="true"] {
+    border-color: var(--brand-500) !important;
+    background-color: var(--brand-experiment-160) !important;
 }
 
 .theme-dark .colorwaySelector-pill_selected,
 .theme-dark .colorwaySelector-pill:hover,
-.theme-dark .colorwaySelector-searchInput:focus {
-    border-color: var(--brand-500);
-    background-color: var(--brand-experiment-15a);
+.theme-dark .colorwaySelector-searchInput:focus,
+.theme-dark .colorwaySelector-pillOption:hover,
+.theme-dark .colorwaySelector-pillOption[aria-selected="true"] {
+    border-color: var(--brand-500) !important;
+    background-color: var(--brand-experiment-15a) !important;
 }
 
 .colorwaysTooltip-tooltipPreviewRow {
@@ -777,7 +815,7 @@
     width: 100%;
 }
 
-.ColorwaySelectorWrapper .colorwaysToolbox-label {
+.colorwaysToolbox-label {
     border-radius: 20px;
     box-sizing: border-box;
     color: var(--text-normal);
@@ -792,52 +830,6 @@
     cursor: default;
     max-height: 2rem;
     padding: 0 8px;
-}
-
-.ColorwaySelectorWrapper .colorwayToolbox-itemList,
-.ColorwaySelectorWrapper.colorwayToolbox-itemList {
-    padding: 0 !important;
-    overflow: visible !important;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 0;
-}
-
-.ColorwaySelectorWrapper .colorwayToolbox-listItem {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background-color: transparent !important;
-    width: calc(564px / 4);
-    cursor: default;
-    float: left;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-.ColorwaySelectorWrapper .colorwayToolbox-listItem .bi {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background-color: var(--background-tertiary);
-    border: 1px solid transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: .15s ease;
-    cursor: pointer;
-    color: var(--interactive-normal);
-}
-
-.ColorwaySelectorWrapper .colorwayToolbox-listItem:hover {
-    color: var(--interactive-normal) !important;
-}
-
-.ColorwaySelectorWrapper .colorwayToolbox-listItem .bi:hover {
-    border-color: var(--brand-500);
-    background-color: var(--brand-experiment-15a);
-    color: var(--interactive-hover) !important;
 }
 
 .colorwaysSelector-changelogHeader {
@@ -921,10 +913,6 @@
 .is-mobile .ColorwaySelectorWrapper {
     justify-content: space-around;
     gap: 10px;
-}
-
-.is-mobile .colorwayToolbox-itemList {
-    justify-content: space-around;
 }
 
 html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
@@ -1132,14 +1120,6 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     gap: 8px;
 }
 
-.colorwaysSettingsPage-wrapper .colorwayToolbox-itemList {
-    padding: 0;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .colorwaysSettings-label {
     flex: 1;
     display: block;
@@ -1173,4 +1153,8 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.colorwaysCreator-toolboxItm:hover {
+    background-color: var(--brand-experiment) !important;
 }

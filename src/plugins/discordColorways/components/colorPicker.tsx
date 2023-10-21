@@ -11,6 +11,7 @@ import {
 import { findByCode } from "@webpack";
 import {
     Clipboard,
+    Forms,
     ScrollerThin,
     TextInput,
     Toasts,
@@ -146,6 +147,7 @@ const ToolboxItems: ToolboxItem[] = [
 
 export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
     const [colorVarItems, setColorVarItems] = useState<ToolboxItem[]>(ColorVarItems);
+    const [collapsedSettings, setCollapsedSettings] = useState<boolean>(false);
     let results: ToolboxItem[];
     function searchToolboxItems(e: string) {
         results = [];
@@ -170,14 +172,14 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
     });
 
     return (
-        <ModalRoot {...modalProps} className="colorwayCreator-modal">
+        <ModalRoot {...modalProps} className="colorwayCreator-modal colorwayCreator-menuWrapper">
             <div className="colorwayToolbox-list">
                 <TextInput
                     placeholder="Search for a color:"
                     onChange={searchToolboxItems}
-                    className="colorwayToolbox-search"
                 ></TextInput>
-                <div className="ColorwaySelectorWrapper colorwayToolbox-itemList" style={{ justifyContent: "space-evenly" }}>
+                <Forms.FormTitle>Main Colors:</Forms.FormTitle>
+                <div className="colorwayToolbox-itemList" style={{ justifyContent: "space-between" }}>
                     {ToolboxItems.map(
                         (
                             toolboxItem: ToolboxItem,
@@ -210,28 +212,38 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
                         }
                     )}
                 </div>
-                <ScrollerThin className="colorwayToolbox-itemList">
-                    {colorVarItems.map((toolboxItem: ToolboxItem) => {
-                        return (
-                            <div
-                                id={
-                                    "colorways-colorstealer-item_" +
-                                    toolboxItem.id
-                                }
-                                className="colorwayToolbox-listItem"
-                                onClick={toolboxItem.onClick}
-                                style={
-                                    {
-                                        "--brand-experiment":
-                                            "var(--" + toolboxItem.id + ")",
-                                    } as React.CSSProperties
-                                }
-                            >
-                                {toolboxItem.title}
-                            </div>
-                        );
-                    })}
-                </ScrollerThin>
+                <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
+                    <div
+                        className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
+                        onClick={() => setCollapsedSettings(!collapsedSettings)}>
+                        <Forms.FormTitle style={{ marginBottom: 0 }}>Other Colors:</Forms.FormTitle>
+                        <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
+                            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
+                        </svg>
+                    </div>
+                    <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList" paddingFix>
+                        {colorVarItems.map((toolboxItem: ToolboxItem) => {
+                            return (
+                                <div
+                                    id={
+                                        "colorways-colorstealer-item_" +
+                                        toolboxItem.id
+                                    }
+                                    className="colorwaysCreator-settingItm colorwaysCreator-toolboxItm"
+                                    onClick={toolboxItem.onClick}
+                                    style={
+                                        {
+                                            "--brand-experiment":
+                                                "var(--" + toolboxItem.id + ")",
+                                        } as React.CSSProperties
+                                    }
+                                >
+                                    {toolboxItem.title}
+                                </div>
+                            );
+                        })}
+                    </ScrollerThin>
+                </div>
             </div>
         </ModalRoot>
     );

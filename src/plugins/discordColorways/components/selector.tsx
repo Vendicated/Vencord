@@ -13,6 +13,7 @@ import { openModal } from "@utils/modal";
 import { filters, findByCode, findByCodeLazy, waitFor } from "@webpack";
 import {
     Forms,
+    Select,
     TextInput,
     Tooltip,
     useCallback,
@@ -137,24 +138,22 @@ export default function Selector({
                         />
                     ) : (
                         <div className="colorwaySelector-pillWrapper">
-                            <div
-                                className={["colorwaySelector-pill", visibility === "all" ? "colorwaySelector-pill_selected" : ""].join(" ")}
-                                onClick={() => setVisibility("all")}
-                            >
-                                All
-                            </div>
-                            <div
-                                className={["colorwaySelector-pill", visibility === "official" ? "colorwaySelector-pill_selected" : ""].join(" ")}
-                                onClick={() => setVisibility("official")}
-                            >
-                                Official
-                            </div>
-                            <div
-                                className={["colorwaySelector-pill", visibility === "custom" ? "colorwaySelector-pill_selected" : ""].join(" ")}
-                                onClick={() => setVisibility("custom")}
-                            >
-                                Custom
-                            </div>
+                            <Forms.FormTitle style={{ marginBottom: 0 }}>Show:</Forms.FormTitle>
+                            <Select look={1} optionClassName="colorwaySelector-pillOption" className="colorwaySelector-pill" popoutClassName="colorwaySelector-pillPopout" options={[{
+                                value: "all",
+                                label: "All"
+                            },
+                            {
+                                value: "official",
+                                label: "Official"
+                            },
+                            {
+                                value: "custom",
+                                label: "Custom"
+                            }]} select={value => {
+                                setVisibility(value);
+                                DataStore.set("colorwaysBtnPos", value);
+                            }} isSelected={value => visibility === value} serialize={String} />
                         </div>
                     )}
                     <div className="colorwaySelector-pillSeparator" />
