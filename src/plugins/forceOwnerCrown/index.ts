@@ -18,7 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { GuildStore } from "@webpack/common";
+import { ChannelStore, GuildStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
@@ -37,8 +37,10 @@ export default definePlugin({
     ],
     isGuildOwner(props: { user: User, channel: Channel, guildId?: string; }) {
         if (!props?.user?.id) return false;
-        if (props.channel?.type === 3 /* GROUP_DM */)
-            return false;
+        if (props.channel?.type === 3 /* GROUP_DM */) {
+            const channel = ChannelStore.getChannel(props.channel.id);
+            return channel?.ownerId === props.user.id;
+        }
 
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props.guildId ?? props.channel?.guild_id;
