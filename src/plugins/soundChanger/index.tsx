@@ -35,7 +35,14 @@ let soundReplacements: SoundReplacement[] = [];
 let availableSounds: string[] = [];
 
 const settings = definePluginSettings({
-    // These are just "common" sounds, they are also editable by the generic setting below
+    // Detune sounds are alternative, weird sounding versions of the default sounds. I don't know why they exist
+    showDetuneSounds: {
+        type: OptionType.BOOLEAN,
+        description: "Show unused(?) \"detune\" sounds in SoundChanger settings.",
+        default: false,
+        requiresRestart: true
+    },
+
     replacements: {
         type: OptionType.COMPONENT,
         description: "",
@@ -59,11 +66,13 @@ const settings = definePluginSettings({
                                         onChange={e => {
                                             const link = e;
                                             const index = soundReplacements.findIndex(r => r.name === sound);
+
                                             if (index === -1) {
                                                 soundReplacements.push({ name: sound, link });
                                             } else {
                                                 soundReplacements[index].link = link;
                                             }
+
                                             DataStore.set("SoundChange_replacements", soundReplacements);
                                             update();
                                         }}
@@ -102,7 +111,7 @@ export default definePlugin({
     settings,
 
     registerSoundFilenames: (names: Record<string, number>) => {
-        availableSounds = Object.keys(names);
+        availableSounds = Vencord.Plugins.plugins.SoundChanger.settings?.store.showDetuneSounds ? Object.keys(names) : Object.keys(names).filter(name => !name.includes("detune"));
     },
 
     getSound: (name: string) => {
