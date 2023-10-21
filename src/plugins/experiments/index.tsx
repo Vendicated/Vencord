@@ -77,15 +77,6 @@ export default definePlugin({
                 }
             ]
         },
-        // Fix search history being disabled / broken with isStaff
-        {
-            find: 'get("disable_new_search")',
-            predicate: () => settings.store.enableIsStaff,
-            replacement: {
-                match: /(?<=showNewSearch"\);return)\s?!/,
-                replace: "!1&&!"
-            }
-        },
         {
             find: 'H1,title:"Experiments"',
             replacement: {
