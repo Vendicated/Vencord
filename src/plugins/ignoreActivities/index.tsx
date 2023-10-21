@@ -106,7 +106,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EMBEDDED_ACTIVITIES_HAVE_PLAYED_ONE_KNOWN",
+            find: ".Messages.EMBEDDED_ACTIVITIES_DEVELOPER_SHELF_SUBTITLE",
             replacement: [
                 {
                     match: /(?<=\(\)\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
