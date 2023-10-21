@@ -89,6 +89,8 @@ export function SoundOverrideComponent({ type, override }: { type: SoundType; ov
                             reader.onload = () => override.url = reader.result as string;
                             reader.readAsDataURL(file);
                         }}
+                        // Sorry .caf lovers, https://en.wikipedia.org/wiki/HTML5_audio#Supported_audio_coding_formats
+                        filters={[{ extensions: ["mp3", "wav", "ogg", "webm", "flac"] }]}
                     />
                 </Button>
             </Flex>
