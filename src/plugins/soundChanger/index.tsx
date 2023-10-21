@@ -26,7 +26,6 @@ import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Forms, Text, TextInput } from "@webpack/common";
 
-
 interface SoundReplacement {
     name: string;
     link: string;
@@ -39,7 +38,7 @@ const settings = definePluginSettings({
     // Detune sounds are alternative, weird sounding versions of the default sounds. I don't know why they exist
     showDetuneSounds: {
         type: OptionType.BOOLEAN,
-        description: "Show unused(?) \"detune\" sounds in SoundChanger settings.",
+        description: "Show unused(?) \"detune\" sounds in SoundChanger settings. You probably don't need this enabled.",
         default: false,
         requiresRestart: true
     },
@@ -65,8 +64,7 @@ const settings = definePluginSettings({
                                         className="sound-changer-link-input"
                                         value={soundReplacements.find(r => r.name === sound)?.link ?? ""}
                                         placeholder="Link to a sound..."
-                                        onChange={e => {
-                                            const link = e;
+                                        onChange={link => {
                                             const index = soundReplacements.findIndex(r => r.name === sound);
 
                                             if (index === -1) {
@@ -117,7 +115,6 @@ export default definePlugin({
     },
 
     getSound: (name: string) => {
-        // If there is a custom sound stored for this, return it. Otherwise, return null.
         const replacement = soundReplacements.find(r => r.name === name);
 
         if (replacement) {
