@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Button, useEffect, UserStore } from "@webpack/common";
+import { Button, SelectedChannelStore, useEffect, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
@@ -113,21 +112,21 @@ export default definePlugin({
             useUsersDecorationsStore.getState().fetch(data.userId, true);
         },
         MESSAGE_CREATE: data => {
-            const channel = getCurrentChannel();
-            if (channel && data.channelId === channel.id) {
+            const channelId = SelectedChannelStore.getChannelId();
+            if (data.channelId === channelId) {
                 useUsersDecorationsStore.getState().fetch(data.message.author.id);
             }
         },
         TYPING_START: data => {
-            const channel = getCurrentChannel();
-            if (channel && data.channelId === channel.id) {
+            const channelId = SelectedChannelStore.getChannelId();
+            if (data.channelId === channelId) {
                 useUsersDecorationsStore.getState().fetch(data.userId);
             }
         },
         LOAD_MESSAGES_SUCCESS: ({ messages }) => {
             useUsersDecorationsStore.getState().fetchMany(messages.map(m => m.author.id));
         },
-        // Still need to fetch for member list
+        // TODO: Still need to fetch for member list
     },
 
     set CustomizationSection(e: any) {
