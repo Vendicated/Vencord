@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// ./message1.mp3
+import "./index.css";
+
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
@@ -61,6 +62,7 @@ const settings = definePluginSettings({
                                 >
                                     <Text>{sound.slice(2, -4)}</Text>
                                     <TextInput
+                                        className="sound-changer-link-input"
                                         value={soundReplacements.find(r => r.name === sound)?.link ?? ""}
                                         placeholder="Link to a sound..."
                                         onChange={e => {
@@ -112,6 +114,7 @@ export default definePlugin({
 
     registerSoundFilenames: (names: Record<string, number>) => {
         availableSounds = Vencord.Plugins.plugins.SoundChanger.settings?.store.showDetuneSounds ? Object.keys(names) : Object.keys(names).filter(name => !name.includes("detune"));
+        console.log(availableSounds);
     },
 
     getSound: (name: string) => {
