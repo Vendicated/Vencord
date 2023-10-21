@@ -295,7 +295,7 @@ export default definePlugin({
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var (\i)=\i.attachments.+?;/,
+                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
