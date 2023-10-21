@@ -114,7 +114,6 @@ export default definePlugin({
 
     registerSoundFilenames: (names: Record<string, number>) => {
         availableSounds = Vencord.Plugins.plugins.SoundChanger.settings?.store.showDetuneSounds ? Object.keys(names) : Object.keys(names).filter(name => !name.includes("detune"));
-        console.log(availableSounds);
     },
 
     getSound: (name: string) => {
