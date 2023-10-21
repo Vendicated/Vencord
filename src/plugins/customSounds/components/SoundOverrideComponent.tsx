@@ -12,7 +12,6 @@ import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, Slider, Switch, TextInput, useRef } from "@webpack/common";
 
 import { SoundOverride, SoundPlayer, SoundType } from "../types";
-import { FolderIcon, OpenExternalIcon } from "@components/Icons";
 import { Flex } from "@components/Flex";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
