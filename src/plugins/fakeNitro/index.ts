@@ -159,12 +159,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    },
-    enableAppIcons: {
-        description: "Allow customizing the app icon",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
     }
 });
 
@@ -338,7 +332,6 @@ export default definePlugin({
         },
         {
             find: "canUsePremiumAppIcons:function",
-            predicate: () => settings.store.enableAppIcons,
             replacement: {
                 match: /canUsePremiumAppIcons:function\(\i\){/,
                 replace: "$&return true;"
@@ -346,7 +339,6 @@ export default definePlugin({
         },
         {
             find: "location:\"AppIconHome\"",
-            predicate: () => settings.store.enableAppIcons,
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
