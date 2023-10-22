@@ -31,8 +31,7 @@ import { Settings } from "./components/settings";
 import { Wrapper } from "./components/wrapper";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
 import { StickerPack, StickerPackMeta } from "./types";
-
-const cl = classNameFactory("vc-more-stickers-");
+import { cl } from "./utils";
 
 export default definePlugin({
     name: "MoreStickers",
@@ -170,7 +169,7 @@ export default definePlugin({
 
         return (
             <Wrapper>
-                <svg width="1" height="1" viewBox="0 0 1 1" fill="none" xmlns="http://www.w3.org/2000/svg" id="vc-more-stickers-inspectedIndicatorMask">
+                <svg width="1" height="1" viewBox="0 0 1 1" fill="none" xmlns="http://www.w3.org/2000/svg" id={cl("inspectedIndicatorMask")}>
                     <path d="M0 0.26087C0 0.137894 0 0.0764069 0.0382035 0.0382035C0.0764069 0 0.137894 0 0.26087 0H0.73913C0.862106 0 0.923593 0 0.961797 0.0382035C1 0.0764069 1 0.137894 1 0.26087V0.73913C1 0.862106 1 0.923593 0.961797 0.961797C0.923593 1 0.862106 1 0.73913 1H0.26087C0.137894 1 0.0764069 1 0.0382035 0.961797C0 0.923593 0 0.862106 0 0.73913V0.26087Z" fill="white" />
                 </svg>
 

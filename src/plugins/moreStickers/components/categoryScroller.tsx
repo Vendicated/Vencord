@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { cl } from "../utils";
+
 export function CategoryScroller(props: { children: React.ReactNode, categoryLength: number; }) {
     const children = Array.isArray(props.children) ? props.children : [props.children];
 
     return (
-        <div className="vc-more-stickers-category-scroller">
+        <div className={cl("category-scroller")}>
             <div>{
                 children.map(child => (
                     <div role="listitem">
