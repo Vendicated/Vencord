@@ -206,7 +206,7 @@ export function SettingsPage() {
             </div>
             <div className="colorwaysSettingsPage-divider" />
             <Forms.FormTitle>
-                OnDemandWays™:
+                OnDemandWays:
             </Forms.FormTitle>
             <div className="colorwaysSettingsPage-settingsGroup">
                 <div className="colorwaysSettingsPage-settingsRowWithDescription">
