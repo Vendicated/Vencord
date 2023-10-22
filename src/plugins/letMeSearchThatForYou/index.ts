@@ -56,7 +56,7 @@ const settings = definePluginSettings({
         
     },})
 export default definePlugin({
-    name: 'LMGTFY',
+    name: 'LMSTFY',
     description:
         "Generates a 'letmesearchthat' link and copies it to the clipboard",
     authors: [Devs.Jaxx],
@@ -86,7 +86,7 @@ export default definePlugin({
                     DiscordNative.clipboard.copy(`https://${settings.store.Provider}/?q=${encodeURIComponent(args[0].value)}${args[1].value && settings.store.Provider !== Provider.GTFY && settings.store.Provider !== Provider.LMDDGTFY ? '&l=1':''}`);
                 }
                 else {
-                    DiscordNative.clipboard.copy(`https://${Provider.LMBTFY}/BingThis/${encodeURIComponent(args[0].value)}`
+                    DiscordNative.clipboard.copy(`https://${Provider.LMBTFY}/BingThis/${encodeURIComponent(args[0].value)}`);
                 }
             },
         },
