@@ -43,7 +43,7 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    external: ["electron", ...commonOpts.external],
+    external: ["electron", "original-fs", ...commonOpts.external],
     define: defines,
 };
 
