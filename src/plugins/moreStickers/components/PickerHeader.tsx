@@ -16,15 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 import { debounce } from "@utils/debounce";
 import { React, TextInput } from "@webpack/common";
 
 import { Header } from "./header";
 import { IconContainer } from "./iconContainer";
 import { CancelIcon, SearchIcon } from "./icons";
-
-const cl = classNameFactory("vc-more-stickers-");
+import { clPicker } from "../utils";
 
 export interface PickerHeaderProps {
     onQueryChange: (query: string) => void;
@@ -43,9 +41,9 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
 
     return (
         <Header>
-            <div className={cl("picker-container")}>
+            <div className={clPicker("container")}>
                 <div>
-                    <div className={cl("picker-search-box")}>
+                    <div className={clPicker("search-box")}>
                         <TextInput
                             style={{ height: "30px" }}
 
@@ -56,11 +54,11 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
                             onChange={(value: string) => setQueryDebounced(value)}
                         />
                     </div>
-                    <div className={cl("picker-search-icon")}>
+                    <div className={clPicker("search-icon")}>
                         <IconContainer>
                             {
                                 (query && query.length > 0) ?
-                                    <CancelIcon className={cl("clear-icon")} width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
+                                    <CancelIcon className={clPicker("clear-icon")} width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
                                     <SearchIcon width={20} height={20} color="var(--text-muted)" />
                             }
                         </IconContainer>
