@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { cl } from "../utils";
+
 export interface CategoryImageProps {
     src: string;
     alt?: string;
@@ -33,9 +35,9 @@ export function CategoryImage({ src, alt, isActive }: CategoryImageProps) {
             }}>
                 <foreignObject
                     className={
-                        "vc-more-stickers-foreign-object" + (
+                        cl("foreign-object") + (
                             isActive ?
-                                " vc-more-stickers-foreign-object-active"
+                                ` ${cl('foreign-object-active')}`
                                 : ""
                         )
                     }

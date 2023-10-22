@@ -26,6 +26,7 @@ import { CogIcon, RecentlyUsedIcon } from "./icons";
 import { RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
 import { Settings } from "./settings";
 import { StickerCategory } from "./stickerCategory";
+import { cl, clPicker } from "../utils";
 
 export interface StickerCategory {
     id: string;
@@ -83,10 +84,10 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                     })
                 }
             </CategoryScroller>
-            <div className="vc-more-stickers-picker-settings-cog-container">
+            <div className={clPicker("settings-cog-container")}>
                 <button
-                    className={"vc-more-stickers-picker-settings-cog" + (
-                        hovering ? " vc-more-stickers-picker-settings-cog-active" : ""
+                    className={clPicker("settings-cog") + (
+                        hovering ? ` ${clPicker('settings-cog-active')}` : ""
                     )}
                     onClick={() => {
                         openModal(modalProps => {
