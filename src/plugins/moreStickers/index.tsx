@@ -63,7 +63,7 @@ export default definePlugin({
                     return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
                 }
             }, {
-                match: /(var \w=)(\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\(.*?\.STICKER,.*?);/,
+                match: /(var \w=)(\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\([\w\.]*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=function\(\)\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
