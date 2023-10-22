@@ -50,11 +50,13 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 (async function () {
-    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos] = await DataStore.getMany([
+    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos, onDemandWays, onDemandWaysTintedText] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
         "showColorwaysButton",
-        "colorwaysBtnPos"
+        "colorwaysBtnPos",
+        "onDemandWays",
+        "onDemandWaysTintedText"
     ]);
 
     if (!customColorways)
@@ -68,6 +70,12 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 
     if (!colorwaysBtnPos)
         DataStore.set("colorwaysBtnPos", "bottom");
+
+    if (!onDemandWays)
+        DataStore.set("onDemandWays", false);
+
+    if (!onDemandWaysTintedText)
+        DataStore.set("onDemandWaysTintedText", true);
 
 })();
 
@@ -110,7 +118,7 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.2.0",
+    pluginVersion: "5.3.0",
     creatorVersion: "1.15",
     toolboxActions: {
         "Change Colorway": () => SettingsRouter.open("ColorwaysSettings"),

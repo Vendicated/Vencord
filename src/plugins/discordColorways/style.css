@@ -196,6 +196,10 @@
     justify-content: space-between;
     gap: 8px;
     position: relative;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    padding: 10px;
 }
 
 .colorwayCreator-colorInput {
@@ -751,6 +755,26 @@
     margin-top: 8px;
 }
 
+.colorwayCreator-colorPreview {
+    width: 100%;
+    border-radius: 4px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.colorwaysCreator-colorPreviewItm .colorwayCreator-colorPreviews {
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.colorwaysCreator-colorPreviewItm {
+    flex-direction: column;
+    align-items: start;
+}
+
 .colorwaysTooltip-header {
     background-color: var(--background-primary);
     padding: 2px 8px;
@@ -1157,4 +1181,22 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
 
 .colorwaysCreator-toolboxItm:hover {
     background-color: var(--brand-experiment) !important;
+}
+
+.colorwayCreator-colorPreview_primary+.colorwayCreator-colorPreview_primary,
+.colorwayCreator-colorPreview_secondary+.colorwayCreator-colorPreview_secondary,
+.colorwayCreator-colorPreview_tertiary+.colorwayCreator-colorPreview_tertiary,
+.colorwayCreator-colorPreview_accent+.colorwayCreator-colorPreview_accent {
+    display: none;
+}
+
+.colorwaysConflictingColors-warning {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+.colorwaysSettingsPage-settingsRowWithDescription {
+    display: flex;
+    flex-direction: column;
 }

@@ -29,6 +29,8 @@ export function SettingsPage() {
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<string[]>();
     const [colorsButtonVisibility, setColorsButtonVisibility] = useState<boolean>(false);
     const [colorsButtonPos, setColorsButtonPos] = useState<string>("bottom");
+    const [onDemand, setOnDemand] = useState<boolean>(false);
+    const [onDemandTinted, setOnDemandTinted] = useState<boolean>(false);
 
     async function loadUI() {
         const colorwaySourceFiles = await DataStore.get(
@@ -48,13 +50,17 @@ export function SettingsPage() {
             "customColorways",
             "colorwaySourceFiles",
             "showColorwaysButton",
-            "colorwaysBtnPos"
+            "colorwaysBtnPos",
+            "onDemandWays",
+            "onDemandWaysTintedText"
         ]);
         setColorways(colorways || fallbackColorways);
         setCustomColorways(baseData[0]);
         setColorwaySourceFiles(baseData[1]);
         setColorsButtonVisibility(baseData[2]);
         setColorsButtonPos(baseData[3]);
+        setOnDemand(baseData[4]);
+        setOnDemandTinted(baseData[5]);
     }
 
     const cached_loadUI = useCallback(loadUI, [setColorways, setCustomColorways]);
@@ -197,6 +203,35 @@ export function SettingsPage() {
                     }} isSelected={value => colorsButtonPos === value} serialize={String}/>
                 </div>
                 */}
+            </div>
+            <div className="colorwaysSettingsPage-divider" />
+            <Forms.FormTitle>
+                OnDemandWays™:
+            </Forms.FormTitle>
+            <div className="colorwaysSettingsPage-settingsGroup">
+                <div className="colorwaysSettingsPage-settingsRowWithDescription">
+                    <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                        setOnDemand(!onDemand);
+                        const showColorwaysButton = await DataStore.get("onDemandWays");
+                        DataStore.set("onDemandWays", !onDemand);
+                    }}><label className="colorwaysSettings-label">Enable OnDemandWays</label>
+                        <Switch style={{ marginBottom: 0 }} hideBorder value={onDemand} onChange={(e: boolean) => {
+                            setOnDemand(e);
+                            DataStore.set("onDemandWays", e);
+                        }}></Switch>
+                    </div>
+                    <Forms.FormText type="DESCRIPTION" style={{ marginTop: 8 }}>Always utilise the latest of what Colorways has to offer. CSS is being directly generated on the device and gets applied in the place of the normal import/CSS given by the colorway.</Forms.FormText>
+                </div>
+                <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                    setOnDemandTinted(!onDemandTinted);
+                    const showColorwaysButton = await DataStore.get("onDemandWaysTintedText");
+                    DataStore.set("onDemandWaysTintedText", !onDemandTinted);
+                }}><label className="colorwaysSettings-label">Use tinted text</label>
+                    <Switch style={{ marginBottom: 0 }} hideBorder value={onDemandTinted} onChange={(e: boolean) => {
+                        setOnDemandTinted(e);
+                        DataStore.set("onDemandWaysTintedText", e);
+                    }}></Switch>
+                </div>
             </div>
             <div className="colorwaysSettingsPage-divider" />
             <div className="colorwaysSettingsSelector-infoWrapper">

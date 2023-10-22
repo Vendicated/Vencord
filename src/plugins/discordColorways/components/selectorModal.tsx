@@ -23,7 +23,9 @@ import {
 
 import { ColorwayCSS } from "..";
 import { fallbackColorways } from "../constants";
+import { generateCss } from "../css";
 import { Colorway } from "../types";
+import { getHex } from "../utils";
 import { ColorPickerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
@@ -407,43 +409,25 @@ export default function SelectorModal({
                                                 </div>
                                                 <div
                                                     className="discordColorwayPreviewColorContainer"
-                                                    onClick={() => {
-                                                        if (
-                                                            currentColorway ===
-                                                            color.name
-                                                        ) {
-                                                            DataStore.set(
-                                                                "actveColorwayID",
-                                                                null
-                                                            );
-                                                            DataStore.set(
-                                                                "actveColorway",
-                                                                null
-                                                            );
+                                                    onClick={async () => {
+                                                        const onDemandWays = await DataStore.get("onDemandWays");
+                                                        const onDemandWaysTintedText = await DataStore.get("onDemandWaysTintedText");
+                                                        if (currentColorway === color.name) {
+                                                            DataStore.set("actveColorwayID", null);
+                                                            DataStore.set("actveColorway", null);
                                                             ColorwayCSS.remove();
                                                         } else {
-                                                            DataStore.set(
-                                                                "actveColorwayID",
-                                                                color.name
-                                                            );
-                                                            DataStore.set(
-                                                                "actveColorway",
-                                                                color.import
-                                                            );
-                                                            ColorwayCSS.set(
-                                                                color.import
-                                                            );
+                                                            DataStore.set("actveColorwayID", color.name);
+                                                            if (onDemandWays) {
+                                                                DataStore.set("actveColorway", generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText));
+                                                                ColorwayCSS.set(generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText));
+                                                            } else {
+                                                                DataStore.set("actveColorway", color.import);
+                                                                ColorwayCSS.set(color.import);
+                                                            }
                                                         }
-                                                        DataStore.get(
-                                                            "actveColorwayID"
-                                                        ).then(
-                                                            (
-                                                                actveColorwayID: string
-                                                            ) =>
-                                                                setCurrentColorway(
-                                                                    actveColorwayID
-                                                                )
-                                                        );
+                                                        const actveColorwayID = await DataStore.get("actveColorwayID");
+                                                        setCurrentColorway(actveColorwayID);
                                                     }}
                                                 >
                                                     {colors.map((colorItm) => {

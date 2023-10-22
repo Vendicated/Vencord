@@ -266,3 +266,41 @@ export const fallbackColorways = [
         authorID: "582170007505731594",
     },
 ];
+
+
+export const knownThemeVars = {
+    "Cyan": {
+        variable: "--cyan-accent-color",
+        accent: "--cyan-accent-color",
+        primary: "--cyan-background-primary",
+        secondary: "--cyan-background-secondary"
+    },
+    "Virtual Boy": {
+        variable: "--VBaccent",
+        tertiary: "--VBaccent-muted",
+        alt: {
+            tertiary: "--VBaccent-dimmest"
+        }
+    },
+    "Modular": {
+        variable: "--modular-hue",
+        accentVariables: {
+            h: "--modular-hue",
+            s: "--modular-saturation",
+            l: "--modular-lightness"
+        }
+    },
+    "Solana": {
+        variable: "--accent-hue",
+        accentVariables: {
+            h: "--accent-hue",
+            s: "--accent-saturation",
+            l: "--accent-brightness"
+        },
+        primaryVariables: {
+            h: "--background-accent-hue",
+            s: "--background-accent-saturation",
+            l: "--background-accent-brightness"
+        }
+    }
+};

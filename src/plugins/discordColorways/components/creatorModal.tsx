@@ -27,10 +27,12 @@ import {
 } from "@webpack/common";
 
 import { ColorPicker, LazySwatchLoaded } from "..";
+import { knownThemeVars } from "../constants";
 import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
 import extractAndRequireModuleIds from "../util/requireModule";
-import { hexToString } from "../utils";
+import { getHex, hexToString } from "../utils";
+import { ConflictingColorsModal } from "./conflictingColorsModal";
 import { ThemePreviewCategory } from "./themePreview";
 export default function CreatorModal({
     modalProps,
@@ -289,42 +291,50 @@ export default function CreatorModal({
                     size={Button.Sizes.MEDIUM}
                     look={Button.Looks.FILLED}
                     onClick={() => {
-                        function getHex(str: string): string {
-                            return Object.assign(
-                                document
-                                    .createElement("canvas")
-                                    .getContext("2d") as {},
-                                { fillStyle: str }
-                            ).fillStyle;
+                        function setAllColors({ accent, primary, secondary, tertiary }: { accent: string, primary: string, secondary: string, tertiary: string; }) {
+                            setAccentColor(accent.split("#")[1]);
+                            setPrimaryColor(primary.split("#")[1]);
+                            setSecondaryColor(secondary.split("#")[1]);
+                            setTertiaryColor(tertiary.split("#")[1]);
                         }
-                        setPrimaryColor(
-                            getHex(
-                                getComputedStyle(
-                                    document.body
-                                ).getPropertyValue("--background-primary")
-                            ).split("#")[1]
-                        );
-                        setSecondaryColor(
-                            getHex(
-                                getComputedStyle(
-                                    document.body
-                                ).getPropertyValue("--background-secondary")
-                            ).split("#")[1]
-                        );
-                        setTertiaryColor(
-                            getHex(
-                                getComputedStyle(
-                                    document.body
-                                ).getPropertyValue("--background-tertiary")
-                            ).split("#")[1]
-                        );
-                        setAccentColor(
-                            getHex(
-                                getComputedStyle(
-                                    document.body
-                                ).getPropertyValue("--brand-experiment")
-                            ).split("#")[1]
-                        );
+                        var copiedThemes = ["Discord"];
+                        Object.values(knownThemeVars).map((theme: { variable: string; variableType?: string; }, i: number) => {
+                            if (getComputedStyle(document.body).getPropertyValue(theme.variable)) {
+                                copiedThemes.push(Object.keys(knownThemeVars)[i]);
+                            }
+                        });
+                        if (copiedThemes.length > 1) {
+                            openModal(props => <ConflictingColorsModal modalProps={props} onFinished={setAllColors} />);
+                        } else {
+                            setPrimaryColor(
+                                getHex(
+                                    getComputedStyle(
+                                        document.body
+                                    ).getPropertyValue("--background-primary")
+                                ).split("#")[1]
+                            );
+                            setSecondaryColor(
+                                getHex(
+                                    getComputedStyle(
+                                        document.body
+                                    ).getPropertyValue("--background-secondary")
+                                ).split("#")[1]
+                            );
+                            setTertiaryColor(
+                                getHex(
+                                    getComputedStyle(
+                                        document.body
+                                    ).getPropertyValue("--background-tertiary")
+                                ).split("#")[1]
+                            );
+                            setAccentColor(
+                                getHex(
+                                    getComputedStyle(
+                                        document.body
+                                    ).getPropertyValue("--brand-experiment")
+                                ).split("#")[1]
+                            );
+                        }
                     }}
                 >
                     Copy Current Colors
