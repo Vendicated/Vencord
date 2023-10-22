@@ -57,13 +57,13 @@ export default definePlugin({
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /null==\(null===\(\w=\w\.stickers\)\|\|void 0.*?\.consolidateGifsStickersEmojis.*?(\w)\.push\((\(0,\w\.jsx\))\((\w+),{disabled:\w,type:(\w)},"sticker"\)\)/,
+                match: /null==\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((\w+),{disabled:\w,type:(\w)},"sticker"\)\)/,
                 replace: (m, _, jsx, compo, type) => {
                     const c = "arguments[0].type";
                     return `${m};${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
                 }
             }, {
-                match: /(var \w,\w=)(\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\(.*?\.STICKER,.*?);/,
+                match: /(var \w=)(\w\.useCallback\(\(function\(\)\{\(0,\w+\.\w+\)\(.*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=function\(\)\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
@@ -79,9 +79,9 @@ export default definePlugin({
         {
             find: ".Messages.EXPRESSION_PICKER_GIF",
             replacement: {
-                match: /role:"tablist",.{10,20}\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/,
+                match: /role:"tablist",.{10,20}\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {
-                    const stickerTabRegex = /(\w)\?(\(.+?\))\((\w{1,2}),.*?isActive:(\w)==.*?children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/;
+                    const stickerTabRegex = /(\w)\?(\(.+?\))\((.{1,2}),.*?isActive:(\w)==.*?children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/s;
                     const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
                         const isActive = `${currentTab}==="stickers+"`;
                         return (
@@ -91,7 +91,7 @@ export default definePlugin({
                         );
                     });
 
-                    return res.replace(/:null,((\w)===.*?\.STICKER&&\w\?(\(.*?\)).*?(\{.*?,onSelectSticker:.*?\})\):null)/, (_, _m, currentTab, jsx, props) => {
+                    return res.replace(/:null,((\w)===.*?\.STICKER&&\w\?(\(.*?\)).*?(\{.*?,onSelectSticker:.*?\})\):null)/s, (_, _m, currentTab, jsx, props) => {
                         return `:null,${currentTab}==="stickers+"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
                     });
                 }
