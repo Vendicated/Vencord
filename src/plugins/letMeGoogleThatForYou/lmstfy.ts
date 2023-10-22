@@ -26,7 +26,9 @@ import { definePluginSettings } from '@api/Settings'
 
 const enum Provider {
     LMGT = "letmegooglethat.com",
-    GTFY = "googlethatforyou.com"
+    GTFY = "googlethatforyou.com",
+    LMDDGTFY = "lmddgtfy.net",
+    LMBTFY = "letmebingthatforyou.com"
 }
 const settings = definePluginSettings({
     Provider: {
@@ -41,6 +43,14 @@ const settings = definePluginSettings({
             {
                 label: "googlethatforyou.com (Feeling Lucky not supported)",
                 value: Provider.GTFY
+            },
+            {
+                label: "lmddgtfy.net (Feeling Lucky not supported and searches using DuckDuckGo)",
+                value: Provider.LMDDGTFY
+            },
+            {
+                label: "letmebingthatforyou.com (Feeling Lucky not supported and searches using Bing)",
+                value: Provider.LMBTFY
             }
         ]
         
@@ -48,12 +58,12 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: 'LMGTFY',
     description:
-        "Generates a 'letmegooglethat' link and copies it to the clipboard",
+        "Generates a 'letmesearchthat' link and copies it to the clipboard",
     authors: [Devs.Jaxx],
     settings,
     commands: [
         {
-            name: 'LMGTFY',
+            name: 'LMSTFY',
             description:
                 'For people that bother you with questions instead of looking it up themselves',
             inputType: ApplicationCommandInputType.BUILT_IN,
@@ -72,7 +82,12 @@ export default definePlugin({
                 },
             ],
             execute: async (args, ctx) => {
-                DiscordNative.clipboard.copy(`https://${settings.store.Provider}/?q=${encodeURIComponent(args[0].value)}${args[1].value && settings.store.Provider !== Provider.GTFY ? '&l=1':''}`);
+                if (settings.store.Provider !== Provider.LMBTFY) {
+                    DiscordNative.clipboard.copy(`https://${settings.store.Provider}/?q=${encodeURIComponent(args[0].value)}${args[1].value && settings.store.Provider !== Provider.GTFY && settings.store.Provider !== Provider.LMDDGTFY ? '&l=1':''}`);
+                }
+                else {
+                    DiscordNative.clipboard.copy(`https://${Provider.LMBTFY}/BingThis/${encodeURIComponent(args[0].value)}`
+                }
             },
         },
     ],
