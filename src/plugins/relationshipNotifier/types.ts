@@ -40,6 +40,15 @@ export interface RelationshipRemove {
     };
 }
 
+export interface RelationshipAdd {
+    type: "RELATIONSHIP_ADD";
+    relationship: {
+        id: string;
+        nickname: string;
+        type: number;
+    };
+}
+
 export interface SimpleGroupChannel {
     id: string;
     name: string;

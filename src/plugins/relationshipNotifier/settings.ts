@@ -35,6 +35,11 @@ export default definePluginSettings({
         description: "Notify when a friend removes you",
         default: true
     },
+    friendsAdd: {
+        type: OptionType.BOOLEAN,
+        description: "Notify when a friend adds you (notice: if you enable this for the first time, you may get a lot of notifications, this is due to the friends database syncing. this will only happen once)",
+        default: false
+    },
     friendRequestCancels: {
         type: OptionType.BOOLEAN,
         description: "Notify when a friend request is cancelled",

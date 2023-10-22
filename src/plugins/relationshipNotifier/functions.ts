@@ -20,7 +20,7 @@ import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { UserUtils } from "@webpack/common";
 
 import settings from "./settings";
-import { ChannelDelete, ChannelType, GuildDelete, RelationshipRemove, RelationshipType } from "./types";
+import { ChannelDelete, ChannelType, GuildDelete, RelationshipAdd, RelationshipRemove, RelationshipType } from "./types";
 import { deleteGroup, deleteGuild, getGroup, getGuild, notify } from "./utils";
 
 let manuallyRemovedFriend: string | undefined;
@@ -31,6 +31,23 @@ export const removeFriend = (id: string) => manuallyRemovedFriend = id;
 export const removeGuild = (id: string) => manuallyRemovedGuild = id;
 export const removeGroup = (id: string) => manuallyRemovedGroup = id;
 
+export async function onRelationshipAdd({ relationship: { type, id } }: RelationshipAdd) {
+
+    const user = await UserUtils.fetchUser(id)
+        .catch(() => null);
+    if (!user) return;
+
+    switch (type) {
+        case RelationshipType.FRIEND:
+            if (settings.store.friendsAdd)
+                notify(
+                    `${getUniqueUsername(user)} added you as a friend.`,
+                    user.getAvatarURL(undefined, undefined, false),
+                    () => openUserProfile(user.id)
+                );
+            break;
+    }
+}
 export async function onRelationshipRemove({ relationship: { type, id } }: RelationshipRemove) {
     if (manuallyRemovedFriend === id) {
         manuallyRemovedFriend = undefined;
