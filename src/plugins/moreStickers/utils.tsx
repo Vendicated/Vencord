@@ -16,14 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
+export const cl = classNameFactory("vc-more-stickers-");
+export const clPicker = (className: string, ...args: any[]) => cl("picker-" + className, ...args);
+
 const CORS_PROXY = "https://corsproxy.io?";
 
 function corsUrl(url: string | URL) {
     return CORS_PROXY + encodeURIComponent(url.toString());
 }
 
-export function corsFetch(url, ...args) {
-    return fetch(corsUrl(url), ...args);
+export function corsFetch(url: string | URL, init?: RequestInit | undefined) {
+    return fetch(corsUrl(url), init);
 }
 
 export class Mutex {
