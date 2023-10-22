@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { cl } from "../utils";
+
 export function Header(props: { children: JSX.Element | JSX.Element[]; }) {
     return (
-        <div className="vc-more-stickers-header">
+        <div className={cl("header")}>
             {props.children}
         </div>
     );

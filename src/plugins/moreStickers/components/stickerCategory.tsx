@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { cl } from "../utils";
+
 export interface StickerCategoryProps {
     children: React.ReactNode;
     onClick?: () => void;
@@ -28,8 +30,8 @@ export function StickerCategory(props: StickerCategoryProps) {
         <div
             style={props.style}
             className={
-                "vc-more-stickers-sticker-category" +
-                (props.isActive ? " vc-more-stickers-sticker-category-active" : "")
+                cl("sticker-category") +
+                (props.isActive ? ` ${cl('sticker-category-active')}` : "")
             }
             tabIndex={0}
             role="button"

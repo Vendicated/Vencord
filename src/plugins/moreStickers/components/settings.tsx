@@ -24,6 +24,7 @@ import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, 
 import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, parseHtml as getLineEPFromHtml, isLineEmojiPackHtml } from "../lineEmojis";
 import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
 import { StickerPack, StickerPackMeta } from "../types";
+import { cl, clPicker } from "../utils";
 
 enum SettingsTabsKey {
     ADD_STICKER_PACK_URL = "Add from URL",
@@ -46,7 +47,7 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
         >
             <div className={
                 [
-                    "vc-more-stickers-picker-content-row-grid-inspected-indicator",
+                    clPicker("content-row-grid-inspected-indicator"),
                     hoveredStickerPackId === meta.id ? "inspected" : ""
                 ].join(" ")
             } style={{
@@ -88,7 +89,7 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
                     <path d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
                 </svg>
             </button>
-            <Text className="vc-more-stickers-pack-title" tag="span">{meta.title}</Text>
+            <Text className={cl("pack-title")} tag="span">{meta.title}</Text>
         </div>
     );
 };
@@ -108,7 +109,7 @@ export const Settings = () => {
     }, []);
 
     return (
-        <div className="vc-more-stickers-settings">
+        <div className={cl("settings")}>
             <TabBar
                 type="top"
                 look="brand"
