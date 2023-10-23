@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: ".withMentionPrefix",
             replacement: {
-                match: /(.roleDot.{10,50}{children:.{1,2})}\)/,
+                match: /(currentUserIsPremium:.{10,50}{children:.{1,2})}\)/,
                 replace: "$1.concat(Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0]))})"
             }
         }
