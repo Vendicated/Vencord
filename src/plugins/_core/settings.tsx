@@ -63,26 +63,26 @@ export default definePlugin({
         replacement: {
             get match() {
                 switch (Settings.plugins.Settings.settingsLocation) {
-                    case "top": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
-                    case "aboveNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
-                    case "belowNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
-                    case "belowActivity": return /(?<=\{section:(\i)\.ID\.DIVIDER},)\{section:"changelog"/;
-                    case "bottom": return /\{section:(\i)\.ID\.CUSTOM,\s*element:.+?}/;
+                    case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
+                    case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
+                    case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
+                    case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
+                    case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
                     case "aboveActivity":
                     default:
-                        return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
+                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
         }
     }],
 
-    customSections: [] as ((ID: Record<string, unknown>) => any)[],
+    customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
 
-    makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
+    makeSettingsCategories(SectionTypes: Record<string, unknown>) {
         return [
             {
-                section: ID.HEADER,
+                section: SectionTypes.HEADER,
                 label: "Vencord",
                 className: "vc-settings-header"
             },
@@ -128,9 +128,9 @@ export default definePlugin({
                 element: require("@components/VencordSettings/PatchHelperTab").default,
                 className: "vc-patch-helper"
             },
-            ...this.customSections.map(func => func(ID)),
+            ...this.customSections.map(func => func(SectionTypes)),
             {
-                section: ID.DIVIDER
+                section: SectionTypes.DIVIDER
             }
         ].filter(Boolean);
     },

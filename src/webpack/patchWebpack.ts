@@ -36,9 +36,8 @@ if (window[WEBPACK_CHUNK]) {
     Object.defineProperty(window, WEBPACK_CHUNK, {
         get: () => webpackChunk,
         set: v => {
-            if (v?.push !== Array.prototype.push) {
+            if (v?.push !== Array.prototype.push && _initWebpack(v)) {
                 logger.info(`Patching ${WEBPACK_CHUNK}.push`);
-                _initWebpack(v);
                 patchPush();
                 // @ts-ignore
                 delete window[WEBPACK_CHUNK];
@@ -85,10 +84,9 @@ function patchPush() {
                         logger.error("Error in patched chunk", err);
                         return void originalMod(module, exports, require);
                     }
-
                     // There are (at the time of writing) 11 modules exporting the window
                     // Make these non enumerable to improve webpack search performance
-                    if (module.exports === window) {
+                    if (exports === window) {
                         Object.defineProperty(require.c, id, {
                             value: require.c[id],
                             enumerable: false,

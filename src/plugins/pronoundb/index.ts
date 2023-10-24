@@ -41,7 +41,7 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /("span",{id:\i,className:\i,children:\i}\))/,
-                replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
+                replace: "$1, $self.CompactPronounsChatComponentWrapper(arguments[0])"
             }
         },
         // Patch the chat timestamp element (normal mode)
@@ -49,7 +49,7 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, $self.PronounsChatComponentWrapper(e)]"
+                replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
             }
         },
         // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
