@@ -217,25 +217,24 @@ export default definePlugin({
             // Module 171447
             find: "displayName=\"MessageStore\"",
             replacement: [
+                // feel like we can make these 2 more efficient instead of repeating the code /shrug
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
+                    // https://regex101.com/r/8QeArU/1
+                    match: /(MESSAGE_DELETE:function\(\i\){).{1,150}(\i\.(?:default|Z)?)\.getOrCreate.{1,500}MESSAGE_DELETE_BULK/,
                     replace:
-                        "MESSAGE_DELETE:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, false);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "$1 let cache=$2.getOrCreate(arguments[0].channelId);" +
+                        "cache=$self.handleDelete(cache, arguments[0], false); $2.commit(cache);" +
+                        "},MESSAGE_DELETE_BULK"
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
+                    match: /(MESSAGE_DELETE_BULK:function\(\i\){).{1,150}(\i\.(?:default|Z)?)\.getOrCreate.{1,500}MESSAGE_REVEAL/,
                     replace:
-                        "MESSAGE_DELETE_BULK:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, true);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "$1 let cache=$2.getOrCreate(arguments[0].channelId);" +
+                        "cache=$self.handleDelete(cache, arguments[0], false); $2.commit(cache);" +
+                        "},MESSAGE_REVEAL"
+
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
