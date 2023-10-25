@@ -50,6 +50,8 @@ const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.include
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 
+const SettingsStores = findByPropsLazy("MessageDisplayCompact");
+
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
@@ -319,6 +321,7 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
+    const compact = SettingsStores.MessageDisplayCompact.useSetting();
     const isDM = guildID === "@me";
     const images = getImages(message);
     const { parse } = Parser;
@@ -334,8 +337,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        // TODO: check for compact mode once settings store api is fixed/replaced
-        compact={false}
+        compact={compact}
         content={
             <>
                 {message.content || message.attachments.length <= images.length

@@ -218,8 +218,8 @@ export default definePlugin({
         {
             find: "renderSystemTag:",
             replacement: {
-                match: /.botTagCozy,type:(\i)/,
-                replace: ".botTagCozy,type:$self.getTag({...arguments[0],origType:$1,location:'chat'})"
+                match: /;return\((.+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
+                replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
             }
         },
         // in the member list
@@ -247,7 +247,7 @@ export default definePlugin({
         },
         // in profiles
         {
-            find: "showStreamerModeTooltip:",
+            find: ",overrideDiscriminator:",
             replacement: [{
                 // prevent channel id from getting ghosted
                 // it's either this or extremely long lookbehind
@@ -255,7 +255,7 @@ export default definePlugin({
                 replace: "$&moreTags_channelId,"
             }, {
                 match: /,botType:(\i\((\i)\)),/g,
-                replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
+                replace: ",botType:$self.getTag({user:$2,channelId:vencordProps.moreTags_channelId,origType:$1,location:'not-chat'}),"
             }]
         },
     ],
