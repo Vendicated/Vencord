@@ -81,7 +81,7 @@ export default definePlugin({
                     // array with the count, or an empty array. Due to spreading, only in the former
                     // case will an element be added to the outer array
                     // Thanks for the fix, Strencher!
-                    replace: "$&...(this.props.pinCount ?? []),"
+                    replace: "$&...this.props.pinCount??[],"
                 },
                 {
                     // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
@@ -93,15 +93,15 @@ export default definePlugin({
                 {
                     // Patch channel lookup inside renderDM
                     // channel=channels[channelIds[row]];
-                    match: /(?<=preRenderedChildren:\i}=this.state,\i=\i\[\i\],\i=)((\i)\[\i\]);/,
+                    match: /(?<=renderDM=\((\i),(\i)\)=>{.*?this.state,\i=\i\[\i\],\i=)((\i)\[\i\]);/,
                     // section 1 is us, manually get our own channel
                     // section === 1 ? getChannel(channels, row) : channels[channelIds[row]];
-                    replace: "arguments[0]===1?$self.getChannel($2,arguments[1]):$1;"
+                    replace: "$1===1?$self.getChannel($4,$2):$3;"
                 },
                 {
                     // Fix getRowHeight's check for whether this is the DMs section
                     // section === DMS
-                    match: /===\i.DMS&&0/,
+                    match: /===\i\.DMS&&0/,
                     // section -1 === DMS
                     replace: "-1$&"
                 },
@@ -115,19 +115,19 @@ export default definePlugin({
 
         // Fix Alt Up/Down navigation
         {
-            find: '"mod+alt+right"',
+            find: ".Routes.APPLICATION_STORE&&",
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : toArray(getStaticPaths()).concat(toArray(channelIds))
-                match: /(?<=(\i)=__OVERLAY__\?\i:.{0,10})\.concat\((.{0,10})\)/,
+                match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
-                replace: ".concat($self.getSnapshot()).concat($2.filter(c=>!$self.isPinned(c)))"
+                replace: "$self.getSnapshot().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
         // fix alt+shift+up/down
         {
-            find: '"alt+shift+down"',
+            find: ".getFlattenedGuildIds()],",
             replacement: {
-                match: /(?<=return \i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
+                match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getSnapshot().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
