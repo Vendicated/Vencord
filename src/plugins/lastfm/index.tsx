@@ -21,8 +21,8 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 interface ActivityAssets {
     large_image?: string;
@@ -86,15 +86,9 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 const logger = new Logger("LastFMRichPresence");
 
 const presenceStore = findByPropsLazy("getLocalPresence");
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
-    {
-        getAsset: filters.byCode("apply("),
-    }
-);
 
 async function getApplicationAsset(key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
 }
 
 function setActivity(activity: Activity | null) {

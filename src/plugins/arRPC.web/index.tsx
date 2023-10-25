@@ -20,26 +20,19 @@ import { popNotice, showNotice } from "@api/Notices";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
-    {
-        getAsset: filters.byCode("apply("),
-    }
-);
-
-const lookupRpcApp = findByCodeLazy(".APPLICATION_RPC(");
+const RpcUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
 }
 
 const apps: any = {};
 async function lookupApp(applicationId: string): Promise<string> {
     const socket: any = {};
-    await lookupRpcApp(socket, applicationId);
+    await RpcUtils.fetchApplicationsRPC(socket, applicationId);
     return socket.application;
 }
 
