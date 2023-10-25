@@ -94,7 +94,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
             />
             <Menu.MenuCheckboxItem
                 id="vc-nearest-neighbour"
-                label="Nearset Neighbour"
+                label="Nearest Neighbour"
                 checked={settings.store.nearestNeighbour}
                 action={() => {
                     settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
