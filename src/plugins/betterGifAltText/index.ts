@@ -34,17 +34,18 @@ export default definePlugin({
             },
         },
         {
-            find: ".embedGallerySide",
+            find: ".Messages.GIF,",
             replacement: {
-                match: /(?<==(.{1,3})\.alt.{0,20})\?.{0,5}\.Messages\.GIF/,
+                match: /alt:(\i)=(\i\.default\.Messages\.GIF)(?=,[^}]*\}=(\i))/,
                 replace:
-                    "?($1.alt='GIF',$self.altify($1))",
+                    // rename prop so we can always use default value
+                    "alt_$$:$1=$self.altify($3)||$2",
             },
         },
     ],
 
     altify(props: any) {
-        if (props.alt !== "GIF") return props.alt;
+        if (props.alt && props.alt !== "GIF") return props.alt;
 
         let url: string = props.original || props.src;
         try {
