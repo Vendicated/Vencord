@@ -15,23 +15,25 @@ export default definePlugin({
     authors: [Devs.AutumnVN],
     description: "Removes Discord new image mosaic",
     tags: ["image", "mosaic", "media"],
-    patches: [{
-        find: "Media Mosaic",
-        replacement: [
-            {
+    patches: [
+        {
+            find: ".oneByTwoLayoutThreeGrid",
+            replacement: [{
                 match: /mediaLayoutType:\i\.\i\.MOSAIC/,
-                replace: 'mediaLayoutType:"RESPONSIVE"',
-            },
-            {
-                match: /\i===\i\.\i\.MOSAIC/,
-                replace: "true",
+                replace: 'mediaLayoutType:"RESPONSIVE"'
             },
             {
                 match: /null!==\(\i=\i\.get\(\i\)\)&&void 0!==\i\?\i:"INVALID"/,
                 replace: '"INVALID"',
-            },
-        ],
-    }],
+            },]
+        },
+        {
+            find: "Messages.REMOVE_ATTACHMENT_TOOLTIP_TEXT",
+            replacement: {
+                match: /\i===\i\.\i\.MOSAIC/,
+                replace: "true"
+            }
+        }],
     start() {
         enableStyle(style);
     },
