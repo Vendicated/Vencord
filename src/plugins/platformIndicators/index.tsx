@@ -22,9 +22,8 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -56,13 +55,13 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = proxyLazy(() => findByProps("getStatusColor")?.getStatusColor);
+const StatusColors = findByPropsLazy("getStatusColor");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} small={small} />;
+    return <Icon color={`var(--${StatusColors.getStatusColor(status)}`} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
