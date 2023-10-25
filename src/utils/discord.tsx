@@ -18,7 +18,7 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatchUtils, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
@@ -48,7 +48,7 @@ export function getTheme(): Theme {
 }
 
 export function insertTextIntoChatInputBox(text: string) {
-    ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
+    ComponentDispatchUtils.ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
         rawText: text,
         plainText: text
     });
