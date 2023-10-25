@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByCode, mapMangledModuleLazy } from "@webpack";
+import { filters, findByCode, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -132,12 +132,7 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
-    openModal: filters.byCode("onCloseRequest:null!="),
-    closeModal: filters.byCode("onCloseCallback&&"),
-    openModalLazy: m => m?.length === 1 && filters.byCode(".apply(this,arguments)")(m),
-    closeAllModals: filters.byCode(".value.key,")
-});
+const ModalAPI = findByPropsLazy("openModalLazy");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.
