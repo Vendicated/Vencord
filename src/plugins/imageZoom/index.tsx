@@ -37,13 +37,6 @@ export const settings = definePluginSettings({
         default: true,
     },
 
-    preventCarouselFromClosingOnClick: {
-        type: OptionType.BOOLEAN,
-        // Thanks chat gpt
-        description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
-        default: true,
-    },
-
     invertScroll: {
         type: OptionType.BOOLEAN,
         description: "Invert scroll",
@@ -163,10 +156,14 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"renderLinkComponent","maxWidth"',
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,200})(src)/,
-                replace: `$1id: '${ELEMENT_ID}',$2`
+                // there are 2 image thingies. one for carosuel and one for the single image.
+                // so thats why i added global flag.
+                // also idk if this patch is good, should it be more specific?
+                // https://regex101.com/r/xfvNvV/1
+                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
@@ -174,28 +171,21 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /showThumbhashPlaceholder:/,
+                    match: /showThumbhashPlaceholder:\i,/,
                     replace: "...$self.makeProps(this),$&"
                 },
 
                 {
-                    match: /componentDidMount=function\(\){/,
+                    match: /componentDidMount\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
-                    match: /componentWillUnmount=function\(\){/,
+                    match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
         },
-        {
-            find: ".carouselModal,",
-            replacement: {
-                match: /onClick:(\i),/,
-                replace: "onClick:$self.settings.store.preventCarouselFromClosingOnClick ? () => {} : $1,"
-            }
-        }
     ],
 
     settings,
