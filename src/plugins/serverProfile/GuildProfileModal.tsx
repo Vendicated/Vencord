@@ -162,7 +162,7 @@ function Owner(guildId: string, owner: User) {
 }
 
 function ServerInfoTab({ guild }: GuildProps) {
-    const [owner] = useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
+    const [owner] = useAwaiter(() => UserUtils.getUser(guild.ownerId), {
         deps: [guild.ownerId],
         fallbackValue: null
     });
