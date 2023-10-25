@@ -18,7 +18,6 @@
 
 import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -36,6 +35,7 @@ import {
     PermissionStore,
     RestAPI,
     Text,
+    TextAndImagesSettingsStores,
     UserStore
 } from "@webpack/common";
 import { Channel, Guild, Message } from "discord-types/general";
@@ -46,11 +46,10 @@ const messageCache = new Map<string, {
 }>();
 
 const Embed = LazyComponent(() => findByCode(".inlineMediaEmbed"));
-const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.includes('["message","compact","className",')));
+const AutoModEmbed = LazyComponent(() => findByCode(".withFooter]:", "childrenMessageContent:"));
+const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.includes("renderSimpleAccessories)")));
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
-
-let AutoModEmbed: React.ComponentType<any> = () => null;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -319,10 +318,9 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
     />;
 }
 
-const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")!;
-
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
+    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
     const isDM = guildID === "@me";
     const images = getImages(message);
     const { parse } = Parser;
@@ -338,7 +336,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                 <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
             </Text>
         }
-        compact={compactModeEnabled.getSetting()}
+        compact={compact}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
@@ -365,20 +363,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI", "SettingsStoreAPI"],
-    patches: [
-        {
-            find: ".embedCard",
-            replacement: [{
-                match: /function (\i)\(\i\){var \i=\i\.message,\i=\i\.channel.{0,200}\.hideTimestamp/,
-                replace: "$self.AutoModEmbed=$1;$&"
-            }]
-        }
-    ],
-
-    set AutoModEmbed(e: any) {
-        AutoModEmbed = e;
-    },
+    dependencies: ["MessageAccessoriesAPI"],
 
     settings,
 
