@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "BAN_CONFIRM_TITLE.",
             replacement: {
-                match: /src:\w\(\d+\)/g,
+                match: /src:\i\("\d+"\)/g,
                 replace: "src: Vencord.Settings.plugins.BANger.source"
             }
         }
