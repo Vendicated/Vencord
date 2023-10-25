@@ -26,7 +26,6 @@ import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
-import extractAndRequireModuleIds from "./lib/utils/extractAndRequireModuleId";
 import showAuthorizationModal from "./lib/utils/showAuthorizationModal";
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
@@ -120,8 +119,6 @@ export default definePlugin({
     async start() {
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
-
-    extractAndRequireModuleIds,
 
     getUserHook(user) {
         if (!user) return user;
