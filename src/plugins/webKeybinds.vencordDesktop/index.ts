@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findLazy, mapMangledModuleLazy } from "@webpack";
-import { ComponentDispatchUtils, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
+import { ComponentDispatch, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
 
 const GuildNavBinds = mapMangledModuleLazy("mod+alt+down", {
     CtrlTab: m => m.binds?.at(-1) === "ctrl+tab",
@@ -43,7 +43,7 @@ export default definePlugin({
                 e.preventDefault();
                 if (e.shiftKey) {
                     if (SelectedGuildStore.getGuildId()) NavigationRouter.transitionToGuild("@me");
-                    ComponentDispatchUtils.ComponentDispatch.safeDispatch("TOGGLE_DM_CREATE");
+                    ComponentDispatch.safeDispatch("TOGGLE_DM_CREATE");
                 } else {
                     FluxDispatcher.dispatch({
                         type: "QUICKSWITCHER_SHOW",
