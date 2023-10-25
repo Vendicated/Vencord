@@ -20,14 +20,13 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { find, findByPropsLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { find, findByCode, findByPropsLazy } from "@webpack";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
-import type { ComponentType } from "react";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
 import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
-import { settings, VIEW_CHANNEL } from "..";
+import { settings } from "..";
 
 const enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -79,19 +78,15 @@ const enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-let ChannelBeginHeader: ComponentType<any>;
-
-export function setChannelBeginHeaderComponent(component: ComponentType<any>) {
-    ChannelBeginHeader = component;
-}
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
 const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
+const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE"));
 const TagComponent = LazyComponent(() => find(m => {
     if (typeof m !== "function") return false;
 
     const code = Function.prototype.toString.call(m);
-    // Get the component which doesn't include increasedActivity logic
+    // Get the component which doesn't include increasedActivity
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 }));
 
@@ -185,7 +180,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
 
                 <div className="shc-lock-screen-heading-container">
-                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel.</Text>
+                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel.</Text>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
