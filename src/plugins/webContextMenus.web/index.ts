@@ -98,8 +98,8 @@ export default definePlugin({
             replacement: [
                 {
                     // if (!IS_WEB || null ==
-                    match: /if\(!\i\.\i\|\|null==/,
-                    replace: "if(null=="
+                    match: /!\i\.isPlatformEmbedded/,
+                    replace: "false"
                 },
                 {
                     match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
@@ -132,23 +132,22 @@ export default definePlugin({
             find: '"interactionUsernameProfile"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /if\("A"===\i\.tagName&&""!==\i\.textContent\)/,
-                replace: "if(false)"
+                match: /if\((?="A"===\i\.tagName&&""!==\i\.textContent)/,
+                replace: "if(false&&"
             }
         },
 
         // Add back slate / text input context menu
         {
-            find: '"slate-toolbar"',
+            find: 'getElementById("slate-toolbar"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /(?<=\.handleContextMenu=.+?"bottom";)\i\.\i\?/,
-                replace: "true?"
+                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\?/,
+                replace: "||true?"
             }
         },
         {
             find: 'navId:"textarea-context"',
-            all: true,
             predicate: () => settings.store.addBack,
             replacement: [
                 {
@@ -167,7 +166,7 @@ export default definePlugin({
             find: '"add-to-dictionary"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /var \i=\i\.text,/,
+                match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
             }
         }
