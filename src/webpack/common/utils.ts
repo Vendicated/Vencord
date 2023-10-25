@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -126,4 +127,11 @@ waitFor("parseTopic", m => Parser = m);
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+// FIXME: hack to support old stable and new canary
+export const PermissionsBits: t.PermissionsBits = proxyLazy(() => {
+    try {
+        return find(m => m.Permissions?.ADMINISTRATOR).Permissions;
+    } catch {
+        return find(m => typeof m.ADMINISTRATOR === "bigint");
+    }
+});
