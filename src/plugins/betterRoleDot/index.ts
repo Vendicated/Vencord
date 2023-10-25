@@ -38,6 +38,7 @@ export default definePlugin({
         {
             find: '"dot"===',
             all: true,
+            noWarn: true,
             predicate: () => Settings.plugins.BetterRoleDot.bothStyles,
             replacement: {
                 match: /"(?:username|dot)"===\i(?!\.\i)/g,
