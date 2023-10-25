@@ -167,6 +167,7 @@ function patchPush(webpackGlobal: any) {
                             try {
                                 const newCode = executePatch(replacement.match, replacement.replace as string);
                                 if (newCode === code && !patch.noWarn) {
+                                    (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
                                     logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                     if (IS_DEV) {
                                         logger.debug("Function Source:\n", code);
