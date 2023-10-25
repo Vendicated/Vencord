@@ -87,15 +87,15 @@ export default definePlugin({
     authors: [Devs.Alyxia, Devs.Remty],
     patches: [
         {
-            find: "getUserProfile=",
+            find: "UserProfileStore",
             replacement: {
-                match: /(?<=getUserProfile=function\(\i\){return )(\i\[\i\])/,
+                match: /(?<=getUserProfile\(\i\){return )(\i\[\i\])/,
                 replace: "$self.colorDecodeHook($1)"
             }
         }, {
             find: ".USER_SETTINGS_PROFILE_THEME_ACCENT",
             replacement: {
-                match: /RESET_PROFILE_THEME}\)(?<=},color:(\i).+?},color:(\i).+?)/,
+                match: /RESET_PROFILE_THEME}\)(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
                 replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
             }
         }
