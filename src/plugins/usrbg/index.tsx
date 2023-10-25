@@ -59,8 +59,8 @@ export default definePlugin({
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(function \i\((\i)\)\{)(.{30,50},bannerSrc:)/,
-                    replace: "$1$2.bannerSrc=$self.useBannerHook($2);$3"
+                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},bannerSrc:)/,
+                    replace: "$1.bannerSrc=$self.useBannerHook($1);"
                 },
                 {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
@@ -73,8 +73,8 @@ export default definePlugin({
             predicate: () => settings.store.voiceBackground,
             replacement: [
                 {
-                    match: /(function\((\i),\i\)\{)(.{20,40},style:)/,
-                    replace: "$1$2.style=$self.voiceBackgroundHook($2);$3"
+                    match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
+                    replace: "$1.style=$self.voiceBackgroundHook($1);"
                 }
             ]
         }
