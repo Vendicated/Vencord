@@ -27,9 +27,8 @@ export default definePlugin({
         {
             find: ".Messages.REMOVE_ATTACHMENT_BODY",
             replacement: {
-                match: /(.container\)?,children:)(\[[^\]]+\])(}\)\};return)/,
-                replace: (_, pre, accessories, post) =>
-                    `${pre}Vencord.Api.MessageAccessories._modifyAccessories(${accessories},this.props)${post}`,
+                match: /(?<=.container\)?,children:)(\[.+?\])/,
+                replace: "Vencord.Api.MessageAccessories._modifyAccessories($1,this.props)",
             },
         },
     ],
