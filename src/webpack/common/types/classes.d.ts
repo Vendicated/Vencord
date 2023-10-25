@@ -19,7 +19,6 @@
 export interface ImageModalClasses {
     image: string,
     modal: string,
-    responsiveWidthMobile: string;
 }
 
 export interface ButtonWrapperClasses {

@@ -173,7 +173,7 @@ export default definePlugin({
     patches: [
         // Make pfps clickable
         {
-            find: "onAddFriend:",
+            find: "onAddFriend:function",
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
                 replace: "{src:$1,onClick:()=>$self.openImage($1)"
@@ -191,9 +191,9 @@ export default definePlugin({
             }
         },
         {
-            find: "().avatarWrapperNonUserBot",
+            find: ".avatarPositionPanel",
             replacement: {
-                match: /(?<=avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
+                match: /(?<=avatarWrapperNonUserBot.{0,50})onClick:(\i\|\|\i)\?void 0(?<=,avatarSrc:(\i).+?)/,
                 replace: "style:($1)?{cursor:\"pointer\"}:{},onClick:$1?()=>{$self.openImage($2)}"
             }
         }
