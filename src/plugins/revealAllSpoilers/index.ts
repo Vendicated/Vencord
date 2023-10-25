@@ -30,9 +30,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".removeObscurity=function",
+            find: ".removeObscurity=",
             replacement: {
-                match: /(?<=\.removeObscurity=function\((\i)\){)/,
+                match: /(?<=\.removeObscurity=(\i)=>{)/,
                 replace: (_, event) => `$self.reveal(${event});`
             }
         }
