@@ -105,10 +105,10 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Commandtechno],
 
     patches: [{
-        find: ".isSidebarVisible,",
+        find: "{isSidebarVisible:",
         replacement: {
-            match: /(var (\i)=\i\.className.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: "$1:[$2?.startsWith('members')?$self.render():null,$3"
+            match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+            replace: ":[$1?.startsWith('members')?$self.render():null,$2"
         }
     }],
 
