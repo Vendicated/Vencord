@@ -49,7 +49,7 @@ export default definePlugin({
             find: ".Messages.USER_PROFILE_MODAL", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.MUTUAL_GUILDS\}\),)(?=(\i\.bot).{0,20}(\(0,\i\.jsx\)\(.{0,100}id:))/,
-                replace: '$1?null:$2"MUTUAL_GDMS",children:"Mutual Groups"}),'
+                replace: '($1||arguments[0].isCurrentUser)?null:$2"MUTUAL_GDMS",children:"Mutual Groups"}),'
             }
         },
         {
