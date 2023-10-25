@@ -25,14 +25,11 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: '("ApplicationStreamPreviewUploadManager")',
-            replacement: [
-                String.raw`\i\.\i\.makeChunkedRequest\(`,
-                String.raw`\i\.\i\.post\({url:`
-            ].map(match => ({
-                match: new RegExp(String.raw`(?=return\[(\d),${match}\i\.\i\.STREAM_PREVIEW.+?}\)\];)`),
-                replace: (_, code) => `return[${code},Promise.resolve({body:"",status:204})];`
-            }))
+            find: '"ApplicationStreamPreviewUploadManager"',
+            replacement: {
+                match: /await \i\.\i\.(makeChunkedRequest\(|post\(\{url:)\i\.\i\.STREAM_PREVIEW.+?\}\)/g,
+                replace: "0"
+            }
         }
     ]
 });
