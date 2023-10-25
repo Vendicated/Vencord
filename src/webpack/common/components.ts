@@ -55,7 +55,7 @@ export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", m => m?.t
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
-waitFor("FormItem", m => {
+waitFor(["FormItem", "Button"], m => {
     ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
     Forms = m;
 });
