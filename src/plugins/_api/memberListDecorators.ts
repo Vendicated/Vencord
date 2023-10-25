@@ -38,17 +38,10 @@ export default definePlugin({
         },
         {
             find: "PrivateChannel.renderAvatar",
-            replacement: [
-                // props are shadowed by nested props so we have to do this
-                {
-                    match: /let\{[^}]*applicationStream:\i[^}]*\}=(\i),/,
-                    replace: "$&vencordProps=$1,"
-                },
-                {
-                    match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
-                    replace: "decorators:[...(typeof vencordProps=='undefined'?[]:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)), $1?$2:null]"
-                }
-            ]
+            replacement: {
+                match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
+                replace: "decorators:[...Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]), $1?$2:null]"
+            }
         }
     ],
 });
