@@ -17,14 +17,14 @@
 */
 
 import { mergeDefaults } from "@utils/misc";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
 import { Argument } from "./types";
 
-const createBotMessage = findByCodeLazy('username:"Clyde"');
+const MessageCreator = findByPropsLazy("createBotMessage");
 const MessageSender = findByPropsLazy("receiveMessage");
 
 export function generateId() {
@@ -38,7 +38,7 @@ export function generateId() {
  * @returns {Message}
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
-    const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
+    const botMessage = MessageCreator.createBotMessage({ channelId, content: "", embeds: [] });
 
     MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
