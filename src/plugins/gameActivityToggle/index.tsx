@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getSettingStoreLazy } from "@api/SettingsStore";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
+import { StatusSettingsStores } from "@webpack/common";
 
 import style from "./style.css?managed";
 
-const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame");
 const Button = findByCodeLazy("Button.Sizes.NONE,disabled:");
 
 function makeIcon(showCurrentGame?: boolean) {
@@ -40,7 +39,7 @@ function makeIcon(showCurrentGame?: boolean) {
                 {!showCurrentGame && <>
                     <mask id="gameActivityMask" >
                         <rect fill="white" x="0" y="0" width="24" height="24" />
-                        <path fill="black" d="M23.27 4.54 19.46.73 .73 19.46 4.54 23.27 23.27 4.54Z"/>
+                        <path fill="black" d="M23.27 4.54 19.46.73 .73 19.46 4.54 23.27 23.27 4.54Z" />
                     </mask>
                     <path fill="var(--status-danger)" d="M23 2.27 21.73 1 1 21.73 2.27 23 23 2.27Z" />
                 </>}
@@ -50,7 +49,7 @@ function makeIcon(showCurrentGame?: boolean) {
 }
 
 function GameActivityToggleButton() {
-    const showCurrentGame = ShowCurrentGame?.useSetting();
+    const showCurrentGame = StatusSettingsStores.ShowCurrentGame.useSetting();
 
     return (
         <Button
@@ -58,7 +57,7 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
-            onClick={() => ShowCurrentGame?.updateSetting(old => !old)}
+            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(old => !old)}
         />
     );
 }
@@ -67,7 +66,6 @@ export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
     authors: [Devs.Nuckyz, Devs.RuukuLada],
-    dependencies: ["SettingsStoreAPI"],
 
     patches: [
         {
