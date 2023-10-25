@@ -69,32 +69,30 @@ export default definePlugin({
             ],
             predicate: () => settings.store.chatMentions,
         },
-        // TODO: Member List Role Names
-        // {
-        //     find: '.membersGroup,"aria-label"',
-        //     replacement: [
-        //         {
-        //             match: /\i.roleIcon,\.\.\.\i/,
-        //             replace: "$&,color:$self.roleGroupColor(arguments[0])"
-        //         },
-        //         // {
-        //         //     match: /children:\[.," \u2014 ",.\]/,
-        //         //     replace: "children:[$self.roleGroupColor(arguments[0])]"
-        //         // },
-        //     ],
-        //     predicate: () => settings.store.memberList,
-        // },
-        // TODO: Voice chat users
-        // {
-        //     find: "renderPrioritySpeaker",
-        //     replacement: [
-        //         {
-        //             match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
-        //             replace: "$&...$self.getVoiceProps(this.props),"
-        //         }
-        //     ],
-        //     predicate: () => settings.store.voiceUsers,
-        // }
+        {
+            find: '.membersGroup,"aria-label"',
+            replacement: [
+                {
+                    match: /\i.roleIcon,\.\.\.\i/,
+                    replace: "$&,color:$self.roleGroupColor(arguments[0])"
+                },
+                {
+                    match: /children:\[.," \u2014 ",.\]/,
+                    replace: "children:[$self.roleGroupColor(arguments[0])]"
+                },
+            ],
+            predicate: () => settings.store.memberList,
+        },
+        {
+            find: "renderPrioritySpeaker",
+            replacement: [
+                {
+                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    replace: "$&...$self.getVoiceProps(this.props),"
+                }
+            ],
+            predicate: () => settings.store.voiceUsers,
+        }
     ],
     settings,
 
@@ -112,11 +110,15 @@ export default definePlugin({
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id];
 
-        return <span style={{
-            color: role?.colorString,
-            fontWeight: "unset",
-            letterSpacing: ".05em"
-        }}>{title ?? label} &mdash; {count}</span>;
+        return (
+            <span style={{
+                color: role?.colorString,
+                fontWeight: "unset",
+                letterSpacing: ".05em"
+            }}>
+                {title ?? label} &mdash; {count}
+            </span>
+        );
     },
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
