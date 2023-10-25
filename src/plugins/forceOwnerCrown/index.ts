@@ -27,23 +27,24 @@ export default definePlugin({
     authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
-            // This is the logic where it decides whether to render the owner crown or not
-            find: ".MULTIPLE_AVATAR",
+            find: "AVATAR_DECORATION_PADDING:",
             replacement: {
-                match: /(\i)=(\i)\.isOwner,/,
-                replace: "$1=$self.isGuildOwner($2),"
+                match: /var (\w+)=function\((\w+)\){/g,
+                replace: "var $1=function($2){$self.setGuildOwner($2);"
             }
         }
     ],
-    isGuildOwner(props: { user: User, channel: Channel, guildId?: string; }) {
-        if (!props?.user?.id) return false;
+    setGuildOwner(props: { user: User, channel: Channel, isOwner: boolean, guildId?: string; }) {
+        if (!props?.user?.id) return;
         if (props.channel?.type === 3 /* GROUP_DM */)
-            return false;
+            return;
 
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props.guildId ?? props.channel?.guild_id;
         const userId = props.user.id;
 
-        return GuildStore.getGuild(guildId)?.ownerId === userId;
+        if (GuildStore.getGuild(guildId)?.ownerId === userId) {
+            props.isOwner = true;
+        }
     },
 });
