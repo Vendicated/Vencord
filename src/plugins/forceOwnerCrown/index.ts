@@ -29,22 +29,20 @@ export default definePlugin({
         {
             find: "AVATAR_DECORATION_PADDING:",
             replacement: {
-                match: /var (\i)=function\((\i)\){/g,
-                replace: "var $1=function($2){$self.setGuildOwner($2);"
+                match: /,isOwner:(\i),/,
+                replace: ",_isOwner:$1=$self.isGuildOwner(e),"
             }
         }
     ],
-    setGuildOwner(props: { user: User, channel: Channel, isOwner: boolean, guildId?: string; }) {
-        if (!props?.user?.id) return;
+    isGuildOwner(props: { user: User, channel: Channel, isOwner: boolean, guildId?: string; }) {
+        if (!props?.user?.id) return props.isOwner;
         if (props.channel?.type === 3 /* GROUP_DM */)
-            return;
+            return props.isOwner;
 
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props.guildId ?? props.channel?.guild_id;
         const userId = props.user.id;
 
-        if (GuildStore.getGuild(guildId)?.ownerId === userId) {
-            props.isOwner = true;
-        }
+        return GuildStore.getGuild(guildId)?.ownerId === userId;
     },
 });
