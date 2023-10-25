@@ -47,16 +47,17 @@ export default definePlugin({
                     replace: "this._intervalId=undefined&&"
                 },
                 {
-                    match: /(?<=increment=function\(\i\){)/,
-                    replace: "return;"
+                    match: /(increment\(\i\){)/,
+                    replace: "$1return;"
                 }
             ]
         },
         {
             find: ".installedLogHooks)",
             replacement: {
-                match: /if\(\i\.getDebugLogging\(\)&&!\i\.installedLogHooks\)/,
-                replace: "if(false)"
+                // if getDebugLogging() returns false, the hooks don't get installed.
+                match: "getDebugLogging(){",
+                replace: "getDebugLogging(){return false;"
             }
         },
     ]
