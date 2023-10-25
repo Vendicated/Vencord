@@ -253,15 +253,16 @@ export default definePlugin({
                     replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
-                    match: /=(\i)\.local;/,
-                    replace: (m, props) => `${m}${props}.local||$self.handleProtoChange(${props}.settings.proto);`
+                    match: /let{settings:/,
+                    replace: "arguments[0].local||$self.handleProtoChange(arguments[0].settings.proto);$&"
                 }
             ]
         },
+        // FIXME
         {
-            find: "updateTheme:function",
+            find: ",updateTheme(",
             replacement: {
-                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)(\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\))/,
+                match: /(function \i\(\i\){let\{backgroundGradientPresetId,(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?\),\i\))/,
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
             }
         },
@@ -281,22 +282,22 @@ export default definePlugin({
             ]
         },
         {
-            find: "renderEmbeds=function",
+            find: "renderEmbeds(",
             replacement: [
                 {
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(renderEmbeds=function\((\i)\){)(.+?embeds\.map\(\(function\((\i)\){)/,
+                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\((\i)=>{)/,
                     replace: (_, rest1, message, rest2, embed) => `${rest1}const fakeNitroMessage=${message};${rest2}if($self.shouldIgnoreEmbed(${embed},fakeNitroMessage))return null;`
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderStickersAccessories=function\((\i)\){var (\i)=\(0,\i\.\i\)\(\i\),/,
-                    replace: (m, message, stickers) => `${m}${stickers}=$self.patchFakeNitroStickers(${stickers},${message}),`
+                    match: /(?<=renderStickersAccessories\((\i)\){let (\i)=)(\(0,\i\.\i\)\(\i\)),/,
+                    replace: (_, message, stickers) => `$self.patchFakeNitroStickers(${stickers},${message}),`
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
-                    replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
+                    match: /renderAttachments\((\i)\){/,
+                    replace: (m, props) => `${m}${props}.attachments=$self.filterAttachments(${props}.attachments);`
                 }
             ]
         },
