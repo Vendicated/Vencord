@@ -27,15 +27,15 @@ export default definePlugin({
         {
             find: "Messages.DISCODO_DISABLED",
             replacement: {
-                match: /(Messages\.DISCODO_DISABLED.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
-                replace: "$1[$2].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
+                match: /(?<=Messages\.DISCODO_DISABLED.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
+                replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
         {
             find: "Messages.SERVERS,children",
             replacement: {
-                match: /(Messages\.SERVERS,children:)(.+?default:return null\}\}\)\))/,
-                replace: "$1Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($2)"
+                match: /(?<=Messages\.SERVERS,children:).+?default:return null\}\}\)/,
+                replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }
     ]
