@@ -33,6 +33,8 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
 
+export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
+
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
