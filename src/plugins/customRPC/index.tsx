@@ -32,7 +32,7 @@ const Colors = findByPropsLazy("profileColors");
 const assetManager = mapMangledModuleLazy(
     "getAssetImage: size must === [number, number] for Twitch",
     {
-        getAsset: filters.byCode("apply("),
+        getAsset: filters.byCode("APPLICATION_ASSETS_FETCH_SUCCESS"),
     }
 );
 
