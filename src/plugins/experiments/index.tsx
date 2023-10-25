@@ -52,7 +52,7 @@ export default definePlugin({
         {
             find: "Object.defineProperties(this,{isDeveloper",
             replacement: {
-                match: /(?<={isDeveloper:\{[^}]+?,get:function\(\)\{return )\w/,
+                match: /(?<={isDeveloper:\{[^}]+?,get:\(\)=>)\i/,
                 replace: "true"
             }
         },
@@ -64,26 +64,26 @@ export default definePlugin({
             }
         },
         {
-            find: ".isStaff=function(){",
+            find: ".isStaff=()",
             predicate: () => settings.store.enableIsStaff,
             replacement: [
                 {
-                    match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                    match: /=>*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
+                    replace: (_, user, flags) => `=>Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
                 },
                 {
-                    match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
-                    replace: "hasFreePremium=function(){return ",
+                    match: /hasFreePremium\(\){return this.isStaff\(\)\s*?\|\|/,
+                    replace: "hasFreePremium(){return ",
                 }
             ]
         },
         // Fix search history being disabled / broken with isStaff
         {
-            find: 'get("disable_new_search")',
+            find: '("showNewSearch")',
             predicate: () => settings.store.enableIsStaff,
             replacement: {
-                match: /(?<=showNewSearch"\);return)\s?!/,
-                replace: "!1&&!"
+                match: /(?<=showNewSearch"\);return)\s?/,
+                replace: "!1&&"
             }
         },
         {
