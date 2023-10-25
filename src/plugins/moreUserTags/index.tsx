@@ -255,7 +255,7 @@ export default definePlugin({
                 replace: "$&moreTags_channelId,"
             }, {
                 match: /,botType:(\i\((\i)\)),/g,
-                replace: ",botType:$self.getTag({user:$2,channelId:vencordProps.moreTags_channelId,origType:$1,location:'not-chat'}),"
+                replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
             }]
         },
     ],
