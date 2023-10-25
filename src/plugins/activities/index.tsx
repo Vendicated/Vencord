@@ -51,17 +51,17 @@ export default definePlugin({
 
     patches: [
         {
-            find: "().textRuler,",
+            find: "textRuler,",
             replacement: {
-                match: /const \w=function\((\w)\)\{var .*?\.activities.*?.applicationStream.*?children:\[.*?null!=.*?(\w\.some\(.{3}\)\?.*?:null)/,
+                match: /var \i=(\i)=>\{let{activities:\i,.*?children:\[.*?null!=\i&&(\i\.some\(\i\.\i\)\?.*?:null)/,
                 replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent(${activities})`)
             },
             predicate: () => settings.store.moreActivityIcons
         },
         {
-            find: "().customStatusSection",
+            find: "customStatusSection,",
             replacement: {
-                match: /\(0,\w\.jsx\)\((\w\.Z),{activity:\w,user:\w,guild:\w,channelId:\w,onClose:\w}\)/,
+                match: /\(0,\i\.jsx\)\((\i\.\i),{activity:\i,user:\i,guild:\i,channelId:\i,onClose:\i}\)/,
                 replace: (m, component) => m.replace(component, "$self.ShowAllActivitiesComponent")
             },
             predicate: () => settings.store.showAllActivities
