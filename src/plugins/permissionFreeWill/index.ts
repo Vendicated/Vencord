@@ -31,7 +31,7 @@ export default definePlugin({
     patches: [
         // Permission lockout, just set the check to true
         {
-            find: "Messages.SELF_DENY_PERMISSION_BODY",
+            find: ".showPermissionLockoutModal(",
             replacement: [
                 {
                     match: /case"DENY":.{0,50}if\((?=\i\.\i\.can)/,
@@ -42,11 +42,12 @@ export default definePlugin({
         },
         // Onboarding, same thing but we need to prevent the check
         {
-            find: "Messages.ONBOARDING_CHANNEL_THRESHOLD_WARNING",
+            find: ".ONBOARDING_CHANNEL_THRESHOLD_WARNING",
             replacement: [
                 {
-                    match: /case 1:if\((?=!\i\.sent.{20,30}Messages\.CANNOT_CHANGE_CHANNEL_PERMS)/,
-                    replace: "$&false&&"
+                    // are we java yet?
+                    match: /(?<=(?:isDefaultChannelThresholdMetAfterDelete|checkDefaultChannelThresholdMetAfterChannelPermissionDeny):function\(\)\{)return \i(?=\})/g,
+                    replace: "return () => true"
                 }
             ],
             predicate: () => settings.store.onboarding
