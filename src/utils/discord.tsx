@@ -17,13 +17,12 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserUtils } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 
 export function getCurrentChannel() {
@@ -44,7 +43,7 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    return PreloadedUserSettings.getCurrentValue()?.appearance?.theme;
+    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
 }
 
 export function insertTextIntoChatInputBox(text: string) {
