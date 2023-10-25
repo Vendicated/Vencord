@@ -73,9 +73,9 @@ export default definePlugin({
     },
 
     patches: [{
-        find: ".renderConnectionStatus=",
+        find: "renderConnectionStatus(){",
         replacement: {
-            match: /(?<=renderConnectionStatus=.+\.channel,children:)\w/,
+            match: /(?<=renderConnectionStatus\(\)\{.+\.channel,children:)\i/,
             replace: "[$&, $self.renderTimer(this.props.channel.id)]"
         }
     }],
