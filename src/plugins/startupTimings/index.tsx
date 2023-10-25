@@ -25,9 +25,9 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
+        find: "UserSettingsSections.PAYMENT_FLOW_MODAL_TEST_PAGE,",
         replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
+            match: /{section:\i\.UserSettingsSections\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
             replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
         }
     }],
