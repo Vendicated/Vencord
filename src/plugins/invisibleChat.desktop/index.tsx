@@ -136,10 +136,10 @@ export default definePlugin({
             }
         },
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],
