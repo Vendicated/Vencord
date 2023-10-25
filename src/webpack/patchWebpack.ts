@@ -90,6 +90,11 @@ function patchPush(webpackGlobal: any) {
                         logger.error("Error in patched chunk", err);
                         return void originalMod(module, exports, require);
                     }
+
+                    exports = module.exports;
+
+                    if (!exports) return;
+
                     // There are (at the time of writing) 11 modules exporting the window
                     // Make these non enumerable to improve webpack search performance
                     if (exports === window) {
@@ -226,11 +231,9 @@ function patchPush(webpackGlobal: any) {
     Object.defineProperty(webpackGlobal, "push", {
         get: () => handlePush,
         set(v) {
-            Object.defineProperty(this, "push", {
-                value: v,
-                configurable: true
-            });
-            patchPush(this);
+            delete webpackGlobal.push;
+            webpackGlobal.push = v;
+            patchPush(webpackGlobal);
         },
         configurable: true
     });
