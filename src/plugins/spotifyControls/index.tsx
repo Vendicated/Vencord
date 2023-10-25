@@ -59,8 +59,8 @@ export default definePlugin({
         {
             find: ".PLAYER_DEVICES",
             replacement: {
-                match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
-                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
+                match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
+                replace: "post:$1.bind(null,$2.post),$&"
             }
         },
         // Discord doesn't give you the repeat kind, only a boolean
