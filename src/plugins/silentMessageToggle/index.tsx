@@ -108,13 +108,13 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             replacement: {
-                match: /"gift"\)\);(?<=(\i)\.push.+?disabled:(\i),.+?)/,
-                replace: (m, array, disabled) => `${m};try{${disabled}||${array}.push($self.SilentMessageToggle(arguments[0]));}catch{}`
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
-        }
+        },
     ],
 
-    SilentMessageToggle: ErrorBoundary.wrap(SilentMessageToggle, { noop: true }),
+    chatBarIcon: ErrorBoundary.wrap(SilentMessageToggle, { noop: true }),
 });
