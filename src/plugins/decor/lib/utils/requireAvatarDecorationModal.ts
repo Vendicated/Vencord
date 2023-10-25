@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCode } from "@webpack";
+import { findByProps } from "@webpack";
 
-import extractAndRequireModuleIds from "./extractAndRequireModuleIds";
-
-export default async () => extractAndRequireModuleIds(findByCode("isTryItOutFlow;"));
+import extractAndRequireModuleId from "./extractAndRequireModuleId";
+export default async () => extractAndRequireModuleId(findByProps("openAvatarDecorationModal").openAvatarDecorationModal);
 

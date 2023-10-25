@@ -19,38 +19,39 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 import { Button, SelectedChannelStore, useEffect, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
-import { setOpenCreateStickerModalLazy } from "./lib/utils/requireCreateStickerModal";
+import extractAndRequireModuleIds from "./lib/utils/extractAndRequireModuleId";
 import showAuthorizationModal from "./lib/utils/showAuthorizationModal";
-import { setAvatarDecorationPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
+import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
 
-let CustomizationSection;
+const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
 
 export default definePlugin({
     name: "Decor",
-    description: "Custom avatar decorations",
+    description: "Custom avatar decorations.",
     authors: [Devs.FieryFlames],
     patches: [
         // Patch UserStore to include Decor avatar decorations when getting users
         {
             find: "getUserStoreVersion",
             replacement: {
-                match: /(?<=getUser=.{10,50}return )(\i\[\i\])/,
-                replace: "$self.patchGetUser($1)"
+                match: /(?<=getUser\(\i\){.{10,50}return )(\i\[\i\])/,
+                replace: "$self.getUserHook($1)"
             }
         },
         // Patch MediaResolver to return correct URL for Decor avatar decorations
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /avatarDecoration,.{1,100}?;/,
-                replace: "$&const vcDecorDecoration=$self.patchGetAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
+                match: /(function \i\(\i\){)(let{avatarDecoration)/,
+                replace: "$1const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;$2"
             }
         },
         // Patch profile customization settings to include Decor section
@@ -61,44 +62,21 @@ export default definePlugin({
                 replace: "$&$self.DecorSection(),"
             }
         },
-        // Obtain CustomizationSection component
-        {
-            find: ".customizationSectionBackground",
-            replacement: {
-                match: /function (\i)\(\i\){var \i,\i=\i\.title/,
-                replace: "$self.CustomizationSection=$1;$&"
-            }
-        },
         // Decoration modal module
         {
             find: ".decorationGridItem",
             replacement: [{
-                match: /,((\i)=function\(\i\){var \i=\i\.children)/,
-                replace: ";var $2;$self.DecorationGridItem=$1"
+                match: /(\i=)(\i=>{let{children:\i)/,
+                replace: "$1$self.DecorationGridItem=$2"
             },
             {
-                match: /const (\i)=(function\(\i\){var \i=\i\.user,\i=\i\.avatarDecorationOverride,\i=\i\.className)/,
-                replace: "let $1;$1=$self.AvatarDecorationPreview=$2"
+                match: /(\i=)(\i=>{let{user:\i,avatarDecoration)/,
+                replace: "$1$self.DecorationGridDecoration=$2"
             },
             {
-                match: /,(\i)=(function\(\i\){var \i=\i\.user,\i=\i\.avatarDecoration,)/,
-                replace: ";var $1;$self.DecorationGridDecoration=$1=$2"
-            },
-            {
-                match: /\i\.\i\.isItemViewed\((\i)\)/,
-                replace: "($1.skuId !== $self.SKU_ID ? $& : true)"
-            },
-            {
-                match: /(?<=(\i)\.label\}\),)(\i===\i\.PURCHASE\|\|\i===\i\.PREMIUM_PURCHASE&&\i)/,
-                replace: "($1.skuId === $self.SKU_ID || ($2))"
+                match: /(\i===\i\.Section\.PURCHASE\|\|\i===\i\.Section\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).{0,800}?)/,
+                replace: "$2.skuId === $self.SKU_ID || ($1)"
             }]
-        },
-        {
-            find: "GUILD_STICKER_SETTINGS_REMAINING_SLOTS_AVAILABLE.format",
-            replacement: {
-                match: /(?<=numTotal:.{1,50}?,)(\i)=(function\(\i\){var \i=\i\.guildId)/,
-                replace: "$1=$self.openCreateStickerModalLazy=$2"
-            }
         }
     ],
 
@@ -129,14 +107,6 @@ export default definePlugin({
         // TODO: Still need to fetch for member list
     },
 
-    set CustomizationSection(e: any) {
-        CustomizationSection = e;
-    },
-
-    set AvatarDecorationPreview(e: any) {
-        setAvatarDecorationPreview(e);
-    },
-
     set DecorationGridItem(e: any) {
         setDecorationGridItem(e);
     },
@@ -145,17 +115,15 @@ export default definePlugin({
         setDecorationGridDecoration(e);
     },
 
-    set openCreateStickerModalLazy(e: any) {
-        setOpenCreateStickerModalLazy(e);
-    },
-
     SKU_ID,
 
     async start() {
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 
-    patchGetUser(user) {
+    extractAndRequireModuleIds,
+
+    getUserHook(user) {
         if (!user) return user;
 
         const store = useUsersDecorationsStore.getState();
@@ -181,7 +149,7 @@ export default definePlugin({
         return user;
     },
 
-    patchGetAvatarDecorationURL({ avatarDecoration, canAnimate }) {
+    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");

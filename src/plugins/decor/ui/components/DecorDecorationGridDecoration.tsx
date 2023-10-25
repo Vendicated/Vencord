@@ -5,8 +5,8 @@
  */
 
 import { ContextMenu } from "@webpack/common";
-import discordifyDecoration from "plugins/decor/lib/utils/discordifyDecoration";
 
+import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import { DecorationGridDecoration } from ".";
 import DecorationContextMenu from "./DecorationContextMenu";
 
@@ -16,6 +16,7 @@ interface DecorDecorationGridDecorationProps {
     onSelect: () => void;
     style: any;
 }
+
 export default function DecorDecorationGridDecoration(props) {
     return <DecorationGridDecoration
         {...props}

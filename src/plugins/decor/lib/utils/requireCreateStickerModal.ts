@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import extractAndRequireModuleIds from "./extractAndRequireModuleIds";
+import { findByCode } from "@webpack";
 
-let openCreateStickerModalLazy;
-export const setOpenCreateStickerModalLazy = e => { openCreateStickerModalLazy = e; };
+import extractAndRequireModuleId from "./extractAndRequireModuleId";
 
-export default async () => extractAndRequireModuleIds(openCreateStickerModalLazy);
+export default async () => extractAndRequireModuleId(findByCode("canManageSticker:", "openModalLazy"));

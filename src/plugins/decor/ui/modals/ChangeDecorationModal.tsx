@@ -9,10 +9,10 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, Mo
 import { LazyComponent } from "@utils/react";
 import { findByCode, findByPropsLazy, waitFor } from "@webpack";
 import { Button, Forms, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
-import cl from "plugins/decor/lib/utils/cl";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
+import cl from "../../lib/utils/cl";
 import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import { AvatarDecorationPreview } from "../components";
@@ -29,7 +29,6 @@ waitFor("MasonryList", m => {
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 const DecorationComponentStyles = findByPropsLazy("decorationGridItemChurned");
-const ModalStyles = findByPropsLazy("closeWithCircleBackground");
 
 interface Section {
     title: string;
