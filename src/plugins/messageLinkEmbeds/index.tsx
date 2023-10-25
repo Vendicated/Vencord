@@ -35,6 +35,7 @@ import {
     PermissionStore,
     RestAPI,
     Text,
+    TextAndImagesSettingsStores,
     UserStore
 } from "@webpack/common";
 import { Channel, Guild, Message } from "discord-types/general";
@@ -49,8 +50,6 @@ const AutoModEmbed = LazyComponent(() => findByCode(".withFooter]:", "childrenMe
 const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.includes("renderSimpleAccessories)")));
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
-
-const SettingsStores = findByPropsLazy("MessageDisplayCompact");
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -321,7 +320,7 @@ function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbe
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel, guildID } = props;
-    const compact = SettingsStores.MessageDisplayCompact.useSetting();
+    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
     const isDM = guildID === "@me";
     const images = getImages(message);
     const { parse } = Parser;

@@ -218,7 +218,7 @@ export default definePlugin({
         {
             find: "renderSystemTag:",
             replacement: {
-                match: /;return\((.+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
+                match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
                 replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
             }
         },
@@ -248,15 +248,17 @@ export default definePlugin({
         // in profiles
         {
             find: ",overrideDiscriminator:",
-            replacement: [{
-                // prevent channel id from getting ghosted
-                // it's either this or extremely long lookbehind
-                match: /user:\i,nick:\i,/,
-                replace: "$&moreTags_channelId,"
-            }, {
-                match: /,botType:(\i\((\i)\)),/g,
-                replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
-            }]
+            replacement: [
+                {
+                    // prevent channel id from getting ghosted
+                    // it's either this or extremely long lookbehind
+                    match: /user:\i,nick:\i,/,
+                    replace: "$&moreTags_channelId,"
+                }, {
+                    match: /,botType:(\i\((\i)\)),/g,
+                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
+                }
+            ]
         },
     ],
 
