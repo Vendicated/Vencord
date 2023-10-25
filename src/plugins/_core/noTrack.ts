@@ -24,7 +24,7 @@ export default definePlugin({
     description: "Disable Discord's tracking ('science'), metrics and Sentry crash reporting",
     authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
     required: true,
-    patches: [
+    patches: true ? [] : [
         {
             find: "TRACKING_URL:",
             replacement: {
