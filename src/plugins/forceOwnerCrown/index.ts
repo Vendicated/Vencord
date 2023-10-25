@@ -29,7 +29,7 @@ export default definePlugin({
         {
             find: "AVATAR_DECORATION_PADDING:",
             replacement: {
-                match: /var (\w+)=function\((\w+)\){/g,
+                match: /var (\i)=function\((\i)\){/g,
                 replace: "var $1=function($2){$self.setGuildOwner($2);"
             }
         }
