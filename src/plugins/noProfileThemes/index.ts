@@ -34,19 +34,19 @@ export default definePlugin({
             }
         },
         {
-            find: "().avatarPositionPremiumNoBanner,default:",
+            find: ".avatarPositionPremiumNoBanner,default:",
             replacement: {
                 // premiumUserWithoutBanner: foo().avatarPositionPremiumNoBanner, default: foo().avatarPositionNormal
-                match: /\.avatarPositionPremiumNoBanner(?=,default:\i\(\)\.(\i))/,
+                match: /\.avatarPositionPremiumNoBanner(?=,default:\i\.(\i))/,
                 // premiumUserWithoutBanner: foo().avatarPositionNormal...
                 replace: ".$1"
             }
         },
         {
-            find: ".hasThemeColors=function(){",
+            find: "hasThemeColors(){",
             replacement: {
-                match: /(?<=key:"canUsePremiumProfileCustomization",get:function\(\){return)/,
-                replace: " false;"
+                match: /get canUsePremiumProfileCustomization\(\){return /,
+                replace: "$&false &&"
             }
         }
     ]
