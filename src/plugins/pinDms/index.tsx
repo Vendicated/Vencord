@@ -117,7 +117,7 @@ export default definePlugin({
         {
             find: ".Routes.APPLICATION_STORE&&",
             replacement: {
-                // channelIds = __OVERLAY__ ? stuff : toArray(getStaticPaths()).concat(toArray(channelIds))
+                // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
                 replace: "$self.getSnapshot().concat($&.filter(c=>!$self.isPinned(c)))"
