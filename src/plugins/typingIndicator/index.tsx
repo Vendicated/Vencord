@@ -83,7 +83,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: typingUsersArray.length - 2 })
+                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
                 : Formatters.Messages.SEVERAL_USERS_TYPING;
             break;
         }
