@@ -49,10 +49,10 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: 'className:"mention"',
+            find: "CLYDE_AI_MENTION_COLOR:null,",
             replacement: [
                 {
-                    match: /user:(\i),channel:(\i).{0,300}?"@"\.concat\(.+?\)/,
+                    match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
                     replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],
@@ -60,42 +60,41 @@ export default definePlugin({
         },
         // Slate
         {
-            // taken from CommandsAPI
-            find: ".source,children",
+            find: ".userTooltip,children",
             replacement: [
                 {
-                    match: /function \i\((\i)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
-                    replace: "$&color:$self.getUserColor($1.id,{guildId:$1?.guildId}),"
+                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
+                    replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
         },
-        // Member List Role Names
-        {
-            find: ".memberGroupsPlaceholder",
-            replacement: [
-                {
-                    match: /(memo\(\(function\((\i)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
-                    replace: "$1$self.roleGroupColor($2)]"
-                },
-                {
-                    match: /children:\[.," \u2014 ",.\]/,
-                    replace: "children:[$self.roleGroupColor(arguments[0])]"
-                },
-            ],
-            predicate: () => settings.store.memberList,
-        },
-        // Voice chat users
-        {
-            find: "renderPrioritySpeaker",
-            replacement: [
-                {
-                    match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
-                    replace: "$&...$self.getVoiceProps(this.props),"
-                }
-            ],
-            predicate: () => settings.store.voiceUsers,
-        }
+        // TODO: Member List Role Names
+        // {
+        //     find: '.membersGroup,"aria-label"',
+        //     replacement: [
+        //         {
+        //             match: /\i.roleIcon,\.\.\.\i/,
+        //             replace: "$&,color:$self.roleGroupColor(arguments[0])"
+        //         },
+        //         // {
+        //         //     match: /children:\[.," \u2014 ",.\]/,
+        //         //     replace: "children:[$self.roleGroupColor(arguments[0])]"
+        //         // },
+        //     ],
+        //     predicate: () => settings.store.memberList,
+        // },
+        // TODO: Voice chat users
+        // {
+        //     find: "renderPrioritySpeaker",
+        //     replacement: [
+        //         {
+        //             match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
+        //             replace: "$&...$self.getVoiceProps(this.props),"
+        //         }
+        //     ],
+        //     predicate: () => settings.store.voiceUsers,
+        // }
     ],
     settings,
 
