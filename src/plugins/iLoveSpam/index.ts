@@ -25,10 +25,10 @@ export default definePlugin({
     authors: [Devs.botato, Devs.Animal],
     patches: [
         {
-            find: "),{hasFlag:",
+            find: "hasFlag:{writable",
             replacement: {
-                match: /(if\((.{1,2})<=1<<30\)return)/,
-                replace: "if($2===(1<<20)){return false};$1",
+                match: /if\((\i)<=(?:1<<30|1073741824)\)return/,
+                replace: "if($1===(1<<20))return false;$&",
             },
         },
     ],
