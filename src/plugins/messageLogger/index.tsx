@@ -260,7 +260,7 @@ export default definePlugin({
         {
             // Message domain model
             // Module 451
-            find: "this.set(\"reactions\",i)",
+            find: "}addReaction(",
             replacement: [
                 {
                     match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
