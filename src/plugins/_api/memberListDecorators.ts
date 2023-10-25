@@ -25,18 +25,23 @@ export default definePlugin({
     authors: [Devs.TheSun, Devs.Ven],
     patches: [
         {
-            find: "lostPermissionTooltipText,",
-            replacement: {
-                match: /decorators:.{0,100}?children:\[(?<=(\i)\.lostPermissionTooltipText.+?)/,
-                replace: "$&...Vencord.Api.MemberListDecorators.__getDecorators($1),"
-            }
+            find: ".lostPermission)",
+            replacement: [
+                {
+                    match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
+                    replace: "$&vencordProps=$1,"
+                }, {
+                    match: /decorators:.{0,100}?children:\[/,
+                    replace: "$&...(typeof vencordProps=='undefined'?[]:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                }
+            ]
         },
         {
             find: "PrivateChannel.renderAvatar",
             replacement: [
                 // props are shadowed by nested props so we have to do this
                 {
-                    match: /\i=(\i)\.applicationStream,/,
+                    match: /let\{[^}]*applicationStream:\i[^}]*\}=(\i),/,
                     replace: "$&vencordProps=$1,"
                 },
                 {
