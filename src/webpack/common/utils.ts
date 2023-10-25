@@ -24,7 +24,9 @@ import { _resolveReady, filters, find, findByCodeLazy, findByPropsLazy, findLazy
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+export let ComponentDispatch;
+waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");

@@ -33,7 +33,7 @@ export default definePlugin({
     patches: [{
         find: ".handleSelectGIF=",
         replacement: {
-            match: /\.handleSelectGIF=function.+?\{/,
+            match: /\.handleSelectGIF=\i=>\{/,
             replace: ".handleSelectGIF=function(gif){return $self.handleSelect(gif);"
         }
     }],
