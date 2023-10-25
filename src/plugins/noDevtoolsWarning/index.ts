@@ -26,8 +26,8 @@ export default definePlugin({
     patches: [{
         find: "setDevtoolsCallbacks",
         replacement: {
-            match: /if\(.{0,10}\|\|"0.0.0"!==.{0,2}\.remoteApp\.getVersion\(\)\)/,
-            replace: "if(false)"
+            match: /if\(null!=\i&&"0.0.0"===\i\.remoteApp\.getVersion\(\)\)/,
+            replace: "if(true)"
         }
     }]
 });
