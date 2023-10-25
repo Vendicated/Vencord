@@ -94,19 +94,19 @@ export default definePlugin({
     },
 
     patches: [
+        // above message box
         {
-            find: ".showCopiableUsername",
+            find: ".lastEditedByContainer",
             replacement: {
-                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
-                // paste my fancy custom button above the message field
+                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
         },
+        // below username
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                match: /\(\)\.body.+?displayProfile:\i}\),/,
-                // paste my fancy custom button below the username
+                match: /\.body.+?displayProfile:\i}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
             }
         }
