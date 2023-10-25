@@ -219,7 +219,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\w)\){let.+?((?:\w+\.){2})getOrCreate.+?},/,
+                    match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -229,7 +229,7 @@ export default definePlugin({
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\){let.+?((?:\w+\.){2})getOrCreate.+?},/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i+\.){2})getOrCreate.+?},/,
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -239,7 +239,7 @@ export default definePlugin({
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
@@ -251,7 +251,7 @@ export default definePlugin({
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
-                    match: /(?<=getLastEditableMessage\(\w\)\{.{0,200}\.find\((\w)=>)/,
+                    match: /(?<=getLastEditableMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
                     replace: "!$1.deleted &&"
                 }
             ]
@@ -263,7 +263,7 @@ export default definePlugin({
             find: "this.set(\"reactions\",i)",
             replacement: [
                 {
-                    match: /this\.customRenderedContent=(\w)\.customRenderedContent,/,
+                    match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
                     replace: "this.customRenderedContent = $1.customRenderedContent," +
                         "this.deleted = $1.deleted || false," +
                         "this.editHistory = $1.editHistory || [],"
@@ -283,7 +283,7 @@ export default definePlugin({
                 // },
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
-                    match: /interactionData:(\w)\.interactionData/,
+                    match: /interactionData:(\i)\.interactionData/,
                     replace:
                         "interactionData:$1.interactionData," +
                         "deleted:$1.deleted," +
@@ -299,7 +299,7 @@ export default definePlugin({
                 {
                     // Construct new edited message and add editHistory & deleted (ref above)
                     // Pass in custom data to attachment parser to mark attachments deleted as well
-                    match: /attachments:(\w{1,2})\((\w)\)/,
+                    match: /attachments:(\i)\((\i)\)/,
                     replace:
                         "attachments: $1((() => {" +
                         "   let old = arguments[1]?.attachments;" +
@@ -315,7 +315,7 @@ export default definePlugin({
                 },
                 {
                     // Preserve deleted attribute on attachments
-                    match: /(\((\w)\){return null==\2\.attachments.+?)spoiler:/,
+                    match: /(\((\i)\){return null==\2\.attachments.+?)spoiler:/,
                     replace:
                         "$1deleted: arguments[0]?.deleted," +
                         "spoiler:"
@@ -329,11 +329,11 @@ export default definePlugin({
             find: ".removeAttachmentHoverButton",
             replacement: [
                 {
-                    match: /(className:\w,attachment:\w),/,
+                    match: /(className:\i,attachment:\i),/,
                     replace: "$1,attachment: {deleted},"
                 },
                 {
-                    match: /\[\w\.obscured\]:.+?,/,
+                    match: /\[\i\.obscured\]:.+?,/,
                     replace: "$& 'messagelogger-deleted-attachment': deleted,"
                 }
             ]
@@ -371,11 +371,11 @@ export default definePlugin({
             find: "displayName=\"ReferencedMessageStore\"",
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:function\((\w)\).+?},/,
+                    match: /MESSAGE_DELETE:function\((\i)\).+?},/,
                     replace: "MESSAGE_DELETE:function($1){},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\).+?},/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\).+?},/,
                     replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
