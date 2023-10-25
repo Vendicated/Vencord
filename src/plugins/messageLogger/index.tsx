@@ -333,7 +333,6 @@ export default definePlugin({
                     replace: "$1,attachment: {deleted},"
                 },
                 {
-                    // match: /\["className","attachment".+?className:/,
                     match: /\[\w\.obscured\]:.+?,/,
                     replace: "$& 'messagelogger-deleted-attachment': deleted,"
                 }
@@ -385,7 +384,6 @@ export default definePlugin({
         {
             // Message context base menu
             // Module 600300
-            // find: "id:\"remove-reactions\"",
             find: "useMessageMenu:",
             replacement: [
                 {
