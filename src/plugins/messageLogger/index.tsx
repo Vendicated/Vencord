@@ -229,7 +229,7 @@ export default definePlugin({
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i+\.){2})getOrCreate.+?},/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
