@@ -295,7 +295,7 @@ export default definePlugin({
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var (\i)=\i.attachments.+?;/,
+                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
@@ -328,6 +328,20 @@ export default definePlugin({
             replacement: {
                 match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
                 replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
+            }
+        },
+        {
+            find: "canUsePremiumAppIcons:function",
+            replacement: {
+                match: /canUsePremiumAppIcons:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
+        {
+            find: "location:\"AppIconHome\"",
+            replacement: {
+                match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
             }
         }
     ],

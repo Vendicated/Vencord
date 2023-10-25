@@ -16,14 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+export let ComponentDispatch;
+waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
@@ -88,9 +91,7 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = {
-    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
-};
+export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
     copy: filters.byCode(".copy("),
@@ -126,4 +127,11 @@ waitFor("parseTopic", m => Parser = m);
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+// FIXME: hack to support old stable and new canary
+export const PermissionsBits: t.PermissionsBits = proxyLazy(() => {
+    try {
+        return find(m => m.Permissions?.ADMINISTRATOR).Permissions;
+    } catch {
+        return find(m => typeof m.ADMINISTRATOR === "bigint");
+    }
+});
