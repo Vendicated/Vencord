@@ -170,7 +170,7 @@ export default definePlugin({
         {
             find: "Messages.WELCOME_CTA_LABEL",
             replacement: {
-                match: /innerClassName:\i\.welcomeCTAButton,(?<={channel:\i,message:\i}=(\i).+?)/,
+                match: /innerClassName:\i\.welcomeCTAButton,(?<={channel:\i,message:\i}=(\i).{0,400}?)/,
                 replace: "$&onContextMenu:(vcEvent)=>$self.pickSticker(vcEvent, $1),"
             }
         }
