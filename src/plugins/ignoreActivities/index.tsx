@@ -6,13 +6,12 @@
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Tooltip } from "webpack/common";
+import { StatusSettingsStores, Tooltip } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -26,7 +25,6 @@ interface IgnoredActivity {
 }
 
 const RunningGameStore = findStoreLazy("RunningGameStore");
-const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame");
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     const forceUpdate = useForceUpdater();
@@ -68,7 +66,7 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
 
     // Trigger activities recalculation
-    ShowCurrentGame?.updateSetting(old => old);
+    StatusSettingsStores.ShowCurrentGame.updateSetting(old => old);
     forceUpdateButton();
 }
 
@@ -85,7 +83,6 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are ignored from the Registered Games and Activities tabs.",
 
-    dependencies: ["SettingsStoreAPI"],
     settings,
 
     patches: [
