@@ -21,14 +21,11 @@ import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { UserStore, useState } from "@webpack/common";
-import type { User } from "discord-types/general";
+import { UserStore, UserUtils, useState } from "@webpack/common";
 import type { ComponentType, ReactNode } from "react";
 
 const fetching = new Set<string>();
 const queue = new Queue(5);
-const UserApi = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User> };
 
 interface MentionProps {
     data: {
@@ -88,7 +85,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                         fetching.add(id);
 
                         queue.unshift(() =>
-                            UserApi.getUser(id)
+                            UserUtils.getUser(id)
                                 .then(() => {
                                     setUserId(id);
                                     fetching.delete(id);
