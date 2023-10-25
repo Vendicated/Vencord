@@ -61,6 +61,13 @@ const report = {
     otherErrors: [] as string[]
 };
 
+const IGNORED_DISCORD_ERRORS = [
+    "KeybindStore: Looking for callback action",
+    "Unable to process domain list delta: Client revision number is null",
+    "Downloading the full bad domains file",
+    /\[GatewaySocket\].{0,110}Cannot access '/
+] as Array<string | RegExp>;
+
 function toCodeBlock(s: string) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
     return "```" + s + " ```";
@@ -85,6 +92,8 @@ async function printReport() {
         console.log(`- ${p.plugin}`);
         console.log(`  - Error: ${toCodeBlock(p.error)}`);
     });
+
+    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {

@@ -33,12 +33,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
-    },
-    forceStagingBanner: {
-        description: "Whether to force Staging banner under user area.",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
     }
 });
 
@@ -82,14 +76,6 @@ export default definePlugin({
                     replace: "hasFreePremium=function(){return ",
                 }
             ]
-        },
-        {
-            find: ".Messages.DEV_NOTICE_STAGING",
-            predicate: () => settings.store.forceStagingBanner,
-            replacement: {
-                match: /"staging"===window\.GLOBAL_ENV\.RELEASE_CHANNEL/,
-                replace: "true"
-            }
         },
         {
             find: 'H1,title:"Experiments"',
