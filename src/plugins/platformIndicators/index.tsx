@@ -22,8 +22,9 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByProps, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -55,7 +56,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
+const getStatusColor = proxyLazy(() => findByProps("getStatusColor")?.getStatusColor);
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
