@@ -45,16 +45,16 @@ export default definePlugin({
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
     patches: [
         {
-            find: ",acceptInvite:function",
+            find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?;(\i)=null.+?;/,
+                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!==.+?;/,
                 replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
             }
         },
         {
-            find: "{joinGuild:function",
+            find: "{joinGuild:",
             replacement: {
-                match: /guildId:(\w+),lurker:(\w+).{0,20}\)}\)\);/,
+                match: /guildId:(\i),lurker:(\i).{0,20}}\)\);/,
                 replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
             }
         }
