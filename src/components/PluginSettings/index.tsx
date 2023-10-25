@@ -34,7 +34,7 @@ import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -251,7 +251,7 @@ export default function PluginSettings() {
         }
         DataStore.set("Vencord_existingPlugins", existingTimestamps);
 
-        return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
+        return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
     type P = JSX.Element | JSX.Element[];

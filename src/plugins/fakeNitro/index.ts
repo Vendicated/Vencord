@@ -25,7 +25,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
+import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -307,7 +307,7 @@ export default definePlugin({
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var (\i)=\i.attachments.+?;/,
+                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
@@ -364,6 +364,20 @@ export default definePlugin({
             replacement: {
                 match: /premiumDisabled-20lb_D/,
                 replace: ""
+            }
+        },
+        {
+            find: "canUsePremiumAppIcons:function",
+            replacement: {
+                match: /canUsePremiumAppIcons:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
+        {
+            find: "location:\"AppIconHome\"",
+            replacement: {
+                match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
             }
         }
     ],
@@ -554,7 +568,7 @@ export default definePlugin({
         };
 
         try {
-            return modifyChildren(window._.cloneDeep(content));
+            return modifyChildren(lodash.cloneDeep(content));
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;

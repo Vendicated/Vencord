@@ -26,7 +26,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, lodash, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -138,7 +138,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         const channelData = audioBuffer.getChannelData(0);
 
         // average the samples into much lower resolution bins, maximum of 256 total bins
-        const bins = new Uint8Array(window._.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+        const bins = new Uint8Array(lodash.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
         const samplesPerBin = Math.floor(channelData.length / bins.length);
 
         // Get root mean square of each bin
