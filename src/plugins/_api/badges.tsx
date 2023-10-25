@@ -85,17 +85,19 @@ export default definePlugin({
                 },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
-                    match: /alt:" ","aria-hidden":!0,src:(?=(\i)\.src)/g,
+                    match: /alt:" ","aria-hidden":!0,src:(?=(\i)\.src)/,
                     // ...badge.props, ..., src: badge.image ?? ...
                     replace: "...$1.props,$& $1.image??"
                 },
+                // replace their component with ours if applicable
                 {
-                    match: /children:function(?<=(\i)\.(?:tooltip|description),spacing:\d.+?)/g,
-                    replace: "children:$1.component ? () => $self.renderBadgeComponent($1) : function"
+                    match: /(?<=text:(\i)\.description,spacing:12,)children:/,
+                    replace: "children:$1.component ? () => $self.renderBadgeComponent($1) :"
                 },
+                // conditionally override their onClick with badge.onClick if it exists
                 {
-                    match: /onClick:function(?=.{0,200}href:(\i)\.link)/,
-                    replace: "onClick:$1.onClick??function"
+                    match: /href:(\i)\.link/,
+                    replace: "...($1.onClick && { onClick: $1.onClick }),$&"
                 }
             ]
         }
