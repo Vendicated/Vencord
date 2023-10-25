@@ -33,7 +33,7 @@ export default definePlugin({
             }
         },
         {
-            find: "renderJumpButton=function()",
+            find: "renderJumpButton()",
             replacement: {
                 match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}UNBLOCK_TO_JUMP_TITLE)/,
                 replace: "if(false)$1"
