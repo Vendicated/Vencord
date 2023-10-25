@@ -178,7 +178,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({user:arguments[0].user,displayProfile:arguments[0].displayProfile})"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
             }
         },
         {
@@ -186,7 +186,7 @@ export default definePlugin({
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
-                replace: "$self.profilePanelComponent({id:$1.recipients[0]}),$&"
+                replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
             }
         }
     ],
