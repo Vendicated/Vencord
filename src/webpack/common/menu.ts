@@ -22,7 +22,7 @@ import type * as t from "./types/menu";
 
 export let Menu = {} as t.Menu;
 
-waitFor("MenuItem", m => Menu = m);
+waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);
 
 export const ContextMenu: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN"', {
     open: filters.byCode("stopPropagation"),
