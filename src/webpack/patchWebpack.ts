@@ -31,17 +31,23 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 if (window[WEBPACK_CHUNK]) {
     logger.info(`Patching ${WEBPACK_CHUNK}.push (was already existant, likely from cache!)`);
     _initWebpack(window[WEBPACK_CHUNK]);
-    patchPush();
+    patchPush(window[WEBPACK_CHUNK]);
 } else {
     Object.defineProperty(window, WEBPACK_CHUNK, {
         get: () => webpackChunk,
         set: v => {
-            if (v?.push !== Array.prototype.push && _initWebpack(v)) {
-                logger.info(`Patching ${WEBPACK_CHUNK}.push`);
-                patchPush();
-                // @ts-ignore
-                delete window[WEBPACK_CHUNK];
-                window[WEBPACK_CHUNK] = v;
+            if (v?.push) {
+                if (!v.push.$$vencordOriginal) {
+                    logger.info(`Patching ${WEBPACK_CHUNK}.push`);
+                    patchPush(v);
+                }
+
+                if (_initWebpack(v)) {
+                    logger.info("Successfully initialised Vencord webpack");
+                    // @ts-ignore
+                    delete window[WEBPACK_CHUNK];
+                    window[WEBPACK_CHUNK] = v;
+                }
             }
             webpackChunk = v;
         },
@@ -49,7 +55,7 @@ if (window[WEBPACK_CHUNK]) {
     });
 }
 
-function patchPush() {
+function patchPush(webpackGlobal: any) {
     function handlePush(chunk: any) {
         try {
             const modules = chunk[1];
@@ -84,6 +90,11 @@ function patchPush() {
                         logger.error("Error in patched chunk", err);
                         return void originalMod(module, exports, require);
                     }
+
+                    exports = module.exports;
+
+                    if (!exports) return;
+
                     // There are (at the time of writing) 11 modules exporting the window
                     // Make these non enumerable to improve webpack search performance
                     if (exports === window) {
@@ -213,13 +224,17 @@ function patchPush() {
             logger.error("Error in handlePush", err);
         }
 
-        return handlePush.original.call(window[WEBPACK_CHUNK], chunk);
+        return handlePush.$$vencordOriginal.call(webpackGlobal, chunk);
     }
 
-    handlePush.original = window[WEBPACK_CHUNK].push;
-    Object.defineProperty(window[WEBPACK_CHUNK], "push", {
+    handlePush.$$vencordOriginal = webpackGlobal.push;
+    Object.defineProperty(webpackGlobal, "push", {
         get: () => handlePush,
-        set: v => (handlePush.original = v),
+        set(v) {
+            delete webpackGlobal.push;
+            webpackGlobal.push = v;
+            patchPush(webpackGlobal);
+        },
         configurable: true
     });
 }
