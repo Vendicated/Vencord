@@ -31,12 +31,8 @@ export default definePlugin({
     patches: [{
         find: "getRelationshipCounts(){",
         replacement: {
-            match: /\.sortBy\((\i)=>\i\.comparator\)/,
-            replace: (_, row) => `.sortBy((${row}) => {
-                return ${row}.type === 3 || ${row}.type === 4
-                    ? -$self.getSince(${row}.user)
-                    : ${row}.comparator
-            })`
+            match: /\.sortBy\(\i=>\i\.comparator\)/,
+            replace: ".sortBy((row) => $self.sortList(row))"
         }
     }, {
         find: "RelationshipTypes.PENDING_INCOMING?",
@@ -48,6 +44,12 @@ export default definePlugin({
                     ${post}`
         }
     }],
+
+    sortList(row: any) {
+        return row.type === 3 || row.type === 4
+            ? -this.getSince(row.user)
+            : row.comparator;
+    },
 
     getSince(user: User) {
         return new Date(RelationshipStore.getSince(user.id));
