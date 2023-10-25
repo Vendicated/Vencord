@@ -39,22 +39,27 @@ export default definePlugin({
     description: "Puts your favorite emoji first in the emoji autocomplete.",
     patches: [
         {
-            find: ".activeCommandOption",
+            find: "renderResults({results:",
             replacement: [
                 {
-                    // = someFunc(a.selectedIndex); ...trackEmojiSearch({ state: theState, isInPopoutExperimental: someBool })
-                    match: /=\i\(\i\.selectedIndex\);(?=.+?state:(\i),isInPopoutExperiment:\i)/,
-                    // self.sortEmojis(theState)
-                    replace: "$&$self.sortEmojis($1);"
+                    // https://regex101.com/r/N7kpLM/1
+                    match: /let \i=.{1,100}renderResults\({results:(\i)\.query\.results,/,
+                    replace: "$self.sortEmojis($1);$&"
                 },
+            ],
+        },
 
+        {
+            find: "MAX_AUTOCOMPLETE_RESULTS+",
+            replacement: [
                 // set maxCount to Infinity so our sortEmojis callback gets the entire list, not just the first 10
                 // and remove Discord's emojiResult slice, storing the endIndex on the array for us to use later
                 {
+                    // https://regex101.com/r/x2mobQ/1
                     // searchEmojis(...,maxCount: stuff) ... endEmojis = emojis.slice(0, maxCount - gifResults.length)
-                    match: /,maxCount:(\i)(.+?)=(\i)\.slice\(0,(\1-\i\.length)\)/,
+                    match: /,maxCount:(\i)(.{1,500}\i)=(\i)\.slice\(0,(\i-\i\.length)\)/,
                     // ,maxCount:Infinity ... endEmojis = (emojis.sliceTo = n, emojis)
-                    replace: ",maxCount:Infinity$2=($3.sliceTo=$4,$3)"
+                    replace: ",maxCount:Infinity$2=($3.sliceTo = $4, $3)"
                 }
             ]
         }
