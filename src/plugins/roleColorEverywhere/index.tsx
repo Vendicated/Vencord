@@ -70,15 +70,15 @@ export default definePlugin({
             predicate: () => settings.store.chatMentions,
         },
         {
-            find: '.membersGroup,"aria-label"',
+            find: 'tutorialId:"whos-online',
             replacement: [
                 {
                     match: /\i.roleIcon,\.\.\.\i/,
                     replace: "$&,color:$self.roleGroupColor(arguments[0])"
                 },
                 {
-                    match: /children:\[.," \u2014 ",.\]/,
-                    replace: "children:[$self.roleGroupColor(arguments[0])]"
+                    match: /null,\i," — ",\i\]/,
+                    replace: "null,$self.roleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList,
