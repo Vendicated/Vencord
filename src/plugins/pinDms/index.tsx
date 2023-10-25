@@ -81,7 +81,7 @@ export default definePlugin({
                     // array with the count, or an empty array. Due to spreading, only in the former
                     // case will an element be added to the outer array
                     // Thanks for the fix, Strencher!
-                    replace: "$&...$1.props.pinCount,"
+                    replace: "$&...($1.props.pinCount ?? []),"
                 },
                 {
                     // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"

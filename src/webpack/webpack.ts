@@ -62,9 +62,50 @@ export type CallbackFn = (mod: any, id: number) => void;
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol("Vencord")], {}, r => r]);
+    instance.push([[Symbol("Vencord")], {}, r => wreq = r]);
+    if (!wreq) return false;
+
     cache = wreq.c;
     instance.pop();
+
+    for (const id in cache) {
+        const { exports } = cache[id];
+        if (!exports) continue;
+
+        const numberId = Number(id);
+
+        for (const callback of listeners) {
+            try {
+                callback(exports, numberId);
+            } catch (err) {
+                logger.error("Error in webpack listener", err);
+            }
+        }
+
+        for (const [filter, callback] of subscriptions) {
+            try {
+                if (filter(exports)) {
+                    subscriptions.delete(filter);
+                    callback(exports, numberId);
+                } else if (typeof exports === "object") {
+                    if (exports.default && filter(exports.default)) {
+                        subscriptions.delete(filter);
+                        callback(exports.default, numberId);
+                    }
+
+                    for (const nested in exports) if (nested.length <= 3) {
+                        if (exports[nested] && filter(exports[nested])) {
+                            subscriptions.delete(filter);
+                            callback(exports[nested], numberId);
+                        }
+                    }
+                }
+            } catch (err) {
+                logger.error("Error while firing callback for webpack chunk", err);
+            }
+        }
+    }
+    return true;
 }
 
 if (IS_DEV && IS_DISCORD_DESKTOP) {
