@@ -59,8 +59,8 @@ export default definePlugin({
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(\i)\.bannerSrc,/,
-                    replace: "$self.useBannerHook($1),"
+                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},bannerSrc:)/,
+                    replace: "$1.bannerSrc=$self.useBannerHook($1);"
                 },
                 {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
@@ -73,8 +73,8 @@ export default definePlugin({
             predicate: () => settings.store.voiceBackground,
             replacement: [
                 {
-                    match: /(\i)\.style,/,
-                    replace: "$self.voiceBackgroundHook($1),"
+                    match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
+                    replace: "$1.style=$self.voiceBackgroundHook($1);"
                 }
             ]
         }
@@ -90,7 +90,7 @@ export default definePlugin({
     },
 
     voiceBackgroundHook({ className, participantUserId }: any) {
-        if (className.includes("tile-")) {
+        if (className.includes("tile_")) {
             if (data[participantUserId]) {
                 return {
                     backgroundImage: `url(${data[participantUserId]})`,
