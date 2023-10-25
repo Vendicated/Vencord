@@ -458,7 +458,7 @@ export function extract(id: number) {
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-${mod.toString()}
+0,${mod.toString()}
 //# sourceURL=ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);
