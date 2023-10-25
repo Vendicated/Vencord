@@ -66,7 +66,7 @@ export default definePlugin({
                     // filter Discord's privateChannelIds list to remove pins, and pass
                     // pinCount as prop. This needs to be here so that the entire DM list receives
                     // updates on pin/unpin
-                    match: /privateChannelIds:(\i),/,
+                    match: /(?<=\i,{channels:\i,)privateChannelIds:(\i),/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c)),pinCount:$self.usePinCount($1),"
                 },
                 {
@@ -75,28 +75,28 @@ export default definePlugin({
                     // - Section 1: buttons for pages like Friends & Library
                     // - Section 2: our pinned dms
                     // - Section 3: the normal dm list
-                    match: /(?<=renderRow:(\i)\.renderRow,)sections:\[\i,/,
+                    match: /(?<=renderRow:this\.renderRow,)sections:\[\i,/,
                     // For some reason, adding our sections when no private channels are ready yet
                     // makes DMs infinitely load. Thus usePinCount returns either a single element
                     // array with the count, or an empty array. Due to spreading, only in the former
                     // case will an element be added to the outer array
                     // Thanks for the fix, Strencher!
-                    replace: "$&...($1.props.pinCount ?? []),"
+                    replace: "$&...(this.props.pinCount ?? []),"
                 },
                 {
                     // Patch renderSection (renders the header) to set the text to "Pinned DMs" instead of "Direct Messages"
                     // lookbehind is used to lookup parameter name. We could use arguments[0], but
                     // if children ever is wrapped in an iife, it will break
-                    match: /children:(\i\.\i\.Messages.DIRECT_MESSAGES)(?<=renderSection=function\((\i)\).+?)/,
+                    match: /children:(\i\.\i\.Messages.DIRECT_MESSAGES)(?<=renderSection=(\i)=>{.+?)/,
                     replace: "children:$2.section===1?'Pinned DMs':$1"
                 },
                 {
                     // Patch channel lookup inside renderDM
                     // channel=channels[channelIds[row]];
-                    match: /(?<=preRenderedChildren,(\i)=)((\i)\[\i\[\i\]\]);/,
+                    match: /(?<=preRenderedChildren:\i}=this.state,\i=\i\[\i\],\i=)((\i)\[\i\]);/,
                     // section 1 is us, manually get our own channel
                     // section === 1 ? getChannel(channels, row) : channels[channelIds[row]];
-                    replace: "arguments[0]===1?$self.getChannel($3,arguments[1]):$2;"
+                    replace: "arguments[0]===1?$self.getChannel($2,arguments[1]):$1;"
                 },
                 {
                     // Fix getRowHeight's check for whether this is the DMs section
@@ -107,7 +107,7 @@ export default definePlugin({
                 },
                 {
                     // Override scrollToChannel to properly account for pinned channels
-                    match: /(?<=else\{\i\+=)(\i)\*\(.+?(?=;)/,
+                    match: /(?<=scrollTo\(\{to:\i\}\):\(\i\+=)(\d+)\*\(.+?(?=,)/,
                     replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
                 }
             ]
