@@ -232,7 +232,7 @@ export default definePlugin({
                     match: /(MESSAGE_DELETE_BULK:function\(\i\){).{1,150}(\i\.(?:default|Z)?)\.getOrCreate.{1,500}MESSAGE_REVEAL/,
                     replace:
                         "$1 let cache=$2.getOrCreate(arguments[0].channelId);" +
-                        "cache=$self.handleDelete(cache, arguments[0], false); $2.commit(cache);" +
+                        "cache=$self.handleDelete(cache, arguments[0], true); $2.commit(cache);" +
                         "},MESSAGE_REVEAL"
 
                 },
