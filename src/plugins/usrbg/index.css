@@ -7,6 +7,6 @@
     top: 76px;
 }
 
-[style*="background-image"] [class*="background-"] {
+[style*="background-image"] [class*="background_"] {
     background-color: transparent !important;
 }
