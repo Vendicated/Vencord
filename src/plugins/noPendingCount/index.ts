@@ -55,18 +55,18 @@ export default definePlugin({
     // or by searching for "showProgressBadge:"
     patches: [
         {
-            find: ".getPendingCount=",
+            find: "getPendingCount(){",
             predicate: () => settings.store.hideFriendRequestsCount,
             replacement: {
-                match: /(?<=\.getPendingCount=function\(\)\{)/,
+                match: /(?<=getPendingCount\(\)\{)/,
                 replace: "return 0;"
             }
         },
         {
-            find: ".getMessageRequestsCount=",
+            find: "getMessageRequestsCount(){",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(?<=\.getMessageRequestsCount=function\(\)\{)/,
+                match: /(?<=getMessageRequestsCount\(\)\{)/,
                 replace: "return 0;"
             }
         },
