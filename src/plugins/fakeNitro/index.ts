@@ -176,8 +176,8 @@ export default definePlugin({
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
                 {
-                    match: /(?<=(\i)=\i\.intention)/,
-                    replace: (_, intention) => `,fakeNitroIntention=${intention}`
+                    match: /(?<=,intention:(\i).+?;)/,
+                    replace: (_, intention) => `var fakeNitroIntention=${intention};`
                 },
                 {
                     match: /\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i(?=\))/g,
@@ -234,7 +234,7 @@ export default definePlugin({
             find: "STREAM_FPS_OPTION.format",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
-                match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
+                match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
             }
         },
@@ -318,7 +318,7 @@ export default definePlugin({
             find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<=(\i)=\i\.node.+?)/,
+                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<={node:(\i),.+?)/,
                 replace: (m, node) => `${m}fakeNitroNode:${node},`
             }
         },
@@ -326,8 +326,8 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
-                replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
+                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.+?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
+                replace: (_, props, rest, reactNode) => `var fakeNitroNode=${props}.fakeNitroNode;${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},fakeNitroNode?.fake)`
             }
         },
         {
