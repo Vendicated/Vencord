@@ -84,8 +84,8 @@ export default definePlugin({
             find: "showProgressBadge:",
             predicate: () => settings.store.hidePremiumOffersCount,
             replacement: {
-                match: /=\i\.unviewedTrialCount\+\i\.unviewedDiscountCount/,
-                replace: "=0"
+                match: /(\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,200}\i=)\2\+\3/,
+                replace: "$10"
             }
         }
     ],
