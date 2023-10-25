@@ -103,7 +103,7 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
 const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
 
 export async function openUserProfile(id: string) {
-    const user = await UserUtils.fetchUser(id);
+    const user = await UserUtils.getUser(id);
     if (!user) throw new Error("No such user: " + id);
 
     const guildId = SelectedGuildStore.getGuildId();

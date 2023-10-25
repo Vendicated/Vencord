@@ -20,7 +20,7 @@ import { proxyLazy } from "@utils/lazy";
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, find, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -91,9 +91,7 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = {
-    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
-};
+export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
     copy: filters.byCode(".copy("),

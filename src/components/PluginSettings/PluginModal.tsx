@@ -94,7 +94,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id
-                    ? await UserUtils.fetchUser(`${user.id}`)
+                    ? await UserUtils.getUser(`${user.id}`)
                         .catch(() => makeDummyUser({ username: user.name }))
                     : makeDummyUser({ username: user.name });
 
