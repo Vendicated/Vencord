@@ -68,7 +68,7 @@ export async function syncAndRunChecks() {
             for (const id of oldFriends.friends) {
                 if (friends.friends.includes(id)) continue;
 
-                const user = await UserUtils.fetchUser(id).catch(() => void 0);
+                const user = await UserUtils.getUser(id).catch(() => void 0);
                 if (user)
                     notify(
                         `You are no longer friends with ${getUniqueUsername(user)}.`,
@@ -85,7 +85,7 @@ export async function syncAndRunChecks() {
                     [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.OUTGOING_REQUEST].includes(RelationshipStore.getRelationshipType(id))
                 ) continue;
 
-                const user = await UserUtils.fetchUser(id).catch(() => void 0);
+                const user = await UserUtils.getUser(id).catch(() => void 0);
                 if (user)
                     notify(
                         `Friend request from ${getUniqueUsername(user)} has been revoked.`,

@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, SelectedChannelStore, useMemo, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
 interface VoiceState {
     userId: string;
@@ -70,11 +70,12 @@ function clean(str: string) {
         .trim();
 }
 
-function formatText(str: string, user: string, channel: string, displayName: string) {
+function formatText(str: string, user: string, channel: string, displayName: string, nickname: string) {
     return str
         .replaceAll("{{USER}}", clean(user) || (user ? "Someone" : ""))
         .replaceAll("{{CHANNEL}}", clean(channel) || "channel")
-        .replaceAll("{{DISPLAY_NAME}}", clean(displayName) || (displayName ? "Someone" : ""));
+        .replaceAll("{{DISPLAY_NAME}}", clean(displayName) || (displayName ? "Someone" : ""))
+        .replaceAll("{{NICKNAME}}", clean(nickname) || (nickname ? "Someone" : ""));
 }
 
 /*
@@ -145,8 +146,9 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 function playSample(tempSettings: any, type: string) {
     const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
     const currentUser = UserStore.getCurrentUser();
+    const myGuildId = SelectedGuildStore.getGuildId();
 
-    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username), settings);
+    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
 }
 
 export default definePlugin({
@@ -156,6 +158,7 @@ export default definePlugin({
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+            const myGuildId = SelectedGuildStore.getGuildId();
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
 
@@ -175,9 +178,10 @@ export default definePlugin({
                 const template = Settings.plugins.VcNarrator[type + "Message"];
                 const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
+                const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
                 const channel = ChannelStore.getChannel(id).name;
 
-                speak(formatText(template, user, channel, displayName));
+                speak(formatText(template, user, channel, displayName, nickname));
 
                 // updateStatuses(type, state, isMe);
             }
@@ -189,7 +193,7 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, ""));
+            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         },
 
         AUDIO_TOGGLE_SELF_DEAF() {
@@ -198,7 +202,7 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, ""));
+            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         }
     },
 
@@ -315,8 +319,8 @@ export default definePlugin({
                     You can customise the spoken messages below. You can disable specific messages by setting them to nothing
                 </Forms.FormText>
                 <Forms.FormText>
-                    The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
-                    will be replaced with the user's name (nothing if it's yourself), the user's display name and the channel's name respectively
+                    The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code>, <code>{"{{NICKNAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
+                    will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server and the channel's name respectively
                 </Forms.FormText>
                 {hasEnglishVoices && (
                     <>

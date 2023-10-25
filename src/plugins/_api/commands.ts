@@ -44,8 +44,8 @@ export default definePlugin({
             find: "Unexpected value for option",
             replacement: {
                 // return [2, cmd.execute(args, ctx)]
-                match: /,(.{1,2})\.execute\((.{1,2}),(.{1,2})\)]/,
-                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})]`
+                match: /,(\i)\.execute\((\i),(\i)\)/,
+                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})`
             }
         },
         // Show plugin name instead of "Built-In"
