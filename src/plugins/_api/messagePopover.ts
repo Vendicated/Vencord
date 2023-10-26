@@ -37,7 +37,7 @@ export default definePlugin({
             }
         },
         {
-            find: "BURST_REACTION_BUTTON_SPARKLE);",
+            find: "BURST_REACTION_BUTTON_SPARKLE),",
             replacement: {
                 match: /\i&&\i\?.{0,300}\?(\i)\(\{key:"copy-link"/,
                 replace: (m, makeElement) => {
