@@ -61,7 +61,13 @@ const quotes = [
     "Wdn`khc'|f*eghl{%"
 ];
 
+
 const settings = definePluginSettings({
+    replaceEvents: {
+        description: "Replace Event Quotes too",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     enablePluginPresetQuotes: {
         description: "Enable the quotes preset by this plugin",
         type: OptionType.BOOLEAN,
@@ -90,6 +96,7 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
 
     settings,
+
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
@@ -102,7 +109,8 @@ export default definePlugin({
             find: "getLoadingTips:",
             replacement: {
                 match: /(\i>=\i\?)(\[.+?\])(:)/,
-                replace: "$1 $self.quotes($2) $3"
+                replace: "$1 $self.quotes($2) $3",
+                predicate: () => settings.store.replaceEvents
             }
         }
     ],
