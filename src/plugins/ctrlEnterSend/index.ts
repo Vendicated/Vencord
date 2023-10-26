@@ -40,10 +40,10 @@ export default definePlugin({
     }),
     patches: [
         {
-            find: "EXPRESSION_SUGGESTIONS_STICKER_DISABLE,",
+            find: "KeyboardKeys.ENTER){if",
             replacement: {
-                match: /if\(!(\i).shiftKey&&!(\i.hasOpenCodeBlock\(\))&&\(!(\i.props).disableEnterToSubmit\|\|\i.ctrlKey\)\)\{.{0,150}?\}/,
-                replace: "$self.handleEnter($1, $2, $3)"
+                match: /if\(!(\i).shiftKey&&!(\i.hasOpenCodeBlock\(\))&&\(!(\i.props).disableEnterToSubmit\|\|\i.ctrlKey\)\).{0,150}?\}/,
+                replace: "$self.handleEnter($1, $2, $3)}"
             }
         }
     ],
