@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
 
 import { Sticker } from "./types";
 
 const MessageUpload = findByPropsLazy("instantBatchUpload");
-const UploadObject = findLazy(m => m.prototype && m.prototype.upload && m.prototype.getSize);
+const CloudUploadParent = findByPropsLazy("CloudUpload");
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
-const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
+const promptToUploadParent = findByPropsLazy("promptToUpload");
 
 async function resizeImage(url: string) {
     const originalImage = new Image();
@@ -124,7 +124,7 @@ export async function sendSticker({
         const file = new File([processedImage], filename!, { type: mimeType });
 
         if (ctrlKey) {
-            promptToUpload([file], ChannelStore.getChannel(channelId), 0);
+            promptToUploadParent.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
             return;
         }
 
@@ -137,7 +137,7 @@ export async function sendSticker({
                 content: messageContent
             },
             uploads: [
-                new UploadObject({
+                new CloudUploadParent.CloudUpload({
                     file,
                     platform: 1
                 }, channelId, false, 0)
