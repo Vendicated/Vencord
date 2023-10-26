@@ -19,17 +19,17 @@
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
-import { find, findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { find, findByCode, findByPropsLazy } from "@webpack";
+import { Avatar, ChannelStore, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 
 const { moveDraggedTabs } = ChannelTabsUtils;
 
-const getDotWidth = findByCodeLazy("<10?16:");
-const dotStyles = findByPropsLazy("numberBadge");
-const useChannelEmoji: (channel: Channel) => { emoji, color; } = findByCodeLazy('"user_channel_emoji_overrides"),');
+const BadgeUtils = findByPropsLazy("getBadgeWidthForValue");
+const dotStyles = findByPropsLazy("numberBadge", "textBadge");
+const ChannelEmojiHooks = findByPropsLazy("useChannelEmojiAndColor");
 
 const Emoji = LazyComponent(() => findByCode(".autoplay,allowAnimatedEmoji:"));
 const FriendsIcon = () => <svg
@@ -46,7 +46,10 @@ const QuestionIcon = () => <svg
 >
     <path fill="var(--text-muted)" d="M12 2C6.486 2 2 6.487 2 12C2 17.515 6.486 22 12 22C17.514 22 22 17.515 22 12C22 6.487 17.514 2 12 2ZM12 18.25C11.31 18.25 10.75 17.691 10.75 17C10.75 16.31 11.31 15.75 12 15.75C12.69 15.75 13.25 16.31 13.25 17C13.25 17.691 12.69 18.25 12 18.25ZM13 13.875V15H11V12H12C13.104 12 14 11.103 14 10C14 8.896 13.104 8 12 8C10.896 8 10 8.896 10 10H8C8 7.795 9.795 6 12 6C14.205 6 16 7.795 16 10C16 11.861 14.723 13.429 13 13.875Z" />
 </svg>;
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes(".dots")));
+const ThreeDots = LazyComponent(() => {
+    const res = find(m => m.Dots && !m.Menu);
+    return res?.Dots;
+});
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
@@ -91,7 +94,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
             className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
                 backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
-                width: getDotWidth(mentionCount || unreadCount)
+                width: BadgeUtils.getBadgeWidthForValue(mentionCount || unreadCount)
             }}
         >
             {mentionCount || unreadCount}
@@ -99,7 +102,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
 };
 
 function ChannelEmoji({ channel }: { channel: Channel; }) {
-    const { emoji, color } = useChannelEmoji(channel);
+    const { emoji, color } = ChannelEmojiHooks.useChannelEmojiAndColor(channel);
     if (!emoji?.name) return null;
 
     return <div className={cl("emoji-container")} style={{ backgroundColor: color }}>
@@ -214,6 +217,8 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     const { channelId, guildId, id, index } = props;
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
+
+    const { useDrag, useDrop } = ReactDnd;
 
     const ref = useRef<HTMLDivElement>(null);
     const [, drag] = useDrag(() => ({

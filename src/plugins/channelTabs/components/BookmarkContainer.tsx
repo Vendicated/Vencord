@@ -18,7 +18,7 @@
 
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
-import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -166,6 +166,7 @@ function Bookmark(props: BookmarkProps) {
     const bookmark = bookmarks[index];
     const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
 
+    const { useDrag, useDrop } = ReactDnd;
     const ref = useRef<HTMLDivElement>(null);
 
     const [, drag] = useDrag(() => ({
