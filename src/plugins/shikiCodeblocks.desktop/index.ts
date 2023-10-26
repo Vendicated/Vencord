@@ -37,12 +37,12 @@ export default definePlugin({
     authors: [Devs.Vap],
     patches: [
         {
-            find: "codeBlock:{react:function",
+            find: "codeBlock:{react(",
             replacement: {
-                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
-                replace: "$&return $self.renderHighlighter($1,$2,$3);",
-            },
-        },
+                match: /codeBlock:\{react\((\i),(\i),(\i)\)\{/,
+                replace: "$&return $self.renderHighlighter($1,$2,$3);"
+            }
+        }
     ],
     start: async () => {
         if (settings.store.useDevIcon !== DeviconSetting.Disabled)

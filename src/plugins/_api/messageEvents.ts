@@ -27,10 +27,8 @@ export default definePlugin({
         {
             find: '"MessageActionCreators"',
             replacement: {
-                // editMessage: function (...) {
-                match: /\beditMessage:(function\(.+?\))\{/,
-                // editMessage: async function (...) { await handlePreEdit(...); ...
-                replace: "editMessage:async $1{await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
+                match: /async editMessage\(.+?\)\{/,
+                replace: "$&await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
             }
         },
         {
@@ -38,7 +36,7 @@ export default definePlugin({
             replacement: {
                 // props.chatInputType...then((function(isMessageValid)... var parsedMessage = b.c.parse(channel,... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply);
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)
-                match: /(props\.chatInputType.+?\.then\(\()(function.+?var (\i)=\i\.\i\.parse\((\i),.+?var (\i)=\i\.\i\.getSendMessageOptionsForReply\(\i\);)(?<=\)\(({.+?})\)\.then.+?)/,
+                match: /(type:this\.props\.chatInputType.+?\.then\()(\i=>\{.+?let (\i)=\i\.\i\.parse\((\i),.+?let (\i)=\i\.\i\.getSendMessageOptionsForReply\(\i\);)(?<=\)\(({.+?})\)\.then.+?)/,
                 // props.chatInputType...then((async function(isMessageValid)... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply); if(await Vencord.api...) return { shoudClear:true, shouldRefocus:true };
                 replace: (_, rest1, rest2, parsedMessage, channel, replyOptions, extra) => "" +
                     `${rest1}async ${rest2}` +
@@ -49,10 +47,10 @@ export default definePlugin({
         {
             find: '("interactionUsernameProfile',
             replacement: {
-                match: /var \i=(\i)\.id,\i=(\i)\.id;return \i\.useCallback\(\(?function\((\i)\){/,
+                match: /let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,
                 replace: (m, message, channel, event) =>
                     // the message param is shadowed by the event param, so need to alias them
-                    `var _msg=${message},_chan=${channel};${m}Vencord.Api.MessageEvents._handleClick(_msg, _chan, ${event});`
+                    `const vcMsg=${message},vcChan=${channel};${m}Vencord.Api.MessageEvents._handleClick(vcMsg, vcChan, ${event});`
             }
         }
     ]

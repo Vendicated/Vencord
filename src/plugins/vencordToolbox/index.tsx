@@ -24,11 +24,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByCode } from "@webpack";
+import { filters, find } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
-const HeaderBarIcon = LazyComponent(() => findByCode(".HEADER_BAR_BADGE,", ".tooltip"));
+const HeaderBarIcon = LazyComponent(() => {
+    const filter = filters.byCode(".HEADER_BAR_BADGE");
+    return find(m => m.Icon && filter(m.Icon)).Icon;
+});
 
 function VencordPopout(onClose: () => void) {
     const pluginEntries = [] as ReactNode[];
@@ -137,7 +140,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".mobileToolbar",
+            find: "toolbar:function",
             replacement: {
                 match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
                 replace: "$self.ToolboxFragmentWrapper,"

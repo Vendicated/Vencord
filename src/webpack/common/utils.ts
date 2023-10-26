@@ -20,16 +20,20 @@ import { proxyLazy } from "@utils/lazy";
 import type { User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, find, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+export let ComponentDispatch;
+waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
+export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
@@ -89,8 +93,10 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = {
-    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
+export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+
+export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
+    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {

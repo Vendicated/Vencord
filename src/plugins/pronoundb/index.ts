@@ -57,15 +57,15 @@ export default definePlugin({
             find: ".userTagNoNickname",
             replacement: [
                 {
-                    match: /,(\i)=(\i)\.pronouns/,
-                    replace: ",[$1,vcPronounSource]=$self.useProfilePronouns($2.user.id)"
+                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i;/,
+                    replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
                 },
                 PRONOUN_TOOLTIP_PATCH
             ]
         },
         // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
         {
-            find: ".USER_PROFILE_ACTIVITY",
+            find: ".nameTagSmall)",
             replacement: [
                 {
                     match: /\.getName\(\i\);(?<=displayProfile.{0,200})/,
