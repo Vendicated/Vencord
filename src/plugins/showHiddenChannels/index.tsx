@@ -416,7 +416,7 @@ export default definePlugin({
                 {
                     // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
                     match: /(?<=getChannels\(\i)(\){.+?)return (.+?)}/,
-                    replace: (_, rest, channels) => `,shouldIncludeHidden=false${rest}return $self.resolveGuildChannels(${channels},shouldIncludeHidden);}`
+                    replace: (_, rest, channels) => `,shouldIncludeHidden${rest}return $self.resolveGuildChannels(${channels},shouldIncludeHidden??false);}`
                 }
             ]
         },
