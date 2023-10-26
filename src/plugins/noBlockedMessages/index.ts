@@ -29,11 +29,11 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu],
     patches: [
         {
-            find: 'safety_prompt:"DMSpamExperiment",response:"show_redacted_messages"',
+            find: "Messages.BLOCKED_MESSAGES_HIDE",
             replacement: [
                 {
-                    match: /\.collapsedReason;return/,
-                    replace: ".collapsedReason;return null;return;"
+                    match: /let\{[^}]*collapsedReason[^}]*\}/,
+                    replace: "return null;$&"
                 }
             ]
         },

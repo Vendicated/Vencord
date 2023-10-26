@@ -26,7 +26,12 @@ import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, 
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = LazyComponent(() => find(m => m.type?.render?.toString()?.includes("().dots")));
+const ThreeDots = LazyComponent(() => {
+    // This doesn't really need to explicitly find Dots' own module, but it's fine
+    const res = find(m => m.Dots && !m.Menu);
+
+    return res?.Dots;
+});
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
@@ -78,7 +83,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: typingUsersArray.length - 2 })
+                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
                 : Formatters.Messages.SEVERAL_USERS_TYPING;
             break;
         }
@@ -126,8 +131,8 @@ export default definePlugin({
         {
             find: ".UNREAD_HIGHLIGHT",
             replacement: {
-                match: /\(\).children.+?:null(?<=(\i)=\i\.channel,.+?)/,
-                replace: (m, channel) => `${m},$self.TypingIndicator(${channel}.id)`
+                match: /channel:(\i).{0,100}?channelEmoji,.{0,250}?\.children.{0,50}?:null/,
+                replace: "$&,$self.TypingIndicator($1.id)"
             }
         }
     ],
