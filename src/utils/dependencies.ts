@@ -28,6 +28,27 @@ export const importApngJs = makeLazy(() => {
     return require("./apng-canvas").APNG as { parseURL(url: string): Promise<ApngFrameData>; };
 });
 
+/**
+ * Get the GifReader from omggif.js
+ * Used in ImageCaption
+ */
+export const getGifReader = makeLazy(async () => {
+    return await fetch("https://unpkg.com/omggif@1.0.10/omggif.js")
+        .then(res => res.text())
+        .then(code => code += ";\nreturn GifReader;")
+        .then(data => Function(data)());
+});
+
+/**
+ * Get the GifEncoder from gifenc.js
+ * Used in ImageCaption
+ */
+export const getGifEncoder = makeLazy(async () => {
+    // @ts-expect-error
+    return import("https://unpkg.com/gifenc@1.0.3/dist/gifenc.esm.js");
+});
+
+
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
 export const enum ApngDisposeOp {
     /**
@@ -84,3 +105,4 @@ export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wa
 
 // @ts-expect-error
 export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+
