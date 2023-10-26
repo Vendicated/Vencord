@@ -74,22 +74,22 @@ function SilentTypingToggle(chatBoxProps: {
 
 export default definePlugin({
     name: "SilentTyping",
-    authors: [Devs.Ven, Devs.dzshn],
+    authors: [Devs.Ven, Devs.Rini],
     description: "Hide that you are typing",
     patches: [
         {
-            find: "startTyping:",
+            find: '.dispatch({type:"TYPING_START_LOCAL"',
             replacement: {
-                match: /startTyping:.+?,stop/,
+                match: /startTyping\(\i\){.+?},stop/,
                 replace: "startTyping:$self.startTyping,stop"
             }
         },
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             predicate: () => settings.store.showIcon,
             replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],

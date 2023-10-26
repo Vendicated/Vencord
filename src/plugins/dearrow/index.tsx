@@ -147,8 +147,8 @@ export default definePlugin({
         replacement: [
             // patch componentDidMount to replace embed thumbnail and title
             {
-                match: /(\i).render=function.{0,50}\i\.embed/,
-                replace: "$1.componentDidMount=$self.embedDidMount,$&"
+                match: /render\(\)\{let\{embed:/,
+                replace: "componentDidMount=$self.embedDidMount;$&"
             },
 
             // add dearrow button
