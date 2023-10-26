@@ -40,4 +40,5 @@ export const enum IpcEvents {
 
     OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
     VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
+    XSOVERLAY_SEND = "VencordXSOSend"
 }

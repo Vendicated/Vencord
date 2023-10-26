@@ -17,6 +17,7 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
+import { Socket, createSocket } from "dgram";
 import { app, ipcMain } from "electron";
 import { readFile } from "fs/promises";
 import { request } from "https";
@@ -86,4 +87,15 @@ ipcMain.handle(IpcEvents.VOICE_MESSAGES_READ_RECORDING, async (_, filePath: stri
     }
 });
 
+// #endregion
+
+// #region XSOverlay
+let xsoSocket: Socket;
+
+ipcMain.handle(IpcEvents.XSOVERLAY_SEND, (_, data) => {
+    data.icon = Buffer.from(data.icon).toString("base64");
+    data = JSON.stringify(data);
+    xsoSocket ??= createSocket("udp4");
+    xsoSocket.send(data, 42069, "127.0.0.1");
+});
 // #endregion

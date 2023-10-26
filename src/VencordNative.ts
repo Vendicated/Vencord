@@ -67,6 +67,9 @@ export default {
         },
         VoiceMessages: {
             readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
+        },
+        XSOverlay: {
+            send: (data: any) => invoke<void>(IpcEvents.XSOVERLAY_SEND, data),
         }
     }
 };
