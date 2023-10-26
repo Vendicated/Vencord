@@ -20,12 +20,12 @@ export default definePlugin({
     patches: [
         // Patch to enable usage of packs for servers which the user has joined
         // This does lead to a messy UI
-        // - The server is listed twice
-        // - The pack listing has the same emojis mentioned twice (one is usable and other gives the nitro screen (if non-nitro))
+        // 1. The server is listed twice
+        // 2. The pack listing has the same emojis mentioned twice (one is usable and other gives the nitro screen (if non-nitro))
         {
             find: "InventoryStore",
             replacement: {
-                match: /(?<=_isADuplicateGuildPack=function\(\i\)\{)/,
+                match: /(?<=_isADuplicateGuildPack\(\i\)\{)/,
                 replace: "return false;"
             }
         },
