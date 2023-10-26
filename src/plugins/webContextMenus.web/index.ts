@@ -147,7 +147,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'navId:"textarea-context"',
+            find: ".SLASH_COMMAND_SUGGESTIONS_TOGGLED,{",
             predicate: () => settings.store.addBack,
             replacement: [
                 {
