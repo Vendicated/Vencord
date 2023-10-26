@@ -101,7 +101,7 @@ export default function CreateDecorationModal(props) {
                 </Link> before creating your decoration.
                 {typeof GuildStore.getGuild(GUILD_ID) === "undefined" && <>
                     <br />You can recieve updates on your decoration's review by joining <Link
-                        href={`https://discord.gg/${INVITE_KEY}}`}
+                        href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
                             e.preventDefault();
                             const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
