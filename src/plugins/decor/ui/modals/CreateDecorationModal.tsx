@@ -17,7 +17,7 @@ import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDeco
 import cl from "../../lib/utils/cl";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import requireCreateStickerModal from "../../lib/utils/requireCreateStickerModal";
-import { AvatarDecorationPreview } from "../components";
+import { AvatarDecorationModalPreview } from "../components";
 
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
@@ -87,7 +87,7 @@ export default function CreateDecorationModal(props) {
                     </Forms.FormSection>
                 </div>
                 <div>
-                    <AvatarDecorationPreview
+                    <AvatarDecorationModalPreview
                         avatarDecorationOverride={decoration}
                         user={UserStore.getCurrentUser()}
                     />

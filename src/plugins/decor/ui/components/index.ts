@@ -8,7 +8,8 @@ import { findByCodeLazy } from "@webpack";
 
 export let DecorationGridItem;
 export const setDecorationGridItem = v => DecorationGridItem = v;
-export const AvatarDecorationPreview = findByCodeLazy("AvatarDecorationModalPreview");
+
+export const AvatarDecorationModalPreview = findByCodeLazy("AvatarDecorationModalPreview");
 
 export let DecorationGridDecoration;
 export const setDecorationGridDecoration = v => DecorationGridDecoration = v;

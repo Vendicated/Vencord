@@ -15,7 +15,7 @@ import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDeco
 import cl from "../../lib/utils/cl";
 import discordifyDecoration from "../../lib/utils/discordifyDecoration";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
-import { AvatarDecorationPreview } from "../components";
+import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
 import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
@@ -202,7 +202,7 @@ export default function ChangeDecorationModal(props: any) {
                 sections={masonryListData.map(section => section.items.length)}
             />
             <div className={cl("change-decoration-modal-preview")}>
-                <AvatarDecorationPreview
+                <AvatarDecorationModalPreview
                     avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
                     user={UserStore.getCurrentUser()}
                 />
