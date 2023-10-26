@@ -17,14 +17,14 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserUtils } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"));
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
@@ -44,7 +44,7 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    return PreloadedUserSettings.getCurrentValue()?.appearance?.theme;
+    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
 }
 
 export function insertTextIntoChatInputBox(text: string) {
@@ -100,14 +100,12 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
     ));
 }
 
-const openProfile = findByCodeLazy("friendToken", "USER_PROFILE_MODAL_OPEN");
-
 export async function openUserProfile(id: string) {
     const user = await UserUtils.getUser(id);
     if (!user) throw new Error("No such user: " + id);
 
     const guildId = SelectedGuildStore.getGuildId();
-    openProfile({
+    UserProfileActions.openUserProfileModal({
         userId: id,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),

@@ -48,8 +48,8 @@ export default definePlugin({
         {
             find: ".Messages.NOTE}",
             replacement: {
-                match: /(\i)\.hideNote\?null/,
-                replace: "$1.hideNote?$self.patchPadding($1)"
+                match: /(?<=return \i\?)null(?=:\(0,\i\.jsxs)/,
+                replace: "$self.patchPadding(arguments[0])"
             }
         }
     ],
