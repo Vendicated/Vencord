@@ -24,35 +24,34 @@ import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
 const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
-const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
-const PreloadedUserSettingsProtoHandler = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
-const ReaderFactory = findByPropsLazy("readerFactory");
 const StickerStore = findStoreLazy("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
     getStickerById(id: string): Sticker | undefined;
 };
 
-function searchProtoClass(localName: string, parentProtoClass: any) {
-    if (!parentProtoClass) return;
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
 
-    const field = parentProtoClass.fields.find(field => field.localName === localName);
+function searchProtoClassField(localName: string, protoClass: any) {
+    const field = protoClass?.fields?.find((field: any) => field.localName === localName);
     if (!field) return;
 
-    const getter: any = Object.values(field).find(value => typeof value === "function");
-    return getter?.();
+    const fieldGetter = Object.values(field).find(value => typeof value === "function") as any;
+    return fieldGetter?.();
 }
 
-const AppearanceSettingsProto = proxyLazy(() => searchProtoClass("appearance", PreloadedUserSettingsProtoHandler.ProtoClass));
-const ClientThemeSettingsProto = proxyLazy(() => searchProtoClass("clientThemeSettings", AppearanceSettingsProto));
+const PreloadedUserSettingsActionCreators = proxyLazy(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
+const AppearanceSettingsActionCreators = proxyLazy(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
+const ClientThemeSettingsActionsCreators = proxyLazy(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -176,31 +175,37 @@ export default definePlugin({
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
                 {
-                    match: /(?<=(\i)=\i\.intention)/,
-                    replace: (_, intention) => `,fakeNitroIntention=${intention}`
+                    // Create a variable for the intention of listing the emoji
+                    match: /(?<=,intention:(\i).+?;)/,
+                    replace: (_, intention) => `let fakeNitroIntention=${intention};`
                 },
                 {
+                    // Send the intention of listing the emoji to the nitro permission check functions
                     match: /\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i(?=\))/g,
                     replace: '$&,typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
                 },
                 {
+                    // Disallow the emoji if the intention doesn't allow it
                     match: /(&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
                     replace: (_, rest, canUseExternal) => `${rest}(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
                 },
                 {
+                    // Make the emoji always available if the intention allows it
                     match: /if\(!\i\.available/,
                     replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
                 }
             ]
         },
+        // Allow emojis and animated emojis to be sent everywhere
         {
             find: "canUseAnimatedEmojis:function",
             predicate: () => settings.store.enableEmojiBypass,
             replacement: {
-                match: /((?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))/g,
-                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+                match: /((?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))(?=})/g,
+                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention!=null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
             }
         },
+        // Allow stickers to be sent everywhere
         {
             find: "canUseStickersEverywhere:function",
             predicate: () => settings.store.enableStickerBypass,
@@ -209,6 +214,7 @@ export default definePlugin({
                 replace: "$&return true;"
             },
         },
+        // Make stickers always available
         {
             find: "\"SENDABLE\"",
             predicate: () => settings.store.enableStickerBypass,
@@ -217,6 +223,7 @@ export default definePlugin({
                 replace: "true?"
             }
         },
+        // Allow streaming with high quality
         {
             find: "canUseHighVideoUploadQuality:function",
             predicate: () => settings.store.enableStreamQualityBypass,
@@ -230,14 +237,16 @@ export default definePlugin({
                 };
             })
         },
+        // Remove boost requirements to stream with high quality
         {
             find: "STREAM_FPS_OPTION.format",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
-                match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
+                match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
             }
         },
+        // Allow client themes to be changeable
         {
             find: "canUseClientThemes:function",
             replacement: {
@@ -249,19 +258,22 @@ export default definePlugin({
             find: '.displayName="UserSettingsProtoStore"',
             replacement: [
                 {
+                    // Overwrite incoming connection settings proto with our local settings
                     match: /CONNECTION_OPEN:function\((\i)\){/,
                     replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
-                    match: /=(\i)\.local;/,
-                    replace: (m, props) => `${m}${props}.local||$self.handleProtoChange(${props}.settings.proto);`
+                    // Overwrite non local proto changes with our local settings
+                    match: /let{settings:/,
+                    replace: "arguments[0].local||$self.handleProtoChange(arguments[0].settings.proto);$&"
                 }
             ]
         },
+        // Call our function to handle changing the gradient theme when selecting a new one
         {
-            find: "updateTheme:function",
+            find: ",updateTheme(",
             replacement: {
-                match: /(function \i\(\i\){var (\i)=\i\.backgroundGradientPresetId.+?)(\i\.\i\.updateAsync.+?theme=(.+?);.+?\),\i\))/,
+                match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
             }
         },
@@ -269,11 +281,13 @@ export default definePlugin({
             find: '["strong","em","u","text","inlineCode","s","spoiler"]',
             replacement: [
                 {
+                    // Call our function to decide whether the emoji link should be kept or not
                     predicate: () => settings.store.transformEmojis,
                     match: /1!==(\i)\.length\|\|1!==\i\.length/,
                     replace: (m, content) => `${m}||$self.shouldKeepEmojiLink(${content}[0])`
                 },
                 {
+                    // Patch the rendered message content to add fake nitro emojis or remove sticker links
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
                     match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
                     replace: (_, content) => `${content}=$self.patchFakeNitroEmojisOrRemoveStickersLinks(${content},arguments[2]?.formatInline);`
@@ -281,36 +295,41 @@ export default definePlugin({
             ]
         },
         {
-            find: "renderEmbeds=function",
+            find: "renderEmbeds(",
             replacement: [
                 {
+                    // Call our function to decide whether the embed should be ignored or not
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(renderEmbeds=function\((\i)\){)(.+?embeds\.map\(\(function\((\i)\){)/,
+                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\((\i)=>{)/,
                     replace: (_, rest1, message, rest2, embed) => `${rest1}const fakeNitroMessage=${message};${rest2}if($self.shouldIgnoreEmbed(${embed},fakeNitroMessage))return null;`
                 },
                 {
+                    // Patch the stickers array to add fake nitro stickers
                     predicate: () => settings.store.transformStickers,
-                    match: /renderStickersAccessories=function\((\i)\){var (\i)=\(0,\i\.\i\)\(\i\),/,
-                    replace: (m, message, stickers) => `${m}${stickers}=$self.patchFakeNitroStickers(${stickers},${message}),`
+                    match: /(?<=renderStickersAccessories\((\i)\){let (\i)=\(0,\i\.\i\)\(\i\).+?;)/,
+                    replace: (_, message, stickers) => `${stickers}=$self.patchFakeNitroStickers(${stickers},${message});`
                 },
                 {
+                    // Filter attachments to remove fake nitro stickers or emojis
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
+                    match: /renderAttachments\(\i\){let{attachments:(\i).+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
         },
         {
-            find: ".STICKER_IN_MESSAGE_HOVER,",
+            find: ".Messages.STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION.format",
             predicate: () => settings.store.transformStickers,
             replacement: [
                 {
-                    match: /var (\i)=\i\.renderableSticker,.{0,50}closePopout.+?channel:\i,closePopout:\i,/,
-                    replace: (m, renderableSticker) => `${m}renderableSticker:${renderableSticker},`
+                    // Export the renderable sticker to be used in the fake nitro sticker notice
+                    match: /let{renderableSticker:(\i).{0,250}isGuildSticker.+?channel:\i,/,
+                    replace: (m, renderableSticker) => `${m}fakeNitroRenderableSticker:${renderableSticker},`
                 },
                 {
-                    match: /(emojiSection.{0,50}description:)(\i)(?<=(\i)\.sticker,.+?)(?=,)/,
-                    replace: (_, rest, reactNode, props) => `${rest}$self.addFakeNotice(${FakeNoticeType.Sticker},${reactNode},!!${props}.renderableSticker?.fake)`
+                    // Add the fake nitro sticker notice
+                    match: /(let \i,{sticker:\i,channel:\i,closePopout:\i.+?}=(\i).+?;)(.+?description:)(\i)(?=,sticker:\i)/,
+                    replace: (_, rest, props, rest2, reactNode) => `${rest}let{fakeNitroRenderableSticker}=${props};${rest2}$self.addFakeNotice(${FakeNoticeType.Sticker},${reactNode},!!fakeNitroRenderableSticker?.fake)`
                 }
             ]
         },
@@ -318,7 +337,8 @@ export default definePlugin({
             find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<=(\i)=\i\.node.+?)/,
+                // Export the emoji node to be used in the fake nitro emoji notice
+                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<={node:(\i),.+?)/,
                 replace: (m, node) => `${m}fakeNitroNode:${node},`
             }
         },
@@ -326,10 +346,12 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
-                replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
+                // Add the fake nitro emoji notice
+                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.+?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
+                replace: (_, props, rest, reactNode) => `let{fakeNitroNode}=${props};${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!fakeNitroNode?.fake)`
             }
         },
+        // Allow using custom app icons
         {
             find: "canUsePremiumAppIcons:function",
             replacement: {
@@ -337,6 +359,7 @@ export default definePlugin({
                 replace: "$&return true;"
             }
         },
+        // Separate patch for allowing using custom app icons
         {
             find: "location:\"AppIconHome\"",
             replacement: {
@@ -359,26 +382,30 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        if (proto == null || typeof proto === "string" || !UserSettingsProtoStore || (!proto.appearance && !AppearanceSettingsProto)) return;
+        if (proto == null || typeof proto === "string" || !UserSettingsProtoStore || !PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators) return;
 
         const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
         if (premiumType !== 2) {
-            proto.appearance ??= AppearanceSettingsProto.create();
+            proto.appearance ??= AppearanceSettingsActionCreators.create();
 
             if (UserSettingsProtoStore.settings.appearance?.theme != null) {
-                proto.appearance.theme = UserSettingsProtoStore.settings.appearance.theme;
+                const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
+                    theme: UserSettingsProtoStore.settings.appearance.theme
+                });
+
+                proto.appearance.theme = appearanceSettingsDummy.theme;
             }
 
-            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null && ClientThemeSettingsProto) {
-                const clientThemeSettingsDummyProto = ClientThemeSettingsProto.create({
+            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
+                const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
                     backgroundGradientPresetId: {
                         value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
                     }
                 });
 
-                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummyProto;
-                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.backgroundGradientPresetId;
+                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
+                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
             }
         }
     },
@@ -387,26 +414,26 @@ export default definePlugin({
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
-        if (!AppearanceSettingsProto || !ClientThemeSettingsProto || !ReaderFactory) return;
+        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !ProtoUtils) return;
 
-        const currentAppearanceProto = PreloadedUserSettingsProtoHandler.getCurrentValue().appearance;
+        const currentAppearanceSettings = PreloadedUserSettingsActionCreators.getCurrentValue().appearance;
 
-        const newAppearanceProto = currentAppearanceProto != null
-            ? AppearanceSettingsProto.fromBinary(AppearanceSettingsProto.toBinary(currentAppearanceProto), ReaderFactory)
-            : AppearanceSettingsProto.create();
+        const newAppearanceProto = currentAppearanceSettings != null
+            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), ProtoUtils.BINARY_READ_OPTIONS)
+            : AppearanceSettingsActionCreators.create();
 
         newAppearanceProto.theme = theme;
 
-        const clientThemeSettingsDummyProto = ClientThemeSettingsProto.create({
+        const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
             backgroundGradientPresetId: {
                 value: backgroundGradientPresetId
             }
         });
 
-        newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummyProto;
-        newAppearanceProto.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummyProto.backgroundGradientPresetId;
+        newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummy;
+        newAppearanceProto.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
 
-        const proto = PreloadedUserSettingsProtoHandler.ProtoClass.create();
+        const proto = PreloadedUserSettingsActionCreators.ProtoClass.create();
         proto.appearance = newAppearanceProto;
 
         FluxDispatcher.dispatch({

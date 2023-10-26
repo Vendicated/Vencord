@@ -90,30 +90,31 @@ export default definePlugin({
             find: '.displayName="LocalActivityStore"',
             replacement: [
                 {
-                    match: /LISTENING.+?\)\);(?<=(\i)\.push.+?)/,
-                    replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
+                    match: /LISTENING.+?}\),(?<=(\i)\.push.+?)/,
+                    replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored),`
                 }
             ]
         },
         {
             find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
             replacement: {
-                match: /\(\)\.removeGame.+?null(?<=(\i)\?\i=\i\.\i\.Messages\.SETTINGS_GAMES_NOW_PLAYING_STATE.+?=(\i)\.overlay.+?)/,
-                replace: (m, nowPlaying, props) => `${m},$self.renderToggleGameActivityButton(${props},${nowPlaying})`
+                match: /\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
+                replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
         {
-            find: ".Messages.EMBEDDED_ACTIVITIES_DEVELOPER_SHELF_SUBTITLE",
-            replacement: [
-                {
-                    match: /(?<=\(\)\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
-                    replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
-                },
-                {
-                    match: /(?<=\(\)\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),)/,
-                    replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
-                }
-            ]
+            find: ".activityTitleText,variant",
+            replacement: {
+                match: /(?<=\i\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
+                replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
+            },
+        },
+        {
+            find: ".activityCardDetails,children",
+            replacement: {
+                match: /(?<=\i\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),)/,
+                replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
+            }
         }
     ],
 
