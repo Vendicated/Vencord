@@ -28,17 +28,17 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "queryEmojiResults:",
+            find: ",queryEmojiResults(",
             replacement: {
                 match: /searchWithoutFetchingLatest\(\{/,
                 replace: "$&...$self.getExtraProps(),"
             }
         },
         {
-            find: "searchWithoutFetchingLatest=",
+            find: "}searchWithoutFetchingLatest(",
             replacement: {
-                match: /(function\(\i\)\{)(var \i=(\i)\.channel,.{0,600}reduce\(\(function\((\i),(\i)\)\{)/,
-                replace: "$1 var includeGuilds = $3.includeGuilds ?? true; $2 if ($5.type === 'GUILD_EMOJI' && !includeGuilds) { return $4; }"
+                match: /(searchWithoutFetchingLatest.+?=(\i);)(.+?reduce\(\((\i),(\i)\)=>\{)/,
+                replace: "$1 let includeGuilds = $2.includeGuilds ?? true; $3 if ($5.type === 'GUILD_EMOJI' && !includeGuilds) { return $4; }"
             }
         }
     ],
