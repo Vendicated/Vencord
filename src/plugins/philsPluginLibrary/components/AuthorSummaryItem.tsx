@@ -33,7 +33,7 @@ export const AuthorUserSummaryItem = (props: AuthorUserSummaryItemProps) => {
     useEffect(() => {
         (async () => {
             props.authors.forEach(author =>
-                UserUtils.fetchUser(`${author.id}`)
+                UserUtils.getUser(`${author.id}`)
                     .then(user => setUsers(users => [...users, user]))
                     .catch(() => setUsers(users => [...users, createDummyUser({
                         username: author.name,

@@ -17,6 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
+import { lodash } from "@webpack/common";
 
 import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone.desktop/stores";
 import { ProfilableStore, replaceObjectValuesIfExist, types } from "../../philsPluginLibrary";
@@ -76,7 +77,7 @@ export function patchConnectionAudioTransportOptions(
     };
 
     const forceUpdateTransportationOptions = () => {
-        const transportOptions = window._.merge({ ...getDefaultAudioTransportationOptions(connection) }, getReplaceableAudioTransportationOptions(connection, get));
+        const transportOptions = lodash.merge({ ...getDefaultAudioTransportationOptions(connection) }, getReplaceableAudioTransportationOptions(connection, get));
 
         logger?.info("Overridden Transport Options", transportOptions);
 
