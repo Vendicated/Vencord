@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
 // don't worry about it :P
@@ -60,17 +61,35 @@ const quotes = [
     "Wdn`khc'|f*eghl{%"
 ];
 
+const settings = definePluginSettings({
+    replaceEvents: {
+        description: "Replace Event Quotes too",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
+
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
     authors: [Devs.Ven, Devs.KraXen72],
+
+    settings,
+
     patches: [
         {
-            find: ".LOADING_DID_YOU_KNOW",
-            replacement: {
-                match: /\._loadingText=.+?random\(.+?;/s,
-                replace: "._loadingText=$self.quote;",
-            },
+            find: ".LOADING_DID_YOU_KNOW}",
+            replacement: [
+                {
+                    match: /\._loadingText=function\(\)\{/,
+                    replace: "$&return $self.quote;",
+                },
+                {
+                    match: /\._eventLoadingText=function\(\)\{/,
+                    replace: "$&return $self.quote;",
+                    predicate: () => settings.store.replaceEvents
+                }
+            ],
         },
     ],
 

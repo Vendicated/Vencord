@@ -91,13 +91,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: "renderCategoryExtras",
+            find: "renderHeaderContent()",
             replacement: [
                 {
-                    // https://regex101.com/r/4uHtTE/1
+                    // https://regex101.com/r/07gpzP/1
                     // ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default:return r.jsx(($<searchComp>), {...props}))
-                    match: /(renderHeaderContent=function.{1,150}FAVORITES:return)(.{1,150};)(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\.\i))/,
-                    replace: "$1 this.state.resultType === \"Favorites\" ? $self.renderSearchBar(this, $<searchComp>) : $2; $3"
+                    match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
+                    replace: "$1 this.state.resultType === 'Favorites' ? $self.renderSearchBar(this, $<searchComp>) : $2;$3"
                 },
                 {
                     // to persist filtered favorites when component re-renders.
@@ -182,7 +182,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ref={ref}
             autoFocus={true}
             className={containerClasses.searchBar}
-            size={SearchBarComponent.Sizes.MEDIUM}
+            size={SearchBarComponent.Sizes.SMALL}
             onChange={onChange}
             onClear={() => {
                 setQuery("");
