@@ -70,22 +70,27 @@ export default definePlugin({
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
             find: ".CannotShow=",
             replacement: [
+                // Remove the special logic for channels we don't have access to
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\i}}/,
                     replace: ""
                 },
+                // Do not check for unreads when selecting the render level if the channel is hidden
                 {
                     match: /(?=!1===\i.\i\.hasRelevantUnread\(this\.record\))/,
                     replace: "$self.isHiddenChannel(this.record)||"
                 },
+                // Make channels we dont have access to be the same level as normal ones
                 {
                     match: /(?<=renderLevel:(\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
                     replace: (_, renderLevelExpression) => renderLevelExpression
                 },
+                // Make channels we dont have access to be the same level as normal ones
                 {
                     match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(\i)\..+?(?=,)/,
                     replace: (_, RenderLevels) => `${RenderLevels}.Show`
                 },
+                // Remove permission checking for getRenderLevel function
                 {
                     match: /(?<=getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
                     replace: " "
