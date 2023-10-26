@@ -75,6 +75,10 @@ export default definePlugin({
                     replace: ""
                 },
                 {
+                    match: /(?=!1===\i.\i\.hasRelevantUnread\(this\.record\))/,
+                    replace: "$self.isHiddenChannel(this.record)||"
+                },
+                {
                     match: /(?<=renderLevel:(\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
                     replace: (_, renderLevelExpression) => renderLevelExpression
                 },
