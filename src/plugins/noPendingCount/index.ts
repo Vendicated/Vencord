@@ -55,18 +55,18 @@ export default definePlugin({
     // or by searching for "showProgressBadge:"
     patches: [
         {
-            find: ".getPendingCount=",
+            find: "getPendingCount(){",
             predicate: () => settings.store.hideFriendRequestsCount,
             replacement: {
-                match: /(?<=\.getPendingCount=function\(\)\{)/,
+                match: /(?<=getPendingCount\(\)\{)/,
                 replace: "return 0;"
             }
         },
         {
-            find: ".getMessageRequestsCount=",
+            find: "getMessageRequestsCount(){",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(?<=\.getMessageRequestsCount=function\(\)\{)/,
+                match: /(?<=getMessageRequestsCount\(\)\{)/,
                 replace: "return 0;"
             }
         },
@@ -84,8 +84,10 @@ export default definePlugin({
             find: "showProgressBadge:",
             predicate: () => settings.store.hidePremiumOffersCount,
             replacement: {
-                match: /=\i\.unviewedTrialCount\+\i\.unviewedDiscountCount/,
-                replace: "=0"
+                // The two groups inside the first group grab the minified names of the variables,
+                // they are then referenced later to find unviewedTrialCount + unviewedDiscountCount.
+                match: /(?<=\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,200}\i=)\1\+\2/,
+                replace: "0"
             }
         }
     ],
