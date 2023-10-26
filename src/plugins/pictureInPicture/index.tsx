@@ -24,13 +24,12 @@ export default definePlugin({
     description: "Adds picture in picture to videos (next to the Download button)",
     authors: [Devs.Lumap],
     settings,
-
     patches: [
         {
-            find: ".onRemoveAttachment,",
+            find: ".nonMediaAttachment]",
             replacement: {
-                match: /\.nonMediaAttachment,!(\i).{0,7}children:\[(\i),/,
-                replace: "$&$1&&$2&&$self.renderPiPButton(),"
+                match: /\.nonMediaAttachment\].{0,10}children:\[\S{3}/,
+                replace: "$&&&$self.renderPiPButton(),"
             },
         },
     ],

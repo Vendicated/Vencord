@@ -25,7 +25,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, EmojiStore, FluxDispatcher, Parser, PermissionStore, UserStore } from "@webpack/common";
+import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -176,8 +176,8 @@ export default definePlugin({
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
                 {
-                    match: /(?<=(\i)=\i\.intention)/,
-                    replace: (_, intention) => `,fakeNitroIntention=${intention}`
+                    match: /(?<=,intention:(\i).+?;)/,
+                    replace: (_, intention) => `var fakeNitroIntention=${intention};`
                 },
                 {
                     match: /\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i(?=\))/g,
@@ -222,8 +222,7 @@ export default definePlugin({
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: [
                 "canUseHighVideoUploadQuality",
-                // TODO: Remove the last two when they get removed from stable
-                "(?:canStreamQuality|canStreamHighQuality|canStreamMidQuality)",
+                "canStreamQuality",
             ].map(func => {
                 return {
                     match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
@@ -235,7 +234,7 @@ export default definePlugin({
             find: "STREAM_FPS_OPTION.format",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
-                match: /(userPremiumType|guildPremiumTier):.{0,10}TIER_\d,?/g,
+                match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
             }
         },
@@ -296,7 +295,7 @@ export default definePlugin({
                 },
                 {
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments=function\(\i\){var (\i)=\i.attachments.+?;/,
+                    match: /renderAttachments=function\(\i\){var \i=this,(\i)=\i.attachments.+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
@@ -319,7 +318,7 @@ export default definePlugin({
             find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<=(\i)=\i\.node.+?)/,
+                match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<={node:(\i),.+?)/,
                 replace: (m, node) => `${m}fakeNitroNode:${node},`
             }
         },
@@ -327,8 +326,22 @@ export default definePlugin({
             find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
-                match: /(?<=\.Messages\.EMOJI_POPOUT_ADDED_PACK_DESCRIPTION.+?return ).{0,1200}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?(?=}\()/,
-                replace: reactNode => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!arguments[0]?.fakeNitroNode?.fake)`
+                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.+?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
+                replace: (_, props, rest, reactNode) => `var fakeNitroNode=${props}.fakeNitroNode;${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},fakeNitroNode?.fake)`
+            }
+        },
+        {
+            find: "canUsePremiumAppIcons:function",
+            replacement: {
+                match: /canUsePremiumAppIcons:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
+        {
+            find: "location:\"AppIconHome\"",
+            replacement: {
+                match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
             }
         }
     ],
@@ -519,7 +532,7 @@ export default definePlugin({
         };
 
         try {
-            return modifyChildren(window._.cloneDeep(content));
+            return modifyChildren(lodash.cloneDeep(content));
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;

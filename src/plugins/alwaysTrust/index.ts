@@ -27,15 +27,15 @@ export default definePlugin({
         {
             find: ".displayName=\"MaskedLinkStore\"",
             replacement: {
-                match: /\.isTrustedDomain=function\(.\){return.+?};/,
-                replace: ".isTrustedDomain=function(){return true};"
+                match: /(?<=isTrustedDomain\(\i\){)return \i\(\i\)/,
+                replace: "return true"
             }
         },
         {
-            find: '"7z","ade","adp"',
+            find: "isSuspiciousDownload:",
             replacement: {
-                match: /JSON\.parse\('\[.+?'\)/,
-                replace: "[]"
+                match: /function \i\(\i\){(?=.{0,60}\.parse\(\i\))/,
+                replace: "$&return null;"
             }
         }
     ]
