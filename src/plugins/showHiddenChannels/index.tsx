@@ -195,11 +195,27 @@ export default definePlugin({
             ]
         },
         {
-            // Hide New unreads box for hidden channels
+            // Hide the new version of unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
                 match: /(?<=if\(null==(\i))(?=.{0,160}?hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
                 replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
+            }
+        },
+        {
+            // Make the old version of unreads box not visible for hidden channels
+            find: "renderBottomUnread(){",
+            replacement: {
+                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i\.record)\))/,
+                replace: "&&!$self.isHiddenChannel($1)"
+            }
+        },
+        {
+            // Make the state of the old version of unreads box not include hidden channels
+            find: ".useFlattenedChannelIdListWithThreads)",
+            replacement: {
+                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i)\))/,
+                replace: "&&!$self.isHiddenChannel($1)"
             }
         },
         // Only render the channel header and buttons that work when transitioning to a hidden channel
