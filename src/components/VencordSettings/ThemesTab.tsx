@@ -25,7 +25,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { getThemeInfo, UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
@@ -47,7 +47,7 @@ interface OnlineTheme {
 }
 
 const InviteActions = findByPropsLazy("resolveInvite");
-const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
+const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
