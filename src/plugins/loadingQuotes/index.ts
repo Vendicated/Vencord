@@ -101,15 +101,15 @@ export default definePlugin({
         {
             find: ".LOADING_DID_YOU_KNOW",
             replacement: {
-                match: /(\._loadingText=\(\i=)(\[.+?\])(\)\[.{0,10}random\(.+?;)/s,
-                replace: "$1 $self.quotes($2)$3"
-            },
+                match: /return (\i)(\[\i\.random)/,
+                replace: "$1 = $self.quotes($1); return $1$2"
+            }
         },
         { // Halloween
             find: "getLoadingTips:",
             replacement: {
-                match: /(\i>=\i\?)(\[.+?\])(:)/,
-                replace: "$1 $self.quotes($2) $3",
+                match: /return(\[.+?\])\}/,
+                replace: "return $self.quotes($1) }",
                 predicate: () => settings.store.replaceEvents
             }
         }
