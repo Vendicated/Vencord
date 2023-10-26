@@ -30,7 +30,7 @@ export default definePlugin({
                 // = isPremiumAtLeast(user.premiumType, TIER_2)
                 match: /=(?=\i\.\i\.isPremiumAtLeast\(null==(\i))/,
                 // = user.banner && isPremiumAtLeast(user.premiumType, TIER_2)
-                replace: "=$1?.banner&&"
+                replace: "=($self.hasUsrbgBanner($1)||$1?.banner)&&"
             }
         },
         {
@@ -49,5 +49,8 @@ export default definePlugin({
                 replace: "$&false &&"
             }
         }
-    ]
+    ],
+    hasUsrbgBanner(user: any) {
+        if (Vencord.Plugins.isPluginEnabled("USRBG")) return (Vencord.Plugins.plugins.USRBG as any).data[user?.userId];
+    }
 });
