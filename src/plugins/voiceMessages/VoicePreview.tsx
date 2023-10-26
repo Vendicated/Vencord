@@ -17,7 +17,7 @@
 */
 
 import { LazyComponent, useTimer } from "@utils/react";
-import { findByCode } from "@webpack";
+import { find } from "@webpack";
 
 import { cl } from "./utils";
 
@@ -25,7 +25,7 @@ interface VoiceMessageProps {
     src: string;
     waveform: string;
 }
-const VoiceMessage = LazyComponent<VoiceMessageProps>(() => findByCode('["onVolumeChange","volume","onMute"]'));
+const VoiceMessage = LazyComponent<VoiceMessageProps>(() => find(m => m.type?.toString().includes("waveform:")));
 
 export type VoicePreviewOptions = {
     src?: string;
