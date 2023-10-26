@@ -25,12 +25,6 @@
     box-shadow: none;
 }
 
-[class*="modalCarouselWrapper"] {
-    height: fit-content;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
 [class|="wrapper"]:has(> #vc-imgzoom-magnify-modal) {
     position: absolute;
     left: 50%;

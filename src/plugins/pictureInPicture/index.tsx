@@ -28,7 +28,7 @@ export default definePlugin({
         {
             find: ".nonMediaAttachment]",
             replacement: {
-                match: /\.nonMediaAttachment\].{0,10}children:\[\S{3}/,
+                match: /\.nonMediaAttachment\].{0,10}children:\[\S/,
                 replace: "$&&&$self.renderPiPButton(),"
             },
         },
