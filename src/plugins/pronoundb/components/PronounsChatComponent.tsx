@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
@@ -39,17 +40,17 @@ function shouldShow(message: Message): boolean {
     return true;
 }
 
-export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
+export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
     return shouldShow(message)
         ? <PronounsChatComponent message={message} />
         : null;
-}
+}, { noop: true });
 
-export function CompactPronounsChatComponentWrapper({ message }: { message: Message; }) {
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
     return shouldShow(message)
         ? <CompactPronounsChatComponent message={message} />
         : null;
-}
+}, { noop: true });
 
 function PronounsChatComponent({ message }: { message: Message; }) {
     const [result] = useFormattedPronouns(message.author.id);
@@ -63,7 +64,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
         : null;
 }
 
-export function CompactPronounsChatComponent({ message }: { message: Message; }) {
+export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
     const [result] = useFormattedPronouns(message.author.id);
 
     return result
@@ -73,4 +74,4 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
             >• {result}</span>
         )
         : null;
-}
+}, { noop: true });
