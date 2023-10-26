@@ -131,15 +131,15 @@ export default definePlugin({
             // Indicator
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
-                match: /var .,.,.=(.)\.className,.=.\.message,.=.\.children,.=.\.content,.=.\.onUpdate/gm,
+                match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
             }
         },
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],

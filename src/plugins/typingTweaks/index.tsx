@@ -21,11 +21,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
-
-const Avatar = findByCodeLazy(".typingIndicatorRef", "svg");
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -45,12 +42,12 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, c }: { a: string, b: string, c: number; }) {
+export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
     return [
         <strong key="0">{a}</strong>,
         ", ",
-        <strong key="2">{b}</strong>,
-        `, and ${c} others are typing...`
+        <strong key="1">{b}</strong>,
+        `, and ${count} others are typing...`
     ];
 }
 
@@ -99,29 +96,35 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /=(\i)\[2];(.+)"aria-atomic":!0,children:(\i)}\)/,
-                replace: "=$1[2];$2\"aria-atomic\":!0,style:{display:\"grid\",gridAutoFlow:\"column\",gridGap:\"0.25em\"},children:$self.mutateChildren(this.props,$1,$3)})"
+                match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i/,
+                replace: "$self.mutateChildren(this.props, $1, $&), style: $self.TYPING_TEXT_STYLE"
             }
         },
         // Changes the indicator to keep the user object when creating the list of typing users
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /return \i\.\i\.getName\(.,.\.props\.channel\.id,(.)\)/,
-                replace: "return $1"
+                match: /(?<=map\(\i=>)\i\.\i\.getName\(\i,this\.props\.channel\.id,(\i)\)/,
+                replace: "$1"
             }
         },
         // Adds the alternative formatting for several users typing
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /((\i)\.length\?.\..\.Messages\.THREE_USERS_TYPING.format\(\{a:(\i),b:(\i),c:.}\)):.+?SEVERAL_USERS_TYPING/,
-                replace: "$1:$self.buildSeveralUsers({a:$3,b:$4,c:$2.length-2})"
+                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),\i:(\i),\i:\i}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
+                replace: (_, users, a, b) => `$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`
             },
             predicate: () => settings.store.alternativeFormatting
         }
     ],
     settings,
+
+    TYPING_TEXT_STYLE: {
+        display: "grid",
+        gridAutoFlow: "column",
+        gridGap: "0.25em"
+    },
 
     buildSeveralUsers,
 
@@ -135,5 +138,5 @@ export default definePlugin({
                 ? <TypingUser {...props} user={users[element++]} />
                 : c
         );
-    },
+    }
 });
