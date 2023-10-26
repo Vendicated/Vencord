@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { UserUtils } from "@webpack/common";
+import { UploadHandler, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DRAFT_TYPE = 0;
@@ -36,7 +36,6 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const UploadUI = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload");
 const UploadStore = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
@@ -175,7 +174,7 @@ export default definePlugin({
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
-                setTimeout(() => UploadUI.promptToUpload([file], cmdCtx.channel, DRAFT_TYPE), 10);
+                setTimeout(() => UploadHandler.promptToUpload([file], cmdCtx.channel, DRAFT_TYPE), 10);
             },
         },
     ]
