@@ -63,10 +63,10 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
     instance.push([[Symbol("Vencord")], {}, r => wreq = r]);
+    instance.pop();
     if (!wreq) return false;
 
     cache = wreq.c;
-    instance.pop();
 
     for (const id in cache) {
         const { exports } = cache[id];
