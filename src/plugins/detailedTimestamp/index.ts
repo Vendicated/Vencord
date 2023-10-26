@@ -128,7 +128,7 @@ export default definePlugin({
             }
         },
         {
-            find: "\"LLLL\"),",
+            find: "timestampVisibleOnHover]:",
             replacement: {
                 match: /"LLLL"/,
                 replace: "$self.settings.store.tooltipFormat"
@@ -142,7 +142,7 @@ export default definePlugin({
             }
         },
         {
-            find: "().localeData(),",
+            find: "toDate())}",
             replacement: {
                 match: /"L LT"/,
                 replace: "$self.settings.store.callFormat"
@@ -245,26 +245,26 @@ export default definePlugin({
             }
         },
         {
-            find: "\"INTEGRATION_ADDED_USER\"",
+            find: "INTEGRATION_ADDED_USER:",
             replacement: [
                 {
-                    match: /("INTEGRATION_ADDED_DATE",.{0,30}){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}/,
+                    match: /(INTEGRATION_ADDED_DATE:.{0,30}){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}(.{0,100}?){timestamp.{0,20}}/,
                     replace: "$1{timestamp}$2{timestamp}$3{timestamp}$4{timestamp}"
                 },
                 {
-                    match: /("WEBHOOK_CREATED_ON".{0,50}?){timestamp.{0,20}}/,
+                    match: /(WEBHOOK_CREATED_ON:.{0,50}?){timestamp.{0,20}}/,
                     replace: "$1{timestamp}"
                 },
                 {
-                    match: /("NEW_MESSAGES".{0,80}?){timestamp.{0,20}}(.{0,300}?){timestamp.{0,50}}(.{0,200}?){timestamp.{0,20}}(.{0,200}?){timestamp.{0,50}}/,
+                    match: /(NEW_MESSAGES:.{0,80}?){timestamp.{0,20}}(.{0,300}?){timestamp.{0,50}}(.{0,200}?){timestamp.{0,20}}(.{0,200}?){timestamp.{0,50}}/,
                     replace: "$1{timestamp}$2{timestamp}$3{timestamp}$4{timestamp}"
                 }
             ]
         },
         {
-            find: "\"has-more-after\"));",
+            find: "\"has-more-after\")),",
             replacement: {
-                match: /(format\({.{0,20}?,timestamp:)(\i)(}\).{0,1000}?format\({.{0,20}?,timestamp:)(\i)(\}\))/,
+                match: /(format\({.{0,20}?,timestamp:)(\i)(}\).{0,2000}?format\({.{0,20}?,timestamp:)(\i)(\}\))/,
                 replace: "$1 $self.formatTime($2, $self.settings.store.newMessagesFormat) $3 $self.formatTime($4, $self.settings.store.newMessagesFormat) $5"
             }
         },
@@ -272,31 +272,29 @@ export default definePlugin({
             find: ".integration.id);",
             replacement: [
                 {
-                    match: /(name]\).{0,150}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,50}?push.{0,80}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
-                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
-                },
-                {
-                    match: /(useMemo.{0,100}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
-                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat)"
-                },
-                {
-                    match: /datetime:(.{0,40}?).calendar\(\)/,
-                    replace: "datetime: $self.formatTime($1, $self.integrationFormat)"
-                },
-                {
-                    match: /(emoticons.{0,300}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,100}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
-                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
-                },
-                {
-                    match: /(\i\.integration,.{0,150}timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))(.{0,50}?push.{0,80}?timestamp:)(\i\.\i\.extractTimestamp\(\i.id\))/,
-                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat)"
+                    match: /("scroll".{0,300}INTEGRATION_ADDED_USER_DATE.{0,50}timestamp:)(.+?)(,.{0,200}timestamp:)(.+?)(}\))/,
+                    replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat) $5"
                 }
             ]
         },
         {
+            find: "enable_emoticons,",
+            replacement: {
+                match: /(INTEGRATION_ADDED_DATE.{0,40}timestamp:)(.+?)(\}.{0,200}timestamp:)(.+?)(}\))/,
+                replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat) $5"
+            }
+        },
+        {
+            find: ".WEBHOOK_DELETE_BODY.",
+            replacement: {
+                match: /(INTEGRATION_CREATED_USER_DATE.{0,40}timestamp:)(.+?)(\}.{0,100}timestamp:)(.+?)(\}\))/,
+                replace: "$1 $self.formatTime($2, $self.settings.store.integrationFormat) $3 $self.formatTime($4, $self.settings.store.integrationFormat) $5"
+            }
+        },
+        {
             find: "relativeTimeThreshold(\"s\");",
             replacement: {
-                match: /(t:.{0,30})"LT"(\)},T:.{0,30})"LTS"(\)},d:.{0,30})"L"(\)},D:.{0,30})"LL"(\)},f:.{0,30})"LLL"(\)},F:.{0,30})"LLLL"/,
+                match: /(t:.{0,30})"LT"(\),T:.{0,30})"LTS"(\),d:.{0,30})"L"(\)},D:.{0,30})"LL"(\),f:.{0,30})"LLL"(\),F:.{0,30})"LLLL"/,
                 replace: "$1 $self.settings.store.timestampLowerT " +
                     "$2 $self.settings.store.timestampUpperT " +
                     "$3 $self.settings.store.timestampLowerD " +
