@@ -229,12 +229,17 @@ function patchPush(webpackGlobal: any) {
     }
 
     handlePush.$$vencordOriginal = webpackGlobal.push;
+    // Webpack overwrites .push with its own push like so: `d.push = n.bind(null, d.push.bind(d));`
+    // it wraps the old push (`d.push.bind(d)`). this old push is in this case our handlePush.
+    // If we then repatched the new push, we would end up with recursive patching, which leads to our patches
+    // being applied multiple times.
+    // Thus, override bind to use the original push
+    handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
+
     Object.defineProperty(webpackGlobal, "push", {
         get: () => handlePush,
         set(v) {
-            delete webpackGlobal.push;
-            webpackGlobal.push = v;
-            patchPush(webpackGlobal);
+            handlePush.$$vencordOriginal = v;
         },
         configurable: true
     });
