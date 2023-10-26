@@ -49,5 +49,5 @@ export default definePlugin({
                 replace: "$&false &&"
             }
         }
-    ],
+    ]
 });
