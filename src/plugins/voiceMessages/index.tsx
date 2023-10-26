@@ -25,7 +25,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, lodash, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
@@ -35,7 +35,7 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
+const CloudUtils = findByPropsLazy("CloudUpload");
 const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
@@ -76,7 +76,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
     const reply = PendingReplyStore.getPendingReply(channelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
-    const upload = new CloudUpload({
+    const upload = new CloudUtils.CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isClip: false,
         isThumbnail: false,
