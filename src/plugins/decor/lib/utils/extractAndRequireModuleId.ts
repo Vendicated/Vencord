@@ -7,7 +7,7 @@
 import { canonicalizeMatch } from "@utils/patches";
 import { wreq } from "@webpack";
 
-export default async function extractAndRequireModuleIds(code: Function | string) {
+export default async function extractAndRequireModuleId(code: Function | string) {
     const chunksAndModule = code.toString()
         .match(canonicalizeMatch(/await \i\.\i\("(\d+)"\)/));
 
