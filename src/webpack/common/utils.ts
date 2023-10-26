@@ -33,6 +33,8 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
 
+export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
+
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
@@ -92,6 +94,10 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
 }
 
 export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+
+export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
+    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
+};
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
     copy: filters.byCode(".copy("),

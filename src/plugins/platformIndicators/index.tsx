@@ -198,13 +198,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
-                    replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                    match: /\.STATUS_TYPING;switch(?=.+?(if\(\i\)return \i\.\i\.Masks\.STATUS_ONLINE_MOBILE))/,
+                    replace: ".STATUS_TYPING;$1;switch"
                 },
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(switch\(\i\){case \i\.\i\.ONLINE:return )(\i)\?({.+?}):/,
-                    replace: (_, rest, isMobile, component) => `if(${isMobile})return${component};${rest}`
+                    match: /switch\(\i\)\{case \i\.\i\.ONLINE:(if\(\i\)return\{[^}]+\})/,
+                    replace: "$1;$&"
                 }
             ]
         },
@@ -230,7 +230,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "isMobileOnline=function",
+            find: "}isMobileOnline(",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
             replacement: {
                 // Make isMobileOnline return true no matter what is the user status
