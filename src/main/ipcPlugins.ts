@@ -17,7 +17,7 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { Socket, createSocket } from "dgram";
+import { createSocket,Socket } from "dgram";
 import { app, ipcMain } from "electron";
 import { readFile } from "fs/promises";
 import { request } from "https";

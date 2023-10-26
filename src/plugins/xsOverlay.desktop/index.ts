@@ -7,11 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Message } from "discord-types/general";
-import { Logger } from "@utils/Logger";
 
 const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
 const XSLog = new Logger("XSOverlay");
@@ -84,7 +84,7 @@ export default definePlugin({
                         titleString = message.author.username;
                         break;
                     case ChannelTypes.GROUP_DM:
-                        let channelName = channel.name.trim() ?? channel.rawRecipients.map(e => e.username).join(", ");
+                        const channelName = channel.name.trim() ?? channel.rawRecipients.map(e => e.username).join(", ");
                         titleString = `${message.author.username} (${channelName})`;
                         break;
                 }
