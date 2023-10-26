@@ -275,7 +275,7 @@ export default definePlugin({
                     match: /MANAGE_ROLES.{0,90}?return(?=\(.+?(\(0,\i\.jsxs\)\("div",{className:\i\.members.+?guildId:(\i)\.guild_id.+?roleColor.+?\]}\)))/,
                     replace: (m, component, channel) => {
                         // Export the channel for the users allowed component patch
-                        component = component.replace(canonicalizeMatch(/(?<=users:\i)/), `,channel:${channel}`);
+                        component = component.replace(canonicalizeMatch(/(?<=users:\i)/), `,shcChannel:${channel}`);
                         // Always render the component for multiple allowed users
                         component = component.replace(canonicalizeMatch(/1!==\i\.length/), "true");
 
@@ -290,22 +290,22 @@ export default definePlugin({
                 {
                     // Create a variable for the channel prop
                     match: /maxUsers:\i,users:\i.+?=(\i).+?;/,
-                    replace: (m, props) => `${m}var channel=${props}.channel;`
+                    replace: (m, props) => `${m}let{shcChannel}=${props};`
                 },
                 {
                     // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
                     match: /\i>0(?=&&.{0,60}renderPopout)/,
-                    replace: m => `($self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)?true:${m})`
+                    replace: m => `($self.isHiddenChannel(shcChannel,true)?true:${m})`
                 },
                 {
                     // Prevent Discord from overwriting the last children with the plus button if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<=\.value\(\),(\i)=.+?length-)1(?=\]=.{0,60}renderPopout)/,
-                    replace: (_, amount) => `($self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)&&${amount}<=0?0:1)`
+                    replace: (_, amount) => `($self.isHiddenChannel(shcChannel,true)&&${amount}<=0?0:1)`
                 },
                 {
                     // Show only the plus text without overflowed children amount if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<="\+",)(\i)\+1/,
-                    replace: (m, amount) => `$self.isHiddenChannel(typeof channel!=="undefined"?channel:void 0,true)&&${amount}<=0?"":${m}`
+                    replace: (m, amount) => `$self.isHiddenChannel(shcChannel,true)&&${amount}<=0?"":${m}`
                 }
             ]
         },
