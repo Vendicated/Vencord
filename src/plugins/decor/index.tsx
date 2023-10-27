@@ -42,7 +42,7 @@ export default definePlugin({
             find: "getUserStoreVersion",
             replacement: {
                 match: /(?<=getUser\(\i\){.{10,50}return )(\i\[\i\])/,
-                replace: "$self.getUserHook($1)"
+                replace: "$self.patchUser($1)"
             }
         },
         // Patch MediaResolver to return correct URL for Decor avatar decorations
@@ -120,7 +120,7 @@ export default definePlugin({
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 
-    getUserHook(user) {
+    patchUser(user) {
         if (!user) return user;
 
         const store = useUsersDecorationsStore.getState();
