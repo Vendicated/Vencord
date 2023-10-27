@@ -107,7 +107,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
                     guildMember.nick || UserStore.getUser(guildMember.userId).username
                 )
             }
-            defaultState={settings.store.defaultPermissionsDropdownState}
+            defaultState={settings.store.permissionsDropdownOpenByDefault}
             buttons={[
                 (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (

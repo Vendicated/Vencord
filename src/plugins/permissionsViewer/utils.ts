@@ -67,6 +67,46 @@ export function getPermissionDescription(permission: string): ReactNode {
     return "";
 }
 
+export const enum PermissionValue {
+    Deny = "DENY",
+    Passthrough = "PASSTHROUGH",
+    Allow = "ALLOW",
+}
+
+export function getPermissionValue(permissionBit: bigint, permissions: bigint): PermissionValue;
+export function getPermissionValue(permissionBit: bigint, permissions: undefined): undefined;
+export function getPermissionValue(permissionBit: bigint, permissions?: bigint): PermissionValue | undefined;
+export function getPermissionValue(permissionBit: bigint, permissions?: bigint): PermissionValue | undefined {
+    return permissions !== undefined
+        ? permissions === 0n ? PermissionValue.Passthrough
+            : (permissions & permissionBit) === permissionBit ? PermissionValue.Allow : PermissionValue.Deny
+        : undefined;
+}
+
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: bigint, overwriteDeny: bigint): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: undefined, overwriteDeny: bigint): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: bigint, overwriteDeny: undefined): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: undefined, overwriteDeny: undefined): undefined;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow?: bigint, overwriteDeny?: bigint): PermissionValue | undefined;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow?: bigint, overwriteDeny?: bigint): PermissionValue | undefined {
+    return overwriteAllow !== undefined || overwriteDeny !== undefined
+        ? overwriteAllow !== undefined && (overwriteAllow & permissionBit) === permissionBit ? PermissionValue.Allow
+            : overwriteDeny !== undefined && (overwriteDeny & permissionBit) === permissionBit ? PermissionValue.Deny
+                : PermissionValue.Passthrough
+        : undefined;
+}
+
+export function isPermissionValueRelevant(permissionValue?: PermissionValue): boolean {
+    return permissionValue !== undefined &&
+        permissionValue !== PermissionValue.Passthrough &&
+        permissionValue !== PermissionValue.Deny;
+}
+
+export function isOverwriteValueRelevant(overwriteValue?: PermissionValue): boolean {
+    return overwriteValue !== undefined &&
+        overwriteValue !== PermissionValue.Passthrough;
+}
+
 export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
     return [...member.roles, id]
         .map(id => roles[id])
