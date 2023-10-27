@@ -135,9 +135,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             <Text variant="text-md/normal">
                                                 {
                                                     permission.type === PermissionType.Role
-                                                        ? role?.name || "Unknown Role"
+                                                        ? role?.name ?? "Unknown Role"
                                                         : permission.type === PermissionType.User
-                                                            ? (user && getUniqueUsername(user)) || "Unknown User"
+                                                            ? (user && getUniqueUsername(user)) ?? "Unknown User"
                                                             : (
                                                                 <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
                                                                     @owner
