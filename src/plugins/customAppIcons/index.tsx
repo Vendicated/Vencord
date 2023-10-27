@@ -79,7 +79,7 @@ export default definePlugin({
     name: "CustomAppIcons",
     description: "Allows you to add your own app icons to the list.",
     settings,
-    authors: [Devs.Nakoyasha, Devs.SimplyData],
+    authors: [Devs.nakoyasha, Devs.SimplyData],
     patches: [
         {
             find: "APP_ICON_HOLO_WAVES}",

@@ -379,7 +379,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
-    Nakoyasha: {
+    nakoyasha: {
         name: "nakoyasha",
         id: 222069018507345921n
     },
