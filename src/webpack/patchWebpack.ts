@@ -29,7 +29,7 @@ let webpackChunk: any[];
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
 if (window[WEBPACK_CHUNK]) {
-    logger.info(`Patching ${WEBPACK_CHUNK}.push (was already existant, likely from cache!)`);
+    logger.info(`Patching ${WEBPACK_CHUNK}.push (was already existent, likely from cache!)`);
     _initWebpack(window[WEBPACK_CHUNK]);
     patchPush(window[WEBPACK_CHUNK]);
 } else {
