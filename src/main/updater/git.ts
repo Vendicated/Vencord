@@ -51,7 +51,7 @@ async function calculateGitChanges() {
 
     const branch = await git("branch", "--show-current");
 
-    const res = await git("log", `HEAD...origin/${branch}`, "--pretty=format:%an/%h/%s");
+    const res = await git("log", `HEAD...origin/${branch.stdout.trim()}`, "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
