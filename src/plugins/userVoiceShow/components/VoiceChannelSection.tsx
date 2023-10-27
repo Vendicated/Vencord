@@ -26,7 +26,7 @@ import { Channel } from "discord-types/general";
 import eyeSvg from "./eye.svg";
 
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
-const UserPopoutSection = findByCodeLazy(".lastSection", ".children");
+const UserPopoutSection = findByCodeLazy(".lastSection", "children:");
 const DiscordPermissions = findLazy(m => m.VIEW_CREATOR_MONETIZATION_ANALYTICS && !m.A11Y_ROLE_SWITCH);
 const transitionTo = findByCodeLazy("transitionTo -");
 
