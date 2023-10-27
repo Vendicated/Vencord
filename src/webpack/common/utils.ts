@@ -136,11 +136,4 @@ waitFor("parseTopic", m => Parser = m);
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-// FIXME: hack to support old stable and new canary
-export const PermissionsBits: t.PermissionsBits = proxyLazy(() => {
-    try {
-        return find(m => m.Permissions?.ADMINISTRATOR).Permissions;
-    } catch {
-        return find(m => typeof m.ADMINISTRATOR === "bigint");
-    }
-});
+export const PermissionsBits: t.PermissionsBits = proxyLazy(() => find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint").Permissions);
