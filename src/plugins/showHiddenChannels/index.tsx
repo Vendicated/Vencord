@@ -415,6 +415,22 @@ export default definePlugin({
             ]
         },
         {
+            // Make the chat input bar channel list contain hidden channels
+            find: ",queryStaticRouteChannels(",
+            replacement: [
+                {
+                    // Make the getChannels call to GuildChannelStore return hidden channels
+                    match: /(?<=queryChannels\(\i\){.+?getChannels\(\i)(?=\))/,
+                    replace: ",true"
+                },
+                {
+                    // Avoid filtering out hidden channels from the channel list
+                    match: /(?<=queryChannels\(\i\){.+?isGuildChannelType\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
+                    replace: "&&!$self.isHiddenChannel($1)"
+                }
+            ]
+        },
+        {
             find: "\"^/guild-stages/(\\\\d+)(?:/)?(\\\\d+)?\"",
             replacement: {
                 // Make mentions of hidden channels work
