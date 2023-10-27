@@ -117,6 +117,7 @@ export default definePlugin({
         },
         {
             find: ".FOLDER_ITEM_GUILD_ICON_MARGIN);",
+            predicate: () => settings.store.sidebar,
             replacement: [
                 // Create the isBetterFolders variable in the nested folders component (the parent exports all the props so we don't have to patch it)
                 {
