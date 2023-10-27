@@ -379,13 +379,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
-    nakoyasha: {
+    Nakoyasha: {
         name: "nakoyasha",
-        id: 222069018507345921n,
+        id: 222069018507345921n
     },
-    simplydata: {
-        name: "simplydata",
-        id: 301494563514613762n,
+    SimplyData: {
+        name: "SimplyData",
+        id: 301494563514613762n
     }
 } satisfies Record<string, Dev>);
 
