@@ -395,7 +395,7 @@ export default definePlugin({
         return (
             <>
                 <Forms.FormText>
-                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to create an application and
+                    Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
                 </Forms.FormText>
                 <Forms.FormText>
