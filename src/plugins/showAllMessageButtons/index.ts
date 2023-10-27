@@ -28,8 +28,8 @@ export default definePlugin({
         {
             find: ".Messages.MESSAGE_UTILITIES_A11Y_LABEL",
             replacement: {
-                match: /isExpanded:\i&&.*?,/,
-                replace: "isExpanded:true,"
+                match: /isExpanded:\i&&(.+?),/,
+                replace: "isExpanded:$1,"
             }
         }
     ]
