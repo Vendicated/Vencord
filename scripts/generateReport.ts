@@ -289,7 +289,7 @@ function runTime(token: string) {
             setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
         }, 1000));
     } catch (e) {
-        console.error("[PUP_DEBUG]", "A fatal error occured");
+        console.error("[PUP_DEBUG]", "A fatal error occurred");
         console.error("[PUP_DEBUG]", e);
         process.exit(1);
     }
