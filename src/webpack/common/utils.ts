@@ -17,7 +17,7 @@
 */
 
 import { proxyLazy } from "@utils/lazy";
-import type { User } from "discord-types/general";
+import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
@@ -94,6 +94,9 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
 }
 
 export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
+    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
+};
 
 export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
