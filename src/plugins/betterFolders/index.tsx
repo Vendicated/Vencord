@@ -141,7 +141,7 @@ export default definePlugin({
                     match: /(?=return\(0,\i.\i\)\("div")(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (_, expanded) => `if((typeof isBetterFolders!=="undefined"?isBetterFolders:false)&&!${expanded})return null;`
                 },
-                /* // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
+                // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /(?<=\.Messages\.SERVER_FOLDER_PLACEHOLDER.+?useTransition\)\()/,
@@ -152,7 +152,7 @@ export default definePlugin({
                     predicate: () => !settings.store.keepIcons,
                     match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (m, expanded) => `${m}((typeof isBetterFolders!=="undefined"?isBetterFolders:false)||!${expanded})&&`
-                } */
+                }
             ]
         },
         {
