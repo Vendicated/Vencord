@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const boolSetting = (description, def?: boolean) => ({
+const boolSetting = (description, def: boolean = false, restartNeeded: boolean = true) => ({
     type: OptionType.BOOLEAN,
     description,
+    restartNeeded,
     default: def
 }) as const;
 
@@ -31,21 +32,21 @@ export default definePlugin({
     description: "Gives you more control over your mute and deafen state when joining a voice call or channel.",
     authors: [Devs.MyNameIsJeff],
     settings: definePluginSettings({
-        alwaysJoinMuted: boolSetting("Automatically mute when joining a voice call or channel", false),
-        alwaysJoinDeafened: boolSetting("Automatically deafen when joining a voice call or channel", false),
-        noAutoUnmute: boolSetting("Stop Discord from automatically unmuting when joining a call", false),
-        noAutoUndeafen: boolSetting("Stop Discord from automatically undeafening when joining a call", false),
+        alwaysJoinMuted: boolSetting("Automatically mute when joining a voice call or channel", false, false),
+        alwaysJoinDeafened: boolSetting("Automatically deafen when joining a voice call or channel", false, false),
+        noAutoUnmute: boolSetting("Stop Discord from automatically unmuting when joining a call", false, false),
+        noAutoUndeafen: boolSetting("Stop Discord from automatically undeafening when joining a call", false, false),
     }),
     patches: [
         {
             find: ".displayName=\"MediaEngineStore\"",
             replacement: [
                 {
-                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\if\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,100}?\({)deaf:!1,mute:!1(?=}\);)/,
+                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?\((?<var>.{1,2})\.mute\|\|\k<var>\.deaf)(?<mid>\).{0,100}?\({)deaf:!1,mute:!1(?=}\),)/,
                     replace: "$<pre>||$self.shouldOverride()$<mid>deaf:$self.shouldDeafen($<event>,$<var>),mute:$self.shouldMute($<event>,$<var>)",
                 },
                 {
-                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?(?:var |,)(?<var>.{1,2})=\k<event>\.guildId.+?if\()(?<cond>null==\k<var>)/,
+                    match: /(?<pre>VOICE_CHANNEL_SELECT:function\((?<event>.{1,2})\){.*?(?:let{|,)\w+:(?<var>.{1,2})(?:,.+?)?}=\k<event>;.*?if\(.*?)(?<cond>null==\k<var>)/,
                     replace: "$<pre>($<cond>||$self.shouldOverride())"
                 }
             ]
