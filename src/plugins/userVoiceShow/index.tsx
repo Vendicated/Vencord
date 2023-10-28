@@ -24,7 +24,7 @@ import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import VoiceActivityIcon, { VoiceActivityClassFactory as vaCl } from "./components/VoiceActivityIcon";
+import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
@@ -108,57 +108,48 @@ export default definePlugin({
         );
     },
 
-    patchMemberList: ({ user }: UserProps) => {
+    patchUserList: ({ user }: UserProps, dmList: boolean) => {
         if (!settings.store.showVoiceActivityIcons) return null;
 
         return (
             <ErrorBoundary noop>
-                <VoiceActivityIcon user={user} />
+                <VoiceActivityIcon user={user} dmChannel={dmList} />
             </ErrorBoundary>
 
         );
     },
-    patchDmList: ({ user }: UserProps) => {
-        if (!settings.store.showVoiceActivityIcons) return null;
-
-        return (
-            <ErrorBoundary noop >
-                <div className={vaCl("iconContainer")}>
-                    <VoiceActivityIcon user={user} />
-                </div>
-            </ErrorBoundary >
-        );
-    },
 
     patches: [
-        // above message box
         {
-            find: ".lastEditedByContainer",
+            find: ".showCopiableUsername",
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
+                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
+                // paste my fancy custom button above the message field
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
         },
-        // below username
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                match: /\.body.+?displayProfile:\i}\),/,
+                match: /\(\)\.body.+?displayProfile:\i}\),/,
+                // paste my fancy custom button below the username
                 replace: "$&$self.patchModal(arguments[0]),",
             }
         },
         {
-            find: "PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP.",
+            // Patch Member List
+            find: "default.MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING",
             replacement: {
-                match: /\w{2}\(\{selected:\w/,
-                replace: "$&,children:[$self.patchMemberList(arguments[0])]",
+                match: /avatar:\(\(/,
+                replace: "children:[$self.patchUserList(arguments[0], false)],$&",
             }
         },
         {
+            // Patch Dm List
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /(\w{1})=\w{1}\.user,.+avatar:\w{1,2}.+selected.+decorators.+\]\}\)\}\)\)/,
-                replace: "$&,$self.patchDmList({user:$1})",
+                match: /highlighted:.+name:.+decorators.+\}\)\}\),/,
+                replace: "$&$self.patchUserList(arguments[0], true),",
             }
         }
     ],
