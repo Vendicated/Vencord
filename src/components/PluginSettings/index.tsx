@@ -20,21 +20,21 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { showNotice } from "@api/Notices";
-import { useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Badge } from "@components/PluginSettings/components";
+import { CogWheel, InfoIcon } from "@components/Icons";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import { Switch } from "@components/Switch";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
+import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
-import Logger from "@utils/Logger";
-import { classes, LazyComponent, useAwaiter } from "@utils/misc";
+import { Logger } from "@utils/Logger";
+import { Margins } from "@utils/margins";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
+import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, Margins, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -45,9 +45,8 @@ const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
+const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-const CogWheel = LazyComponent(() => findByCode("18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069"));
-const InfoIcon = LazyComponent(() => findByCode("4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16"));
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -91,8 +90,8 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     isNew?: boolean;
 }
 
-function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = useSettings([`plugins.${plugin.name}`]).plugins[plugin.name];
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+    const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => settings.enabled ?? false;
 
@@ -123,7 +122,7 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches) {
+        if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name);
             return;
@@ -136,11 +135,13 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-        const action = wasEnabled ? "stop" : "start";
 
         if (!result) {
-            logger.error(`Failed to ${action} plugin ${plugin.name}`);
-            showErrorToast(`Failed to ${action} plugin: ${plugin.name}`);
+            settings.enabled = false;
+
+            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            logger.error(msg);
+            showErrorToast(msg);
             return;
         }
 
@@ -148,34 +149,34 @@ function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLe
     }
 
     return (
-        <Flex className={cl("card", { "card-disabled": disabled })} flexDirection="column" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <div className={cl("card-header")}>
-                <Text variant="text-md/bold" className={cl("name")}>
-                    {plugin.name}{isNew && <Badge text="NEW" color="#ED4245" />}
-                </Text>
-                <button role="switch" onClick={() => openModal()} className={classes("button-12Fmur", cl("info-button"))}>
-                    {plugin.options
+        <AddonCard
+            name={plugin.name}
+            description={plugin.description}
+            isNew={isNew}
+            enabled={isEnabled()}
+            setEnabled={toggleEnabled}
+            disabled={disabled}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            infoButton={
+                <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
+                    {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel />
-                        : <InfoIcon width="24" height="24" />}
+                        : <InfoIcon />}
                 </button>
-                <Switch
-                    checked={isEnabled()}
-                    onChange={toggleEnabled}
-                    disabled={disabled}
-                />
-            </div>
-            <Text className={cl("note")} variant="text-sm/normal">{plugin.description}</Text>
-        </Flex >
+            }
+        />
     );
 }
 
-enum SearchStatus {
+const enum SearchStatus {
     ALL,
     ENABLED,
-    DISABLED
+    DISABLED,
+    NEW
 }
 
-export default ErrorBoundary.wrap(function PluginSettings() {
+export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -222,13 +223,17 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const enabled = settings.plugins[plugin.name]?.enabled || plugin.started;
+        const enabled = settings.plugins[plugin.name]?.enabled;
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
+        if (searchValue.status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
         if (!searchValue.value.length) return true;
+
+        const v = searchValue.value.toLowerCase();
         return (
-            plugin.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-            plugin.description.toLowerCase().includes(searchValue.value.toLowerCase())
+            plugin.name.toLowerCase().includes(v) ||
+            plugin.description.toLowerCase().includes(v) ||
+            plugin.tags?.some(t => t.toLowerCase().includes(v))
         );
     };
 
@@ -246,7 +251,7 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         }
         DataStore.set("Vencord_existingPlugins", existingTimestamps);
 
-        return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
+        return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
     type P = JSX.Element | JSX.Element[];
@@ -256,6 +261,9 @@ export default ErrorBoundary.wrap(function PluginSettings() {
         requiredPlugins = [];
 
         for (const p of sortedPlugins) {
+            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+                continue;
+
             if (!pluginFilter(p)) continue;
 
             const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
@@ -296,22 +304,23 @@ export default ErrorBoundary.wrap(function PluginSettings() {
     }
 
     return (
-        <Forms.FormSection>
+        <SettingsTab title="Plugins">
             <ReloadRequiredCard required={changes.hasChanges} />
 
-            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+            <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
             </Forms.FormTitle>
 
             <div className={cl("filter-controls")}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.marginBottom20} />
+                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.bottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         className={InputStyles.inputDefault}
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED }
+                            { label: "Show Disabled", value: SearchStatus.DISABLED },
+                            { label: "Show New", value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}
@@ -321,24 +330,23 @@ export default ErrorBoundary.wrap(function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.marginTop20}>Plugins</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
 
             <div className={cl("grid")}>
                 {plugins}
             </div>
-            <Forms.FormDivider />
-            <Forms.FormTitle tag="h5" className={classes(Margins.marginTop20, Margins.marginBottom8)}>
+
+            <Forms.FormDivider className={Margins.top20} />
+
+            <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
             </Forms.FormTitle>
             <div className={cl("grid")}>
                 {requiredPlugins}
             </div>
-        </Forms.FormSection >
+        </SettingsTab >
     );
-}, {
-    message: "Failed to render the Plugin Settings. If this persists, try using the installer to reinstall!",
-    onError: handleComponentFailed,
-});
+}
 
 function makeDependencyList(deps: string[]) {
     return (

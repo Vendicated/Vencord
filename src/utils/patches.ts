@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PatchReplacement } from "./types";
-
-export type ReplaceFn = (match: string, ...groups: string[]) => string;
+import { PatchReplacement, ReplaceFn } from "./types";
 
 export function canonicalizeMatch(match: RegExp | string) {
     if (typeof match === "string") return match;
@@ -27,9 +25,13 @@ export function canonicalizeMatch(match: RegExp | string) {
     return new RegExp(canonSource, match.flags);
 }
 
-export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string) {
-    if (typeof replace === "function") return replace;
-    return replace.replaceAll("$self", `Vencord.Plugins.plugins.${pluginName}`);
+export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string): string | ReplaceFn {
+    const self = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`;
+
+    if (typeof replace !== "function")
+        return replace.replaceAll("$self", self);
+
+    return (...args) => replace(...args).replaceAll("$self", self);
 }
 
 export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {

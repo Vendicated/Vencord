@@ -33,8 +33,14 @@ declare global {
      * replace: `${IS_WEB}?foo:bar`
      */
     export var IS_WEB: boolean;
+    export var IS_EXTENSION: boolean;
     export var IS_DEV: boolean;
     export var IS_STANDALONE: boolean;
+    export var IS_UPDATER_DISABLED: boolean;
+    export var IS_DISCORD_DESKTOP: boolean;
+    export var IS_VESKTOP: boolean;
+    export var VERSION: string;
+    export var BUILD_TIMESTAMP: number;
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
@@ -51,10 +57,11 @@ declare global {
      * Only available when running in Electron, undefined on web.
      * Thus, avoid using this or only use it inside an {@link IS_WEB} guard.
      *
-     * If you really must use it, mark your plugin as Desktop App only via
-     * `target: "DESKTOP"`
+     * If you really must use it, mark your plugin as Desktop App only by naming it Foo.desktop.ts(x)
      */
     export var DiscordNative: any;
+    export var Vesktop: any;
+    export var VesktopNative: any;
 
     interface Window {
         webpackChunkdiscord_app: {

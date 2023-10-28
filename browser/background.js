@@ -1,48 +1,32 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Linnea Gräf
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-function setContentTypeOnStylesheets(details) {
-    if (details.type === "stylesheet") {
-        details.responseHeaders = details.responseHeaders.filter(it => it.name.toLowerCase() !== 'content-type');
-        details.responseHeaders.push({ name: "Content-Type", value: "text/css" });
-    }
-    return { responseHeaders: details.responseHeaders };
+/**
+ * @template T
+ * @param {T[]} arr
+ * @param {(v: T) => boolean} predicate
+ */
+function removeFirst(arr, predicate) {
+    const idx = arr.findIndex(predicate);
+    if (idx !== -1) arr.splice(idx, 1);
 }
 
-var cspHeaders = [
-    "content-security-policy",
-    "content-security-policy-report-only",
-];
+chrome.webRequest.onHeadersReceived.addListener(
+    ({ responseHeaders, type, url }) => {
+        if (!responseHeaders) return;
 
-function removeCSPHeaders(details) {
-    return {
-        responseHeaders: details.responseHeaders.filter(header =>
-            !cspHeaders.includes(header.name.toLowerCase()))
-    };
-}
-
-
-
-
-browser.webRequest.onHeadersReceived.addListener(
-    setContentTypeOnStylesheets, { urls: ["https://raw.githubusercontent.com/*"] }, ["blocking", "responseHeaders"]
-);
-
-browser.webRequest.onHeadersReceived.addListener(
-    removeCSPHeaders, { urls: ["https://raw.githubusercontent.com/*", "*://*.discord.com/*"] }, ["blocking", "responseHeaders"]
+        if (type === "main_frame") {
+            // In main frame requests, the CSP needs to be removed to enable fetching of custom css
+            // as desired by the user
+            removeFirst(responseHeaders, h => h.name.toLowerCase() === "content-security-policy");
+        } else if (type === "stylesheet" && url.startsWith("https://raw.githubusercontent.com/")) {
+            // Most users will load css from GitHub, but GitHub doesn't set the correct content type,
+            // so we fix it here
+            removeFirst(responseHeaders, h => h.name.toLowerCase() === "content-type");
+            responseHeaders.push({
+                name: "Content-Type",
+                value: "text/css"
+            });
+        }
+        return { responseHeaders };
+    },
+    { urls: ["https://raw.githubusercontent.com/*", "*://*.discord.com/*"], types: ["main_frame", "stylesheet"] },
+    ["blocking", "responseHeaders"]
 );

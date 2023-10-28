@@ -17,8 +17,7 @@
 */
 
 import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
-import { contextBridge, ipcRenderer, webFrame } from "electron";
+import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
 import { join } from "path";
 
@@ -26,49 +25,40 @@ import VencordNative from "./VencordNative";
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
+// Discord
 if (location.protocol !== "data:") {
-    // Discord
-    webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-    const rendererCss = join(__dirname, "renderer.css");
+    // #region cssInsert
+    const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
-    function insertCss(css: string) {
-        const style = document.createElement("style");
-        style.id = "vencord-css-core";
-        style.textContent = css;
+    const style = document.createElement("style");
+    style.id = "vencord-css-core";
+    style.textContent = readFileSync(rendererCss, "utf-8");
 
-        if (document.readyState === "complete") {
-            document.documentElement.appendChild(style);
-        } else {
-            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
-                once: true
-            });
-        }
+    if (document.readyState === "complete") {
+        document.documentElement.appendChild(style);
+    } else {
+        document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+            once: true
+        });
     }
 
-    try {
-        const css = readFileSync(rendererCss, "utf-8");
-        insertCss(css);
-        if (IS_DEV) {
-            // persistent means keep process running if watcher is the only thing still running
-            // which we obviously don't want
-            watch(rendererCss, { persistent: false }, () => {
-                document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
-            });
-        }
-    } catch (err) {
-        if ((err as NodeJS.ErrnoException)?.code !== "ENOENT")
-            throw err;
-
-        // hack: the pre update updater does not download this file, so manually download it
-        // TODO: remove this in a future version
-        ipcRenderer.invoke(IpcEvents.DOWNLOAD_VENCORD_CSS)
-            .then(insertCss);
+    if (IS_DEV) {
+        // persistent means keep process running if watcher is the only thing still running
+        // which we obviously don't want
+        watch(rendererCss, { persistent: false }, () => {
+            document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
+        });
     }
-    require(process.env.DISCORD_PRELOAD!);
-} else {
-    // Monaco Popout
-    contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
-    contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
+    // #endregion
+
+    if (IS_DISCORD_DESKTOP) {
+        webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
+        require(process.env.DISCORD_PRELOAD!);
+    }
+} // Monaco popout
+else {
+    contextBridge.exposeInMainWorld("setCss", debounce(VencordNative.quickCss.set));
+    contextBridge.exposeInMainWorld("getCurrentCss", VencordNative.quickCss.get);
     // shrug
     contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
 }

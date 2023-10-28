@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "lib": [
             "DOM",
+            "DOM.Iterable",
             "esnext",
             "esnext.array",
             "esnext.asynciterable",
@@ -18,11 +19,12 @@
 
         "baseUrl": "./src/",
         "paths": {
-            "@webpack": ["./webpack"],
-            "@webpack/common": ["./webpack/common"],
-            "@utils/*": ["./utils/*"],
             "@api/*": ["./api/*"],
-            "@components/*": ["./components/*"]
+            "@components/*": ["./components/*"],
+            "@utils/*": ["./utils/*"],
+            "@webpack/types": ["./webpack/common/types"],
+            "@webpack/common": ["./webpack/common"],
+            "@webpack": ["./webpack/webpack"]
         }
     },
     "include": ["src/**/*"]

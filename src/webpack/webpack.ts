@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
-import { proxyLazy } from "@utils/proxyLazy";
+import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -50,22 +50,65 @@ export const filters = {
         }
         return true;
     },
+    byStoreName: (name: string): FilterFn => m =>
+        m.constructor?.displayName === name
 };
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
-export type CallbackFn = (mod: any) => void;
+export type CallbackFn = (mod: any, id: number) => void;
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
 
-    wreq = instance.push([[Symbol("Vencord")], {}, r => r]);
-    cache = wreq.c;
+    instance.push([[Symbol("Vencord")], {}, r => wreq = r]);
     instance.pop();
+    if (!wreq) return false;
+
+    cache = wreq.c;
+
+    for (const id in cache) {
+        const { exports } = cache[id];
+        if (!exports) continue;
+
+        const numberId = Number(id);
+
+        for (const callback of listeners) {
+            try {
+                callback(exports, numberId);
+            } catch (err) {
+                logger.error("Error in webpack listener", err);
+            }
+        }
+
+        for (const [filter, callback] of subscriptions) {
+            try {
+                if (filter(exports)) {
+                    subscriptions.delete(filter);
+                    callback(exports, numberId);
+                } else if (typeof exports === "object") {
+                    if (exports.default && filter(exports.default)) {
+                        subscriptions.delete(filter);
+                        callback(exports.default, numberId);
+                    }
+
+                    for (const nested in exports) if (nested.length <= 3) {
+                        if (exports[nested] && filter(exports[nested])) {
+                            subscriptions.delete(filter);
+                            callback(exports[nested], numberId);
+                        }
+                    }
+                }
+            } catch (err) {
+                logger.error("Error while firing callback for webpack chunk", err);
+            }
+        }
+    }
+    return true;
 }
 
-if (IS_DEV && !IS_WEB) {
+if (IS_DEV && IS_DISCORD_DESKTOP) {
     var devToolsOpen = false;
     // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
     setTimeout(() => {
@@ -73,10 +116,19 @@ if (IS_DEV && !IS_WEB) {
     }, 0);
 }
 
+function handleModuleNotFound(method: string, ...filter: unknown[]) {
+    const err = new Error(`webpack.${method} found no module`);
+    logger.error(err, "Filter:", filter);
+
+    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+    if (IS_DEV && !devToolsOpen)
+        throw err;
+}
+
 /**
  * Find the first module that matches the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, getDefault = true, isWaitFor = false) {
+export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -84,43 +136,41 @@ export const find = traceFunction("find", function find(filter: FilterFn, getDef
         const mod = cache[key];
         if (!mod?.exports) continue;
 
-        if (filter(mod.exports))
-            return mod.exports;
+        if (filter(mod.exports)) {
+            return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
+        }
 
         if (typeof mod.exports !== "object") continue;
 
-        if (mod.exports.default && filter(mod.exports.default))
-            return getDefault ? mod.exports.default : mod.exports;
+        if (mod.exports.default && filter(mod.exports.default)) {
+            const found = mod.exports.default;
+            return isWaitFor ? [found, Number(key)] : found;
+        }
 
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) return nested;
+            if (nested && filter(nested)) {
+                return isWaitFor ? [nested, Number(key)] : nested;
+            }
         }
     }
 
-    if (!isWaitFor) {
-        const err = new Error("Didn't find module matching this filter");
-        if (IS_DEV) {
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
-        } else {
-            logger.warn(err);
-        }
+    if (!isIndirect) {
+        handleModuleNotFound("find", filter);
     }
 
-    return null;
+    return isWaitFor ? [null, null] : null;
 });
 
 /**
  * find but lazy
  */
-export function findLazy(filter: FilterFn, getDefault = true) {
-    return proxyLazy(() => find(filter, getDefault));
+export function findLazy(filter: FilterFn) {
+    return proxyLazy(() => find(filter));
 }
 
-export function findAll(filter: FilterFn, getDefault = true) {
+export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -135,7 +185,7 @@ export function findAll(filter: FilterFn, getDefault = true) {
             continue;
 
         if (mod.exports.default && filter(mod.exports.default))
-            ret.push(getDefault ? mod.exports.default : mod.exports);
+            ret.push(mod.exports.default);
         else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
@@ -295,35 +345,51 @@ export function mapMangledModuleLazy<S extends string>(code: string, mappers: Re
  * Find the first module that has the specified properties
  */
 export function findByProps(...props: string[]) {
-    return find(filters.byProps(...props));
+    const res = find(filters.byProps(...props), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByProps", ...props);
+    return res;
 }
 
 /**
  * findByProps but lazy
  */
 export function findByPropsLazy(...props: string[]) {
-    return findLazy(filters.byProps(...props));
-}
-
-/**
- * Find all modules that have the specified properties
- */
-export function findAllByProps(...props: string[]) {
-    return findAll(filters.byProps(...props));
+    return proxyLazy(() => findByProps(...props));
 }
 
 /**
  * Find a function by its code
  */
 export function findByCode(...code: string[]) {
-    return find(filters.byCode(...code));
+    const res = find(filters.byCode(...code), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByCode", ...code);
+    return res;
 }
 
 /**
  * findByCode but lazy
  */
 export function findByCodeLazy(...code: string[]) {
-    return findLazy(filters.byCode(...code));
+    return proxyLazy(() => findByCode(...code));
+}
+
+/**
+ * Find a store by its displayName
+ */
+export function findStore(name: string) {
+    const res = find(filters.byStoreName(name), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findStore", name);
+    return res;
+}
+
+/**
+ * findByDisplayName but lazy
+ */
+export function findStoreLazy(name: string) {
+    return proxyLazy(() => findStore(name));
 }
 
 /**
@@ -338,8 +404,8 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const existing = find(filter!, true, true);
-    if (existing) return void callback(existing);
+    const [existing, id] = find(filter!, { isIndirect: true, isWaitFor: true });
+    if (existing) return void callback(existing, id);
 
     subscriptions.set(filter, callback);
 }
@@ -392,7 +458,7 @@ export function extract(id: number) {
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-${mod.toString()}
+0,${mod.toString()}
 //# sourceURL=ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);

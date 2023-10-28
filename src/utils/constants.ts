@@ -19,11 +19,28 @@
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
+export {
+    gitHash,
+    gitRemote
+};
+
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
+export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
-// Add yourself here if you made a plugin
+export interface Dev {
+    name: string;
+    id: bigint;
+    badge?: boolean;
+}
+
+/**
+ * If you made a plugin or substantial contribution, add yourself here.
+ * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
+ * If you wish to stay fully anonymous, feel free to set ID to 0n.
+ * If you are fine with attribution but don't want the badge, add badge: false
+ */
 export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -193,8 +210,186 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Captain",
         id: 347366054806159360n
     },
+    nick: {
+        name: "nick",
+        id: 347884694408265729n,
+        badge: false
+    },
+    whqwert: {
+        name: "whqwert",
+        id: 586239091520176128n
+    },
+    lewisakura: {
+        name: "lewisakura",
+        id: 96269247411400704n
+    },
+    RuiNtD: {
+        name: "RuiNtD",
+        id: 157917665162297344n
+    },
+    hunt: {
+        name: "hunt-g",
+        id: 222800179697287168n
+    },
+    cloudburst: {
+        name: "cloudburst",
+        id: 892128204150685769n
+    },
+    Aria: {
+        name: "Syncxv",
+        id: 549244932213309442n,
+    },
+    TheKodeToad: {
+        name: "TheKodeToad",
+        id: 706152404072267788n
+    },
+    LordElias: {
+        name: "LordElias",
+        id: 319460781567639554n
+    },
+    juby: {
+        name: "Juby210",
+        id: 324622488644616195n
+    },
+    Alyxia: {
+        name: "Alyxia Sother",
+        id: 952185386350829688n
+    },
+    Remty: {
+        name: "Remty",
+        id: 335055032204656642n
+    },
+    skyevg: {
+        name: "skyevg",
+        id: 1090310844283363348n
+    },
+    Dziurwa: {
+        name: "Dziurwa",
+        id: 1001086404203389018n
+    },
+    AutumnVN: {
+        name: "AutumnVN",
+        id: 393694671383166998n
+    },
+    pylix: {
+        name: "pylix",
+        id: 492949202121261067n
+    },
+    Tyler: {
+        name: "\\\\GGTyler\\\\",
+        id: 143117463788191746n
+    },
+    RyanCaoDev: {
+        name: "RyanCaoDev",
+        id: 952235800110694471n,
+    },
+    Strencher: {
+        name: "Strencher",
+        id: 415849376598982656n
+    },
+    FieryFlames: {
+        name: "Fiery",
+        id: 890228870559698955n
+    },
+    KannaDev: {
+        name: "Kanna",
+        id: 317728561106518019n
+    },
+    carince: {
+        name: "carince",
+        id: 818323528755314698n
+    },
+    PandaNinjas: {
+        name: "PandaNinjas",
+        id: 455128749071925248n
+    },
+    CatNoir: {
+        name: "CatNoir",
+        id: 260371016348336128n
+    },
+    outfoxxed: {
+        name: "outfoxxed",
+        id: 837425748435796060n
+    },
+    UwUDev: {
+        name: "UwU",
+        id: 691413039156690994n,
+    },
+    amia: {
+        name: "amia",
+        id: 142007603549962240n
+    },
+    phil: {
+        name: "phil",
+        id: 305288513941667851n
+    },
+    ImLvna: {
+        name: "Luna <3",
+        id: 799319081723232267n
+    },
+    rad: {
+        name: "rad",
+        id: 610945092504780823n
+    },
+    AndrewDLO: {
+        name: "Andrew-DLO",
+        id: 434135504792059917n
+    },
+    HypedDomi: {
+        name: "HypedDomi",
+        id: 354191516979429376n
+    },
+    Rini: {
+        name: "Rini",
+        id: 1079479184478441643n
+    },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n
+    },
+    Arrow: {
+        name: "arrow",
+        id: 958158495302176778n
+    },
+    bb010g: {
+        name: "bb010g",
+        id: 72791153467990016n,
+    },
+    Lumap: {
+        name: "lumap",
+        id: 635383782576357407n
+    },
+    Dolfies: {
+        name: "Dolfies",
+        id: 852892297661906993n,
+    },
+    RuukuLada: {
+        name: "RuukuLada",
+        id: 119705748346241027n,
+    },
+    blahajZip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n,
+    },
+    archeruwu: {
+        name: "archer_uwu",
+        id: 160068695383736320n
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
+    },
     MyNameIsJeff: {
         name: "My-Name-Is-Jeff",
         id: 150427554166210560n
-    }
-});
+    },
+} satisfies Record<string, Dev>);
+
+// iife so #__PURE__ works correctly
+export const DevsById = /* #__PURE__*/ (() =>
+    Object.freeze(Object.fromEntries(
+        Object.entries(Devs)
+            .filter(d => d[1].id !== 0n)
+            .map(([_, v]) => [v.id, v] as const)
+    ))
+)() as Record<string, Dev>;

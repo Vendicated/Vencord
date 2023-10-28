@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, mapMangledModuleLazy } from "@webpack";
+import { filters, findByProps, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
-export enum ModalSize {
+import { LazyComponent } from "./react";
+
+export const enum ModalSize {
     SMALL = "small",
     MEDIUM = "medium",
     LARGE = "large",
     DYNAMIC = "dynamic",
 }
 
-enum ModalTransitionState {
+const enum ModalTransitionState {
     ENTERING,
     ENTERED,
     EXITING,
@@ -44,16 +47,7 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-interface ModalRootProps {
-    transitionState: ModalTransitionState;
-    children: React.ReactNode;
-    size?: ModalSize;
-    role?: "alertdialog" | "dialog";
-    className?: string;
-    onAnimationEnd?(): string;
-}
-
-type RenderFunction = (props: ModalProps) => React.ReactNode;
+type RenderFunction = (props: ModalProps) => ReactNode;
 
 export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
     ModalRoot: filters.byCode(".root"),
@@ -61,19 +55,84 @@ export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
     ModalContent: filters.byCode(".content"),
     ModalFooter: filters.byCode(".footerSeparator"),
     ModalCloseButton: filters.byCode(".closeWithCircleBackground"),
-});
+}) as {
+    ModalRoot: ComponentType<PropsWithChildren<{
+        transitionState: ModalTransitionState;
+        size?: ModalSize;
+        role?: "alertdialog" | "dialog";
+        className?: string;
+        fullscreenOnMobile?: boolean;
+        "aria-label"?: string;
+        "aria-labelledby"?: string;
+        onAnimationEnd?(): string;
+    }>>;
+    ModalHeader: ComponentType<PropsWithChildren<{
+        /** Flex.Justify.START */
+        justify?: string;
+        /** Flex.Direction.HORIZONTAL */
+        direction?: string;
+        /** Flex.Align.CENTER */
+        align?: string;
+        /** Flex.Wrap.NO_WRAP */
+        wrap?: string;
+        separator?: boolean;
 
-export const ModalRoot = (props: ModalRootProps) => <Modals.ModalRoot {...props} />;
-export const ModalHeader = (props: any) => <Modals.ModalHeader {...props} />;
-export const ModalContent = (props: any) => <Modals.ModalContent {...props} />;
-export const ModalFooter = (props: any) => <Modals.ModalFooter {...props} />;
-export const ModalCloseButton = (props: any) => <Modals.ModalCloseButton {...props} />;
+        className?: string;
+    }>>;
+    /** This also accepts Scroller props but good luck with that */
+    ModalContent: ComponentType<PropsWithChildren<{
+        className?: string;
+        scrollerRef?: Ref<HTMLElement>;
+        [prop: string]: any;
+    }>>;
+    ModalFooter: ComponentType<PropsWithChildren<{
+        /** Flex.Justify.START */
+        justify?: string;
+        /** Flex.Direction.HORIZONTAL_REVERSE */
+        direction?: string;
+        /** Flex.Align.STRETCH */
+        align?: string;
+        /** Flex.Wrap.NO_WRAP */
+        wrap?: string;
+        separator?: boolean;
 
-const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
-    openModal: filters.byCode("onCloseRequest:null!="),
-    closeModal: filters.byCode("onCloseCallback&&"),
-    openModalLazy: m => m?.length === 1 && filters.byCode(".apply(this,arguments)")(m),
-});
+        className?: string;
+    }>>;
+    ModalCloseButton: ComponentType<{
+        focusProps?: any;
+        onClick(): void;
+        withCircleBackground?: boolean;
+        hideOnFullscreen?: boolean;
+        className?: string;
+    }>;
+};
+
+export type ImageModal = ComponentType<{
+    className?: string;
+    src: string;
+    placeholder: string;
+    original: string;
+    width?: number;
+    height?: number;
+    animated?: boolean;
+    responsive?: boolean;
+    renderLinkComponent(props: any): ReactNode;
+    maxWidth?: number;
+    maxHeight?: number;
+    shouldAnimate?: boolean;
+    onClose?(): void;
+    shouldHideMediaOptions?: boolean;
+}>;
+
+export const ImageModal = LazyComponent(() => findByProps("ImageModal").ImageModal as ImageModal);
+
+export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
+export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
+export const ModalContent = LazyComponent(() => Modals.ModalContent);
+export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
+export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
+
+const ModalAPI = findByPropsLazy("openModalLazy");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.
@@ -97,4 +156,11 @@ export function openModal(render: RenderFunction, options?: ModalOptions, contex
  */
 export function closeModal(modalKey: string, contextKey?: string): void {
     return ModalAPI.closeModal(modalKey, contextKey);
+}
+
+/**
+ * Close all open modals
+ */
+export function closeAllModals(): void {
+    return ModalAPI.closeAllModals();
 }
