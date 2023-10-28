@@ -13,6 +13,7 @@ import { isLinux, isMac, isWindows } from "./constants";
 import { localStorage } from "./localStorage";
 
 export function sendTelemetry() {
+    // TODO: READD THIS CHECK BEFORE RELEASING!!
     // if (IS_DEV) return; // don't send on devbuilds, usually contains incorrect data
 
     // if we have not yet told the user about the telemetry's existence, DON'T send
