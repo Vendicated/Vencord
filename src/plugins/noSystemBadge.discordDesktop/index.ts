@@ -25,15 +25,15 @@ export default definePlugin({
     authors: [Devs.rushii],
     patches: [
         {
-            find: "setSystemTrayApplications:function",
+            find: ",setSystemTrayApplications",
             replacement: [
                 {
-                    match: /setBadge:function.+?},/,
-                    replace: "setBadge:function(){},"
+                    match: /setBadge\(\i\).+?},/,
+                    replace: "setBadge(){},"
                 },
                 {
-                    match: /setSystemTrayIcon:function.+?},/,
-                    replace: "setSystemTrayIcon:function(){},"
+                    match: /setSystemTrayIcon\(\i\).+?},/,
+                    replace: "setSystemTrayIcon(){},"
                 }
             ]
         }
