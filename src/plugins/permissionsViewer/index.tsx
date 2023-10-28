@@ -161,7 +161,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
+            find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /showBorder:.{0,60}}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
                 replace: (m, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember}),`
