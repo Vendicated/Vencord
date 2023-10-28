@@ -18,19 +18,14 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findLazy, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ComponentDispatch, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
 
-const GuildNavBinds = mapMangledModuleLazy("mod+alt+down", {
-    CtrlTab: m => m.binds?.at(-1) === "ctrl+tab",
-    CtrlShiftTab: m => m.binds?.at(-1) === "ctrl+shift+tab",
-});
-
-const DigitBinds = findLazy(m => m.binds?.[0] === "mod+1");
+const KeyBinds = findByPropsLazy("JUMP_TO_GUILD", "SERVER_NEXT");
 
 export default definePlugin({
     name: "WebKeybinds",
-    description: "Re-adds keybinds missing in the web version of Discord: ctrl+t, ctrl+shift+t, ctrl+tab, ctrl+shift+tab, ctrl+1-9, ctrl+,",
+    description: "Re-adds keybinds missing in the web version of Discord: ctrl+t, ctrl+shift+t, ctrl+tab, ctrl+shift+tab, ctrl+1-9, ctrl+,. Only works fully on Vesktop/ArmCord, not inside your browser",
     authors: [Devs.Ven],
     enabledByDefault: true,
 
@@ -57,13 +52,13 @@ export default definePlugin({
                 SettingsRouter.open("My Account");
                 break;
             case "Tab":
-                const handler = e.shiftKey ? GuildNavBinds.CtrlShiftTab : GuildNavBinds.CtrlTab;
+                const handler = e.shiftKey ? KeyBinds.SERVER_PREV : KeyBinds.SERVER_NEXT;
                 handler.action(e);
                 break;
             default:
                 if (e.key >= "1" && e.key <= "9") {
                     e.preventDefault();
-                    DigitBinds.action(e, `mod+${e.key}`);
+                    KeyBinds.JUMP_TO_GUILD.action(e, `mod+${e.key}`);
                 }
                 break;
         }
