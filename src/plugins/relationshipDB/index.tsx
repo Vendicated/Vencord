@@ -254,7 +254,7 @@ export default definePlugin({
                 description: "Who's your cute kitten?"
             }, {
                 name: "message",
-                type: ApplicationCommandOptionType.USER,
+                type: ApplicationCommandOptionType.STRING,
                 required: true,
                 description: "gimme yourbest pickup line"
             }], execute(args, ctx) {
