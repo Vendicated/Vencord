@@ -91,6 +91,11 @@ function VencordSettings() {
                 key: "macosTranslucency",
                 title: "Enable translucent window",
                 note: "Requires a full restart"
+            },
+            {
+                key: "telemetry",
+                title: "Enable Telemetry",
+                note: "We only gather anonymous telemetry data. All data deleted after 3 days if you opt out."
             }
         ];
 

@@ -34,6 +34,7 @@ import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
+import { sendTelemetry } from "./utils/telemetry";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
@@ -82,6 +83,8 @@ async function init() {
     startAllPlugins();
 
     syncSettings();
+
+    sendTelemetry();
 
     if (!IS_WEB) {
         try {

@@ -61,6 +61,8 @@ export interface Settings {
         settingsSync: boolean;
         settingsSyncVersion: number;
     };
+
+    telemetry: boolean;
 }
 
 const DefaultSettings: Settings = {
@@ -91,7 +93,9 @@ const DefaultSettings: Settings = {
         url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
-    }
+    },
+
+    telemetry: true
 };
 
 try {
