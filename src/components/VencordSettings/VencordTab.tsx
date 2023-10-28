@@ -21,6 +21,7 @@ import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { ErrorCard } from "@components/ErrorCard";
+import { isMac, isWindows } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
@@ -45,9 +46,6 @@ function VencordSettings() {
     const settings = useSettings();
 
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
-
-    const isWindows = navigator.platform.toLowerCase().startsWith("win");
-    const isMac = navigator.platform.toLowerCase().startsWith("mac");
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;

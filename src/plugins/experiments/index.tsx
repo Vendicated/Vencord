@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Devs, isMac } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -96,9 +96,8 @@ export default definePlugin({
     ],
 
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
+        const modKey = isMac ? "cmd" : "ctrl";
+        const altKey = isMac ? "opt" : "alt";
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>

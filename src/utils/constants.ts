@@ -389,3 +389,10 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
+
+
+const { platform } = navigator;
+
+export const isWindows = platform.startsWith("Win");
+export const isMac = platform.startsWith("Mac");
+export const isLinux = platform.startsWith("Linux");
