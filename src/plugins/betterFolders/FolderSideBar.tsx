@@ -18,16 +18,19 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
-import { find, findByPropsLazy } from "@webpack";
-import { React, useStateFromStores } from "@webpack/common";
+import { find, findByPropsLazy, findStoreLazy } from "@webpack";
+import { useStateFromStores } from "@webpack/common";
+import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
+const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = LazyComponent(() => find(m => m.type?.toString().includes('("guildsnav")')));
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
+    const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
         <GuildsBar
@@ -40,9 +43,15 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const visible = !!expandedFolders.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
+    // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
+    // Also display flex otherwise to fix scrolling
+    const barStyle = {
+        display: isFullscreen ? "none" : "flex",
+    } as CSSProperties;
+
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div style={{ display: "flex " }}>{Sidebar}</div>
+            ? <div style={barStyle}>{Sidebar}</div>
             : null;
     }
 
@@ -54,9 +63,9 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(style, show) =>
+            {(animationStyle, show) =>
                 show && (
-                    <Animations.animated.div style={{ ...style, display: "flex" }}>
+                    <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
                         {Sidebar}
                     </Animations.animated.div>
                 )
