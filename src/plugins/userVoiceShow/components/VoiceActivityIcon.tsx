@@ -121,13 +121,13 @@ const cl = classNameFactory("vc-uvs-");
 export const VoiceActivityClassFactory = cl;
 
 export default ({ user, dmChannel }: VoiceActivityIconProps) => {
+    const { transitionTo, transitionToGuild } = Vencord.Webpack.Common.NavigationRouter;
     let channelPath: string;
     let text: string;
     let subtext: string;
     let TooltipIcon: string;
     let className = cl("icon");
     let voiceChannelUsers: User[] | undefined;
-
 
     if (!user?.id) return null;
 
@@ -186,7 +186,7 @@ export default ({ user, dmChannel }: VoiceActivityIconProps) => {
         <div className={className} onClick={e => {
             e.stopPropagation();
             e.preventDefault();
-            if (!canConnect && guild) transitionTo(`/channels/${guild.id}`);
+            if (!canConnect && guild) transitionToGuild("guild.id");
             if (channelPath) transitionTo(channelPath);
         }}>
             <Tooltip text={
