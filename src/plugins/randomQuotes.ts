@@ -36,6 +36,11 @@ const settings = definePluginSettings({
                 })
             }
         ]
+    },
+    replaceEvents: {
+        description: "Replace Event Quotes too",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 export default definePlugin({
@@ -46,10 +51,17 @@ export default definePlugin({
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
-            replacement: {
-                match: /;(.{0,10}\._loadingText)=.+?random\(.+?;/s,
-                replace: ";$self.quote().then(quoteText => $1 = quoteText);",
+            replacement: [
+            {
+                match: /,(.{0,10}\._loadingText)=function\(\)\{.+?\}\(\),/,
+                replace: ",$self.quote().then(quoteText => $1 = quoteText),",
             },
+            {
+                match: /,(.{0,10}\._eventLoadingText)=function\(\)\{.+?\}\(\),/,
+                replace: ",$self.quote().then(quoteText => $1 = quoteText),",
+                predicate: () => settings.store.replaceEvents
+            }
+        ]
         },
     ],
     commands: [
