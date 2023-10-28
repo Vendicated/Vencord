@@ -33,6 +33,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         <GuildsBar
             {...guildsBarProps}
             isBetterFolders={true}
+            betterFoldersExpandedIds={expandedFolders}
         />
     );
 
