@@ -73,6 +73,12 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
         default: false
+    },
+    keepIcons: {
+        type: OptionType.BOOLEAN,
+        description: "Keep showing guild icons in the primary guild bar folder when it's open in the BetterFolders sidebar",
+        restartNeeded: true,
+        default: false
     }
 });
 
@@ -126,6 +132,7 @@ export default definePlugin({
                 },
                 // If we are rendering the normal GuildsBar sidebar, we make Discord think the folder is always collapsed to show better icons (the mini guild icons) and avoid transitions
                 {
+                    predicate: () => settings.store.keepIcons,
                     match: /(?<=let{folderNode:\i,setNodeRef:\i,.+?expanded:(\i).+?;)(?=let)/,
                     replace: '$1=(typeof isBetterFolders!=="undefined"?isBetterFolders:false)?$1:false;'
                 },
@@ -133,20 +140,19 @@ export default definePlugin({
                 {
                     match: /(?=return\(0,\i.\i\)\("div")(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (_, expanded) => `if((typeof isBetterFolders!=="undefined"?isBetterFolders:false)&&!${expanded})return null;`
-                }
-                // This code is required for the plugin to work, but we don't need it right now because we are making Discord think the folder is always collapsed
-                // If we no longer want to make Discord think the folder is always collapsed, we can use this code for the plugin to work
-                // One reason to no longer want that is to make better icons (the mini guild icons) no longer show
-                /* // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
+                },
+                // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
+                    predicate: () => !settings.store.keepIcons,
                     match: /(?<=\.Messages\.SERVER_FOLDER_PLACEHOLDER.+?useTransition\)\()/,
                     replace: '(typeof isBetterFolders!=="undefined"?isBetterFolders:false)&&'
                 },
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
+                    predicate: () => !settings.store.keepIcons,
                     match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (m, expanded) => `${m}((typeof isBetterFolders!=="undefined"?isBetterFolders:false)||!${expanded})&&`
-                } */
+                }
             ]
         },
         {
