@@ -6,9 +6,11 @@
     background-color: var(--background-floating);
     cursor: pointer;
 }
+
 .vc-uvs-icon:hover {
     background-color: var(--background-tertiary);
 }
+
 .vc-uvs-icon svg {
     padding: 3px;
     color: var(--interactive-normal);
@@ -17,9 +19,11 @@
 .vc-uvs-iconCurrentCall {
     background-color: var(--status-positive);
 }
+
 .vc-uvs-iconCurrentCall:hover {
     background-color: var(--button-positive-background);
 }
+
 .vc-uvs-iconCurrentCall svg {
     color: #fff;
 }
@@ -35,10 +39,12 @@
     font-family: var(--font-display);
     text-transform: uppercase;
 }
+
 .vc-uvs-iconLive:hover {
     background-color: var(--button-danger-background);
 }
-.vc-uvs-iconLive > div {
+
+.vc-uvs-iconLive>div {
     padding: 0 6px;
 }
 
@@ -48,16 +54,19 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
 .vc-uvs-tooltip .subtext {
     display: flex;
     flex-direction: row;
     margin-top: 3px;
 }
-.vc-uvs-tooltip .subtext > div {
+
+.vc-uvs-tooltip .subtext>div {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
 .vc-uvs-tooltip .tooltipIcon {
     min-width: 16px;
     margin-right: 3px;
@@ -66,22 +75,17 @@
 
 .vc-uvs-iconContainer {
     margin-left: auto;
-}
-
-.vc-uvs-iconContainer .vc-uvs-icon {
-    margin-right: 8px;
-}
-
-.vc-uvs-iconContainer .vc-uvs-iconLive {
     margin-right: 8px;
 }
 
 .vc-uvs-iconLocked {
     background-color: var(--button-danger-background);
 }
+
 .vc-uvs-iconLocked:hover {
     background-color: var(--button-danger-background-hover);
 }
+
 .vc-uvs-iconLocked svg {
     color: #fff;
 }

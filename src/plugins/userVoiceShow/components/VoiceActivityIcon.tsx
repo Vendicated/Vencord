@@ -73,6 +73,7 @@ const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer"
 
 interface VoiceActivityIconProps {
     user: User;
+    dmChannel: boolean
 }
 interface VoiceState {
     userId: string;
@@ -119,13 +120,14 @@ function makeRenderMoreUsers(users: User[], count = 5) {
 const cl = classNameFactory("vc-uvs-");
 export const VoiceActivityClassFactory = cl;
 
-export default ({ user }: VoiceActivityIconProps) => {
+export default ({ user, dmChannel }: VoiceActivityIconProps) => {
     let channelPath: string;
     let text: string;
     let subtext: string;
     let TooltipIcon: string;
     let className = cl("icon");
     let voiceChannelUsers: User[] | undefined;
+
 
     if (!user?.id) return null;
 
@@ -178,6 +180,7 @@ export default ({ user }: VoiceActivityIconProps) => {
 
     const canConnect = PermissionStore.can(CONNECT, channel);
     if (!canConnect) className = `${className} ${cl("iconLocked")}`;
+    if (dmChannel) className = `${className} ${cl("iconContainer")}`;
 
     return (
         <div className={className} onClick={e => {
