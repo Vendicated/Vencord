@@ -5,41 +5,44 @@
  */
 
 import { Settings } from "@api/Settings";
-import { Alerts, SettingsRouter } from "@webpack/common";
+import { Alerts } from "@webpack/common";
 
 import { isPluginEnabled } from "../plugins";
 import { Plugins } from "../Vencord";
 import { isLinux, isMac, isWindows } from "./constants";
-import { localStorage } from "./localStorage";
 
 export function sendTelemetry() {
-    // TODO: READD THIS CHECK BEFORE RELEASING!!
+    // TODO: READ THIS CHECK BEFORE RELEASING!!
     // if (IS_DEV) return; // don't send on devbuilds, usually contains incorrect data
 
-    // if we have not yet told the user about the telemetry's existence, DON'T send
-    // a probe now, but tell them and then let them decide if they want to opt in or
-    // not. this only takes place the next time the mod starts.
-    if (!localStorage.getItem("Vencord_telemetryAcknowledged")) {
+    // if we have not yet told the user about the telemetry's existence, or they haven't agreed at all, DON'T send a
+    // probe now, but tell them and then let them decide if they want to opt in or not.
+    if (Settings.telemetry === undefined) {
         Alerts.show({
             title: "Telemetry Notice",
             body: <>
                 <p>
-                    Vencord has a telemetry feature that sends anonymous data to us, which we use to improve the mod.
+                    Vencord has a telemetry feature that sends anonymous data to us, which we use to improve the mod. We
+                    gather your operating system, the version of Vencord you're using and a list of enabled plugins, and
+                    we can use this data to help improve it for yourself and everyone else.
                 </p>
                 <p>
-                    If you don't want this, that's okay! We haven't sent anything yet. You can disable this in the
-                    settings at any time, easily. If you choose to do nothing, we'll send some information the next time
-                    you reload or restart Discord.
+                    If you don't want this, that's okay! We haven't sent anything yet. Please decide if you want to allow
+                    us to gather a little bit of data. You can change this setting at any time in the future. If you
+                    grant consent, we will start sending the data above the next time you reload or restart Discord.
                 </p>
             </>,
-            confirmText: "Okay",
-            secondaryConfirmText: "Vencord Settings",
-            onConfirmSecondary() {
-                SettingsRouter.open("VencordSettings");
-            },
-        });
+            confirmText: "Yes, that's fine",
+            cancelText: "No, I don't want that",
 
-        localStorage.setItem("Vencord_telemetryAcknowledged", "1");
+            onConfirm() {
+                Settings.telemetry = true;
+            },
+
+            onCancel() {
+                Settings.telemetry = false;
+            }
+        });
 
         return;
     }

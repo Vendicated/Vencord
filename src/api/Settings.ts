@@ -62,7 +62,7 @@ export interface Settings {
         settingsSyncVersion: number;
     };
 
-    telemetry: boolean;
+    telemetry?: boolean; // tri-state, undefined = ask
 }
 
 const DefaultSettings: Settings = {
@@ -95,7 +95,7 @@ const DefaultSettings: Settings = {
         settingsSyncVersion: 0
     },
 
-    telemetry: true
+    telemetry: undefined
 };
 
 try {
