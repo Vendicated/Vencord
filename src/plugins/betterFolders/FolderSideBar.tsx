@@ -16,56 +16,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { i18n, React, useStateFromStores } from "@webpack/common";
+import { LazyComponent } from "@utils/react";
+import { find, findByPropsLazy } from "@webpack";
+import { React, useStateFromStores } from "@webpack/common";
 
-const cl = classNameFactory("vc-bf-");
-const classes = findByPropsLazy("sidebar", "guilds");
+import { ExpandedGuildFolderStore, settings } from ".";
 
 const Animations = findByPropsLazy("a", "animated", "useTransition");
-const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
-const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
+const GuildsBar = LazyComponent(() => find(m => m.type?.toString().includes('("guildsnav")')));
 
-function Guilds(props: {
-    className: string;
-    bfGuildFolders: any[];
-}) {
-    // @ts-expect-error
-    const res = Vencord.Plugins.plugins.BetterFolders.Guilds(props);
-
-    // TODO: Make this better
-    const scrollerProps = res.props.children?.props?.children?.props?.children?.[1]?.props;
-    if (scrollerProps?.children) {
-        const servers = scrollerProps.children.find(c => c?.props?.["aria-label"] === i18n.Messages.SERVERS);
-        if (servers) scrollerProps.children = servers;
-    }
-
-    return res;
-}
-
-export default ErrorBoundary.wrap(() => {
+export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const fullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
-
-    const guilds = document.querySelector(`.${classes.guilds}`);
-
-    const visible = !!expandedFolders.size;
-    const className = cl("folder-sidebar", { fullscreen });
 
     const Sidebar = (
-        <Guilds
-            className={classes.guilds}
-            bfGuildFolders={Array.from(expandedFolders)}
+        <GuildsBar
+            {...guildsBarProps}
+            isBetterFolders={true}
+            betterFoldersExpandedIds={expandedFolders}
         />
     );
 
-    if (!guilds || !Settings.plugins.BetterFolders.sidebarAnim)
+    const visible = !!expandedFolders.size;
+    const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
+
+    if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div className={className}>{Sidebar}</div>
+            ? <div style={{ display: "flex " }}>{Sidebar}</div>
             : null;
+    }
 
     return (
         <Animations.Transition
@@ -75,11 +54,13 @@ export default ErrorBoundary.wrap(() => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(style, show) => show && (
-                <Animations.animated.div style={style} className={className}>
-                    {Sidebar}
-                </Animations.animated.div>
-            )}
+            {(style, show) =>
+                show && (
+                    <Animations.animated.div style={{ ...style, display: "flex" }}>
+                        {Sidebar}
+                    </Animations.animated.div>
+                )
+            }
         </Animations.Transition>
     );
 }, { noop: true });
