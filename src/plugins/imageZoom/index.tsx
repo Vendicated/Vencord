@@ -186,6 +186,13 @@ export default definePlugin({
                 }
             ]
         },
+        {
+            find: "{hideShadow:",
+            replacement: {
+                match: /(?<=onClick:)\i/,
+                replace: "()=>{}"
+            }
+        }
     ],
 
     settings,
