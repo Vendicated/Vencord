@@ -10,7 +10,7 @@ import * as DataStore from "@api/DataStore";
 import { CloseIcon, SearchIcon } from "@components/Icons";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { openModal } from "@utils/modal";
-import { filters, findByCode, findByCodeLazy, waitFor } from "@webpack";
+import { findByCode } from "@webpack";
 import {
     Forms,
     Select,
@@ -28,10 +28,6 @@ import extractAndRequireModuleIds from "../util/requireModule";
 import { ColorPickerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
-
-const SelectionCircle = findByCodeLazy(".selectionCircle");
-let loader;
-waitFor(filters.byProps("loaderContainer"), (m) => loader = m);
 
 export default function Selector({
     visibleTabProps = "all",
@@ -333,7 +329,7 @@ export default function Selector({
                                 {({ onMouseEnter, onMouseLeave }) => {
                                     return (
                                         <div
-                                            className="discordColorway"
+                                            className={"discordColorway" + (currentColorway === color.name ? " active" : "")}
                                             id={"colorway-" + color.name}
                                             data-last-official={
                                                 ind + 1 === colorways.length
@@ -369,6 +365,22 @@ export default function Selector({
                                                         viewBox="0 0 16 16"
                                                     >
                                                         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div className="colorwayCheckIconContainer">
+                                                <div className="colorwayCheckIcon">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <circle r="8" cx="12" cy="12" fill="var(--white-500)" />
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                                        </g>
                                                     </svg>
                                                 </div>
                                             </div>
@@ -425,7 +437,6 @@ export default function Selector({
                                                     );
                                                 })}
                                             </div>
-                                            {currentColorway === color.name ? <SelectionCircle /> : <></>}
                                         </div>
                                     );
                                 }}

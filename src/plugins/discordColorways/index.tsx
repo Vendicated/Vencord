@@ -119,7 +119,7 @@ export default definePlugin({
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: "5.3.0",
-    creatorVersion: "1.15",
+    creatorVersion: "1.17",
     toolboxActions: {
         "Change Colorway": () => SettingsRouter.open("ColorwaysSettings"),
         "Open Colorway Creator": () =>
@@ -142,7 +142,7 @@ export default definePlugin({
         {
             find: "Messages.ACTIVITY_SETTINGS",
             replacement: {
-                match: /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/,
+                match: /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/,
                 replace: "...$self.makeSettingsCategories($1),$&"
             }
         }
@@ -152,12 +152,12 @@ export default definePlugin({
         LazySwatchLoaded = true;
     },
 
-    customSections: [] as ((ID: Record<string, unknown>) => any)[],
+    customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
 
-    makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
+    makeSettingsCategories(SectionTypes: Record<string, unknown>) {
         return [
             {
-                section: ID.HEADER,
+                section: SectionTypes.HEADER,
                 label: "Discord Colorways",
                 className: "vc-settings-header"
             },
@@ -173,9 +173,9 @@ export default definePlugin({
                 element: SettingsPage,
                 className: "dc-colorway-settings"
             },
-            ...this.customSections.map(func => func(ID)),
+            ...this.customSections.map(func => func(SectionTypes)),
             {
-                section: ID.DIVIDER
+                section: SectionTypes.DIVIDER
             }
         ].filter(Boolean);
     },

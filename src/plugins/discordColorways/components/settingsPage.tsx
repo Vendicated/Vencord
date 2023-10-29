@@ -185,7 +185,7 @@ export function SettingsPage() {
                     <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
                         setColorsButtonVisibility(e);
                         DataStore.set("showColorwaysButton", e);
-                    }}></Switch>
+                    }} />
                 </div>
                 {/*
                 <div className="colorwaysSettingsPage-settingsRow">
@@ -218,7 +218,7 @@ export function SettingsPage() {
                         <Switch style={{ marginBottom: 0 }} hideBorder value={onDemand} onChange={(e: boolean) => {
                             setOnDemand(e);
                             DataStore.set("onDemandWays", e);
-                        }}></Switch>
+                        }} />
                     </div>
                     <Forms.FormText type="DESCRIPTION" style={{ marginTop: 8 }}>Always utilise the latest of what Colorways has to offer. CSS is being directly generated on the device and gets applied in the place of the normal import/CSS given by the colorway.</Forms.FormText>
                 </div>
@@ -230,7 +230,7 @@ export function SettingsPage() {
                     <Switch style={{ marginBottom: 0 }} hideBorder value={onDemandTinted} onChange={(e: boolean) => {
                         setOnDemandTinted(e);
                         DataStore.set("onDemandWaysTintedText", e);
-                    }}></Switch>
+                    }} />
                 </div>
             </div>
             <div className="colorwaysSettingsPage-divider" />

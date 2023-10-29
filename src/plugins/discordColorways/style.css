@@ -92,11 +92,11 @@
 }
 
 .colorwaySelectorModal {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid var(--background-tertiary);
+    width: 100% !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--background-tertiary) !important;
     box-shadow: var(--dark-elevation-high) !important;
-    min-width: 596px;
+    min-width: 596px !important;
 }
 
 .colorwaySelectorModalContent {
@@ -681,13 +681,13 @@
 }
 
 .colorwaySelector-pill {
-    border-radius: 20px;
+    border-radius: 20px !important;
     background-color: var(--background-tertiary);
     border: 1px solid transparent;
-    box-sizing: border-box;
-    padding: 0 12px;
-    display: inline-flex;
-    align-items: center;
+    box-sizing: border-box !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
     height: 32px;
     overflow: hidden;
     color: var(--text-normal);

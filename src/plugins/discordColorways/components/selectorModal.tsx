@@ -9,7 +9,6 @@
 import * as DataStore from "@api/DataStore";
 import { CloseIcon, SearchIcon } from "@components/Icons";
 import { ModalContent, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { filters, findByCodeLazy, waitFor } from "@webpack";
 import {
     Forms,
     Select,
@@ -29,10 +28,6 @@ import { getHex } from "../utils";
 import { ColorPickerModal } from "./colorPicker";
 import CreatorModal from "./creatorModal";
 import ColorwayInfoModal from "./infoModal";
-
-const SelectionCircle = findByCodeLazy(".selectionCircle");
-let loader;
-waitFor(filters.byProps("loaderContainer"), (m) => loader = m);
 
 export default function SelectorModal({
     modalProps,
@@ -368,7 +363,7 @@ export default function SelectorModal({
                                     {({ onMouseEnter, onMouseLeave }) => {
                                         return (
                                             <div
-                                                className="discordColorway"
+                                                className={"discordColorway" + (currentColorway === color.name ? " active" : "")}
                                                 id={"colorway-" + color.name}
                                                 data-last-official={
                                                     ind + 1 === colorways.length
@@ -407,6 +402,22 @@ export default function SelectorModal({
                                                         </svg>
                                                     </div>
                                                 </div>
+                                                <div className="colorwayCheckIconContainer">
+                                                    <div className="colorwayCheckIcon">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="20"
+                                                            height="20"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <circle r="8" cx="12" cy="12" fill="var(--white-500)" />
+                                                            <g fill="none" fill-rule="evenodd">
+                                                                <path fill="var(--brand-500)" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                                 <div
                                                     className="discordColorwayPreviewColorContainer"
                                                     onClick={async () => {
@@ -442,7 +453,6 @@ export default function SelectorModal({
                                                         );
                                                     })}
                                                 </div>
-                                                {currentColorway === color.name ? <SelectionCircle /> : <></>}
                                             </div>
                                         );
                                     }}
