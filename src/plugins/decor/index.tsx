@@ -34,7 +34,7 @@ const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
 
 export default definePlugin({
     name: "Decor",
-    description: "Custom avatar decorations.",
+    description: "Create and use your own custom avatar decorations, or pick your favorite from the presets.",
     authors: [Devs.FieryFlames],
     patches: [
         // Patch UserStore to include Decor avatar decorations when getting users
