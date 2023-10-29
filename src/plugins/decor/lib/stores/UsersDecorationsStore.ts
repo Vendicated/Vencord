@@ -32,6 +32,7 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         set({ fetchQueue: new Set() });
 
         const fetchIds = Array.from(fetchQueue);
+        if (fetchIds.length === 0) return;
         const fetchedUsersDecorations = await getUsersDecorations(fetchIds);
 
         const newUsersDecorations = new Map(usersDecorations);
