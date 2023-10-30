@@ -8,10 +8,10 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, Co
 import { Devs } from "@utils/constants";
 import { getGifEncoder, getGifReader } from "@utils/dependencies";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
+import { UploadHandler } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 const UploadStore = findByPropsLazy("getUploads");
 
 async function resolveImage(options: Argument[], ctx: CommandContext): Promise<File | string | null> {
@@ -248,5 +248,5 @@ function drawText(ctx: CanvasRenderingContext2D, image: HTMLImageElement, text: 
 function promptUpload(file: File, channel: Channel) {
     // Immediately after the command finishes, Discord clears all input, including pending attachments.
     // Thus, setTimeout is needed to make this execute after Discord cleared the input
-    setTimeout(() => promptToUpload([file], channel, 0), 10);
+    setTimeout(() => UploadHandler.promptToUpload([file], channel, 0), 10);
 }
