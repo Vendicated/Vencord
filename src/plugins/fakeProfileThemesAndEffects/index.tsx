@@ -207,7 +207,7 @@ export default definePlugin({
             <Forms.FormSection>
                 <Forms.FormTitle tag={"h3"}>{"Usage"}</Forms.FormTitle>
                 <Forms.FormText>
-                    {"After enabling this plugin, you will see custom theme colors and effects in the profiles of other people using this plugin."}<br />
+                    {"After enabling this plugin, you will see custom theme colors and effects in the profiles of other people using this plugin."}
                     <div className={Margins.top8}>
                         <b>{"To set your own profile theme colors and effect:"}</b>
                     </div>
