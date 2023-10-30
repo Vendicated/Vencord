@@ -45,7 +45,7 @@ function base125StrToBase10Num(base125Str: string, upperLim: number): number {
     if (base125Str === "") return -1;
     let base10Num: number = 0;
     for (let i: number = 0; i < base125Str.length; i++) {
-        if (base10Num > upperLim) return -1;
+        if (base10Num > upperLim) return -2;
         base10Num += (base125Str.codePointAt(i) - 1) * 125 ** (base125Str.length - 1 - i);
     }
     return base10Num;
@@ -55,7 +55,7 @@ function base125StrToBase10BigInt(base125Str: string, upperLim: bigint): bigint 
     if (base125Str === "") return -1n;
     let base10BigInt: bigint = 0n;
     for (let i: number = 0; i < base125Str.length; i++) {
-        if (base10BigInt > upperLim) return -1n;
+        if (base10BigInt > upperLim) return -2n;
         base10BigInt += BigInt(base125Str.codePointAt(i) - 1) * 125n ** BigInt(base125Str.length - 1 - i);
     }
     return base10BigInt;
@@ -104,6 +104,82 @@ function decodeUserBio3y3(userBio: string): [string, string, string] {
         }
     }
     return decodedUserBio3y3;
+}
+
+function legacyStrToProfileThemeColors(userBio: string): [number, number] {
+    const profileThemeColors: [number, number] = [-1, -1];
+    let numberSignIndex: number = -1;
+    for (let i: number = 0; i < userBio.length; i++) {
+        if (userBio[i] === "#") {
+            numberSignIndex = i;
+            break;
+        }
+    }
+    if (numberSignIndex !== -1) {
+        let tempStr: string = "";
+        let upperLimit: number = numberSignIndex + 7 < userBio.length ? numberSignIndex + 7 : userBio.length;
+        for (let i: number = numberSignIndex + 1; i < upperLimit; i++) {
+            if (userBio[i] === "," || userBio[i] === "]") break;
+            tempStr += userBio[i];
+        }
+        let extractedColor: number = parseInt(tempStr, 16);
+        if (!Number.isNaN(extractedColor)) {
+            profileThemeColors[0] = extractedColor;
+            numberSignIndex = -1;
+            for (let i: number = upperLimit; i < userBio.length; i++) {
+                if (userBio[i] === "#") {
+                    numberSignIndex = i;
+                    break;
+                }
+            }
+            if (numberSignIndex !== -1) {
+                tempStr = "";
+                upperLimit = numberSignIndex + 7 < userBio.length ? numberSignIndex + 7 : userBio.length;
+                for (let i: number = numberSignIndex + 1; i < upperLimit; i++) {
+                    if (userBio[i] === "]" || userBio[i] === ",") break;
+                    tempStr += userBio[i];
+                }
+                extractedColor = parseInt(tempStr, 16);
+                if (!Number.isNaN(extractedColor))
+                    profileThemeColors[1] = extractedColor;
+            }
+        }
+    }
+    return profileThemeColors;
+}
+
+function legacy3y3(user: User, legacyStr: string): void {
+    const profileThemeColors: [number, number] = legacyStrToProfileThemeColors(legacyStr);
+    if (profileThemeColors[0] > -1) {
+        if (profileThemeColors[1] > -1)
+            user.themeColors = [profileThemeColors[0], profileThemeColors[1]];
+        else
+            user.themeColors = [profileThemeColors[0], profileThemeColors[0]];
+        user.premiumType = 2;
+    } else if (profileThemeColors[1] > -1) {
+        user.themeColors = [profileThemeColors[1], profileThemeColors[1]];
+        user.premiumType = 2;
+    }
+}
+
+function updateUserThemeColors(user: User, primary: number, accent: number): void {
+    if (primary > -1) {
+        if (accent > -1)
+            user.themeColors = [primary, accent];
+        else
+            user.themeColors = [primary, primary];
+        user.premiumType = 2;
+    } else if (accent > -1) {
+        user.themeColors = [accent, accent];
+        user.premiumType = 2;
+    }
+}
+
+function updateUserEffectID(user: User, id: bigint): void {
+    if (id > -1n) {
+        user.profileEffectID = id.toString();
+        user.premiumType = 2;
+    }
 }
 
 function openProfileThemeColorPicker(colorType: "Primary" | "Accent"): void {
@@ -236,52 +312,31 @@ export default definePlugin({
                     if (userProfileEffectID === undefined) {
                         const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
                         const profileEffectID: bigint = base125StrToBase10ItemID(decodedUserBio3y3[2]);
-                        if (profileEffectID !== -1n) {
-                            user.profileEffectID = profileEffectID.toString();
-                            users.premiumType = 2;   
-                        }
+                        updateUserEffectID(user, profileEffectID);
                     }
+                    return user;
                 } else if(userProfileEffectID !== undefined) {
                     const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
                     const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
-                    const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
-                    let shouldChangeUserPremiumType: boolean = false;
-                    if (profileThemePrimaryColor !== -1) {
-                        if (profileThemeAccentColor !== -1)
-                            user.themeColors = [profileThemePrimaryColor, profileThemeAccentColor];
-                        else
-                            user.themeColors = [profileThemePrimaryColor, profileThemePrimaryColor];
-                        shouldChangeUserPremiumType = true;
-                    } else if (profileThemeAccentColor !== -1) {
-                        user.themeColors = [profileThemeAccentColor, profileThemeAccentColor];
-                        shouldChangeUserPremiumType = true;
+                    if (profileThemePrimaryColor === -2) {
+                        legacy3y3(user, decodedUserBio3y3[0]);
+                    } else {
+                        const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
+                        updateUserThemeColors(user, profileThemePrimaryColor, profileThemeAccentColor);
                     }
-                    if (shouldChangeUserPremiumType === true)
-                        user.premiumType = 2;
-                }
-                return user;
+                    return user;
+                } 
             }
             const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
             const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
-            const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
-            const profileEffectID: bigint = base125StrToBase10ItemID(decodedUserBio3y3[2]);
-            let shouldChangeUserPremiumType: boolean = false;
-            if (profileThemePrimaryColor !== -1) {
-                if (profileThemeAccentColor !== -1)
-                    user.themeColors = [profileThemePrimaryColor, profileThemeAccentColor];
-                else
-                    user.themeColors = [profileThemePrimaryColor, profileThemePrimaryColor];
-                shouldChangeUserPremiumType = true;
-            } else if (profileThemeAccentColor !== -1) {
-                user.themeColors = [profileThemeAccentColor, profileThemeAccentColor];
-                shouldChangeUserPremiumType = true;
+            if (profileThemePrimaryColor === -2) {
+                legacy3y3(user, decodedUserBio3y3[0]);
+            } else {
+                const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
+                updateUserThemeColors(user, profileThemePrimaryColor, profileThemeAccentColor);
+                const profileEffectID: bigint = base125StrToBase10ItemID(decodedUserBio3y3[2]);
+                updateUserEffectID(user, profileEffectID);
             }
-            if (profileEffectID !== -1n) {
-                user.profileEffectID = profileEffectID.toString();
-                shouldChangeUserPremiumType = true;
-            }
-            if (shouldChangeUserPremiumType === true)
-                user.premiumType = 2;
         }
         return user;
     },
@@ -291,16 +346,24 @@ export default definePlugin({
                 <Text
                     tag={"h3"}
                     variant={"eyebrow"}
-                    className={Margins.bottom8}
                     style={{display: "inline"}}
                 >
                     {"3y3 Builder"}
                 </Text>
                 <Button
+                    id={pluginName + "3y3BuilderResetButton"}
                     look={Button.Looks.LINK}
                     color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.SMALL}
-                    style={{display: "inline"}}
+                    size={Button.Sizes.TINY}
+                    style={{
+                        display: _3y3BuilderVals[0] === -1 && _3y3BuilderVals[1] === -1 && _3y3BuilderVals[2] === ""
+                            ? "none" : "inline",
+                        height: "14px",
+                        marginLeft: "4px",
+                        minHeight: "0",
+                        paddingBottom: "0",
+                        paddingTop: "0"
+                    }}
                     onClick={(): void => {
                         _3y3BuilderVals[0] = -1;
                         _3y3BuilderVals[1] = -1;
@@ -312,11 +375,13 @@ export default definePlugin({
                             .textContent = "Accent: unchanged";
                         document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div")
                             .textContent = "Effect: unchanged";
+                        document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "none";
                     }}
                 >
                     {"Reset"}
                 </Button>
                 <div
+                    className={Margins.top8}
                     style={{
                         display: "grid",
                         gridTemplateColumns: "repeat(4, 1fr)",
@@ -411,7 +476,10 @@ export default definePlugin({
                                 stringToCopy = "\u{e007e}\u{e007e}"
                                     + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
                             }
-                            copyWithToast(stringToCopy, "3y3 copied to clipboard!");
+                            if (stringToCopy === "")
+                                showToast("3y3 Builder is empty; nothing to copy!");
+                            else
+                                copyWithToast(stringToCopy, "3y3 copied to clipboard!");
                         }}
                     >
                         {"Copy 3y3"}
@@ -434,6 +502,7 @@ export default definePlugin({
                     document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div")
                         .textContent = "Accent: #" + profileThemeAccentColor.toString(16).padStart(6, "0");
                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                    document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "inline";
                 }}
             >
                 {"Update 3y3"}
@@ -472,6 +541,7 @@ export default definePlugin({
                                                 document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div")
                                                     .textContent = "Effect: " + _3y3BuilderProfileEffectName;
                                                 showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                                document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "inline";
                                             } else
                                                 showToast("Cannot not find the selected profile effect's ID.", Toasts.Type.FAILURE);
                                         }
