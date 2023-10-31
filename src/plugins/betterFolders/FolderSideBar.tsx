@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LazyComponent } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { useStateFromStores } from "@webpack/common";
+import { React, useStateFromStores } from "@webpack/common";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
