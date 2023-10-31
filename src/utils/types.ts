@@ -20,6 +20,8 @@ import { Command } from "@api/Commands";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
+import { ModalSize } from "./modal";
+
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
     return p;
@@ -115,6 +117,8 @@ export interface PluginDef {
     toolboxActions?: Record<string, () => void>;
 
     tags?: string[];
+
+    modalSize?: ModalSize;
 }
 
 export const enum OptionType {
