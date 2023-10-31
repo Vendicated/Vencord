@@ -122,7 +122,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && " • "}
                     {!!theme.invite && (
-                        <InviteLink target={"${theme.invite}"}>
+                        <InviteLink target={theme.invite}>
                             Discord Server
                         </InviteLink>
                     )}
