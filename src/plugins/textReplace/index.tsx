@@ -21,6 +21,8 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
+import { InviteLink } from "@components/InviteLink";
+import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -28,7 +30,7 @@ import { ModalSize } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
-import { Button, Forms, React, TextInput, Toasts, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -55,8 +57,9 @@ const settings = definePluginSettings({
             const update = useForceUpdater();
             return (
                 <>
-                    <TextReplace update={update} />
                     <ButtonRow update={update} />
+                    <Forms.FormDivider></Forms.FormDivider>
+                    <TextReplace update={update} />
                     <TextReplaceTesting />
                 </>
             );
@@ -143,8 +146,10 @@ function TextReplace({ update }: { update: () => void; }) {
 
     return (
         <>
-            <Forms.FormTitle tag="h5" style={{ marginBottom: 0 }}>IS ENABLED</Forms.FormTitle >
-            <Forms.FormTitle tag="h5" style={{ position: "absolute", right: "40px" }}>IS REGEX</Forms.FormTitle >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Forms.FormTitle tag="h5" style={{ marginBottom: 0 }}>ENABLED</Forms.FormTitle >
+                <Forms.FormTitle tag="h5" style={{ marginBottom: 0, marginRight: "35px" }}>IS REGEX</Forms.FormTitle >
+            </div>
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     textReplaceRules.map((rule, i) => {
@@ -206,6 +211,13 @@ function ButtonRow({ update }: { update: () => void; }) {
     }
 
     async function importRules() {
+        importRules2(false);
+    }
+    async function mergeRules() {
+        importRules2(true);
+    }
+
+    async function importRules2(merge: boolean) {
         if (IS_DISCORD_DESKTOP) {
             const [file] = await DiscordNative.fileManager.openFiles({
                 filters: [
@@ -215,7 +227,7 @@ function ButtonRow({ update }: { update: () => void; }) {
             });
 
             if (file) {
-                tryImport(new TextDecoder().decode(file.data), update);
+                tryImport(new TextDecoder().decode(file.data), update, merge);
             }
         } else {
             const file = await chooseFile("application/json");
@@ -223,7 +235,7 @@ function ButtonRow({ update }: { update: () => void; }) {
 
             const reader = new FileReader();
             reader.onload = async () => {
-                tryImport(reader.result as string, update);
+                tryImport(reader.result as string, update, merge);
             };
             reader.readAsText(file);
         }
@@ -247,24 +259,29 @@ function ButtonRow({ update }: { update: () => void; }) {
             <Button
                 onClick={importRules}
             >
-                Import & Merge
+                Import Rules
+            </Button>
+            <Button
+                onClick={mergeRules}
+            >
+                Merge Rules
             </Button>
             <Button
                 onClick={exportRules}
             >
-                Export Settings
+                Export Rules
             </Button>
             <Button
                 onClick={newRule}
                 color={Button.Colors.GREEN}
             >
-                Create New Rule
+                New Rule
             </Button>
         </Flex>
     );
 }
 
-async function tryImport(str: string, update: () => void) {
+async function tryImport(str: string, update: () => void, merge: boolean) {
     try {
         const data = JSON.parse(str);
         for (const rule of data) {
@@ -274,19 +291,23 @@ async function tryImport(str: string, update: () => void) {
             if (typeof rule.onlyIfIncludes !== "string") throw new Error("A rule is missing onlyIfIncludes.");
             if (typeof rule.isRegex !== "boolean") throw new Error("A rule is missing isRegex.");
             textReplaceRules.push(rule);
+            if (!merge) { // Wow this is gross! sucks that it works
+                merge = true;
+                textReplaceRules = [rule];
+            }
             await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
             update();
         }
         Toasts.show({
             type: Toasts.Type.SUCCESS,
-            message: "Successfully imported & merged text replace rules.",
+            message: "Successfully " + merge ? "merged" : "imported" + " text replace rules.",
             id: Toasts.genId()
         });
     } catch (err) {
         new Logger("TextReplace").error(err);
         Toasts.show({
             type: Toasts.Type.FAILURE,
-            message: "Failed to import text replace rules: " + String(err),
+            message: "Failed to " + merge ? "merge" : "import" + " text replace rules: " + String(err),
             id: Toasts.genId()
         });
     }
@@ -303,14 +324,8 @@ function TextReplaceTesting() {
     );
 }
 
-function applyRules(content: string): string {
-    if (content.length === 0)
-        return content;
-
-    for (const rule of textReplaceRules) {
-        if (!rule.find || !rule.isEnabled) continue;
-        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
-
+function applyRule(rule: Rule, content: string): string {
+    if (rule.find && rule.isEnabled && !rule.onlyIfIncludes || content.includes(rule.onlyIfIncludes)) {
         if (rule.isRegex) {
             try {
                 const regex = stringToRegex(rule.find);
@@ -322,6 +337,16 @@ function applyRules(content: string): string {
             content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
         }
     }
+    return content;
+}
+
+function applyRules(content: string): string {
+    if (content.length === 0)
+        return content;
+
+    for (const rule of textReplaceRules) {
+        content = applyRule(rule, content);
+    }
 
     return content;
 }
@@ -330,8 +355,30 @@ const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
-    authors: [Devs.AutumnVN, Devs.TheKodeToad],
+    description: "Replace text in your messages.",
+    authors: [Devs.TheKodeToad, Devs.skykittenpuppy, Devs.AutumnVN],
+
+    settingsAboutComponent: () => {
+        return (
+            <React.Fragment>
+                <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
+                <Forms.FormText>
+                    You can find pre-made rules in the{" "}
+                    <Link
+                        href={`https://discord.com/channels/1015060230222131221/${TEXT_REPLACE_RULES_CHANNEL_ID}`}
+                        onClick={async e => {
+                            e.preventDefault();
+                            if (!ChannelStore.hasChannel(TEXT_REPLACE_RULES_CHANNEL_ID)) return;
+                            NavigationRouter.transitionTo(`/channels/1015060230222131221/${TEXT_REPLACE_RULES_CHANNEL_ID}`);
+                        }}>#textreplace-rules</Link>
+                    {" "}channel in{" "}
+                    <InviteLink target="D9uwnFnqmd">Vencord's Server</InviteLink>
+                    .
+                </Forms.FormText>
+            </React.Fragment >
+        );
+    },
+
     dependencies: ["MessageEventsAPI"],
     modalSize: ModalSize.DYNAMIC,
 
