@@ -53,6 +53,7 @@ const settings = definePluginSettings({
             return (
                 <>
                     <TextReplace update={update} />
+                    <NewRuleButton update={update} />
                     <TextReplaceTesting />
                 </>
             );
@@ -97,10 +98,12 @@ function Input({ initialValue, onChange, placeholder }: {
         <TextInput
             placeholder={placeholder}
             value={value}
-            onChange={setValue}
+            onChange={e => {
+                setValue(e);
+                onChange(e);
+            }}
             spellCheck={false}
             maxLength={2000}
-            onBlur={() => value !== initialValue && onChange(value)}
         />
     );
 }
@@ -108,7 +111,6 @@ function Input({ initialValue, onChange, placeholder }: {
 function TextReplace({ update }: { update: () => void; }) {
 
     async function onClickRemove(index: number) {
-        if (index === textReplaceRules.length - 1) return;
         textReplaceRules.splice(index, 1);
 
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
@@ -116,13 +118,7 @@ function TextReplace({ update }: { update: () => void; }) {
     }
 
     async function onChange(e: string, index: number, key: string) {
-        if (index === textReplaceRules.length - 1)
-            textReplaceRules.push(makeEmptyRule());
-
         textReplaceRules[index][key] = e;
-
-        if (textReplaceRules[index].find === "" && textReplaceRules[index].replace === "" && textReplaceRules[index].onlyIfIncludes === "" && index !== textReplaceRules.length - 1)
-            textReplaceRules.splice(index, 1);
 
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
         update();
@@ -130,6 +126,7 @@ function TextReplace({ update }: { update: () => void; }) {
 
     async function onCheck(checked: boolean, index: number) {
         textReplaceRules[index].isRegex = checked;
+
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
         update();
     }
@@ -141,7 +138,7 @@ function TextReplace({ update }: { update: () => void; }) {
                 {
                     textReplaceRules.map((rule, i) => {
                         return (
-                            <React.Fragment key={i}>
+                            <React.Fragment key={`${i}-${textReplaceRules.length}`}>
                                 <Flex flexDirection="row" style={{ gap: 0 }}>
                                     <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
                                         <Input
@@ -171,14 +168,7 @@ function TextReplace({ update }: { update: () => void; }) {
                                         onClick={() => onClickRemove(i)}
                                         style={{
                                             background: "none",
-                                            color: "var(--status-danger)",
-                                            ...(i === textReplaceRules.length - 1
-                                                ? {
-                                                    visibility: "hidden",
-                                                    pointerEvents: "none"
-                                                }
-                                                : {}
-                                            )
+                                            color: "var(--status-danger)"
                                         }}
                                     >
                                         <DeleteIcon />
@@ -191,6 +181,18 @@ function TextReplace({ update }: { update: () => void; }) {
                 }
             </Flex>
         </>
+    );
+}
+
+function NewRuleButton({ update }: { update: () => void; }) {
+    async function onClick() {
+        textReplaceRules.push(makeEmptyRule());
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+
+    return (
+        <Button onClick={onClick}>Add new rule</Button>
     );
 }
 
