@@ -21,6 +21,7 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
+import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { ModalSize } from "@utils/modal";
@@ -143,18 +144,16 @@ function TextReplace({ update }: { update: () => void; }) {
     return (
         <>
             <Forms.FormTitle tag="h5" style={{ marginBottom: 0 }}>IS ENABLED</Forms.FormTitle >
-            <Forms.FormTitle tag="h5" style={{ position: "absolute", right: "30px" }}>IS REGEX</Forms.FormTitle >
+            <Forms.FormTitle tag="h5" style={{ position: "absolute", right: "40px" }}>IS REGEX</Forms.FormTitle >
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     textReplaceRules.map((rule, i) => {
                         return (
                             <React.Fragment key={`${i}-${textReplaceRules.length}`}>
-                                <Flex flexDirection="row" style={{ gap: 0 }}>
-                                    <input
-                                        type="checkbox"
-                                        style={{ height: "32px", width: "32px" }}
+                                <Flex flexDirection="row" style={{ gap: "0.5em" }}>
+                                    <Switch
                                         checked={rule.isEnabled}
-                                        onChange={e => onToggle(e.target.checked, i)}
+                                        onChange={e => onToggle(e, i)}
                                     />
                                     <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
                                         <Input
@@ -173,11 +172,9 @@ function TextReplace({ update }: { update: () => void; }) {
                                             onChange={e => onChange(e, i, "onlyIfIncludes")}
                                         />
                                     </Flex>
-                                    <input
-                                        type="checkbox"
-                                        style={{ height: "32px", width: "32px" }}
+                                    <Switch
                                         checked={rule.isRegex}
-                                        onChange={e => onCheck(e.target.checked, i)}
+                                        onChange={e => onCheck(e, i)}
                                     />
                                     <Button
                                         size={Button.Sizes.MIN}
