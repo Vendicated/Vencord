@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { Avatar, GuildMemberStore, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
@@ -135,7 +135,7 @@ export default definePlugin({
 
         return children.map(c =>
             c.type === "strong"
-                ? <TypingUser {...props} user={users[element++]} />
+                ? <TypingUser {...props} user={users[element++]} key={users[element].id} />
                 : c
         );
     }

@@ -38,19 +38,21 @@ function msToHuman(ms: number) {
 }
 
 function Svg(path: string, label: string) {
-    return () => (
-        <svg
-            className={classes(cl("button-icon"), cl(label))}
-            height="24"
-            width="24"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-label={label}
-            focusable={false}
-        >
-            <path d={path} />
-        </svg>
-    );
+    return function Icon() {
+        return (
+            <svg
+                className={classes(cl("button-icon"), cl(label))}
+                height="24"
+                width="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-label={label}
+                focusable={false}
+            >
+                <path d={path} />
+            </svg>
+        );
+    };
 }
 
 // KraXen's icons :yesyes:

@@ -23,7 +23,7 @@ import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");

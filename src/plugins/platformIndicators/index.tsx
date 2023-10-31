@@ -30,21 +30,23 @@ import { User } from "discord-types/general";
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
-        <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
-                <svg
-                    {...tooltipProps}
-                    height={(opts?.height ?? 20) - (small ? 3 : 0)}
-                    width={(opts?.width ?? 20) - (small ? 3 : 0)}
-                    viewBox={opts?.viewBox ?? "0 0 24 24"}
-                    fill={color}
-                >
-                    <path d={path} />
-                </svg>
-            )}
-        </Tooltip>
-    );
+    return function PlatformIndicator({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) {
+        return (
+            <Tooltip text={tooltip} >
+                {(tooltipProps: any) => (
+                    <svg
+                        {...tooltipProps}
+                        height={(opts?.height ?? 20) - (small ? 3 : 0)}
+                        width={(opts?.width ?? 20) - (small ? 3 : 0)}
+                        viewBox={opts?.viewBox ?? "0 0 24 24"}
+                        fill={color}
+                    >
+                        <path d={path} />
+                    </svg>
+                )}
+            </Tooltip>
+        );
+    };
 }
 
 const Icons = {

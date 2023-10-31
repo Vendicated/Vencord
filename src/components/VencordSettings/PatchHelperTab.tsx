@@ -106,9 +106,9 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     }
 
     function renderDiff() {
-        return diff?.map(p => {
+        return diff?.map((p, i) => {
             const color = p.added ? "lime" : p.removed ? "red" : "grey";
-            return <div style={{ color, userSelect: "text" }}>{p.value}</div>;
+            return <div key={i} style={{ color, userSelect: "text" }}>{p.value}</div>;
         });
     }
 
