@@ -104,7 +104,6 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                                 return (
                                     <button
-                                        key={permission.id}
                                         className={cl("perms-list-item-btn")}
                                         onClick={() => selectItem(index)}
                                     >
@@ -158,7 +157,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         </div>
                         <div className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
-                                <div key={permissionName} className={cl("perms-perms-item")}>
+                                <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;

@@ -64,7 +64,6 @@ export default definePlugin({
     renderMutualGDMs(user: User, onClose: () => void) {
         const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
             <Clickable
-                key={c.id}
                 className={ProfileListClasses.listRow}
                 onClick={() => {
                     onClose();

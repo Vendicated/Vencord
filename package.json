@@ -57,7 +57,6 @@
         "eslint": "^8.46.0",
         "eslint-import-resolver-alias": "^1.1.2",
         "eslint-plugin-path-alias": "^1.0.0",
-        "eslint-plugin-react": "^7.33.2",
         "eslint-plugin-simple-import-sort": "^10.0.0",
         "eslint-plugin-unused-imports": "^2.0.0",
         "highlight.js": "10.6.0",
