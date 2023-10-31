@@ -26,15 +26,17 @@ import { Logger } from "@utils/Logger";
 import { ModalSize } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, React, TextInput, useState } from "@webpack/common";
+import { chooseFile, saveFile } from "@utils/web";
+import { Button, Forms, React, TextInput, Toasts, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 const TEXT_REPLACE_KEY = "TextReplace";
 
-type Rule = Record<"find" | "replace" | "onlyIfIncludes", string> & Record<"isRegex", boolean>;
+type Rule = Record<"find" | "replace" | "onlyIfIncludes", string> & Record<"isRegex" | "isEnabled", boolean>;
 
 const makeEmptyRule: () => Rule = () => ({
+    isEnabled: true,
     find: "",
     replace: "",
     onlyIfIncludes: "",
@@ -53,7 +55,7 @@ const settings = definePluginSettings({
             return (
                 <>
                     <TextReplace update={update} />
-                    <NewRuleButton update={update} />
+                    <ButtonRow update={update} />
                     <TextReplaceTesting />
                 </>
             );
@@ -131,15 +133,29 @@ function TextReplace({ update }: { update: () => void; }) {
         update();
     }
 
+    async function onToggle(checked: boolean, index: number) {
+        textReplaceRules[index].isEnabled = checked;
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+
     return (
         <>
-            <Forms.FormTitle tag="h5" style={{ position: "absolute", right: "30px", marginTop: "-20px" }}>IS REGEX</Forms.FormTitle >
+            <Forms.FormTitle tag="h5" style={{ marginBottom: 0 }}>IS ENABLED</Forms.FormTitle >
+            <Forms.FormTitle tag="h5" style={{ position: "absolute", right: "30px" }}>IS REGEX</Forms.FormTitle >
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     textReplaceRules.map((rule, i) => {
                         return (
                             <React.Fragment key={`${i}-${textReplaceRules.length}`}>
                                 <Flex flexDirection="row" style={{ gap: 0 }}>
+                                    <input
+                                        type="checkbox"
+                                        style={{ height: "32px", width: "32px" }}
+                                        checked={rule.isEnabled}
+                                        onChange={e => onToggle(e.target.checked, i)}
+                                    />
                                     <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
                                         <Input
                                             placeholder="Find"
@@ -184,16 +200,99 @@ function TextReplace({ update }: { update: () => void; }) {
     );
 }
 
-function NewRuleButton({ update }: { update: () => void; }) {
-    async function onClick() {
+function ButtonRow({ update }: { update: () => void; }) {
+
+    async function newRule() {
         textReplaceRules.push(makeEmptyRule());
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
         update();
     }
 
+    async function importRules() {
+        if (IS_DISCORD_DESKTOP) {
+            const [file] = await DiscordNative.fileManager.openFiles({
+                filters: [
+                    { name: "Text Replace Rules", extensions: ["json"] },
+                    { name: "all", extensions: ["*"] }
+                ]
+            });
+
+            if (file) {
+                tryImport(new TextDecoder().decode(file.data), update);
+            }
+        } else {
+            const file = await chooseFile("application/json");
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async () => {
+                tryImport(reader.result as string, update);
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    async function exportRules() {
+        const filename = "text-replace-rules.json";
+        const rules = await DataStore.get(TEXT_REPLACE_KEY);
+        if (!rules) return;
+        const data = new TextEncoder().encode(JSON.stringify(rules));
+
+        if (IS_DISCORD_DESKTOP) {
+            DiscordNative.fileManager.saveWithDialog(data, filename);
+        } else {
+            saveFile(new File([data], filename, { type: "application/json" }));
+        }
+    }
+
     return (
-        <Button onClick={onClick}>Add new rule</Button>
+        <Flex>
+            <Button
+                onClick={importRules}
+            >
+                Import & Merge
+            </Button>
+            <Button
+                onClick={exportRules}
+            >
+                Export Settings
+            </Button>
+            <Button
+                onClick={newRule}
+                color={Button.Colors.GREEN}
+            >
+                Create New Rule
+            </Button>
+        </Flex>
     );
+}
+
+async function tryImport(str: string, update: () => void) {
+    try {
+        const data = JSON.parse(str);
+        for (const rule of data) {
+            if (typeof rule.isEnabled !== "boolean") throw new Error("A rule is missing isEnabled.");
+            if (typeof rule.find !== "string") throw new Error("A rule is missing find.");
+            if (typeof rule.replace !== "string") throw new Error("A rule is missing replace.");
+            if (typeof rule.onlyIfIncludes !== "string") throw new Error("A rule is missing onlyIfIncludes.");
+            if (typeof rule.isRegex !== "boolean") throw new Error("A rule is missing isRegex.");
+            textReplaceRules.push(rule);
+            await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+            update();
+        }
+        Toasts.show({
+            type: Toasts.Type.SUCCESS,
+            message: "Successfully imported & merged text replace rules.",
+            id: Toasts.genId()
+        });
+    } catch (err) {
+        new Logger("TextReplace").error(err);
+        Toasts.show({
+            type: Toasts.Type.FAILURE,
+            message: "Failed to import text replace rules: " + String(err),
+            id: Toasts.genId()
+        });
+    }
 }
 
 function TextReplaceTesting() {
@@ -212,7 +311,7 @@ function applyRules(content: string): string {
         return content;
 
     for (const rule of textReplaceRules) {
-        if (!rule.find) continue;
+        if (!rule.find || !rule.isEnabled) continue;
         if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
         if (rule.isRegex) {
@@ -251,6 +350,7 @@ export default definePlugin({
         if (oldStringRules) {
             for (const rule of oldStringRules) {
                 textReplaceRules.push({
+                    isEnabled: true,
                     find: rule.find,
                     replace: rule.replace,
                     onlyIfIncludes: rule.onlyIfIncludes,
@@ -264,6 +364,7 @@ export default definePlugin({
         if (oldRegexRules) {
             for (const rule of oldRegexRules) {
                 textReplaceRules.push({
+                    isEnabled: true,
                     find: rule.find,
                     replace: rule.replace,
                     onlyIfIncludes: rule.onlyIfIncludes,
