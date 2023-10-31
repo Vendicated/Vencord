@@ -20,13 +20,14 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
+import { InviteLink } from "@components/InviteLink";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Card, Forms, React, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
@@ -121,23 +122,9 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && " • "}
                     {!!theme.invite && (
-                        <Link
-                            href={`https://discord.gg/${theme.invite}`}
-                            onClick={async e => {
-                                e.preventDefault();
-                                const { invite } = await InviteActions.resolveInvite(theme.invite, "Desktop Modal");
-                                if (!invite) return showToast("Invalid or expired invite");
-
-                                FluxDispatcher.dispatch({
-                                    type: "INVITE_MODAL_OPEN",
-                                    invite,
-                                    code: theme.invite,
-                                    context: "APP"
-                                });
-                            }}
-                        >
+                        <InviteLink target={"${theme.invite}"}>
                             Discord Server
-                        </Link>
+                        </InviteLink>
                     )}
                 </Flex>
             }
