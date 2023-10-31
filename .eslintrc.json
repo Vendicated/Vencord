@@ -9,7 +9,6 @@
         "unused-imports",
         "path-alias"
     ],
-    "extends": ["plugin:react/recommended", "plugin:react/jsx-runtime"],
     "settings": {
         "import/resolver": {
             "alias": {
@@ -21,9 +20,6 @@
                     ["@components", "./src/components"]
                 ]
             }
-        },
-        "react": {
-            "version": "18.2"
         }
     },
     "rules": {
@@ -97,12 +93,6 @@
 
         "unused-imports/no-unused-imports": "error",
 
-        "path-alias/no-relative": "error",
-
-        "react/no-unescaped-entities": "off",
-        "react/prop-types": "off",
-
-        /* we dont target ancient browsers */
-        "react/jsx-no-target-blank": "off"
+        "path-alias/no-relative": "error"
     }
 }

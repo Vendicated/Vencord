@@ -343,10 +343,10 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     ? parse(message.content)
                     : [noContent(message.attachments.length, message.embeds.length)]
                 }
-                {images.map((a, i) => {
+                {images.map(a => {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
-                        <div key={i}>
+                        <div>
                             <img src={a.url} width={width} height={height} />
                         </div>
                     );
