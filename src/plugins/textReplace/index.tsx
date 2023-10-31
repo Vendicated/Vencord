@@ -30,7 +30,7 @@ import { ModalSize } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
-import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -57,10 +57,7 @@ const settings = definePluginSettings({
             const update = useForceUpdater();
             return (
                 <>
-                    <ButtonRow update={update} />
-                    <Forms.FormDivider></Forms.FormDivider>
                     <TextReplace update={update} />
-                    <TextReplaceTesting />
                 </>
             );
         }
@@ -94,9 +91,10 @@ function renderFindError(find: string) {
     }
 }
 
-function Input({ initialValue, onChange, placeholder }: {
+function Input({ initialValue, onChange, placeholder, enabled }: {
     placeholder: string;
     initialValue: string;
+    enabled: boolean;
     onChange(value: string): void;
 }) {
     const [value, setValue] = useState(initialValue);
@@ -104,6 +102,7 @@ function Input({ initialValue, onChange, placeholder }: {
         <TextInput
             placeholder={placeholder}
             value={value}
+            disabled={!enabled}
             onChange={e => {
                 setValue(e);
                 onChange(e);
@@ -116,94 +115,6 @@ function Input({ initialValue, onChange, placeholder }: {
 
 function TextReplace({ update }: { update: () => void; }) {
 
-    async function onClickRemove(index: number) {
-        textReplaceRules.splice(index, 1);
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
-    }
-
-    async function onChange(e: string, index: number, key: string) {
-        textReplaceRules[index][key] = e;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
-    }
-
-    async function onCheck(checked: boolean, index: number) {
-        textReplaceRules[index].isRegex = checked;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
-    }
-
-    async function onToggle(checked: boolean, index: number) {
-        textReplaceRules[index].isEnabled = checked;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
-    }
-
-    return (
-        <>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <Forms.FormTitle tag="h5" style={{ marginBottom: 0 }}>ENABLED</Forms.FormTitle >
-                <Forms.FormTitle tag="h5" style={{ marginBottom: 0, marginRight: "35px" }}>IS REGEX</Forms.FormTitle >
-            </div>
-            <Flex flexDirection="column" style={{ gap: "0.5em" }}>
-                {
-                    textReplaceRules.map((rule, i) => {
-                        return (
-                            <React.Fragment key={`${i}-${textReplaceRules.length}`}>
-                                <Flex flexDirection="row" style={{ gap: "0.5em" }}>
-                                    <Switch
-                                        checked={rule.isEnabled}
-                                        onChange={e => onToggle(e, i)}
-                                    />
-                                    <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                        <Input
-                                            placeholder="Find"
-                                            initialValue={rule.find}
-                                            onChange={e => onChange(e, i, "find")}
-                                        />
-                                        <Input
-                                            placeholder="Replace"
-                                            initialValue={rule.replace}
-                                            onChange={e => onChange(e, i, "replace")}
-                                        />
-                                        <Input
-                                            placeholder="Only if includes"
-                                            initialValue={rule.onlyIfIncludes}
-                                            onChange={e => onChange(e, i, "onlyIfIncludes")}
-                                        />
-                                    </Flex>
-                                    <Switch
-                                        checked={rule.isRegex}
-                                        onChange={e => onCheck(e, i)}
-                                    />
-                                    <Button
-                                        size={Button.Sizes.MIN}
-                                        onClick={() => onClickRemove(i)}
-                                        style={{
-                                            background: "none",
-                                            color: "var(--status-danger)"
-                                        }}
-                                    >
-                                        <DeleteIcon />
-                                    </Button>
-                                </Flex>
-                                {rule.isRegex && renderFindError(rule.find)}
-                            </React.Fragment>
-                        );
-                    })
-                }
-            </Flex>
-        </>
-    );
-}
-
-function ButtonRow({ update }: { update: () => void; }) {
-
     async function newRule() {
         textReplaceRules.push(makeEmptyRule());
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
@@ -211,13 +122,13 @@ function ButtonRow({ update }: { update: () => void; }) {
     }
 
     async function importRules() {
-        importRules2(false);
+        rulesFromFile(false);
     }
     async function mergeRules() {
-        importRules2(true);
+        rulesFromFile(true);
     }
 
-    async function importRules2(merge: boolean) {
+    async function rulesFromFile(merge: boolean) {
         if (IS_DISCORD_DESKTOP) {
             const [file] = await DiscordNative.fileManager.openFiles({
                 filters: [
@@ -254,30 +165,191 @@ function ButtonRow({ update }: { update: () => void; }) {
         }
     }
 
+    async function onClickRemove(index: number) {
+        textReplaceRules.splice(index, 1);
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+    async function onClickMoveUp(index: number) {
+        if (index === 0) return;
+        [textReplaceRules[index], textReplaceRules[index - 1]] = [textReplaceRules[index - 1], textReplaceRules[index]];
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update(); // BIG PROBLEM: doesn't update the textboxes, but it does work
+    }
+    async function onClickMoveDown(index: number) {
+        if (index === textReplaceRules.length - 1) return;
+        [textReplaceRules[index], textReplaceRules[index + 1]] = [textReplaceRules[index + 1], textReplaceRules[index]];
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update(); // BIG PROBLEM: doesn't update the textboxes, but it does work
+    }
+
+    async function onChange(e: string, index: number, key: string) {
+        textReplaceRules[index][key] = e;
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+
+    async function onCheck(checked: boolean, index: number) {
+        textReplaceRules[index].isRegex = checked;
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+
+    async function onToggle(checked: boolean, index: number) {
+        textReplaceRules[index].isEnabled = checked;
+
+        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
+        update();
+    }
+
+    const [value, setValue] = useState("");
+
+    const previews = useMemo(() => {
+        const previews: JSX.Element[] = [];
+
+        let inputText = value;
+
+        for (const rule of textReplaceRules) {
+            inputText = applyRule(rule, inputText);
+            previews.push(<TextInput editable={false} value={inputText} disabled={!rule.isEnabled} />);
+        }
+
+        return previews;
+    }, [value, textReplaceRules]);
+
     return (
-        <Flex>
-            <Button
-                onClick={importRules}
-            >
-                Import Rules
-            </Button>
-            <Button
-                onClick={mergeRules}
-            >
-                Merge Rules
-            </Button>
-            <Button
-                onClick={exportRules}
-            >
-                Export Rules
-            </Button>
-            <Button
-                onClick={newRule}
-                color={Button.Colors.GREEN}
-            >
-                New Rule
-            </Button>
-        </Flex>
+        <>
+            <Flex style={{ justifyContent: "space-between" }}>
+                <Flex>
+                    <Button
+                        onClick={importRules}
+                    >
+                        Import Rules
+                    </Button>
+                    <Button
+                        onClick={mergeRules}
+                    >
+                        Merge Rules
+                    </Button>
+                    <Button
+                        onClick={exportRules}
+                    >
+                        Export Rules
+                    </Button>
+                    <Button
+                        onClick={newRule}
+                        color={Button.Colors.GREEN}
+                    >
+                        New Rule
+                    </Button>
+                </Flex>
+                <TextInput placeholder="Test your rules!" onChange={setValue} />
+            </Flex>
+            <Forms.FormDivider></Forms.FormDivider>
+            <Flex flexDirection="column" style={{ gap: "0.5em" }}>
+                {
+                    textReplaceRules.map((rule, i) => {
+                        return (
+                            <React.Fragment key={`${i}-${textReplaceRules.length}`}>
+                                <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
+                                    <div style={{
+                                        backgroundColor: "var(--background-secondary)",
+                                        borderRadius: "3px",
+                                        padding: "10px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "0.5em",
+                                    }}>
+                                        <Flex flexDirection="row" style={{ gap: "0.5em" }}>
+                                            <Flex flexDirection="column" style={{ gap: "0.5em" }}>
+                                                <Flex flexDirection="row" style={{ justifyContent: "space-between", gap: "0.5em" }}>
+                                                    <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
+                                                        <Forms.FormText>Enabled:</Forms.FormText>
+                                                        <Switch
+                                                            checked={rule.isEnabled}
+                                                            onChange={e => onToggle(e, i)}
+                                                        />
+                                                    </Flex>
+                                                    <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
+                                                        <Forms.FormText style={{
+                                                            opacity: rule.isEnabled ? 1 : 0.5
+                                                        }}>Is Regex:</Forms.FormText>
+                                                        <Switch
+                                                            checked={rule.isRegex}
+                                                            disabled={!rule.isEnabled}
+                                                            onChange={e => onCheck(e, i)}
+                                                        />
+                                                        <Button
+                                                            size={Button.Sizes.MIN}
+                                                            onClick={() => onClickRemove(i)}
+                                                            style={{
+                                                                background: "none",
+                                                                color: "var(--status-danger)"
+                                                            }}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </Button>
+                                                    </Flex>
+                                                </Flex>
+                                                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+                                                    <Input
+                                                        placeholder="Find"
+                                                        initialValue={rule.find}
+                                                        enabled={rule.isEnabled}
+                                                        onChange={e => onChange(e, i, "find")}
+                                                    />
+                                                    <Input
+                                                        placeholder="Replace"
+                                                        initialValue={rule.replace}
+                                                        enabled={rule.isEnabled}
+                                                        onChange={e => onChange(e, i, "replace")}
+                                                    />
+                                                    <Input
+                                                        placeholder="Only if includes"
+                                                        initialValue={rule.onlyIfIncludes}
+                                                        enabled={rule.isEnabled}
+                                                        onChange={e => onChange(e, i, "onlyIfIncludes")}
+                                                    />
+                                                </Flex>
+                                            </Flex>
+                                            <Flex flexDirection="column" style={{ gap: "0.5em", justifyContent: "space-evenly" }}>
+                                                <Button
+                                                    size={Button.Sizes.MIN}
+                                                    onClick={() => onClickMoveUp(i)}
+                                                    style={{
+                                                        background: "var(--background-modifier-hover)",
+                                                        color: "var(--brand-experiment)"
+                                                    }}
+                                                >
+                                                    <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 16.0001L12 11.4201L16.59 16.0001L18 14.5901L12 8.59006L6 14.5901L7.41 16.0001Z"></path></svg>
+                                                </Button>
+                                                <Button
+                                                    size={Button.Sizes.MIN}
+                                                    onClick={() => onClickMoveDown(i)}
+                                                    style={{
+                                                        background: "var(--background-modifier-hover)",
+                                                        color: "var(--brand-experiment)"
+                                                    }}
+                                                >
+                                                    <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
+                                                </Button>
+                                            </Flex>
+                                        </Flex>
+                                    </div>
+                                    {previews[i]}
+                                </Flex>
+                                {rule.isRegex && renderFindError(rule.find)}
+                            </React.Fragment>
+                        );
+                    })
+                }
+            </Flex>
+        </>
     );
 }
 
@@ -313,29 +385,17 @@ async function tryImport(str: string, update: () => void, merge: boolean) {
     }
 }
 
-function TextReplaceTesting() {
-    const [value, setValue] = useState("");
-    return (
-        <>
-            <Forms.FormTitle tag="h4">Test Rules</Forms.FormTitle>
-            <TextInput placeholder="Type a message" onChange={setValue} />
-            <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} />
-        </>
-    );
-}
-
 function applyRule(rule: Rule, content: string): string {
-    if (rule.find && rule.isEnabled && !rule.onlyIfIncludes || content.includes(rule.onlyIfIncludes)) {
-        if (rule.isRegex) {
-            try {
-                const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
-            } catch (e) {
-                new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-            }
-        } else {
-            content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+    if (!rule.isEnabled || !rule.find) return content;
+    if (rule.isRegex && !rule.onlyIfIncludes || /* MAKE THIS A REGEX CHECK */ content.includes(rule.onlyIfIncludes) /* REGEX CHECK */) {
+        try {
+            const regex = stringToRegex(rule.find);
+            content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
+        } catch (e) {
+            new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
         }
+    } else if (!rule.onlyIfIncludes || content.includes(rule.onlyIfIncludes)) {
+        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
     }
     return content;
 }
