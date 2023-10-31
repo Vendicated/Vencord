@@ -21,7 +21,7 @@ import "./styles.css";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
+import { useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
 

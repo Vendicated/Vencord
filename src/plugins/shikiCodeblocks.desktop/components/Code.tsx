@@ -46,7 +46,7 @@ export const Code = ({
                 .split("\n")
                 .map((line, i) => <span key={i} dangerouslySetInnerHTML={{ __html: line }} />);
         } catch {
-            lines = content.split("\n").map(line => <span>{line}</span>);
+            lines = content.split("\n").map((line, i) => <span key={i}>{line}</span>);
         }
     } else {
         const renderTokens =
@@ -55,11 +55,11 @@ export const Code = ({
                 .split("\n")
                 .map(line => [{ color: theme.plainColor, content: line } as IThemedToken]);
 
-        lines = renderTokens.map(line => {
+        lines = renderTokens.map((line, i) => {
             // [Cynthia] this makes it so when you highlight the codeblock
             // empty lines are also selected and copied when you Ctrl+C.
             if (line.length === 0) {
-                return <span>{"\n"}</span>;
+                return <span key={i}>{"\n"}</span>;
             }
 
             return (

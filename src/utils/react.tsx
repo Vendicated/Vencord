@@ -133,7 +133,7 @@ export function useForceUpdater(withDep?: true) {
 
 export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
     const get = makeLazy(factory, attempts);
-    return (props: T) => {
+    return function Lazy(props: T) {
         const Component = get() ?? NoopComponent;
         return <Component {...props} />;
     };
