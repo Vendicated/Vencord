@@ -28,7 +28,7 @@ import style from "./style.css?managed";
 const Button = findByCodeLazy("Button.Sizes.NONE,disabled:");
 
 function makeIcon(showCurrentGame?: boolean) {
-    return function GameActivityToggle() {
+    return function () {
         return (
             <svg
                 width="20"
