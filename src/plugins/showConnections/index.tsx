@@ -105,7 +105,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
                 gap: getSpacingPx(settings.store.iconSpacing),
                 flexWrap: "wrap"
             }}>
-                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />)}
             </Flex>
         </Section>
     );

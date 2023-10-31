@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useAwaiter, useIntersection } from "@utils/react";
-import { hljs, React } from "@webpack/common";
+import { hljs } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
