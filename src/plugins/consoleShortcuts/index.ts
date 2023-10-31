@@ -92,6 +92,7 @@ export default definePlugin({
                 fakeRenderWin = new WeakRef(win);
                 win.focus();
 
+                // eslint-disable-next-line react/no-deprecated
                 ReactDOM.render(React.createElement(component, props), win.document.body);
             }
         };

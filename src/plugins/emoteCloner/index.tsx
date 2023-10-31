@@ -205,7 +205,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 alignItems: "center"
             }}>
                 {guilds.map(g => (
-                    <Tooltip text={g.name}>
+                    <Tooltip key={g.id} text={g.name}>
                         {({ onMouseLeave, onMouseEnter }) => (
                             <div
                                 onMouseLeave={onMouseLeave}
@@ -278,25 +278,27 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                     const data = { t: type, ...res } as Sticker | Emoji;
                     const url = getUrl(data);
 
-                    return modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={url}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                    style={{ marginRight: "0.5em" }}
-                                />
-                                <Forms.FormText>Clone {data.name}</Forms.FormText>
-                            </ModalHeader>
-                            <ModalContent>
-                                <CloneModal data={data} />
-                            </ModalContent>
-                        </ModalRoot>
-                    );
+                    return function EmoteClonerModal(modalProps) {
+                        return (
+                            <ModalRoot {...modalProps}>
+                                <ModalHeader>
+                                    <img
+                                        role="presentation"
+                                        aria-hidden
+                                        src={url}
+                                        alt=""
+                                        height={24}
+                                        width={24}
+                                        style={{ marginRight: "0.5em" }}
+                                    />
+                                    <Forms.FormText>Clone {data.name}</Forms.FormText>
+                                </ModalHeader>
+                                <ModalContent>
+                                    <CloneModal data={data} />
+                                </ModalContent>
+                            </ModalRoot>
+                        );
+                    };
                 })
             }
         />

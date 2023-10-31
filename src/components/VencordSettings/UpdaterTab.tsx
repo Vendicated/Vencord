@@ -57,7 +57,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                 title: "Oops!",
                 body: (
                     <ErrorCard>
-                        {err.split("\n").map(line => <div>{Parser.parse(line)}</div>)}
+                        {err.split("\n").map((line, i) => <div key={i}>{Parser.parse(line)}</div>)}
                     </ErrorCard>
                 )
             });
@@ -83,7 +83,7 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
     return (
         <Card style={{ padding: ".5em" }}>
             {updates.map(({ hash, author, message }) => (
-                <div>
+                <div key={hash}>
                     <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",

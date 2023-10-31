@@ -30,7 +30,7 @@ import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
-import { openModalLazy } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -95,12 +95,14 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     const isEnabled = () => settings.enabled ?? false;
 
-    function openModal() {
-        openModalLazy(async () => {
-            return modalProps => {
-                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => onRestartNeeded(plugin.name)} />;
-            };
-        });
+    function openPluginModal() {
+        openModal(modalProps => (
+            <PluginModal
+                {...modalProps}
+                plugin={plugin}
+                onRestartNeeded={() => onRestartNeeded(plugin.name)}
+            />
+        ));
     }
 
     function toggleEnabled() {
@@ -159,7 +161,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             infoButton={
-                <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
+                <button role="switch" onClick={() => openPluginModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
                     {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel />
                         : <InfoIcon />}
@@ -352,7 +354,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }

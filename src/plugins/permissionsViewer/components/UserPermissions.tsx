@@ -109,7 +109,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             }
             defaultState={settings.store.defaultPermissionsDropdownState}
             buttons={[
-                (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
+                (<Tooltip key="sort" text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (
                         <button
                             {...tooltipProps}
@@ -133,7 +133,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             {userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
                     {userPermissions.map(({ permission, roleColor }) => (
-                        <div className={classes(role, rolePill, rolePillBorder)}>
+                        <div key={permission} className={classes(role, rolePill, rolePillBorder)}>
                             <div className={roleRemoveButton}>
                                 <span
                                     className={roleCircle}

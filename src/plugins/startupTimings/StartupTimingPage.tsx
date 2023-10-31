@@ -120,8 +120,8 @@ function ServerTrace({ trace }: ServerTraceProps) {
         <Forms.FormSection title="Server Trace" tag="h2">
             <code>
                 <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
-                    {lines.map(line => (
-                        <span>{line}</span>
+                    {lines.map((line, i) => (
+                        <span key={i}>{line}</span>
                     ))}
                 </Flex>
             </code>

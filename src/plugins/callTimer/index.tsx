@@ -21,7 +21,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
 
 function formatDuration(ms: number) {
     // here be dragons (moment fucking sucks)
