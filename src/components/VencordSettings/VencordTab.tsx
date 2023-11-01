@@ -90,12 +90,6 @@ function VencordSettings() {
                 title: "Disable minimum window size",
                 note: "Requires a full restart"
             },
-            // Is now replaced by macOsVibrancyStyle
-            IS_DISCORD_DESKTOP && isMac && false && {
-                key: "macosTranslucency",
-                title: "Enable translucent window",
-                note: "Requires a full restart"
-            },
         ];
 
     return (
@@ -214,8 +208,8 @@ function VencordSettings() {
                             value: "hud"
                         },
                     ]}
-                    select={v => settings.macOsVibrancyStyle = v}
-                    isSelected={v => settings.macOsVibrancyStyle === v}
+                    select={v => settings.macosVibrancyStyle = v}
+                    isSelected={v => settings.macosVibrancyStyle === v}
                     serialize={identity} />
             </>}
 

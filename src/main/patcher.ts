@@ -85,11 +85,11 @@ if (!IS_VANILLA) {
                     options.backgroundColor = "#00000000";
                 }
 
-                const needsVibrancy = process.platform === "darwin" || (settings.macOsVibrancyStyle || settings.macosTranslucency);
+                const needsVibrancy = process.platform === "darwin" || (settings.macosVibrancyStyle || settings.macosTranslucency);
 
                 if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = settings.macOsVibrancyStyle || "sidebar";
+                    options.vibrancy = settings.macosVibrancyStyle || "sidebar";
                 }
 
                 process.env.DISCORD_PRELOAD = original;

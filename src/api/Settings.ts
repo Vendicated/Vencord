@@ -38,7 +38,7 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
-    macOsVibrancyStyle:
+    macosVibrancyStyle:
     | "content"
     | "fullscreen-ui"
     | "header"
@@ -88,9 +88,9 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
-    // Replaced by macOsVibrancyStyle
+    // Replaced by macosVibrancyStyle
     macosTranslucency: undefined,
-    macOsVibrancyStyle: undefined,
+    macosVibrancyStyle: undefined,
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
