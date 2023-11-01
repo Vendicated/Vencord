@@ -53,6 +53,7 @@ function VencordSettings() {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
         note: string;
+        disabled?: boolean;
     }> =
         [
             {
@@ -93,6 +94,12 @@ function VencordSettings() {
                 key: "macosTranslucency",
                 title: "Enable translucent window",
                 note: "Requires a full restart"
+            },
+            IS_DISCORD_DESKTOP && isMac && {
+                key: "macosFullscreenUITranslucency",
+                title: "Enable more visible translucent window style",
+                note: "Requires a full restart",
+                disabled: !settings.macosTranslucency
             }
         ];
 
@@ -145,6 +152,7 @@ function VencordSettings() {
                         value={settings[s.key]}
                         onChange={v => settings[s.key] = v}
                         note={s.note}
+                        disabled={s.disabled}
                     >
                         {s.title}
                     </Switch>

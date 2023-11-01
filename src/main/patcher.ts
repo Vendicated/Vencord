@@ -87,7 +87,7 @@ if (!IS_VANILLA) {
 
                 if (settings.macosTranslucency && process.platform === "darwin") {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = "sidebar";
+                    options.vibrancy = settings.macosFullscreenUITranslucency ? "fullscreen-ui" : "sidebar";
                 }
 
                 process.env.DISCORD_PRELOAD = original;

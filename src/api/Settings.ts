@@ -39,6 +39,7 @@ export interface Settings {
     transparent: boolean;
     winCtrlQ: boolean;
     macosTranslucency: boolean;
+    macosFullscreenUITranslucency: boolean;
     disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
@@ -75,6 +76,7 @@ const DefaultSettings: Settings = {
     transparent: false,
     winCtrlQ: false,
     macosTranslucency: false,
+    macosFullscreenUITranslucency: false,
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
