@@ -55,10 +55,8 @@ export default definePlugin({
     }],
     isPrivateChannelRead(message: MessageJSON) {
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
-        if (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) {
-            return false;
-        }
         if (
+            (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) ||
             (channelType === ChannelType.DM && settings.store.channelToAffect === "group_dm") ||
             (channelType === ChannelType.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
             (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser().id)) ||
