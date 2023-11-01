@@ -36,14 +36,15 @@ const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 const TEXT_REPLACE_KEY = "TextReplace";
 
-type Rule = Record<"find" | "replace" | "onlyIfIncludes", string> & Record<"isRegex" | "isEnabled", boolean>;
+type Rule = Record<"find" | "replace" | "onlyIfIncludes", string> & Record<"isRegex" | "isEnabled", boolean> & Record<"id", number>;
 
 const makeEmptyRule: () => Rule = () => ({
     isEnabled: true,
     find: "",
     replace: "",
     onlyIfIncludes: "",
-    isRegex: false
+    isRegex: false,
+    id: random()
 });
 const makeEmptyRuleArray = () => [makeEmptyRule()];
 
@@ -63,6 +64,10 @@ const settings = definePluginSettings({
         }
     },
 });
+
+function random() {
+    return Math.floor(Date.now() + Math.random() * 1000000);
+}
 
 function stringToRegex(str: string) {
     const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
@@ -169,14 +174,14 @@ function TextReplace({ update }: { update: () => void; }) {
         [textReplaceRules[index], textReplaceRules[index - 1]] = [textReplaceRules[index - 1], textReplaceRules[index]];
 
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update(); // BIG PROBLEM: doesn't update the textboxes, but it does work
+        update();
     }
     async function onClickMoveDown(index: number) {
         if (index === textReplaceRules.length - 1) return;
         [textReplaceRules[index], textReplaceRules[index + 1]] = [textReplaceRules[index + 1], textReplaceRules[index]];
 
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update(); // BIG PROBLEM: doesn't update the textboxes, but it does work
+        update();
     }
 
     async function onChange(e: string, index: number, key: string) {
@@ -243,7 +248,7 @@ function TextReplace({ update }: { update: () => void; }) {
                 {
                     textReplaceRules.map((rule, i) => {
                         return (
-                            <React.Fragment key={`${i}-${textReplaceRules.length}`}>
+                            <React.Fragment key={`${i}-${textReplaceRules.length}-${rule.id}`}>
                                 <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
                                     <div style={{
                                         backgroundColor: "var(--background-secondary)",
@@ -314,7 +319,7 @@ function TextReplace({ update }: { update: () => void; }) {
                                                         color: "var(--brand-experiment)"
                                                     }}
                                                 >
-                                                    <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 16.0001L12 11.4201L16.59 16.0001L18 14.5901L12 8.59006L6 14.5901L7.41 16.0001Z"></path></svg>
+                                                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 16.0001L12 11.4201L16.59 16.0001L18 14.5901L12 8.59006L6 14.5901L7.41 16.0001Z"></path></svg>
                                                 </Button>
                                                 <Button
                                                     size={Button.Sizes.MIN}
@@ -324,7 +329,7 @@ function TextReplace({ update }: { update: () => void; }) {
                                                         color: "var(--brand-experiment)"
                                                     }}
                                                 >
-                                                    <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
+                                                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
                                                 </Button>
                                             </Flex>
                                         </Flex>
@@ -453,7 +458,8 @@ export default definePlugin({
                     find: rule.find,
                     replace: rule.replace,
                     onlyIfIncludes: rule.onlyIfIncludes,
-                    isRegex: false
+                    isRegex: false,
+                    id: random()
                 });
             }
             await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
@@ -467,7 +473,8 @@ export default definePlugin({
                     find: rule.find,
                     replace: rule.replace,
                     onlyIfIncludes: rule.onlyIfIncludes,
-                    isRegex: true
+                    isRegex: true,
+                    id: random()
                 });
             }
             await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
