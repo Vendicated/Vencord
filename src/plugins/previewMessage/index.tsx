@@ -137,5 +137,5 @@ export default definePlugin({
         },
     ],
 
-    previewIcon: ErrorBoundary.wrap(PreviewButton, { noop: true }),
+    chatBarIcon: ErrorBoundary.wrap(PreviewButton, { noop: true }),
 });
