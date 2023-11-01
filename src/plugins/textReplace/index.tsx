@@ -36,7 +36,7 @@ const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 const TEXT_REPLACE_KEY = "TextReplace";
 
-type Rule = Record<"find" | "replace" | "onlyIfIncludes", string> & Record<"isRegex" | "isEnabled", boolean> & Record<"id", number>;
+type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string> & Record<"isRegex" | "isEnabled", boolean>;
 
 const makeEmptyRule: () => Rule = () => ({
     isEnabled: true,
@@ -66,7 +66,7 @@ const settings = definePluginSettings({
 });
 
 function random() {
-    return Math.floor(Date.now() + Math.random() * 1000000);
+    return `${Date.now()}${Math.random()}`;
 }
 
 function stringToRegex(str: string) {
@@ -357,6 +357,8 @@ async function tryImport(str: string, update: () => void) {
             if (typeof rule.isRegex !== "boolean") throw new Error("A rule is missing isRegex.");
 
             if (textReplaceRules.find(r => r.find === rule.find && r.replace === rule.replace && r.onlyIfIncludes === rule.onlyIfIncludes && r.isRegex === rule.isRegex)) continue;
+
+            rule.id = random();
 
             textReplaceRules.push(rule);
             await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
