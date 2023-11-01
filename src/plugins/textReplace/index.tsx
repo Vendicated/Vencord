@@ -30,7 +30,7 @@ import { ModalSize } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
-import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -114,6 +114,19 @@ function Input({ initialValue, onChange, placeholder, enabled }: {
             }}
             spellCheck={false}
             maxLength={2000}
+        />
+    );
+}
+
+function Preview({ value, index, enabled }) {
+    for (let i = 0; i <= index; i++) {
+        value = applyRule(textReplaceRules[i], value);
+    }
+    return (
+        <TextInput
+            editable={false}
+            value={value}
+            disabled={!enabled}
         />
     );
 }
@@ -206,19 +219,6 @@ function TextReplace({ update }: { update: () => void; }) {
     }
 
     const [value, setValue] = useState("");
-
-    const previews = useMemo(() => {
-        const previews: JSX.Element[] = [];
-
-        let inputText = value;
-
-        for (const rule of textReplaceRules) {
-            inputText = applyRule(rule, inputText);
-            previews.push(<TextInput editable={false} value={inputText} disabled={!rule.isEnabled} />);
-        }
-
-        return previews;
-    }, [value, textReplaceRules]);
 
     return (
         <>
@@ -334,7 +334,7 @@ function TextReplace({ update }: { update: () => void; }) {
                                             </Flex>
                                         </Flex>
                                     </div>
-                                    {previews[i]}
+                                    <Preview value={value} index={i} enabled={rule.isEnabled} />
                                 </Flex>
                                 {rule.isRegex && renderFindError(rule.find)}
                             </React.Fragment>
