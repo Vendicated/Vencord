@@ -187,10 +187,10 @@ export default definePlugin({
             ]
         },
         {
-            find: "{hideShadow:",
+            find: ".carouselModal",
             replacement: {
-                match: /(?<=onClick:)\i/,
-                replace: "()=>{}"
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
             }
         }
     ],
