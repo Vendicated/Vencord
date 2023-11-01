@@ -374,7 +374,15 @@ async function tryImport(str: string, update: () => void) {
 
 function applyRule(rule: Rule, content: string): string {
     if (!rule.isEnabled || !rule.find) return content;
-    if (rule.isRegex && !rule.onlyIfIncludes || /* MAKE THIS A REGEX CHECK */ content.includes(rule.onlyIfIncludes) /* REGEX CHECK */) {
+    if (rule.isRegex) {
+        if (rule.onlyIfIncludes) {
+            try {
+                const onlyIfIncludesRegex = stringToRegex(rule.onlyIfIncludes);
+                if (!onlyIfIncludesRegex.test(content)) return content;
+            } catch (e) {
+                new Logger("TextReplace").error(`Invalid regex: ${rule.onlyIfIncludes}`);
+            }
+        }
         try {
             const regex = stringToRegex(rule.find);
             content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
