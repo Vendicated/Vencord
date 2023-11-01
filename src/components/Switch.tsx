@@ -33,7 +33,10 @@ const SwitchClasses = findByPropsLazy("slider", "input", "container");
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
     return (
-        <div>
+        <div style={{
+            alignItems: "center",
+            display: "flex",
+        }}>
             <div className={classes(SwitchClasses.container, "default-colors", checked ? SwitchClasses.checked : void 0)} style={{
                 backgroundColor: checked ? SWITCH_ON : SWITCH_OFF,
                 opacity: disabled ? 0.3 : 1
