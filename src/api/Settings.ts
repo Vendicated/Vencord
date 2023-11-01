@@ -38,8 +38,21 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
-    macosTranslucency: boolean;
-    macosFullscreenUITranslucency: boolean;
+    macOsVibrancyStyle:
+    | "content"
+    | "fullscreen-ui"
+    | "header"
+    | "hud"
+    | "menu"
+    | "popover"
+    | "selection"
+    | "sidebar"
+    | "titlebar"
+    | "tooltip"
+    | "under-page"
+    | "window"
+    | undefined;
+    macosTranslucency: boolean | undefined;
     disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
@@ -75,8 +88,9 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
-    macosTranslucency: false,
-    macosFullscreenUITranslucency: false,
+    // Replaced by macOsVibrancyStyle
+    macosTranslucency: undefined,
+    macOsVibrancyStyle: undefined,
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},

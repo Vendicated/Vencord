@@ -85,9 +85,11 @@ if (!IS_VANILLA) {
                     options.backgroundColor = "#00000000";
                 }
 
-                if (settings.macosTranslucency && process.platform === "darwin") {
+                const needsVibrancy = process.platform === "darwin" || (settings.macOsVibrancyStyle || settings.macosTranslucency);
+
+                if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = settings.macosFullscreenUITranslucency ? "fullscreen-ui" : "sidebar";
+                    options.vibrancy = settings.macOsVibrancyStyle || "sidebar";
                 }
 
                 process.env.DISCORD_PRELOAD = original;
