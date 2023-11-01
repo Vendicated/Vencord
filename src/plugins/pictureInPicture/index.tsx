@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -28,8 +30,8 @@ export default definePlugin({
         {
             find: ".nonMediaAttachment]",
             replacement: {
-                match: /\.nonMediaAttachment\].{0,10}children:\[(\S)/,
-                replace: "$&,$1&&$self.renderPiPButton(),"
+                match: /\.nonMediaAttachment\]:!(\i).{0,10}children:\[(\S)/,
+                replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
     ],
@@ -40,6 +42,7 @@ export default definePlugin({
                 {tooltipProps => (
                     <div
                         {...tooltipProps}
+                        className="vc-pip-button"
                         role="button"
                         style={{
                             cursor: "pointer",
@@ -70,7 +73,7 @@ export default definePlugin({
                     >
                         <svg width="24px" height="24px" viewBox="0 0 24 24">
                             <path
-                                fill="var(--interactive-normal)"
+                                fill="currentColor"
                                 d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"
                             />
                         </svg>
