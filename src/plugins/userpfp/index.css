@@ -1,0 +1,7 @@
+@import url("https://userpfp.github.io/UserPFP/import.css");
+
+[style*="profile-picture"] {
+    object-fit: scale-down;
+    aspect-ratio: 1;
+    background-image: none !important;
+}
