@@ -30,7 +30,8 @@ export default definePlugin({
         return (
             <div>
                 <h1>About UserPFP</h1>
-                <p>Custom animated profile pictures without Discord nitro.</p>
+                <Link href="https://discord.gg/userpfp-1129784704267210844">CLICK HERE FOR YOUR PFP</Link>
+                <p></p>Custom animated profile pictures without Discord nitro.</p>
             </div>
         );
     },
