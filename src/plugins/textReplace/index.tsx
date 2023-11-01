@@ -245,7 +245,7 @@ function TextReplace({ update }: { update: () => void; }) {
                         onClick={newRule}
                         color={Button.Colors.GREEN}
                     >
-                        New Rule
+                        Create New Rule
                     </Button>
                 </Flex>
                 <TextInput placeholder="Test your rules!" onChange={setValue} />
