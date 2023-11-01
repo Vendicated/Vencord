@@ -227,7 +227,7 @@ function TextReplace({ update }: { update: () => void; }) {
             <Flex style={{ justifyContent: "space-between" }}>
                 <Flex>
                     <Button
-                        onClick={importRules}
+                        onClick={() => rulesFromFile(false)}
                     >
                         Import Rules
                     </Button>
