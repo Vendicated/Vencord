@@ -416,7 +416,7 @@ const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 export default definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages.",
-    authors: [Devs.TheKodeToad, Devs.skykittenpuppy, Devs.AutumnVN],
+    authors: [Devs.AutumnVN, Devs.TheKodeToad, Devs.skykittenpuppy],
 
     settingsAboutComponent: () => {
         return (
