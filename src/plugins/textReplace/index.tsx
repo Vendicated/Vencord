@@ -122,13 +122,6 @@ function TextReplace({ update }: { update: () => void; }) {
     }
 
     async function importRules() {
-        rulesFromFile(false);
-    }
-    async function mergeRules() {
-        rulesFromFile(true);
-    }
-
-    async function rulesFromFile(merge: boolean) {
         if (IS_DISCORD_DESKTOP) {
             const [file] = await DiscordNative.fileManager.openFiles({
                 filters: [
@@ -138,7 +131,7 @@ function TextReplace({ update }: { update: () => void; }) {
             });
 
             if (file) {
-                tryImport(new TextDecoder().decode(file.data), update, merge);
+                tryImport(new TextDecoder().decode(file.data), update);
             }
         } else {
             const file = await chooseFile("application/json");
@@ -146,7 +139,7 @@ function TextReplace({ update }: { update: () => void; }) {
 
             const reader = new FileReader();
             reader.onload = async () => {
-                tryImport(reader.result as string, update, merge);
+                tryImport(reader.result as string, update);
             };
             reader.readAsText(file);
         }
@@ -227,14 +220,9 @@ function TextReplace({ update }: { update: () => void; }) {
             <Flex style={{ justifyContent: "space-between" }}>
                 <Flex>
                     <Button
-                        onClick={() => rulesFromFile(false)}
+                        onClick={importRules}
                     >
-                        Import Rules
-                    </Button>
-                    <Button
-                        onClick={() => rulesFromFile(true)}
-                    >
-                        Merge Rules
+                        Import & Merge Rules
                     </Button>
                     <Button
                         onClick={exportRules}
@@ -353,7 +341,7 @@ function TextReplace({ update }: { update: () => void; }) {
     );
 }
 
-async function tryImport(str: string, update: () => void, merge: boolean) {
+async function tryImport(str: string, update: () => void) {
     try {
         const data = JSON.parse(str);
         for (const rule of data) {
@@ -362,24 +350,23 @@ async function tryImport(str: string, update: () => void, merge: boolean) {
             if (typeof rule.replace !== "string") throw new Error("A rule is missing replace.");
             if (typeof rule.onlyIfIncludes !== "string") throw new Error("A rule is missing onlyIfIncludes.");
             if (typeof rule.isRegex !== "boolean") throw new Error("A rule is missing isRegex.");
+
+            if (textReplaceRules.find(r => r.find === rule.find && r.replace === rule.replace && r.onlyIfIncludes === rule.onlyIfIncludes && r.isRegex === rule.isRegex)) continue;
+
             textReplaceRules.push(rule);
-            if (!merge) { // Wow this is gross! sucks that it works
-                merge = true;
-                textReplaceRules = [rule];
-            }
             await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
             update();
         }
         Toasts.show({
             type: Toasts.Type.SUCCESS,
-            message: "Successfully " + merge ? "merged" : "imported" + " text replace rules.",
+            message: "Successfully imported & merged text replace rules.",
             id: Toasts.genId()
         });
     } catch (err) {
         new Logger("TextReplace").error(err);
         Toasts.show({
             type: Toasts.Type.FAILURE,
-            message: "Failed to " + merge ? "merge" : "import" + " text replace rules: " + String(err),
+            message: "Failed to import text replace rules: " + String(err),
             id: Toasts.genId()
         });
     }
@@ -400,7 +387,7 @@ function applyRule(rule: Rule, content: string): string {
     return content;
 }
 
-function applyRules(content: string): string {
+function applyAllRules(content: string): string {
     if (content.length === 0)
         return content;
 
@@ -420,7 +407,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <React.Fragment>
+            <>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
                 <Forms.FormText>
                     You can find pre-made rules in the{" "}
@@ -435,7 +422,7 @@ export default definePlugin({
                     <InviteLink target="D9uwnFnqmd">Vencord's Server</InviteLink>
                     .
                 </Forms.FormText>
-            </React.Fragment >
+            </>
         );
     },
 
@@ -482,7 +469,7 @@ export default definePlugin({
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
             if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyRules(msg.content);
+            msg.content = applyAllRules(msg.content);
         });
     },
 
