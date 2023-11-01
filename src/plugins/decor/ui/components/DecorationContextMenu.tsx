@@ -6,13 +6,11 @@
 
 import "../styles.css";
 
-import { classNameFactory } from "@api/Styles";
 import { CopyIcon, DeleteIcon } from "@components/Icons";
 import { Alerts, Clipboard, ContextMenu, Menu, UserStore } from "webpack/common";
 
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-
-const cl = classNameFactory("vc-decor-");
+import cl from "../../lib/utils/cl";
 
 export default function DecorationContextMenu({ decoration }) {
     const { delete: deleteDecoration } = useCurrentUserDecorationsStore();

@@ -18,6 +18,9 @@ interface DecorDecorationGridDecorationProps {
 }
 
 export default function DecorDecorationGridDecoration(props) {
+    const { decoration } = props;
+    delete props.decoration;
+
     return <DecorationGridDecoration
         {...props}
         onContextMenu={e => {
@@ -27,6 +30,6 @@ export default function DecorDecorationGridDecoration(props) {
                 />
             ));
         }}
-        avatarDecoration={discordifyDecoration(props.decoration)}
+        avatarDecoration={discordifyDecoration(decoration)}
     />;
 }
