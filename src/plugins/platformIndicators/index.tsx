@@ -23,7 +23,7 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -55,13 +55,13 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
+const StatusUtils = findByPropsLazy("getStatusColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} small={small} />;
+    return <Icon color={`var(--${StatusUtils.getStatusColor(status)}`} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
@@ -198,13 +198,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
-                    replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                    match: /\.STATUS_TYPING;switch(?=.+?(if\(\i\)return \i\.\i\.Masks\.STATUS_ONLINE_MOBILE))/,
+                    replace: ".STATUS_TYPING;$1;switch"
                 },
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(switch\(\i\){case \i\.\i\.ONLINE:return )(\i)\?({.+?}):/,
-                    replace: (_, rest, isMobile, component) => `if(${isMobile})return${component};${rest}`
+                    match: /switch\(\i\)\{case \i\.\i\.ONLINE:(if\(\i\)return\{[^}]+\})/,
+                    replace: "$1;$&"
                 }
             ]
         },
@@ -230,7 +230,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "isMobileOnline=function",
+            find: "}isMobileOnline(",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
             replacement: {
                 // Make isMobileOnline return true no matter what is the user status
