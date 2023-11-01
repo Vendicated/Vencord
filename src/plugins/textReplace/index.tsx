@@ -232,7 +232,7 @@ function TextReplace({ update }: { update: () => void; }) {
                         Import Rules
                     </Button>
                     <Button
-                        onClick={mergeRules}
+                        onClick={() => rulesFromFile(true)}
                     >
                         Merge Rules
                     </Button>
