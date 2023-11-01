@@ -268,7 +268,7 @@ function runTime(token: string) {
             const { wreq } = Vencord.Webpack;
 
             console.error("[PUP_DEBUG]", "Loading all chunks...");
-            const ids = Function("return" + wreq.u.toString().match(/\{.+\}/s)![0])();
+            const ids = Function("return" + wreq.u.toString().match(/(?<=\()\{.+?\}/s)![0])();
             for (const id in ids) {
                 const isWasm = await fetch(wreq.p + wreq.u(id))
                     .then(r => r.text())
@@ -289,7 +289,7 @@ function runTime(token: string) {
             setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
         }, 1000));
     } catch (e) {
-        console.error("[PUP_DEBUG]", "A fatal error occured");
+        console.error("[PUP_DEBUG]", "A fatal error occurred");
         console.error("[PUP_DEBUG]", e);
         process.exit(1);
     }
