@@ -143,26 +143,6 @@ async function fetchBlob(url: string) {
     return res.blob();
 }
 
-function tryParseJSON(data: string) {
-    let parsingError = undefined;
-
-    try {
-        var out = JSON.parse(data);
-        if (out && typeof out === "object")
-            return {
-                success: true,
-                data: out,
-            };
-    } catch (e: Error | any) {
-        parsingError = e.toString();
-        new Logger("EmoteCloner").error("Failed parsing JSON:", parsingError);
-    }
-    return {
-        success: false,
-        message: parsingError,
-    };
-}
-
 async function doClone(guildId: string, data: Sticker | Emoji) {
     try {
         if (data.t === "Sticker")
@@ -176,19 +156,14 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             id: Toasts.genId()
         });
     } catch (e: any) {
-        let errorMessage = "Something went wrong (check console!)";
-        const exceptionJSON = e?.text;
-
-        if (exceptionJSON !== undefined) {
-            const parsedJSON = tryParseJSON(exceptionJSON) as any;
-            if (parsedJSON.success === true) {
-                errorMessage = parsedJSON.data?.message || errorMessage;
-            }
-        }
+        let message = "Something went wrong (check console!)";
+        try {
+            message = JSON.parse(e.text).message;
+        } catch { }
 
         new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
         Toasts.show({
-            message: "Failed to clone: " + errorMessage,
+            message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
             id: Toasts.genId()
         });
