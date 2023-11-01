@@ -20,8 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
-import { Button, Forms, showToast, Text, Toasts } from "@webpack/common";
+import { Button, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
 import { User } from "discord-types/general";
+
+interface UserProfile extends User {
+    themeColors: [number, number] | undefined;
+    profileEffectID: string | undefined;
+}
 
 const pluginName: string = "FakeProfileThemesAndEffects";
 
@@ -46,7 +51,7 @@ function base125StrToBase10Num(base125Str: string, upperLim: number): number {
     let base10Num: number = 0;
     for (let i: number = 0; i < base125Str.length; i++) {
         if (base10Num > upperLim) return -2;
-        base10Num += (base125Str.codePointAt(i) - 1) * 125 ** (base125Str.length - 1 - i);
+        base10Num += (base125Str.codePointAt(i)! - 1) * 125 ** (base125Str.length - 1 - i);
     }
     return base10Num;
 }
@@ -56,7 +61,7 @@ function base125StrToBase10BigInt(base125Str: string, upperLim: bigint): bigint 
     let base10BigInt: bigint = 0n;
     for (let i: number = 0; i < base125Str.length; i++) {
         if (base10BigInt > upperLim) return -2n;
-        base10BigInt += BigInt(base125Str.codePointAt(i) - 1) * 125n ** BigInt(base125Str.length - 1 - i);
+        base10BigInt += BigInt(base125Str.codePointAt(i)! - 1) * 125n ** BigInt(base125Str.length - 1 - i);
     }
     return base10BigInt;
 }
@@ -72,7 +77,7 @@ function base125StrToBase10ItemID(base125Str: string): bigint {
 function encode3y3(str: string): string {
     const encoded3y3StrCodePoints: Array<number> = [];
     for (let i: number = 0; i < str.length; i++)
-        encoded3y3StrCodePoints.push(str.codePointAt(i) + 0xE0000);
+        encoded3y3StrCodePoints.push(str.codePointAt(i)! + 0xE0000);
     return String.fromCodePoint(...encoded3y3StrCodePoints);
 }
 
@@ -85,7 +90,7 @@ function decodeUserBio3y3(userBio: string): [string, string, string] {
         let tempCodePoints: Array<number> = [];
         let decodedUserBio3y3Index: number = 0;
         for (let i: number = 0; i < userBioCodePoints.length; i++) {
-            const currCodePoint: number = userBioCodePoints[i].codePointAt(0);
+            const currCodePoint: number = userBioCodePoints[i].codePointAt(0)!;
             if (currCodePoint === 0xE007E) {
                 if (tempCodePoints.length > 0)
                     decodedUserBio3y3[decodedUserBio3y3Index] = String.fromCodePoint(...tempCodePoints);
@@ -148,7 +153,7 @@ function legacyStrToProfileThemeColors(userBio: string): [number, number] {
     return profileThemeColors;
 }
 
-function legacy3y3(user: User, legacyStr: string): void {
+function legacy3y3(user: UserProfile, legacyStr: string): void {
     const profileThemeColors: [number, number] = legacyStrToProfileThemeColors(legacyStr);
     if (profileThemeColors[0] > -1) {
         if (profileThemeColors[1] > -1)
@@ -162,7 +167,7 @@ function legacy3y3(user: User, legacyStr: string): void {
     }
 }
 
-function updateUserThemeColors(user: User, primary: number, accent: number): void {
+function updateUserThemeColors(user: UserProfile, primary: number, accent: number): void {
     if (primary > -1) {
         if (accent > -1)
             user.themeColors = [primary, accent];
@@ -175,7 +180,7 @@ function updateUserThemeColors(user: User, primary: number, accent: number): voi
     }
 }
 
-function updateUserEffectID(user: User, id: bigint): void {
+function updateUserEffectID(user: UserProfile, id: bigint): void {
     if (id > -1n) {
         user.profileEffectID = id.toString();
         user.premiumType = 2;
@@ -200,14 +205,19 @@ function openProfileThemeColorPicker(colorType: "Primary" | "Accent"): void {
 const _3y3BuilderVals: [number, number, string] = [-1, -1, ""];
 let _3y3BuilderProfileEffectName: string = "";
 
-const settings = definePluginSettings ({
-    shouldPrioritizeNitro: {
+const settings = definePluginSettings({
+    prioritizeNitro: {
         description: "Source to use if profile theme colors / effects are set on both Nitro and About Me",
         type: OptionType.SELECT,
         options: [
             { label: "Nitro", value: true },
             { label: "About Me", value: false, default: true },
         ]
+    },
+    "Hide 3y3 Builder": {
+        description: "Hide the 3y3 Builder in the profiles settings page",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
@@ -278,7 +288,7 @@ export default definePlugin({
             }
         }
     ],
-    settingsAboutComponent: (): Forms.FormSection => {
+    settingsAboutComponent: (): JSX.Element => {
         return (
             <Forms.FormSection>
                 <Forms.FormTitle tag={"h3"}>{"Usage"}</Forms.FormTitle>
@@ -303,44 +313,43 @@ export default definePlugin({
         );
     },
     settings,
-    decodeUserBio3y3Hook(user: User | undefined): User | undefined {
+    decodeUserBio3y3Hook(user: UserProfile | undefined): UserProfile | undefined {
         if (user !== undefined) {
-            const userThemeColors: [number, number] | undefined = user.themeColors;
-            const userProfileEffectID: string | undefined = user.profileEffectID;
-            if (settings.store.shouldPrioritizeNitro === true) {
-                if (userThemeColors !== undefined) {
-                    if (userProfileEffectID === undefined) {
+            if (settings.store.prioritizeNitro === true) {
+                if (user.themeColors !== undefined) {
+                    if (user.profileEffectID === undefined) {
                         const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
-                        const profileEffectID: bigint = base125StrToBase10ItemID(decodedUserBio3y3[2]);
-                        updateUserEffectID(user, profileEffectID);
+                        if (base125StrToBase10CSSColor(decodedUserBio3y3[0]) === -2)
+                            updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[1]));
+                        else
+                            updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[2]));
                     }
                     return user;
-                } else if(userProfileEffectID !== undefined) {
+                } else if(user.profileEffectID !== undefined) {
                     const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
                     const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
-                    if (profileThemePrimaryColor === -2) {
+                    if (profileThemePrimaryColor === -2)
                         legacy3y3(user, decodedUserBio3y3[0]);
-                    } else {
-                        const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
-                        updateUserThemeColors(user, profileThemePrimaryColor, profileThemeAccentColor);
-                    }
+                    else
+                        updateUserThemeColors(user, profileThemePrimaryColor, base125StrToBase10CSSColor(decodedUserBio3y3[1]));
                     return user;
-                } 
+                }
             }
             const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
             const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
             if (profileThemePrimaryColor === -2) {
                 legacy3y3(user, decodedUserBio3y3[0]);
+                updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[1]));
             } else {
-                const profileThemeAccentColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[1]);
-                updateUserThemeColors(user, profileThemePrimaryColor, profileThemeAccentColor);
-                const profileEffectID: bigint = base125StrToBase10ItemID(decodedUserBio3y3[2]);
-                updateUserEffectID(user, profileEffectID);
+                updateUserThemeColors(user, profileThemePrimaryColor, base125StrToBase10CSSColor(decodedUserBio3y3[1]));
+                updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[2]));
             }
         }
         return user;
     },
-    add3y3Builder(): HTMLElement {
+    add3y3Builder(): JSX.Element {
+        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
+        const [shouldBuildLegacyStr, setShouldBuildLegacyStr] = useState(false);
         return (
             <>
                 <Text
@@ -369,23 +378,35 @@ export default definePlugin({
                         _3y3BuilderVals[1] = -1;
                         _3y3BuilderVals[2] = "";
                         _3y3BuilderProfileEffectName = "";
-                        document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div")
-                            .textContent = "Primary: unchanged";
-                        document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div")
-                            .textContent = "Accent: unchanged";
-                        document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div")
-                            .textContent = "Effect: unchanged";
-                        document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "none";
+                        let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div");
+                        if (temp !== null)
+                            temp.textContent = "Primary: unchanged";
+                        else
+                            showToast("Cannot find the 3y3 Builder's Profile Theme Primary Color button.", Toasts.Type.FAILURE);
+                        temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div");
+                        if (temp !== null)
+                            temp.textContent = "Accent: unchanged";
+                        else
+                            showToast("Cannot find the 3y3 Builder's Profile Theme Accent Color button.", Toasts.Type.FAILURE);
+                        temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div");
+                        if (temp !== null)
+                            temp.textContent = "Effect: unchanged";
+                        else
+                            showToast("Cannot find the 3y3 Builder's Profile Effect button.", Toasts.Type.FAILURE);
+                        temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton")
+                        if (temp !== null)
+                            temp.style.display = "none";
+                        else
+                            showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
                     }}
                 >
                     {"Reset"}
                 </Button>
                 <div
-                    className={Margins.top8}
+                    className={Margins.bottom8 + " " + Margins.top8}
                     style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(4, 1fr)",
-                        marginBottom: "24px"
+                        gridTemplateColumns: "repeat(4, 1fr)"
                     }}
                 >
                     <Button
@@ -446,7 +467,21 @@ export default definePlugin({
                         }}
                         onClick={(): void => {
                             let stringToCopy: string = "";
-                            if (_3y3BuilderVals[0] !== -1) {
+                            if (shouldBuildLegacyStr === true) {
+                                if (_3y3BuilderVals[0] !== -1) {
+                                    if (_3y3BuilderVals[1] !== -1)
+                                        stringToCopy = encode3y3("[#" + _3y3BuilderVals[0].toString(16) + ",#" + _3y3BuilderVals[1].toString(16) + "]");
+                                    else
+                                        stringToCopy = encode3y3("[#" + _3y3BuilderVals[0].toString(16) + ",#" + _3y3BuilderVals[0].toString(16) + "]");
+                                    if (_3y3BuilderVals[2] !== "")
+                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                } else if (_3y3BuilderVals[1] !== -1) {
+                                    stringToCopy = encode3y3("[#" + _3y3BuilderVals[1].toString(16) + ",#" + _3y3BuilderVals[1].toString(16) + "]");
+                                    if (_3y3BuilderVals[2] !== "")
+                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                } else if (_3y3BuilderVals[2] !== "")
+                                    stringToCopy = "\u{e007e}\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                            } else if (_3y3BuilderVals[0] !== -1) {
                                 if(_3y3BuilderVals[1] !== -1 && _3y3BuilderVals[0] !== _3y3BuilderVals[1]) {
                                     if (_3y3BuilderVals[2] !== "") {
                                         stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[0]))
@@ -485,10 +520,20 @@ export default definePlugin({
                         {"Copy 3y3"}
                     </Button>
                 </div>
+                <Switch
+                    value={shouldBuildLegacyStr}
+                    note={"Will use more characters"}
+                    onChange={(value: boolean): void => {
+                        setShouldBuildLegacyStr(value);
+                    }}
+                >
+                    {"Build backwards compatible 3y3"}
+                </Switch>
             </>
         );
     },
-    addUpdate3y3BuilderProfileThemeColorsButton(profileThemePrimaryColor: number, profileThemeAccentColor: number): Button {
+    addUpdate3y3BuilderProfileThemeColorsButton(profileThemePrimaryColor: number, profileThemeAccentColor: number): JSX.Element {
+        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
         return (
             <Button
                 color={Button.Colors.PRIMARY}
@@ -497,19 +542,30 @@ export default definePlugin({
                 onClick={(): void => {
                     _3y3BuilderVals[0] = profileThemePrimaryColor;
                     _3y3BuilderVals[1] = profileThemeAccentColor;
-                    document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div")
-                        .textContent = "Primary: #" + profileThemePrimaryColor.toString(16).padStart(6, "0");
-                    document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div")
-                        .textContent = "Accent: #" + profileThemeAccentColor.toString(16).padStart(6, "0");
                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                    document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "inline";
+                    let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div");
+                    if (temp !== null)
+                        temp.textContent = "Primary: #" + profileThemePrimaryColor.toString(16).padStart(6, "0");
+                    else
+                        showToast("Cannot find the 3y3 Builder's Profile Theme Primary Color button.", Toasts.Type.FAILURE);
+                    temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div");
+                    if (temp !== null)
+                        temp.textContent = "Accent: #" + profileThemeAccentColor.toString(16).padStart(6, "0");
+                    else
+                        showToast("Cannot find the 3y3 Builder's Profile Theme Accent Color button.", Toasts.Type.FAILURE);
+                    temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton");
+                    if (temp !== null)
+                        temp.style.display = "inline";
+                    else
+                        showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
                 }}
             >
                 {"Update 3y3"}
             </Button>
         );
     },
-    addUpdate3y3BuilderProfileEffectButton(): Button {
+    addUpdate3y3BuilderProfileEffectButton(): JSX.Element {
+        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
         return (
             <Button
                 color={Button.Colors.PRIMARY}
@@ -525,7 +581,7 @@ export default definePlugin({
                             const profileEffectName: string | null = selectedProfileEffect.getAttribute("alt");
                             if (profileEffectName !== null) {
                                 fetch("/api/v9/collectibles-categories", { mode:"same-origin", cache: "only-if-cached" })
-                                    .then((response: Response): Proimse<string> | null => {
+                                    .then((response: Response): Promise<string> | null => {
                                         if (response.ok === true)
                                             return response.text();
                                         showToast("Unable to retrieve the list of profile effect IDs (" + response.status + ").", Toasts.Type.FAILURE);
@@ -538,10 +594,17 @@ export default definePlugin({
                                             if (profileEfectIDMatch !== null) {
                                                 _3y3BuilderProfileEffectName = profileEffectName;
                                                 _3y3BuilderVals[2] = profileEfectIDMatch[0];
-                                                document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div")
-                                                    .textContent = "Effect: " + _3y3BuilderProfileEffectName;
                                                 showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                                                document.querySelector("#" + pluginName + "3y3BuilderResetButton").style.display = "inline";
+                                                let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div");
+                                                if (temp !== null)
+                                                    temp.textContent = "Effect: " + _3y3BuilderProfileEffectName;
+                                                else
+                                                    showToast("Cannot find the 3y3 Builder's Profile Effect button.", Toasts.Type.FAILURE);
+                                                temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton");
+                                                if (temp !== null)
+                                                    temp.style.display = "inline";
+                                                else
+                                                    showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
                                             } else
                                                 showToast("Cannot not find the selected profile effect's ID.", Toasts.Type.FAILURE);
                                         }
