@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
@@ -23,7 +24,7 @@ interface SectionedGridListProps<ItemT, SectionT, SectionU = Section<SectionT, I
 
 // NOTE - I am proud of SectionedGridList (and Grid)'s types
 export default function SectionedGridList<ItemT, SectionU>(props: SectionedGridListProps<ItemT, SectionU>) {
-    return <div className={`${cl("sectioned-grid-list-container")} ${ScrollerClasses.thin}`}>
+    return <div className={classes(cl("sectioned-grid-list-container"), ScrollerClasses.thin)}>
         {props.sections.map(section => <div key={props.getSectionKey(section)} className={cl("sectioned-grid-list-section")}>
             {props.renderSectionHeader(section)}
             <Grid
