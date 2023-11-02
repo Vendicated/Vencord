@@ -47,7 +47,7 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad],
     patches: [
         {
-            find: '"Message Username"',
+            find: ".useCanSeeRemixBadge)",
             replacement: {
                 match: /(?<=onContextMenu:\i,children:).*?\}/,
                 replace: "$self.renderUsername(arguments[0])}"
