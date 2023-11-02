@@ -50,6 +50,14 @@ function VencordSettings() {
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
+    // One-time migration of the old setting to the new one if necessary.
+    React.useEffect(() => {
+        if (settings.macosTranslucency === true && !settings.macosVibrancyStyle) {
+            settings.macosVibrancyStyle = "sidebar";
+            settings.macosTranslucency = undefined;
+        }
+    }, []);
+
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
         title: string;

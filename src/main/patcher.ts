@@ -89,7 +89,11 @@ if (!IS_VANILLA) {
 
                 if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = settings.macosVibrancyStyle || "sidebar";
+                    if (settings.macosTranslucency) {
+                        options.vibrancy = "sidebar";
+                    } else if (settings.macosVibrancyStyle) {
+                        options.vibrancy = settings.macosVibrancyStyle;
+                    }
                 }
 
                 process.env.DISCORD_PRELOAD = original;
