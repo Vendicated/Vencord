@@ -47,6 +47,8 @@ if (IS_VESKTOP || !IS_VANILLA) {
                 case "vencordDesktopPreload.js.map":
                 case "patcher.js.map":
                 case "vencordDesktopMain.js.map":
+                case "ipcPlugins.js.map":
+                case "vencordDesktopIpcPlugins.js.map":
                     cb(join(__dirname, url));
                     break;
                 default:

@@ -20,6 +20,7 @@ export const VENCORD_FILES = [
     IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
     IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js",
     IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
+    IS_DISCORD_DESKTOP ? "ipcPlugins.js" : "vencordDesktopIpcPlugins.js",
     IS_DISCORD_DESKTOP ? "renderer.css" : "vencordDesktopRenderer.css",
 ];
 

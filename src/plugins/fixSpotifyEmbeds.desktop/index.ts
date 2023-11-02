@@ -22,5 +22,5 @@ export default definePlugin({
             stickToMarkers: false,
             default: 10
         }
-    })
+    }),
 });

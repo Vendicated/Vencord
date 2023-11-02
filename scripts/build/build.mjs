@@ -1,25 +1,22 @@
 #!/usr/bin/node
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import esbuild from "esbuild";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
+import {
+    BUILD_TIMESTAMP,
+    commonOpts,
+    globIpcPlugins,
+    globPlugins,
+    isStandalone,
+    updaterDisabled,
+    VERSION,
+    watch,
+} from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone,
@@ -47,7 +44,8 @@ const nodeCommonOpts = {
     define: defines,
 };
 
-const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = s =>
+    watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
 await Promise.all([
@@ -56,13 +54,16 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/patcher.js",
-        footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
+        footer: {
+            js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher"),
+        },
         sourcemap,
+        plugins: [globIpcPlugins, ...commonOpts.plugins],
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
-        }
+            IS_VESKTOP: false,
+        },
     }),
     esbuild.build({
         ...commonOpts,
@@ -70,30 +71,35 @@ await Promise.all([
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
+        footer: {
+            js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer"),
+        },
         globalName: "Vencord",
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
-            ...commonOpts.plugins
+            globIpcPlugins,
+            ...commonOpts.plugins,
         ],
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
-        }
+            IS_VESKTOP: false,
+        },
     }),
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/preload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
+        footer: {
+            js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload"),
+        },
         sourcemap,
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
-        }
+            IS_VESKTOP: false,
+        },
     }),
 
     // Vencord Desktop main & renderer & preload
@@ -101,13 +107,18 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/vencordDesktopMain.js",
-        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
+        footer: {
+            js:
+                "//# sourceURL=VencordDesktopMain\n" +
+                sourceMapFooter("vencordDesktopMain"),
+        },
         sourcemap,
+        plugins: [globIpcPlugins, ...commonOpts.plugins],
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        }
+            IS_VESKTOP: true,
+        },
     }),
     esbuild.build({
         ...commonOpts,
@@ -115,35 +126,91 @@ await Promise.all([
         outfile: "dist/vencordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
+        footer: {
+            js:
+                "//# sourceURL=VencordDesktopRenderer\n" +
+                sourceMapFooter("vencordDesktopRenderer"),
+        },
         globalName: "Vencord",
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
-            ...commonOpts.plugins
+            globIpcPlugins,
+            ...commonOpts.plugins,
         ],
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        }
+            IS_VESKTOP: true,
+        },
     }),
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/vencordDesktopPreload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
+        footer: {
+            js:
+                "//# sourceURL=VencordPreload\n" +
+                sourceMapFooter("vencordDesktopPreload"),
+        },
         sourcemap,
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        }
+            IS_VESKTOP: true,
+        },
+    }),
+    esbuild.build({
+        ...commonOpts,
+        entryPoints: ["src/main/ipcPlugins/renderer.ts"],
+        outfile: "dist/ipcPlugins.js",
+        format: "iife",
+        target: ["esnext"],
+        footer: {
+            js:
+                "//# sourceURL=VencordIpcPlugins\n" +
+                sourceMapFooter("ipcPlugins"),
+        },
+        globalName: "VencordIpc",
+        sourcemap,
+        plugins: [
+            globPlugins("discordDesktop"),
+            globIpcPlugins,
+            ...commonOpts.plugins,
+        ],
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false,
+        },
+    }),
+    esbuild.build({
+        ...commonOpts,
+        entryPoints: ["src/main/ipcPlugins/renderer.ts"],
+        outfile: "dist/vencordDesktopIpcPlugins.js",
+        format: "iife",
+        target: ["esnext"],
+        footer: {
+            js:
+                "//# sourceURL=VencordIpcPlugins\n" +
+                sourceMapFooter("vencordDesktopIpcPlugins"),
+        },
+        globalName: "VencordIpc",
+        sourcemap,
+        plugins: [
+            globPlugins("vencordDesktop"),
+            globIpcPlugins,
+            ...commonOpts.plugins,
+        ],
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true,
+        },
     }),
 ]).catch(err => {
     console.error("Build failed");
     console.error(err.message);
     // make ci fail
-    if (!commonOpts.watch)
-        process.exitCode = 1;
+    if (!commonOpts.watch) process.exitCode = 1;
 });

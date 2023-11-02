@@ -1,26 +1,14 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, statSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
@@ -31,18 +19,25 @@ import { getPluginTarget } from "../utils.mjs";
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
-export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
+export const BUILD_TIMESTAMP =
+    Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
-export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
-export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
-export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const isStandalone = JSON.stringify(
+    process.argv.includes("--standalone")
+);
+export const updaterDisabled = JSON.stringify(
+    process.argv.includes("--disable-updater")
+);
+export const gitHash =
+    process.env.VENCORD_HASH ||
+    execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 export const banner = {
     js: `
 // Vencord ${gitHash}
 // Standalone: ${isStandalone}
 // Platform: ${isStandalone === "false" ? process.platform : "Universal"}
 // Updater disabled: ${updaterDisabled}
-`.trim()
+`.trim(),
 };
 
 const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
@@ -55,7 +50,10 @@ export const makeAllPackagesExternalPlugin = {
     name: "make-all-packages-external",
     setup(build) {
         const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
-        build.onResolve({ filter }, args => ({ path: args.path, external: true }));
+        build.onResolve({ filter }, args => ({
+            path: args.path,
+            external: true,
+        }));
     },
 };
 
@@ -69,12 +67,17 @@ export const globPlugins = kind => ({
         build.onResolve({ filter }, args => {
             return {
                 namespace: "import-plugins",
-                path: args.path
+                path: args.path,
             };
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
+            const pluginDirs = [
+                "plugins/_api",
+                "plugins/_core",
+                "plugins",
+                "userplugins",
+            ];
             let code = "";
             let plugins = "\n";
             let i = 0;
@@ -88,14 +91,26 @@ export const globPlugins = kind => ({
                     const target = getPluginTarget(file);
                     if (target) {
                         if (target === "dev" && !watch) continue;
-                        if (target === "web" && kind === "discordDesktop") continue;
+                        if (target === "web" && kind === "discordDesktop")
+                            continue;
                         if (target === "desktop" && kind === "web") continue;
-                        if (target === "discordDesktop" && kind !== "discordDesktop") continue;
-                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue;
+                        if (
+                            target === "discordDesktop" &&
+                            kind !== "discordDesktop"
+                        )
+                            continue;
+                        if (
+                            target === "vencordDesktop" &&
+                            kind !== "vencordDesktop"
+                        )
+                            continue;
                     }
 
                     const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
+                    code += `import ${mod} from "./${dir}/${file.replace(
+                        /\.tsx?$/,
+                        ""
+                    )}";\n`;
                     plugins += `[${mod}.name]:${mod},\n`;
                     i++;
                 }
@@ -103,11 +118,61 @@ export const globPlugins = kind => ({
             code += `export default {${plugins}};`;
             return {
                 contents: code,
-                resolveDir: "./src"
+                resolveDir: "./src",
             };
         });
-    }
+    },
 });
+
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const globIpcPlugins = {
+    name: "glob-ipc-plugins",
+    setup: build => {
+        const filter = /^~ipcPlugins$/;
+        build.onResolve({ filter }, args => {
+            return {
+                namespace: "import-ipc-plugins",
+                path: args.path,
+            };
+        });
+
+        build.onLoad({ filter, namespace: "import-ipc-plugins" }, async () => {
+            const pluginDirs = [
+                "plugins/_api",
+                "plugins/_core",
+                "plugins",
+                "userplugins",
+            ];
+            let code = "";
+            let plugins = "\n";
+            let i = 0;
+            for (const dir of pluginDirs) {
+                if (!existsSync(`./src/${dir}`)) continue;
+                const folders = await readdir(`./src/${dir}`);
+                for (const folder of folders) {
+                    if (folder.startsWith("_") || folder.startsWith("."))
+                        continue;
+                    if (statSync(`./src/${dir}/${folder}`).isFile()) continue;
+
+                    if (!existsSync(`./src/${dir}/${folder}/ipcPlugin.ts`))
+                        continue;
+
+                    const mod = `p${i}`;
+                    code += `import ${mod} from "./${dir}/${folder}/ipcPlugin";\n`;
+                    plugins += `[${mod}.name]:${mod},\n`;
+                    i++;
+                }
+            }
+            code += `export default {${plugins}};`;
+            return {
+                contents: code,
+                resolveDir: "./src",
+            };
+        });
+    },
+};
 
 /**
  * @type {import("esbuild").Plugin}
@@ -117,12 +182,13 @@ export const gitHashPlugin = {
     setup: build => {
         const filter = /^~git-hash$/;
         build.onResolve({ filter }, args => ({
-            namespace: "git-hash", path: args.path
+            namespace: "git-hash",
+            path: args.path,
         }));
         build.onLoad({ filter, namespace: "git-hash" }, () => ({
-            contents: `export default "${gitHash}"`
+            contents: `export default "${gitHash}"`,
         }));
-    }
+    },
 };
 
 /**
@@ -133,13 +199,17 @@ export const gitRemotePlugin = {
     setup: build => {
         const filter = /^~git-remote$/;
         build.onResolve({ filter }, args => ({
-            namespace: "git-remote", path: args.path
+            namespace: "git-remote",
+            path: args.path,
         }));
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
             let remote = process.env.VENCORD_REMOTE;
             if (!remote) {
-                const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
-                remote = res.stdout.trim()
+                const res = await promisify(exec)("git remote get-url origin", {
+                    encoding: "utf-8",
+                });
+                remote = res.stdout
+                    .trim()
                     .replace("https://github.com/", "")
                     .replace("git@github.com:", "")
                     .replace(/.git$/, "");
@@ -147,7 +217,7 @@ export const gitRemotePlugin = {
 
             return { contents: `export default "${remote}"` };
         });
-    }
+    },
 };
 
 /**
@@ -161,16 +231,24 @@ export const fileIncludePlugin = {
             namespace: "include-file",
             path: args.path,
             pluginData: {
-                path: join(args.resolveDir, args.path.slice("include-file/".length))
-            }
+                path: join(
+                    args.resolveDir,
+                    args.path.slice("include-file/".length)
+                ),
+            },
         }));
-        build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
-            const [name, format] = path.split(";");
-            return {
-                contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
-            };
-        });
-    }
+        build.onLoad(
+            { filter, namespace: "include-file" },
+            async ({ pluginData: { path } }) => {
+                const [name, format] = path.split(";");
+                return {
+                    contents: `export default ${JSON.stringify(
+                        await readFile(name, format ?? "utf-8")
+                    )}`,
+                };
+            }
+        );
+    },
 };
 
 const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
@@ -180,22 +258,34 @@ const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
 export const stylePlugin = {
     name: "style-plugin",
     setup: ({ onResolve, onLoad }) => {
-        onResolve({ filter: /\.css\?managed$/, namespace: "file" }, ({ path, resolveDir }) => ({
-            path: relative(process.cwd(), join(resolveDir, path.replace("?managed", ""))),
-            namespace: "managed-style",
-        }));
-        onLoad({ filter: /\.css$/, namespace: "managed-style" }, async ({ path }) => {
-            const css = await readFile(path, "utf-8");
-            const name = relative(process.cwd(), path).replaceAll("\\", "/");
+        onResolve(
+            { filter: /\.css\?managed$/, namespace: "file" },
+            ({ path, resolveDir }) => ({
+                path: relative(
+                    process.cwd(),
+                    join(resolveDir, path.replace("?managed", ""))
+                ),
+                namespace: "managed-style",
+            })
+        );
+        onLoad(
+            { filter: /\.css$/, namespace: "managed-style" },
+            async ({ path }) => {
+                const css = await readFile(path, "utf-8");
+                const name = relative(process.cwd(), path).replaceAll(
+                    "\\",
+                    "/"
+                );
 
-            return {
-                loader: "js",
-                contents: styleModule
-                    .replaceAll("STYLE_SOURCE", JSON.stringify(css))
-                    .replaceAll("STYLE_NAME", JSON.stringify(name))
-            };
-        });
-    }
+                return {
+                    loader: "js",
+                    contents: styleModule
+                        .replaceAll("STYLE_SOURCE", JSON.stringify(css))
+                        .replaceAll("STYLE_NAME", JSON.stringify(name)),
+                };
+            }
+        );
+    },
 };
 
 /**
@@ -215,5 +305,5 @@ export const commonOpts = {
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
     // Work around https://github.com/evanw/esbuild/issues/2460
-    tsconfig: "./scripts/build/tsconfig.esbuild.json"
+    tsconfig: "./scripts/build/tsconfig.esbuild.json",
 };

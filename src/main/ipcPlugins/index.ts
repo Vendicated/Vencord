@@ -18,27 +18,28 @@
 
 import { IpcEvents } from "@utils/IpcEvents";
 import { app, ipcMain } from "electron";
+import { readFileSync } from "fs";
 import { readFile } from "fs/promises";
 import { request } from "https";
-import { basename, normalize } from "path";
+import { basename, join, normalize } from "path";
 
-import { getSettings } from "./ipcMain";
+import ipcPlugins from "~ipcPlugins";
 
-// FixSpotifyEmbeds
+import { getSettings } from "../ipcMain";
+
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
-        frame.once("dom-ready", () => {
-            if (frame.url.startsWith("https://open.spotify.com/embed/")) {
-                const settings = getSettings().plugins?.FixSpotifyEmbeds;
-                if (!settings?.enabled) return;
-
-                frame.executeJavaScript(`
-                    const original = Audio.prototype.play;
-                    Audio.prototype.play = function() {
-                        this.volume = ${(settings.volume / 100) || 0.1};
-                        return original.apply(this, arguments);
+        frame.once("dom-ready", async () => {
+            for (const plugin of Object.values(ipcPlugins)) {
+                console.log(frame.url, plugin.matcher);
+                if (frame.url.match(plugin.matcher)) {
+                    const settings = getSettings().plugins?.[plugin.name];
+                    if (settings?.enabled) {
+                        await frame.executeJavaScript("if (!window.PluginSettings) window.PluginSettings = {}");
+                        await frame.executeJavaScript(`window.PluginSettings["${plugin.name}"] = JSON.parse('${JSON.stringify(settings)}')`);
+                        await frame.executeJavaScript(readFileSync(join(__dirname, "ipcPlugins.js"), "utf-8"));
                     }
-                `);
+                }
             }
         });
     });

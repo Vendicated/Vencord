@@ -24,6 +24,12 @@ declare module "~plugins" {
     export default plugins;
 }
 
+declare module "~ipcPlugins" {
+    const ipcPlugins: Record<string, import("@utils/types").IpcPlugin>;
+    export default ipcPlugins;
+}
+
+
 declare module "~git-hash" {
     const hash: string;
     export default hash;
