@@ -26,7 +26,7 @@ export default function DecorDecorationGridDecoration(props) {
         onContextMenu={e => {
             ContextMenu.open(e, () => (
                 <DecorationContextMenu
-                    decoration={props.decoration}
+                    decoration={decoration}
                 />
             ));
         }}
