@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
+import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -202,8 +203,84 @@ function openProfileThemeColorPicker(colorType: "Primary" | "Accent"): void {
     showToast("Cannot find the Profile Theme " + colorType + " Color picker.", Toasts.Type.FAILURE);
 }
 
+function ProfileEffectsModal({ props, profileEffects, onClose }: { props: ModalProps, profileEffects: any, onClose: () => void }): JSX.Element {
+    const [selected, setSelected]: [number, (v: number) => void] = useState(-1);
+    return (
+        <ModalRoot {...props} size={ModalSize.MEDIUM}>
+            <ModalHeader>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%"
+                    }}
+                >
+                    <Text style={{fontSize: "20px"}}>
+                        {"Add Profile Effect"}
+                    </Text>
+                    <ModalCloseButton onClick={onClose} />
+                </div>
+            </ModalHeader>
+            <div
+                style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center"
+                }}
+            >
+                {profileEffects.map((e, i): JSX.Element =>
+                    <div
+                        style={{
+                            background: "top / cover url(" + e.thumbnailPreviewSrc + "), top / cover url(/assets/f328a6f8209d4f1f5022.png)",
+                            borderRadius: "4px",
+                            boxShadow: i === selected ? "inset 0 0 0 2px var(--brand-experiment-500, #5865f2)" : "none",
+                            cursor: "pointer",
+                            margin: "6px",
+                            width: "80px",
+                            height: "80px"
+                        }}
+                        onClick={(): void => {setSelected(i)}}
+                    />
+                )}
+            </div>
+            <ModalFooter>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%"
+                    }}
+                >
+                    <Text>
+                        {selected === -1 ? "" : profileEffects[selected].title}
+                    </Text>
+                    <Button
+                        color={Button.Colors.PRIMARY}
+                        size={Button.Sizes.MEDIUM}
+                        onClick={(): void => {
+                            if (selected !== -1) {
+                                _3y3BuilderVals[2] = profileEffects[selected].id;
+                                set3y3BuilderEffectName(profileEffects[selected].title);
+                                showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                            } else
+                                showToast("No effect selected!", Toasts.Type.MESSAGE);
+                        }}
+                    >
+                        {"Update 3y3"}
+                    </Button>
+                </div>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
+
 const _3y3BuilderVals: [number, number, string] = [-1, -1, ""];
 let _3y3BuilderProfileEffectName: string = "";
+let set3y3BuilderPrimaryColor: (v: number) => void = (v: number): void => {};
+let set3y3BuilderAccentColor: (v: number) => void = (v: number): void => {};
+let set3y3BuilderEffectName: (v: string) => void = (v: string): void => {};
 
 const settings = definePluginSettings({
     prioritizeNitro: {
@@ -247,45 +324,20 @@ export default definePlugin({
         },
         {
             find: ".USER_SETTINGS_PROFILE_THEME_PRIMARY",
-            replacement: {
-                match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_PRIMARY[,}])/,
-                replace: '$&id:"' + pluginName + 'ProfileThemePrimaryColorPickerContainer",'
-            }
-        },
-        {
-            find: ".USER_SETTINGS_PROFILE_THEME_PRIMARY",
-            replacement: {
-                match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_ACCENT[,}])/,
-                replace: '$&id:"' + pluginName + 'ProfileThemeAccentColorPickerContainer",'
-            }
-        },
-        {
-            find: ".USER_SETTINGS_PROFILE_THEME_PRIMARY",
-            replacement: {
-                match: /(?<=[{,]color:(\i),.{0,500}?[{,]color:(\i),.{0,500}?\.USER_SETTINGS_RESET_PROFILE_THEME[,}])\)/,
-                replace: "$&,$self.addUpdate3y3BuilderProfileThemeColorsButton($1, $2)"
-            }
-        },
-        {
-            find: ".USER_SETTINGS_CHANGE_PROFILE_EFFECT",
-            replacement: {
-                match: /,(?=children:.{0,50}?\.USER_SETTINGS_CHANGE_PROFILE_EFFECT[,}])/,
-                replace: '$&id:"' + pluginName + 'ChangeProfileEffectButton",'
-            }
-        },
-        {
-            find: ".PROFILE_EFFECT_MODAL_HEADER",
-            replacement: {
-                match: /(?<=\(\i.ModalContent,){/,
-                replace: '$&id:"' + pluginName + 'AddProfileEffectModalContent",'
-            }
-        },
-        {
-            find: ".PROFILE_EFFECT_MODAL_HEADER",
-            replacement: {
-                match: /(?<=\(\i\.ModalFooter,.{0,50}?children:).{0,500}?]}\)/,
-                replace: "[$self.addUpdate3y3BuilderProfileEffectButton(),$&]"
-            }
+            replacement: [
+                {
+                    match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_PRIMARY[,}])/,
+                    replace: '$&id:"' + pluginName + 'ProfileThemePrimaryColorPickerContainer",'
+                },
+                {
+                    match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_ACCENT[,}])/,
+                    replace: '$&id:"' + pluginName + 'ProfileThemeAccentColorPickerContainer",'
+                },
+                {
+                    match: /(?<=[{,]color:(\i),.{0,500}?[{,]color:(\i),.{0,500}?\.USER_SETTINGS_RESET_PROFILE_THEME[,}])\)/,
+                    replace: "$&,$self.addUpdate3y3BuilderProfileThemeColorsButton($1, $2)"
+                }
+            ]
         }
     ],
     settingsAboutComponent: (): JSX.Element => {
@@ -350,6 +402,9 @@ export default definePlugin({
     add3y3Builder(): JSX.Element {
         if (settings.store["Hide 3y3 Builder"] === true) return <></>;
         const [shouldBuildLegacyStr, setShouldBuildLegacyStr] = useState(false);
+        [_3y3BuilderVals[0], set3y3BuilderPrimaryColor] = useState(_3y3BuilderVals[0]);
+        [_3y3BuilderVals[1], set3y3BuilderAccentColor] = useState(_3y3BuilderVals[1]);
+        [_3y3BuilderProfileEffectName, set3y3BuilderEffectName] = useState(_3y3BuilderProfileEffectName);
         return (
             <>
                 <Text
@@ -360,7 +415,6 @@ export default definePlugin({
                     {"3y3 Builder"}
                 </Text>
                 <Button
-                    id={pluginName + "3y3BuilderResetButton"}
                     look={Button.Looks.LINK}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.TINY}
@@ -374,30 +428,9 @@ export default definePlugin({
                         paddingTop: "0"
                     }}
                     onClick={(): void => {
-                        _3y3BuilderVals[0] = -1;
-                        _3y3BuilderVals[1] = -1;
-                        _3y3BuilderVals[2] = "";
-                        _3y3BuilderProfileEffectName = "";
-                        let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div");
-                        if (temp !== null)
-                            temp.textContent = "Primary: unchanged";
-                        else
-                            showToast("Cannot find the 3y3 Builder's Profile Theme Primary Color button.", Toasts.Type.FAILURE);
-                        temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div");
-                        if (temp !== null)
-                            temp.textContent = "Accent: unchanged";
-                        else
-                            showToast("Cannot find the 3y3 Builder's Profile Theme Accent Color button.", Toasts.Type.FAILURE);
-                        temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div");
-                        if (temp !== null)
-                            temp.textContent = "Effect: unchanged";
-                        else
-                            showToast("Cannot find the 3y3 Builder's Profile Effect button.", Toasts.Type.FAILURE);
-                        temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton")
-                        if (temp !== null)
-                            temp.style.display = "none";
-                        else
-                            showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
+                        set3y3BuilderPrimaryColor(-1);
+                        set3y3BuilderAccentColor(-1);
+                        set3y3BuilderEffectName(_3y3BuilderVals[2] = "");
                     }}
                 >
                     {"Reset"}
@@ -410,7 +443,6 @@ export default definePlugin({
                     }}
                 >
                     <Button
-                        id = {pluginName + "3y3BuilderSetProfileThemePrimaryColorButton"}
                         innerClassName={pluginName + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
@@ -424,7 +456,6 @@ export default definePlugin({
                         {"Primary: " + (_3y3BuilderVals[0] === -1 ? "unchanged" : "#" + _3y3BuilderVals[0].toString(16).padStart(6, "0"))}
                     </Button>
                     <Button
-                        id={pluginName + "3y3BuilderSetProfileThemeAccentColorButton"}
                         innerClassName={pluginName + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
@@ -437,7 +468,6 @@ export default definePlugin({
                         {"Accent: " + (_3y3BuilderVals[1] === -1 ? "unchanged" : "#" + _3y3BuilderVals[1].toString(16).padStart(6, "0"))}
                     </Button>
                     <Button
-                        id={pluginName + "3y3BuilderSetProfileEffectButton"}
                         innerClassName={pluginName + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
@@ -446,12 +476,33 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={(): void => {
-                            const changeProfileEffectButton: HTMLElement | null = document
-                                .querySelector("#" + pluginName + "ChangeProfileEffectButton");
-                            if (changeProfileEffectButton !== null)
-                                changeProfileEffectButton.click();
-                            else
-                                showToast("Cannot find the Change Profile Effect button.", Toasts.Type.FAILURE);
+                            fetch("/api/v9/user-profile-effects", { mode:"same-origin", cache: "only-if-cached" })
+                                .then((response: Response): Promise<string> | null => {
+                                    if (response.ok === true)
+                                        return response.text();
+                                    showToast("Unable to retrieve the list of profile effects (" + response.status + ").", Toasts.Type.FAILURE);
+                                    return null;
+                                })
+                                .then((data: string | null): void => {
+                                    if (data !== null) {
+                                        let profileEffects: any = null;
+                                        try {
+                                            profileEffects = JSON.parse(data);
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                        if (profileEffects !== null && profileEffects.profile_effect_configs) {
+                                            const key = openModal(props =>
+                                                <ProfileEffectsModal
+                                                    props={props}
+                                                    profileEffects={profileEffects.profile_effect_configs}
+                                                    onClose={(): void => {closeModal(key)}}
+                                                />
+                                            );
+                                        } else
+                                            showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
+                                    }
+                                });
                         }}
                     >
                         {"Effect: " + (_3y3BuilderVals[2] === "" ? "unchanged" : _3y3BuilderProfileEffectName)}
@@ -540,81 +591,9 @@ export default definePlugin({
                 size={Button.Sizes.XLARGE}
                 className={Margins.left16}
                 onClick={(): void => {
-                    _3y3BuilderVals[0] = profileThemePrimaryColor;
-                    _3y3BuilderVals[1] = profileThemeAccentColor;
+                    set3y3BuilderPrimaryColor(profileThemePrimaryColor);
+                    set3y3BuilderAccentColor(profileThemeAccentColor);
                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                    let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemePrimaryColorButton div");
-                    if (temp !== null)
-                        temp.textContent = "Primary: #" + profileThemePrimaryColor.toString(16).padStart(6, "0");
-                    else
-                        showToast("Cannot find the 3y3 Builder's Profile Theme Primary Color button.", Toasts.Type.FAILURE);
-                    temp = document.querySelector("#" + pluginName + "3y3BuilderSetProfileThemeAccentColorButton div");
-                    if (temp !== null)
-                        temp.textContent = "Accent: #" + profileThemeAccentColor.toString(16).padStart(6, "0");
-                    else
-                        showToast("Cannot find the 3y3 Builder's Profile Theme Accent Color button.", Toasts.Type.FAILURE);
-                    temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton");
-                    if (temp !== null)
-                        temp.style.display = "inline";
-                    else
-                        showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
-                }}
-            >
-                {"Update 3y3"}
-            </Button>
-        );
-    },
-    addUpdate3y3BuilderProfileEffectButton(): JSX.Element {
-        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
-        return (
-            <Button
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.MEDIUM}
-                style={{order: "1"}}
-                onClick={(): void => {
-                    const addProfileEffectModalContent: HTMLElement | null = document
-                        .querySelector("#" + pluginName + "AddProfileEffectModalContent");
-                    if (addProfileEffectModalContent !== null) {
-                        const selectedProfileEffect: HTMLElement | null = addProfileEffectModalContent.
-                            querySelector('[class*="selected_"] [class*="presetEffectImg__"]');
-                        if (selectedProfileEffect !== null) {
-                            const profileEffectName: string | null = selectedProfileEffect.getAttribute("alt");
-                            if (profileEffectName !== null) {
-                                fetch("/api/v9/collectibles-categories", { mode:"same-origin", cache: "only-if-cached" })
-                                    .then((response: Response): Promise<string> | null => {
-                                        if (response.ok === true)
-                                            return response.text();
-                                        showToast("Unable to retrieve the list of profile effect IDs (" + response.status + ").", Toasts.Type.FAILURE);
-                                        return null;
-                                    })
-                                    .then((data: string | null): void => {
-                                        if (data !== null) {
-                                            const profileEfectIDMatch: RegExpMatchArray | null = data
-                                                .match(new RegExp('(?<="name":"' + profileEffectName + '".*?"id":")[0-9]*?(?=")'));
-                                            if (profileEfectIDMatch !== null) {
-                                                _3y3BuilderProfileEffectName = profileEffectName;
-                                                _3y3BuilderVals[2] = profileEfectIDMatch[0];
-                                                showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                                                let temp: HTMLElement | null = document.querySelector("#" + pluginName + "3y3BuilderSetProfileEffectButton div");
-                                                if (temp !== null)
-                                                    temp.textContent = "Effect: " + _3y3BuilderProfileEffectName;
-                                                else
-                                                    showToast("Cannot find the 3y3 Builder's Profile Effect button.", Toasts.Type.FAILURE);
-                                                temp = document.querySelector("#" + pluginName + "3y3BuilderResetButton");
-                                                if (temp !== null)
-                                                    temp.style.display = "inline";
-                                                else
-                                                    showToast("Cannot find the 3y3 Builder's reset button.", Toasts.Type.FAILURE);
-                                            } else
-                                                showToast("Cannot not find the selected profile effect's ID.", Toasts.Type.FAILURE);
-                                        }
-                                    });
-                            } else
-                                showToast("Cannot find the selected profile effect's name.", Toasts.Type.FAILURE);
-                        } else
-                            showToast("Cannot find the selected profile effect.", Toasts.Type.FAILURE);
-                    } else
-                        showToast("Cannot find the Add Profile Effect modal's content.", Toasts.Type.FAILURE);
                 }}
             >
                 {"Update 3y3"}
