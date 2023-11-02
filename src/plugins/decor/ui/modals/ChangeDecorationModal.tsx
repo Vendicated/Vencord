@@ -5,15 +5,19 @@
  */
 
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Button, Forms, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
+import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
+import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 import discordifyDecoration from "../../lib/utils/discordifyDecoration";
+import openInviteModal from "../../lib/utils/openInviteModal";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
@@ -176,22 +180,61 @@ export default function ChangeDecorationModal(props: any) {
                 {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
             </div>
         </ModalContent>
-        <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    selectDecoration(tryingDecoration!).then(props.onClose);
-                }}
-                disabled={!isTryingDecoration}
-            >
-                Apply
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Cancel
-            </Button>
+        <ModalFooter className={classes(cl("change-decoration-modal-footer", cl("modal-footer")))}>
+            <div className={cl("change-decoration-modal-footer-btn-container")}>
+                <Button
+                    onClick={() => {
+                        selectDecoration(tryingDecoration!).then(props.onClose);
+                    }}
+                    disabled={!isTryingDecoration}
+                >
+                    Apply
+                </Button>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.LINK}
+                >
+                    Cancel
+                </Button>
+            </div>
+            <div className={cl("change-decoration-modal-footer-btn-container")}>
+                <Button
+                    onClick={() => Alerts.show({
+                        title: "Log Out",
+                        body: "Are you sure you want to log out of Decor?",
+                        confirmText: "Log Out",
+                        confirmColor: cl("danger-btn"),
+                        cancelText: "Cancel",
+                        onConfirm() {
+                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                            props.onClose();
+                        }
+                    })}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.LINK}
+                >
+                    Log Out
+                </Button>
+                <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
+                    {tooltipProps => <Button
+                        {...tooltipProps}
+                        onClick={() => {
+                            if (!GuildStore.getGuild(GUILD_ID)) {
+                                openInviteModal(INVITE_KEY);
+                            } else {
+                                props.onClose();
+                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                NavigationRouter.transitionToGuild(GUILD_ID);
+                            }
+                        }}
+                        color={Button.Colors.PRIMARY}
+                        look={Button.Looks.LINK}
+                    >
+                        Discord Server
+                    </Button>}
+                </Tooltip>
+            </div>
         </ModalFooter>
     </ModalRoot>;
 }

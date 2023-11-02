@@ -18,6 +18,7 @@ interface AuthorizationState {
     init: () => void;
     authorize: () => void;
     setToken: (token: string) => void;
+    remove: (id: string) => void;
     isAuthorized: () => boolean;
 }
 
@@ -41,6 +42,14 @@ export const useAuthorizationStore = proxyLazy(() => create<AuthorizationState>(
             tokens: {},
             init: () => { set({ token: get().tokens[UserStore.getCurrentUser().id] ?? null }); },
             setToken: (token: string) => set({ token, tokens: { ...get().tokens, [UserStore.getCurrentUser().id]: token } }),
+            remove: (id: string) => {
+                const { tokens, init } = get();
+                const newTokens = { ...tokens };
+                delete newTokens[id];
+                set({ tokens: newTokens });
+
+                init();
+            },
             authorize: () => void showAuthorizationModal(),
             isAuthorized: () => !!get().token,
         }),

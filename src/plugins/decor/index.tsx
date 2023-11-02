@@ -181,7 +181,7 @@ export default definePlugin({
                 >
                     Change Decor Decoration
                 </Button>
-                {selectedDecoration && <Button
+                {selectedDecoration && authorization.isAuthorized() && <Button
                     onClick={() => selectDecoration(null)}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.SMALL}

@@ -1,4 +1,4 @@
-.vc-decor-delete-decoration-danger-btn {
+.vc-decor-danger-btn {
     color: var(--white-500);
     background-color: var(--button-danger-background);
 }
@@ -24,6 +24,14 @@
     height: 80px;
 }
 
+.vc-decor-change-decoration-modal-footer {
+    justify-content: space-between;
+}
+
+.vc-decor-change-decoration-modal-footer-btn-container {
+    display: flex;
+    flex-direction: row-reverse;
+}
 
 .vc-decor-create-decoration-modal-content {
     display: flex;

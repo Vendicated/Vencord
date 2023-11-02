@@ -10,11 +10,12 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, GuildStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, Forms, GuildStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
+import openInviteModal from "../../lib/utils/openInviteModal";
 import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
 import requireCreateStickerModal from "../../lib/utils/requireCreateStickerModal";
 import { AvatarDecorationModalPreview } from "../components";
@@ -23,8 +24,6 @@ import { AvatarDecorationModalPreview } from "../components";
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 const FileUpload = findByCodeLazy("fileUploadInput,");
-
-const InviteActions = findByPropsLazy("resolveInvite");
 
 export default function CreateDecorationModal(props) {
     const [name, setName] = useState("");
@@ -104,14 +103,7 @@ export default function CreateDecorationModal(props) {
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
                             e.preventDefault();
-                            const { invite } = await InviteActions.resolveInvite(INVITE_KEY, "Desktop Modal");
-
-                            FluxDispatcher.dispatch({
-                                type: "INVITE_MODAL_OPEN",
-                                invite,
-                                code: INVITE_KEY,
-                                context: "APP"
-                            });
+                            await openInviteModal(INVITE_KEY);
                         }}
                     >Decor's Discord server
                     </Link>.

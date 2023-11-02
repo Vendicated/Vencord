@@ -35,7 +35,7 @@ export default function DecorationContextMenu({ decoration }) {
                     title: "Delete Decoration",
                     body: `Are you sure you want to delete ${decoration.alt}?`,
                     confirmText: "Delete",
-                    confirmColor: cl("delete-decoration-danger-btn"),
+                    confirmColor: cl("danger-btn"),
                     cancelText: "Cancel",
                     onConfirm() {
                         deleteDecoration(decoration);
