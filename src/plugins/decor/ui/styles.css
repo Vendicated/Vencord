@@ -8,14 +8,20 @@
     display: flex;
     border-radius: 5px 5px 0 0;
     padding: 0 16px;
+    gap: 4px
 }
 
 .vc-decor-change-decoration-modal-preview {
     display: flex;
     flex-direction: column;
     margin-top: 24px;
-    gap: 16px;
+    gap: 8px;
     max-width: 280px;
+}
+
+.vc-decor-change-decoration-modal-decoration {
+    width: 80px;
+    height: 80px;
 }
 
 
@@ -44,4 +50,19 @@
     flex-direction: column;
     flex-grow: 1;
     gap: 16px;
+}
+
+.vc-decor-sectioned-grid-list-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden scroll;
+    max-height: 512px;
+    width: 352px; /* ((80 + 8 (grid gap)) * desired columns) (scrolled takes the extra 8 padding off conveniently) */
+    gap: 12px;
+}
+
+.vc-decor-sectioned-grid-list-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px
 }

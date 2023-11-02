@@ -7,7 +7,7 @@
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
-import { findByCode, findByPropsLazy, waitFor } from "@webpack";
+import { findByCode, findByPropsLazy } from "@webpack";
 import { Button, Forms, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
@@ -19,21 +19,16 @@ import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
 import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
+import SectionedGridList from "../components/SectionedGridList";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
-
-let MasonryList;
-waitFor("MasonryList", m => {
-    ({ MasonryList } = m);
-});
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
-const DecorationComponentStyles = findByPropsLazy("decorationGridItemChurned");
 
 interface Section {
     title: string;
     subtitle?: string;
-    itemKeyPrefix: string;
+    sectionKey: string;
     items: ("none" | "create" | Decoration)[];
     authorIds?: string[];
 }
@@ -66,16 +61,16 @@ export default function ChangeDecorationModal(props: any) {
 
     const ownDecorations = decorations.filter(d => !presetDecorations.some(p => p.hash === d.hash));
 
-    const masonryListData = [
+    const data = [
         {
             title: "Your Decor Decorations",
-            itemKeyPrefix: "ownDecorations",
+            sectionKey: "ownDecorations",
             items: ["none", ...ownDecorations, "create"]
         },
         ...presets.map(preset => ({
             title: preset.name,
             subtitle: preset.description || undefined,
-            itemKeyPrefix: `preset-${preset.id}`,
+            sectionKey: `preset-${preset.id}`,
             items: preset.decorations,
             authorIds: preset.authorIds
         }))
@@ -83,7 +78,7 @@ export default function ChangeDecorationModal(props: any) {
 
     return <ModalRoot
         {...props}
-        size={ModalSize.MEDIUM}
+        size={ModalSize.DYNAMIC}
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
@@ -101,87 +96,50 @@ export default function ChangeDecorationModal(props: any) {
             className={cl("change-decoration-modal-content")}
             scrollbarType="none"
         >
-            <MasonryList
-                className={DecorationComponentStyles.list}
-                columns={3}
-                sectionGutter={16}
-                fade
-                getItemHeight={() => 80}
-                getItemKey={(section, index) => {
-                    const sectionData = masonryListData[section];
-                    const item = sectionData.items[index];
-                    return `${sectionData.itemKeyPrefix}-${typeof item === "string" ? item : item.hash}`;
-                }}
-                getSectionHeight={section => {
-                    const data = masonryListData[section];
-                    if (data.subtitle) {
-                        return data.subtitle.length > 32 ? 60 : 40;
-                    } else return 16;
-                }}
-                itemGutter={12}
-                paddingHorizontal={12}
-                paddingVertical={0}
-                removeEdgeItemGutters
-                renderItem={(section, index, style) => {
-                    const item = masonryListData[section].items[index];
-
+            <SectionedGridList
+                renderItem={item => {
                     if (typeof item === "string") {
                         switch (item) {
                             case "none":
                                 return <DecorationGridNone
+                                    className={cl("change-decoration-modal-decoration")}
                                     isSelected={activeSelectedDecoration === null}
                                     onSelect={() => setTryingDecoration(null)}
-                                    style={style}
                                 />;
                             case "create":
-                                if (decorations.some(d => d.reviewed === false)) {
-                                    return <Tooltip text="You already have a decoration pending review">
-                                        {tooltipProps => <DecorationGridCreate
-                                            {...tooltipProps}
-                                            onSelect={() => { }}
-                                            style={style}
-                                        />}
-                                    </Tooltip>;
-                                } else {
-                                    return <DecorationGridCreate
-                                        onSelect={openCreateDecorationModal}
-                                        style={style}
-                                    />;
-                                }
+                                return <Tooltip text="You already have a decoration pending review" shouldShow={hasPendingReview}>
+                                    {tooltipProps => <DecorationGridCreate
+                                        className={cl("change-decoration-modal-decoration")}
+                                        {...tooltipProps}
+                                        onSelect={!hasPendingReview ? openCreateDecorationModal : () => { }}
+                                    />}
+                                </Tooltip>;
                         }
                     } else {
-                        if (item.reviewed === false) {
-                            return <Tooltip text={"Pending review"}>
-                                {tooltipProps => (
-                                    <DecorDecorationGridDecoration
-                                        {...tooltipProps}
-                                        style={style}
-                                        onSelect={() => { }}
-                                        isSelected={activeSelectedDecoration?.hash === item.hash}
-                                        decoration={item}
-                                    />
-                                )}
-                            </Tooltip>;
-                        } else {
-                            return <DecorDecorationGridDecoration
-                                style={style}
-                                onSelect={() => setTryingDecoration(item)}
-                                isSelected={activeSelectedDecoration?.hash === item.hash}
-                                decoration={item}
-                            />;
-                        }
+                        return <Tooltip text={"Pending review"} shouldShow={item.reviewed === false}>
+                            {tooltipProps => (
+                                <DecorDecorationGridDecoration
+                                    {...tooltipProps}
+                                    className={cl("change-decoration-modal-decoration")}
+                                    onSelect={item.reviewed !== false ? () => setTryingDecoration(item) : () => { }}
+                                    isSelected={activeSelectedDecoration?.hash === item.hash}
+                                    decoration={item}
+                                />
+                            )}
+                        </Tooltip>;
                     }
                 }}
-                renderSection={section => {
-                    const sectionData = masonryListData[section];
-                    const hasSubtitle = typeof sectionData.subtitle !== "undefined";
-                    const hasAuthorIds = typeof sectionData.authorIds !== "undefined";
+                getItemKey={item => typeof item === "string" ? item : item.hash}
+                getSectionKey={section => section.sectionKey}
+                renderSectionHeader={section => {
+                    const hasSubtitle = typeof section.subtitle !== "undefined";
+                    const hasAuthorIds = typeof section.authorIds !== "undefined";
 
                     return <div>
                         <div style={{ display: "flex" }}>
-                            <Forms.FormTitle style={{ flexGrow: 1 }}>{sectionData.title}</Forms.FormTitle>
+                            <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
                             {hasAuthorIds && <UserSummaryItem
-                                users={sectionData.authorIds?.map(id => UserStore.getUser(id))}
+                                users={section.authorIds?.map(id => UserStore.getUser(id))}
                                 guildId={undefined}
                                 renderIcon={false}
                                 max={5}
@@ -193,19 +151,20 @@ export default function ChangeDecorationModal(props: any) {
                             }
                         </div>
                         {hasSubtitle &&
-                            <Forms.FormText type="description">
-                                {sectionData.subtitle}
+                            <Forms.FormText type="description" className={Margins.bottom8}>
+                                {section.subtitle}
                             </Forms.FormText>
                         }
                     </div>;
                 }}
-                sections={masonryListData.map(section => section.items.length)}
+                sections={data}
             />
             <div className={cl("change-decoration-modal-preview")}>
                 <AvatarDecorationModalPreview
                     avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
                     user={UserStore.getCurrentUser()}
                 />
+                {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
                 {typeof activeSelectedDecoration === "object" &&
                     <Text
                         variant="text-sm/semibold"
@@ -213,16 +172,6 @@ export default function ChangeDecorationModal(props: any) {
                     >
                         {activeSelectedDecoration?.alt}
                     </Text>
-                }
-                {isActiveDecorationPreset &&
-                    <div>
-                        <Forms.FormTitle>Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>
-                        {activeDecorationPreset?.description !== null &&
-                            <Forms.FormText type="description">
-                                {activeDecorationPreset?.description}
-                            </Forms.FormText>
-                        }
-                    </div>
                 }
                 {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
             </div>

@@ -9,7 +9,7 @@ import { i18n, Text } from "@webpack/common";
 
 import { DecorationGridItem } from ".";
 
-export default function DecorationGridNone(props: { isSelected, onSelect, style; }) {
+export default function DecorationGridNone(props: { isSelected, onSelect; className?: string; }) {
     return <DecorationGridItem
         {...props}
     >
