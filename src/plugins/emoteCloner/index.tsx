@@ -155,10 +155,15 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             type: Toasts.Type.SUCCESS,
             id: Toasts.genId()
         });
-    } catch (e) {
+    } catch (e: any) {
+        let message = "Something went wrong (check console!)";
+        try {
+            message = JSON.parse(e.text).message;
+        } catch { }
+
         new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
         Toasts.show({
-            message: "Oopsie something went wrong :( Check console!!!",
+            message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
             id: Toasts.genId()
         });
