@@ -112,7 +112,7 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),\i:(\i),\i:\i}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
+                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),(?:\i:)?(\i),\i:\i}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
                 replace: (_, users, a, b) => `$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`
             },
             predicate: () => settings.store.alternativeFormatting
