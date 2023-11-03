@@ -17,6 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
+import { lodash } from "@webpack/common";
 
 import { ScreenshareProfile, ScreenshareStore } from "../../betterScreenshare.desktop/stores";
 import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "../../philsPluginLibrary";
@@ -204,7 +205,7 @@ export function patchConnectionVideoSetDesktopSourceWithOptions(
     };
 
     const forceUpdateDesktopSourceOptions = () => {
-        const desktopSourceOptions = window._.merge({ ...getDefaultVideoDesktopSourceOptions(connection) }, getReplaceableVideoDesktopSourceOptions(get));
+        const desktopSourceOptions = lodash.merge({ ...getDefaultVideoDesktopSourceOptions(connection) }, getReplaceableVideoDesktopSourceOptions(get));
 
         logger?.info("Force Updated Desktop Source Options", desktopSourceOptions);
 
@@ -238,7 +239,7 @@ export function patchConnectionVideoTransportOptions(
     };
 
     const forceUpdateTransportationOptions = () => {
-        const transportOptions = window._.merge({ ...getDefaultVideoTransportationOptions(connection) }, getReplaceableVideoTransportationOptions(connection, get));
+        const transportOptions = lodash.merge({ ...getDefaultVideoTransportationOptions(connection) }, getReplaceableVideoTransportationOptions(connection, get));
 
         logger?.info("Force Updated Transport Options", transportOptions);
 
