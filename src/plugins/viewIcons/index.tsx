@@ -178,7 +178,7 @@ export default definePlugin({
             find: ".AVATAR_DECORATION_STATUS_ROUND_16;",
             replacement: {
                 match: /memo\(.{0,50}(?=let{statusColor:\i,status:\i,...\i}=(\i),)/,
-                replace: (m, props) => `${m}${props}.onClick=()=>$self.openImage(${props}.src);${props}.style={cursor:${props}.src?"pointer":void 0};`
+                replace: (m, props) => `${m}if(${props}.size==="SIZE_120")${props}.onClick=()=>$self.openImage(${props}.src);`
             }
         },
         // Make banners clickable
