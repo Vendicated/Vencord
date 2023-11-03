@@ -372,18 +372,18 @@ export default definePlugin({
             },
         },
         {
-            find: "unavailableTooltip:\"unavailableTooltip-CuQXIg\"",
+            find: "unavailableTooltip:\"unavailableTooltip__58709\"",
             predicate: () => settings.store.enableSoundboardGuildLimitBypass,
             replacement: {
-                match: /unavailableTooltip-CuQXIg/,
+                match: /unavailableTooltip__58709/,
                 replace: ""
             }
         },
         {
-            find: "premiumDisabled:\"premiumDisabled-20lb_D\"",
+            find: "premiumDisabled:\"premiumDisabled__07ada\"",
             predicate: () => settings.store.enableSoundboardGuildLimitBypass,
             replacement: {
-                match: /premiumDisabled-20lb_D/,
+                match: /premiumDisabled__07ada/,
                 replace: ""
             }
         },
