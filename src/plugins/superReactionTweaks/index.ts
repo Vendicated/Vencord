@@ -48,7 +48,7 @@ export default definePlugin({
         {
             find: ".hasAvailableBurstCurrency)",
             replacement: {
-                match: /(?<=\.useBurstReactionsExperiment.{0,20})useState\(!1\)/,
+                match: /(?<=\.useBurstReactionsExperiment.{0,20})useState\(!1\)(?=.+?(\i===\i\.EmojiIntention.REACTION))/,
                 replace: "useState($self.settings.store.superReactByDefault)"
             }
         }
