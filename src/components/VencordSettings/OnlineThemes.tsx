@@ -6,16 +6,20 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { CopyIcon, DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, Text, TextInput, useEffect, useState } from "@webpack/common";
 import { getThemeInfo, UserThemeHeader } from "main/themes";
 
+import { AddonCard } from "./AddonCard";
 import { ThemeCard } from "./ThemesTab";
 
 export interface OnlineTheme {
     link: string;
     headers?: UserThemeHeader;
+    error?: string;
 }
 
 const cl = classNameFactory("vc-settings-theme-");
@@ -51,6 +55,8 @@ async function FetchTheme(link: string) {
         .then(text => {
             const headers = getThemeInfo(text, trimThemeUrl(link));
             return { link, headers };
+        }).catch(e => {
+            return { link, error: e };
         });
 
     return theme;
@@ -176,12 +182,6 @@ export function OnlineThemes() {
         <>
             <Card className="vc-settings-card">
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
-                    <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
-                        BetterDiscord Themes
-                    </Link>
-                    <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
-                </div>
                 <Forms.FormText>
                     Find a theme you like and press "Add Theme" to add it.
                     To get a raw link to a theme, go to it's GitHub repository,
@@ -209,7 +209,7 @@ export function OnlineThemes() {
                         <Forms.FormText>Add themes with the "Add Theme" button above</Forms.FormText>
                     )}
                     {themes.map(theme => (
-                        <ThemeCard
+                        (!theme.error && <ThemeCard
                             key={theme.link}
                             enabled={!settings.disabledThemeLinks.includes(theme.link)}
                             onChange={value => {
@@ -219,6 +219,31 @@ export function OnlineThemes() {
                             theme={theme.headers!}
                             showDelete={true}
                         />
+                        ) || (
+                            <AddonCard
+                                key={theme.link}
+                                name={theme.error}
+                                description={theme.link}
+                                enabled={false}
+                                setEnabled={() => { }}
+                                infoButton={<>
+                                    <div
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => copyWithToast(theme.link, "Link copied to clipboard!")}
+                                    >
+                                        <CopyIcon />
+                                    </div>
+                                    <div
+                                        style={{ cursor: "pointer", color: "var(--status-danger" }}
+                                        onClick={() => removeTheme(theme.link)}
+                                    >
+                                        <DeleteIcon />
+                                    </div>
+                                </>
+                                }
+                                hideSwitch={true}
+                            />
+                        )
                     ))}
                 </div>
             </Forms.FormSection>
