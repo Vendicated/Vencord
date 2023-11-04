@@ -50,13 +50,15 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 (async function () {
-    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos, onDemandWays, onDemandWaysTintedText] = await DataStore.getMany([
+    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos, onDemandWays, onDemandWaysTintedText, useThinMenuButton, onDemandWaysDiscordSaturation] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
         "showColorwaysButton",
         "colorwaysBtnPos",
         "onDemandWays",
-        "onDemandWaysTintedText"
+        "onDemandWaysTintedText",
+        "useThinMenuButton",
+        "onDemandWaysDiscordSaturation"
     ]);
 
     if (!customColorways)
@@ -76,6 +78,12 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 
     if (!onDemandWaysTintedText)
         DataStore.set("onDemandWaysTintedText", true);
+
+    if (!useThinMenuButton)
+        DataStore.set("useThinMenuButton", false);
+
+    if (!onDemandWaysDiscordSaturation)
+        DataStore.set("onDemandWaysDiscordSaturation", false);
 
 })();
 
@@ -118,8 +126,8 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.3.0",
-    creatorVersion: "1.17",
+    pluginVersion: "5.4.0",
+    creatorVersion: "1.18",
     toolboxActions: {
         "Change Colorway": () => SettingsRouter.open("ColorwaysSettings"),
         "Open Colorway Creator": () =>
@@ -133,9 +141,9 @@ export default definePlugin({
     },
     patches: [
         {
-            find: ".colorPickerFooter",
+            find: "colorPickerFooter:",
             replacement: {
-                match: /function (\i).{0,200}\.colorPickerFooter/,
+                match: /function (\i).{0,200}colorPickerFooter:/,
                 replace: "$self.ColorPicker=$1;$&",
             },
         },

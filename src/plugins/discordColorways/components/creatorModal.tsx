@@ -49,6 +49,7 @@ export default function CreatorModal({
     const [tertiaryColor, setTertiaryColor] = useState<string>("1e1f22");
     const [colorwayName, setColorwayName] = useState<string>("");
     const [tintedText, setTintedText] = useState<boolean>(true);
+    const [discordSaturation, setDiscordSaturation] = useState<boolean>(true);
     const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
     const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
@@ -59,8 +60,7 @@ export default function CreatorModal({
             extractAndRequireModuleIds(
                 findByCode(
                     "Promise.all",
-                    "openModalLazy",
-                    "location_page"
+                    "openModalLazy"
                 )
             );
         }
@@ -196,6 +196,10 @@ export default function CreatorModal({
                             <Text variant="eyebrow" tag="h5">Use colored text</Text>
                             <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
                         </div>
+                        <div className="colorwaysCreator-settingItm" onClick={() => setDiscordSaturation(!discordSaturation)}>
+                            <Text variant="eyebrow" tag="h5">Use Discord's saturation</Text>
+                            <Switch value={discordSaturation} onChange={setDiscordSaturation} hideBorder={true} style={{ marginBottom: 0 }} />
+                        </div>
                     </ScrollerThin>
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedPresets ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
@@ -248,7 +252,8 @@ export default function CreatorModal({
                                 secondaryColor,
                                 tertiaryColor,
                                 accentColor,
-                                tintedText
+                                tintedText,
+                                discordSaturation
                             );
                         } else {
                             customColorwayCSS = getPreset(
@@ -256,7 +261,7 @@ export default function CreatorModal({
                                 secondaryColor,
                                 tertiaryColor,
                                 accentColor
-                            )[preset].preset();
+                            )[preset].preset(discordSaturation);
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway") + (preset === "default" ? "" : ": Made for " + getPreset()[preset].name),

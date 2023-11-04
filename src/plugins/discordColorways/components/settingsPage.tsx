@@ -10,6 +10,7 @@ import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import {
     Button,
+    FluxDispatcher,
     Forms,
     Switch,
     Text,
@@ -31,6 +32,8 @@ export function SettingsPage() {
     const [colorsButtonPos, setColorsButtonPos] = useState<string>("bottom");
     const [onDemand, setOnDemand] = useState<boolean>(false);
     const [onDemandTinted, setOnDemandTinted] = useState<boolean>(false);
+    const [isButtonThin, setIsButtonThin] = useState<boolean>(false);
+    const [onDemandDiscordSat, setOnDemandDiscordSat] = useState<boolean>(false);
 
     async function loadUI() {
         const colorwaySourceFiles = await DataStore.get(
@@ -52,7 +55,8 @@ export function SettingsPage() {
             "showColorwaysButton",
             "colorwaysBtnPos",
             "onDemandWays",
-            "onDemandWaysTintedText"
+            "onDemandWaysTintedText",
+            "useThinMenuButton"
         ]);
         setColorways(colorways || fallbackColorways);
         setCustomColorways(baseData[0]);
@@ -61,6 +65,7 @@ export function SettingsPage() {
         setColorsButtonPos(baseData[3]);
         setOnDemand(baseData[4]);
         setOnDemandTinted(baseData[5]);
+        setIsButtonThin(baseData[6]);
     }
 
     const cached_loadUI = useCallback(loadUI, [setColorways, setCustomColorways]);
@@ -181,10 +186,36 @@ export function SettingsPage() {
                     setColorsButtonVisibility(!colorsButtonVisibility);
                     const showColorwaysButton = await DataStore.get("showColorwaysButton");
                     DataStore.set("showColorwaysButton", !showColorwaysButton);
+                    FluxDispatcher.dispatch({
+                        type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY",
+                        isVisible: !colorsButtonVisibility
+                    });
                 }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
                     <Switch style={{ marginBottom: 0 }} hideBorder value={colorsButtonVisibility} onChange={(e: boolean) => {
                         setColorsButtonVisibility(e);
                         DataStore.set("showColorwaysButton", e);
+                        FluxDispatcher.dispatch({
+                            type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY",
+                            isVisible: e
+                        });
+                    }} />
+                </div>
+                <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                    setIsButtonThin(!isButtonThin);
+                    const useThinMenuButton = await DataStore.get("useThinMenuButton");
+                    DataStore.set("useThinMenuButton", !useThinMenuButton);
+                    FluxDispatcher.dispatch({
+                        type: "COLORWAYS_UPDATE_BUTTON_HEIGHT",
+                        isTall: !isButtonThin
+                    });
+                }}><label className="colorwaysSettings-label">Use thin menu button</label>
+                    <Switch style={{ marginBottom: 0 }} hideBorder value={isButtonThin} onChange={(e: boolean) => {
+                        setIsButtonThin(e);
+                        DataStore.set("useThinMenuButton", e);
+                        FluxDispatcher.dispatch({
+                            type: "COLORWAYS_UPDATE_BUTTON_HEIGHT",
+                            isTall: e
+                        });
                     }} />
                 </div>
                 {/*
@@ -224,12 +255,20 @@ export function SettingsPage() {
                 </div>
                 <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
                     setOnDemandTinted(!onDemandTinted);
-                    const showColorwaysButton = await DataStore.get("onDemandWaysTintedText");
                     DataStore.set("onDemandWaysTintedText", !onDemandTinted);
                 }}><label className="colorwaysSettings-label">Use tinted text</label>
                     <Switch style={{ marginBottom: 0 }} hideBorder value={onDemandTinted} onChange={(e: boolean) => {
                         setOnDemandTinted(e);
                         DataStore.set("onDemandWaysTintedText", e);
+                    }} />
+                </div>
+                <div className="colorwaysSettingsPage-settingsRow" onClick={async () => {
+                    setOnDemandDiscordSat(!onDemandDiscordSat);
+                    DataStore.set("onDemandWaysDiscordSaturation", !onDemandDiscordSat);
+                }}><label className="colorwaysSettings-label">Use Discord's saturation</label>
+                    <Switch style={{ marginBottom: 0 }} hideBorder value={onDemandDiscordSat} onChange={(e: boolean) => {
+                        setOnDemandDiscordSat(e);
+                        DataStore.set("onDemandWaysDiscordSaturation", e);
                     }} />
                 </div>
             </div>

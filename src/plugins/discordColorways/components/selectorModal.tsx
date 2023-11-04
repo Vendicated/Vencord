@@ -421,17 +421,21 @@ export default function SelectorModal({
                                                 <div
                                                     className="discordColorwayPreviewColorContainer"
                                                     onClick={async () => {
-                                                        const onDemandWays = await DataStore.get("onDemandWays");
-                                                        const onDemandWaysTintedText = await DataStore.get("onDemandWaysTintedText");
+                                                        const [onDemandWays, onDemandWaysTintedText, onDemandWaysDiscordSaturation] = await DataStore.getMany([
+                                                            "onDemandWays",
+                                                            "onDemandWaysTintedText",
+                                                            "onDemandWaysDiscordSaturation"
+                                                        ]);
                                                         if (currentColorway === color.name) {
                                                             DataStore.set("actveColorwayID", null);
                                                             DataStore.set("actveColorway", null);
                                                             ColorwayCSS.remove();
                                                         } else {
+                                                            DataStore.set("activeColorwayColors", color.colors);
                                                             DataStore.set("actveColorwayID", color.name);
                                                             if (onDemandWays) {
-                                                                DataStore.set("actveColorway", generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText));
-                                                                ColorwayCSS.set(generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText));
+                                                                DataStore.set("actveColorway", generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText, onDemandWaysDiscordSaturation));
+                                                                ColorwayCSS.set(generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText, onDemandWaysDiscordSaturation));
                                                             } else {
                                                                 DataStore.set("actveColorway", color.import);
                                                                 ColorwayCSS.set(color.import);

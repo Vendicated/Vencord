@@ -219,7 +219,7 @@
 }
 
 .colorwayCreator-modal {
-    width: 620px;
+    width: 620px !important;
     max-width: 620px;
     max-height: unset !important;
 }
@@ -233,8 +233,8 @@
     display: none;
 }
 
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG,
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG>.swatch-efj8wq {
+.colorwayCreator-colorPreviews>[class^="colorSwatch"],
+.colorwayCreator-colorPreviews>[class^="colorSwatch"]>[class^="swatch"] {
     width: 100%;
     border: none;
     position: relative;
@@ -939,8 +939,12 @@
     gap: 10px;
 }
 
-html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
-    display: none;
+#colorwaySelector-pill_closeSelector {
+    display: none !important;
+}
+
+.is-mobile #colorwaySelector-pill_closeSelector {
+    display: flex !important;
 }
 
 .colorwaysBtn-spinner {
@@ -1199,4 +1203,13 @@ html:not(.is-mobile) #colorwaySelector-pill_closeSelector {
 .colorwaysSettingsPage-settingsRowWithDescription {
     display: flex;
     flex-direction: column;
+}
+
+.ColorwaySelectorBtn_thin {
+    height: 21px !important;
+    width: 56px !important;
+}
+
+.ColorwaySelectorBtn_thin:hover {
+    border-radius: 8px;
 }
