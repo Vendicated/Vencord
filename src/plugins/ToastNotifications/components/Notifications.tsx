@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ReactDOM, React } from "@webpack/common";
+import { React, ReactDOM } from "@webpack/common";
 import type { ReactNode } from "react";
 import type { Root } from "react-dom/client";
 
@@ -67,7 +67,7 @@ export async function showNotification(notification: NotificationData) {
                 {...notification}
                 onClose={() => {
                     // Remove this notification from the queue.
-                    NotificationQueue = NotificationQueue.filter((n) => n.key !== thisNotificationID.toString());
+                    NotificationQueue = NotificationQueue.filter(n => n.key !== thisNotificationID.toString());
                     notification.onClose?.(); // Trigger the onClose callback if it exists.
                     console.log(`[DEBUG] [ToastNotifications] Removed #${thisNotificationID} from queue.`);
 
