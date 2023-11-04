@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChannelStore, GuildStore, UserStore, Button, RelationshipStore, SelectedChannelStore } from "@webpack/common";
-import { findByPropsLazy } from "@webpack";
-import type { Channel, Message, User } from "discord-types/general";
-
-import { Webpack } from "Vencord";
-import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
 import { makeRange } from "@components/PluginSettings/components";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Button, ChannelStore, GuildStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import type { Channel, Message, User } from "discord-types/general";
+import { ReactNode } from "react";
+import { Webpack } from "Vencord";
 
 import { NotificationData, showNotification } from "./components/Notifications";
 import { MessageTypes } from "./types";
@@ -120,7 +120,7 @@ const addMention = (id: string, type: string, guildId?: string): ReactNode => {
 
     // Return the mention as a styled span.
     return (
-        <span key={`${type}-${id}`} className={`toastnotifications-mention-class`}>
+        <span key={`${type}-${id}`} className={"toastnotifications-mention-class"}>
             {name}
         </span>
     );
@@ -147,7 +147,7 @@ export default definePlugin({
             ) return;
 
             // Prepare the notification.
-            let Notification: NotificationData = {
+            const Notification: NotificationData = {
                 title: getName(message.author),
                 icon: `https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`,
                 body: message.content,
@@ -156,7 +156,7 @@ export default definePlugin({
                 onClick() { SelectedChannelActionCreators.selectPrivateChannel(message.channel_id); }
             };
 
-            let notificationText = message.content.length > 0 ? message.content : false;
+            const notificationText = message.content.length > 0 ? message.content : false;
             const richBodyElements: React.ReactNode[] = [];
 
             // If this channel is a group DM, include the channel name.
@@ -192,7 +192,7 @@ export default definePlugin({
                     const actor = UserStore.getUser(message.author.id);
                     const targetUser = UserStore.getUser(message.mentions[0]?.id);
 
-                    if (actor.id != targetUser.id) {
+                    if (actor.id !== targetUser.id) {
                         Notification.body = `${getName(targetUser)} was removed from the group by ${getName(actor)}.`;
                     } else {
                         Notification.body = "Left the group.";
@@ -219,7 +219,7 @@ export default definePlugin({
             }
 
             // Message contains a sticker.
-            if (message?.sticker_items) {
+            if (message?.stickerItems) {
                 Notification.body = notificationText || "Sent a sticker.";
             }
 
@@ -236,7 +236,7 @@ export default definePlugin({
             }
 
             // TODO: Format emotes properly.
-            let matches = Notification.body.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
+            const matches = Notification.body.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
             if (matches) {
                 for (const match of matches) {
                     Notification.body = Notification.body.replace(new RegExp(`${match}`, "g"), `:${match.split(":")[1]}:`);

@@ -22,8 +22,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { React, useEffect, useMemo, useState } from "@webpack/common";
 
-import { NotificationData } from "./Notifications";
 import { settings as PluginSettings } from "../index";
+import { NotificationData } from "./Notifications";
 
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
@@ -53,9 +53,9 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     const positionStyle = useMemo(() => {
         if (index === undefined) return {};
         const isTopPosition = AppearanceSettings.position.includes("top");
-        const actualHeight = 115;  // Update this with the actual height including margin
+        const actualHeight = 115; // Update this with the actual height including margin
         const effectiveIndex = index % PluginSettings.store.maxNotifications;
-        const offset = 10 + (effectiveIndex * actualHeight);  // 10 is the base offset
+        const offset = 10 + (effectiveIndex * actualHeight); // 10 is the base offset
 
         return isTopPosition ? { top: `${offset}px` } : { bottom: `${offset}px` };
     }, [index, AppearanceSettings.position]);
