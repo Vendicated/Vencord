@@ -23,7 +23,7 @@ import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
 const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
-const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/(.+)(?:\?.+?)?$/;
+const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/;
 const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
 const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
 
