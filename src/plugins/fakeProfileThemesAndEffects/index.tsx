@@ -20,8 +20,9 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
-import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
+import { Button, Forms, showToast, Slider, Switch, Text, Toasts, useState } from "@webpack/common";
+import { openColorPickerModal } from "./components/ColorPickerModal";
+import { openProfileEffectModal } from "./components/ProfileEffectModal";
 import { User } from "discord-types/general";
 
 interface UserProfile extends User {
@@ -29,141 +30,139 @@ interface UserProfile extends User {
     profileEffectID: string | undefined;
 }
 
-const pluginName: string = "FakeProfileThemesAndEffects";
-
-function base10NumToBase125Str(base10Num: number): string {
-    if (base10Num === 0) return "\u{00001}";
-    const base125StrCodePoints: Array<number> = [];
-    for (let i: number = base10Num; i > 0; i = Math.trunc(i / 125))
-        base125StrCodePoints.unshift(i % 125 + 1);
-    return String.fromCodePoint(...base125StrCodePoints);
+function base10NumToBase125Str(base10: number): string {
+    if (base10 === 0) return "\u{00001}";
+    const base125CPs: Array<number> = [];
+    for (let i: number = base10; i > 0; i = Math.trunc(i / 125))
+        base125CPs.unshift(i % 125 + 1);
+    return String.fromCodePoint(...base125CPs);
 }
 
-function base10BigIntToBase125Str(base10BigInt: bigint): string {
-    if (base10BigInt === 0n) return "\u{00001}";
-    const base125StrCodePoints: Array<number> = [];
-    for (let i: bigint = base10BigInt; i > 0n; i /= 125n)
-        base125StrCodePoints.unshift(Number(i % 125n + 1n));
-    return String.fromCodePoint(...base125StrCodePoints);
+function base10BigIntToBase125Str(base10: bigint): string {
+    if (base10 === 0n) return "\u{00001}";
+    const base125CPs: Array<number> = [];
+    for (let i: bigint = base10; i > 0n; i /= 125n)
+        base125CPs.unshift(Number(i % 125n + 1n));
+    return String.fromCodePoint(...base125CPs);
 }
 
-function base125StrToBase10Num(base125Str: string, upperLim: number): number {
-    if (base125Str === "") return -1;
-    let base10Num: number = 0;
-    for (let i: number = 0; i < base125Str.length; i++) {
-        if (base10Num > upperLim) return -2;
-        base10Num += (base125Str.codePointAt(i)! - 1) * 125 ** (base125Str.length - 1 - i);
+function base125StrToBase10Num(str: string, lim: number): number {
+    if (str === "") return -1;
+    let base10: number = 0;
+    for (let i: number = 0; i < str.length; i++) {
+        if (base10 > lim) return -2;
+        base10 += (str.codePointAt(i)! - 1) * 125 ** (str.length - 1 - i);
     }
-    return base10Num;
+    return base10;
 }
 
-function base125StrToBase10BigInt(base125Str: string, upperLim: bigint): bigint {
-    if (base125Str === "") return -1n;
-    let base10BigInt: bigint = 0n;
-    for (let i: number = 0; i < base125Str.length; i++) {
-        if (base10BigInt > upperLim) return -2n;
-        base10BigInt += BigInt(base125Str.codePointAt(i)! - 1) * 125n ** BigInt(base125Str.length - 1 - i);
+function base125StrToBase10BigInt(str: string, lim: bigint): bigint {
+    if (str === "") return -1n;
+    let base10: bigint = 0n;
+    for (let i: number = 0; i < str.length; i++) {
+        if (base10 > lim) return -2n;
+        base10 += BigInt(str.codePointAt(i)! - 1) * 125n ** BigInt(str.length - 1 - i);
     }
-    return base10BigInt;
+    return base10;
 }
 
-function base125StrToBase10CSSColor(base125Str: string): number {
-    return base125StrToBase10Num(base125Str, 16_777_215);
+function base125StrToBase10CSSColor(str: string): number {
+    return base125StrToBase10Num(str, 16_777_215);
 }
 
-function base125StrToBase10ItemID(base125Str: string): bigint {
-    return base125StrToBase10BigInt(base125Str, 1_200_000_000_000_000_000n);
+function base125StrToBase10ItemID(str: string): bigint {
+    return base125StrToBase10BigInt(str, 1_200_000_000_000_000_000n);
 }
 
 function encode3y3(str: string): string {
-    const encoded3y3StrCodePoints: Array<number> = [];
+    const encodedCPs: Array<number> = [];
     for (let i: number = 0; i < str.length; i++)
-        encoded3y3StrCodePoints.push(str.codePointAt(i)! + 0xE0000);
-    return String.fromCodePoint(...encoded3y3StrCodePoints);
+        encodedCPs.push(str.codePointAt(i)! + 0xE0000);
+    return String.fromCodePoint(...encodedCPs);
 }
 
 // If the given user bio is empty or contains no 3y3 characters, return ["", "", ""];
 // otherwise return the first string of 3y3 characters decoded.
-function decodeUserBio3y3(userBio: string): [string, string, string] {
-    const decodedUserBio3y3: [string, string, string] = ["", "", ""];
-    const userBioCodePoints: Array<string> = [...userBio];
-    if (userBioCodePoints.length > 0) {
-        let tempCodePoints: Array<number> = [];
-        let decodedUserBio3y3Index: number = 0;
-        for (let i: number = 0; i < userBioCodePoints.length; i++) {
-            const currCodePoint: number = userBioCodePoints[i].codePointAt(0)!;
-            if (currCodePoint === 0xE007E) {
-                if (tempCodePoints.length > 0)
-                    decodedUserBio3y3[decodedUserBio3y3Index] = String.fromCodePoint(...tempCodePoints);
-                if (decodedUserBio3y3Index > 1) break;
-                tempCodePoints = [];
-                decodedUserBio3y3Index++;
-            } else if (0xE0000 < currCodePoint && currCodePoint < 0xE007E) {
-                tempCodePoints.push(currCodePoint - 0xE0000);
-                if (i === userBioCodePoints.length - 1)
-                    decodedUserBio3y3[decodedUserBio3y3Index] = String.fromCodePoint(...tempCodePoints);
-            } else if (decodedUserBio3y3Index > 0) {
-                if (tempCodePoints.length > 0)
-                    decodedUserBio3y3[decodedUserBio3y3Index] = String.fromCodePoint(...tempCodePoints);
+function decode3y3(bio: string): [string, string, string] {
+    const decoded3y3: [string, string, string] = ["", "", ""];
+    const bioCPs: Array<string> = [...bio];
+    if (bioCPs.length > 0) {
+        let tempCPs: Array<number> = [];
+        let i: number = 0;
+        for (let j: number = 0; j < bioCPs.length; j++) {
+            const currCP: number = bioCPs[j].codePointAt(0)!;
+            if (currCP === 0xE007E) {
+                if (tempCPs.length > 0)
+                    decoded3y3[i] = String.fromCodePoint(...tempCPs);
+                if (i > 1) break;
+                tempCPs = [];
+                i++;
+            } else if (0xE0000 < currCP && currCP < 0xE007E) {
+                tempCPs.push(currCP - 0xE0000);
+                if (j === bioCPs.length - 1)
+                    decoded3y3[i] = String.fromCodePoint(...tempCPs);
+            } else if (i > 0) {
+                if (tempCPs.length > 0)
+                    decoded3y3[i] = String.fromCodePoint(...tempCPs);
                 break;
             }
         }
     }
-    return decodedUserBio3y3;
+    return decoded3y3;
 }
 
-function legacyStrToProfileThemeColors(userBio: string): [number, number] {
-    const profileThemeColors: [number, number] = [-1, -1];
-    let numberSignIndex: number = -1;
-    for (let i: number = 0; i < userBio.length; i++) {
-        if (userBio[i] === "#") {
-            numberSignIndex = i;
+function legacyStrToThemeColors(bio: string): [number, number] {
+    const themeColors: [number, number] = [-1, -1];
+    let numSignIndex: number = -1;
+    for (let i: number = 0; i < bio.length; i++) {
+        if (bio[i] === "#") {
+            numSignIndex = i;
             break;
         }
     }
-    if (numberSignIndex !== -1) {
+    if (numSignIndex !== -1) {
         let tempStr: string = "";
-        let upperLimit: number = numberSignIndex + 7 < userBio.length ? numberSignIndex + 7 : userBio.length;
-        for (let i: number = numberSignIndex + 1; i < upperLimit; i++) {
-            if (userBio[i] === "," || userBio[i] === "]") break;
-            tempStr += userBio[i];
+        let lim: number = numSignIndex + 7 < bio.length ? numSignIndex + 7 : bio.length;
+        for (let i: number = numSignIndex + 1; i < lim; i++) {
+            if (bio[i] === "," || bio[i] === "]") break;
+            tempStr += bio[i];
         }
-        let extractedColor: number = parseInt(tempStr, 16);
-        if (!Number.isNaN(extractedColor)) {
-            profileThemeColors[0] = extractedColor;
-            numberSignIndex = -1;
-            for (let i: number = upperLimit; i < userBio.length; i++) {
-                if (userBio[i] === "#") {
-                    numberSignIndex = i;
+        let color: number = parseInt(tempStr, 16);
+        if (!Number.isNaN(color)) {
+            themeColors[0] = color;
+            numSignIndex = -1;
+            for (let i: number = lim; i < bio.length; i++) {
+                if (bio[i] === "#") {
+                    numSignIndex = i;
                     break;
                 }
             }
-            if (numberSignIndex !== -1) {
+            if (numSignIndex !== -1) {
                 tempStr = "";
-                upperLimit = numberSignIndex + 7 < userBio.length ? numberSignIndex + 7 : userBio.length;
-                for (let i: number = numberSignIndex + 1; i < upperLimit; i++) {
-                    if (userBio[i] === "]" || userBio[i] === ",") break;
-                    tempStr += userBio[i];
+                lim = numSignIndex + 7 < bio.length ? numSignIndex + 7 : bio.length;
+                for (let i: number = numSignIndex + 1; i < lim; i++) {
+                    if (bio[i] === "]" || bio[i] === ",") break;
+                    tempStr += bio[i];
                 }
-                extractedColor = parseInt(tempStr, 16);
-                if (!Number.isNaN(extractedColor))
-                    profileThemeColors[1] = extractedColor;
+                color = parseInt(tempStr, 16);
+                if (!Number.isNaN(color))
+                    themeColors[1] = color;
             }
         }
     }
-    return profileThemeColors;
+    return themeColors;
 }
 
-function legacy3y3(user: UserProfile, legacyStr: string): void {
-    const profileThemeColors: [number, number] = legacyStrToProfileThemeColors(legacyStr);
-    if (profileThemeColors[0] > -1) {
-        if (profileThemeColors[1] > -1)
-            user.themeColors = [profileThemeColors[0], profileThemeColors[1]];
+function legacy3y3(user: UserProfile, str: string): void {
+    const themeColors: [number, number] = legacyStrToThemeColors(str);
+    if (themeColors[0] > -1) {
+        if (themeColors[1] > -1)
+            user.themeColors = [themeColors[0], themeColors[1]];
         else
-            user.themeColors = [profileThemeColors[0], profileThemeColors[0]];
+            user.themeColors = [themeColors[0], themeColors[0]];
         user.premiumType = 2;
-    } else if (profileThemeColors[1] > -1) {
-        user.themeColors = [profileThemeColors[1], profileThemeColors[1]];
+    } else if (themeColors[1] > -1) {
+        user.themeColors = [themeColors[1], themeColors[1]];
         user.premiumType = 2;
     }
 }
@@ -188,103 +187,9 @@ function updateUserEffectID(user: UserProfile, id: bigint): void {
     }
 }
 
-function openProfileThemeColorPicker(colorType: "Primary" | "Accent"): void {
-    const profileThemeColorPickerContainer: HTMLDivElement | null = document
-        .querySelector("#" + pluginName + "ProfileTheme" + colorType + "ColorPickerContainer");
-    if (profileThemeColorPickerContainer !== null) {
-        const profileThemeColorPicker: HTMLDivElement | null = profileThemeColorPickerContainer
-            .querySelector('[class*="swatch__"]');
-        if (profileThemeColorPicker !== null) {
-            profileThemeColorPicker.scrollIntoView();
-            profileThemeColorPicker.click();
-            return;
-        }
-    }
-    showToast("Cannot find the Profile Theme " + colorType + " Color picker.", Toasts.Type.FAILURE);
-}
-
-function ProfileEffectsModal({ props, profileEffects, onClose }: { props: ModalProps, profileEffects: any, onClose: () => void }): JSX.Element {
-    const [selected, setSelected]: [number, (v: number) => void] = useState(-1);
-    return (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%"
-                    }}
-                >
-                    <Text style={{fontSize: "20px"}}>
-                        {"Add Profile Effect"}
-                    </Text>
-                    <ModalCloseButton onClick={onClose} />
-                </div>
-            </ModalHeader>
-            <div
-                style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "center"
-                }}
-            >
-                {profileEffects.map((e, i): JSX.Element =>
-                    <div
-                        style={{
-                            background: "top / cover url(" + e.thumbnailPreviewSrc + "), top / cover url(/assets/f328a6f8209d4f1f5022.png)",
-                            borderRadius: "4px",
-                            boxShadow: i === selected ? "inset 0 0 0 2px var(--brand-experiment-500, #5865f2)" : "none",
-                            cursor: "pointer",
-                            margin: "6px",
-                            width: "80px",
-                            height: "80px"
-                        }}
-                        onClick={(): void => {setSelected(i)}}
-                    />
-                )}
-            </div>
-            <ModalFooter>
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%"
-                    }}
-                >
-                    <Text>
-                        {selected === -1 ? "" : profileEffects[selected].title}
-                    </Text>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        onClick={(): void => {
-                            if (selected !== -1) {
-                                _3y3BuilderVals[2] = profileEffects[selected].id;
-                                set3y3BuilderEffectName(profileEffects[selected].title);
-                                showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                            } else
-                                showToast("No effect selected!", Toasts.Type.MESSAGE);
-                        }}
-                    >
-                        {"Update 3y3"}
-                    </Button>
-                </div>
-            </ModalFooter>
-        </ModalRoot>
-    );
-}
-
-const _3y3BuilderVals: [number, number, string] = [-1, -1, ""];
-let _3y3BuilderProfileEffectName: string = "";
-let set3y3BuilderPrimaryColor: (v: number) => void = (v: number): void => {};
-let set3y3BuilderAccentColor: (v: number) => void = (v: number): void => {};
-let set3y3BuilderEffectName: (v: string) => void = (v: string): void => {};
-
 const settings = definePluginSettings({
     prioritizeNitro: {
-        description: "Source to use if profile theme colors / effects are set on both Nitro and About Me",
+        description: "Source to use if profile theme colors / effects are set by both Nitro and About Me",
         type: OptionType.SELECT,
         options: [
             { label: "Nitro", value: true },
@@ -299,7 +204,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: pluginName,
+    name: "FakeProfileThemesAndEffects",
     description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible 3y3 encoded characters",
     authors: [
         {
@@ -321,23 +226,6 @@ export default definePlugin({
                 match: /(?<=\.sectionsContainer,children:)\[/,
                 replace: "$&$self.add3y3Builder(),"
             }
-        },
-        {
-            find: ".USER_SETTINGS_PROFILE_THEME_PRIMARY",
-            replacement: [
-                {
-                    match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_PRIMARY[,}])/,
-                    replace: '$&id:"' + pluginName + 'ProfileThemePrimaryColorPickerContainer",'
-                },
-                {
-                    match: /(?<=[{,]className:\i\.sparkleContainer),(?=.{0,500}?\.USER_SETTINGS_PROFILE_THEME_ACCENT[,}])/,
-                    replace: '$&id:"' + pluginName + 'ProfileThemeAccentColorPickerContainer",'
-                },
-                {
-                    match: /(?<=[{,]color:(\i),.{0,500}?[{,]color:(\i),.{0,500}?\.USER_SETTINGS_RESET_PROFILE_THEME[,}])\)/,
-                    replace: "$&,$self.addUpdate3y3BuilderProfileThemeColorsButton($1, $2)"
-                }
-            ]
         }
     ],
     settingsAboutComponent: (): JSX.Element => {
@@ -358,8 +246,6 @@ export default definePlugin({
                         <li>{'Click the "Copy 3y3" button'}</li>
                         <li>{"Paste the invisible text anywhere in your About Me"}</li>
                     </ol>
-                    <b>{"Please note:"}</b>
-                    {" if you are using a theme which hides Nitro ads, you may have to disable it temporarily to set profile theme colors and effects."}
                 </Forms.FormText>
             </Forms.FormSection>
         );
@@ -370,41 +256,44 @@ export default definePlugin({
             if (settings.store.prioritizeNitro === true) {
                 if (user.themeColors !== undefined) {
                     if (user.profileEffectID === undefined) {
-                        const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
-                        if (base125StrToBase10CSSColor(decodedUserBio3y3[0]) === -2)
-                            updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[1]));
+                        const decoded3y3: [string, string, string] = decode3y3(user.bio);
+                        if (base125StrToBase10CSSColor(decoded3y3[0]) === -2)
+                            updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[1]));
                         else
-                            updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[2]));
+                            updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[2]));
                     }
                     return user;
                 } else if(user.profileEffectID !== undefined) {
-                    const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
-                    const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
-                    if (profileThemePrimaryColor === -2)
-                        legacy3y3(user, decodedUserBio3y3[0]);
+                    const decoded3y3: [string, string, string] = decode3y3(user.bio);
+                    const primaryColor: number = base125StrToBase10CSSColor(decoded3y3[0]);
+                    if (primaryColor === -2)
+                        legacy3y3(user, decoded3y3[0]);
                     else
-                        updateUserThemeColors(user, profileThemePrimaryColor, base125StrToBase10CSSColor(decodedUserBio3y3[1]));
+                        updateUserThemeColors(user, primaryColor, base125StrToBase10CSSColor(decoded3y3[1]));
                     return user;
                 }
             }
-            const decodedUserBio3y3: [string, string, string] = decodeUserBio3y3(user.bio);
-            const profileThemePrimaryColor: number = base125StrToBase10CSSColor(decodedUserBio3y3[0]);
-            if (profileThemePrimaryColor === -2) {
-                legacy3y3(user, decodedUserBio3y3[0]);
-                updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[1]));
+            const decoded3y3: [string, string, string] = decode3y3(user.bio);
+            const primaryColor: number = base125StrToBase10CSSColor(decoded3y3[0]);
+            if (primaryColor === -2) {
+                legacy3y3(user, decoded3y3[0]);
+                updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[1]));
             } else {
-                updateUserThemeColors(user, profileThemePrimaryColor, base125StrToBase10CSSColor(decodedUserBio3y3[1]));
-                updateUserEffectID(user, base125StrToBase10ItemID(decodedUserBio3y3[2]));
+                updateUserThemeColors(user, primaryColor, base125StrToBase10CSSColor(decoded3y3[1]));
+                updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[2]));
             }
         }
         return user;
     },
     add3y3Builder(): JSX.Element {
         if (settings.store["Hide 3y3 Builder"] === true) return <></>;
-        const [shouldBuildLegacyStr, setShouldBuildLegacyStr] = useState(false);
-        [_3y3BuilderVals[0], set3y3BuilderPrimaryColor] = useState(_3y3BuilderVals[0]);
-        [_3y3BuilderVals[1], set3y3BuilderAccentColor] = useState(_3y3BuilderVals[1]);
-        [_3y3BuilderProfileEffectName, set3y3BuilderEffectName] = useState(_3y3BuilderProfileEffectName);
+
+        const [primaryColor, setPrimaryColor]: [number, (v: number) => void] = useState(-1);
+        const [accentColor, setAccentColor]: [number, (v: number) => void] = useState(-1);
+        const [effectID, setEffectID]: [string, (v: string) => void] = useState("");
+        const [effectName, setEffectName]: [string, (v: string) => void] = useState("");
+        const [buildLegacy3y3, setBuildLegacy3y3]: [boolean, (v: boolean) => void] = useState(false);
+
         return (
             <>
                 <Text
@@ -419,8 +308,7 @@ export default definePlugin({
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.TINY}
                     style={{
-                        display: _3y3BuilderVals[0] === -1 && _3y3BuilderVals[1] === -1 && _3y3BuilderVals[2] === ""
-                            ? "none" : "inline",
+                        display: primaryColor === -1 && accentColor === -1 && effectID === "" ? "none" : "inline",
                         height: "14px",
                         marginLeft: "4px",
                         minHeight: "0",
@@ -428,9 +316,10 @@ export default definePlugin({
                         paddingTop: "0"
                     }}
                     onClick={(): void => {
-                        set3y3BuilderPrimaryColor(-1);
-                        set3y3BuilderAccentColor(-1);
-                        set3y3BuilderEffectName(_3y3BuilderVals[2] = "");
+                        setPrimaryColor(-1);
+                        setAccentColor(-1);
+                        setEffectID("");
+                        setEffectName("");
                     }}
                 >
                     {"Reset"}
@@ -443,7 +332,7 @@ export default definePlugin({
                     }}
                 >
                     <Button
-                        innerClassName={pluginName + "TextOverflow"}
+                        innerClassName={this.name + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
                             borderTopRightRadius: "0",
@@ -451,24 +340,40 @@ export default definePlugin({
                             paddingLeft: "0",
                             paddingRight: "0"
                         }}
-                        onClick={(): void => {openProfileThemeColorPicker("Primary")}}
+                        onClick={(): void => {
+                            openColorPickerModal(
+                                (color: number): void => {
+                                    setPrimaryColor(color);
+                                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                },
+                                primaryColor === -1 ? 0 : primaryColor
+                            );
+                        }}
                     >
-                        {"Primary: " + (_3y3BuilderVals[0] === -1 ? "unchanged" : "#" + _3y3BuilderVals[0].toString(16).padStart(6, "0"))}
+                        {"Primary: " + (primaryColor === -1 ? "unchanged" : "#" + primaryColor.toString(16).padStart(6, "0"))}
                     </Button>
                     <Button
-                        innerClassName={pluginName + "TextOverflow"}
+                        innerClassName={this.name + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
                             borderRadius: "0",
                             paddingLeft: "0",
                             paddingRight: "0"
                         }}
-                        onClick={(): void => {openProfileThemeColorPicker("Accent")}}
+                        onClick={(): void => {
+                            openColorPickerModal(
+                                (color: number): void => {
+                                    setAccentColor(color);
+                                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                },
+                                accentColor === -1 ? 0 : accentColor
+                            );
+                        }}
                     >
-                        {"Accent: " + (_3y3BuilderVals[1] === -1 ? "unchanged" : "#" + _3y3BuilderVals[1].toString(16).padStart(6, "0"))}
+                        {"Accent: " + (accentColor === -1 ? "unchanged" : "#" + accentColor.toString(16).padStart(6, "0"))}
                     </Button>
                     <Button
-                        innerClassName={pluginName + "TextOverflow"}
+                        innerClassName={this.name + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
                             borderRadius: "0",
@@ -492,12 +397,13 @@ export default definePlugin({
                                             console.error(e);
                                         }
                                         if (profileEffects !== null && profileEffects.profile_effect_configs) {
-                                            const key = openModal(props =>
-                                                <ProfileEffectsModal
-                                                    props={props}
-                                                    profileEffects={profileEffects.profile_effect_configs}
-                                                    onClose={(): void => {closeModal(key)}}
-                                                />
+                                            openProfileEffectModal(
+                                                (id: string, name: string): void => {
+                                                    setEffectID(id);
+                                                    setEffectName(name);
+                                                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                                },
+                                                profileEffects.profile_effect_configs
                                             );
                                         } else
                                             showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
@@ -505,10 +411,10 @@ export default definePlugin({
                                 });
                         }}
                     >
-                        {"Effect: " + (_3y3BuilderVals[2] === "" ? "unchanged" : _3y3BuilderProfileEffectName)}
+                        {"Effect: " + (effectID === "" ? "unchanged" : effectName)}
                     </Button>
                     <Button
-                        innerClassName={pluginName + "TextOverflow"}
+                        innerClassName={this.name + "TextOverflow"}
                         color={Button.Colors.PRIMARY}
                         style={{
                             borderTopLeftRadius: "0",
@@ -518,49 +424,49 @@ export default definePlugin({
                         }}
                         onClick={(): void => {
                             let stringToCopy: string = "";
-                            if (shouldBuildLegacyStr === true) {
-                                if (_3y3BuilderVals[0] !== -1) {
-                                    if (_3y3BuilderVals[1] !== -1)
-                                        stringToCopy = encode3y3("[#" + _3y3BuilderVals[0].toString(16) + ",#" + _3y3BuilderVals[1].toString(16) + "]");
+                            if (buildLegacy3y3 === true) {
+                                if (primaryColor !== -1) {
+                                    if (accentColor !== -1)
+                                        stringToCopy = encode3y3("[#" + primaryColor.toString(16) + ",#" + accentColor.toString(16) + "]");
                                     else
-                                        stringToCopy = encode3y3("[#" + _3y3BuilderVals[0].toString(16) + ",#" + _3y3BuilderVals[0].toString(16) + "]");
-                                    if (_3y3BuilderVals[2] !== "")
-                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
-                                } else if (_3y3BuilderVals[1] !== -1) {
-                                    stringToCopy = encode3y3("[#" + _3y3BuilderVals[1].toString(16) + ",#" + _3y3BuilderVals[1].toString(16) + "]");
-                                    if (_3y3BuilderVals[2] !== "")
-                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
-                                } else if (_3y3BuilderVals[2] !== "")
-                                    stringToCopy = "\u{e007e}\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
-                            } else if (_3y3BuilderVals[0] !== -1) {
-                                if(_3y3BuilderVals[1] !== -1 && _3y3BuilderVals[0] !== _3y3BuilderVals[1]) {
-                                    if (_3y3BuilderVals[2] !== "") {
-                                        stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[0]))
+                                        stringToCopy = encode3y3("[#" + primaryColor.toString(16) + ",#" + primaryColor.toString(16) + "]");
+                                    if (effectID !== "")
+                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
+                                } else if (accentColor !== -1) {
+                                    stringToCopy = encode3y3("[#" + accentColor.toString(16) + ",#" + accentColor.toString(16) + "]");
+                                    if (effectID !== "")
+                                        stringToCopy += "\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
+                                } else if (effectID !== "")
+                                    stringToCopy = "\u{e007e}\u{e007e}" + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
+                            } else if (primaryColor !== -1) {
+                                if(accentColor !== -1 && primaryColor !== accentColor) {
+                                    if (effectID !== "") {
+                                        stringToCopy = encode3y3(base10NumToBase125Str(primaryColor))
                                             + "\u{e007e}"
-                                            + encode3y3(base10NumToBase125Str(_3y3BuilderVals[1]))
+                                            + encode3y3(base10NumToBase125Str(accentColor))
                                             + "\u{e007e}"
-                                            + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                            + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
                                     } else {
-                                        stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[0]))
+                                        stringToCopy = encode3y3(base10NumToBase125Str(primaryColor))
                                             + "\u{e007e}"
-                                            + encode3y3(base10NumToBase125Str(_3y3BuilderVals[1]));
+                                            + encode3y3(base10NumToBase125Str(accentColor));
                                     }
-                                } else if(_3y3BuilderVals[2] !== "") {
-                                    stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[0]))
+                                } else if(effectID !== "") {
+                                    stringToCopy = encode3y3(base10NumToBase125Str(primaryColor))
                                         + "\u{e007e}\u{e007e}"
-                                        + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                        + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
                                 } else
-                                    stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[0]));
-                            } else if(_3y3BuilderVals[1] !== -1) {
-                                if (_3y3BuilderVals[2] !== "") {
-                                    stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[1]))
+                                    stringToCopy = encode3y3(base10NumToBase125Str(primaryColor));
+                            } else if(accentColor !== -1) {
+                                if (effectID !== "") {
+                                    stringToCopy = encode3y3(base10NumToBase125Str(accentColor))
                                         + "\u{e007e}\u{e007e}"
-                                        + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                        + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
                                 } else
-                                    stringToCopy = encode3y3(base10NumToBase125Str(_3y3BuilderVals[1]));
-                            } else if (_3y3BuilderVals[2] !== "") {
+                                    stringToCopy = encode3y3(base10NumToBase125Str(accentColor));
+                            } else if (effectID !== "") {
                                 stringToCopy = "\u{e007e}\u{e007e}"
-                                    + encode3y3(base10BigIntToBase125Str(BigInt(_3y3BuilderVals[2])));
+                                    + encode3y3(base10BigIntToBase125Str(BigInt(effectID)));
                             }
                             if (stringToCopy === "")
                                 showToast("3y3 Builder is empty; nothing to copy!");
@@ -572,38 +478,19 @@ export default definePlugin({
                     </Button>
                 </div>
                 <Switch
-                    value={shouldBuildLegacyStr}
+                    value={buildLegacy3y3}
                     note={"Will use more characters"}
-                    onChange={(value: boolean): void => {
-                        setShouldBuildLegacyStr(value);
-                    }}
+                    onChange={(value: boolean): void => {setBuildLegacy3y3(value)}}
                 >
                     {"Build backwards compatible 3y3"}
                 </Switch>
             </>
         );
     },
-    addUpdate3y3BuilderProfileThemeColorsButton(profileThemePrimaryColor: number, profileThemeAccentColor: number): JSX.Element {
-        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
-        return (
-            <Button
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.XLARGE}
-                className={Margins.left16}
-                onClick={(): void => {
-                    set3y3BuilderPrimaryColor(profileThemePrimaryColor);
-                    set3y3BuilderAccentColor(profileThemeAccentColor);
-                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                }}
-            >
-                {"Update 3y3"}
-            </Button>
-        );
-    },
     start(): void {
         document.documentElement.appendChild(Object.assign(
             document.createElement("style"),
-            { textContent: "." + pluginName + "TextOverflow{white-space:normal!important;text-overflow:clip!important}" }
+            { textContent: "." + this.name + "TextOverflow{white-space:normal!important;text-overflow:clip!important}" }
         ));
     }
 });
