@@ -19,6 +19,9 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+
+const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
 
 export default definePlugin({
     name: "BetterNotesBox",
@@ -29,16 +32,30 @@ export default definePlugin({
         {
             find: "hideNote:",
             all: true,
+            // Some modules match the find but the replacement is returned untouched
+            noWarn: true,
             predicate: () => Vencord.Settings.plugins.BetterNotesBox.hide,
             replacement: {
-                match: /hideNote:.+?(?=[,}])/g,
-                replace: "hideNote:true",
+                match: /hideNote:.+?(?=([,}].*?\)))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return "hideNote:!0";
+                    return m;
+                }
             }
-        }, {
+        },
+        {
             find: "Messages.NOTE_PLACEHOLDER",
             replacement: {
                 match: /\.NOTE_PLACEHOLDER,/,
                 replace: "$&spellCheck:!Vencord.Settings.plugins.BetterNotesBox.noSpellCheck,"
+            }
+        },
+        {
+            find: ".Messages.NOTE}",
+            replacement: {
+                match: /(?<=return \i\?)null(?=:\(0,\i\.jsxs)/,
+                replace: "$self.patchPadding(arguments[0])"
             }
         }
     ],
@@ -56,5 +73,12 @@ export default definePlugin({
             disabled: () => Settings.plugins.BetterNotesBox.hide,
             default: false
         }
+    },
+
+    patchPadding(e: any) {
+        if (!e.lastSection) return;
+        return (
+            <div className={UserPopoutSectionCssClasses.lastSection}></div>
+        );
     }
 });

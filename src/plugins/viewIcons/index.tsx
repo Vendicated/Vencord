@@ -65,7 +65,9 @@ const settings = definePluginSettings({
     }
 });
 
-function openImage(url: string) {
+function openImage(url?: string) {
+    if (!url) return;
+
     const format = url.startsWith("/") ? "png" : settings.store.format;
 
     const u = new URL(url, window.location.href);
@@ -171,12 +173,12 @@ export default definePlugin({
     },
 
     patches: [
-        // Make pfps clickable
+        // Make pfps clickable and add pointer cursor
         {
-            find: "onAddFriend:",
+            find: ".AVATAR_DECORATION_STATUS_ROUND_16;",
             replacement: {
-                match: /\{src:(\i)(?=,avatarDecoration)/,
-                replace: "{src:$1,onClick:()=>$self.openImage($1)"
+                match: /memo\(.{0,50}(?=let{statusColor:\i,status:\i,...\i}=(\i),)/,
+                replace: (m, props) => `${m}${props}.onClick=()=>$self.openImage(${props}.src);${props}.style={cursor:${props}.src?"pointer":void 0};`
             }
         },
         // Make banners clickable
@@ -191,9 +193,9 @@ export default definePlugin({
             }
         },
         {
-            find: "().avatarWrapperNonUserBot",
+            find: ".avatarPositionPanel",
             replacement: {
-                match: /(?<=avatarPositionPanel.+?)onClick:(\i\|\|\i)\?void 0(?<=,(\i)=\i\.avatarSrc.+?)/,
+                match: /(?<=avatarWrapperNonUserBot.{0,50})onClick:(\i\|\|\i)\?void 0(?<=,avatarSrc:(\i).+?)/,
                 replace: "style:($1)?{cursor:\"pointer\"}:{},onClick:$1?()=>{$self.openImage($2)}"
             }
         }
