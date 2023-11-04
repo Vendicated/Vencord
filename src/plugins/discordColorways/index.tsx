@@ -50,7 +50,17 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 (async function () {
-    const [customColorways, colorwaySourcesFiles, showColorwaysButton, colorwaysBtnPos, onDemandWays, onDemandWaysTintedText, useThinMenuButton, onDemandWaysDiscordSaturation] = await DataStore.getMany([
+    const [
+        customColorways,
+        colorwaySourcesFiles,
+        showColorwaysButton,
+        colorwaysBtnPos,
+        onDemandWays,
+        onDemandWaysTintedText,
+        useThinMenuButton,
+        onDemandWaysDiscordSaturation,
+        onDemandWaysColorArray
+    ] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
         "showColorwaysButton",
@@ -58,7 +68,8 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
         "onDemandWays",
         "onDemandWaysTintedText",
         "useThinMenuButton",
-        "onDemandWaysDiscordSaturation"
+        "onDemandWaysDiscordSaturation",
+        "onDemandWaysColorArray"
     ]);
 
     if (!customColorways)
@@ -84,6 +95,9 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 
     if (!onDemandWaysDiscordSaturation)
         DataStore.set("onDemandWaysDiscordSaturation", false);
+
+    if (!onDemandWaysColorArray)
+        DataStore.set("onDemandWaysColorArray", ["313338", "2b2d31", "1e1f22", "5865f2"]);
 
 })();
 

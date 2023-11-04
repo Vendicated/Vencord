@@ -19,6 +19,7 @@ import {
     useEffect,
     useState
 } from "@webpack/common";
+import { FluxEvents } from "@webpack/types";
 import { Plugins } from "Vencord";
 
 import { fallbackColorways } from "../constants";
@@ -49,26 +50,37 @@ export function SettingsPage() {
                 res.json().catch(() => { return { colorways: [] }; })
             ));
         const colorways = data.flatMap(json => json.colorways);
-        const baseData = await DataStore.getMany([
+        const [
+            customColorways,
+            colorwaySourceFiless,
+            showColorwaysButton,
+            colorwaysBtnPos,
+            onDemandWays,
+            onDemandWaysTintedText,
+            useThinMenuButton,
+            onDemandWaysDiscordSaturation
+        ] = await DataStore.getMany([
             "customColorways",
             "colorwaySourceFiles",
             "showColorwaysButton",
             "colorwaysBtnPos",
             "onDemandWays",
             "onDemandWaysTintedText",
-            "useThinMenuButton"
+            "useThinMenuButton",
+            "onDemandWaysDiscordSaturation"
         ]);
         setColorways(colorways || fallbackColorways);
-        setCustomColorways(baseData[0]);
-        setColorwaySourceFiles(baseData[1]);
-        setColorsButtonVisibility(baseData[2]);
-        setColorsButtonPos(baseData[3]);
-        setOnDemand(baseData[4]);
-        setOnDemandTinted(baseData[5]);
-        setIsButtonThin(baseData[6]);
+        setCustomColorways(customColorways);
+        setColorwaySourceFiles(colorwaySourceFiless);
+        setColorsButtonVisibility(showColorwaysButton);
+        setColorsButtonPos(colorwaysBtnPos);
+        setOnDemand(onDemandWays);
+        setOnDemandTinted(onDemandWaysTintedText);
+        setIsButtonThin(useThinMenuButton);
+        setOnDemandDiscordSat(onDemandWaysDiscordSaturation);
     }
 
-    const cached_loadUI = useCallback(loadUI, [setColorways, setCustomColorways]);
+    const cached_loadUI = useCallback(loadUI, []);
 
     useEffect(() => {
         cached_loadUI();
@@ -187,7 +199,7 @@ export function SettingsPage() {
                     const showColorwaysButton = await DataStore.get("showColorwaysButton");
                     DataStore.set("showColorwaysButton", !showColorwaysButton);
                     FluxDispatcher.dispatch({
-                        type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY",
+                        type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents,
                         isVisible: !colorsButtonVisibility
                     });
                 }}><label className="colorwaysSettings-label">Show Colorways button in Servers List</label>
@@ -195,7 +207,7 @@ export function SettingsPage() {
                         setColorsButtonVisibility(e);
                         DataStore.set("showColorwaysButton", e);
                         FluxDispatcher.dispatch({
-                            type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY",
+                            type: "COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents,
                             isVisible: e
                         });
                     }} />
@@ -205,7 +217,7 @@ export function SettingsPage() {
                     const useThinMenuButton = await DataStore.get("useThinMenuButton");
                     DataStore.set("useThinMenuButton", !useThinMenuButton);
                     FluxDispatcher.dispatch({
-                        type: "COLORWAYS_UPDATE_BUTTON_HEIGHT",
+                        type: "COLORWAYS_UPDATE_BUTTON_HEIGHT" as FluxEvents,
                         isTall: !isButtonThin
                     });
                 }}><label className="colorwaysSettings-label">Use thin menu button</label>
@@ -213,7 +225,7 @@ export function SettingsPage() {
                         setIsButtonThin(e);
                         DataStore.set("useThinMenuButton", e);
                         FluxDispatcher.dispatch({
-                            type: "COLORWAYS_UPDATE_BUTTON_HEIGHT",
+                            type: "COLORWAYS_UPDATE_BUTTON_HEIGHT" as FluxEvents,
                             isTall: e
                         });
                     }} />

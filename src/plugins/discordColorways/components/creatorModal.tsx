@@ -270,6 +270,7 @@ export default function CreatorModal({
                             primary: "#" + primaryColor,
                             secondary: "#" + secondaryColor,
                             tertiary: "#" + tertiaryColor,
+                            colors: presetColorArray,
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
                         };

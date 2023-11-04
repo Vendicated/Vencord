@@ -8,6 +8,7 @@ import * as DataStore from "@api/DataStore";
 import { PalleteIcon } from "@components/Icons";
 import { openModal } from "@utils/modal";
 import { FluxDispatcher, Text, Tooltip, useCallback, useEffect, useState } from "@webpack/common";
+import { FluxEvents } from "@webpack/types";
 
 import SelectorModal from "./selectorModal";
 
@@ -44,11 +45,11 @@ export default function ColorwaysButton({
         cached_setButtonVisibility();
     });
 
-    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_HEIGHT", ({ isTall }) => {
+    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_HEIGHT" as FluxEvents, ({ isTall }) => {
         setIsThin(isTall);
     });
 
-    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_VISIBILITY", ({ isVisible }) => {
+    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents, ({ isVisible }) => {
         setVisibility(isVisible);
     });
 

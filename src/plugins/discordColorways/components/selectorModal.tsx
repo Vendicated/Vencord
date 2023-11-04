@@ -421,7 +421,11 @@ export default function SelectorModal({
                                                 <div
                                                     className="discordColorwayPreviewColorContainer"
                                                     onClick={async () => {
-                                                        const [onDemandWays, onDemandWaysTintedText, onDemandWaysDiscordSaturation] = await DataStore.getMany([
+                                                        const [
+                                                            onDemandWays,
+                                                            onDemandWaysTintedText,
+                                                            onDemandWaysDiscordSaturation
+                                                        ] = await DataStore.getMany([
                                                             "onDemandWays",
                                                             "onDemandWaysTintedText",
                                                             "onDemandWaysDiscordSaturation"
@@ -434,8 +438,16 @@ export default function SelectorModal({
                                                             DataStore.set("activeColorwayColors", color.colors);
                                                             DataStore.set("actveColorwayID", color.name);
                                                             if (onDemandWays) {
-                                                                DataStore.set("actveColorway", generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText, onDemandWaysDiscordSaturation));
-                                                                ColorwayCSS.set(generateCss(getHex(color.primary).split("#")[1], getHex(color.secondary).split("#")[1], getHex(color.tertiary).split("#")[1], getHex(color.accent).split("#")[1], onDemandWaysTintedText, onDemandWaysDiscordSaturation));
+                                                                const demandedColorway = generateCss(
+                                                                    getHex(color.primary).split("#")[1],
+                                                                    getHex(color.secondary).split("#")[1],
+                                                                    getHex(color.tertiary).split("#")[1],
+                                                                    getHex(color.accent).split("#")[1],
+                                                                    onDemandWaysTintedText,
+                                                                    onDemandWaysDiscordSaturation
+                                                                );
+                                                                DataStore.set("actveColorway", demandedColorway);
+                                                                ColorwayCSS.set(demandedColorway);
                                                             } else {
                                                                 DataStore.set("actveColorway", color.import);
                                                                 ColorwayCSS.set(color.import);
