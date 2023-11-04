@@ -381,7 +381,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     ant0n: {
         name: "ant0n",
-        id: 609329952180928513n
+        id: 145224646868860928n
     },
 } satisfies Record<string, Dev>);
 
