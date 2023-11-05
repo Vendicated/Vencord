@@ -27,8 +27,9 @@ import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, M
 import definePlugin from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
 
-function parseTime(time: string) {
-    const cleanTime = time.slice(1, -1).replace(/(\d)(AM|PM)$/i, "$1 $2");
+function parseTime(time: string, h: string, m: string, s: string, a: string, format: Format) {
+    if (!Formats.includes(format || "")) return time;
+    const cleanTime = `${h.padStart(2, "0")}:${m}${s ? `:${s}` : ""}${a ? ` ${a}` : ""}`;
 
     let ms = new Date(`${new Date().toDateString()} ${cleanTime}`).getTime() / 1000;
     if (isNaN(ms)) return time;
@@ -36,9 +37,10 @@ function parseTime(time: string) {
     // add 24h if time is in the past
     if (Date.now() / 1000 > ms) ms += 86400;
 
-    return `<t:${Math.round(ms)}:t>`;
+    return `<t:${Math.round(ms)}:${format || "t"}>`;
 }
 
+const TimeRegex = /`(\d{1,2}):(\d\d)(?::(\d\d))?(?:\s*(AM|PM))?(?::(\w))`/gi;
 const Formats = ["", "t", "T", "d", "D", "f", "F", "R"] as const;
 type Format = typeof Formats[number];
 
@@ -116,7 +118,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
 export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
-    authors: [Devs.Ven, Devs.Tyler],
+    authors: [Devs.Ven, Devs.Tyler, Devs.UlyssesZhan],
     dependencies: ["MessageEventsAPI"],
 
     patches: [
@@ -131,7 +133,7 @@ export default definePlugin({
 
     start() {
         this.listener = addPreSendListener((_, msg) => {
-            msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+            msg.content = msg.content.replace(TimeRegex, parseTime);
         });
     },
 
@@ -193,7 +195,9 @@ export default definePlugin({
             "17:59",
             "24:00",
             "12:00 AM",
-            "0:13PM"
+            "0:13PM",
+            "23:59:R",
+            "11:59PM:R"
         ].map(s => `\`${s}\``);
 
         return (
@@ -210,7 +214,7 @@ export default definePlugin({
                     <ul>
                         {samples.map(s => (
                             <li key={s}>
-                                <code>{s}</code> {"->"} {Parser.parse(parseTime(s))}
+                                <code>{s}</code> {"->"} {Parser.parse(s.replace(TimeRegex, parseTime))}
                             </li>
                         ))}
                     </ul>
