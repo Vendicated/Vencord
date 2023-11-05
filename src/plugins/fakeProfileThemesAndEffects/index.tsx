@@ -416,7 +416,7 @@ export default definePlugin({
         return user;
     },
     add3y3Builder(): JSX.Element {
-        if (settings.store["Hide 3y3 Builder"] === true) return <></>;
+        if (settings.store["Hide 3y3 Builder"]) return <></>;
 
         const [primaryColor, setPrimaryColor] = useState(-1);
         const [accentColor, setAccentColor] = useState(-1);
