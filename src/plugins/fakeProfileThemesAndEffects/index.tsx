@@ -426,6 +426,7 @@ export default definePlugin({
 
         return (
             <>
+                <style>{"." + this.name + "TextOverflow{white-space:normal!important;text-overflow:clip!important}"}</style>
                 <Text
                     tag={"h3"}
                     variant={"eyebrow"}
@@ -557,11 +558,5 @@ export default definePlugin({
                 </Switch>
             </>
         );
-    },
-    start(): void {
-        document.documentElement.appendChild(Object.assign(
-            document.createElement("style"),
-            { textContent: "." + this.name + "TextOverflow{white-space:normal!important;text-overflow:clip!important}" }
-        ));
     }
 });
