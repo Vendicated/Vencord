@@ -243,7 +243,9 @@ function TextReplace({ update }: { update: () => void; }) {
                 </Flex>
                 <TextInput placeholder="Test your rules!" onChange={setValue} />
             </Flex>
+
             <Forms.FormDivider></Forms.FormDivider>
+
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     textReplaceRules.map((rule, i) => {
@@ -254,85 +256,77 @@ function TextReplace({ update }: { update: () => void; }) {
                                         backgroundColor: "var(--background-secondary)",
                                         borderRadius: "3px",
                                         padding: "10px",
-                                        display: "flex",
-                                        flexDirection: "column",
                                         gap: "0.5em",
+                                        display: "grid",
+                                        gridTemplateColumns: "1fr 1fr 1fr auto",
+                                        gridTemplateRows: "1fr 1fr",
                                     }}>
-                                        <Flex flexDirection="row" style={{ gap: "0.5em" }}>
-                                            <Flex flexDirection="column" style={{ gap: "0.5em" }}>
-                                                <Flex flexDirection="row" style={{ justifyContent: "space-between", gap: "0.5em" }}>
-                                                    <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
-                                                        <Forms.FormText>Enabled:</Forms.FormText>
-                                                        <Switch
-                                                            checked={rule.isEnabled}
-                                                            onChange={e => onToggle(e, i)}
-                                                        />
-                                                    </Flex>
-                                                    <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center" }}>
-                                                        <Forms.FormText style={{
-                                                            opacity: rule.isEnabled ? 1 : 0.5
-                                                        }}>Is Regex:</Forms.FormText>
-                                                        <Switch
-                                                            checked={rule.isRegex}
-                                                            disabled={!rule.isEnabled}
-                                                            onChange={e => onCheck(e, i)}
-                                                        />
-                                                        <Button
-                                                            size={Button.Sizes.MIN}
-                                                            onClick={() => onClickRemove(i)}
-                                                            style={{
-                                                                background: "none",
-                                                                color: "var(--status-danger)"
-                                                            }}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </Button>
-                                                    </Flex>
-                                                </Flex>
-                                                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                                    <Input
-                                                        placeholder="Find"
-                                                        initialValue={rule.find}
-                                                        enabled={rule.isEnabled}
-                                                        onChange={e => onChange(e, i, "find")}
-                                                    />
-                                                    <Input
-                                                        placeholder="Replace"
-                                                        initialValue={rule.replace}
-                                                        enabled={rule.isEnabled}
-                                                        onChange={e => onChange(e, i, "replace")}
-                                                    />
-                                                    <Input
-                                                        placeholder="Only if includes"
-                                                        initialValue={rule.onlyIfIncludes}
-                                                        enabled={rule.isEnabled}
-                                                        onChange={e => onChange(e, i, "onlyIfIncludes")}
-                                                    />
-                                                </Flex>
-                                            </Flex>
-                                            <Flex flexDirection="column" style={{ gap: "0.5em", justifyContent: "space-evenly" }}>
-                                                <Button
-                                                    size={Button.Sizes.MIN}
-                                                    onClick={() => onClickMoveUp(i)}
-                                                    style={{
-                                                        background: "var(--background-modifier-hover)",
-                                                        color: "var(--brand-experiment)"
-                                                    }}
-                                                >
-                                                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 16.0001L12 11.4201L16.59 16.0001L18 14.5901L12 8.59006L6 14.5901L7.41 16.0001Z"></path></svg>
-                                                </Button>
-                                                <Button
-                                                    size={Button.Sizes.MIN}
-                                                    onClick={() => onClickMoveDown(i)}
-                                                    style={{
-                                                        background: "var(--background-modifier-hover)",
-                                                        color: "var(--brand-experiment)"
-                                                    }}
-                                                >
-                                                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
-                                                </Button>
-                                            </Flex>
+                                        <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center", justifyContent: "flex-start" }}>
+                                            <Forms.FormText>Enabled:</Forms.FormText>
+                                            <Switch
+                                                checked={rule.isEnabled}
+                                                onChange={e => onToggle(e, i)}
+                                            />
                                         </Flex>
+                                        <div></div>
+                                        <Flex flexDirection="row" style={{ gap: "0.5em", alignItems: "center", justifyContent: "flex-end" }}>
+                                            <Forms.FormText style={{
+                                                opacity: rule.isEnabled ? 1 : 0.5
+                                            }}>Is Regex:</Forms.FormText>
+                                            <Switch
+                                                checked={rule.isRegex}
+                                                disabled={!rule.isEnabled}
+                                                onChange={e => onCheck(e, i)}
+                                            />
+                                            <Button
+                                                size={Button.Sizes.MIN}
+                                                onClick={() => onClickRemove(i)}
+                                                style={{
+                                                    background: "none",
+                                                    color: "var(--status-danger)"
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </Button>
+                                        </Flex>
+                                        <Button
+                                            size={Button.Sizes.MIN}
+                                            onClick={() => onClickMoveUp(i)}
+                                            style={{
+                                                background: "var(--background-modifier-hover)",
+                                                color: "var(--brand-experiment)"
+                                            }}
+                                        >
+                                            <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 16.0001L12 11.4201L16.59 16.0001L18 14.5901L12 8.59006L6 14.5901L7.41 16.0001Z"></path></svg>
+                                        </Button>
+                                        <Input
+                                            placeholder="Find"
+                                            initialValue={rule.find}
+                                            enabled={rule.isEnabled}
+                                            onChange={e => onChange(e, i, "find")}
+                                        />
+                                        <Input
+                                            placeholder="Replace"
+                                            initialValue={rule.replace}
+                                            enabled={rule.isEnabled}
+                                            onChange={e => onChange(e, i, "replace")}
+                                        />
+                                        <Input
+                                            placeholder="Only if includes"
+                                            initialValue={rule.onlyIfIncludes}
+                                            enabled={rule.isEnabled}
+                                            onChange={e => onChange(e, i, "onlyIfIncludes")}
+                                        />
+                                        <Button
+                                            size={Button.Sizes.MIN}
+                                            onClick={() => onClickMoveDown(i)}
+                                            style={{
+                                                background: "var(--background-modifier-hover)",
+                                                color: "var(--brand-experiment)"
+                                            }}
+                                        >
+                                            <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
+                                        </Button>
                                     </div>
                                     <Preview value={value} index={i} enabled={rule.isEnabled} />
                                 </Flex>
