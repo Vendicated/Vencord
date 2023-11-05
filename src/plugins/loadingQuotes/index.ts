@@ -61,36 +61,58 @@ const quotes = [
     "Wdn`khc'|f*eghl{%"
 ];
 
+
 const settings = definePluginSettings({
     replaceEvents: {
         description: "Replace Event Quotes too",
         type: OptionType.BOOLEAN,
         default: true
-    }
+    },
+    enablePluginPresetQuotes: {
+        description: "Enable the quotes preset by this plugin",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    enableDiscordPresetQuotes: {
+        description: "Enable the quotes preset by Discord",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    additionalQuotes: {
+        description: "Additional custom quotes to possibly appear",
+        type: OptionType.STRING,
+        default: "",
+    },
+    additionalQuotesDelimiter: {
+        description: "Delimiter for additional quotes",
+        type: OptionType.STRING,
+        default: "|",
+    },
 });
 
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
-    authors: [Devs.Ven, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
 
     settings,
 
     patches: [
         {
-            find: ".LOADING_DID_YOU_KNOW}",
-            replacement: [
-                {
-                    match: /\._loadingText=function\(\)\{/,
-                    replace: "$&return $self.quote;",
-                },
-                {
-                    match: /\._eventLoadingText=function\(\)\{/,
-                    replace: "$&return $self.quote;",
-                    predicate: () => settings.store.replaceEvents
-                }
-            ],
+            find: ".LOADING_DID_YOU_KNOW",
+            replacement: {
+                match: /return (\i)(\[\i\.random)/,
+                replace: "$1 = $self.quotes($1); return $1$2"
+            }
         },
+        { // Halloween
+            find: "getLoadingTips:",
+            replacement: {
+                match: /return(\[.+?\])\}/,
+                replace: "return $self.quotes($1) }",
+                predicate: () => settings.store.replaceEvents
+            }
+        }
     ],
 
     xor(quote: string) {
@@ -99,7 +121,12 @@ export default definePlugin({
         return String.fromCharCode(...codes);
     },
 
-    get quote() {
-        return this.xor(quotes[Math.floor(Math.random() * quotes.length)]);
+    quotes(preset: string[]) {
+        const result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
+        if (settings.store.enablePluginPresetQuotes) {
+            result.push(...quotes.map(this.xor));
+        }
+        result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter));
+        return result.length > 0 ? result : ["Loading"];
     }
 });
