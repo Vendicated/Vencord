@@ -23,7 +23,7 @@ import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
 const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
-const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/(.+)(?:\?.+?)?$/;
+const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/;
 const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
 const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
 
@@ -55,8 +55,8 @@ export default definePlugin({
         {
             find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /(?<=handleClick:function\(\)\{return (\i)\}.+?)async function \1\(.+?\)\{/,
-                replace: "$& if(await $self.handleLink(...arguments)) return;"
+                match: /(?<=handleClick:function\(\)\{return (\i)\}.+?)function \1\(.+?\)\{/,
+                replace: "async $& if(await $self.handleLink(...arguments)) return;"
             }
         },
         // Make Spotify profile activity links open in app on web
