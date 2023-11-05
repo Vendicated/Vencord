@@ -186,6 +186,13 @@ export default definePlugin({
                 }
             ]
         },
+        {
+            find: ".carouselModal",
+            replacement: {
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
+            }
+        }
     ],
 
     settings,
