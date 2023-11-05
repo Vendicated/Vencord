@@ -284,15 +284,20 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
     return str;
 }
 
-function fetchProfileEffects(callback: (v: string | null) => void): void {
+function fetchProfileEffects(callback: (v: any) => void): void {
     fetch("/api/v9/user-profile-effects", { mode:"same-origin", cache: "only-if-cached" })
         .then((response: Response): Promise<string> | null => {
-            if (response.ok === true)
-                return response.text();
+            if (response.ok) return response.text();
             showToast("Unable to retrieve the list of profile effects (" + response.status + ").", Toasts.Type.FAILURE);
             return null;
         })
-        .then(callback);
+        .then((data: string | null) => {
+            try {
+                callback(JSON.parse(data)?.profile_effect_configs);
+            } catch (e) {
+                console.error(e);
+            }
+        });
 }
 
 function updateUserThemeColors(user: UserProfile, primary: number, accent: number): void {
@@ -467,7 +472,7 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             openColorPickerModal(
-                                (color: number): void => {
+                                (color: number) => {
                                     setPrimaryColor(color);
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
@@ -487,7 +492,7 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             openColorPickerModal(
-                                (color: number): void => {
+                                (color: number) => {
                                     setAccentColor(color);
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
@@ -506,22 +511,15 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            fetchProfileEffects((data: string | null): void => {
-                                if (data === null) return;
-                                let profileEffects: any = null;
-                                try {
-                                    profileEffects = JSON.parse(data);
-                                } catch (e) {
-                                    console.error(e);
-                                }
-                                if (profileEffects !== null && profileEffects.profile_effect_configs) {
+                            fetchProfileEffects((data: any) => {
+                                if (data) {
                                     openProfileEffectModal(
-                                        (id: string, name: string): void => {
+                                        (id: string, name: string) => {
                                             setEffectID(id);
                                             setEffectName(name);
                                             showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                         },
-                                        profileEffects.profile_effect_configs
+                                        data
                                     );
                                 } else
                                     showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
