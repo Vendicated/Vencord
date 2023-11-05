@@ -7,7 +7,6 @@
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CopyIcon, DeleteIcon } from "@components/Icons";
-import { Link } from "@components/Link";
 import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, Text, TextInput, useEffect, useState } from "@webpack/common";
@@ -42,9 +41,9 @@ function trimThemeUrl(url: string) {
 }
 
 async function FetchTheme(link: string) {
-    const theme: OnlineTheme = await fetch(link)
+    const theme: OnlineTheme = await fetch(link, { redirect: "follow" })
         .then(res => {
-            if (res.status > 300) throw `${res.status} ${res.statusText}`;
+            if (res.status >= 400) throw `${res.status} ${res.statusText}`;
 
             const contentType = res.headers.get("Content-Type");
             if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
@@ -56,7 +55,7 @@ async function FetchTheme(link: string) {
             const headers = getThemeInfo(text, trimThemeUrl(link));
             return { link, headers };
         }).catch(e => {
-            return { link, error: e };
+            return { link, error: e.toString() };
         });
 
     return theme;
@@ -124,7 +123,7 @@ export function OnlineThemes() {
             }
 
             if (urlObj.hostname !== "raw.githubusercontent.com" && !urlObj.hostname.endsWith("github.io")) {
-                setError("Only raw.githubusercontent.com and github.io URLs are allowed");
+                setError("Only raw.githubusercontent.com and github.io URLs are allowed, otherwise the theme will not work");
                 setDisabled(true);
                 return;
             }
@@ -142,6 +141,10 @@ export function OnlineThemes() {
                     setDisabled(true);
                     success = false;
                 }
+            }).catch(e => {
+                setError(`Could not fetch theme: ${e}`);
+                setDisabled(true);
+                success = false;
             });
 
             if (!success) return;
@@ -156,19 +159,14 @@ export function OnlineThemes() {
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent className={cl("add-theme-content")}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Link href="https://betterdiscord.app/themes">
-                        BetterDiscord Themes
-                    </Link>
-                    <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
-                </div>
-                <Forms.FormText>Only raw.githubusercontent.com and github.io URLs</Forms.FormText>
+                <Forms.FormText>Only raw.githubusercontent.com and github.io URLs will work</Forms.FormText>
+
                 <TextInput placeholder="URL" name="url" onBlur={checkUrl} onChange={setUrl} />
                 <Forms.FormText className={cl("add-theme-error")}>{error}</Forms.FormText>
             </ModalContent>
             <ModalFooter className={cl("add-theme-footer")}>
                 <Button onClick={onClose} color={Button.Colors.RED}>Cancel</Button>
-                <Button onClick={async () => {
+                <Button onClick={() => {
                     addTheme(url);
                     onClose();
                 }} color={Button.Colors.BRAND} disabled={disabled}>
@@ -218,6 +216,14 @@ export function OnlineThemes() {
                             onDelete={() => removeTheme(theme.link)}
                             theme={theme.headers!}
                             showDelete={true}
+                            extraButtons={
+                                <div
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => copyWithToast(theme.link, "Link copied to clipboard!")}
+                                >
+                                    <CopyIcon />
+                                </div>
+                            }
                         />
                         ) || (
                             <AddonCard
@@ -226,6 +232,7 @@ export function OnlineThemes() {
                                 description={theme.link}
                                 enabled={false}
                                 setEnabled={() => { }}
+                                hideSwitch={true}
                                 infoButton={<>
                                     <div
                                         style={{ cursor: "pointer" }}
@@ -241,7 +248,6 @@ export function OnlineThemes() {
                                     </div>
                                 </>
                                 }
-                                hideSwitch={true}
                             />
                         )
                     ))}

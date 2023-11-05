@@ -49,9 +49,10 @@ interface ThemeCardProps {
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
     showDelete?: boolean;
+    extraButtons?: React.ReactNode;
 }
 
-export function ThemeCard({ theme, enabled, onChange, onDelete, showDelete }: ThemeCardProps) {
+export function ThemeCard({ theme, enabled, onChange, onDelete, showDelete, extraButtons }: ThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -60,13 +61,15 @@ export function ThemeCard({ theme, enabled, onChange, onDelete, showDelete }: Th
             enabled={enabled}
             setEnabled={onChange}
             infoButton={
-                (IS_WEB || showDelete) && (
+                (IS_WEB || showDelete) && (<>
+                    {extraButtons}
                     <div
                         style={{ cursor: "pointer", color: "var(--status-danger" }}
                         onClick={onDelete}
                     >
                         <DeleteIcon />
                     </div>
+                </>
                 )
             }
             footer={
