@@ -78,20 +78,20 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
     const startDrag = (onMouseMoveFunc: (e: MouseEvent) => void): void => {
         document.addEventListener("mousemove", onMouseMoveFunc);
         document.addEventListener("mouseup",
-            (): void => {document.removeEventListener("mousemove", onMouseMoveFunc)},
+            () => {document.removeEventListener("mousemove", onMouseMoveFunc)},
             { once: true }
         );
     }
 
     const colorAreaRef = useRef<HTMLDivElement>(null);
     const sliderBarRef = useRef<HTMLDivElement>(null);
-    const [color, setColor]: [number, (v: number) => void] = useState(initialColor);
-    const [markerPos, setMarkerPos]: [[number, number], (v: [number, number]) => void] = useState(((): [number, number] => {
+    const [color, setColor] = useState(initialColor);
+    const [markerPos, setMarkerPos] = useState(((): [number, number] => {
         const hsv: [number, number, number] = RGBtoHSV(..._24BitColorToRGB(initialColor));
         return [hsv[1], 1 - hsv[2]];
     })());
-    const [sliderPos, setSliderPos]: [number, (v: number) => void] = useState(RGBtoHSV(..._24BitColorToRGB(initialColor))[0] / 360);
-    const [inputColor, setInputColor]: [string, (v: string) => void] = useState(initialColor.toString(16).padStart(6, "0"));
+    const [sliderPos, setSliderPos] = useState(RGBtoHSV(..._24BitColorToRGB(initialColor))[0] / 360);
+    const [inputColor, setInputColor] = useState(initialColor.toString(16).padStart(6, "0"));
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
@@ -252,7 +252,7 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
                 <Button
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    onClick={(): void => {onSubmit(color)}}
+                    onClick={() => {onSubmit(color)}}
                 >
                     {"Apply"}
                 </Button>
@@ -265,7 +265,7 @@ export function openColorPickerModal(onSubmit: (v: number) => void, initialColor
     const key = openModal(modalProps =>
         <ColorPickerModal
             modalProps={modalProps}
-            onClose={(): void => {closeModal(key)}}
+            onClose={() => {closeModal(key)}}
             onSubmit={onSubmit}
             initialColor={initialColor}
         />

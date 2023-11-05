@@ -27,7 +27,7 @@ interface ProfileEffectModalProps {
 }
 
 export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects }: ProfileEffectModalProps): JSX.Element {
-    const [selected, setSelected]: [number, (v: number) => void] = useState(-1);
+    const [selected, setSelected] = useState(-1);
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
@@ -64,7 +64,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                             width: "80px",
                             height: "80px"
                         }}
-                        onClick={(): void => {setSelected(i)}}
+                        onClick={() => {setSelected(i)}}
                     />
                 )}
             </ModalContent>
@@ -83,7 +83,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                     <Button
                         color={Button.Colors.PRIMARY}
                         size={Button.Sizes.MEDIUM}
-                        onClick={(): void => {
+                        onClick={() => {
                             if (selected !== -1)
                                 onSubmit(profileEffects[selected].id, profileEffects[selected].title);
                             else
@@ -102,7 +102,7 @@ export function openProfileEffectModal(onSubmit: (i: string, n: string) => void,
     const key = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
-            onClose={(): void => {closeModal(key)}}
+            onClose={() => {closeModal(key)}}
             onSubmit={onSubmit}
             profileEffects={profileEffects}
         />
