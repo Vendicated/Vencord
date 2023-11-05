@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchHeader", "searchInput");
+const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -182,7 +182,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ref={ref}
             autoFocus={true}
             className={containerClasses.searchBar}
-            size={SearchBarComponent.Sizes.SMALL}
+            size={SearchBarComponent.Sizes.MEDIUM}
             onChange={onChange}
             onClear={() => {
                 setQuery("");
