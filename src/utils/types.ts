@@ -125,6 +125,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    LIST,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -141,6 +142,7 @@ export type PluginSettingDef = (
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
+    | PluginSettingListDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
@@ -189,6 +191,10 @@ export interface PluginSettingBigIntDef {
 export interface PluginSettingBooleanDef {
     type: OptionType.BOOLEAN;
     default?: boolean;
+}
+export interface PluginSettingListDef {
+    type: OptionType.LIST;
+    default?: string[];
 }
 
 export interface PluginSettingSelectDef {
@@ -250,6 +256,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingListDef ? string[] :
     never;
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
@@ -300,10 +307,12 @@ export type PluginOptionsItem =
     | PluginOptionBoolean
     | PluginOptionSelect
     | PluginOptionSlider
-    | PluginOptionComponent;
+    | PluginOptionComponent
+    | PluginOptionList;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionList = PluginSettingListDef & PluginSettingCommon & IsDisabled & IsValid<string[]>;

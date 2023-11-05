@@ -35,6 +35,7 @@ import {
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
+    SettingListComponent,
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
@@ -73,7 +74,8 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.BOOLEAN]: SettingBooleanComponent,
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+    [OptionType.COMPONENT]: SettingCustomComponent,
+    [OptionType.LIST]: SettingListComponent,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {

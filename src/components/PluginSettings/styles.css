@@ -83,3 +83,16 @@
 .vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
 }
+
+.vc-settings-list-wrapper {
+    display: grid;
+    gap: 10px;
+    grid-template-rows: 40px;
+}
+
+.vc-settings-list-row {
+    display: grid;
+    height: 40px;
+    gap: 10px;
+    grid-template-columns: 1fr 40px;
+}
