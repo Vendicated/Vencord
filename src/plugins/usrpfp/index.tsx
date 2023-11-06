@@ -8,10 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "discord-types/general";
 
 import { DataFile } from "./types";
-
-const isAnimated = (url: string) => new URL(url).pathname.endsWith(".gif");
 
 const BASE_URL = "https://userpfp.github.io/UserPFP/source/data.json";
 
@@ -21,14 +20,13 @@ let data: DataFile = {
 };
 
 const settings = definePluginSettings({
-    priority: {
+    preferNitro: {
         description:
-            "Which avatar to use if both Discord and UserPFP avatars are present",
+            "Which avatar to use if both Nitro and UserPFP avatars are present",
         type: OptionType.SELECT,
         options: [
-            { label: "UserPFP", value: "usrpfp", default: true },
-            { label: "Prefer animated", value: "animated" },
-            { label: "Prefer static", value: "static" },
+            { label: "UserPFP", value: false },
+            { label: "Nitro", value: true, default: true },
         ],
     },
 });
@@ -47,25 +45,19 @@ export default definePlugin({
     ),
     patches: [
         {
-            find: ",SUPPORTS_WEBP:",
-            replacement: [
-                {
-                    match: /getUserAvatarURL:(C)/,
-                    replace:
-                        "getUserAvatarURL:(u,anim,sz)=>$self.patchGetAvatar(u,$1(u,anim,sz))",
-                },
-            ],
-        },
+            find: "getUserAvatarURL:",
+            replacement: {
+                match: /(getUserAvatarURL:)(\i),/,
+                replace: "$1(user,anim,size)=>$self.patchGetAvatar(user)||$2(user,anim,size),"
+            }
+        }
     ],
 
-    patchGetAvatar: (user: any, originalAvatar: string) => {
+    patchGetAvatar: (user: User) => {
         const customAvatar = data.avatars[user.id];
-        if (!customAvatar) return originalAvatar;
+        if (settings.store.preferNitro && user.avatar?.startsWith("a_")) return;
 
-        if (settings.store.priority === "usrpfp") return customAvatar;
-        else if (settings.store.priority === "animated")
-            return isAnimated(customAvatar) ? customAvatar : originalAvatar;
-        else return !isAnimated(customAvatar) ? customAvatar : originalAvatar;
+        return customAvatar;
     },
 
     async start() {
