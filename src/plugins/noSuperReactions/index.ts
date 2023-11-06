@@ -51,22 +51,9 @@ type LoadMessagesSuccess = {
     messages: Message[];
 };
 
-enum ReactionType {
-    UNICODE = 0,
-    CUSTOM = 1,
-}
-
 type MessageReactionBase = {
     channelId: string;
     messageId: string;
-};
-
-type MessageReactionAdd = MessageReactionBase & {
-    type: "MESSAGE_REACTION_ADD";
-    emoji: Emoji;
-    burst: boolean;
-    burst_colors: string[];
-    reactionType: ReactionType;
 };
 
 function transformMessageReaction(reaction: MessageReaction) {
@@ -81,7 +68,7 @@ function transformMessageReaction(reaction: MessageReaction) {
     reaction.me_burst = false;
 }
 
-function handleMessageReactionRemove(event: MessageReactionBase) {
+function handleMessageReactionEvent(event: MessageReactionBase) {
     const storedMessage = MessageStore.getMessage(event.channelId, event.messageId);
     if (!storedMessage || !storedMessage.reactions || !storedMessage.reactions.length) return;
     for (const reaction of storedMessage.reactions) {
@@ -106,26 +93,9 @@ export default definePlugin({
             }
         },
 
-        MESSAGE_REACTION_ADD(event: MessageReactionAdd) {
-            if (event.reactionType === ReactionType.UNICODE) return;
-            const storedMessage = MessageStore.getMessage(event.channelId, event.messageId);
-            if (!storedMessage) return;
-            const reaction = storedMessage.reactions.find(r => r.emoji.id === event.emoji.id);
-            if (!reaction) return;
-            // @ts-expect-error discord-types is outdated
-            transformMessageReaction(reaction);
-        },
-
-        MESSAGE_REACTION_REMOVE(reaction: MessageReactionBase) {
-            handleMessageReactionRemove(reaction);
-        },
-
-        MESSAGE_REACTION_REMOVE_ALL(reaction: MessageReactionBase) {
-            handleMessageReactionRemove(reaction);
-        },
-
-        MESSAGE_REACTION_REMOVE_EMOJI(reaction: MessageReactionBase) {
-            handleMessageReactionRemove(reaction);
-        },
-    },
+        MESSAGE_REACTION_ADD: handleMessageReactionEvent,
+        MESSAGE_REACTION_REMOVE: handleMessageReactionEvent,
+        MESSAGE_REACTION_REMOVE_ALL: handleMessageReactionEvent,
+        MESSAGE_REACTION_REMOVE_EMOJI: handleMessageReactionEvent,
+    }
 });
