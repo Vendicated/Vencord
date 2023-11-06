@@ -93,9 +93,11 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
             data-has-mention={!!mentionCount}
             className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
-                backgroundColor: mentionCount ? "var(--status-danger)" : "var(--brand-experiment)",
                 width: BadgeUtils.getBadgeWidthForValue(mentionCount || unreadCount)
             }}
+            ref={node => node?.style.setProperty("background-color",
+                mentionCount ? "var(--red-400)" : "var(--brand-experiment)", "important"
+            )}
         >
             {mentionCount || unreadCount}
         </div> : null;
