@@ -91,7 +91,7 @@ function handleMessageReactionRemove(event: MessageReactionBase) {
 
 export default definePlugin({
     name: "NoSuperReactions",
-    authors: [0n],
+    authors: [Devs.Ven],
     description: "Treats super reactions as normal reactions.",
 
     flux: {
