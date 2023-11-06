@@ -20,26 +20,19 @@ import { popNotice, showNotice } from "@api/Notices";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
-    {
-        getAsset: filters.byCode("apply("),
-    }
-);
-
-const lookupRpcApp = findByCodeLazy(".APPLICATION_RPC(");
+const RpcUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
 }
 
 const apps: any = {};
 async function lookupApp(applicationId: string): Promise<string> {
     const socket: any = {};
-    await lookupRpcApp(socket, applicationId);
+    await RpcUtils.fetchApplicationsRPC(socket, applicationId);
     return socket.application;
 }
 
@@ -58,6 +51,26 @@ export default definePlugin({
         </>
     ),
 
+    async handleEvent(e: MessageEvent<any>) {
+        const data = JSON.parse(e.data);
+
+        const { activity } = data;
+        const assets = activity?.assets;
+
+        if (assets?.large_image) assets.large_image = await lookupAsset(activity.application_id, assets.large_image);
+        if (assets?.small_image) assets.small_image = await lookupAsset(activity.application_id, assets.small_image);
+
+        if (activity) {
+            const appId = activity.application_id;
+            apps[appId] ||= await lookupApp(appId);
+
+            const app = apps[appId];
+            activity.name ||= app.name;
+        }
+
+        FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
+    },
+
     async start() {
         // ArmCord comes with its own arRPC implementation, so this plugin just confuses users
         if ("armcord" in window) return;
@@ -65,22 +78,7 @@ export default definePlugin({
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
-        ws.onmessage = async e => { // on message, set status to data
-            const data = JSON.parse(e.data);
-
-            if (data.activity?.assets?.large_image) data.activity.assets.large_image = await lookupAsset(data.activity.application_id, data.activity.assets.large_image);
-            if (data.activity?.assets?.small_image) data.activity.assets.small_image = await lookupAsset(data.activity.application_id, data.activity.assets.small_image);
-
-            if (data.activity) {
-                const appId = data.activity.application_id;
-                apps[appId] ||= await lookupApp(appId);
-
-                const app = apps[appId];
-                data.activity.name ||= app.name;
-            }
-
-            FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
-        };
+        ws.onmessage = this.handleEvent;
 
         const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
         if (!connectionSuccessful) {

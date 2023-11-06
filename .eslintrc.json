@@ -51,7 +51,10 @@
         "eqeqeq": ["error", "always", { "null": "ignore" }],
         "spaced-comment": ["error", "always", { "markers": ["!"] }],
         "yoda": "error",
-        "prefer-destructuring": ["error", { "object": true, "array": false }],
+        "prefer-destructuring": ["error", {
+                "VariableDeclarator": { "array": false, "object": true },
+                "AssignmentExpression": { "array": false, "object": false }
+        }],
         "operator-assignment": ["error", "always"],
         "no-useless-computed-key": "error",
         "no-unneeded-ternary": ["error", { "defaultAssignment": false }],

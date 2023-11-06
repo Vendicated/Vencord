@@ -23,12 +23,12 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
-const uploadEmoji = findByCodeLazy('"EMOJI_UPLOAD_START"', "GUILD_EMOJIS(");
+const EmojiManager = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
 
 interface Sticker {
     t: "Sticker";
@@ -106,7 +106,7 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
         reader.readAsDataURL(data);
     });
 
-    return uploadEmoji({
+    return EmojiManager.uploadEmoji({
         guildId,
         name: emoji.name.split("~")[0],
         image: dataUrl
@@ -155,10 +155,15 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             type: Toasts.Type.SUCCESS,
             id: Toasts.genId()
         });
-    } catch (e) {
+    } catch (e: any) {
+        let message = "Something went wrong (check console!)";
+        try {
+            message = JSON.parse(e.text).message;
+        } catch { }
+
         new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
         Toasts.show({
-            message: "Oopsie something went wrong :( Check console!!!",
+            message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
             id: Toasts.genId()
         });

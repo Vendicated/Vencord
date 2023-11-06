@@ -23,7 +23,7 @@ import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
 const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
-const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user)\/(.+)(?:\?.+?)?$/;
+const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/;
 const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
 const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
 
@@ -53,10 +53,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"MaskedLinkStore"',
+            find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /return ((\i)\.apply\(this,arguments\))(?=\}function \i.{0,250}\.trusted)/,
-                replace: "return $self.handleLink(...arguments).then(handled => handled||$1)"
+                match: /(?<=handleClick:function\(\)\{return (\i)\}.+?)function \1\(.+?\)\{/,
+                replace: "async $& if(await $self.handleLink(...arguments)) return;"
             }
         },
         // Make Spotify profile activity links open in app on web
@@ -71,7 +71,7 @@ export default definePlugin({
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
             replacement: {
-                match: /(?<=href:\i,onClick:function\(\i\)\{)(?=\i=(\i)\.type,.{0,50}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=href:\i,onClick:\i=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
                 replace: "$self.handleAccountView(arguments[0],$1.type,$1.id);"
             }
         }

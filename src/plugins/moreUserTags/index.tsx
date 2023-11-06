@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, Switch, TextInput, Tooltip, useState } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Message, User } from "discord-types/general";
 
@@ -53,14 +53,11 @@ interface TagSettings {
     [k: string]: TagSetting;
 }
 
-const CLYDE_ID = "1081004946872352958";
-
 // PermissionStore.computePermissions is not the same function and doesn't work here
 const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Permissions = findByPropsLazy("SEND_MESSAGES", "VIEW_CREATOR_MONETIZATION_ANALYTICS") as Record<PermissionName, bigint>;
 const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
@@ -190,17 +187,14 @@ export default definePlugin({
     patches: [
         // add tags to the tag list
         {
-            find: '.BOT=0]="BOT"',
-            replacement: [
-                // add tags to the exported tags list (Tag.Types)
-                {
-                    match: /(\i)\[.\.BOT=0\]="BOT";/,
-                    replace: "$&$1=$self.addTagVariants($1);"
-                }
-            ]
+            find: "BotTagTypes:",
+            replacement: {
+                match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
+                replace: "($1=$self.getTagTypes()))[$2.BOT"
+            }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP;",
+            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,",
             replacement: [
                 // make the tag show the right text
                 {
@@ -215,25 +209,25 @@ export default definePlugin({
                 },
                 // add HTML data attributes (for easier theming)
                 {
-                    match: /children:\[(?=\i,\(0,\i\.jsx\)\("span",{className:\i\(\)\.botText,children:(\i)}\)\])/,
-                    replace: "'data-tag':$1.toLowerCase(),children:["
+                    match: /.botText,children:(\i)}\)]/,
+                    replace: "$&,'data-tag':$1.toLowerCase()"
                 }
             ],
         },
         // in messages
         {
-            find: ".Types.ORIGINAL_POSTER",
+            find: "renderSystemTag:",
             replacement: {
-                match: /return null==(\i)\?null:\(0,/,
-                replace: "$1=$self.getTag({...arguments[0],origType:$1,location:'chat'});$&"
+                match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
+                replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
             }
         },
         // in the member list
         {
-            find: ".renderBot=function(){",
+            find: ".Messages.GUILD_OWNER,",
             replacement: {
-                match: /\.BOT;return null!=(\i)&&.{0,10}\?(.{0,50})\.botTag,type:\i/,
-                replace: ".BOT;var type=$self.getTag({...this.props,origType:$1.bot?0:null,location:'not-chat'});return type!==null?$2.botTag,type"
+                match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
+                replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
             }
         },
         // pass channel id down props to be used in profiles
@@ -253,11 +247,18 @@ export default definePlugin({
         },
         // in profiles
         {
-            find: ",botType:",
-            replacement: {
-                match: /,botType:(\i\((\i)\)),/g,
-                replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
-            }
+            find: ",overrideDiscriminator:",
+            replacement: [
+                {
+                    // prevent channel id from getting ghosted
+                    // it's either this or extremely long lookbehind
+                    match: /user:\i,nick:\i,/,
+                    replace: "$&moreTags_channelId,"
+                }, {
+                    match: /,botType:(\i\((\i)\)),/g,
+                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
+                }
+            ]
         },
     ],
 
@@ -297,24 +298,25 @@ export default definePlugin({
         if (!guild) return [];
 
         const permissions = PermissionUtil.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
-        return Object.entries(Permissions)
+        return Object.entries(PermissionsBits)
             .map(([perm, permInt]) =>
                 permissions & permInt ? perm : ""
             )
             .filter(Boolean);
     },
 
-    addTagVariants(tagConstant) {
+    getTagTypes() {
+        const obj = {};
         let i = 100;
         tags.forEach(({ name }) => {
-            tagConstant[name] = ++i;
-            tagConstant[i] = name;
-            tagConstant[`${name}-BOT`] = ++i;
-            tagConstant[i] = `${name}-BOT`;
-            tagConstant[`${name}-OP`] = ++i;
-            tagConstant[i] = `${name}-OP`;
+            obj[name] = ++i;
+            obj[i] = name;
+            obj[`${name}-BOT`] = ++i;
+            obj[i] = `${name}-BOT`;
+            obj[`${name}-OP`] = ++i;
+            obj[i] = `${name}-OP`;
         });
-        return tagConstant;
+        return obj;
     },
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
@@ -341,15 +343,17 @@ export default definePlugin({
         message, user, channelId, origType, location, channel
     }: {
         message?: Message,
-        user: User,
+        user: User & { isClyde(): boolean; },
         channel?: Channel & { isForumPost(): boolean; },
         channelId?: string;
         origType?: number;
         location: "chat" | "not-chat";
     }): number | null {
+        if (!user)
+            return null;
         if (location === "chat" && user.id === "1")
             return Tag.Types.OFFICIAL;
-        if (user.id === CLYDE_ID)
+        if (user.isClyde())
             return Tag.Types.AI;
 
         let type = typeof origType === "number" ? origType : null;
@@ -377,7 +381,6 @@ export default definePlugin({
                 break;
             }
         }
-
         return type;
     }
 });
