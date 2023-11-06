@@ -286,17 +286,15 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
 
 function fetchProfileEffects(callback: (v: any) => void): void {
     fetch("/api/v9/user-profile-effects", { mode:"same-origin", cache: "only-if-cached" })
-        .then((response: Response): Promise<string> | null => {
-            if (response.ok) return response.text();
-            showToast("Unable to retrieve the list of profile effects (" + response.status + ").", Toasts.Type.FAILURE);
-            return null;
+        .then((response: Response): Promise<any> => {
+            return response.json();
         })
-        .then((data: string | null) => {
-            try {
-                callback(JSON.parse(data)?.profile_effect_configs);
-            } catch (e) {
-                console.error(e);
-            }
+        .then((data: any) => {
+            callback(data?.profile_effect_configs);
+        })
+        .catch((e) => {
+            console.error(e);
+            showToast("Unable to retrieve the list of profile effects.", Toasts.Type.FAILURE);
         });
 }
 
@@ -415,8 +413,8 @@ export default definePlugin({
 
         return user;
     },
-    add3y3Builder(): JSX.Element {
-        if (settings.store["Hide 3y3 Builder"]) return <></>;
+    add3y3Builder(): JSX.Element | null {
+        if (settings.store["Hide 3y3 Builder"]) return null;
 
         const [primaryColor, setPrimaryColor] = useState(-1);
         const [accentColor, setAccentColor] = useState(-1);
