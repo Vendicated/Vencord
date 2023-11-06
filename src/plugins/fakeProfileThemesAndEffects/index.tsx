@@ -134,7 +134,7 @@ function decode3y3(bio: string): [string, string, string] {
             if (i > 1) break;
             tempCPs = [];
             i++;
-        } else if (currCP < 0xE0000 && currCP < 0xE007E) {
+        } else if (currCP > 0xE0000 && currCP < 0xE007E) {
             tempCPs.push(currCP - 0xE0000);
             if (j === bioCPs.length - 1)
                 decoded3y3[i] = String.fromCodePoint(...tempCPs);
@@ -274,7 +274,7 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
 }
 
 function fetchProfileEffects(callback: (v: any) => void): void {
-    fetch("/api/v9/user-profile-effects", { mode:"same-origin", cache: "only-if-cached" })
+    fetch("/api/v9/user-profile-effects", { mode: "same-origin", cache: "only-if-cached" })
         .then((response: Response): Promise<any> => {
             return response.json();
         })
