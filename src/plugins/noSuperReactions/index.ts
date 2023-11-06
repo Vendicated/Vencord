@@ -54,6 +54,7 @@ type LoadMessagesSuccess = {
 type MessageReactionBase = {
     channelId: string;
     messageId: string;
+    optimistic: boolean;
 };
 
 function transformMessageReaction(reaction: MessageReaction) {
@@ -69,6 +70,7 @@ function transformMessageReaction(reaction: MessageReaction) {
 }
 
 function handleMessageReactionEvent(event: MessageReactionBase) {
+    if (event.optimistic) return;
     const storedMessage = MessageStore.getMessage(event.channelId, event.messageId);
     if (!storedMessage || !storedMessage.reactions || !storedMessage.reactions.length) return;
     for (const reaction of storedMessage.reactions) {
