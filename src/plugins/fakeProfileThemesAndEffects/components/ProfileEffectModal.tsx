@@ -1,19 +1,7 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -40,7 +28,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                         width: "100%"
                     }}
                 >
-                    <Text style={{color: "var(--header-primary)", fontSize: "20px", fontWeight: "600"}}>
+                    <Text style={{ color: "var(--header-primary)", fontSize: "20px", fontWeight: "600" }}>
                         {"Add Profile Effect"}
                     </Text>
                     <ModalCloseButton onClick={onClose} />
@@ -64,7 +52,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                             width: "80px",
                             height: "80px"
                         }}
-                        onClick={() => {setSelected(i)}}
+                        onClick={() => { setSelected(i); }}
                     />
                 )}
             </ModalContent>
@@ -77,7 +65,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                         width: "100%"
                     }}
                 >
-                    <Text style={{color: "var(--header-primary)", fontSize: "20px", fontWeight: "600"}}>
+                    <Text style={{ color: "var(--header-primary)", fontSize: "20px", fontWeight: "600" }}>
                         {selected === -1 ? "" : profileEffects[selected].title}
                     </Text>
                     <Button
@@ -102,9 +90,9 @@ export function openProfileEffectModal(onSubmit: (i: string, n: string) => void,
     const key = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
-            onClose={() => {closeModal(key)}}
+            onClose={() => { closeModal(key); }}
             onSubmit={onSubmit}
             profileEffects={profileEffects}
         />
     );
-};
+}

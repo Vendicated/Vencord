@@ -1,30 +1,19 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
-import { Button, Forms, showToast, Slider, Switch, Text, Toasts, useState } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { Button, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
+import { User } from "discord-types/general";
+
 import { openColorPickerModal } from "./components/ColorPickerModal";
 import { openProfileEffectModal } from "./components/ProfileEffectModal";
-import { User } from "discord-types/general";
 
 interface UserProfile extends User {
     themeColors: [number, number] | undefined;
@@ -145,7 +134,7 @@ function decode3y3(bio: string): [string, string, string] {
             if (i > 1) break;
             tempCPs = [];
             i++;
-        } else if (0xE0000 < currCP && currCP < 0xE007E) {
+        } else if (currCP < 0xE0000 && currCP < 0xE007E) {
             tempCPs.push(currCP - 0xE0000);
             if (j === bioCPs.length - 1)
                 decoded3y3[i] = String.fromCodePoint(...tempCPs);
@@ -263,7 +252,7 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
         // If the accent color is set and different from the primary color, it
         // will be encoded and added to the string prefixed by one separator.
         if (accent !== -1 && primary !== accent) {
-            str += sep + encode3y3(base10NumToBase125Str(accent))
+            str += sep + encode3y3(base10NumToBase125Str(accent));
 
             // If the effect is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
@@ -292,7 +281,7 @@ function fetchProfileEffects(callback: (v: any) => void): void {
         .then((data: any) => {
             callback(data?.profile_effect_configs);
         })
-        .catch((e) => {
+        .catch(e => {
             console.error(e);
             showToast("Unable to retrieve the list of profile effects.", Toasts.Type.FAILURE);
         });
@@ -365,7 +354,7 @@ export default definePlugin({
                     </div>
                     <ol
                         className={Margins.bottom8}
-                        style={{listStyle: "decimal", paddingLeft: "40px"}}
+                        style={{ listStyle: "decimal", paddingLeft: "40px" }}
                     >
                         <li>{"Go to your profile settings"}</li>
                         <li>{"Use the 3y3 Builder to choose your profile theme colors and effect"}</li>
@@ -428,7 +417,7 @@ export default definePlugin({
                 <Text
                     tag={"h3"}
                     variant={"eyebrow"}
-                    style={{display: "inline"}}
+                    style={{ display: "inline" }}
                 >
                     {"3y3 Builder"}
                 </Text>
@@ -537,7 +526,7 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                           const stringToCopy: string = generate3y3(primaryColor, accentColor, effectID, buildLegacy3y3);
+                            const stringToCopy: string = generate3y3(primaryColor, accentColor, effectID, buildLegacy3y3);
                             if (stringToCopy === "")
                                 showToast("3y3 Builder is empty; nothing to copy!");
                             else
@@ -550,7 +539,7 @@ export default definePlugin({
                 <Switch
                     value={buildLegacy3y3}
                     note={"Will use more characters"}
-                    onChange={(value: boolean) => {setBuildLegacy3y3(value)}}
+                    onChange={(value: boolean) => { setBuildLegacy3y3(value); }}
                 >
                     {"Build backwards compatible 3y3"}
                 </Switch>

@@ -1,19 +1,7 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -33,10 +21,10 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
         b /= 255;
         const xmax: number = Math.max(r, g, b);
         const xmin: number = Math.min(r, g, b);
-        const chroma: number  = xmax - xmin;
-        const v: number  = xmax;
-        let h: number  = 0;
-        let s: number  = 0;
+        const chroma: number = xmax - xmin;
+        const v: number = xmax;
+        let h: number = 0;
+        let s: number = 0;
         if (chroma > 0) {
             if (xmax === r) h = (g - b) / chroma;
             if (xmax === g) h = (b - r) / chroma + 2;
@@ -45,7 +33,7 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
         }
         h *= 60;
         return [h < 0 ? h + 360 : h, s, v];
-    }
+    };
 
     const HSVtoRGB = (h: number, s: number, v: number): [number, number, number] => {
         let chroma = s * v;
@@ -59,29 +47,29 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
             Math.round([x, chroma, chroma, x, m, m][index] * 255),
             Math.round([m, m, x, chroma, chroma, x][index] * 255)
         ];
-    }
+    };
 
     const RGBto24BitColor = (r: number, g: number, b: number): number => {
         return r * 65_536 + g * 256 + b;
-    }
+    };
 
     const _24BitColorToRGB = (c: number): [number, number, number] => {
         return [Math.trunc(c / 65_536), Math.trunc(c % 65_536 / 256), c % 65_536 % 256];
-    }
+    };
 
     const updateColor = (newSliderPos: number, newMarkerPos: [number, number]): void => {
         const newColor: number = RGBto24BitColor(...HSVtoRGB(newSliderPos * 360, newMarkerPos[0], 1 - newMarkerPos[1]));
         setColor(newColor);
         setInputColor(newColor.toString(16).padStart(6, "0"));
-    }
+    };
 
     const startDrag = (onMouseMoveFunc: (e: MouseEvent) => void): void => {
         document.addEventListener("mousemove", onMouseMoveFunc);
         document.addEventListener("mouseup",
-            () => {document.removeEventListener("mousemove", onMouseMoveFunc)},
+            () => { document.removeEventListener("mousemove", onMouseMoveFunc); },
             { once: true }
         );
-    }
+    };
 
     const colorAreaRef = useRef<HTMLDivElement>(null);
     const sliderBarRef = useRef<HTMLDivElement>(null);
@@ -104,14 +92,14 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
                         width: "100%"
                     }}
                 >
-                    <Text style={{color: "var(--header-primary)", fontSize: "20px", fontWeight: "600"}}>
+                    <Text style={{ color: "var(--header-primary)", fontSize: "20px", fontWeight: "600" }}>
                         {"Color Picker"}
                     </Text>
                     <ModalCloseButton onClick={onClose} />
                 </div>
             </ModalHeader>
             <ModalContent>
-                <div style={{width: "220px", padding: "16px"}}>
+                <div style={{ width: "220px", padding: "16px" }}>
                     <div
                         ref={colorAreaRef}
                         style={{
@@ -135,7 +123,7 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
                                     ];
                                     setMarkerPos(newMarkerPos);
                                     updateColor(sliderPos, newMarkerPos);
-                                }
+                                };
                                 startDrag(onMouseMoveFunc);
                             }
                         }}
@@ -173,7 +161,7 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
                                     const newSliderPos: number = e.pageX < rect.left ? 0 : e.pageX > rect.right ? 1 : (e.pageX - rect.left) / rect.width;
                                     setSliderPos(newSliderPos);
                                     updateColor(newSliderPos, markerPos);
-                                }
+                                };
                                 startDrag(onMouseMoveFunc);
                             }
                         }}
@@ -252,7 +240,7 @@ export function ColorPickerModal({ modalProps, onClose, onSubmit, initialColor =
                 <Button
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    onClick={() => {onSubmit(color)}}
+                    onClick={() => { onSubmit(color); }}
                 >
                     {"Apply"}
                 </Button>
@@ -265,9 +253,9 @@ export function openColorPickerModal(onSubmit: (v: number) => void, initialColor
     const key = openModal(modalProps =>
         <ColorPickerModal
             modalProps={modalProps}
-            onClose={() => {closeModal(key)}}
+            onClose={() => { closeModal(key); }}
             onSubmit={onSubmit}
             initialColor={initialColor}
         />
     );
-};
+}
