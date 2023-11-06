@@ -30,6 +30,7 @@ const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
 
 async function getApplicationAsset(key: string): Promise<string> {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
     return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
 }
 
@@ -395,7 +396,7 @@ export default definePlugin({
         return (
             <>
                 <Forms.FormText>
-                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to create an application and
+                    Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
                 </Forms.FormText>
                 <Forms.FormText>
