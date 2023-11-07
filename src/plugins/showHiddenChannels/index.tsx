@@ -70,18 +70,27 @@ export default definePlugin({
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
             find: ".CannotShow=",
             replacement: [
+                // Remove the special logic for channels we don't have access to
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\i}}/,
                     replace: ""
                 },
+                // Do not check for unreads when selecting the render level if the channel is hidden
+                {
+                    match: /(?=!1===\i.\i\.hasRelevantUnread\(this\.record\))/,
+                    replace: "$self.isHiddenChannel(this.record)||"
+                },
+                // Make channels we dont have access to be the same level as normal ones
                 {
                     match: /(?<=renderLevel:(\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
                     replace: (_, renderLevelExpression) => renderLevelExpression
                 },
+                // Make channels we dont have access to be the same level as normal ones
                 {
                     match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(\i)\..+?(?=,)/,
                     replace: (_, RenderLevels) => `${RenderLevels}.Show`
                 },
+                // Remove permission checking for getRenderLevel function
                 {
                     match: /(?<=getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
                     replace: " "
@@ -186,11 +195,27 @@ export default definePlugin({
             ]
         },
         {
-            // Hide New unreads box for hidden channels
+            // Hide the new version of unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
                 match: /(?<=if\(null==(\i))(?=.{0,160}?hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
                 replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
+            }
+        },
+        {
+            // Make the old version of unreads box not visible for hidden channels
+            find: "renderBottomUnread(){",
+            replacement: {
+                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i\.record)\))/,
+                replace: "&&!$self.isHiddenChannel($1)"
+            }
+        },
+        {
+            // Make the state of the old version of unreads box not include hidden channels
+            find: ".useFlattenedChannelIdListWithThreads)",
+            replacement: {
+                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i)\))/,
+                replace: "&&!$self.isHiddenChannel($1)"
             }
         },
         // Only render the channel header and buttons that work when transitioning to a hidden channel
@@ -386,6 +411,22 @@ export default definePlugin({
                     // Remove the open chat button for the HiddenChannelLockScreen
                     match: /"recents".+?&&(?=\(.+?channelId:(\i)\.id,showRequestToSpeakSidebar)/,
                     replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
+                }
+            ]
+        },
+        {
+            // Make the chat input bar channel list contain hidden channels
+            find: ",queryStaticRouteChannels(",
+            replacement: [
+                {
+                    // Make the getChannels call to GuildChannelStore return hidden channels
+                    match: /(?<=queryChannels\(\i\){.+?getChannels\(\i)(?=\))/,
+                    replace: ",true"
+                },
+                {
+                    // Avoid filtering out hidden channels from the channel list
+                    match: /(?<=queryChannels\(\i\){.+?isGuildChannelType\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
+                    replace: "&&!$self.isHiddenChannel($1)"
                 }
             ]
         },

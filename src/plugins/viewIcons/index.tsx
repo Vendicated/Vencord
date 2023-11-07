@@ -173,7 +173,7 @@ export default definePlugin({
     patches: [
         // Make pfps clickable
         {
-            find: "onAddFriend:function",
+            find: "User Profile Modal - Context Menu",
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
                 replace: "{src:$1,onClick:()=>$self.openImage($1)"
