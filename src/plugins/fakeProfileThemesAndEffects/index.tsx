@@ -428,12 +428,17 @@ export default definePlugin({
     },
     profilePreviewHook(props: any) {
         if (preview) {
-            if (primaryColor !== -1)
+            if (primaryColor !== -1) {
                 props.pendingThemeColors = [primaryColor, accentColor === -1 ? primaryColor : accentColor];
-            else if (accentColor !== -1)
+                props.canUsePremiumCustomization = true;
+            } else if (accentColor !== -1) {
                 props.pendingThemeColors = [accentColor, accentColor];
-            if (effectID !== "")
+                props.canUsePremiumCustomization = true;
+            }
+            if (effectID !== "") {
                 props.pendingProfileEffectID = effectID;
+                props.canUsePremiumCustomization = true;
+            }
         }
     },
     add3y3Builder(): JSX.Element | null {
