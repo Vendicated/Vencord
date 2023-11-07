@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { openColorPickerModal } from "./components/ColorPickerModal";
@@ -21,7 +21,6 @@ interface UserProfile extends User {
 }
 
 let ColorPicker: React.ComponentType<any> = () => null;
-let previewUpdate = () => { };
 let [primaryColor, setPrimaryColor] = [-1, (v: number): void => { }];
 let [accentColor, setAccentColor] = [-1, (v: number): void => { }];
 let [effectID, setEffectID] = ["", (v: string): void => { }];
@@ -311,6 +310,10 @@ function updateUserEffectID(user: UserProfile, id: bigint): void {
     }
 }
 
+function updatePreview(): void {
+    FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SUBMIT_SUCCESS" });
+}
+
 const settings = definePluginSettings({
     prioritizeNitro: {
         description: "Source to use if profile theme colors / effects are set by both Nitro and About Me",
@@ -342,7 +345,7 @@ export default definePlugin({
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /(?<=\.sectionsContainer,children:)\[/,
+                match: /\.sectionsContainer,children:\[/,
                 replace: "$&$self.add3y3Builder(),"
             }
         },
@@ -356,16 +359,13 @@ export default definePlugin({
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /(let{.*?),?pendingThemeColors:(\i)(.*?),pendingProfileEffectID:(\i)(.*?}=(\i),?)/,
-                replace: "$self.previewUpdate=Vencord.Webpack.Common.useReducer(()=>({}),{})[1];$1$3$5[$2,$4]=$self.profilePreviewHook($6),"
+                match: /let{[^}]*pendingThemeColors[^}]*pendingProfileEffectID/,
+                replace: "$self.profilePreviewHook(arguments[0]);$&"
             }
         }
     ],
     set ColorPicker(e: any) {
         ColorPicker = e;
-    },
-    set previewUpdate(f: () => void) {
-        previewUpdate = f;
     },
     settingsAboutComponent: (): JSX.Element => {
         return (
@@ -426,18 +426,15 @@ export default definePlugin({
 
         return user;
     },
-    profilePreviewHook(props: any): [[number, number], string] {
-        let colors: [number, number] = props.pendingThemeColors;
-        let effect: string = props.pendingProfileEffectID;
+    profilePreviewHook(props: any) {
         if (preview) {
             if (primaryColor !== -1)
-                colors = [primaryColor, accentColor === -1 ? primaryColor : accentColor];
+                props.pendingThemeColors = [primaryColor, accentColor === -1 ? primaryColor : accentColor];
             else if (accentColor !== -1)
-                colors = [accentColor, accentColor];
+                props.pendingThemeColors = [accentColor, accentColor];
             if (effectID !== "")
-                effect = effectID;
+                props.pendingProfileEffectID = effectID;
         }
-        return [colors, effect];
     },
     add3y3Builder(): JSX.Element | null {
         if (settings.store["Hide 3y3 Builder"]) return null;
@@ -476,7 +473,7 @@ export default definePlugin({
                         setAccentColor(-1);
                         setEffectID("");
                         setEffectName("");
-                        previewUpdate();
+                        if (preview) updatePreview();
                     }}
                 >
                     {"Reset"}
@@ -502,7 +499,7 @@ export default definePlugin({
                                 ColorPicker,
                                 (color: number) => {
                                     setPrimaryColor(color);
-                                    previewUpdate();
+                                    if (preview) updatePreview();
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
                                 primaryColor === -1 ? 0 : primaryColor
@@ -524,7 +521,7 @@ export default definePlugin({
                                 ColorPicker,
                                 (color: number) => {
                                     setAccentColor(color);
-                                    previewUpdate();
+                                    if (preview) updatePreview();
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
                                 accentColor === -1 ? 0 : accentColor
@@ -548,7 +545,7 @@ export default definePlugin({
                                         (id: string, name: string) => {
                                             setEffectID(id);
                                             setEffectName(name);
-                                            previewUpdate();
+                                            if (preview) updatePreview();
                                             showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                         },
                                         data
@@ -585,7 +582,7 @@ export default definePlugin({
                     value={preview}
                     onChange={(value: boolean) => {
                         setPreview(value);
-                        previewUpdate();
+                        updatePreview();
                     }}
                 >
                     {"3y3 Builder Preview"}
