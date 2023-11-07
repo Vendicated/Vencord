@@ -21,6 +21,11 @@ interface UserProfile extends User {
 }
 
 let ColorPicker: React.ComponentType<any> = () => null;
+let previewUpdate = () => { };
+let [primaryColor, setPrimaryColor] = [-1, (v: number): void => { }];
+let [accentColor, setAccentColor] = [-1, (v: number): void => { }];
+let [effectID, setEffectID] = ["", (v: string): void => { }];
+let [preview, setPreview] = [true, (v: boolean): void => { }];
 
 /**
  * Converts the given base10 number to a base125 string
@@ -291,10 +296,7 @@ function fetchProfileEffects(callback: (v: any) => void): void {
 
 function updateUserThemeColors(user: UserProfile, primary: number, accent: number): void {
     if (primary > -1) {
-        if (accent > -1)
-            user.themeColors = [primary, accent];
-        else
-            user.themeColors = [primary, primary];
+        user.themeColors = [primary, accent > -1 ? accent : primary];
         user.premiumType = 2;
     } else if (accent > -1) {
         user.themeColors = [accent, accent];
@@ -350,10 +352,20 @@ export default definePlugin({
                 match: /\i\.memo\(\i=>/,
                 replace: "$self.ColorPicker=$&"
             }
+        },
+        {
+            find: '"ProfileCustomizationPreview"',
+            replacement: {
+                match: /(let{.*?),?pendingThemeColors:(\i)(.*?),pendingProfileEffectID:(\i)(.*?}=(\i),?)/,
+                replace: "$self.previewUpdate=Vencord.Webpack.Common.useReducer(()=>({}),{})[1];$1$3$5[$2,$4]=$self.profilePreviewHook($6),"
+            }
         }
     ],
     set ColorPicker(e: any) {
         ColorPicker = e;
+    },
+    set previewUpdate(f: () => void) {
+        previewUpdate = f;
     },
     settingsAboutComponent: (): JSX.Element => {
         return (
@@ -414,13 +426,27 @@ export default definePlugin({
 
         return user;
     },
+    profilePreviewHook(props: any): [[number, number], string] {
+        let colors: [number, number] = props.pendingThemeColors;
+        let effect: string = props.pendingProfileEffectID;
+        if (preview) {
+            if (primaryColor !== -1)
+                colors = [primaryColor, accentColor === -1 ? primaryColor : accentColor];
+            else if (accentColor !== -1)
+                colors = [accentColor, accentColor];
+            if (effectID !== "")
+                effect = effectID;
+        }
+        return [colors, effect];
+    },
     add3y3Builder(): JSX.Element | null {
         if (settings.store["Hide 3y3 Builder"]) return null;
 
-        const [primaryColor, setPrimaryColor] = useState(-1);
-        const [accentColor, setAccentColor] = useState(-1);
-        const [effectID, setEffectID] = useState("");
+        [primaryColor, setPrimaryColor] = useState(-1);
+        [accentColor, setAccentColor] = useState(-1);
+        [effectID, setEffectID] = useState("");
         const [effectName, setEffectName] = useState("");
+        [preview, setPreview] = useState(true);
         const [buildLegacy3y3, setBuildLegacy3y3] = useState(false);
 
         return (
@@ -450,6 +476,7 @@ export default definePlugin({
                         setAccentColor(-1);
                         setEffectID("");
                         setEffectName("");
+                        previewUpdate();
                     }}
                 >
                     {"Reset"}
@@ -475,6 +502,7 @@ export default definePlugin({
                                 ColorPicker,
                                 (color: number) => {
                                     setPrimaryColor(color);
+                                    previewUpdate();
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
                                 primaryColor === -1 ? 0 : primaryColor
@@ -496,6 +524,7 @@ export default definePlugin({
                                 ColorPicker,
                                 (color: number) => {
                                     setAccentColor(color);
+                                    previewUpdate();
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                 },
                                 accentColor === -1 ? 0 : accentColor
@@ -519,6 +548,7 @@ export default definePlugin({
                                         (id: string, name: string) => {
                                             setEffectID(id);
                                             setEffectName(name);
+                                            previewUpdate();
                                             showToast("3y3 updated!", Toasts.Type.SUCCESS);
                                         },
                                         data
@@ -550,6 +580,16 @@ export default definePlugin({
                         {"Copy 3y3"}
                     </Button>
                 </div>
+                <Forms.FormDivider className={Margins.bottom20 + " " + Margins.top20} />
+                <Switch
+                    value={preview}
+                    onChange={(value: boolean) => {
+                        setPreview(value);
+                        previewUpdate();
+                    }}
+                >
+                    {"3y3 Builder Preview"}
+                </Switch>
                 <Switch
                     value={buildLegacy3y3}
                     note={"Will use more characters"}
