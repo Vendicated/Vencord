@@ -206,10 +206,10 @@ export default definePlugin({
         },
         // Allow stickers to be sent everywhere
         {
-            find: "canUseStickersEverywhere:function",
+            find: "canUseCustomStickersEverywhere:function",
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /canUseStickersEverywhere:function\(\i\){/,
+                match: /canUseCustomStickersEverywhere:function\(\i\){/,
                 replace: "$&return true;"
             },
         },
