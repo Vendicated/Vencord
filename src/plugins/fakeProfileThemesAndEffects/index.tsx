@@ -20,6 +20,8 @@ interface UserProfile extends User {
     profileEffectID: string | undefined;
 }
 
+let ColorPicker: React.ComponentType<any> = () => null;
+
 /**
  * Converts the given base10 number to a base125 string
  * @param {number} base10 - The base10 number to be converted
@@ -341,8 +343,18 @@ export default definePlugin({
                 match: /(?<=\.sectionsContainer,children:)\[/,
                 replace: "$&$self.add3y3Builder(),"
             }
+        },
+        {
+            find: ".PICK_A_COLOR_FROM_THE_PAGE",
+            replacement: {
+                match: /\i\.memo\(\i=>/,
+                replace: "$self.ColorPicker=$&"
+            }
         }
     ],
+    set ColorPicker(e: any) {
+        ColorPicker = e;
+    },
     settingsAboutComponent: (): JSX.Element => {
         return (
             <Forms.FormSection>
@@ -460,6 +472,7 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             openColorPickerModal(
+                                ColorPicker,
                                 (color: number) => {
                                     setPrimaryColor(color);
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);
@@ -480,6 +493,7 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             openColorPickerModal(
+                                ColorPicker,
                                 (color: number) => {
                                     setAccentColor(color);
                                     showToast("3y3 updated!", Toasts.Type.SUCCESS);

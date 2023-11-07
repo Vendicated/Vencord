@@ -8,10 +8,10 @@ import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, M
 import { Button, showToast, Text, Toasts, useState } from "@webpack/common";
 
 interface ProfileEffectModalProps {
-    modalProps: ModalProps,
-    onClose: () => void,
-    onSubmit: (i: string, n: string) => void,
-    profileEffects: any
+    modalProps: ModalProps;
+    onClose: () => void;
+    onSubmit: (i: string, n: string) => void;
+    profileEffects: any;
 }
 
 export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects }: ProfileEffectModalProps): JSX.Element {
