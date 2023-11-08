@@ -18,8 +18,10 @@
 */
 
 import esbuild from "esbuild";
+import { readdir } from "fs/promises";
+import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, existsAsync, globPlugins, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: isStandalone,
@@ -43,12 +45,53 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    external: ["electron", "original-fs", ...commonOpts.external],
+    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
     define: defines,
 };
 
 const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
+
+/**
+ * @type {import("esbuild").Plugin}
+ */
+const globNativesPlugin = {
+    name: "glob-natives-plugin",
+    setup: build => {
+        const filter = /^~pluginNatives$/;
+        build.onResolve({ filter }, args => {
+            return {
+                namespace: "import-natives",
+                path: args.path
+            };
+        });
+
+        build.onLoad({ filter, namespace: "import-natives" }, async () => {
+            const pluginDirs = ["plugins", "userplugins"];
+            let code = "";
+            let natives = "\n";
+            let i = 0;
+            for (const dir of pluginDirs) {
+                const dirPath = join("src", dir);
+                if (!await existsAsync(dirPath)) continue;
+                const plugins = await readdir(dirPath);
+                for (const p of plugins) {
+                    if (!await existsAsync(join(dirPath, p, "native.ts"))) continue;
+
+                    const mod = `p${i}`;
+                    code += `import * as ${mod} from "./${dir}/${p}/native";\n`;
+                    natives += `${JSON.stringify(p[0].toUpperCase() + p.slice(1))}:${mod},\n`;
+                    i++;
+                }
+            }
+            code += `export default {${natives}};`;
+            return {
+                contents: code,
+                resolveDir: "./src"
+            };
+        });
+    }
+};
 
 await Promise.all([
     // Discord Desktop main & renderer & preload
@@ -62,7 +105,11 @@ await Promise.all([
             ...defines,
             IS_DISCORD_DESKTOP: true,
             IS_VESKTOP: false
-        }
+        },
+        plugins: [
+            ...nodeCommonOpts.plugins,
+            globNativesPlugin
+        ]
     }),
     esbuild.build({
         ...commonOpts,
@@ -107,7 +154,11 @@ await Promise.all([
             ...defines,
             IS_DISCORD_DESKTOP: false,
             IS_VESKTOP: true
-        }
+        },
+        plugins: [
+            ...nodeCommonOpts.plugins,
+            globNativesPlugin
+        ]
     }),
     esbuild.build({
         ...commonOpts,
