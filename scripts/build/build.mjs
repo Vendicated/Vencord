@@ -78,9 +78,14 @@ const globNativesPlugin = {
                 for (const p of plugins) {
                     if (!await existsAsync(join(dirPath, p, "native.ts"))) continue;
 
+                    const nameParts = p.split(".");
+                    const namePartsWithoutTarget = nameParts.length === 1 ? nameParts : nameParts.slice(0, -1);
+                    // pluginName.thing.desktop -> PluginName.thing
+                    const cleanPluginName = p[0].toUpperCase() + namePartsWithoutTarget.join(".").slice(1);
+
                     const mod = `p${i}`;
                     code += `import * as ${mod} from "./${dir}/${p}/native";\n`;
-                    natives += `${JSON.stringify(p[0].toUpperCase() + p.slice(1))}:${mod},\n`;
+                    natives += `${cleanPluginName}:${mod},\n`;
                     i++;
                 }
             }

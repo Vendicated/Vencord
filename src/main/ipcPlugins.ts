@@ -25,9 +25,12 @@ const PluginIpcMappings = {} as Record<string, Record<string, string>>;
 export type PluginIpcMappings = typeof PluginIpcMappings;
 
 for (const [plugin, methods] of Object.entries(PluginNatives)) {
+    const entries = Object.entries(methods);
+    if (!entries.length) continue;
+
     const mappings = PluginIpcMappings[plugin] = {};
 
-    for (const [methodName, method] of Object.entries(methods)) {
+    for (const [methodName, method] of entries) {
         const key = `VencordPluginNative_${plugin}_${methodName}`;
         ipcMain.handle(key, method);
         mappings[methodName] = key;
