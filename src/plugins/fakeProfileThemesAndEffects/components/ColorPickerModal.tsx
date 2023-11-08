@@ -24,7 +24,7 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
     return (
         <div
             style={{
-                position: pos[0] === -1 || pos[1] === -1 ? "revert" : "absolute",
+                position: pos[0] === -1 || pos[1] === -1 ? "revert" : "fixed",
                 left: "clamp(0px, " + pos[0] + "px, calc(100vw - " + (() => {
                     const ref: HTMLDivElement | null = headerRef.current;
                     if (ref !== null) return ref.getBoundingClientRect().width;

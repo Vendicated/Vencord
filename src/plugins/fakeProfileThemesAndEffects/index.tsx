@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { openColorPickerModal } from "./components/ColorPickerModal";
@@ -21,6 +21,7 @@ interface UserProfile extends User {
 }
 
 let ColorPicker: React.ComponentType<any> = () => null;
+let suggestedColorsFunc: (v: string) => Promise<[number, number, number][]>;
 let [primaryColor, setPrimaryColor] = [-1, (v: number): void => { }];
 let [accentColor, setAccentColor] = [-1, (v: number): void => { }];
 let [effectID, setEffectID] = ["", (v: string): void => { }];
@@ -33,7 +34,7 @@ let [preview, setPreview] = [true, (v: boolean): void => { }];
  */
 function base10NumToBase125Str(base10: number): string {
     if (base10 === 0) return "\u{00001}";
-    const base125CPs: Array<number> = [];
+    const base125CPs: number[] = [];
     for (let i: number = base10; i > 0; i = Math.trunc(i / 125))
         base125CPs.unshift(i % 125 + 1);
     return String.fromCodePoint(...base125CPs);
@@ -46,7 +47,7 @@ function base10NumToBase125Str(base10: number): string {
  */
 function base10BigIntToBase125Str(base10: bigint): string {
     if (base10 === 0n) return "\u{00001}";
-    const base125CPs: Array<number> = [];
+    const base125CPs: number[] = [];
     for (let i: bigint = base10; i > 0n; i /= 125n)
         base125CPs.unshift(Number(i % 125n + 1n));
     return String.fromCodePoint(...base125CPs);
@@ -112,7 +113,7 @@ function base125StrToBase10ItemID(str: string): bigint {
  * @returns {string} - The encoded 3y3 string
  */
 function encode3y3(str: string): string {
-    const encodedCPs: Array<number> = [];
+    const encodedCPs: number[] = [];
     for (let i: number = 0; i < str.length; i++)
         encodedCPs.push(str.codePointAt(i)! + 0xE0000);
     return String.fromCodePoint(...encodedCPs);
@@ -126,10 +127,10 @@ function encode3y3(str: string): string {
 function decode3y3(bio: string): [string, string, string] {
     const decoded3y3: [string, string, string] = ["", "", ""]; // The primary / accent colors and effect to be returned
 
-    const bioCPs: Array<string> = [...bio]; // An array containing the individual code points of the user bio string
+    const bioCPs: string[] = [...bio]; // An array containing the individual code points of the user bio string
     if (bioCPs.length === 0) return decoded3y3;
 
-    let tempCPs: Array<number> = []; // An array to hold the current index of decoded3y3 getting decoded
+    let tempCPs: number[] = []; // An array to hold the current index of decoded3y3 getting decoded
     let i: number = 0; // The index of decoded3y3
 
     for (let j: number = 0; j < bioCPs.length; j++) {
@@ -279,6 +280,18 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
     return str;
 }
 
+function getSuggestedColors(callback: (v: string[]) => void) {
+    const user: User = UserStore.getCurrentUser();
+    const avatarURL: string = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + "?size=80";
+    Promise.resolve(suggestedColorsFunc(avatarURL)).then((colors: [number, number, number][]) => {
+        console.log(colors);
+        const colorsAsHex: string[] = [];
+        for (let i: number = 0; i < colors.length; i++)
+            colorsAsHex.push("#" + (colors[i][0] * 65_536 + colors[i][1] * 256 + colors[i][2]).toString(16).padStart(6, "0"));
+        callback(colorsAsHex);
+    });
+}
+
 function fetchProfileEffects(callback: (v: any) => void): void {
     fetch("/api/v9/user-profile-effects", { mode: "same-origin", cache: "only-if-cached" })
         .then((response: Response): Promise<any> => {
@@ -357,6 +370,13 @@ export default definePlugin({
             }
         },
         {
+            find: '"Input data is not a valid image."',
+            replacement: {
+                match: /\.palette\(\)}let \i/,
+                replace: "$&=$self.suggestedColorsFunc"
+            }
+        },
+        {
             find: '"ProfileCustomizationPreview"',
             replacement: {
                 match: /let{[^}]*pendingThemeColors[^}]*pendingProfileEffectID/,
@@ -366,6 +386,9 @@ export default definePlugin({
     ],
     set ColorPicker(e: any) {
         ColorPicker = e;
+    },
+    set suggestedColorsFunc(f: (v: string) => Promise<[number, number, number][]>) {
+        suggestedColorsFunc = f;
     },
     settingsAboutComponent: (): JSX.Element => {
         return (
@@ -500,15 +523,18 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            openColorPickerModal(
-                                ColorPicker,
-                                (color: number) => {
-                                    setPrimaryColor(color);
-                                    if (preview) updatePreview();
-                                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                                },
-                                primaryColor === -1 ? 0 : primaryColor
-                            );
+                            getSuggestedColors((colors: string[]) => {
+                                openColorPickerModal(
+                                    ColorPicker,
+                                    (color: number) => {
+                                        setPrimaryColor(color);
+                                        if (preview) updatePreview();
+                                        showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                    },
+                                    primaryColor === -1 ? 0 : primaryColor,
+                                    colors
+                                );
+                            });
                         }}
                     >
                         {"Primary: " + (primaryColor === -1 ? "unchanged" : "#" + primaryColor.toString(16).padStart(6, "0"))}
@@ -522,15 +548,18 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            openColorPickerModal(
-                                ColorPicker,
-                                (color: number) => {
-                                    setAccentColor(color);
-                                    if (preview) updatePreview();
-                                    showToast("3y3 updated!", Toasts.Type.SUCCESS);
-                                },
-                                accentColor === -1 ? 0 : accentColor
-                            );
+                            getSuggestedColors((colors: string[]) => {
+                                openColorPickerModal(
+                                    ColorPicker,
+                                    (color: number) => {
+                                        setAccentColor(color);
+                                        if (preview) updatePreview();
+                                        showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                    },
+                                    accentColor === -1 ? 0 : accentColor,
+                                    colors
+                                );
+                            });
                         }}
                     >
                         {"Accent: " + (accentColor === -1 ? "unchanged" : "#" + accentColor.toString(16).padStart(6, "0"))}
