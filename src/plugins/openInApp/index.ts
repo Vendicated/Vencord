@@ -18,9 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
-import { PluginNative } from "main/ipcPlugins";
 import type { MouseEvent } from "react";
 
 const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;

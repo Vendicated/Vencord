@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { PluginNative } from "@utils/types";
 import { Button, showToast, Toasts, useState } from "@webpack/common";
-import type { PluginNative } from "main/ipcPlugins";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
