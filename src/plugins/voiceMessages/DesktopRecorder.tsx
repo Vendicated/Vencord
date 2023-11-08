@@ -17,7 +17,7 @@
 */
 
 import { Button, showToast, Toasts, useState } from "@webpack/common";
-import { PluginNative } from "main/ipcPlugins";
+import type { PluginNative } from "main/ipcPlugins";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
