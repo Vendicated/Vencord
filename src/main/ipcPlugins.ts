@@ -17,13 +17,12 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { app, ipcMain } from "electron";
+import { ipcMain } from "electron";
 
 import PluginNatives from "~pluginNatives";
 
-import { getSettings } from "./ipcMain";
-
 const PluginIpcMappings = {} as Record<string, Record<string, string>>;
+export type PluginIpcMappings = typeof PluginIpcMappings;
 
 for (const [plugin, methods] of Object.entries(PluginNatives)) {
     const mappings = PluginIpcMappings[plugin] = {};
@@ -39,22 +38,9 @@ ipcMain.on(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP, e => {
     e.returnValue = PluginIpcMappings;
 });
 
-// FixSpotifyEmbeds
-app.on("browser-window-created", (_, win) => {
-    win.webContents.on("frame-created", (_, { frame }) => {
-        frame.once("dom-ready", () => {
-            if (frame.url.startsWith("https://open.spotify.com/embed/")) {
-                const settings = getSettings().plugins?.FixSpotifyEmbeds;
-                if (!settings?.enabled) return;
-
-                frame.executeJavaScript(`
-                    const original = Audio.prototype.play;
-                    Audio.prototype.play = function() {
-                        this.volume = ${(settings.volume / 100) || 0.1};
-                        return original.apply(this, arguments);
-                    }
-                `);
-            }
-        });
-    });
-});
+export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
+    [key in keyof PluginExports]:
+    PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
+    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+    : never;
+};
