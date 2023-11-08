@@ -20,8 +20,11 @@ interface UserProfile extends User {
     profileEffectID: string | undefined;
 }
 
+type RGBColor = [number, number, number];
+
 let ColorPicker: React.ComponentType<any> = () => null;
-let suggestedColorsFunc: (v: string) => Promise<[number, number, number][]>;
+let getPaletteForAvatar: (v: string) => Promise<RGBColor[]>;
+let getComplimentaryPaletteForColor: (v: RGBColor) => RGBColor[];
 let [primaryColor, setPrimaryColor] = [-1, (v: number): void => { }];
 let [accentColor, setAccentColor] = [-1, (v: number): void => { }];
 let [effectID, setEffectID] = ["", (v: string): void => { }];
@@ -280,15 +283,21 @@ function generate3y3(primary: number, accent: number, effect: string, legacy: bo
     return str;
 }
 
+function RGBtoHex(rgb: RGBColor): string {
+    return "#" + ((rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).padStart(6, "0");
+}
+
 function getSuggestedColors(callback: (v: string[]) => void) {
     const user: User = UserStore.getCurrentUser();
     const avatarURL: string = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + "?size=80";
-    Promise.resolve(suggestedColorsFunc(avatarURL)).then((colors: [number, number, number][]) => {
-        console.log(colors);
-        const colorsAsHex: string[] = [];
-        for (let i: number = 0; i < colors.length; i++)
-            colorsAsHex.push("#" + (colors[i][0] * 65_536 + colors[i][1] * 256 + colors[i][2]).toString(16).padStart(6, "0"));
-        callback(colorsAsHex);
+    Promise.resolve(getPaletteForAvatar(avatarURL)).then((avatarColors: RGBColor[]) => {
+        const suggestedColors: string[] = [];
+        for (let i: number = 0; i < 2; i++)
+            suggestedColors.push(RGBtoHex(avatarColors[i]));
+        const compColors: RGBColor[] = getComplimentaryPaletteForColor(avatarColors[0]);
+        for (let i: number = 0; i < compColors.length; i++)
+            suggestedColors.push(RGBtoHex(compColors[i]));
+        callback(suggestedColors);
     });
 }
 
@@ -373,7 +382,14 @@ export default definePlugin({
             find: '"Input data is not a valid image."',
             replacement: {
                 match: /\.palette\(\)}let \i/,
-                replace: "$&=$self.suggestedColorsFunc"
+                replace: "$&=$self.getPaletteForAvatar"
+            }
+        },
+        {
+            find: "getComplimentaryPaletteForColor:function()",
+            replacement: {
+                match: /function \i\(\i\){let \i=arguments\.length.*?}(?=function)/,
+                replace: "$self.getComplimentaryPaletteForColor=$&;$&"
             }
         },
         {
@@ -387,8 +403,11 @@ export default definePlugin({
     set ColorPicker(e: any) {
         ColorPicker = e;
     },
-    set suggestedColorsFunc(f: (v: string) => Promise<[number, number, number][]>) {
-        suggestedColorsFunc = f;
+    set getPaletteForAvatar(f: (v: string) => Promise<RGBColor[]>) {
+        getPaletteForAvatar = f;
+    },
+    set getComplimentaryPaletteForColor(f: (v: RGBColor) => RGBColor[]) {
+        getComplimentaryPaletteForColor = f;
     },
     settingsAboutComponent: (): JSX.Element => {
         return (
