@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
@@ -83,7 +83,7 @@ const settings = definePluginSettings({
     pingColor: {
         type: OptionType.STRING,
         description: "User mention color",
-        default: "#7289DA"
+        default: "#7289da"
     },
     channelPingColor: {
         type: OptionType.STRING,
@@ -113,6 +113,8 @@ const settings = definePluginSettings({
         markers: makeRange(0, 1, 0.1)
     },
 });
+
+const Native = VencordNative.pluginHelpers.XsOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
@@ -242,7 +244,7 @@ function sendMsgNotif(titleString: string, content: string, message: Message) {
             icon: result,
             sourceApp: "Vencord"
         };
-        VencordNative.pluginHelpers.XSOverlay.send(msgData);
+        Native.sendToOverlay(msgData);
     });
 }
 
@@ -261,7 +263,7 @@ function sendOtherNotif(content: string, titleString: string) {
         icon: null,
         sourceApp: "Vencord"
     };
-    VencordNative.pluginHelpers.XSOverlay.send(msgData);
+    Native.sendToOverlay(msgData);
 }
 
 function shouldNotify(message: Message, channel: Channel) {

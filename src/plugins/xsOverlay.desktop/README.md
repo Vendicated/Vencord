@@ -4,11 +4,12 @@ Sends Discord messages to XSOverlay for easier viewing while using VR.
 
 ## Preview
 
-https://github.com/nyakowint/Vencord/assets/24845294/1f07f6a5-10c4-4bbf-b35d-a5d857cef809
+![grafik](https://github.com/Vendicated/Vencord/assets/24845294/205d2055-bb4a-44e4-b7e3-265391bccd40)
 
-![grafik](https://github.com/nyakowint/Vencord/assets/24845294/94f5dc19-5a34-405b-bf70-760c61e4bf3e)
+![image](https://github.com/Vendicated/Vencord/assets/24845294/f15eff61-2d52-4620-bcab-808ecb1606d2)
 
 ## Usage
 - Enable this plugin
+- Set plugin settings as desired
 - Open XSOverlay
 - get ping spammed
