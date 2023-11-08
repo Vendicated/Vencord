@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findLazy } from "@webpack";
+import { filters, findLazy } from "@webpack";
 
 import extractAndRequireModuleId from "./extractAndRequireModuleId";
 
-const StickerPickerPreview = findLazy(m => {
-    const type = m.default?.type;
-    if (typeof type !== "function") return false;
-    const s = Function.prototype.toString.call(type);
-    return s.includes("isDisplayingIndividualStickers");
-});
+const filter = filters.byCode("isDisplayingIndividualStickers");
+const StickerPickerPreview = findLazy(m => m.default?.type && filter(m.default.type));
 
 export default async () => extractAndRequireModuleId(StickerPickerPreview.default.type);
