@@ -289,8 +289,8 @@ function RGBtoHex(rgb: RGBColor): string {
 
 function getSuggestedColors(callback: (v: string[]) => void) {
     const user: User = UserStore.getCurrentUser();
-    const avatarURL: string = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + "?size=80";
-    Promise.resolve(getPaletteForAvatar(avatarURL)).then((avatarColors: RGBColor[]) => {
+    const avatarURL: string = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".webp?size=80";
+    getPaletteForAvatar(avatarURL).then((avatarColors: RGBColor[]) => {
         const suggestedColors: string[] = [];
         for (let i: number = 0; i < 2; i++)
             suggestedColors.push(RGBtoHex(avatarColors[i]));
@@ -298,6 +298,10 @@ function getSuggestedColors(callback: (v: string[]) => void) {
         for (let i: number = 0; i < compColors.length; i++)
             suggestedColors.push(RGBtoHex(compColors[i]));
         callback(suggestedColors);
+    }).catch(e => {
+        console.error(e);
+        showToast("Unable to retrieve suggested colors.", Toasts.Type.FAILURE);
+        callback([]);
     });
 }
 
