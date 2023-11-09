@@ -20,12 +20,12 @@ import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCal
 import { ReplyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, i18n, Menu, PermissionsBits, PermissionStore, SelectedChannelStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
-const replyFn = findByCodeLazy("showMentionToggle", "TEXTAREA_FOCUS", "shiftKey");
+const messageUtils = findByPropsLazy("replyToMessage");
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => () => {
     // make sure the message is in the selected channel
@@ -43,7 +43,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: React.MouseEvent) => replyFn(channel, message, e)}
+                action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
             />
         ));
     }
@@ -56,7 +56,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: React.MouseEvent) => replyFn(channel, message, e)}
+                action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
             />
         ));
     }
