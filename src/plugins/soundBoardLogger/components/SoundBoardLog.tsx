@@ -150,7 +150,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                                 )}
                             />
                             <Flex flexDirection="row" className={cl("sound-buttons")}>
-                                <Button color={Button.Colors.LINK} size={Button.Sizes.SMALL} onClick={() => downloadAudio(item.soundId)}>Download</Button>
+                                <Button color={Button.Colors.PRIMARY} size={Button.Sizes.SMALL} onClick={() => downloadAudio(item.soundId)}>Download</Button>
                                 <Button color={Button.Colors.GREEN} size={Button.Sizes.SMALL} onClick={() => copyWithToast(item.soundId, "ID copied to clipboard!")}>Copy ID</Button>
                                 <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={() => (new Audio(`https://cdn.discordapp.com/soundboard-sounds/${item.soundId}`)).play()} > Play Sound</Button>
                             </Flex>
