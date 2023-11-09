@@ -96,18 +96,18 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
 })));
 
 export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
-    if (!user) return null;
-
-    const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(useUsersDecorationsStore.getState().getAsset(user?.id) ?? null);
+    const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
     useEffect(() => useUsersDecorationsStore.subscribe(
         state => {
+            if (!user) return;
             const newDecorAvatarDecoration = state.getAsset(user.id);
             if (!newDecorAvatarDecoration) return;
             if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
         }), []);
 
     useEffect(() => {
+        if (!user) return;
         const { has: hasDecorAvatarDecoration, fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
         if (!hasDecorAvatarDecoration(user.id)) fetchUserDecorAvatarDecoration(user.id);
     }, []);
