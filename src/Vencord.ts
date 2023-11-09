@@ -136,7 +136,7 @@ if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLow
     document.addEventListener("DOMContentLoaded", () => {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar-]{display: none!important}"
+            textContent: "[class*=titleBar]{display: none!important}"
         }));
     }, { once: true });
 }

@@ -20,6 +20,7 @@ export * from "./classes";
 export * from "./components";
 export * from "./menu";
 export * from "./react";
+export * from "./settingsStores";
 export * from "./stores";
 export * as ComponentTypes from "./types/components.d";
 export * as MenuTypes from "./types/menu.d";

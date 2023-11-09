@@ -19,6 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { GuildStore } from "@webpack/common";
+import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
     name: "ForceOwnerCrown",
@@ -26,33 +27,22 @@ export default definePlugin({
     authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
-            // This is the logic where it decides whether to render the owner crown or not
-            find: ".MULTIPLE_AVATAR",
+            find: "AVATAR_DECORATION_PADDING:",
             replacement: {
-                match: /(\i)=(\i)\.isOwner,/,
-                replace: "$1=$self.isGuildOwner($2),"
+                match: /,isOwner:(\i),/,
+                replace: ",_isOwner:$1=$self.isGuildOwner(e),"
             }
         }
     ],
-    isGuildOwner(props) {
-        // Check if channel is a Group DM, if so return false
-        if (props?.channel?.type === 3) {
-            return false;
-        }
+    isGuildOwner(props: { user: User, channel: Channel, isOwner: boolean, guildId?: string; }) {
+        if (!props?.user?.id) return props.isOwner;
+        if (props.channel?.type === 3 /* GROUP_DM */)
+            return props.isOwner;
 
         // guild id is in props twice, fallback if the first is undefined
-        const guildId = props?.guildId ?? props?.channel?.guild_id;
-        const userId = props?.user?.id;
+        const guildId = props.guildId ?? props.channel?.guild_id;
+        const userId = props.user.id;
 
-        if (guildId && userId) {
-            const guild = GuildStore.getGuild(guildId);
-            if (guild) {
-                return guild.ownerId === userId;
-            }
-            console.error("[ForceOwnerCrown] failed to get guild", { guildId, guild, props });
-        } else {
-            console.error("[ForceOwnerCrown] no guildId or userId", { guildId, userId, props });
-        }
-        return false;
+        return GuildStore.getGuild(guildId)?.ownerId === userId;
     },
 });
