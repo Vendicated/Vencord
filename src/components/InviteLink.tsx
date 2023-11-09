@@ -17,15 +17,13 @@
 */
 
 import { Link } from "@components/Link";
-import { findByPropsLazy } from "@webpack";
+import { InviteActions } from "@utils/discord";
 import { FluxDispatcher, showToast } from "@webpack/common";
 
 interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
     target: string;
     disabled?: boolean;
 }
-
-const InviteActions = findByPropsLazy("resolveInvite");
 
 export function InviteLink(props: React.PropsWithChildren<Props>) {
     if (props.disabled) {

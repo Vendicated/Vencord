@@ -26,6 +26,8 @@ import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 
+export const InviteActions = findByPropsLazy("resolveInvite");
+
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 }
