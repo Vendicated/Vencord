@@ -10,7 +10,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, RestAPI, showToast, Switch, Text, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { openColorPickerModal } from "./components/ColorPickerModal";
@@ -307,13 +307,8 @@ function getSuggestedColors(callback: (v: string[]) => void) {
 }
 
 function fetchProfileEffects(callback: (v: any) => void): void {
-    fetch("/api/v9/user-profile-effects", { mode: "same-origin", cache: "only-if-cached" })
-        .then((response: Response): Promise<any> => {
-            return response.json();
-        })
-        .then((data: any) => {
-            callback(data?.profile_effect_configs);
-        })
+    RestAPI.get({ url: "/user-profile-effects" })
+        .then(res => { callback(res.body.profile_effect_configs); })
         .catch(e => {
             console.error(e);
             showToast("Unable to retrieve the list of profile effects.", Toasts.Type.FAILURE);
