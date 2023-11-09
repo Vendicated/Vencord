@@ -379,9 +379,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
     Skully: {
         name: "Skully",
-        id: 150298098516754432n,
+        id: 150298098516754432n
     },
 } satisfies Record<string, Dev>);
 

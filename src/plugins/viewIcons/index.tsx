@@ -65,9 +65,7 @@ const settings = definePluginSettings({
     }
 });
 
-function openImage(url?: string) {
-    if (!url) return;
-
+function openImage(url: string) {
     const format = url.startsWith("/") ? "png" : settings.store.format;
 
     const u = new URL(url, window.location.href);
@@ -173,12 +171,12 @@ export default definePlugin({
     },
 
     patches: [
-        // Make pfps clickable and add pointer cursor
+        // Make pfps clickable
         {
-            find: ".AVATAR_DECORATION_STATUS_ROUND_16;",
+            find: "User Profile Modal - Context Menu",
             replacement: {
-                match: /memo\(.{0,50}(?=let{statusColor:\i,status:\i,...\i}=(\i),)/,
-                replace: (m, props) => `${m}${props}.onClick=()=>$self.openImage(${props}.src);${props}.style={cursor:${props}.src?"pointer":void 0};`
+                match: /\{src:(\i)(?=,avatarDecoration)/,
+                replace: "{src:$1,onClick:()=>$self.openImage($1)"
             }
         },
         // Make banners clickable
