@@ -4,7 +4,7 @@ This plugin applies configurable various tweaks to super reactions.
 
 ![Screenshot](https://user-images.githubusercontent.com/22851444/281598795-58f07116-9f95-4f64-940b-23a5499f2302.png)
 
-### Currently, the plugin allows for two tweaks:
+## Currently, the plugin allows for two tweaks:
 
 **Super React By Default** -  The reaction picker will default to super reactions instead of normal reactions.
 
