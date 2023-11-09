@@ -100,8 +100,6 @@ export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | nu
 
     const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(useUsersDecorationsStore.getState().getAsset(user?.id) ?? null);
 
-
-    // Connect to the store on mount, disconnect on unmount, catch state-changes in a reference
     useEffect(() => useUsersDecorationsStore.subscribe(
         state => {
             const newDecorAvatarDecoration = state.getAsset(user.id);
