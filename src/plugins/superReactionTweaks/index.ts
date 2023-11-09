@@ -58,6 +58,6 @@ export default definePlugin({
     shouldPlayBurstReaction(playingCount: number) {
         if (settings.store.unlimitedSuperReactionPlaying) return true;
         else if (playingCount <= settings.store.superReactionPlayingLimit) return true;
-        else return false;
+        return false;
     }
 });
