@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { PluginNative } from "@utils/types";
 import { Button, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
+
+const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
@@ -49,7 +52,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
         } else {
             discordVoice.stopLocalAudioRecording(async (filePath: string) => {
                 if (filePath) {
-                    const buf = await VencordNative.pluginHelpers.VoiceMessages.readRecording(filePath);
+                    const buf = await Native.readRecording(filePath);
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
