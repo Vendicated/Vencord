@@ -12,7 +12,7 @@ export const settings = definePluginSettings({
     superReactByDefault: {
         type: OptionType.BOOLEAN,
         description: "Reaction picker will default to Super Reactions",
-        default: false,
+        default: true,
     },
     unlimitedSuperReactionPlaying: {
         type: OptionType.BOOLEAN,
