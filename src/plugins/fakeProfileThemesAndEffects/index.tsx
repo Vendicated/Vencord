@@ -494,7 +494,7 @@ export default definePlugin({
         const [buildLegacy3y3, setBuildLegacy3y3] = useState(false);
         const currModal = useRef("");
 
-        useEffect(() => { return () => { closeModal(currModal.current); }; });
+        useEffect(() => { return () => { closeModal(currModal.current); }; }, []);
 
         return (
             <>
