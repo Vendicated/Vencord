@@ -13,3 +13,4 @@ export const SKU_ID = "100101099111114"; // decor in ascii numbers
 export const RAW_SKU_ID = "11497119"; // raw in ascii numbers
 export const GUILD_ID = "1096357702931841148";
 export const INVITE_KEY = "dXp2SdxDcP";
+export const DECORATION_FETCH_COOLDOWN = 1000 * 60 * 60 * 4; // 4 hours

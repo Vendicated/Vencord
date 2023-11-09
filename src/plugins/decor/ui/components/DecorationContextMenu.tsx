@@ -9,10 +9,11 @@ import "../styles.css";
 import { CopyIcon, DeleteIcon } from "@components/Icons";
 import { Alerts, Clipboard, ContextMenu, Menu, UserStore } from "webpack/common";
 
+import { Decoration } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 
-export default function DecorationContextMenu({ decoration }) {
+export default function DecorationContextMenu({ decoration }: { decoration: Decoration; }) {
     const { delete: deleteDecoration } = useCurrentUserDecorationsStore();
     return <Menu.Menu
         navId={cl("decoration-context-menu")}

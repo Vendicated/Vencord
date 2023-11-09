@@ -51,7 +51,7 @@ export default function CreateDecorationModal(props) {
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
-                Create Decor Decoration
+                Create Decoration
             </Text>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>

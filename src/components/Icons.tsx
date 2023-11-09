@@ -272,11 +272,11 @@ export function PlusIcon(props: IconProps) {
     );
 }
 
-export function NoneIcon(props: IconProps) {
+export function NoEntrySignIcon(props: IconProps) {
     return (
         <Icon
             {...props}
-            className={classes(props.className, "vc-none-icon")}
+            className={classes(props.className, "vc-no-entry-sign-icon")}
             viewBox="0 0 24 24"
         >
             <path

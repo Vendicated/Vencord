@@ -1,34 +1,27 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated, FieryFlames and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Button, SelectedChannelStore, useEffect, UserStore } from "@webpack/common";
+import { Button, useEffect, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
-import { useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
+import { useUserDecorAvatarDecoration, useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
 import showAuthorizationModal from "./lib/utils/showAuthorizationModal";
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import { openChangeDecorationModal } from "./ui/modals/ChangeDecorationModal";
+
+export interface AvatarDecoration {
+    asset: string;
+    skuId: string;
+}
 
 const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
 
@@ -37,45 +30,76 @@ export default definePlugin({
     description: "Create and use your own custom avatar decorations, or pick your favorite from the presets.",
     authors: [Devs.FieryFlames],
     patches: [
-        // Patch UserStore to include Decor avatar decorations when getting users
-        {
-            find: "getUserStoreVersion",
-            replacement: {
-                match: /(?<=getUser\(\i\){.{10,50}return )(\i\[\i\])/,
-                replace: "$self.patchUser($1)"
-            }
-        },
         // Patch MediaResolver to return correct URL for Decor avatar decorations
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(function \i\(\i\){)(let{avatarDecoration)/,
-                replace: "$1const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;$2"
+                match: /(?<=function \i\(\i\){)let{avatarDecoration/,
+                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;$&"
             }
         },
         // Patch profile customization settings to include Decor section
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /{user:\i},"decoration"\),/,
-                replace: "$&$self.DecorSection(),"
+                match: /(?<={user:\i},"decoration"\),)/,
+                replace: "$self.DecorSection(),"
             }
         },
         // Decoration modal module
         {
             find: ".decorationGridItem",
-            replacement: [{
-                match: /(\i=)(\i=>{let{children:\i)/,
-                replace: "$1$self.DecorationGridItem=$2"
-            },
-            {
-                match: /(\i=)(\i=>{let{user:\i,avatarDecoration)/,
-                replace: "$1$self.DecorationGridDecoration=$2"
-            },
-            {
-                match: /(\i===\i\.Section\.PURCHASE\|\|\i===\i\.Section\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).{0,800}?)/,
-                replace: "$2.skuId === $self.SKU_ID || ($1)"
-            }]
+            replacement: [
+                {
+                    match: /(?<=\i=)\i=>{let{children/,
+                    replace: "$self.DecorationGridItem=$&"
+                },
+                {
+                    match: /(?<=\i=)\i=>{let{user:\i,avatarDecoration/,
+                    replace: "$self.DecorationGridDecoration=$&"
+                },
+                // Remove NEW label from decor avatar decorations
+                {
+                    match: /\i===\i\.Section\.PURCHASE\|\|\i===\i\.Section\.PREMIUM_PURCHASE&&\i(?<=avatarDecoration:(\i).+?)/,
+                    replace: "$1.skuId === $self.SKU_ID || ($&)"
+                }
+            ]
+        },
+        {
+            find: "isAvatarDecorationAnimating:",
+            replacement: [
+                // Add Decor avatar decoration hook to avatar decoration hook
+                {
+                    match: /(?<=TryItOut:\i}\),)(?<=user:(\i).+?)/,
+                    replace: "vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1),"
+                },
+                // Use added hook
+                {
+                    match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
+                    replace: "$1 ?? vcDecorAvatarDecoration ?? ($&)"
+                },
+                // Make memo depend on added hook
+                {
+                    match: /(?<=size:\i}\),\[)/,
+                    replace: "vcDecorAvatarDecoration,"
+                }
+            ]
+        },
+        // Current user area, at bottom of channels/dm list
+        {
+            find: "renderAvatarWithPopout(){",
+            replacement: [
+                // Add Decor avatar decoration hook
+                {
+                    match: /(?=let \i=\(0,\i.getAvatarDecorationURL\))(?<=currentUser:(\i).+?)/,
+                    replace: "let vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1);"
+                },
+                // Use added hook
+                {
+                    match: /(?<={avatarDecoration:).{1,20}?(?=,)/,
+                    replace: "vcDecorAvatarDecoration ?? $&"
+                }
+            ]
         }
     ],
 
@@ -88,22 +112,6 @@ export default definePlugin({
         USER_PROFILE_MODAL_OPEN: data => {
             useUsersDecorationsStore.getState().fetch(data.userId, true);
         },
-        MESSAGE_CREATE: data => {
-            const channelId = SelectedChannelStore.getChannelId();
-            if (data.channelId === channelId) {
-                useUsersDecorationsStore.getState().fetch(data.message.author.id);
-            }
-        },
-        TYPING_START: data => {
-            const channelId = SelectedChannelStore.getChannelId();
-            if (data.channelId === channelId) {
-                useUsersDecorationsStore.getState().fetch(data.userId);
-            }
-        },
-        LOAD_MESSAGES_SUCCESS: ({ messages }) => {
-            useUsersDecorationsStore.getState().fetchMany(messages.map(m => m.author.id));
-        },
-        // TODO: Still need to fetch for member list
     },
 
     set DecorationGridItem(e: any) {
@@ -116,37 +124,13 @@ export default definePlugin({
 
     SKU_ID,
 
+    useUserDecorAvatarDecoration,
+
     async start() {
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 
-    patchUser(user) {
-        if (!user) return user;
-
-        const store = useUsersDecorationsStore.getState();
-
-        // No decor fetched yet
-        if (!store.has(user.id)) return user;
-
-        const decoration = store.get(user.id);
-
-        // Decor decoration is not null and the user doesn't have their decor decoration yet
-        if (decoration && user.avatarDecoration?.skuId !== SKU_ID) {
-            user.avatarDecoration = {
-                asset: decoration,
-                skuId: SKU_ID
-            };
-            // if the decor decoration is null, but the user has a decor decoration, remove it
-        } else if (!decoration && user.avatarDecoration && user.avatarDecoration.skuId === SKU_ID) {
-            user.avatarDecoration = null;
-        }
-
-        user.avatarDecorationData = user.avatarDecoration;
-
-        return user;
-    },
-
-    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }) {
+    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate: boolean; }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");
@@ -159,15 +143,14 @@ export default definePlugin({
 
     DecorSection: ErrorBoundary.wrap(() => {
         const authorization = useAuthorizationStore();
-        const { selectedDecoration, select: selectDecoration, fetch } = useCurrentUserDecorationsStore();
+        const { selectedDecoration, select: selectDecoration, fetch: fetchDecorations } = useCurrentUserDecorationsStore();
 
         useEffect(() => {
-            if (authorization.isAuthorized()) fetch();
+            if (authorization.isAuthorized()) fetchDecorations();
         }, [authorization.token]);
 
-        // TODO: Change title to just "Decor" when profile effects are implemented
         return <CustomizationSection
-            title="Decor Avatar Decoration"
+            title="Decor"
             hasBackground={true}
         >
             <div style={{ display: "flex" }}>
@@ -179,7 +162,7 @@ export default definePlugin({
                     }}
                     size={Button.Sizes.SMALL}
                 >
-                    Change Decor Decoration
+                    Change Decoration
                 </Button>
                 {selectedDecoration && authorization.isAuthorized() && <Button
                     onClick={() => selectDecoration(null)}
@@ -187,7 +170,7 @@ export default definePlugin({
                     size={Button.Sizes.SMALL}
                     look={Button.Looks.LINK}
                 >
-                    Remove Decor Decoration
+                    Remove Decoration
                 </Button>}
             </div>
         </CustomizationSection >;

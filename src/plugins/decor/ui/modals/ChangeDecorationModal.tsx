@@ -67,7 +67,7 @@ export default function ChangeDecorationModal(props: any) {
 
     const data = [
         {
-            title: "Your Decor Decorations",
+            title: "Your Decorations",
             sectionKey: "ownDecorations",
             items: ["none", ...ownDecorations, "create"]
         },
@@ -92,7 +92,7 @@ export default function ChangeDecorationModal(props: any) {
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
-                Change Decor Decoration
+                Change Decoration
             </Text>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>

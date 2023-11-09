@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NoneIcon } from "@components/Icons";
+import { NoEntrySignIcon } from "@components/Icons";
 import { i18n, Text } from "@webpack/common";
 
 import { DecorationGridItem } from ".";
@@ -13,7 +13,7 @@ export default function DecorationGridNone(props: { isSelected, onSelect; classN
     return <DecorationGridItem
         {...props}
     >
-        <NoneIcon />
+        <NoEntrySignIcon />
         <Text
             variant="text-xs/normal"
             color="header-primary"

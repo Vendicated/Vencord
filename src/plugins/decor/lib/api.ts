@@ -29,14 +29,21 @@ export interface NewDecoration {
 }
 
 export async function fetchApi(url: RequestInfo, options?: RequestInit) {
-    const res = await fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${useAuthorizationStore.getState().token}` } });
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            ...options?.headers,
+            Authorization: `Bearer ${useAuthorizationStore.getState().token}`
+        }
+    });
 
     if (res.ok) return res;
     else throw new Error(await res.text());
 }
 
-export const getUsersDecorations = async (ids: string[] | undefined = undefined) => {
+export const getUsersDecorations = async (ids?: string[]) => {
     if (ids && ids.length === 0) return {};
+
     const url = new URL(API_URL + "/users");
     if (ids && ids.length !== 0) url.searchParams.set("ids", JSON.stringify(ids));
 

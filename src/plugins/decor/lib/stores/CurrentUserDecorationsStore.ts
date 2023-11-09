@@ -5,11 +5,10 @@
  */
 
 import { proxyLazy } from "@utils/lazy";
-import { FluxDispatcher, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
 import decorationToString from "../utils/decorationToString";
-import discordifyDecoration from "../utils/discordifyDecoration";
 import { create } from "../zustand";
 import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
@@ -23,24 +22,12 @@ interface UserDecorationsState {
     clear: () => void;
 }
 
-function updateCurrentUserAvatarDecoration(decoration: Decoration | null) {
-    const user = UserStore.getCurrentUser() as any;
-    user.avatarDecoration = decoration ? discordifyDecoration(decoration) : null;
-    user.avatarDecorationData = user.avatarDecoration;
-
-    useUsersDecorationsStore.getState().set(user.id, decoration ? decorationToString(decoration) : null);
-    FluxDispatcher.dispatch({ type: "CURRENT_USER_UPDATE", user });
-    FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SUBMIT_SUCCESS" });
-}
-
 export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
     decorations: [],
     selectedDecoration: null,
     async fetch() {
         const decorations = await getUserDecorations();
         const selectedDecoration = await getUserDecoration();
-
-        if (get().selectedDecoration?.hash !== selectedDecoration?.hash) updateCurrentUserAvatarDecoration(selectedDecoration);
 
         set({ decorations, selectedDecoration });
     },
@@ -64,8 +51,7 @@ export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorat
         if (get().selectedDecoration === decoration) return;
         set({ selectedDecoration: decoration });
         setUserDecoration(decoration);
-
-        updateCurrentUserAvatarDecoration(decoration);
+        useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToString(decoration) : null);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })
 })));

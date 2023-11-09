@@ -6,25 +6,33 @@
 
 import { debounce } from "@utils/debounce";
 import { proxyLazy } from "@utils/lazy";
-import { FluxDispatcher, UserStore } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
+import { User } from "discord-types/general";
 
+import { AvatarDecoration } from "../../";
 import { getUsersDecorations } from "../api";
-import { SKU_ID } from "../constants";
+import { DECORATION_FETCH_COOLDOWN, SKU_ID } from "../constants";
 import { create } from "../zustand";
 
+interface UserDecorationData {
+    asset: string | null;
+    fetchedAt: Date;
+}
+
 interface UsersDecorationsState {
-    usersDecorations: Map<string, string | null>;
+    usersDecorations: Map<string, UserDecorationData>;
     fetchQueue: Set<string>;
     bulkFetch: () => Promise<void>;
     fetch: (userId: string, force?: boolean) => Promise<void>;
     fetchMany: (userIds: string[]) => Promise<void>;
-    get: (userId: string) => string | null | undefined;
+    get: (userId: string) => UserDecorationData | undefined;
+    getAsset: (userId: string) => string | null | undefined;
     has: (userId: string) => boolean;
     set: (userId: string, decoration: string | null) => void;
 }
 
 export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsState>((set, get) => ({
-    usersDecorations: new Map(),
+    usersDecorations: new Map<string, UserDecorationData>(),
     fetchQueue: new Set(),
     bulkFetch: debounce(async () => {
         const { fetchQueue, usersDecorations } = get();
@@ -38,19 +46,11 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         const newUsersDecorations = new Map(usersDecorations);
 
         for (const [userId, decoration] of Object.entries(fetchedUsersDecorations)) {
-            newUsersDecorations.set(userId, decoration);
-
-            const user = UserStore.getUser(userId) as any;
-            if (user) {
-                user.avatarDecoration = decoration ? { asset: decoration, skuId: SKU_ID } : null;
-                user.avatarDecorationData = user.avatarDecoration;
-
-                FluxDispatcher.dispatch({ type: "USER_UPDATE", user });
-            }
+            newUsersDecorations.set(userId, { asset: decoration, fetchedAt: new Date() });
         }
 
         for (const fetchedId of fetchIds) {
-            if (!newUsersDecorations.has(fetchedId)) newUsersDecorations.set(fetchedId, null);
+            if (!newUsersDecorations.has(fetchedId)) newUsersDecorations.set(fetchedId, { asset: null, fetchedAt: new Date() });
         }
 
         set({ usersDecorations: newUsersDecorations });
@@ -58,7 +58,10 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
     async fetch(userId: string, force: boolean = false) {
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
-        if (!force && usersDecorations.has(userId)) return;
+        if (usersDecorations.has(userId)) {
+            const { fetchedAt } = usersDecorations.get(userId)!;
+            if (!force && Date.now() - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) return;
+        }
 
         set({ fetchQueue: new Set(fetchQueue).add(userId) });
         bulkFetch();
@@ -68,20 +71,48 @@ export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsS
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
         const newFetchQueue = new Set(fetchQueue);
+
         for (const userId of userIds) {
-            if (!usersDecorations.has(userId)) newFetchQueue.add(userId);
+            if (usersDecorations.has(userId)) {
+                const { fetchedAt } = usersDecorations.get(userId)!;
+                if (Date.now() - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) continue;
+            }
+            newFetchQueue.add(userId);
         }
 
         set({ fetchQueue: newFetchQueue });
         bulkFetch();
     },
     get(userId: string) { return get().usersDecorations.get(userId); },
+    getAsset(userId: string) { return get().usersDecorations.get(userId)?.asset; },
     has(userId: string) { return get().usersDecorations.has(userId); },
     set(userId: string, decoration: string | null) {
         const { usersDecorations } = get();
         const newUsersDecorations = new Map(usersDecorations);
 
-        newUsersDecorations.set(userId, decoration);
+        newUsersDecorations.set(userId, { asset: decoration, fetchedAt: new Date() });
         set({ usersDecorations: newUsersDecorations });
     }
 })));
+
+export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
+    if (!user) return null;
+
+    const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(useUsersDecorationsStore.getState().getAsset(user?.id) ?? null);
+
+
+    // Connect to the store on mount, disconnect on unmount, catch state-changes in a reference
+    useEffect(() => useUsersDecorationsStore.subscribe(
+        state => {
+            const newDecorAvatarDecoration = state.getAsset(user.id);
+            if (!newDecorAvatarDecoration) return;
+            if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+        }), []);
+
+    useEffect(() => {
+        const { has: hasDecorAvatarDecoration, fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+        if (!hasDecorAvatarDecoration(user.id)) fetchUserDecorAvatarDecoration(user.id);
+    }, []);
+
+    return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
+}
