@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { Logger } from "@utils/Logger";
-import { Toasts } from "@webpack/common";
+import { showToast, Toasts } from "@webpack/common";
 
 type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string> & Record<"isRegex" | "isEnabled", boolean>;
 
@@ -84,17 +84,9 @@ export async function tryImport(textReplaceRules: Rule[], textReplaceKey: string
             await DataStore.set(textReplaceKey, textReplaceRules);
             update();
         }
-        Toasts.show({
-            type: Toasts.Type.SUCCESS,
-            message: "Successfully imported & merged text replace rules.",
-            id: Toasts.genId()
-        });
+        showToast("Successfully imported & merged text replace rules.", Toasts.Type.SUCCESS);
     } catch (err) {
         new Logger("TextReplace").error(err);
-        Toasts.show({
-            type: Toasts.Type.FAILURE,
-            message: "Failed to import text replace rules: " + String(err),
-            id: Toasts.genId()
-        });
+        showToast("Failed to import text replace rules: " + String(err), Toasts.Type.FAILURE);
     }
 }

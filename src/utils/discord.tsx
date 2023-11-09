@@ -18,7 +18,7 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
@@ -27,6 +27,18 @@ const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 
 export const InviteActions = findByPropsLazy("resolveInvite");
+
+export async function openInviteModal(code: string) {
+    const { invite } = await InviteActions.resolveInvite(code, "Desktop Modal");
+    if (!invite) return showToast("Invalid or expired invite", Toasts.Type.FAILURE);
+
+    FluxDispatcher.dispatch({
+        type: "INVITE_MODAL_OPEN",
+        invite,
+        code,
+        context: "APP"
+    });
+}
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());

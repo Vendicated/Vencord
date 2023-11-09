@@ -17,8 +17,7 @@
 */
 
 import { Link } from "@components/Link";
-import { InviteActions } from "@utils/discord";
-import { FluxDispatcher, showToast } from "@webpack/common";
+import { openInviteModal } from "@utils/discord";
 
 interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
     target: string;
@@ -31,15 +30,7 @@ export function InviteLink(props: React.PropsWithChildren<Props>) {
             href={`https://discord.gg/${props.target}`}
             onClick={async e => {
                 e.preventDefault();
-                const { invite } = await InviteActions.resolveInvite(props.target, "Desktop Modal");
-                if (!invite) return showToast("Invalid or expired invite");
-
-                FluxDispatcher.dispatch({
-                    type: "INVITE_MODAL_OPEN",
-                    invite,
-                    code: props.target,
-                    context: "APP"
-                });
+                openInviteModal(props.target);
             }}
         >
             {props.children}
