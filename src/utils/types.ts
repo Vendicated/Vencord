@@ -311,3 +311,10 @@ export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon 
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+
+export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
+    [key in keyof PluginExports]:
+    PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
+    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+    : never;
+};
