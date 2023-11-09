@@ -71,7 +71,7 @@
         "zip-local": "^0.3.5",
         "zustand": "^3.7.2"
     },
-    "packageManager": "pnpm@8.1.1",
+    "packageManager": "pnpm@8.10.2",
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
