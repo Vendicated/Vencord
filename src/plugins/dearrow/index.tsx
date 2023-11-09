@@ -63,7 +63,7 @@ async function embedDidMount(this: Component<Props>) {
             embed.rawTitle = titles[0].title;
         }
 
-        if (thumbnails[0]?.votes >= 0) {
+        if (thumbnails[0]?.votes >= 0 && thumbnails[0].timestamp) {
             embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
             embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
         }

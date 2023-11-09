@@ -38,6 +38,8 @@ export const enum IpcEvents {
     BUILD = "VencordBuild",
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
 
+    GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
+
     OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
     VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
 }
