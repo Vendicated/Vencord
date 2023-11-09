@@ -20,8 +20,8 @@ import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
-import { constants as FsConstants, readFileSync } from "fs";
-import { access, readdir, readFile } from "fs/promises";
+import { existsSync, readFileSync } from "fs";
+import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
@@ -46,12 +46,6 @@ export const banner = {
 };
 
 const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
-
-export function existsAsync(path) {
-    return access(path, FsConstants.F_OK)
-        .then(() => true)
-        .catch(() => false);
-}
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -85,7 +79,7 @@ export const globPlugins = kind => ({
             let plugins = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!await existsAsync(`./src/${dir}`)) continue;
+                if (!existsSync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
                     if (file.startsWith("_") || file.startsWith(".")) continue;
