@@ -42,7 +42,7 @@ export async function fetchApi(url: RequestInfo, options?: RequestInit) {
 }
 
 export const getUsersDecorations = async (ids?: string[]) => {
-    if (ids && ids.length === 0) return {};
+    if (ids?.length === 0) return {};
 
     const url = new URL(API_URL + "/users");
     if (ids && ids.length !== 0) url.searchParams.set("ids", JSON.stringify(ids));
