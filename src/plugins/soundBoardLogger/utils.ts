@@ -22,6 +22,25 @@ import { LazyComponent } from "@utils/react";
 import { saveFile } from "@utils/web";
 import { findByCode, findByProps, findByPropsLazy } from "@webpack";
 import settings from "./settings";
+import type { User } from "discord-types/general";
+
+export { User };
+
+export interface SoundEvent {
+    type: "VOICE_CHANNEL_EFFECT_SEND",
+    emoji: { name: string, id?: string, animated: boolean; },
+    channelId: string,
+    userId: string,
+    animationType: number,
+    animationId: number,
+    soundId: string,
+    soundVolume: number;
+}
+
+export interface SoundLogEntry extends SoundEvent {
+    users: { id: string, plays: number[]; }[];
+}
+
 
 export const cl = classNameFactory("vc-soundlog-");
 
@@ -60,3 +79,4 @@ export function removeListener(fn): void {
 // Taken from https://github.com/Vendicated/Vencord/blob/86e94343cca10b950f2dc8d18d496d6db9f3b728/src/components/PluginSettings/PluginModal.tsx#L45
 export const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 export const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+// a

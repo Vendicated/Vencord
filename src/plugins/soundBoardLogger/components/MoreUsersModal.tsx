@@ -21,7 +21,7 @@ import { Forms, Clickable } from "@webpack/common";
 import { Flex } from "@components/Flex";
 import { cl, getEmojiUrl } from "../utils";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { SoundLogEntry, User } from "../types";
+import { SoundLogEntry, User } from "../utils";
 
 export function openMoreUsersModal(item: SoundLogEntry, users: User[], onClickUser: Function) {
     const key = openModal(props => (

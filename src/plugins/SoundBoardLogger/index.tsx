@@ -24,8 +24,7 @@ import { Devs } from "@utils/constants";
 import styles from "./styles.css?managed";
 import settings from "./settings";
 import { getListeners } from "./utils";
-import IconWithTooltip from "./components/IconWithTooltip";
-import { LogIcon } from "./components/Icons";
+import { LogIcon, IconWithTooltip } from "./components/Icons";
 import { updateLoggedSounds } from "./store";
 import { openSoundBoardLog } from "./components/SoundBoardLog";
 

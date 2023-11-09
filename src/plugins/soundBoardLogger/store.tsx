@@ -18,7 +18,7 @@
 
 import { DataStore } from "@api/index";
 import settings from "./settings";
-import { SoundEvent, SoundLogEntry } from "./types";
+import { SoundEvent, SoundLogEntry } from "./utils";
 
 /** Attempts to add a sound event to the log */
 export async function updateLoggedSounds(sound: SoundEvent): Promise<void> {

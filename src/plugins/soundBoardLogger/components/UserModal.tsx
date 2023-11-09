@@ -23,11 +23,10 @@ import { classes, copyWithToast } from "@utils/misc";
 import { ModalRoot, ModalContent, ModalProps, closeModal, openModal } from "@utils/modal";
 import { Clickable, Forms, Timestamp, Text } from "@webpack/common";
 import { Flex } from "@components/Flex";
-import { SoundLogEntry, User } from "../types";
+import { SoundLogEntry, User } from "../utils";
 import moment from "moment";
 import { AvatarStyles, UserSummaryItem, cl, downloadAudio, getEmojiUrl } from "../utils";
-import IconWithTooltip from "./IconWithTooltip";
-import { DownloadIcon, PlayIcon } from "./Icons";
+import { DownloadIcon, PlayIcon, IconWithTooltip } from "./Icons";
 
 export function openUserModal(item, user, sounds) {
     const key = openModal(props =>

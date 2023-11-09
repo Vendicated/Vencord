@@ -24,7 +24,7 @@ import { UserUtils, Clickable, Tooltip, Forms, Button, Text, useState, useEffect
 import { Flex } from "@components/Flex";
 import { User } from "discord-types/general";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
-import { SoundLogEntry } from "../types";
+import { SoundLogEntry } from "../utils";
 import { AvatarStyles, cl, getEmojiUrl, UserSummaryItem, downloadAudio, addListener, removeListener } from "../utils";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
