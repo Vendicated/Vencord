@@ -85,7 +85,7 @@ const globNativesPlugin = {
 
                     const mod = `p${i}`;
                     code += `import * as ${mod} from "./${dir}/${p}/native";\n`;
-                    natives += `${cleanPluginName}:${mod},\n`;
+                    natives += `${JSON.stringify(cleanPluginName)}:${mod},\n`;
                     i++;
                 }
             }
