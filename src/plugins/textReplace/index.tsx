@@ -436,7 +436,7 @@ export default definePlugin({
     },
 
     dependencies: ["MessageEventsAPI"],
-    modalSize: ModalSize.DYNAMIC,
+    settingsModalSize: ModalSize.DYNAMIC,
 
     settings,
 

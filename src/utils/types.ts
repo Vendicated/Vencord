@@ -118,7 +118,7 @@ export interface PluginDef {
 
     tags?: string[];
 
-    modalSize?: ModalSize;
+    settingsModalSize?: ModalSize;
 }
 
 export const enum OptionType {
