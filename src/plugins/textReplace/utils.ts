@@ -10,7 +10,7 @@ import { Toasts } from "@webpack/common";
 
 type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string> & Record<"isRegex" | "isEnabled", boolean>;
 
-function makeEmptyRule() {
+export function makeEmptyRule() {
     return {
         isEnabled: true,
         find: "",
@@ -21,15 +21,15 @@ function makeEmptyRule() {
     };
 }
 
-function makeEmptyRuleArray() {
+export function makeEmptyRuleArray() {
     return [makeEmptyRule()];
 }
 
-function random() {
+export function random() {
     return `${Date.now()}${Math.random()}`;
 }
 
-function applyRule(rule: Rule, content: string): string {
+export function applyRule(rule: Rule, content: string): string {
     if (!rule.isEnabled || !rule.find) return content;
     if (rule.isRegex) {
         if (rule.onlyIfIncludes) {
@@ -52,7 +52,7 @@ function applyRule(rule: Rule, content: string): string {
     return content;
 }
 
-function stringToRegex(str: string) {
+export function stringToRegex(str: string) {
     const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
     return match
         ? new RegExp(
@@ -66,7 +66,7 @@ function stringToRegex(str: string) {
         : new RegExp(str); // Not a regex, return string
 }
 
-async function tryImport(textReplaceRules: Rule[], textReplaceKey: string, str: string, update: () => void) {
+export async function tryImport(textReplaceRules: Rule[], textReplaceKey: string, str: string, update: () => void) {
     try {
         const data = JSON.parse(str);
         for (const rule of data) {
@@ -98,5 +98,3 @@ async function tryImport(textReplaceRules: Rule[], textReplaceKey: string, str: 
         });
     }
 }
-
-export { applyRule, makeEmptyRule, makeEmptyRuleArray, random, stringToRegex, tryImport };

@@ -8,7 +8,7 @@ import { TextInput, useState } from "@webpack/common";
 
 import { applyRule, stringToRegex } from "./utils";
 
-function Input({ initialValue, onChange, placeholder, enabled }: {
+export function Input({ initialValue, onChange, placeholder, enabled }: {
     placeholder: string;
     initialValue: string;
     enabled: boolean;
@@ -30,7 +30,7 @@ function Input({ initialValue, onChange, placeholder, enabled }: {
     );
 }
 
-function Preview({ textReplaceRules, value, index, enabled }) {
+export function Preview({ textReplaceRules, value, index, enabled }) {
     for (let i = 0; i <= index; i++) {
         value = applyRule(textReplaceRules[i], value);
     }
@@ -43,7 +43,7 @@ function Preview({ textReplaceRules, value, index, enabled }) {
     );
 }
 
-function renderFindError(find: string) {
+export function renderFindError(find: string) {
     try {
         stringToRegex(find);
         return null;
@@ -55,5 +55,3 @@ function renderFindError(find: string) {
         );
     }
 }
-
-export { Input, Preview, renderFindError };
