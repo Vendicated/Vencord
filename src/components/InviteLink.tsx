@@ -26,11 +26,6 @@ interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLA
 }
 
 export function InviteLink(props: React.PropsWithChildren<Props>) {
-    if (props.disabled) {
-        props.style ??= {};
-        props.style.pointerEvents = "none";
-        props["aria-disabled"] = true;
-    }
     return (
         <Link
             href={`https://discord.gg/${props.target}`}
