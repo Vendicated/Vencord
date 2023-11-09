@@ -8,7 +8,7 @@ import { DataStore } from "@api/index";
 import { Logger } from "@utils/Logger";
 import { Toasts } from "@webpack/common";
 
-import { Rule } from "./type";
+type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string> & Record<"isRegex" | "isEnabled", boolean>;
 
 function makeEmptyRule() {
     return {
