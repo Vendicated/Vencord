@@ -8,8 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
+import { closeModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, showToast, Switch, Text, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { openColorPickerModal } from "./components/ColorPickerModal";
@@ -496,6 +497,9 @@ export default definePlugin({
         const [effectName, setEffectName] = useState("");
         [preview, setPreview] = useState(true);
         const [buildLegacy3y3, setBuildLegacy3y3] = useState(false);
+        const currModal = useRef("");
+
+        useEffect(() => { return () => { closeModal(currModal.current); }; });
 
         return (
             <>
@@ -547,7 +551,8 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             getSuggestedColors((colors: string[]) => {
-                                openColorPickerModal(
+                                closeModal(currModal.current);
+                                currModal.current = openColorPickerModal(
                                     ColorPicker,
                                     (color: number) => {
                                         setPrimaryColor(color);
@@ -572,7 +577,8 @@ export default definePlugin({
                         }}
                         onClick={() => {
                             getSuggestedColors((colors: string[]) => {
-                                openColorPickerModal(
+                                closeModal(currModal.current);
+                                currModal.current = openColorPickerModal(
                                     ColorPicker,
                                     (color: number) => {
                                         setAccentColor(color);
@@ -598,7 +604,8 @@ export default definePlugin({
                         onClick={() => {
                             fetchProfileEffects((data: any) => {
                                 if (data) {
-                                    openProfileEffectModal(
+                                    closeModal(currModal.current);
+                                    currModal.current = openProfileEffectModal(
                                         (id: string, name: string) => {
                                             setEffectID(id);
                                             setEffectName(name);

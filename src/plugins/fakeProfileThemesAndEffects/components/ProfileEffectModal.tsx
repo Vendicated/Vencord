@@ -86,8 +86,8 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
     );
 }
 
-export function openProfileEffectModal(onSubmit: (i: string, n: string) => void, profileEffects: any): void {
-    const key = openModal(modalProps =>
+export function openProfileEffectModal(onSubmit: (i: string, n: string) => void, profileEffects: any): string {
+    const key: string = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
             onClose={() => { closeModal(key); }}
@@ -95,4 +95,5 @@ export function openProfileEffectModal(onSubmit: (i: string, n: string) => void,
             profileEffects={profileEffects}
         />
     );
+    return key;
 }

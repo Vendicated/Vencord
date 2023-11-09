@@ -17,9 +17,9 @@ interface ColorPickerModalProps {
 }
 
 export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, initialColor = 0, suggestedColors = [] }: ColorPickerModalProps): JSX.Element {
-    const headerRef = useRef<HTMLDivElement>(null);
     const [color, setColor] = useState(initialColor);
     const [pos, setPos] = useState([-1, -1]);
+    const headerRef = useRef<HTMLDivElement>(null);
 
     return (
         <div
@@ -36,9 +36,10 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
             }}
         >
             <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
-                <style>{":has([class*=customColorPicker__])>[class*=backdrop__]{opacity:0!important}[class*=root_] [class*=customColorPicker__]{border:none!important;box-shadow:none!important}"}</style>
+                <style>{":has(>:not([class*=hidden__]) [class*=customColorPicker__])>[class*=backdrop__]{display:none!important}[class*=root_] [class*=customColorPicker__]{border:none!important;box-shadow:none!important}"}</style>
                 <div
                     ref={headerRef}
+                    style={{ cursor: "move" }}
                     onMouseDown={(e: React.MouseEvent) => {
                         const ref: HTMLDivElement | null = headerRef.current;
                         if (ref === null) return;
@@ -91,8 +92,8 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
     );
 }
 
-export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => void, initialColor: number = 0, suggestedColors: Array<string> = []): void {
-    const key = openModal(modalProps =>
+export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => void, initialColor: number = 0, suggestedColors: Array<string> = []): string {
+    const key: string = openModal(modalProps =>
         <ColorPickerModal
             modalProps={modalProps}
             ColorPicker={ColorPicker}
@@ -102,4 +103,5 @@ export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => 
             suggestedColors={suggestedColors}
         />
     );
+    return key;
 }
