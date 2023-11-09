@@ -603,7 +603,7 @@ export default definePlugin({
             }
         }
     ],
-    description: "Logs all soundboards that are played in vc and allows you to download them",
+    description: "Logs all soundboards that are played in a voice chat and allows you to download them",
     start() {
         enableStyle(styles);
         FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", async (sound) => {
