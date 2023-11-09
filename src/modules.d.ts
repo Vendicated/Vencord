@@ -24,6 +24,11 @@ declare module "~plugins" {
     export default plugins;
 }
 
+declare module "~pluginNatives" {
+    const pluginNatives: Record<string, Record<string, (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown>>;
+    export default pluginNatives;
+}
+
 declare module "~git-hash" {
     const hash: string;
     export default hash;

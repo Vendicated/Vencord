@@ -18,7 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
@@ -44,6 +44,8 @@ const settings = definePluginSettings({
         default: true,
     }
 });
+
+const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "OpenInApp",
@@ -84,7 +86,7 @@ export default definePlugin({
         if (!IS_WEB && ShortUrlMatcher.test(url)) {
             event?.preventDefault();
             // CORS jumpscare
-            url = await VencordNative.pluginHelpers.OpenInApp.resolveRedirect(url);
+            url = await Native.resolveRedirect(url);
         }
 
         spotify: {
