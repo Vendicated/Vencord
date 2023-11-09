@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "../styles.css";
-
 import { CopyIcon, DeleteIcon } from "@components/Icons";
 import { Alerts, Clipboard, ContextMenu, Menu, UserStore } from "webpack/common";
 
