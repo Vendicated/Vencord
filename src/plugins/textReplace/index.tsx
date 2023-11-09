@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
@@ -25,28 +27,18 @@ import { InviteLink } from "@components/InviteLink";
 import { Link } from "@components/Link";
 import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import { ModalSize } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
-import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, Toasts, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, NavigationRouter, React, TextInput, useState } from "@webpack/common";
+
+import { Input, Preview, renderFindError } from "./components";
+import { applyRule, makeEmptyRule, makeEmptyRuleArray, random, tryImport } from "./utils";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 const TEXT_REPLACE_KEY = "TextReplace";
-
-type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string> & Record<"isRegex" | "isEnabled", boolean>;
-
-const makeEmptyRule: () => Rule = () => ({
-    isEnabled: true,
-    find: "",
-    replace: "",
-    onlyIfIncludes: "",
-    isRegex: false,
-    id: random()
-});
-const makeEmptyRuleArray = () => [makeEmptyRule()];
 
 let textReplaceRules = makeEmptyRuleArray();
 
@@ -65,78 +57,16 @@ const settings = definePluginSettings({
     },
 });
 
-function random() {
-    return `${Date.now()}${Math.random()}`;
-}
-
-function stringToRegex(str: string) {
-    const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
-    return match
-        ? new RegExp(
-            match[2], // Pattern
-            match[3]
-                ?.split("") // Remove duplicate flags
-                .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                .join("")
-            ?? "g"
-        )
-        : new RegExp(str); // Not a regex, return string
-}
-
-function renderFindError(find: string) {
-    try {
-        stringToRegex(find);
-        return null;
-    } catch (e) {
-        return (
-            <span style={{ color: "var(--text-danger)" }}>
-                {String(e)}
-            </span>
-        );
-    }
-}
-
-function Input({ initialValue, onChange, placeholder, enabled }: {
-    placeholder: string;
-    initialValue: string;
-    enabled: boolean;
-    onChange(value: string): void;
-}) {
-    const [value, setValue] = useState(initialValue);
-    return (
-        <TextInput
-            placeholder={placeholder}
-            value={value}
-            disabled={!enabled}
-            onChange={e => {
-                setValue(e);
-                onChange(e);
-            }}
-            spellCheck={false}
-            maxLength={2000}
-        />
-    );
-}
-
-function Preview({ value, index, enabled }) {
-    for (let i = 0; i <= index; i++) {
-        value = applyRule(textReplaceRules[i], value);
-    }
-    return (
-        <TextInput
-            editable={false}
-            value={value}
-            disabled={!enabled}
-        />
-    );
-}
-
 function TextReplace({ update }: { update: () => void; }) {
 
-    async function newRule() {
-        textReplaceRules.push(makeEmptyRule());
+    async function setAndUpdate() {
         await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
         update();
+    }
+
+    function newRule() {
+        textReplaceRules.push(makeEmptyRule());
+        setAndUpdate();
     }
 
     async function importRules() {
@@ -149,7 +79,7 @@ function TextReplace({ update }: { update: () => void; }) {
             });
 
             if (file) {
-                tryImport(new TextDecoder().decode(file.data), update);
+                tryImport(textReplaceRules, TEXT_REPLACE_KEY, new TextDecoder().decode(file.data), update);
             }
         } else {
             const file = await chooseFile("application/json");
@@ -157,7 +87,7 @@ function TextReplace({ update }: { update: () => void; }) {
 
             const reader = new FileReader();
             reader.onload = async () => {
-                tryImport(reader.result as string, update);
+                tryImport(textReplaceRules, TEXT_REPLACE_KEY, reader.result as string, update);
             };
             reader.readAsText(file);
         }
@@ -176,46 +106,34 @@ function TextReplace({ update }: { update: () => void; }) {
         }
     }
 
-    async function onClickRemove(index: number) {
+    function onClickRemove(index: number) {
         textReplaceRules.splice(index, 1);
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
-    async function onClickMoveUp(index: number) {
+    function onClickMoveUp(index: number) {
         if (index === 0) return;
         [textReplaceRules[index], textReplaceRules[index - 1]] = [textReplaceRules[index - 1], textReplaceRules[index]];
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
-    async function onClickMoveDown(index: number) {
+    function onClickMoveDown(index: number) {
         if (index === textReplaceRules.length - 1) return;
         [textReplaceRules[index], textReplaceRules[index + 1]] = [textReplaceRules[index + 1], textReplaceRules[index]];
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
 
-    async function onChange(e: string, index: number, key: string) {
+    function onChange(e: string, index: number, key: string) {
         textReplaceRules[index][key] = e;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
 
-    async function onCheck(checked: boolean, index: number) {
+    function onCheck(checked: boolean, index: number) {
         textReplaceRules[index].isRegex = checked;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
 
-    async function onToggle(checked: boolean, index: number) {
+    function onToggle(checked: boolean, index: number) {
         textReplaceRules[index].isEnabled = checked;
-
-        await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-        update();
+        setAndUpdate();
     }
 
     const [value, setValue] = useState("");
@@ -328,7 +246,7 @@ function TextReplace({ update }: { update: () => void; }) {
                                             <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z"></path></svg>
                                         </Button>
                                     </div>
-                                    <Preview value={value} index={i} enabled={rule.isEnabled} />
+                                    <Preview textReplaceRules={textReplaceRules} value={value} index={i} enabled={rule.isEnabled} />
                                 </Flex>
                                 {rule.isRegex && renderFindError(rule.find)}
                             </React.Fragment>
@@ -338,73 +256,6 @@ function TextReplace({ update }: { update: () => void; }) {
             </Flex>
         </>
     );
-}
-
-async function tryImport(str: string, update: () => void) {
-    try {
-        const data = JSON.parse(str);
-        for (const rule of data) {
-            if (typeof rule.isEnabled !== "boolean") throw new Error("A rule is missing isEnabled.");
-            if (typeof rule.find !== "string") throw new Error("A rule is missing find.");
-            if (typeof rule.replace !== "string") throw new Error("A rule is missing replace.");
-            if (typeof rule.onlyIfIncludes !== "string") throw new Error("A rule is missing onlyIfIncludes.");
-            if (typeof rule.isRegex !== "boolean") throw new Error("A rule is missing isRegex.");
-
-            if (textReplaceRules.find(r => r.find === rule.find && r.replace === rule.replace && r.onlyIfIncludes === rule.onlyIfIncludes && r.isRegex === rule.isRegex)) continue;
-
-            rule.id = random();
-
-            textReplaceRules.push(rule);
-            await DataStore.set(TEXT_REPLACE_KEY, textReplaceRules);
-            update();
-        }
-        Toasts.show({
-            type: Toasts.Type.SUCCESS,
-            message: "Successfully imported & merged text replace rules.",
-            id: Toasts.genId()
-        });
-    } catch (err) {
-        new Logger("TextReplace").error(err);
-        Toasts.show({
-            type: Toasts.Type.FAILURE,
-            message: "Failed to import text replace rules: " + String(err),
-            id: Toasts.genId()
-        });
-    }
-}
-
-function applyRule(rule: Rule, content: string): string {
-    if (!rule.isEnabled || !rule.find) return content;
-    if (rule.isRegex) {
-        if (rule.onlyIfIncludes) {
-            try {
-                const onlyIfIncludesRegex = stringToRegex(rule.onlyIfIncludes);
-                if (!onlyIfIncludesRegex.test(content)) return content;
-            } catch (e) {
-                new Logger("TextReplace").error(`Invalid regex: ${rule.onlyIfIncludes}`);
-            }
-        }
-        try {
-            const regex = stringToRegex(rule.find);
-            content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
-        } catch (e) {
-            new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-        }
-    } else if (!rule.onlyIfIncludes || content.includes(rule.onlyIfIncludes)) {
-        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
-    }
-    return content;
-}
-
-function applyAllRules(content: string): string {
-    if (content.length === 0)
-        return content;
-
-    for (const rule of textReplaceRules) {
-        content = applyRule(rule, content);
-    }
-
-    return content;
 }
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
@@ -480,7 +331,10 @@ export default definePlugin({
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
             if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyAllRules(msg.content);
+
+            for (const rule of textReplaceRules) {
+                msg.content = applyRule(rule, msg.content);
+            }
         });
     },
 
