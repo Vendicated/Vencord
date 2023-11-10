@@ -63,7 +63,7 @@ export default function UserModal({ item, user, sounds, closeModal }: { item: So
                 />
                 <Flex flexDirection="column" style={{ gap: "7px", height: "68px", justifyContent: "space-between" }}>
                     <Text variant="text-md/bold" style={{ height: "20px" }}>{item.soundId}</Text>
-                    <Text variant="text-md/normal">Played {currentUser.plays.length} times.</Text>
+                    <Text variant="text-md/normal">Played {currentUser.plays.length} {currentUser.plays.length === 1 ? 'time' : 'times'}.</Text>
                     <Text variant="text-md/normal">Last played: <Timestamp timestamp={moment(currentUser.plays.at(-1))} /></Text>
                 </Flex>
             </Flex>

@@ -63,7 +63,7 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
                                     />
                                     <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>{user.username}</Forms.FormText>
                                 </Flex>
-                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>Played {currentUser.plays.length} times</Forms.FormText>
+                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>Played {currentUser.plays.length} {currentUser.plays.length === 1 ? 'time' : 'times'}</Forms.FormText>
                             </div>
                         </Clickable>
                     );

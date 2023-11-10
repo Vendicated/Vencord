@@ -66,5 +66,3 @@ export function IconWithTooltip({ text, icon, onClick }) {
         )}
     </Tooltip>;
 }
-
-// a

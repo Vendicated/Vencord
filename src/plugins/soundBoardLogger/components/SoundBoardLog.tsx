@@ -28,6 +28,7 @@ import { SoundLogEntry } from "../utils";
 import { AvatarStyles, cl, getEmojiUrl, UserSummaryItem, downloadAudio, addListener, removeListener } from "../utils";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
+import { findByProps } from "@webpack";
 
 export async function openSoundBoardLog(): Promise<void> {
 
@@ -104,6 +105,11 @@ export default function SoundBoardLog({ data, closeModal }) {
         openUserModal(item, user, sounds);
     }
 
+    const { amplitudeToPerceptual } = findByProps("amplitudeToPerceptual");
+    const soundboardVolume = amplitudeToPerceptual(findByProps("getAmplitudinalSoundboardVolume").getAmplitudinalSoundboardVolume());
+
+    const playSound = id => findByProps("_handleSoundboardSoundPlayLocally")._playSound(id, 1);
+
     return (
         <>
             <ModalHeader className={cl("modal-header")}>
@@ -111,7 +117,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                 <ModalCloseButton onClick={closeModal} />
             </ModalHeader>
             <ModalContent className={classes(cl("modal-content"), Margins.top8)}>
-                {sounds.map(item => {
+                {sounds.length ? sounds.map(item => {
                     const itemUsers = users.filter(user => item.users.map(u => u.id).includes(user.id));
 
                     return (
@@ -152,11 +158,23 @@ export default function SoundBoardLog({ data, closeModal }) {
                             <Flex flexDirection="row" className={cl("sound-buttons")}>
                                 <Button color={Button.Colors.PRIMARY} size={Button.Sizes.SMALL} onClick={() => downloadAudio(item.soundId)}>Download</Button>
                                 <Button color={Button.Colors.GREEN} size={Button.Sizes.SMALL} onClick={() => copyWithToast(item.soundId, "ID copied to clipboard!")}>Copy ID</Button>
-                                <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={() => (new Audio(`https://cdn.discordapp.com/soundboard-sounds/${item.soundId}`)).play()} > Play Sound</Button>
+                                <Tooltip text={`Soundboard volume: ${Math.floor(soundboardVolume)}%`}>
+                                    {({ onMouseEnter, onMouseLeave }) =>
+                                        <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={() => playSound(item.soundId)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>Play Sound</Button>
+                                    }
+                                </Tooltip>
                             </Flex>
                         </div>
                     );
-                })}
+                }) :
+                    <div style={{ textAlign: "center" }} className={Margins.top16}>
+                        <img
+                            src="https://raw.githubusercontent.com/fres621/assets/main/shiggy.png"
+                            height="200px"
+                        />
+                        <Forms.FormText variant="text-sm/medium" style={{ color: "var(--text-muted)" }} className={Margins.bottom16}>No sounds logged yet. Join a voice chat to start logging!</Forms.FormText>
+                    </div>
+                }
             </ModalContent >
             <ModalFooter className={cl("modal-footer")}>
                 <Button color={Button.Colors.RED} onClick={async () => { await clearLoggedSounds(); update(); }}>
