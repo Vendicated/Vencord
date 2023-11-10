@@ -81,6 +81,9 @@ export default definePlugin({
                 } else {
                     if (!settings.store.enableDoubleClickToReply) return;
 
+                    const EPHEMERAL = 64;
+                    if ((msg.flags & EPHEMERAL) === EPHEMERAL) return;
+
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
                         channel,
