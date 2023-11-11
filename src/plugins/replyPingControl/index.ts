@@ -46,7 +46,7 @@ export default definePlugin({
         }
     },
 
-    isReplyToCurrentUser(message) {
+    isReplyToCurrentUser(message: MessageJSON) {
         if (!message.message_reference) return false;
         const repliedMessage = MessageStore.getMessage(message.channel_id, message.message_reference.message_id);
         return repliedMessage && repliedMessage.author.id === UserStore.getCurrentUser().id;
