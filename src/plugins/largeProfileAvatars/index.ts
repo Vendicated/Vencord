@@ -23,7 +23,7 @@ export default definePlugin({
     name: "LargeProfileAvatars",
     description: "Makes avatars take up the full width of the profile modal and scales resolution accordingly",
     authors: [
-        Devs.board
+        Devs.Board
     ],
 
     settings,
