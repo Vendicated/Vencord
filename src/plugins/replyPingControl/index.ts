@@ -53,7 +53,6 @@ export default definePlugin({
     },
 
     getCurrentUserMention() {
-        const currentUser = UserStore.getCurrentUser();
-        return { id: currentUser.id, username: currentUser.username, discriminator: currentUser.discriminator };
+        return UserStore.getCurrentUser() as unknown as UserJSON;
     }
 });
