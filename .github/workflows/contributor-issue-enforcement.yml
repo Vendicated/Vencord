@@ -1,0 +1,45 @@
+name: Enforce contributor requirement
+on:
+  issues:
+    types:
+      - created
+
+jobs:
+    enforcement:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Delay to allow contributor comment
+              run: sleep 180
+
+            - name: Find potential contributor comment
+              uses: peter-evans/find-comment@d362b58d73ad53d089dd54460397ec1b8b47dbfd
+              id: comment
+              with:
+                  issue-number: ${{ github.event.number }}
+                  body-includes: /ok
+
+            - name: Check commenter is contributor
+              uses: actions-cool/check-user-permission@a0668c9aec87f3875fc56170b6452a453e9dd819
+              id: comment-contrib
+              if: ${{ !steps.comment.outputs.comment-id }}
+              with:
+                  username: ${{ steps.comment.outputs.comment-author }}
+                  check-contributor: true
+
+            - name: Check author is contributor
+              uses: actions-cool/check-user-permission@a0668c9aec87f3875fc56170b6452a453e9dd819
+              id: author-contrib
+              if: ${{ !steps.comment-contrib.check-result }}
+              with:
+                  # no username means it checks the person who triggered the workflow run i.e. the issue creator
+                  check-contributor: true
+
+            - name: Tag and close issue
+              if: ${{ !steps.comment-contrib.check-result && !steps.author-contrib.check-result }}
+              run: |
+                  gh issue close $ISSUE -c "Your issue does not comply with our contributor requirement. Please do not ignore the issue template." -r "not planned"
+                  gh issue edit $ISSUE --add-label "ignored contributor requirement"
+                  gh issue lock $ISSUE
+              env:
+                  ISSUE: ${{ github.event.issue.html_url }}
