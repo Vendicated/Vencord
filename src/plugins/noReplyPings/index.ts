@@ -7,6 +7,16 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { MessageStore, UserStore } from "@webpack/common";
+import { Message } from "discord-types/general";
+
+// for some reason discord has two different types for messages, isn't that just amazing design
+type ReceivedMessage = {
+    message_reference: {
+        guild_id?: string;
+        channel_id: string;
+        message_id: string;
+    } | undefined;
+} & Omit<Message, "messageReference">;
 
 export default definePlugin({
     name: "NoReplyPings",
@@ -22,8 +32,7 @@ export default definePlugin({
         }
     ],
 
-    // I would type this as Message but for some reason there's two types discord uses, and this happens to be the one discord-types doesn't have
-    isReplyMention(e: any) {
+    isReplyMention(e: ReceivedMessage) {
         if (!e.message_reference) return false;
 
         const repliedMessage = MessageStore.getMessage(e.channel_id, e.message_reference.message_id);
