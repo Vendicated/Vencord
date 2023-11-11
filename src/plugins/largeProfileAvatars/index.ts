@@ -1,0 +1,35 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and Board
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { disableStyle, enableStyle } from "@api/Styles";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+import styles from "./styles.css?managed";
+
+export default definePlugin({
+    name: "LargeProfileAvatars",
+    description: "Makes avatars take up the full width of the profile modal and scales resolution accordingly",
+    version: "1.0.0",
+    authors: [
+        Devs.board
+    ],
+    patches: [
+        {
+            find: "getUserAvatarURL:",
+            replacement: {
+                match: /(\i=arguments\.length>2&&void .!==arguments\[2\]\?)arguments\[2\](:f\.AVATAR_SIZE)/,
+                replace: "$1(arguments[2]==80?300:arguments[2])$2"
+            }
+        }
+    ],
+    start() {
+        enableStyle(styles);
+    },
+    stop() {
+        disableStyle(styles);
+    }
+});

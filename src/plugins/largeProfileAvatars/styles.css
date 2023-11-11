@@ -1,0 +1,69 @@
+[class*="userPopoutOuter_"] [class*="avatarPositionNormal__"],
+[class*="userPopoutOuter_"] [class*="avatarPositionPremiumBanner__"],
+[class*="userPopoutOuter_"] [class*="avatarPositionPremiumNoBanner__"] {
+    position: static;
+    order: -1;
+    z-index: 1;
+}
+
+[class*="userPopoutOuter_"] [class*="avatarHint__"] {
+    height: 340px;
+    width: 100%;
+}
+
+[class*="userPopoutOuter_"] [class*="wrapper_"][style^="width: 80px"] {
+    width: 340px !important;
+    height: 340px !important;
+}
+
+[class*="userPopoutOuter_"] [class*="avatarHintInner__"] {
+    box-shadow: none;
+}
+
+[class*="userPopoutOuter_"]
+    [class*="bannerSVGWrapper__"]:not([viewBox$="120"]) {
+    display: none;
+}
+
+[class*="userPopoutOuter_"] [class*="bannerSVGWrapper__"] mask circle {
+    display: none;
+}
+
+[class*="userPopoutOuter_"]
+    [class*="avatarHoverTarget__"]
+    [class*="wrapper_"]
+    svg {
+    width: 115%;
+    height: 115%;
+}
+
+[class*="userPopoutOuter_"]
+    [class*="avatarHoverTarget__"]
+    [class*="wrapper_"]
+    svg
+    circle {
+    display: none;
+}
+
+[class*="userPopoutOuter_"]
+    [class*="avatarHoverTarget__"]
+    foreignObject
+    [class*="avatarStack__"] {
+    transform: translate(0, 0);
+}
+
+[class*="userPopoutOuter_"] [class*="roundedBanner__"] {
+    border-radius: 0;
+}
+
+/* Following hopefully fixes decorations */
+
+[class*="userPopoutOuter_"] [class*="avatarDecorationHint__"] {
+    height: 340px;
+    width: 100%;
+}
+
+[class*="userPopoutOuter_"] [class*="avatarDecoration_"],
+[class*="userPopoutOuter_"] [class*="bannerSVGWrapper__"] mask {
+    display: none;
+}
