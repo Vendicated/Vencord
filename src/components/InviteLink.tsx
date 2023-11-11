@@ -19,12 +19,12 @@
 import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 
-interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
+interface Props {
     target: string;
-    disabled?: boolean;
+    children: React.ReactNode;
 }
 
-export function InviteLink(props: React.PropsWithChildren<Props>) {
+export function InviteLink(props: Props) {
     return (
         <Link
             href={`https://discord.gg/${props.target}`}
