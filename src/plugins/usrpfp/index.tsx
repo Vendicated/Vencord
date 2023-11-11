@@ -44,20 +44,28 @@ export default definePlugin({
         </Link>
     ),
     patches: [
+        // default export patch
         {
             find: "getUserAvatarURL:",
             replacement: {
                 match: /(getUserAvatarURL:)(\i),/,
-                replace: "$1(user,anim,size)=>$self.patchGetAvatar(user)||$2(user,anim,size),"
+                replace: "$1$self.getAvatarHook($2),"
+            }
+        },
+        // named export patch
+        {
+            find: "getUserAvatarURL:",
+            replacement: {
+                match: /(getUserAvatarURL:\i\(\){return )(\i)}/,
+                replace: "$1$self.getAvatarHook($2)}"
             }
         }
     ],
 
-    patchGetAvatar: (user: User) => {
-        const customAvatar = data.avatars[user.id];
-        if (settings.store.preferNitro && user.avatar?.startsWith("a_")) return;
+    getAvatarHook: (original: any) => (user: User, animated: boolean, size: number) => {
+        if (settings.store.preferNitro && user.avatar?.startsWith("a_")) return original(user, animated, size);
 
-        return customAvatar;
+        return data.avatars[user.id] ?? original(user, animated, size);
     },
 
     async start() {
