@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "_channelMessages",
             replacement: {
-                match: /receiveMessage\((\w+)\)\{/,
+                match: /receiveMessage\((\i)\)\{/,
                 replace: "$&$self.modifyMentions($1);"
             }
         }
