@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated, MrDiamond, ant0n, and contributors
+ * Copyright (c) 2023 Vendicated, Mr Diamond, ant0n and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -28,20 +28,21 @@ export default definePlugin({
         {
             find: "_channelMessages",
             replacement: {
-                match: /receiveMessage\((\i)\)\{/,
+                match: /receiveMessage\((\w+)\)\{/,
                 replace: "$&$self.modifyMentions($1);"
             }
         }
     ],
 
     modifyMentions(message: MessageJSON) {
-        const isReplyToCurrentUser = this.isReplyToCurrentUser(message);
-        if (settings.store.alwaysPingOnReply && isReplyToCurrentUser) {
 
+        if (!this.isReplyToCurrentUser(message)) return;
+
+        if (settings.store.alwaysPingOnReply) {
             if (!message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id)) {
                 message.mentions.push(this.getCurrentUserMention());
             }
-        } else if (!settings.store.alwaysPingOnReply && isReplyToCurrentUser) {
+        } else {
 
             message.mentions = message.mentions.filter(mention => mention.id !== UserStore.getCurrentUser().id);
         }
