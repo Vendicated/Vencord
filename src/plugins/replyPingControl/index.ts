@@ -33,7 +33,7 @@ export default definePlugin({
         }
     ],
 
-    modifyMentions(message) {
+    modifyMentions(message: MessageJSON) {
         const isReplyToCurrentUser = this.isReplyToCurrentUser(message);
         if (settings.store.alwaysPingOnReply && isReplyToCurrentUser) {
 
