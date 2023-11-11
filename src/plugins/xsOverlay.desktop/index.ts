@@ -129,9 +129,10 @@ export default definePlugin({
                 sendOtherNotif("Incoming call", `${channel.name} is calling you...`);
             }
         },
-        MESSAGE_CREATE({ message }: { message: Message; }) {
+        MESSAGE_CREATE({ message, optimistic }: { message: Message; optimistic: boolean; }) {
             // Apparently without this try/catch, discord's socket connection dies if any part of this errors
             try {
+                if (optimistic) return;
                 const channel = ChannelStore.getChannel(message.channel_id);
                 if (!shouldNotify(message, channel)) return;
 
