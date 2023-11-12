@@ -34,7 +34,8 @@ export default definePlugin({
 
     modifyMentions(message: MessageJSON) {
         const user = UserStore.getCurrentUser();
-
+        if (message.author.id === user.id)
+            return;
         if (this.getRepliedMessage(message)?.author.id !== user.id)
             return;
 
