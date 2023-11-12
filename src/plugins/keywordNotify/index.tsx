@@ -94,7 +94,7 @@ export default definePlugin({
 	    find: "isRawMessageMentioned:",
 	    replacement: {
             match: /isRawMessageMentioned:function\(\){return (.{1,2}).{1,512}function \1\(.{1,512}?=(.{1,2});return/,
-            replace: "$& Vencord.Plugins.plugins.KeywordNotify.contains($2) ||"
+            replace: "$& $self.contains($2) ||"
 	    }
 	}],
 
