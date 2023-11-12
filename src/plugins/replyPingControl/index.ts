@@ -24,37 +24,28 @@ export default definePlugin({
     authors: [Devs.ant0n, Devs.MrDiamond],
     settings,
 
-    patches: [
-        {
-            find: "_channelMessages",
-            replacement: {
-                match: /receiveMessage\((\i)\)\{/,
-                replace: "$&$self.modifyMentions($1);"
-            }
+    patches: [{
+        find: "_channelMessages",
+        replacement: {
+            match: /receiveMessage\((\i)\)\{/,
+            replace: "$&$self.modifyMentions($1);"
         }
-    ],
+    }],
 
     modifyMentions(message: MessageJSON) {
+        const user = UserStore.getCurrentUser();
 
-        if (!this.isReplyToCurrentUser(message)) return;
+        if (this.getRepliedMessage(message)?.author.id !== user.id)
+            return;
 
-        if (settings.store.alwaysPingOnReply) {
-            if (!message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id)) {
-                message.mentions.push(this.getCurrentUserMention());
-            }
-        } else {
-
-            message.mentions = message.mentions.filter(mention => mention.id !== UserStore.getCurrentUser().id);
-        }
+        if (!settings.store.alwaysPingOnReply)
+            message.mentions = message.mentions.filter(mention => mention.id !== user.id);
+        else if (!message.mentions.some(mention => mention.id === user.id))
+            message.mentions.push(user as any);
     },
 
-    isReplyToCurrentUser(message: MessageJSON) {
-        if (!message.message_reference) return false;
-        const repliedMessage = MessageStore.getMessage(message.channel_id, message.message_reference.message_id);
-        return repliedMessage && repliedMessage.author.id === UserStore.getCurrentUser().id;
+    getRepliedMessage(message: MessageJSON) {
+        const ref = message.message_reference;
+        return ref && MessageStore.getMessage(ref.channel_id, ref.message_id);
     },
-
-    getCurrentUserMention() {
-        return UserStore.getCurrentUser() as unknown as UserJSON;
-    }
 });
