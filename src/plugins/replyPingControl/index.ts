@@ -75,7 +75,12 @@ export default definePlugin({
 
 function validateWhitelist(value: string) {
     const whitelist = parseWhitelist(value);
-    return !whitelist.some(id => !isValidUserId(id));
+    if (whitelist.length === 0 && value.trim() !== "") {
+        showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
+        return false;
+    }
+    showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
+    return true;
 }
 
 function parseWhitelist(value: string) {
