@@ -56,7 +56,7 @@ export function CheckedTextInput({ value: initialValue, onChange, validate }: Te
     }
 
     useEffect(() => {
-        setValue(initialValue);
+        handleChange(initialValue);
     }, [initialValue]);
 
     return (
