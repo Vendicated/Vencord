@@ -82,5 +82,5 @@ function parseWhitelist(value: string) {
 }
 
 function isValidUserId(id: string) {
-    return /^\d+$/.test(id); // Validates if the string is a number (basic validation for Discord User IDs)
+    return /^\d+$/.test(id);
 }
