@@ -108,8 +108,8 @@ export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | nu
 
     useEffect(() => {
         if (!user) return;
-        const { has: hasDecorAvatarDecoration, fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
-        if (!hasDecorAvatarDecoration(user.id)) fetchUserDecorAvatarDecoration(user.id);
+        const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+        fetchUserDecorAvatarDecoration(user.id);
     }, []);
 
     return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
