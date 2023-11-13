@@ -24,13 +24,16 @@ export const settings = definePluginSettings({
         default: "",
         disabled: () => settings.store.alwaysPingOnReply,
         onChange: newValue => {
-            const originalIDs = newValue.split(",").map(id => id.trim()).filter(id => id !== "");
-            const validatedIDs = originalIDs.filter(isValidUserId);
+            const originalIDs = newValue.split(",")
+                .map(id => id.trim())
+                .filter(id => id !== "");
 
-            if (originalIDs.length !== validatedIDs.length) {
+            const isInvalid = originalIDs.some(id => !isValidUserId(id));
+
+            if (isInvalid) {
                 showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
             } else {
-                cachedWhitelist = validatedIDs;
+                cachedWhitelist = originalIDs;
                 showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
             }
         }
