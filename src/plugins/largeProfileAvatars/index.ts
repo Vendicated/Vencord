@@ -33,7 +33,7 @@ export default definePlugin({
         {
             find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
-                match: /(src:null!=\i\?)(\i)/,
+                match: /("img",{src:null!=\i\?)(\i)/,
                 replace: "$1($2.replace(/(80|128)$/,$self.settings.store.imgSize))"
             }
         }
