@@ -28,6 +28,14 @@ Visit https://vencord.dev/download
 
 https://discord.gg/D9uwnFnqmd
 
+## Sponsors
+
+| **Thanks a lot to all Vencord [sponsors](https://github.com/sponsors/Vendicated)!!** |
+|:--:| 
+| [![](https://meow.vendicated.dev/sponsors.png)](https://github.com/sponsors/Vendicated) |
+| *generated using [github-sponsor-graph](https://github.com/Vendicated/github-sponsor-graph)* |
+
+
 ## Star History
 
 <a href="https://star-history.com/#Vendicated/Vencord&Timeline">
