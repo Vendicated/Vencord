@@ -50,6 +50,17 @@ export function getEmojiUrl(emoji) {
     return emoji.id ? `https://cdn.discordapp.com/emojis/${emoji.id}.png?size=32` : getURL(emoji.name);
 };
 
+const v1 = findByPropsLazy("amplitudeToPerceptual");
+const v2 = findByPropsLazy("getAmplitudinalSoundboardVolume");
+
+export const getSoundboardVolume = () => v1.amplitudeToPerceptual(v2.getAmplitudinalSoundboardVolume());
+
+export const playSound = id => {
+    let audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
+    audio.volume = getSoundboardVolume() / 100;
+    audio.play();
+}
+
 export async function downloadAudio(id: string): Promise<void> {
     const filename = id + settings.store.FileType;
     const data = await fetch(`https://cdn.discordapp.com/soundboard-sounds/${id}`).then(e => e.arrayBuffer());

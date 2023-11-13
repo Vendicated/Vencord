@@ -20,10 +20,10 @@ import { CopyIcon } from "@components/Icons";
 import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
-import { ModalRoot, ModalContent, ModalProps, closeModal, openModal } from "@utils/modal";
+import { ModalRoot, ModalContent, closeModal, openModal } from "@utils/modal";
 import { Clickable, Forms, Timestamp, Text } from "@webpack/common";
 import { Flex } from "@components/Flex";
-import { SoundLogEntry, User } from "../utils";
+import { SoundLogEntry, User, playSound } from "../utils";
 import moment from "moment";
 import { AvatarStyles, UserSummaryItem, cl, downloadAudio, getEmojiUrl } from "../utils";
 import { DownloadIcon, PlayIcon, IconWithTooltip } from "./Icons";
@@ -39,6 +39,7 @@ export function openUserModal(item, user, sounds) {
 export default function UserModal({ item, user, sounds, closeModal }: { item: SoundLogEntry, user: User, sounds: SoundLogEntry[], closeModal: Function; }) {
     const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: '', plays: [0] };
     const soundsDoneByCurrentUser = sounds.filter(sound => sound.users.some(itemUser => itemUser.id === user.id) && sound.soundId != item.soundId);
+
     return (
         <ModalContent className={cl("user")}>
             <Clickable onClick={() => {
@@ -107,7 +108,7 @@ export default function UserModal({ item, user, sounds, closeModal }: { item: So
                 <div className={cl("user-buttons")}>
                     <IconWithTooltip text="Download" icon={<DownloadIcon />} onClick={() => downloadAudio(item.soundId)} />
                     <IconWithTooltip text="Copy ID" icon={<CopyIcon />} onClick={() => copyWithToast(item.soundId, "ID copied to clipboard!")} />
-                    <IconWithTooltip text="Play Sound" icon={<PlayIcon />} onClick={() => (new Audio(`https://cdn.discordapp.com/soundboard-sounds/${item.soundId}`)).play()} />
+                    <IconWithTooltip text="Play Sound" icon={<PlayIcon />} onClick={() => playSound(item.soundId)} />
                 </div>
             </Flex>
         </ModalContent>
