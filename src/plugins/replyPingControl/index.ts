@@ -10,6 +10,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { MessageStore, showToast, UserStore } from "@webpack/common";
 import { MessageJSON } from "discord-types/general";
 
+let cachedWhitelist: string[] = [];
+
 export const settings = definePluginSettings({
     alwaysPingOnReply: {
         type: OptionType.BOOLEAN,
@@ -21,6 +23,14 @@ export const settings = definePluginSettings({
         description: "Comma-separated list of User IDs to always receive reply pings from",
         default: "",
         disabled: () => settings.store.alwaysPingOnReply,
+        onChange: newValue => {
+            cachedWhitelist = parseWhitelist(newValue);
+            if (!validateWhitelist(newValue)) {
+                showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
+            } else {
+                showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
+            }
+        }
     }
 });
 
@@ -47,8 +57,7 @@ export default definePlugin({
         if (!repliedMessage || repliedMessage.author.id !== user.id)
             return;
 
-        const whitelist = parseWhitelist(settings.store.replyPingWhitelist);
-        const isWhitelisted = whitelist.includes(message.author.id);
+        const isWhitelisted = cachedWhitelist.includes(message.author.id);
 
         if (isWhitelisted || settings.store.alwaysPingOnReply) {
             if (!message.mentions.some(mention => mention.id === user.id))
@@ -66,19 +75,13 @@ export default definePlugin({
 
 function validateWhitelist(value: string) {
     const whitelist = parseWhitelist(value);
-    if (whitelist.some(id => !isValidUserId(id))) {
-        showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
-        return false;
-    }
-    showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
-    return true;
+    return !whitelist.some(id => !isValidUserId(id));
 }
-
 
 function parseWhitelist(value: string) {
     return value.split(",")
         .map(id => id.trim())
-        .filter(id => id !== "");
+        .filter(id => id !== "" && isValidUserId(id));
 }
 
 function isValidUserId(id: string) {
