@@ -24,10 +24,12 @@ export const settings = definePluginSettings({
         default: "",
         disabled: () => settings.store.alwaysPingOnReply,
         onChange: newValue => {
-            cachedWhitelist = parseWhitelist(newValue);
-            if (!validateWhitelist(newValue)) {
+            const newWhitelist = parseWhitelist(newValue);
+
+            if (newWhitelist.length === 0 && newValue.trim() !== "") {
                 showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
             } else {
+                cachedWhitelist = newWhitelist;
                 showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
             }
         }
@@ -72,16 +74,6 @@ export default definePlugin({
         return ref && MessageStore.getMessage(ref.channel_id, ref.message_id);
     },
 });
-
-function validateWhitelist(value: string) {
-    const whitelist = parseWhitelist(value);
-    if (whitelist.length === 0 && value.trim() !== "") {
-        showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
-        return false;
-    }
-    showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
-    return true;
-}
 
 function parseWhitelist(value: string) {
     return value.split(",")
