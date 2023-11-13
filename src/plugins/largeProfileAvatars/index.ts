@@ -16,6 +16,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "The resolution of the avatar image",
         options: ["300", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "300" })),
+
     }
 });
 
@@ -30,10 +31,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "getUserAvatarURL:",
+            find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
-                match: /(\i=arguments\.length>2&&void .!==arguments\[2\]\?)arguments\[2\](:f\.AVATAR_SIZE)/,
-                replace: "$1(arguments[2]==80?$self.settings.store.imgSize:arguments[2])$2"
+                match: /(src:null!=\i\?)(\i)/,
+                replace: "$1($2.replace(/(80|128)$/,$self.settings.store.imgSize))"
             }
         }
     ],
