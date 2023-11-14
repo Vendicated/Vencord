@@ -9,7 +9,8 @@ import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { findByCode, findByPropsLazy } from "@webpack";
-import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
+import { User } from "discord-types/general";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
 import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
@@ -36,6 +37,47 @@ interface Section {
     items: ("none" | "create" | Decoration)[];
     authorIds?: string[];
 }
+
+function SectionHeader({ section }: { section: Section; }) {
+    const hasSubtitle = typeof section.subtitle !== "undefined";
+    const hasAuthorIds = typeof section.authorIds !== "undefined";
+
+    const [authors, setAuthors] = useState<User[]>([]);
+
+    useEffect(() => {
+        (async () => {
+            if (!section.authorIds) return;
+
+            for (const authorId of section.authorIds) {
+                const author = UserStore.getUser(authorId) ?? await UserUtils.getUser(authorId);
+                setAuthors(authors => [...authors, author]);
+            }
+        })();
+    }, [section.authorIds]);
+
+    return <div>
+        <div style={{ display: "flex" }}>
+            <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
+            {hasAuthorIds && <UserSummaryItem
+                users={authors}
+                guildId={undefined}
+                renderIcon={false}
+                max={5}
+                showDefaultAvatarsForNullUsers
+                size={16}
+                showUserPopout
+                className={Margins.bottom8}
+            />
+            }
+        </div>
+        {hasSubtitle &&
+            <Forms.FormText type="description" className={Margins.bottom8}>
+                {section.subtitle}
+            </Forms.FormText>
+        }
+    </div>;
+}
+
 export default function ChangeDecorationModal(props: any) {
     // undefined = not trying, null = none, Decoration = selected
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
@@ -135,32 +177,7 @@ export default function ChangeDecorationModal(props: any) {
                 }}
                 getItemKey={item => typeof item === "string" ? item : item.hash}
                 getSectionKey={section => section.sectionKey}
-                renderSectionHeader={section => {
-                    const hasSubtitle = typeof section.subtitle !== "undefined";
-                    const hasAuthorIds = typeof section.authorIds !== "undefined";
-
-                    return <div>
-                        <div style={{ display: "flex" }}>
-                            <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
-                            {hasAuthorIds && <UserSummaryItem
-                                users={section.authorIds?.map(id => UserStore.getUser(id))}
-                                guildId={undefined}
-                                renderIcon={false}
-                                max={5}
-                                showDefaultAvatarsForNullUsers
-                                size={16}
-                                showUserPopout
-                                className={Margins.bottom8}
-                            />
-                            }
-                        </div>
-                        {hasSubtitle &&
-                            <Forms.FormText type="description" className={Margins.bottom8}>
-                                {section.subtitle}
-                            </Forms.FormText>
-                        }
-                    </div>;
-                }}
+                renderSectionHeader={section => <SectionHeader section={section} />}
                 sections={data}
             />
             <div className={cl("change-decoration-modal-preview")}>
