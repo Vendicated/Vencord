@@ -5,18 +5,31 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { useForceUpdater } from "@utils/react";
+import definePlugin, { OptionType } from "@utils/types";
 import { InventoryStore } from "@webpack/common";
 
 import * as PackManager from "./packManager";
-import TabComponent from "./TabComponent";
+import { PinnedGuildsComponent, TabComponent } from "./TabComponent";
+
+const settings = definePluginSettings({
+    pinnedGuilds: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component() {
+            return <PinnedGuildsComponent update={useForceUpdater()} />;
+        },
+    }
+});
 
 export default definePlugin({
     name: "PackManager",
     description: "(Un)claim packs with slash commands, and additional UI patches for supporting packs for joined servers.",
     authors: [Devs.arHSM],
     dependencies: ["CommandsAPI"],
+    settings,
     patches: [
         // Patch to enable usage of packs for servers which the user has joined
         // This does lead to a messy UI
