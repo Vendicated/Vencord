@@ -68,7 +68,7 @@ export default definePlugin({
     patches: [
         {
             // RenderLevel defines if a channel is hidden, collapsed in category, visible, etc
-            find: ".CannotShow=",
+            find: '"placeholder-channel-id"',
             replacement: [
                 // Remove the special logic for channels we don't have access to
                 {
@@ -82,13 +82,8 @@ export default definePlugin({
                 },
                 // Make channels we dont have access to be the same level as normal ones
                 {
-                    match: /(?<=renderLevel:(\i\(this,\i\)\?\i\.Show:\i\.WouldShowIfUncollapsed).+?renderLevel:).+?(?=,)/,
-                    replace: (_, renderLevelExpression) => renderLevelExpression
-                },
-                // Make channels we dont have access to be the same level as normal ones
-                {
-                    match: /(?<=activeJoinedRelevantThreads.+?renderLevel:.+?,threadIds:\i\(this.record.+?renderLevel:)(\i)\..+?(?=,)/,
-                    replace: (_, RenderLevels) => `${RenderLevels}.Show`
+                    match: /(activeJoinedRelevantThreads:.{0,50}VIEW_CHANNEL.+?renderLevel:(.+?),threadIds.+?renderLevel:).+?(?=,threadIds)/g,
+                    replace: (_, rest, defaultRenderLevel) => `${rest}${defaultRenderLevel}`
                 },
                 // Remove permission checking for getRenderLevel function
                 {
