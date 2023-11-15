@@ -24,14 +24,13 @@ import { getCurrentGuild } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
-const promptToUpload = findByCodeLazy("UPLOAD_FILE_LIMIT_ERROR");
 const StickerStore = findStoreLazy("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
@@ -202,15 +201,15 @@ export default definePlugin({
             predicate: () => settings.store.enableEmojiBypass,
             replacement: {
                 match: /((?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))(?=})/g,
-                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention!=null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
             }
         },
         // Allow stickers to be sent everywhere
         {
-            find: "canUseStickersEverywhere:function",
+            find: "canUseCustomStickersEverywhere:function",
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /canUseStickersEverywhere:function\(\i\){/,
+                match: /canUseCustomStickersEverywhere:function\(\i\){/,
                 replace: "$&return true;"
             },
         },
@@ -756,7 +755,7 @@ export default definePlugin({
         gif.finish();
 
         const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-        promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+        UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
     },
 
     start() {
