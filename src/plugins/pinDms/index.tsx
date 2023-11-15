@@ -100,10 +100,10 @@ export default definePlugin({
                 },
                 {
                     // Fix getRowHeight's check for whether this is the DMs section
-                    // section === DMS
-                    match: /===\i\.DMS&&0/,
-                    // section -1 === DMS
-                    replace: "-1$&"
+                    // DMS (inlined) === section
+                    match: /(?<=getRowHeight=\(.{2,50}?)1===\i/,
+                    // DMS (inlined) === section - 1
+                    replace: "$&-1"
                 },
                 {
                     // Override scrollToChannel to properly account for pinned channels
