@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
@@ -20,19 +21,14 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NotificationVolume",
     description: "Save your ears and set a separate volume for notifications and in-app sounds",
-    authors: [
-        {
-            id: 554994003318276106n,
-            name: "philipbry",
-        },
-    ],
+    authors: [Devs.philipbry],
     settings,
     patches: [
         {
             find: "_ensureAudio(){",
             replacement: {
                 match: /_ensureAudio\(\)\{/,
-                replace: "_ensureAudio(){this._volume*=$self.settings.store.notificationVolume/100;"
+                replace: "$&this._volume*=$self.settings.store.notificationVolume/100;"
             },
         },
     ],
