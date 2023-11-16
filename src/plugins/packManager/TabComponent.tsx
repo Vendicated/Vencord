@@ -68,7 +68,7 @@ function CategorySection({ heading, children }: PropsWithChildren & { heading: s
 
 function GuildAvatar({ id, icon }: { id: string, icon: string | undefined; }) {
     return <Avatar
-        src={`https://cdn.discordapp.com/${isNonNullish(icon) ? `icons/${id}/${icon}` : `embed/avatars/${BigInt(id) % 6n}.png`}.png?size=128"`}
+        src={isNonNullish(icon) ? `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=128` : ""}
         size="SIZE_40"
         className={ProfileListClasses.listAvatar}
     ></Avatar>;
