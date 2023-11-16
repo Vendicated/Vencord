@@ -805,7 +805,7 @@ export default definePlugin({
                     if (!emoji.require_colons) continue;
                     if (emoji.available !== false && canUseEmotes) continue;
                     if (emoji.guildId === guildId && !emoji.animated) continue;
-                    if (emoji.type === "PACK_EMOJI") continue;
+                    if (emoji.type === "PACK_EMOJI" && (this.canUseEmotes || !emoji.animated)) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
                     const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
