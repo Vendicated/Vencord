@@ -107,7 +107,7 @@ export default definePlugin({
     },
 
     applyRegexes(m) {
-        if (regexes.some(r => m.content.match(new RegExp(r)))) {
+        if (regexes.some(r => m.content.match(new RegExp(r))) && m != "") {
             m.mentions.push(me);
         }
     },
