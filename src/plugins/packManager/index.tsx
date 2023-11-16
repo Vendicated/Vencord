@@ -12,7 +12,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { InventoryStore } from "@webpack/common";
 
 import * as PackManager from "./packManager";
-import { PinnedGuildsComponent, TabComponent } from "./TabComponent";
+import { PinnedGuildsComponent, populate, TabComponent } from "./TabComponent";
 
 const settings = definePluginSettings({
     pinnedGuilds: {
@@ -137,7 +137,12 @@ export default definePlugin({
             },
         }
     ],
+
     TabComponent() {
         return <TabComponent></TabComponent>;
+    },
+
+    async start() {
+        await populate();
     }
 });

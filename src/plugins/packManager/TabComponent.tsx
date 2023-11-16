@@ -14,14 +14,17 @@ import { PropsWithChildren } from "react";
 
 import * as PackManager from "./packManager";
 
-export type PinnedGuild = Record<"id" | "name", string>;
+type PinnedGuild = Record<"id" | "name", string>;
 
 const PINNED_GUILDS_KEY = "PackManager_pinnedGuilds";
 const makeEmptyPinnedGuild = (): PinnedGuild => ({
     id: "",
     name: ""
 });
-const pinnedGuilds = [makeEmptyPinnedGuild()];
+let pinnedGuilds = [makeEmptyPinnedGuild()];
+export const populate = async () => {
+    pinnedGuilds = await DataStore.get(PINNED_GUILDS_KEY) ?? [makeEmptyPinnedGuild()];
+};
 
 const ScrollerClasses = findByPropsLazy("scroller", "listItems", "listWrapper");
 const HeadingWrapperClasses = findByPropsLazy("categorySection", "header");
