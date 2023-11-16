@@ -4,7 +4,9 @@
 
 The cutest Discord client mod
 
-![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334)
+| ![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
+|:--:|
+| A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme) |
 
 ## Features
 
