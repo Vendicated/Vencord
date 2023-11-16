@@ -63,6 +63,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
+    type: "GUILD_EMOJI" | "PACK_EMOJI";
     url: string;
 }
 
@@ -75,6 +76,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
+    type: "UNICODE";
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
