@@ -123,7 +123,7 @@ export default definePlugin({
         {
             find: ".lastEditedByContainer,",
             replacement: {
-                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
+                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
                 // paste my fancy custom button above the message field
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
