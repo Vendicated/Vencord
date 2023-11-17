@@ -121,7 +121,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".showCopiableUsername",
+            find: ".lastEditedByContainer,",
             replacement: {
                 match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
                 // paste my fancy custom button above the message field
