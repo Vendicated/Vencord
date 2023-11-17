@@ -148,7 +148,7 @@ export default definePlugin({
             // Patch Dm List
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /highlighted:.+name:.+decorators.+\}\)\}\),/,
+                match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
                 replace: "$&$self.patchUserList(arguments[0], true),",
             }
         }
