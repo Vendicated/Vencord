@@ -60,7 +60,7 @@ async function embedDidMount(this: Component<Props>) {
 
         if (titles[0]?.votes >= 0) {
             embed.dearrow.oldTitle = embed.rawTitle;
-            embed.rawTitle = titles[0].title;
+            embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
         }
 
         if (thumbnails[0]?.votes >= 0 && thumbnails[0].timestamp) {
