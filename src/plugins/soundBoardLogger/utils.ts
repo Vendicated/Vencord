@@ -59,15 +59,18 @@ export const playSound = id => {
     let audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
     audio.volume = getSoundboardVolume() / 100;
     audio.play();
-}
+};
+
+const saveFileModule = findByPropsLazy("saveFile");
 
 export async function downloadAudio(id: string): Promise<void> {
     const filename = id + settings.store.FileType;
-    const data = await fetch(`https://cdn.discordapp.com/soundboard-sounds/${id}`).then(e => e.arrayBuffer());
+    const uri = `https://cdn.discordapp.com/soundboard-sounds/${id}`;
+    const data = await fetch(uri).then(e => e.arrayBuffer());
 
 
     if (IS_DISCORD_DESKTOP) {
-        DiscordNative.fileManager.saveWithDialog(data, filename);
+        saveFileModule.saveFile(uri, filename);
     } else {
         saveFile(new File([data], filename, { type: "audio/ogg" }));
     }
@@ -79,8 +82,8 @@ export function getListeners(): Function[] {
     return listeners;
 }
 
-export  function addListener(fn): void {
-    listeners.push(fn)
+export function addListener(fn): void {
+    listeners.push(fn);
 }
 
 export function removeListener(fn): void {
