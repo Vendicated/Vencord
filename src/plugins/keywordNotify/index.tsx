@@ -95,7 +95,7 @@ export default definePlugin({
         {
     	    find: "}_dispatch(",
     	    replacement: {
-                match: /}_dispatch\((.{1,2}),.{1,2}\){/,
+                match: /}_dispatch\((\i),\i\){/,
                 replace: "$&$1=$self.modify($1);"
     	    }
     	}
