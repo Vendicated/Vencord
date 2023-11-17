@@ -131,7 +131,7 @@ export default definePlugin({
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
-                match: /\(\)\.body.+?displayProfile:\i}\),/,
+                match: /\.body.+?displayProfile:\i}\),/,
                 // paste my fancy custom button below the username
                 replace: "$&$self.patchModal(arguments[0]),",
             }
