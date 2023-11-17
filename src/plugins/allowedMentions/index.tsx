@@ -114,6 +114,16 @@ export default definePlugin({
                     replace: "$1.content === this.props.message.content && $self.removeEditMentionsMap(this.props.channel.id),"
                 }
             ]
+        },
+        {
+            find: ".Messages.EVERYONE_POPOUT_BODY",
+            replacement: [
+                // Remove the warning popout for server members >30 and @everyone mention is off
+                {
+                    match: /(?<=shouldShowEveryoneGuard\(\i,(\i)\))/,
+                    replace: "|| $self.shouldSkipContentWarningPopout($1.id)"
+                }
+            ]
         }
     ],
 
@@ -256,6 +266,11 @@ export default definePlugin({
 
     removeEditMentionsMap(channelId: string) {
         editMentionsMap.delete(channelId);
+    },
+
+    shouldSkipContentWarningPopout(channelId: string) {
+        const mentions = sendMentionsMap.get(channelId);
+        return isNonNullish(mentions) && !mentions.everyone;
     },
 
     start() {
