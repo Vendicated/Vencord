@@ -6,9 +6,10 @@
 
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
+import { isNonNullish } from "@utils/guards";
 import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout, RelationshipStore, useEffect, UserStore, useState } from "@webpack/common";
+import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 export interface Mentions {
     hasEveryone: boolean,
@@ -32,10 +33,16 @@ export interface AllowedMentionsProps {
 
 const replyClasses = findByPropsLazy("replyBar", "replyLabel", "separator");
 
-function getDisplayableUserName(userId: string, guildId: string | null) {
+function getDisplayableUserNameParts(userId: string, guildId: string | null) {
     // @ts-ignore discord-types doesn't have globalName
-    const { globalName, username } = UserStore.getUser(userId);
+    const { globalName, username } = UserStore.getUser(userId) ?? {};
     const nickname = guildId ? GuildMemberStore.getNick(guildId, userId) : RelationshipStore.getNickname(userId);
+
+    return [nickname, globalName as string, username];
+}
+
+function getDisplayableUserName(userId: string, guildId: string | null) {
+    const [nickname, globalName, username] = getDisplayableUserNameParts(userId, guildId);
 
     // Displayed name priority
     // Guild/Friend Nickname > Global Name > Username
@@ -51,6 +58,26 @@ function getDisplayableRoleName(roleId: string, guildId: string | null) {
     return role ?? "@deleted-role";
 }
 
+function fuzzySearch(searchQuery: string, searchString: string) {
+    let searchIndex = 0;
+    let score = 0;
+
+    for (let i = 0; i < searchString.length; i++) {
+        if (searchString[i] === searchQuery[searchIndex]) {
+            score++;
+            searchIndex++;
+        } else {
+            score--;
+        }
+
+        if (searchIndex === searchQuery.length) {
+            return score;
+        }
+    }
+
+    return null;
+}
+
 function Title({ children, pointer }: { children: string; pointer?: boolean; }) {
     return <Forms.FormTitle style={{ margin: 0, cursor: pointer ? "pointer" : "default" }}>{children}</Forms.FormTitle>;
 }
@@ -64,6 +91,7 @@ function Flyer({
     shouldShow,
     setShouldShow,
     update,
+    fuzzy,
     ids,
     rawIds,
     guildId,
@@ -75,13 +103,16 @@ function Flyer({
     shouldShow: boolean,
     setShouldShow: (value: boolean) => void,
     update: () => void,
+    fuzzy: (search: string, id: string) => number | null,
     ids: Set<string>,
     rawIds: string[],
     guildId: string | null,
-    getDisplayableName: (userId: string, guildId: string | null) => string,
+    getDisplayableName: (userId: string, guildId: string | null) => string | undefined,
     all: boolean,
     setAll: (value: boolean) => void,
 }) {
+    const [search, setSearch] = useState(undefined as undefined | string);
+
     return <Popout
         animation={Popout.Animation.SCALE}
         align="center"
@@ -101,25 +132,51 @@ function Flyer({
                     action={() => setAll(!all)}
                 />
                 <Menu.MenuSeparator />
-                {rawIds.map(userId => {
-                    return <Menu.MenuCheckboxItem
-                        id={`vc-allowed-mentions-${title}-flyer-${userId}`}
-                        label={getDisplayableName(userId, guildId)}
-                        disabled={
-                            /*
-                                API allows only 100, athough do not disable
-                                already checked ids because that would cause a
-                                soft lock in the menu
-                            */
-                            all || (ids.size >= 100 && !ids.has(userId))
-                        }
-                        checked={ids.has(userId)}
-                        action={() => {
-                            ids.has(userId) ? ids.delete(userId) : ids.add(userId);
-                            update();
-                        }}
-                    />;
-                })}
+                <Menu.MenuItem
+                    label="Search"
+                    id={`vc-allowed-mentions-${title}-flyer-search`}
+                    render={() => {
+                        return <TextInput
+                            placeholder={`Search ${title.toLowerCase()}`}
+                            value={search}
+                            onChange={value => setSearch(value.trim())}
+                        />;
+                    }}
+                />
+                {(isNonNullish(search) ?
+                    rawIds.map(id => ({
+                        score: fuzzy(search, id),
+                        name: getDisplayableName(id, guildId),
+                        id: id
+                    })
+                    ).filter(o => isNonNullish(o.score))
+                        .sort((a, b) => b.score! - a.score!)
+                    : rawIds.map(id => ({
+                        score: 0,
+                        name: getDisplayableName(id, guildId),
+                        id: id
+                    }))
+                )
+                    .filter(o => isNonNullish(o.name))
+                    .map(object => {
+                        return <Menu.MenuCheckboxItem
+                            id={`vc-allowed-mentions-${title}-flyer-${object.id}`}
+                            label={object.name!}
+                            disabled={
+                                /*
+                                    API allows only 100, athough do not disable
+                                    already checked ids because that would cause a
+                                    soft lock in the menu
+                                */
+                                all || (ids.size >= 100 && !ids.has(object.id))
+                            }
+                            checked={ids.has(object.id)}
+                            action={() => {
+                                ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
+                                update();
+                            }}
+                        />;
+                    })}
             </Menu.Menu>;
         }}
     >
@@ -180,6 +237,13 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
                 shouldShow={shouldShowUsersFlyer}
                 setShouldShow={setShouldShowUsersFlyer}
                 update={update}
+                fuzzy={(search, userId) => {
+                    const samples = getDisplayableUserNameParts(userId, channel.guild_id)
+                        .filter(isNonNullish)
+                        .map(name => fuzzySearch(search, name))
+                        .filter(isNonNullish) as number[];
+                    return samples.length > 0 ? Math.max(...samples) : null;
+                }}
                 ids={userIds}
                 rawIds={mentions.userIds}
                 guildId={channel.guild_id}
@@ -195,6 +259,7 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
                 shouldShow={shouldShowRolesFlyer}
                 setShouldShow={setShouldShowRolesFlyer}
                 update={update}
+                fuzzy={(search, roleId) => fuzzySearch(search, getDisplayableRoleName(roleId, channel.guild_id).toLowerCase())}
                 ids={roleIds}
                 rawIds={mentions.roleIds}
                 guildId={channel.guild_id}
