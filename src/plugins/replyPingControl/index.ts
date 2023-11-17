@@ -46,7 +46,7 @@ export default definePlugin({
         if (!repliedMessage || repliedMessage.author.id !== user.id) return;
 
         const whitelist = settings.store.replyPingWhitelist.split(",").map(id => id.trim());
-        const isWhitelisted = whitelist.some(id => isValidUserId(id) && message.author.id === id);
+        const isWhitelisted = whitelist.some(id => message.author.id === id);
 
         if (isWhitelisted || settings.store.alwaysPingOnReply) {
             if (!message.mentions.some(mention => mention.id === user.id)) {
@@ -63,7 +63,4 @@ export default definePlugin({
     },
 });
 
-function isValidUserId(id: string) {
-    return /^\d+$/.test(id);
-}
 
