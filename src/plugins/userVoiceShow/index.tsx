@@ -138,7 +138,7 @@ export default definePlugin({
         },
         {
             // Patch Member List
-            find: "default.MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING",
+            find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
             replacement: {
                 match: /avatar:\(\(/,
                 replace: "children:[$self.patchUserList(arguments[0], false)],$&",
