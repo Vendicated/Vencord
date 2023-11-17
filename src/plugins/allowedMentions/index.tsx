@@ -258,10 +258,6 @@ export default definePlugin({
         editMentionsMap.delete(channelId);
     },
 
-    getMentionsMaps() {
-        return { editMentionsMap, sendMentionsMap };
-    },
-
     start() {
         this.preSend = addPreSendListener((channelId, _, extra) => this.setAllowedMentions(channelId, extra, "send"));
     },
