@@ -81,7 +81,7 @@ function handleMessageReactionEvent(event: MessageReactionBase) {
 
 export default definePlugin({
     name: "NoSuperReactions",
-    authors: [Devs.Ven],
+    authors: [Devs.throwaway],
     description: "Treats super reactions as normal reactions.",
 
     flux: {
