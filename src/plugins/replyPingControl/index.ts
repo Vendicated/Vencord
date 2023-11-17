@@ -79,12 +79,6 @@ export default definePlugin({
     },
 });
 
-function parseWhitelist(value: string) {
-    return value.split(",")
-        .map(id => id.trim())
-        .filter(id => id !== "");
-}
-
 function isValidUserId(id: string) {
     return /^\d+$/.test(id);
 }
