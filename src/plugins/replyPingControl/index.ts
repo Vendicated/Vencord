@@ -7,10 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { MessageStore, showToast, UserStore } from "@webpack/common";
+import { MessageStore, UserStore } from "@webpack/common";
 import { MessageJSON } from "discord-types/general";
-
-let cachedWhitelist: string[] = [];
 
 export const settings = definePluginSettings({
     alwaysPingOnReply: {
@@ -23,20 +21,6 @@ export const settings = definePluginSettings({
         description: "Comma-separated list of User IDs to always receive reply pings from",
         default: "",
         disabled: () => settings.store.alwaysPingOnReply,
-        onChange: newValue => {
-            const originalIDs = newValue.split(",")
-                .map(id => id.trim())
-                .filter(id => id !== "");
-
-            const isInvalid = originalIDs.some(id => !isValidUserId(id));
-
-            if (isInvalid) {
-                showToast("Invalid User ID: One or more User IDs in the whitelist are invalid. Please check your input.");
-            } else {
-                cachedWhitelist = originalIDs;
-                showToast("Whitelist Updated: Reply ping whitelist has been successfully updated.");
-            }
-        }
     }
 });
 
@@ -56,18 +40,18 @@ export default definePlugin({
 
     modifyMentions(message: MessageJSON) {
         const user = UserStore.getCurrentUser();
-        if (message.author.id === user.id)
-            return;
+        if (message.author.id === user.id) return;
 
         const repliedMessage = this.getRepliedMessage(message);
-        if (!repliedMessage || repliedMessage.author.id !== user.id)
-            return;
+        if (!repliedMessage || repliedMessage.author.id !== user.id) return;
 
-        const isWhitelisted = settings.store.replyPingWhitelist.split(",").some(id => message.author.id === id.trim());
+        const whitelist = settings.store.replyPingWhitelist.split(",").map(id => id.trim());
+        const isWhitelisted = whitelist.some(id => isValidUserId(id) && message.author.id === id);
 
         if (isWhitelisted || settings.store.alwaysPingOnReply) {
-            if (!message.mentions.some(mention => mention.id === user.id))
+            if (!message.mentions.some(mention => mention.id === user.id)) {
                 message.mentions.push(user as any);
+            }
         } else {
             message.mentions = message.mentions.filter(mention => mention.id !== user.id);
         }
@@ -82,3 +66,4 @@ export default definePlugin({
 function isValidUserId(id: string) {
     return /^\d+$/.test(id);
 }
+
