@@ -147,7 +147,7 @@ export default definePlugin({
         if (slotOneEnabled) {
             var slotOneClock = document.createElement("p");
             slotOneClock.classList.add("vc-clock");
-            clockContainer?.appendChild(slotOneClock);
+            clockContainer.appendChild(slotOneClock);
         }
         if (slotTwoEnabled) {
             var slotTwoClock = document.createElement("p");
