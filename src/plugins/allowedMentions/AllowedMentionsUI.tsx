@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./AllowedMentionsUI.css";
+
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { isNonNullish } from "@utils/guards";
 import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout as DiscordPopout, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 export interface Mentions {
     hasEveryone: boolean,
@@ -47,7 +49,8 @@ function getDisplayableUserName(userId: string, guildId: string | null) {
     // Displayed name priority
     // Guild/Friend Nickname > Global Name > Username
 
-    return nickname ?? globalName ?? username;
+    // User id if not cached in any stores
+    return nickname ?? globalName ?? username ?? userId;
 }
 
 function getDisplayableRoleName(roleId: string, guildId: string | null) {
@@ -86,7 +89,7 @@ function Separator() {
     return <div className={replyClasses.separator}></div>;
 }
 
-function Flyer({
+function Popout({
     title,
     shouldShow,
     setShouldShow,
@@ -113,19 +116,20 @@ function Flyer({
 }) {
     const [search, setSearch] = useState(undefined as undefined | string);
 
-    return <Popout
-        animation={Popout.Animation.SCALE}
+    return <DiscordPopout
+        animation={DiscordPopout.Animation.SCALE}
         align="center"
         position="top"
         shouldShow={shouldShow}
         onRequestClose={() => setShouldShow(false)}
         renderPopout={() => {
             return <Menu.Menu
-                navId={`vc-allowed-mentions-${title}-flyer`}
+                navId={`vc-allowed-mentions-${title}-popout`}
                 onClose={() => setShouldShow(false)}
+                className="vc-allowed-mentions-popout-menu"
             >
                 <Menu.MenuCheckboxItem
-                    id={`vc-allowed-mentions-${title}-flyer-all`}
+                    id={`vc-allowed-mentions-${title}-popout-all`}
                     label="All"
                     disabled={ids.size > 0}
                     checked={all}
@@ -134,7 +138,7 @@ function Flyer({
                 <Menu.MenuSeparator />
                 <Menu.MenuItem
                     label="Search"
-                    id={`vc-allowed-mentions-${title}-flyer-search`}
+                    id={`vc-allowed-mentions-${title}-popout-search`}
                     render={() => {
                         return <TextInput
                             placeholder={`Search ${title.toLowerCase()}`}
@@ -158,10 +162,9 @@ function Flyer({
                         id: id
                     }))
                 )
-                    .filter(o => isNonNullish(o.name))
                     .map(object => {
                         return <Menu.MenuCheckboxItem
-                            id={`vc-allowed-mentions-${title}-flyer-${object.id}`}
+                            id={`vc-allowed-mentions-${title}-popout-${object.id}`}
                             label={object.name!}
                             disabled={
                                 /*
@@ -188,7 +191,7 @@ function Flyer({
                 </Clickable>;
             }
         }
-    </Popout>;
+    </DiscordPopout>;
 }
 
 export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMentionsForChannel }: AllowedMentionsProps) {
@@ -218,8 +221,8 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
         allRoles,
     ]);
 
-    const [shouldShowUsersFlyer, setShouldShowUsersFlyer] = useState(false);
-    const [shouldShowRolesFlyer, setShouldShowRolesFlyer] = useState(false);
+    const [shouldShowUsersPopout, setShouldShowUsersPopout] = useState(false);
+    const [shouldShowRolesPopout, setShouldShowRolesPopout] = useState(false);
     const update = useForceUpdater();
 
     const displayEveryone = mentions.hasEveryone;
@@ -233,10 +236,10 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
         </>}
         {displayUserIds && <>
             {displayEveryone && <Separator />}
-            <Flyer
+            <Popout
                 title="Users"
-                shouldShow={shouldShowUsersFlyer}
-                setShouldShow={setShouldShowUsersFlyer}
+                shouldShow={shouldShowUsersPopout}
+                setShouldShow={setShouldShowUsersPopout}
                 update={update}
                 fuzzy={(search, userId) => {
                     const samples = getDisplayableUserNameParts(userId, channel.guild_id)
@@ -255,10 +258,10 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
         </>}
         {displayRoleIds && <>
             {(displayEveryone || displayUserIds) && <Separator />}
-            <Flyer
+            <Popout
                 title="Roles"
-                shouldShow={shouldShowRolesFlyer}
-                setShouldShow={setShouldShowRolesFlyer}
+                shouldShow={shouldShowRolesPopout}
+                setShouldShow={setShouldShowRolesPopout}
                 update={update}
                 fuzzy={(search, roleId) => fuzzySearch(search, getDisplayableRoleName(roleId, channel.guild_id).toLowerCase())}
                 ids={roleIds}
