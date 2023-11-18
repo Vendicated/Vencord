@@ -278,10 +278,6 @@ export default definePlugin({
         return isNonNullish(mentions) && !mentions.everyone;
     },
 
-    getMentionsMaps() {
-        return { editMentionsMap, sendMentionsMap };
-    },
-
     start() {
         this.preSend = addPreSendListener((channelId, _, extra) => this.setAllowedMentions(channelId, extra, "send"));
     },
