@@ -112,6 +112,11 @@ export default definePlugin({
                 {
                     match: /(?<=return )(?=(\i).content!==this.props.message.content)/,
                     replace: "$1.content === this.props.message.content && $self.removeEditMentionsMap(this.props.channel.id),"
+                },
+                // Remove entry from editMap when escape is pressed
+                {
+                    match: /(?<=this.onKeyDown=\i=>\{if\(\i.keyCode===\i.KeyboardKeys.ESCAPE&&!\i.shiftKey\){)/,
+                    replace: "$self.removeEditMentionsMap(this.props.channel.id);"
                 }
             ]
         },
@@ -271,6 +276,10 @@ export default definePlugin({
     shouldSkipContentWarningPopout(channelId: string) {
         const mentions = sendMentionsMap.get(channelId);
         return isNonNullish(mentions) && !mentions.everyone;
+    },
+
+    getMentionsMaps() {
+        return { editMentionsMap, sendMentionsMap };
     },
 
     start() {
