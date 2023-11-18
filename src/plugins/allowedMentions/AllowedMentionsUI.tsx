@@ -139,6 +139,7 @@ function Flyer({
                         return <TextInput
                             placeholder={`Search ${title.toLowerCase()}`}
                             value={search}
+                            disabled={all}
                             onChange={value => setSearch(value.trim())}
                         />;
                     }}
@@ -166,7 +167,7 @@ function Flyer({
                                 /*
                                     API allows only 100, athough do not disable
                                     already checked ids because that would cause a
-                                    soft lock in the menu
+                                    hard lock in the menu
                                 */
                                 all || (ids.size >= 100 && !ids.has(object.id))
                             }
