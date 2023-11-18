@@ -143,7 +143,7 @@ export default definePlugin({
 
         if (rightAlign) clockContainer.classList.add("right-align");
 
-        panels?.appendChild(clockContainer);
+        panels.appendChild(clockContainer);
         if (slotOneEnabled) {
             var slotOneClock = document.createElement("p");
             slotOneClock.classList.add("vc-clock");
