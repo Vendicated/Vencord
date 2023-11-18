@@ -145,7 +145,7 @@ const settings = definePluginSettings({
     vencordContributorBadgePosition: {
         type: OptionType.NUMBER,
         description: "The position of the Vencord Contributor badge.",
-        default: 2
+        default: 1
     },
     showDiscordProfileBadges: {
         type: OptionType.BOOLEAN,
@@ -155,7 +155,7 @@ const settings = definePluginSettings({
     discordProfileBadgesPosition: {
         type: OptionType.NUMBER,
         description: "The position of the Discord profile badges.",
-        default: 3
+        default: 2
     },
     showDiscordNitroBadges: {
         type: OptionType.BOOLEAN,
@@ -165,7 +165,7 @@ const settings = definePluginSettings({
     discordNitroBadgePosition: {
         type: OptionType.NUMBER,
         description: "The position of the Discord Nitro badge.",
-        default: 4
+        default: 3
     }
 });
 
