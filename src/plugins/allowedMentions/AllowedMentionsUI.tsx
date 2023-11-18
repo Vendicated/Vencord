@@ -142,9 +142,29 @@ function Popout({
                     render={() => {
                         return <TextInput
                             placeholder={`Search ${title.toLowerCase()}`}
+                            type="text"
+                            maxLength={32}
+                            role="combobox"
                             value={search}
                             disabled={all}
                             onChange={value => setSearch(value.trim())}
+                            style={{ margin: "2px 0", padding: "6px 8px" }}
+                            onKeyDown={e => {
+                                if (e.key === "Escape") {
+                                    setSearch(undefined);
+                                } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                                    // Some random event listener is blocking
+                                    // left & right arrow keys so you can't
+                                    // navigate the text with arrow keys unless
+                                    // you do e.stopPropogation
+                                    e.stopPropagation();
+                                } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                                    // Pressing up/down arrow keys leads to a messy
+                                    // UI state, blurring the text input fixes it.
+                                    // (kinda)
+                                    e.currentTarget.blur();
+                                }
+                            }}
                         />;
                     }}
                 />
