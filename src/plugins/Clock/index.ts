@@ -166,10 +166,10 @@ export default definePlugin({
         }
         function updateTime() {
             const now = new Date();
-            if (slotOneEnabled) { slotOneClock.textContent = slotOneLabel + seperator + now.toLocaleTimeString([], clockOneOptions); }
-            if (slotTwoEnabled) { slotTwoClock.textContent = slotTwoLabel + seperator + now.toLocaleTimeString([], clockTwoOptions); }
-            if (slotThreeEnabled) { slotThreeClock.textContent = slotThreeLabel + seperator + now.toLocaleTimeString([], clockThreeOptions); }
-            if (slotFourEnabled) { slotFourClock.textContent = slotFourLabel + seperator + now.toLocaleTimeString([], clockFourOptions); }
+            if (slotOneEnabled) slotOneClock.textContent = slotOneLabel + seperator + now.toLocaleTimeString([], clockOneOptions);
+            if (slotTwoEnabled) slotTwoClock.textContent = slotTwoLabel + seperator + now.toLocaleTimeString([], clockTwoOptions);
+            if (slotThreeEnabled) slotThreeClock.textContent = slotThreeLabel + seperator + now.toLocaleTimeString([], clockThreeOptions);
+            if (slotFourEnabled) slotFourClock.textContent = slotFourLabel + seperator + now.toLocaleTimeString([], clockFourOptions);
         }
         setInterval(updateTime, 1000);
     },
