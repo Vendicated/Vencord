@@ -1,0 +1,15 @@
+.vc-clock {
+    color: var(--text-normal);
+    display: block;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    white-space: nowrap;
+}
+
+.vc-clock-container {
+    border-bottom: 1px solid var(--background-primary);
+}
+
+.right-align {
+    text-align: right;
+}
