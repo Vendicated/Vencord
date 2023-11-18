@@ -1,0 +1,6 @@
+.vc-charcounter-text {
+    position: absolute;
+    right: 0;
+    bottom: -32px;
+    white-space: nowrap;
+}
