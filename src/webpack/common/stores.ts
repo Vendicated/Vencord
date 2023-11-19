@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { filters, findByProps, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -83,7 +84,7 @@ export const useStateFromStores: <T>(
     idk?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T
-    = findByCodeLazy("useStateFromStores");
+    = proxyLazy(() => findByProps("useStateFromStores").useStateFromStores);
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);

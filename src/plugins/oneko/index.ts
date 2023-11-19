@@ -16,39 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./oneko-element.js";
-
-import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-
-const settings = definePluginSettings({
-    speed: {
-        description: "Cat speed",
-        type: OptionType.SLIDER, // "y566666666444t" -- Korbo's cat Coraline, stepping on their keyboard
-        restartNeeded: true,
-        markers: makeRange(10, 50, 5),
-        default: 10,
-    },
-});
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "oneko",
     description: "cat follow mouse (real)",
-    // Listing adryd here because this literally just runs her script
-    authors: [Devs.Ven, Devs.adryd, Devs.Korbo],
-    settings,
+    // Listing adryd here because this literally just evals her script
+    authors: [Devs.Ven, Devs.adryd],
 
     start() {
-        const nekoEl = document.createElement("o-neko");
-        nekoEl.setAttribute("speed", settings.store.speed.toString());
-        nekoEl.setAttribute("x", String(Math.random() * window.innerWidth));
-        nekoEl.setAttribute("y", String(Math.random() * window.innerHeight));
-        document.body.appendChild(nekoEl);
+        fetch("https://raw.githubusercontent.com/adryd325/oneko.js/5977144dce83e4d71af1de005d16e38eebeb7b72/oneko.js")
+            .then(x => x.text())
+            .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif"))
+            .then(eval);
     },
 
     stop() {
-        document.querySelectorAll("o-neko").forEach((oneko => oneko.remove()));
+        clearInterval(window.onekoInterval);
+        delete window.onekoInterval;
+        document.getElementById("oneko")?.remove();
     }
 });
