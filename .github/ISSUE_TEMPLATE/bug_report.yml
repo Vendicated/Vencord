@@ -14,7 +14,8 @@ body:
         DO NOT USE THIS FORM, unless
         - you are a vencord contributor
         - you were given explicit permission to use this form by a moderator in our support server
-        - you are filing a security related report
+        
+        DO NOT USE THIS FORM FOR SECURITY RELATED ISSUES. [CREATE A SECURITY ADVISORY INSTEAD.](https://github.com/Vendicated/Vencord/security/advisories/new)
   
   - type: input
     id: discord

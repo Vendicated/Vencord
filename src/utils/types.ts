@@ -269,7 +269,7 @@ export interface DefinedSettings<
     store: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelavent settings
+     * @param filter optional filter to avoid rerenders for irrelevent settings
      */
     use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
     /** Definitions of each setting */
@@ -307,3 +307,10 @@ export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon 
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+
+export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
+    [key in keyof PluginExports]:
+    PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
+    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+    : never;
+};

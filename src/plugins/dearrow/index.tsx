@@ -63,7 +63,7 @@ async function embedDidMount(this: Component<Props>) {
             embed.rawTitle = titles[0].title;
         }
 
-        if (thumbnails[0]?.votes >= 0) {
+        if (thumbnails[0]?.votes >= 0 && thumbnails[0].timestamp) {
             embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
             embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
         }
@@ -147,8 +147,8 @@ export default definePlugin({
         replacement: [
             // patch componentDidMount to replace embed thumbnail and title
             {
-                match: /(\i).render=function.{0,50}\i\.embed/,
-                replace: "$1.componentDidMount=$self.embedDidMount,$&"
+                match: /render\(\)\{let\{embed:/,
+                replace: "componentDidMount=$self.embedDidMount;$&"
             },
 
             // add dearrow button
