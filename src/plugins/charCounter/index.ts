@@ -7,11 +7,9 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const cl = classNameFactory("vc-charcounter-");
 let maxChars = 2000;
 let currChars = 0;
 
@@ -71,7 +69,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=\("span",{(?:[^}]*,)?children:)\i(?=}|,)/,
-                    replace: "$self.CharCounter"
+                    replace: "$self.charCounterText"
                 }
             ]
         }
@@ -88,15 +86,11 @@ export default definePlugin({
             (maxChars - currChars) / maxChars <= settings.store.maxRemainingCharCount / 100
             : maxChars - currChars <= settings.store.maxRemainingCharCount);
     },
-    get CharCounter() {
-        return (
-            <span className={cl("text")}>
-                {settings.store.characterCounterText
-                    .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[mM]/g, maxChars.toString())
-                    .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[cC]/g, currChars.toString())
-                    .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[rR]/g, (maxChars - currChars).toString())
-                    .replaceAll(/\\(.|$)/g, "$1")}
-            </span>
-        );
+    get charCounterText() {
+        return settings.store.characterCounterText
+            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[mM]/g, maxChars.toString())
+            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[cC]/g, currChars.toString())
+            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[rR]/g, (maxChars - currChars).toString())
+            .replaceAll(/\\(.|$)/g, "$1");
     }
 });

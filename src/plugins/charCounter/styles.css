@@ -1,6 +1,19 @@
-.vc-charcounter-text {
-    position: absolute;
-    right: 0;
-    bottom: -32px;
-    white-space: nowrap;
+[class*="characterCount_"] {
+    inset: -24px 8px auto auto;
+}
+
+:has([class*="bioTextArea_"]) > [class*="characterCount_"] {
+    inset: auto 3px -24px auto;
+}
+
+[class*="messagesWrapper_"]:has([class*="jumpToPresentBar__"]) + * [class*="characterCount_"] {
+    top: -48px;
+}
+
+[class*="messagesWrapper_"]:has([class*="jumpToPresentBar__"]) + * :has([class*="attachedBars_"]) [class*="characterCount_"] {
+    top: -45px;
+}
+
+[class*="messagesWrapper_"]:has(+ * [class*="characterCount_"]) [class*="container__"]:has(+ [class*="emptyForum__"]) {
+    margin-bottom: 20px;
 }
