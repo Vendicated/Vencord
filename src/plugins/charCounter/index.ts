@@ -24,9 +24,17 @@ const settings = definePluginSettings({
         description: "Always show the character counter, regardless of the remaining character count.",
         default: true
     },
-    maxRemainingCharCount: {
+    compareCurrWithRemaining: {
+        type: OptionType.SELECT,
+        description: "Only show the character counter when:",
+        options: [
+            { label: "remaining character count ≤", value: true, default: true },
+            { label: "current character count ≥", value: false }
+        ]
+    },
+    charCountToShowCounterAt: {
         type: OptionType.NUMBER,
-        description: "Only show character counter when remaining character count is less than or equal to:",
+        description: "",
         default: 10
     },
     interpretAsPercentage: {
@@ -35,7 +43,7 @@ const settings = definePluginSettings({
         options: [
             { label: "% of max character count", value: true, default: true },
             { label: "characters", value: false }
-        ]
+        ],
     }
 });
 
@@ -82,9 +90,15 @@ export default definePlugin({
         currChars = n;
     },
     get shouldShowCharCounter() {
-        return settings.store.alwaysShowCharacterCounter || (settings.store.interpretAsPercentage ?
-            (maxChars - currChars) / maxChars <= settings.store.maxRemainingCharCount / 100
-            : maxChars - currChars <= settings.store.maxRemainingCharCount);
+        return settings.store.alwaysShowCharacterCounter || (
+            settings.store.compareCurrWithRemaining ?
+                settings.store.interpretAsPercentage ?
+                    (maxChars - currChars) / maxChars <= settings.store.charCountToShowCounterAt / 100
+                    : maxChars - currChars <= settings.store.charCountToShowCounterAt
+                : settings.store.interpretAsPercentage ?
+                    currChars / maxChars >= settings.store.charCountToShowCounterAt / 100
+                    : currChars >= settings.store.charCountToShowCounterAt
+        );
     },
     get charCounterText() {
         return settings.store.characterCounterText
