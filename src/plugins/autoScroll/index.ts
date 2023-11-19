@@ -239,11 +239,11 @@ function stopEvent(event: Event, preventDefault: boolean) {
 
 function getImageUrl(scrollNormal: IScrollNormal) {
     if (scrollNormal.width && scrollNormal.height)
-        return "https://raw.githubusercontent.com/PavelDobCZ23/Vencord/main/src/plugins/autoScroll/img/both.svg";
+        return "https://raw.githubusercontent.com/Vendicated/Vencord/main/src/plugins/autoScroll/img/both.svg";
     else if (scrollNormal.width)
-        return "https://raw.githubusercontent.com/PavelDobCZ23/Vencord/main/src/plugins/autoScroll/img/horizontal.svg";
+        return "https://raw.githubusercontent.com/Vendicated/Vencord/main/src/plugins/autoScroll/img/horizontal.svg";
     else
-        return "https://raw.githubusercontent.com/PavelDobCZ23/Vencord/main/src/plugins/autoScroll/img/vertical.svg";
+        return "https://raw.githubusercontent.com/Vendicated/Vencord/main/src/plugins/autoScroll/img/vertical.svg";
 }
 
 function direction(x: number, y: number) {
