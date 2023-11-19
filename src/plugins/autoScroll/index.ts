@@ -102,7 +102,7 @@ export const settings = definePluginSettings({
     sameSpeed: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Don't change speed depending on the position of the cursor."
+        description: "Don't change speed based on the position of the cursor."
     },
     speed: {
         type: OptionType.SLIDER,
