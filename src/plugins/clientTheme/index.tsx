@@ -20,8 +20,8 @@ import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
 import { Button } from "@webpack/common";
 
 let ColorPicker: React.ComponentType<any> = () => null;
@@ -41,11 +41,9 @@ function onPickColor(color) {
     updateColorVars();
 }
 
-const themeStore = findStoreLazy("ThemeStore");
-
 function ThemeSettings() {
     const lightnessWarning = hexToLightness(settings.store.color) > 45;
-    const lightModeWarning = themeStore.theme === "light";
+    const lightModeWarning = getTheme() === Theme.Light;
 
     return <div className="client-theme-settings">
         <div className="client-theme-container">
