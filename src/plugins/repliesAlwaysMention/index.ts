@@ -17,13 +17,16 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { UserStore, FluxDispatcher } from "@webpack/common";
 import { Message, User } from "discord-types/general";
+
+import settings from "./settings";
 
 interface IMessage {
     referenced_message?: Message;
     mentions: User[];
+    flags: number;
 }
 
 interface IMessageCreate {
@@ -39,11 +42,21 @@ export default definePlugin({
     authors: [Devs.HAHALOSAH],
     description: "Always receive pings when someone replies to your messages",
 
+    settings,
+
     interceptor({ optimistic, type, message }: IMessageCreate) {
         if (optimistic || type !== "MESSAGE_CREATE") return;
         if (!message.referenced_message) return;
         var currentUser = UserStore.getCurrentUser();
         if (message.referenced_message.author.id == currentUser.id) {
+            for (const mention of message.mentions) {
+                if (mention.id == currentUser.id) {
+                    return;
+                }
+            }
+            if (settings.store.silent) {
+                message.flags |= 1 << 12;
+            }
             message.mentions.push(currentUser);
         }
     },
