@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -92,7 +92,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
     start() {
         addDeleteStyle();
@@ -147,25 +147,36 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Whether to ignore messages by yourself",
             default: false
-        }
+        },
+        ignoreUsers: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of user IDs to ignore",
+            default: ""
+        },
+        ignoreChannels: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of channel IDs to ignore",
+            default: ""
+        },
+        ignoreGuilds: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of guild IDs to ignore",
+            default: ""
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (cache == null || (!isBulk && !cache.has(data.id))) return cache;
 
-            const { ignoreBots, ignoreSelf } = Settings.plugins.MessageLogger;
-            const myId = UserStore.getCurrentUser().id;
-
-            function mutate(id: string) {
+            const mutate = (id: string) => {
                 const msg = cache.get(id);
                 if (!msg) return;
 
                 const EPHEMERAL = 64;
                 const shouldIgnore = data.mlDeleted ||
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
-                    ignoreBots && msg.author?.bot ||
-                    ignoreSelf && msg.author?.id === myId;
+                    this.shouldIgnore(msg);
 
                 if (shouldIgnore) {
                     cache = cache.remove(id);
@@ -174,7 +185,7 @@ export default definePlugin({
                         .set("deleted", true)
                         .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
                 }
-            }
+            };
 
             if (isBulk) {
                 data.ids.forEach(mutate);
@@ -187,7 +198,19 @@ export default definePlugin({
         return cache;
     },
 
-    // Based on canary 9ab8626bcebceaea6da570b9c586172d02b9c996
+    shouldIgnore(message: any) {
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
+        const myId = UserStore.getCurrentUser().id;
+
+        return ignoreBots && message.author?.bot ||
+            ignoreSelf && message.author?.id === myId ||
+            ignoreUsers.includes(message.author?.id) ||
+            ignoreChannels.includes(message.channel_id) ||
+            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+    },
+
+    // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
     patches: [
         {
             // MessageStore
@@ -196,7 +219,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
+                    match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -206,7 +229,7 @@ export default definePlugin({
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\){var .+?((?:\w{1,2}\.){2})getOrCreate.+?},/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -216,10 +239,10 @@ export default definePlugin({
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\w)\).+?)\.update\((\w)/,
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || (Vencord.Settings.plugins.MessageLogger.ignoreBots && $2.message.author?.bot) || (Vencord.Settings.plugins.MessageLogger.ignoreSelf && $2.message.author?.id === Vencord.Webpack.Common.UserStore.getCurrentUser().id)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -228,8 +251,8 @@ export default definePlugin({
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
-                    match: /(?<=getLastEditableMessage=.{0,200}\.find\(\(function\((\i)\)\{)return/,
-                    replace: "return !$1.deleted &&"
+                    match: /(?<=getLastEditableMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
+                    replace: "!$1.deleted &&"
                 }
             ]
         },
@@ -237,13 +260,13 @@ export default definePlugin({
         {
             // Message domain model
             // Module 451
-            find: "isFirstMessageInForumPost=function",
+            find: "}addReaction(",
             replacement: [
                 {
-                    match: /(\w)\.customRenderedContent=(\w)\.customRenderedContent;/,
-                    replace: "$1.customRenderedContent = $2.customRenderedContent;" +
-                        "$1.deleted = $2.deleted || false;" +
-                        "$1.editHistory = $2.editHistory || [];"
+                    match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
+                    replace: "this.customRenderedContent = $1.customRenderedContent," +
+                        "this.deleted = $1.deleted || false," +
+                        "this.editHistory = $1.editHistory || [],"
                 }
             ]
         },
@@ -260,7 +283,7 @@ export default definePlugin({
                 // },
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
-                    match: /interactionData:(\w)\.interactionData/,
+                    match: /interactionData:(\i)\.interactionData/,
                     replace:
                         "interactionData:$1.interactionData," +
                         "deleted:$1.deleted," +
@@ -276,7 +299,7 @@ export default definePlugin({
                 {
                     // Construct new edited message and add editHistory & deleted (ref above)
                     // Pass in custom data to attachment parser to mark attachments deleted as well
-                    match: /attachments:(\w{1,2})\((\w)\)/,
+                    match: /attachments:(\i)\((\i)\)/,
                     replace:
                         "attachments: $1((() => {" +
                         "   let old = arguments[1]?.attachments;" +
@@ -292,7 +315,7 @@ export default definePlugin({
                 },
                 {
                     // Preserve deleted attribute on attachments
-                    match: /(\((\w)\){return null==\2\.attachments.+?)spoiler:/,
+                    match: /(\((\i)\){return null==\2\.attachments.+?)spoiler:/,
                     replace:
                         "$1deleted: arguments[0]?.deleted," +
                         "spoiler:"
@@ -303,15 +326,15 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: "[\"className\",\"attachment\",\"inlineMedia\"",
+            find: ".removeAttachmentHoverButton",
             replacement: [
                 {
-                    match: /((\w)\.className,\w=\2\.attachment),/,
-                    replace: "$1,deleted=$2.attachment?.deleted,"
+                    match: /(className:\i,attachment:\i),/,
+                    replace: "$1,attachment: {deleted},"
                 },
                 {
-                    match: /\["className","attachment","inlineMedia".+?className:/,
-                    replace: "$& (deleted ? 'messagelogger-deleted-attachment ' : '') +"
+                    match: /\[\i\.obscured\]:.+?,/,
+                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
                 }
             ]
         },
@@ -337,7 +360,7 @@ export default definePlugin({
                 {
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (arguments[0].message.editHistory.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
+                    replace: "$1 (arguments[0].message.editHistory?.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
                 }
             ]
         },
@@ -348,11 +371,11 @@ export default definePlugin({
             find: "displayName=\"ReferencedMessageStore\"",
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:function\((\w)\).+?},/,
+                    match: /MESSAGE_DELETE:function\((\i)\).+?},/,
                     replace: "MESSAGE_DELETE:function($1){},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function\((\w)\).+?},/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\).+?},/,
                     replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
@@ -361,7 +384,7 @@ export default definePlugin({
         {
             // Message context base menu
             // Module 600300
-            find: "id:\"remove-reactions\"",
+            find: "useMessageMenu:",
             replacement: [
                 {
                     // Remove the first section if message is deleted

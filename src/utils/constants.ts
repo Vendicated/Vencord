@@ -29,7 +29,18 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
-// Add yourself here if you made a plugin
+export interface Dev {
+    name: string;
+    id: bigint;
+    badge?: boolean;
+}
+
+/**
+ * If you made a plugin or substantial contribution, add yourself here.
+ * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
+ * If you wish to stay fully anonymous, feel free to set ID to 0n.
+ * If you are fine with attribution but don't want the badge, add badge: false
+ */
 export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
         name: "Vendicated",
@@ -201,7 +212,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     nick: {
         name: "nick",
-        id: 347884694408265729n
+        id: 347884694408265729n,
+        badge: false
     },
     whqwert: {
         name: "whqwert",
@@ -253,7 +265,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Dziurwa: {
         name: "Dziurwa",
-        id: 787017887877169173n
+        id: 1001086404203389018n
     },
     F53: {
         name: "F53",
@@ -291,6 +303,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "carince",
         id: 818323528755314698n
     },
+    PandaNinjas: {
+        name: "PandaNinjas",
+        id: 455128749071925248n
+    },
     CatNoir: {
         name: "CatNoir",
         id: 260371016348336128n
@@ -299,4 +315,85 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "outfoxxed",
         id: 837425748435796060n
     },
-});
+    UwUDev: {
+        name: "UwU",
+        id: 691413039156690994n,
+    },
+    amia: {
+        name: "amia",
+        id: 142007603549962240n
+    },
+    phil: {
+        name: "phil",
+        id: 305288513941667851n
+    },
+    ImLvna: {
+        name: "Luna <3",
+        id: 799319081723232267n
+    },
+    rad: {
+        name: "rad",
+        id: 610945092504780823n
+    },
+    AndrewDLO: {
+        name: "Andrew-DLO",
+        id: 434135504792059917n
+    },
+    HypedDomi: {
+        name: "HypedDomi",
+        id: 354191516979429376n
+    },
+    Rini: {
+        name: "Rini",
+        id: 1079479184478441643n
+    },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n
+    },
+    Arrow: {
+        name: "arrow",
+        id: 958158495302176778n
+    },
+    bb010g: {
+        name: "bb010g",
+        id: 72791153467990016n,
+    },
+    Lumap: {
+        name: "lumap",
+        id: 635383782576357407n
+    },
+    Dolfies: {
+        name: "Dolfies",
+        id: 852892297661906993n,
+    },
+    RuukuLada: {
+        name: "RuukuLada",
+        id: 119705748346241027n,
+    },
+    blahajZip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n,
+    },
+    archeruwu: {
+        name: "archer_uwu",
+        id: 160068695383736320n
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
+    },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+} satisfies Record<string, Dev>);
+
+// iife so #__PURE__ works correctly
+export const DevsById = /* #__PURE__*/ (() =>
+    Object.freeze(Object.fromEntries(
+        Object.entries(Devs)
+            .filter(d => d[1].id !== 0n)
+            .map(([_, v]) => [v.id, v] as const)
+    ))
+)() as Record<string, Dev>;

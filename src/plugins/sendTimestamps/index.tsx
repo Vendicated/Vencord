@@ -121,10 +121,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],
@@ -139,14 +139,16 @@ export default definePlugin({
         removePreSendListener(this.listener);
     },
 
-    chatBarIcon() {
+    chatBarIcon(chatBoxProps: { type: { analyticsName: string; }; }) {
+        if (chatBoxProps.type.analyticsName !== "normal") return null;
+
         return (
             <Tooltip text="Insert Timestamp">
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div style={{ display: "flex" }}>
                         <Button
                             aria-haspopup="dialog"
-                            aria-label=""
+                            aria-label="Insert Timestamp"
                             size=""
                             look={ButtonLooks.BLANK}
                             onMouseEnter={onMouseEnter}

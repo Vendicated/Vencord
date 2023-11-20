@@ -16,16 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { filters, findByProps, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
 export const Flux: t.Flux = findByPropsLazy("connectStores");
 
-type GenericStore = t.FluxStore & Record<string, any>;
+export type GenericStore = t.FluxStore & Record<string, any>;
+
+export enum DraftType {
+    ChannelMessage = 0,
+    ThreadSettings = 1,
+    FirstThreadMessage = 2,
+    ApplicationLauncherCommand = 3
+}
 
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
@@ -37,9 +45,11 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
+export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: Stores.GuildStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
+export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
@@ -51,6 +61,7 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 
 export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
+export let DraftStore: t.DraftStore;
 
 export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
     openUntrustedLink: filters.byCode(".apply(this,arguments)")
@@ -73,9 +84,11 @@ export const useStateFromStores: <T>(
     idk?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T
-    = findByCodeLazy("useStateFromStores");
+    = proxyLazy(() => findByProps("useStateFromStores").useStateFromStores);
 
+waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
+waitForStore("UserProfileStore", m => UserProfileStore = m);
 waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);

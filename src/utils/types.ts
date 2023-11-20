@@ -117,7 +117,7 @@ export interface PluginDef {
     tags?: string[];
 }
 
-export enum OptionType {
+export const enum OptionType {
     STRING,
     NUMBER,
     BIGINT,
@@ -260,23 +260,29 @@ type SettingsStore<D extends SettingsDefinition> = {
 };
 
 /** An instance of defined plugin settings */
-export interface DefinedSettings<D extends SettingsDefinition = SettingsDefinition, C extends SettingsChecks<D> = {}> {
+export interface DefinedSettings<
+    Def extends SettingsDefinition = SettingsDefinition,
+    Checks extends SettingsChecks<Def> = {},
+    PrivateSettings extends object = {}
+> {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
-    store: SettingsStore<D>;
+    store: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelavent settings
+     * @param filter optional filter to avoid rerenders for irrelevent settings
      */
-    use<F extends Extract<keyof D, string>>(filter?: F[]): Pick<SettingsStore<D>, F>;
+    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
     /** Definitions of each setting */
-    def: D;
+    def: Def;
     /** Setting methods with return values that could rely on other settings */
-    checks: C;
+    checks: Checks;
     /**
      * Name of the plugin these settings belong to,
      * will be an empty string until plugin is initialized
      */
     pluginName: string;
+
+    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
@@ -301,3 +307,10 @@ export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon 
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+
+export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
+    [key in keyof PluginExports]:
+    PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
+    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+    : never;
+};

@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, React, ReactDOM } from "@webpack/common";
+import { ContextMenu, Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -37,17 +37,22 @@ export const settings = definePluginSettings({
         default: true,
     },
 
-    preventCarouselFromClosingOnClick: {
-        type: OptionType.BOOLEAN,
-        // Thanks chat gpt
-        description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
-        default: true,
-    },
-
     invertScroll: {
         type: OptionType.BOOLEAN,
         description: "Invert scroll",
         default: true,
+    },
+
+    nearestNeighbour: {
+        type: OptionType.BOOLEAN,
+        description: "Use Nearest Neighbour Interpolation when scaling images",
+        default: false,
+    },
+
+    square: {
+        type: OptionType.BOOLEAN,
+        description: "Make the lens square",
+        default: false,
     },
 
     zoom: {
@@ -78,9 +83,26 @@ export const settings = definePluginSettings({
 const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
     children.push(
         <Menu.MenuGroup id="image-zoom">
-            {/* thanks SpotifyControls */}
+            <Menu.MenuCheckboxItem
+                id="vc-square"
+                label="Square Lens"
+                checked={settings.store.square}
+                action={() => {
+                    settings.store.square = !settings.store.square;
+                    ContextMenu.close();
+                }}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-nearest-neighbour"
+                label="Nearest Neighbour"
+                checked={settings.store.nearestNeighbour}
+                action={() => {
+                    settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
+                    ContextMenu.close();
+                }}
+            />
             <Menu.MenuControlItem
-                id="zoom"
+                id="vc-zoom"
                 label="Zoom"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -94,7 +116,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="size"
+                id="vc-size"
                 label="Lens Size"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -108,7 +130,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="zoom-speed"
+                id="vc-zoom-speed"
                 label="Zoom Speed"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -134,10 +156,14 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"renderLinkComponent","maxWidth"',
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
-                replace: `$1id: '${ELEMENT_ID}',$2`
+                // there are 2 image thingies. one for carosuel and one for the single image.
+                // so thats why i added global flag.
+                // also idk if this patch is good, should it be more specific?
+                // https://regex101.com/r/xfvNvV/1
+                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
@@ -145,27 +171,26 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /showThumbhashPlaceholder:\i,/,
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
-                    match: /componentDidMount=function\(\){/,
+                    match: /componentDidMount\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
-                    match: /componentWillUnmount=function\(\){/,
+                    match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
         },
-
         {
-            find: ".carouselModal,",
+            find: ".carouselModal",
             replacement: {
-                match: /onClick:(\i),/,
-                replace: "onClick:$self.settings.store.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
             }
         }
     ],

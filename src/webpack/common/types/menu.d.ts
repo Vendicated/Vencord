@@ -44,6 +44,7 @@ export interface Menu {
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
+        disabled?: boolean;
     }>;
     MenuCheckboxItem: RC<{
         id: string;
@@ -64,8 +65,13 @@ export interface Menu {
         id: string;
         interactive?: boolean;
     }>;
-    // TODO: Type me
-    MenuSliderControl: RC<any>;
+    MenuSliderControl: RC<{
+        minValue: number,
+        maxValue: number,
+        value: number,
+        onChange(value: number): void,
+        renderValue?(value: number): string,
+    }>;
 }
 
 export interface ContextMenuApi {

@@ -16,9 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function makeLazy<T>(factory: () => T): () => T {
+export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
+    let tries = 0;
     let cache: T;
-    return () => cache ?? (cache = factory());
+    return () => {
+        if (!cache && attempts > tries++) {
+            cache = factory();
+            if (!cache && attempts === tries)
+                console.error("Lazy factory failed:", factory);
+        }
+        return cache;
+    };
 }
 
 // Proxies demand that these properties be unmodified, so proxyLazy
@@ -27,8 +35,8 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {};
 
-const GET_KEY = Symbol.for("vencord.lazy.get");
-const CACHED_KEY = Symbol.for("vencord.lazy.cached");
+const kGET = Symbol.for("vencord.lazy.get");
+const kCACHE = Symbol.for("vencord.lazy.cached");
 
 for (const method of [
     "apply",
@@ -46,11 +54,11 @@ for (const method of [
     "setPrototypeOf"
 ]) {
     handler[method] =
-        (target: any, ...args: any[]) => Reflect[method](target[GET_KEY](), ...args);
+        (target: any, ...args: any[]) => Reflect[method](target[kGET](), ...args);
 }
 
 handler.ownKeys = target => {
-    const v = target[GET_KEY]();
+    const v = target[kGET]();
     const keys = Reflect.ownKeys(v);
     for (const key of unconfigurable) {
         if (!keys.includes(key)) keys.push(key);
@@ -62,7 +70,7 @@ handler.getOwnPropertyDescriptor = (target, p) => {
     if (typeof p === "string" && unconfigurable.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
 
-    const descriptor = Reflect.getOwnPropertyDescriptor(target[GET_KEY](), p);
+    const descriptor = Reflect.getOwnPropertyDescriptor(target[kGET](), p);
 
     if (descriptor) Object.defineProperty(target, p, descriptor);
     return descriptor;
@@ -72,15 +80,24 @@ handler.getOwnPropertyDescriptor = (target, p) => {
  * Wraps the result of {@see makeLazy} in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the lazy is evaluated
  * @param factory lazy factory
+ * @param attempts how many times to try to evaluate the lazy before giving up
  * @returns Proxy
  *
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazy<T>(factory: () => T): T {
-    const proxyDummy: { (): void;[CACHED_KEY]?: T;[GET_KEY](): T; } = Object.assign(function () { }, {
-        [CACHED_KEY]: void 0,
-        [GET_KEY]: () => proxyDummy[CACHED_KEY] ??= factory(),
+export function proxyLazy<T>(factory: () => T, attempts = 5): T {
+    let tries = 0;
+    const proxyDummy = Object.assign(function () { }, {
+        [kCACHE]: void 0 as T | undefined,
+        [kGET]() {
+            if (!proxyDummy[kCACHE] && attempts > tries++) {
+                proxyDummy[kCACHE] = factory();
+                if (!proxyDummy[kCACHE] && attempts === tries)
+                    console.error("Lazy factory failed:", factory);
+            }
+            return proxyDummy[kCACHE];
+        }
     });
 
     return new Proxy(proxyDummy, handler) as any;

@@ -16,19 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { User } from "discord-types/general";
+import { proxyLazy } from "@utils/lazy";
+import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-export const ComponentDispatch = findLazy(m => m.emitter?._events?.INSERT_TEXT);
+export let ComponentDispatch;
+waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+
 
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+
+export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
@@ -77,12 +82,28 @@ export const Toasts = {
     }
 };
 
-export const UserUtils = {
-    fetchUser: findByCodeLazy(".USER(", "getUser") as (id: string) => Promise<User>,
+/**
+ * Show a simple toast. If you need more options, use Toasts.show manually
+ */
+export function showToast(message: string, type = ToastType.MESSAGE) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type
+    });
+}
+
+export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
+    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
+};
+
+export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
+    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
 export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".default.copy("),
+    copy: filters.byCode(".copy("),
     SUPPORTS_COPY: x => typeof x === "boolean",
 });
 
@@ -115,4 +136,4 @@ waitFor("parseTopic", m => Parser = m);
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+export const PermissionsBits: t.PermissionsBits = proxyLazy(() => find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint").Permissions);

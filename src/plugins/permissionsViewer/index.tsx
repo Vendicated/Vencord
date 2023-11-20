@@ -27,7 +27,7 @@ import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles } from "./utils";
+import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -94,12 +94,12 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     case MenuItemParentType.Channel: {
                         const channel = ChannelStore.getChannel(id!);
 
-                        permissions = Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                        permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
                             type: type as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
-                        }));
+                        })), guildId);
 
                         header = channel.name;
 
@@ -126,7 +126,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => () => {
-        if (!props) return children;
+        if (!props || (type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild)) return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 
@@ -161,7 +161,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
+            find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /showBorder:.{0,60}}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
                 replace: (m, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember}),`
@@ -178,12 +178,12 @@ export default definePlugin({
     start() {
         addContextMenuPatch("user-context", this.userContextMenuPatch);
         addContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        addContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        addContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("user-context", this.userContextMenuPatch);
         removeContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        removeContextMenuPatch("guild-context", this.guildContextMenuPatch);
+        removeContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
     },
 });

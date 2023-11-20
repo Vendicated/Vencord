@@ -46,7 +46,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                 if (code === "ENOENT")
                     var err = `Command \`${path}\` not found.\nPlease install it and try again`;
                 else {
-                    var err = `An error occured while running \`${cmd}\`:\n`;
+                    var err = `An error occurred while running \`${cmd}\`:\n`;
                     err += stderr || `Code \`${code}\`. See the console for more info`;
                 }
 
@@ -249,4 +249,4 @@ function Updater() {
     );
 }
 
-export default IS_WEB ? null : wrapTab(Updater, "Updater");
+export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");
