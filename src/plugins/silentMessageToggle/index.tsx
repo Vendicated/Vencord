@@ -107,7 +107,7 @@ function SilentMessageToggle(chatBoxProps: {
 
 export default definePlugin({
     name: "SilentMessageToggle",
-    authors: [Devs.Nuckyz, Devs.CatNoir, Devs.Korbo],
+    authors: [Devs.Nuckyz, Devs.CatNoir, Devs.RuukuLada, Devs.Korbo],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
     dependencies: ["MessageEventsAPI"],
 
