@@ -21,6 +21,7 @@ import "./clientTheme.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStore } from "@webpack";
 import { Button } from "@webpack/common";
 
 let ColorPicker: React.ComponentType<any> = () => null;
@@ -42,7 +43,7 @@ function onPickColor(color) {
 
 function ThemeSettings() {
     const lightnessWarning = hexToLightness(settings.store.color) > 45;
-    const lightModeWarning = document.querySelector("html")?.classList.contains("theme-light");
+    const lightModeWarning = findStore("ThemeStore").theme === "light";
 
     return <div className="client-theme-settings">
         <div className="client-theme-container">
