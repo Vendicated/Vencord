@@ -18,7 +18,7 @@
 
 import "./clientTheme.css";
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
@@ -86,9 +86,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".colorPickerFooter",
+            find: "colorPickerFooter:",
             replacement: {
-                match: /function (\i).{0,200}\.colorPickerFooter/,
+                match: /function (\i).{0,200}colorPickerFooter:/,
                 replace: "$self.ColorPicker=$1;$&"
             }
         }
@@ -110,22 +110,27 @@ export default definePlugin({
 
 
 async function generateColorOffsets() {
-    // get the CSS
-    const styleLinkNode = document.head.querySelector('link[rel="stylesheet"]');
-    if (!styleLinkNode) return console.error("Failed to get stylesheet for clientTheme");
-    const cssLink = styleLinkNode.getAttribute("href");
-    if (!cssLink) return;
-    const resp = await fetch(cssLink);
-    const cssString = await resp.text();
-
-    // get lightness values of --primary variables >=500
-    const variableRegex = /(--primary-([5-9]\d{2})-hsl:).*?(\S*)%;/g;
-    let variableMatch = variableRegex.exec(cssString);
+    // get all CSS stylesheets
+    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
     const variableLightness = {};
-    while (variableMatch !== null) {
-        const [, variable, , lightness] = variableMatch;
-        variableLightness[variable] = parseFloat(lightness);
-        variableMatch = variableRegex.exec(cssString);
+
+    // search all stylesheets for color variables
+    for (const styleLinkNode of styleLinkNodes) {
+        const cssLink = styleLinkNode.getAttribute("href");
+        if (!cssLink) continue;
+
+        // fetch the stylesheet
+        const resp = await fetch(cssLink);
+        const cssString = await resp.text();
+
+        // get lightness values of --primary variables >=500
+        const variableRegex = /(--primary-([5-9]\d{2})-hsl:).*?(\S*)%;/g;
+        let variableMatch = variableRegex.exec(cssString);
+        while (variableMatch !== null) {
+            const [, variable, , lightness] = variableMatch;
+            variableLightness[variable] = parseFloat(lightness);
+            variableMatch = variableRegex.exec(cssString);
+        }
     }
 
     // generate offsets
