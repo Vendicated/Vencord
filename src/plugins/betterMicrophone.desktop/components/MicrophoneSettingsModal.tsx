@@ -47,6 +47,10 @@ const simpleVoiceBitrates: readonly SelectOption[] = [
     {
         label: "High",
         value: 320
+    },
+    {
+        label: "Very-High",
+        value: 512
     }
 ] as const;
 
@@ -167,8 +171,8 @@ export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => 
                         onValueChange={value => setVoiceBitrate(value)}
                         initialValue={voiceBitrate || 8}
                         minValue={8}
-                        maxValue={320}
-                        markers={[8, 96, 320]}
+                        maxValue={512}
+                        markers={[8, 96, 320, 512]}
                         onValueRender={value => `${value.toFixed(0)}kb/s`} />
                 </div>
             </SettingsModalCardItem>
