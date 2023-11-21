@@ -159,5 +159,5 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, string>;
+    Messages: Record<i18nMessages, any>;
 }
