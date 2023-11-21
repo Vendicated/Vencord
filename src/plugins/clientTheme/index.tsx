@@ -1,30 +1,22 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { debounce } from "@utils/debounce";
 import { getTheme, Theme } from "@utils/discord";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import { Button, Forms } from "@webpack/common";
 
-let ColorPicker: React.ComponentType<any> = () => null;
+const ColorPicker = findByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
@@ -32,51 +24,65 @@ const colorPresets = [
     "#3C2E42", "#422938"
 ];
 
-function onPickColor(color) {
+const setSettingsColor = debounce((color: string) => settings.store.color = color);
+
+function onPickColor(color: number) {
     let hexColor = color.toString(16);
+
     while (hexColor.length < 6) {
         hexColor = "0" + hexColor;
     }
-    settings.store.color = hexColor;
-    updateColorVars();
+
+    setSettingsColor(hexColor);
+    updateColorVars(hexColor);
 }
 
 function ThemeSettings() {
     const lightnessWarning = hexToLightness(settings.store.color) > 45;
     const lightModeWarning = getTheme() === Theme.Light;
 
-    return <div className="client-theme-settings">
-        <div className="client-theme-container">
-            <div className="client-theme-settings-labels">
-                <h2>Theme Color</h2>
-                <span>Add a color to your Discord client theme</span>
+    return (
+        <div className="client-theme-settings">
+            <div className="client-theme-container">
+                <div className="client-theme-settings-labels">
+                    <Forms.FormTitle tag="h3">Theme Color</Forms.FormTitle>
+                    <Forms.FormText>Add a color to your Discord client theme</Forms.FormText>
+                </div>
+                <ColorPicker
+                    color={parseInt(settings.store.color, 16)}
+                    onChange={onPickColor}
+                    showEyeDropper={false}
+                    suggestedColors={colorPresets}
+                />
             </div>
-            <ColorPicker
-                color={parseInt(settings.store.color, 16)}
-                onChange={onPickColor}
-                showEyeDropper={false}
-                suggestedColors={colorPresets}
-            />
+            {lightnessWarning || lightModeWarning
+                ? <div>
+                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
+                    <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
+                    {lightnessWarning && <Forms.FormText className="client-theme-warning">Selected color is very light</Forms.FormText>}
+                    {lightModeWarning && <Forms.FormText className="client-theme-warning">Light mode isn't supported</Forms.FormText>}
+                </div>
+                : null}
         </div>
-        {lightnessWarning && <span className="client-theme-warning">Selected color is very light, will look dogshit</span>}
-        {lightModeWarning && <span className="client-theme-warning">Light mode isn't supported, will look dogshit</span>}
-    </div>;
+    );
 }
 
 const settings = definePluginSettings({
     color: {
-        description: "Color your Discord client theme will be based around, light mode isn't supported",
+        description: "Color your Discord client theme will be based around. Light mode isn't supported",
         type: OptionType.COMPONENT,
         default: "313338",
         component: () => <ThemeSettings />
     },
     resetColor: {
-        description: "Reset theme color",
+        description: "Reset Theme Color",
         type: OptionType.COMPONENT,
         default: "313338",
-        component: () => <Button onClick={() => { settings.store.color = "313338"; updateColorVars(); }}>
-            Reset theme color
-        </Button>
+        component: () => (
+            <Button onClick={() => onPickColor(313338)}>
+                Reset Theme Color
+            </Button>
+        )
     }
 });
 
@@ -85,64 +91,63 @@ export default definePlugin({
     authors: [Devs.F53],
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
+
     patches: [
         {
-            find: "colorPickerFooter:",
+            find: "Could not find app-mount",
             replacement: {
-                match: /function (\i).{0,200}colorPickerFooter:/,
-                replace: "$self.ColorPicker=$1;$&"
+                match: /(?<=Could not find app-mount"\))/,
+                replace: ",$self.addThemeInitializer()"
             }
         }
     ],
 
-    set ColorPicker(e: any) {
-        ColorPicker = e;
+    addThemeInitializer() {
+        document.addEventListener("DOMContentLoaded", this.themeInitializer = () => {
+            updateColorVars(settings.store.color);
+            generateColorOffsets();
+        });
     },
 
-    start() {
-        updateColorVars();
-        generateColorOffsets();
-    },
     stop() {
-        document.querySelector("style#clientThemeOffsets")?.remove();
-        document.querySelector("style#clientThemeVars")?.remove();
+        document.removeEventListener("DOMContentLoaded", this.themeInitializer);
+        document.getElementById("clientThemeVars")?.remove();
+        document.getElementById("clientThemeOffsets")?.remove();
     }
 });
 
-
 async function generateColorOffsets() {
-    // get all CSS stylesheets
-    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
-    const variableLightness = {};
+    const variableRegex = /(--primary-[5-9]\d{2}-hsl):.*?(\S*)%;/g;
 
-    // search all stylesheets for color variables
+    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
+    const variableLightness = {} as Record<string, number>;
+
+    // Search all stylesheets for color variables
     for (const styleLinkNode of styleLinkNodes) {
         const cssLink = styleLinkNode.getAttribute("href");
         if (!cssLink) continue;
 
-        // fetch the stylesheet
-        const resp = await fetch(cssLink);
-        const cssString = await resp.text();
+        const res = await fetch(cssLink);
+        const cssString = await res.text();
 
-        // get lightness values of --primary variables >=500
-        const variableRegex = /(--primary-([5-9]\d{2})-hsl:).*?(\S*)%;/g;
+        // Get lightness values of --primary variables >=500
         let variableMatch = variableRegex.exec(cssString);
         while (variableMatch !== null) {
-            const [, variable, , lightness] = variableMatch;
+            const [, variable, lightness] = variableMatch;
             variableLightness[variable] = parseFloat(lightness);
             variableMatch = variableRegex.exec(cssString);
         }
     }
 
-    // generate offsets
-    const lightnessOffsets = Object.keys(variableLightness).map(key => {
-        const lightness = variableLightness[key];
-        const lightnessOffset = lightness - variableLightness["--primary-600-hsl:"];
-        const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
-        return `${key} var(--theme-h) var(--theme-s) calc(var(--theme-l) ${plusOrMinus} ${Math.abs(lightnessOffset).toFixed(2)}%);`;
-    }).join("\n");
+    // Generate offsets
+    const lightnessOffsets = Object.entries(variableLightness)
+        .map(([key, lightness]) => {
+            const lightnessOffset = lightness - variableLightness["--primary-600-hsl"];
+            const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
+            return `${key}: var(--theme-h) var(--theme-s) calc(var(--theme-l) ${plusOrMinus} ${Math.abs(lightnessOffset).toFixed(2)}%);`;
+        })
+        .join("\n");
 
-    // add to the document
     const style = document.createElement("style");
     style.setAttribute("id", "clientThemeOffsets");
     style.textContent = `:root:root {
@@ -151,21 +156,16 @@ async function generateColorOffsets() {
     document.head.appendChild(style);
 }
 
+function updateColorVars(color: string) {
+    const { hue, saturation, lightness } = hexToHSL(color);
 
-function updateColorVars() {
-    // get HSL values for current color
-    const { hue, saturation, lightness } = hexToHSL(settings.store.color);
-    console.log(hue, saturation, lightness);
-
-    // find/create style node
-    let style = document.querySelector("style#clientThemeVars");
+    let style = document.getElementById("clientThemeVars");
     if (!style) {
         style = document.createElement("style");
         style.setAttribute("id", "clientThemeVars");
         document.head.appendChild(style);
     }
 
-    // update its content
     style.textContent = `:root {
         --theme-h: ${hue};
         --theme-s: ${saturation}%;
@@ -173,29 +173,28 @@ function updateColorVars() {
     }`;
 }
 
-
 // https://css-tricks.com/converting-color-spaces-in-javascript/
-function hexToHSL(hexCode) {
-    // hex => rgb normalized to 0-1
+function hexToHSL(hexCode: string) {
+    // Hex => RGB normalized to 0-1
     const r = parseInt(hexCode.substring(0, 2), 16) / 255;
     const g = parseInt(hexCode.substring(2, 4), 16) / 255;
     const b = parseInt(hexCode.substring(4, 6), 16) / 255;
 
-    // rgb => hsl
+    // RGB => HSL
     const cMax = Math.max(r, g, b);
     const cMin = Math.min(r, g, b);
     const delta = cMax - cMin;
 
-    let hue, saturation, lightness;
+    let hue: number, saturation: number, lightness: number;
 
     lightness = (cMax + cMin) / 2;
 
     if (delta === 0) {
-        // if r=g=b then the only thing that matters is lightness
+        // If r=g=b then the only thing that matters is lightness
         hue = 0;
         saturation = 0;
     } else {
-        // Magic bullshit
+        // Magic
         saturation = delta / (1 - Math.abs(2 * lightness - 1));
 
         if (cMax === r)
@@ -205,20 +204,20 @@ function hexToHSL(hexCode) {
         else
             hue = (r - g) / delta + 4;
         hue *= 60;
-        if (hue < 0) hue += 360;
+        if (hue < 0)
+            hue += 360;
     }
 
-    // move saturation and lightness from 0-1 to 0-100
+    // Move saturation and lightness from 0-1 to 0-100
     saturation *= 100;
     lightness *= 100;
 
     return { hue, saturation, lightness };
 }
 
-
 // Minimized math just for lightness, lowers lag when changing colors
 function hexToLightness(hexCode) {
-    // hex => rgb normalized to 0-1
+    // Hex => RGB normalized to 0-1
     const r = parseInt(hexCode.substring(0, 2), 16) / 255;
     const g = parseInt(hexCode.substring(2, 4), 16) / 255;
     const b = parseInt(hexCode.substring(4, 6), 16) / 255;
