@@ -129,7 +129,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".UNREAD_HIGHLIGHT",
+            find: "UNREAD_IMPORTANT:",
             replacement: {
                 match: /channel:(\i).{0,100}?channelEmoji,.{0,250}?\.children.{0,50}?:null/,
                 replace: "$&,$self.TypingIndicator($1.id)"
