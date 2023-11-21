@@ -10,12 +10,19 @@ import { definePluginSettings } from "@api/Settings";
 import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Flex } from "@components/Flex";
-import { TextInput, useState, Forms, Button, UserStore, UserUtils } from "@webpack/common";
+import { TextInput, useState, Forms, Button, UserStore, UserUtils, TabBar, ChannelStore, SelectedChannelStore  } from "@webpack/common";
 import { useForceUpdater } from "@utils/react";
+import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy, filters } from "@webpack";
 import "./style.css";
 
 let regexes = [];
-let me = null;
+
+const MenuHeader = findByCodeLazy("useInDesktopNotificationCenterExperiment)(");
+const Popout = findByPropsLazy("ItemsPopout");
+const popoutClasses = findByPropsLazy("recentMentionsPopout");
+const MessageObject = findByCodeLazy("}isFirstMessageInForumPost");
+const createMessageRecord = mapMangledModuleLazy("createMessageRecord:", {fn: filters.byCode("MessageTypes.THREAD_CREATED")})
+
 
 async function setRegexes(idx: number, reg: string) {
     regexes[idx] = reg;
@@ -42,6 +49,31 @@ function safeMatchesRegex(s: string, r: string) {
     }
 }
 
+function highlightKeywords(s: string, r: Array<string>) {
+    let reg;
+    try {
+        reg = new RegExp(r.join("|"), "g");
+    } catch {
+        return [s];
+    }
+
+    let matches = s.match(reg);
+    if (!matches)
+        return [s];
+
+    let parts = [...matches.map((e) => {
+        let idx = s.indexOf(e);
+        let before = s.substring(0, idx);
+        s = s.substring(idx + e.length);
+        return before;
+    }, s), s];
+
+    return parts.map(e => [
+        (<span>{e}</span>),
+        matches.length ? (<span class="highlight">{matches.splice(0, 1)[0]}</span>) : []
+    ]);
+}
+
 const settings = definePluginSettings({
     replace: {
         type: OptionType.COMPONENT,
@@ -64,14 +96,13 @@ const settings = definePluginSettings({
                         <Flex flexDirection="row">
                             <div style={{flexGrow: 1}}>
                                 <TextInput
-                                    placeholder={"example|regex"}
+                                    placeholder="example|regex"
                                     spellCheck={false}
                                     value={values[i]}
                                     onChange={setValue}
                                     onBlur={() => setRegexes(i, values[i])}
                                 />
                             </div>
-
                             <Button
                                 onClick={() => removeRegex(i, update)}
                                 look={Button.Looks.BLANK}
@@ -106,18 +137,125 @@ export default definePlugin({
                 match: /}_dispatch\((\i),\i\){/,
                 replace: "$&$1=$self.modify($1);"
     	    }
-    	}
+    	},
+        {
+            find: "Messages.UNREADS_TAB_LABEL}",
+            replacement: {
+                match: /\i\?\(0,\i\.jsxs\)\(\i\.TabBar\.Item/,
+                replace: "$self.keywordTabBar(),$&"
+            }
+        },
+        {
+            find: "InboxTab.TODOS?(",
+            replacement: {
+                match: /:\i&&(\i)===\i\.InboxTab\.TODOS.{1,50}setTab:(\i),onJump:(\i),closePopout:(\i)/,
+                replace: ": $1 === 5 ? $self.tryKeywordMenu($2, $3, $4) $&"
+            }
+        },
+        {
+            find: ".default.guildFilter:null",
+            replacement: {
+                match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
+                replace: "$self.renderMsg = $1; $&"
+            }
+        }
     ],
 
     async start() {
         regexes = await DataStore.get("KeywordNotify_rules") ?? [];
-        me = await UserUtils.getUser(UserStore.getCurrentUser().id);
+        this.me = await UserUtils.getUser(UserStore.getCurrentUser().id);
+        this.onUpdate = ()=>null;
+        this.keywordLog = [];
+
+        (await DataStore.get("KeywordNotify_log") ?? []).map((e) => JSON.parse(e)).forEach((e) => {
+            this.addToLog(e);
+        });
     },
 
     applyRegexes(m) {
         if (regexes.some(r => r != "" && safeMatchesRegex(m.content, r))) {
-            m.mentions.push(me);
+            m.mentions.push(this.me);
+
+            if (m.author.id != this.me.id)
+                this.addToLog(m);
         }
+    },
+
+    addToLog(m) {
+        if (this.keywordLog.some((e) => e.id == m.id))
+            return;
+
+        let thing = createMessageRecord.fn(m);
+        this.keywordLog.push(thing);
+        this.keywordLog.sort((a, b) => b.timestamp - a.timestamp);
+
+        if (this.keywordLog.length > 50)
+            this.keywordLog.pop();
+
+        this.onUpdate();
+    },
+
+
+    keywordTabBar() {
+        return (
+            <TabBar.Item className="vc-settings-tab-bar-item" id={5}>
+                Keywords
+            </TabBar.Item>
+        );
+    },
+
+    tryKeywordMenu(setTab, onJump, closePopout) {
+        let header = (
+            <MenuHeader tab={5} setTab={setTab} closePopout={closePopout} badgeState={{badgeForYou: false}}/>
+        );
+
+        let channel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+
+        let [keywordLog, setKeywordLog] = useState(this.keywordLog);
+        this.onUpdate = () => {
+            let newLog = [...this.keywordLog];
+            setKeywordLog(newLog);
+
+            DataStore.set("KeywordNotify_log", newLog.map((e) => JSON.stringify(e)));
+        };
+
+        let onDelete = (m) => {
+            this.keywordLog = this.keywordLog.filter((e) => e.id != m.id);
+            this.onUpdate();
+        };
+
+        let messageRender = (e, t) => {
+            console.log("Message: ", e.content);
+            let msg = this.renderMsg({
+                message: e,
+                gotoMessage: t,
+                dismissible: true
+            });
+
+            msg.props.children[0].props.children.props.onClick = () => onDelete(e);
+            msg.props.children[1].props.children[1].props.message.customRenderedContent = {
+                content: highlightKeywords(e.content, regexes)
+            };
+
+            return [msg];
+        };
+
+        return (
+            <>
+                <Popout.default
+                    className={popoutClasses.recentMentionsPopout}
+                    renderHeader={() => header}
+                    renderMessage={messageRender}
+                    channel={channel}
+                    onJump={onJump}
+                    onFetch={()=>null}
+                    onCloseMessage={onDelete}
+                    loadMore={()=>null}
+                    messages={keywordLog}
+                    renderEmptyState={()=>null}
+                />
+            </>
+        );
     },
 
     modify(e) {
