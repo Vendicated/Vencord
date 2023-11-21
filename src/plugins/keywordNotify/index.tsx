@@ -153,7 +153,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".default.guildFilter:null",
+            find: ".guildFilter:null",
             replacement: {
                 match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
                 replace: "$self.renderMsg = $1; $&"
