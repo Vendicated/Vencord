@@ -77,7 +77,7 @@ export default definePlugin({
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
-                    match: /(?=!1===\i.\i\.hasRelevantUnread\(this\.record\))/,
+                    match: /(?=!\(0,\i\.getHasImportantUnread\)\(this\.record\))/,
                     replace: "$self.isHiddenChannel(this.record)||"
                 },
                 // Make channels we dont have access to be the same level as normal ones
@@ -152,7 +152,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UNREAD_HIGHLIGHT",
+            find: "UNREAD_IMPORTANT:",
             predicate: () => settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: [
                 // Make the channel appear as muted if it's hidden
@@ -173,7 +173,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".UNREAD_HIGHLIGHT",
+            find: "UNREAD_IMPORTANT:",
             replacement: [
                 {
                     // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
@@ -193,7 +193,7 @@ export default definePlugin({
             // Hide the new version of unreads box for hidden channels
             find: '.displayName="ChannelListUnreadsStore"',
             replacement: {
-                match: /(?<=if\(null==(\i))(?=.{0,160}?hasRelevantUnread\(\i\))/g, // Global because Discord has multiple methods like that in the same module
+                match: /(?<=if\(null==(\i))(?=.{0,160}?getHasImportantUnread\)\(\i\))/g, // Global because Discord has multiple methods like that in the same module
                 replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
             }
         },
@@ -201,7 +201,7 @@ export default definePlugin({
             // Make the old version of unreads box not visible for hidden channels
             find: "renderBottomUnread(){",
             replacement: {
-                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i\.record)\))/,
+                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i\.record)\))/,
                 replace: "&&!$self.isHiddenChannel($1)"
             }
         },
@@ -209,7 +209,7 @@ export default definePlugin({
             // Make the state of the old version of unreads box not include hidden channels
             find: ".useFlattenedChannelIdListWithThreads)",
             replacement: {
-                match: /(?=&&\i\.\i\.hasRelevantUnread\((\i)\))/,
+                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i)\))/,
                 replace: "&&!$self.isHiddenChannel($1)"
             }
         },
@@ -255,7 +255,7 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?hasRelevantUnread\(\i\))/,
+                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?getHasImportantUnread\)\(\i\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
