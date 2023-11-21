@@ -1,0 +1,24 @@
+.client-theme-settings {
+    display: flex;
+    flex-direction: column;
+}
+
+.client-theme-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.client-theme-settings-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.client-theme-container > [class^="colorSwatch"] > [class^="swatch"] {
+    border: thin solid var(--background-modifier-accent) !important;
+}
+
+.client-theme-warning {
+    color: var(--text-danger);
+}
