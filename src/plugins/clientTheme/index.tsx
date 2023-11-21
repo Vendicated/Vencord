@@ -8,7 +8,6 @@ import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { debounce } from "@utils/debounce";
 import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -24,8 +23,6 @@ const colorPresets = [
     "#3C2E42", "#422938"
 ];
 
-const setSettingsColor = debounce((color: string) => settings.store.color = color);
-
 function onPickColor(color: number) {
     let hexColor = color.toString(16);
 
@@ -33,7 +30,7 @@ function onPickColor(color: number) {
         hexColor = "0" + hexColor;
     }
 
-    setSettingsColor(hexColor);
+    settings.store.color = hexColor;
     updateColorVars(hexColor);
 }
 
@@ -79,7 +76,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         default: "313338",
         component: () => (
-            <Button onClick={() => onPickColor(313338)}>
+            <Button onClick={() => onPickColor(0x313338)}>
                 Reset Theme Color
             </Button>
         )
