@@ -163,13 +163,13 @@ export default definePlugin({
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /showBorder:.{0,60}}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
-                replace: (m, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember}),`
+                match: /showBorder:(.{0,60})}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
+                replace: (m, showBoder, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember},${showBoder}),`
             }
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember?: GuildMember) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} />,
+    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
 
     userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
     channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
