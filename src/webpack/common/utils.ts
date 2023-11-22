@@ -31,7 +31,7 @@ waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
