@@ -204,6 +204,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
             if (code.includes(patch.find)) {
                 patchedBy.add(patch.plugin);
 
+                const previousMod = mod;
+                const previousCode = code;
+
                 // we change all patch.replacement to array in plugins/index
                 for (const replacement of patch.replacement as PatchReplacement[]) {
                     if (replacement.predicate && !replacement.predicate()) continue;
@@ -214,11 +217,21 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                     try {
                         const newCode = executePatch(replacement.match, replacement.replace as string);
-                        if (newCode === code && !patch.noWarn) {
-                            (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
-                            logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
-                            if (IS_DEV) {
-                                logger.debug("Function Source:\n", code);
+                        if (newCode === code) {
+                            if (!patch.noWarn) {
+                                (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
+                                logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                if (IS_DEV) {
+                                    logger.debug("Function Source:\n", code);
+                                }
+                            }
+
+                            if (patch.group) {
+                                logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                code = previousCode;
+                                mod = previousMod;
+                                patchedBy.delete(patch.plugin);
+                                break;
                             }
                         } else {
                             code = newCode;
@@ -259,9 +272,17 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
                             logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                         }
+
+                        patchedBy.delete(patch.plugin);
+                        if (patch.group) {
+                            logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                            code = previousCode;
+                            mod = previousMod;
+                            break;
+                        }
+
                         code = lastCode;
                         mod = lastMod;
-                        patchedBy.delete(patch.plugin);
                     }
                 }
 
