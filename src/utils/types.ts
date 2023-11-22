@@ -41,7 +41,7 @@ export interface Patch {
     all?: boolean;
     /** Do not warn if this patch did no changes */
     noWarn?: boolean;
-    /** Only patch the module if all replacements succeed */
+    /** Only apply the patches inside this find if all replacements succeed */
     group?: boolean;
     predicate?(): boolean;
 }
