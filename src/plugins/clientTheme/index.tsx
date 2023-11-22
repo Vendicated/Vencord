@@ -79,7 +79,7 @@ function ThemeSettings() {
                         <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
                         <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
                     </div>
-                    {!unFixableContrast && <Button onClick={() => swapTheme(theme)}>Swap Theme</Button>}
+                    {!unFixableContrast && <Button onClick={() => swapTheme(theme)} color={Button.Colors.RED}>Swap Theme</Button>}
                 </div>
             </>)}
         </div>
