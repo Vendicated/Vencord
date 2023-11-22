@@ -50,10 +50,15 @@ function ThemeSettings() {
     const selectedLightness = hexToLightness(settings.store.color);
 
     let contrastWarning, unFixableContrast = false;
-    if ((isLightTheme && selectedLightness < 60) || !isLightTheme && selectedLightness > 40)
+    if ((isLightTheme && selectedLightness < 55) || !isLightTheme && selectedLightness > 40)
         contrastWarning = true;
-    if (selectedLightness < 60 && selectedLightness > 40)
+    if (selectedLightness < 55 && selectedLightness > 40)
         unFixableContrast = true;
+    // light mode with values greater than 70 leads to background colors getting crushed together and poor text contrast for muted channels
+    if (isLightTheme && selectedLightness > 70) {
+        contrastWarning = true;
+        unFixableContrast = true;
+    }
 
     return (
         <div className="client-theme-settings">
