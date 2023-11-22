@@ -11,10 +11,10 @@ import { findByPropsLazy } from "@webpack";
 import { AUTHORIZE_URL, CLIENT_ID } from "../constants";
 import { useAuthorizationStore } from "../stores/AuthorizationStore";
 
-const OAuth = findByPropsLazy("OAuth2AuthorizeModal");
+const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 export default async () => new Promise(r => openModal(props =>
-    <OAuth.OAuth2AuthorizeModal
+    <OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
         responseType="code"

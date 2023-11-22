@@ -8,6 +8,7 @@ import { filters, findByPropsLazy, findLazy } from "@webpack";
 
 import extractAndRequireModuleId from "./extractAndRequireModuleId";
 
+// Cannot destructure this, otherwise extractAndRequire tries to run on the proxy
 const AvatarDecorationModalOpener = findByPropsLazy("openAvatarDecorationModal");
 
 export function requireAvatarDecorationModal() {
@@ -15,9 +16,9 @@ export function requireAvatarDecorationModal() {
 }
 
 const filter = filters.byCode("isDisplayingIndividualStickers");
-const StickerPickerPreview = findLazy(m => m.default?.type && filter(m.default.type));
+const { default: StickerPickerPreview } = findLazy(m => m.default?.type && filter(m.default.type));
 
 export function requireCreateStickerModal() {
-    return extractAndRequireModuleId(StickerPickerPreview.default.type);
+    return extractAndRequireModuleId(StickerPickerPreview.type);
 
 }

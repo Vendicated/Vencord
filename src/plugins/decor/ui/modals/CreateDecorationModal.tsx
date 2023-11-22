@@ -7,7 +7,7 @@
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Forms, GuildStore, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
@@ -20,7 +20,7 @@ import { AvatarDecorationModalPreview } from "../components";
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
-const FileUpload = findByCodeLazy("fileUploadInput,");
+const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 
 function useObjectURL(object: Blob | MediaSource | null) {
     const [url, setUrl] = useState<string | null>(null);
