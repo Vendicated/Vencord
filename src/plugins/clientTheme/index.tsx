@@ -11,8 +11,8 @@ import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { findComponentByCodeLazy } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
 import { Button, Forms } from "@webpack/common";
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");

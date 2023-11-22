@@ -19,8 +19,8 @@
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { findComponentByCodeLazy } from "@utils/react";
 import definePlugin from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
 import { StatusSettingsStores } from "@webpack/common";
 
 import style from "./style.css?managed";

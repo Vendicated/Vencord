@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findComponentByCodeLazy, useTimer } from "@utils/react";
+import { useTimer } from "@utils/react";
+import { findComponentByCodeLazy } from "@webpack";
 
 import { cl } from "./utils";
 
