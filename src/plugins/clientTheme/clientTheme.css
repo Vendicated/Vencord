@@ -22,3 +22,10 @@
 .client-theme-warning {
     color: var(--text-danger);
 }
+
+.client-theme-contrast-warning {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
+}

@@ -75,10 +75,12 @@ function ThemeSettings() {
                 />
             </div>
             {contrastWarning
-                ? <div>
-                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
-                    <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
-                    <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
+                ? <div className="client-theme-contrast-warning">
+                    <div>
+                        <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
+                        <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
+                        <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
+                    </div>
                     {!unFixableContrast && <Button onClick={swapTheme}>Swap Theme</Button>}
                 </div>
                 : null
