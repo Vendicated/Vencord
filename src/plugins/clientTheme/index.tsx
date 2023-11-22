@@ -7,6 +7,7 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -14,6 +15,8 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
+
+import lightModeFixes from "./lightModeFixes.css?managed";
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
 
@@ -31,11 +34,11 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
-const saveClientTheme = findByPropsLazy("saveClientTheme");
+const { saveClientTheme } = findByPropsLazy("saveClientTheme");
 
 function swapTheme() {
     const isLightTheme = getTheme() === Theme.Light;
-    saveClientTheme.saveClientTheme({ theme: isLightTheme ? "dark" : "light" });
+    saveClientTheme({ theme: isLightTheme ? "dark" : "light" });
 }
 
 const ThemeStore = findStoreLazy("ThemeStore");
@@ -106,11 +109,13 @@ export default definePlugin({
 
     startAt: StartAt.DOMContentLoaded,
     start() {
+        enableStyle(lightModeFixes);
         updateColorVars(settings.store.color);
         generateColorOffsets();
     },
 
     stop() {
+        disableStyle(lightModeFixes);
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
     }

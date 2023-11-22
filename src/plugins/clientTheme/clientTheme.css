@@ -22,17 +22,3 @@
 .client-theme-warning {
     color: var(--text-danger);
 }
-
-/* color fixes for light mode */
-.theme-light {
-    --background-primary: var(--primary-100);
-    --modal-background: var(--primary-100);
-    --background-nested-floating: var(--primary-100);
-    --activity-card-background: var(--primary-100);
-    --alert-bg: var(--primary-100);
-    --background-floating: var(--primary-100);
-}
-
-.theme-light [class^="customColorPicker_"] {
-    background: var(--primary-100) !important;
-}

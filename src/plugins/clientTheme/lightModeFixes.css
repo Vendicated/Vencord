@@ -1,0 +1,4 @@
+/* Lots of light mode stuff points to --white-500 for backgrounds, which makes parts of UI clash with the theme */
+.theme-light {
+    --white-500-hsl: var(--primary-100-hsl) !important;
+}
