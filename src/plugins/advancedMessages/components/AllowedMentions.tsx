@@ -131,9 +131,18 @@ function Popout({
                 <Menu.MenuCheckboxItem
                     id={`vc-allowed-mentions-${title}-popout-all`}
                     label="All"
-                    disabled={ids.size > 0}
                     checked={all}
-                    action={() => setAll(!all)}
+                    action={() => {
+                        // If all are selected, deselect them,
+                        // otherwise select the remaining ones.
+                        if (ids.size === rawIds.size) {
+                            ids.clear();
+                            setAll(false);
+                        } else {
+                            rawIds.forEach(id => ids.add(id));
+                            setAll(true);
+                        }
+                    }}
                 />
                 <Menu.MenuSeparator />
                 <Menu.MenuItem
@@ -146,7 +155,6 @@ function Popout({
                             maxLength={32}
                             role="combobox"
                             value={search}
-                            disabled={all}
                             onChange={value => setSearch(value.trim())}
                             style={{ margin: "2px 0", padding: "6px 8px" }}
                             onKeyDown={e => {
@@ -186,17 +194,10 @@ function Popout({
                         return <Menu.MenuCheckboxItem
                             id={`vc-allowed-mentions-${title}-popout-${object.id}`}
                             label={object.name!}
-                            disabled={
-                                /*
-                                    API allows only 100, athough do not disable
-                                    already checked ids because that would cause a
-                                    hard lock in the menu
-                                */
-                                all || (ids.size >= 100 && !ids.has(object.id))
-                            }
                             checked={ids.has(object.id)}
                             action={() => {
                                 ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
+                                setAll(ids.size === rawIds.size);
                                 update();
                             }}
                         />;
@@ -218,27 +219,28 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
     const store = mentions.meta.isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
 
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
-    const [allUsers, setAllUsers] = useState(mentions.parse.has("users"));
-    const [allRoles, setAllRoles] = useState(mentions.parse.has("roles"));
+    const [allUsers, setAllUsers] = useState(mentions?.users?.size === mentions.meta.userIds.size);
+    const [allRoles, setAllRoles] = useState(mentions?.roles?.size === mentions.meta.roleIds.size);
     const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
     const [users] = useState(mentions.users ?? new Set<string>());
     const [roles] = useState(mentions.roles ?? new Set<string>());
 
     useEffect(() => {
+        setAllUsers(mentions?.users?.size === mentions.meta.userIds.size);
+        setAllRoles(mentions?.roles?.size === mentions.meta.roleIds.size);
+
         store.set(channel.id, {
             parse: new Set(
                 (
                     [
                         [everyone, "everyone"],
-                        [allUsers, "users"],
-                        [allRoles, "roles"]
                     ] satisfies [boolean, AllowedMentionsParsables][]
                 )
                     .filter(([b]) => b)
                     .map(([, v]) => v)
             ),
-            users: allUsers ? undefined : users,
-            roles: allRoles ? undefined : roles,
+            users: users,
+            roles: roles,
             repliedUser,
             meta: mentions.meta
         });

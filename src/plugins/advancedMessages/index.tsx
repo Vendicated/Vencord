@@ -10,7 +10,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildStore, MessageStore, PermissionsBits, PermissionStore } from "@webpack/common";
+import { Alerts, GuildStore, MessageStore, PermissionsBits, PermissionStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { AllowedMentionsBar, AllowedMentionsProps } from "./components/AllowedMentions";
@@ -293,22 +293,26 @@ export default definePlugin({
             }
         }
 
+        // Provide default set of ids to be used in AllowedMentionsBar
         if (isNonNullish(message)) {
-            // Provide default set of ids to be used in AllowedMentionsBar
-            // filter these cause we don't want "ghost" ids (ids in original
+            // Filter these cause we don't want "ghost" ids (ids in original
             // text but not in the edited)
-            const users = new Set(message.mentions.filter(userId => mentions.meta.userIds.has(userId)));
-            const roles = new Set(message.mentionRoles.filter(roleId => mentions.meta.roleIds.has(roleId)));
-            // Set these to false, we need complete verbosity over editing.
-            // These must be true if mentioned count is more than 100 cause api
-            // can only handle 100 explicit ids, beyond that you have to cope
-            // with pinging all
-            if (users.size > 100) { mentions.parse.add("users"); } else { mentions.users = users; }
-            if (roles.size > 100) { mentions.parse.add("roles"); } else { mentions.roles = roles; }
+            mentions.users = new Set(message.mentions.filter(userId => mentions.meta.userIds.has(userId)));
+            mentions.roles = new Set(message.mentionRoles.filter(roleId => mentions.meta.roleIds.has(roleId)));
         } else {
-            if (previous?.parse.has("users") ?? this.settings.store.pingAllUsers) { mentions.parse.add("users"); }
-            if (previous?.parse.has("roles") ?? this.settings.store.pingAllRoles) { mentions.parse.add("roles"); }
+            if (this.settings.store.pingAllUsers) {
+                const newMentions = Array.from(mentions.meta.userIds).filter(userId => !previous?.meta.userIds.has(userId));
+                newMentions.forEach(userId => mentions.users?.add(userId));
+            }
+            if (this.settings.store.pingAllRoles) {
+                const newMentions = Array.from(mentions.meta.roleIds).filter(roleId => !previous?.meta.roleIds.has(roleId));
+                newMentions.forEach(roleId => mentions.roles?.add(roleId));
+            }
         }
+
+        // Remove erased mentions
+        mentions?.users?.forEach(userId => { if (!mentions.meta.userIds.has(userId)) mentions?.users?.delete(userId); });
+        mentions?.roles?.forEach(roleId => { if (!mentions.meta.roleIds.has(roleId)) mentions?.roles?.delete(roleId); });
 
         if (
             !mentions.meta.hasEveryone
@@ -329,6 +333,24 @@ export default definePlugin({
     patchSendAllowedMentions(channelId: string, extra: MessageExtra) {
         const mentions = this.getAllowedMentions(channelId, false, true);
         if (!isNonNullish(mentions)) return;
+
+        const mentionAllUsers = mentions?.users?.size === mentions.meta.userIds.size;
+        const mentionAllRoles = mentions?.roles?.size === mentions.meta.roleIds.size;
+        // Replace individual ids with parse variants
+        // if all ids are selected.
+        if (mentionAllUsers) { mentions.parse.add("users"); delete mentions.users; }
+        if (mentionAllRoles) { mentions.parse.add("roles"); delete mentions.roles; }
+
+        const tooManyUsers = mentions.users && mentions.users.size > 100;
+        const tooManyRoles = mentions.roles && mentions.roles.size > 100;
+        if (tooManyUsers || tooManyRoles) {
+            const type = [tooManyUsers && "users", tooManyRoles && "roles"].filter(x => x).join(" and ");
+            Alerts.show({
+                title: "Uh oh!",
+                body: `You've selected too many individual ${type}.\nYou may only select all or up to 100 ids in each category.`
+            });
+            return { cancel: true };
+        }
 
         extra.replyOptions.allowedMentions = {
             parse: Array.from(mentions.parse),
