@@ -8,7 +8,7 @@ import { proxyLazy } from "@utils/lazy";
 import { UserStore } from "@webpack/common";
 
 import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
-import decorationToString from "../utils/decorationToString";
+import { decorationToAsset } from "../utils/decoration";
 import { create } from "../zustand";
 import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
@@ -51,7 +51,7 @@ export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorat
         if (get().selectedDecoration === decoration) return;
         set({ selectedDecoration: decoration });
         setUserDecoration(decoration);
-        useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToString(decoration) : null);
+        useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToAsset(decoration) : null);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })
 })));

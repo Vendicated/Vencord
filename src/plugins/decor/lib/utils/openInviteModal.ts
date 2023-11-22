@@ -7,6 +7,7 @@
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
+// TODO: Move to common util when added
 const InviteActions = findByPropsLazy("resolveInvite");
 
 export default async function openInviteModal(key: string) {

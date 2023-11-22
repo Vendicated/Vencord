@@ -5,21 +5,21 @@
  */
 
 import { ContextMenu } from "@webpack/common";
+import type { HTMLProps } from "react";
 
-import discordifyDecoration from "../../lib/utils/discordifyDecoration";
+import { Decoration } from "../../lib/api";
+import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
 import { DecorationGridDecoration } from ".";
 import DecorationContextMenu from "./DecorationContextMenu";
 
-interface DecorDecorationGridDecorationProps {
-    decoration: any;
+interface DecorDecorationGridDecorationProps extends HTMLProps<HTMLDivElement> {
+    decoration: Decoration;
     isSelected: boolean;
     onSelect: () => void;
-    style: any;
 }
 
-export default function DecorDecorationGridDecoration(props) {
+export default function DecorDecorationGridDecoration(props: DecorDecorationGridDecorationProps) {
     const { decoration } = props;
-    delete props.decoration;
 
     return <DecorationGridDecoration
         {...props}
@@ -30,6 +30,6 @@ export default function DecorDecorationGridDecoration(props) {
                 />
             ));
         }}
-        avatarDecoration={discordifyDecoration(decoration)}
+        avatarDecoration={decorationToAvatarDecoration(decoration)}
     />;
 }

@@ -17,9 +17,9 @@ import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
-import discordifyDecoration from "../../lib/utils/discordifyDecoration";
+import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
 import openInviteModal from "../../lib/utils/openInviteModal";
-import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
+import { requireAvatarDecorationModal } from "../../lib/utils/requireModals";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
@@ -29,6 +29,12 @@ import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
+
+function usePresets() {
+    const [presets, setPresets] = useState<Preset[]>([]);
+    useEffect(() => { getPresets().then(setPresets); }, []);
+    return presets;
+}
 
 interface Section {
     title: string;
@@ -83,6 +89,8 @@ export default function ChangeDecorationModal(props: any) {
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
     const isTryingDecoration = typeof tryingDecoration !== "undefined";
 
+    const avatarDecorationOverride = isTryingDecoration ? tryingDecoration ? decorationToAvatarDecoration(tryingDecoration) : null : undefined;
+
     const {
         decorations,
         selectedDecoration,
@@ -96,10 +104,9 @@ export default function ChangeDecorationModal(props: any) {
 
     const activeSelectedDecoration = isTryingDecoration ? tryingDecoration : selectedDecoration;
     const activeDecorationHasAuthor = typeof activeSelectedDecoration?.authorId !== "undefined";
-    const hasPendingReview = decorations.some(d => d.reviewed === false);
+    const hasDecorationPendingReview = decorations.some(d => d.reviewed === false);
 
-    const [presets, setPresets] = useState<Preset[]>([]);
-    useEffect(() => { getPresets().then(setPresets); }, []);
+    const presets = usePresets();
     const presetDecorations = presets.flatMap(preset => preset.decorations);
 
     const activeDecorationPreset = presets.find(preset => preset.id === activeSelectedDecoration?.presetId);
@@ -153,11 +160,11 @@ export default function ChangeDecorationModal(props: any) {
                                     onSelect={() => setTryingDecoration(null)}
                                 />;
                             case "create":
-                                return <Tooltip text="You already have a decoration pending review" shouldShow={hasPendingReview}>
+                                return <Tooltip text="You already have a decoration pending review" shouldShow={hasDecorationPendingReview}>
                                     {tooltipProps => <DecorationGridCreate
                                         className={cl("change-decoration-modal-decoration")}
                                         {...tooltipProps}
-                                        onSelect={!hasPendingReview ? openCreateDecorationModal : () => { }}
+                                        onSelect={!hasDecorationPendingReview ? openCreateDecorationModal : () => { }}
                                     />}
                                 </Tooltip>;
                         }
@@ -182,7 +189,7 @@ export default function ChangeDecorationModal(props: any) {
             />
             <div className={cl("change-decoration-modal-preview")}>
                 <AvatarDecorationModalPreview
-                    avatarDecorationOverride={isTryingDecoration ? tryingDecoration ? discordifyDecoration(tryingDecoration) : null : undefined}
+                    avatarDecorationOverride={avatarDecorationOverride}
                     user={UserStore.getCurrentUser()}
                 />
                 {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}

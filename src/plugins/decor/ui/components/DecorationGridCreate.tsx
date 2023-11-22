@@ -6,12 +6,18 @@
 
 import { PlusIcon } from "@components/Icons";
 import { Text } from "@webpack/common";
+import { HTMLProps } from "react";
 
 import { DecorationGridItem } from ".";
 
-export default function DecorationGridCreate(props: { onSelect; className?: string; }) {
+type DecorationGridCreateProps = HTMLProps<HTMLDivElement> & {
+    onSelect: () => void;
+};
+
+export default function DecorationGridCreate(props: DecorationGridCreateProps) {
     return <DecorationGridItem
         {...props}
+        isSelected={false}
     >
         <PlusIcon />
         <Text

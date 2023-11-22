@@ -8,20 +8,37 @@ import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, Forms, GuildStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, Forms, GuildStore, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
 import openInviteModal from "../../lib/utils/openInviteModal";
-import requireAvatarDecorationModal from "../../lib/utils/requireAvatarDecorationModal";
-import requireCreateStickerModal from "../../lib/utils/requireCreateStickerModal";
+import { requireAvatarDecorationModal, requireCreateStickerModal } from "../../lib/utils/requireModals";
 import { AvatarDecorationModalPreview } from "../components";
 
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 const FileUpload = findByCodeLazy("fileUploadInput,");
+
+function useObjectURL(object: Blob | MediaSource | null) {
+    const [url, setUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!object) return;
+
+        const objectUrl = URL.createObjectURL(object);
+        setUrl(objectUrl);
+
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+            if (!object) setUrl(null);
+        };
+    }, [object]);
+
+    return url;
+}
 
 export default function CreateDecorationModal(props) {
     const [name, setName] = useState("");
@@ -35,7 +52,9 @@ export default function CreateDecorationModal(props) {
 
     const { create: createDecoration } = useCurrentUserDecorationsStore();
 
-    const decoration = file ? { asset: URL.createObjectURL(file), skuId: RAW_SKU_ID } : null;
+    const fileUrl = useObjectURL(file);
+
+    const decoration = useMemo(() => fileUrl ? { asset: fileUrl, skuId: RAW_SKU_ID } : null, [fileUrl]);
 
     return <ModalRoot
         {...props}

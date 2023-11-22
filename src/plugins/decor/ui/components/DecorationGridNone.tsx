@@ -6,10 +6,16 @@
 
 import { NoEntrySignIcon } from "@components/Icons";
 import { i18n, Text } from "@webpack/common";
+import { HTMLProps } from "react";
 
 import { DecorationGridItem } from ".";
 
-export default function DecorationGridNone(props: { isSelected, onSelect; className?: string; }) {
+type DecorationGridNoneProps = HTMLProps<HTMLDivElement> & {
+    isSelected: boolean;
+    onSelect: () => void;
+};
+
+export default function DecorationGridNone(props: DecorationGridNoneProps) {
     return <DecorationGridItem
         {...props}
     >
