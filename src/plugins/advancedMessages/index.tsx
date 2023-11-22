@@ -20,7 +20,7 @@ import { AllowedMentions, EditAllowedMentionsStore, EditAttachmentsStore, SendAl
 export default definePlugin({
     name: "AdvancedMessages",
     description: "Power utilities for sending/editing messages",
-    authors: [Devs.arHSM],
+    authors: [Devs.arHSM, Devs.amia],
     dependencies: ["MessageEventsAPI"],
     settings: definePluginSettings({
         pingEveryone: {
