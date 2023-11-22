@@ -21,11 +21,9 @@ export interface AllowedMentions {
 }
 
 export interface EditAttachments {
-    messageId: string,
     attachments: File[];
 }
 
 export const SendAllowedMentionsStore = new Map<string, AllowedMentions>();
 export const EditAllowedMentionsStore = new Map<string, AllowedMentions>();
 export const EditAttachmentsStore = new Map<string, EditAttachments>();
-

@@ -71,7 +71,7 @@ export default definePlugin({
                 // Set allowedMentions & populate attachments store
                 {
                     match: /"chat input type must be set"\);/,
-                    replace: '$& $self.setAllowedMentions(arguments[0]); arguments[0].type?.analyticsName === "edit" && $self.createEditAttachmentEntry(arguments[0]);'
+                    replace: '$& $self.allowedSlateTypes.includes(arguments[0].type?.analyticsName) && $self.setAllowedMentions(arguments[0]); arguments[0].type?.analyticsName === "edit" && $self.createEditAttachmentEntry(arguments[0].channel.id);'
                 },
                 // Add the hasConnectedBar class when AllowedMentionsBar is visible
                 {
@@ -168,6 +168,19 @@ export default definePlugin({
             ]
         },
         {
+            find: ".AnalyticEvents.MESSAGE_POPOUT_MENU_OPENED_DESKTOP",
+            replacement: [
+                // You can start editing message in the midst of editing another
+                // message, this cancels the previous message but there's no clear
+                // way to handle that, so patching the edit button on messages
+                // ensures that before editing any message the previous state is cleared
+                {
+                    match: /(?<=\i\(\{key:"edit",channel:(\i),.+?,onClick:)\i.editMessage/,
+                    replace: "(...args) => { $self.onEditCancel($1.id); return $&(...args) }"
+                }
+            ]
+        },
+        {
             find: '..."IMAGE"===',
             replacement: [
                 // Override renderImageComponent and renderVideoComponent functions
@@ -178,6 +191,7 @@ export default definePlugin({
             ]
         },
     ],
+    allowedSlateTypes: ["normal", "edit", "sidebar", "thread_creation", "create_forum_post"],
     getAllowedMentionsStore(isEdit: boolean) {
         return isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
     },
@@ -239,6 +253,8 @@ export default definePlugin({
             // Replying is a special case where we don't need extra ast nodes
             if (mentions.meta.isReply) {
                 store.set(channelId, mentions);
+            } else {
+                store.delete(channelId);
             }
 
             return;
@@ -323,24 +339,11 @@ export default definePlugin({
             replied_user: mentions.repliedUser,
         };
     },
-    createEditAttachmentEntry({
-        channel: { id: channelId },
-        message: { id: messageId }
-    }: {
-        channel: Channel,
-        message: Message;
-    }) {
-        // An entry is created for a channel when the `analyticsName` of the
-        // `type` prop passed to slate is "edit", onEditCancels removes this
-        // entry, but! you can switch the message you are editing without
-        // cancelling (implicit cancel)
-        // This implicit cancel is a non-issue for allowedMentions cause that
-        // updates dynamically based on richValue
-        // This condition checks if an entry exists and for the same message
-        // with just one call
-        if (EditAttachmentsStore.get(channelId)?.messageId === messageId) return;
+    createEditAttachmentEntry(channelId: string) {
+        // An entry could have been created in a previous render
+        if (EditAttachmentsStore.has(channelId)) return;
 
-        EditAttachmentsStore.set(channelId, { messageId, attachments: [] });
+        EditAttachmentsStore.set(channelId, { attachments: [] });
     },
     handlePaste(channelId: string, event: ClipboardEvent) {
         // In the evnt where the patch to create an entry fails return instead
@@ -428,6 +431,9 @@ export default definePlugin({
     },
     stop() {
         removePreSendListener(this.preSend);
+        SendAllowedMentionsStore.clear();
+        EditAllowedMentionsStore.clear();
+        EditAttachmentsStore.clear();
     },
     // HACK: remove
     debug() {
