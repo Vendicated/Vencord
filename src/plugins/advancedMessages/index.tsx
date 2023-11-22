@@ -347,7 +347,7 @@ export default definePlugin({
             const type = [tooManyUsers && "users", tooManyRoles && "roles"].filter(x => x).join(" and ");
             Alerts.show({
                 title: "Uh oh!",
-                body: `You've selected too many individual ${type}.\nYou may only select all or up to 100 ids in each category.`
+                body: `You've selected too many individual ${type} to mention!\nYou may only select all or up to 100 items in each category.`
             });
             return { cancel: true };
         }
