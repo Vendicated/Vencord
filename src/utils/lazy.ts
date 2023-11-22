@@ -43,7 +43,6 @@ for (const method of [
     "construct",
     "defineProperty",
     "deleteProperty",
-    "get",
     "getOwnPropertyDescriptor",
     "getPrototypeOf",
     "has",
@@ -86,7 +85,11 @@ handler.getOwnPropertyDescriptor = (target, p) => {
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazy<T>(factory: () => T, attempts = 5): T {
+export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T {
+    let isSameTick = true;
+    if (!isChild)
+        setTimeout(() => isSameTick = false, 0);
+
     let tries = 0;
     const proxyDummy = Object.assign(function () { }, {
         [kCACHE]: void 0 as T | undefined,
@@ -100,5 +103,21 @@ export function proxyLazy<T>(factory: () => T, attempts = 5): T {
         }
     });
 
-    return new Proxy(proxyDummy, handler) as any;
+    return new Proxy(proxyDummy, {
+        ...handler,
+        get(target, p, receiver) {
+            // if we're still in the same tick, it means the lazy was immediately used.
+            // thus, we lazy proxy the get access to make things like destructuring work as expected
+            // meow here will also be a lazy
+            // `const { meow } = findByPropsLazy("meow");`
+            if (!isChild && isSameTick)
+                return proxyLazy(
+                    () => Reflect.get(target[kGET](), p, receiver),
+                    attempts,
+                    true
+                );
+
+            return Reflect.get(target[kGET](), p, receiver);
+        }
+    }) as any;
 }

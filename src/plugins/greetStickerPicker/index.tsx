@@ -18,9 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ContextMenu, FluxDispatcher, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
@@ -51,7 +50,7 @@ const settings = definePluginSettings({
 }>();
 
 const MessageActions = findByPropsLazy("sendGreetMessage");
-const WELCOME_STICKERS = proxyLazy(() => findByProps("WELCOME_STICKERS")?.WELCOME_STICKERS);
+const { WELCOME_STICKERS } = findByPropsLazy("WELCOME_STICKERS");
 
 function greet(channel: Channel, message: Message, stickers: string[]) {
     const options = MessageActions.getSendMessageOptionsForReply({
