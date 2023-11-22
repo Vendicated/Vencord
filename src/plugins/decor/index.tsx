@@ -58,8 +58,8 @@ export default definePlugin({
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(?<=function \i\(\i\){)let{avatarDecoration/,
-                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;$&"
+                match: /(?<=function \i\(\i\){)(?=let{avatarDecoration)/,
+                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
         // Patch profile customization settings to include Decor section
@@ -75,22 +75,23 @@ export default definePlugin({
             find: ".decorationGridItem",
             replacement: [
                 {
-                    match: /(?<=\i=)\i=>{let{children/,
+                    match: /(?<==)\i=>{let{children.{20,100}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&"
                 },
                 {
-                    match: /(?<=\i=)\i=>{let{user:\i,avatarDecoration/,
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration.{300,600}decorationGridItemChurned/,
                     replace: "$self.DecorationGridDecoration=$&"
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /\i===\i\.Section\.PURCHASE\|\|\i===\i\.Section\.PREMIUM_PURCHASE&&\i(?<=avatarDecoration:(\i).+?)/,
-                    replace: "$1.skuId === $self.SKU_ID || ($&)"
+                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i;if\()(?<=avatarDecoration:(\i).+?)/,
+                    replace: "$1.skuId===$self.SKU_ID||"
                 }
             ]
         },
         {
             find: "isAvatarDecorationAnimating:",
+            group: true,
             replacement: [
                 // Add Decor avatar decoration hook to avatar decoration hook
                 {
@@ -100,7 +101,7 @@ export default definePlugin({
                 // Use added hook
                 {
                     match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
-                    replace: "$1 ?? vcDecorAvatarDecoration ?? ($&)"
+                    replace: "$1??vcDecorAvatarDecoration??($&)"
                 },
                 // Make memo depend on added hook
                 {
@@ -113,15 +114,10 @@ export default definePlugin({
         {
             find: "renderAvatarWithPopout(){",
             replacement: [
-                // Add Decor avatar decoration hook
+                // Use Decor avatar decoration hook
                 {
-                    match: /(?=let \i=\(0,\i.getAvatarDecorationURL\))(?<=currentUser:(\i).+?)/,
-                    replace: "let vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1);"
-                },
-                // Use added hook
-                {
-                    match: /(?<={avatarDecoration:).{1,20}?(?=,)/,
-                    replace: "vcDecorAvatarDecoration ?? $&"
+                    match: /(?<=getAvatarDecorationURL\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
+                    replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
         }
