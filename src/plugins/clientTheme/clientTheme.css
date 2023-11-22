@@ -15,7 +15,7 @@
     justify-content: flex-start;
 }
 
-.client-theme-container > [class^="colorSwatch"] > [class^="swatch"] {
+.client-theme-container>[class^="colorSwatch"]>[class^="swatch"] {
     border: thin solid var(--background-modifier-accent) !important;
 }
 
@@ -24,8 +24,11 @@
 }
 
 .client-theme-contrast-warning {
+    background-color: #313338;
+    padding: 0.5rem;
+    border-radius: .5rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: end;
+    align-items: center;
 }
