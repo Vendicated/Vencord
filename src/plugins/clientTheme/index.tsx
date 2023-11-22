@@ -11,12 +11,11 @@ import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { LazyComponent } from "@utils/react";
+import { findComponentByCodeLazy } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCode } from "@webpack";
 import { Button, Forms } from "@webpack/common";
 
-const ColorPicker = LazyComponent(() => findByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR"));
+const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",

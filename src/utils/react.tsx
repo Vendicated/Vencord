@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FilterFn, filters, find, findByProps } from "@webpack";
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 
 import { makeLazy } from "./lazy";
@@ -77,7 +78,6 @@ interface AwaiterOpts<T> {
  * @param fallbackValue The fallback value that will be used until the promise resolved
  * @returns [value, error, isPending]
  */
-
 export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts: AwaiterOpts<T>): AwaiterRes<T>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterOpts<T | null>): AwaiterRes<T | null> {
@@ -113,30 +113,15 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
 
     return [state.value, state.error, state.pending];
 }
+
 /**
  * Returns a function that can be used to force rerender react components
  */
-
 export function useForceUpdater(): () => void;
 export function useForceUpdater(withDep: true): [unknown, () => void];
 export function useForceUpdater(withDep?: true) {
     const r = useReducer(x => x + 1, 0);
     return withDep ? r : r[1];
-}
-/**
- * A lazy component. The factory method is called on first render. For example useful
- * for const Component = LazyComponent(() => findByDisplayName("...").default)
- * @param factory Function returning a Component
- * @param attempts How many times to try to get the component before giving up
- * @returns Result of factory function
- */
-
-export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
-    const get = makeLazy(factory, attempts);
-    return (props: T) => {
-        const Component = get() ?? NoopComponent;
-        return <Component {...props} />;
-    };
 }
 
 interface TimerOpts {
@@ -158,4 +143,53 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     }, deps);
 
     return time;
+}
+
+/**
+ * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
+ */
+export function findComponentByCode(...code: string[]) {
+    const filter = filters.byCode(...code);
+    return find(m => {
+        if (filter(m)) return true;
+        if (!m.$$typeof) return false;
+        if (m.type) return filter(m.type); // memos
+        if (m.render) return filter(m.render); // forwardRefs
+        return false;
+    }) ?? NoopComponent;
+}
+
+/**
+ * Finds the first component that matches the filter, lazily.
+ */
+export function findComponentLazy<T extends object = any>(filter: FilterFn) {
+    return LazyComponent<T>(() => find(filter));
+}
+
+/**
+ * Finds the first component that includes all the given code, lazily
+ */
+export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
+    return LazyComponent<T>(() => findComponentByCode(...code));
+}
+
+/**
+ * Finds the first component that is exported by the first prop name, lazily
+ */
+export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
+    return LazyComponent<T>(() => findByProps(...props)?.[props[0]]);
+}
+
+/**
+ * A lazy component. The factory method is called on first render.
+ * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
+ * @returns Result of factory function
+ */
+export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
+    const get = makeLazy(factory, attempts);
+    return (props: T) => {
+        const Component = get() ?? NoopComponent;
+        return <Component {...props} />;
+    };
 }
