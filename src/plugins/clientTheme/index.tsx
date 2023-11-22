@@ -12,7 +12,7 @@ import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCode } from "@webpack";
 import { Button, Forms } from "@webpack/common";
 
@@ -87,25 +87,13 @@ export default definePlugin({
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
 
-    patches: [
-        {
-            find: "Could not find app-mount",
-            replacement: {
-                match: /(?<=Could not find app-mount"\))/,
-                replace: ",$self.addThemeInitializer()"
-            }
-        }
-    ],
-
-    addThemeInitializer() {
-        document.addEventListener("DOMContentLoaded", this.themeInitializer = () => {
-            updateColorVars(settings.store.color);
-            generateColorOffsets();
-        });
+    startAt: StartAt.DOMContentLoaded,
+    start() {
+        updateColorVars(settings.store.color);
+        generateColorOffsets();
     },
 
     stop() {
-        document.removeEventListener("DOMContentLoaded", this.themeInitializer);
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
     }

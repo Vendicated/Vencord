@@ -81,6 +81,11 @@ export interface PluginDef {
      */
     enabledByDefault?: boolean;
     /**
+     * When to call the start() method
+     * @default StartAt.WebpackReady
+     */
+    startAt?: StartAt,
+    /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
      */
@@ -115,6 +120,15 @@ export interface PluginDef {
     toolboxActions?: Record<string, () => void>;
 
     tags?: string[];
+}
+
+export const enum StartAt {
+    /** Right away, as soon as Vencord initialised */
+    Init = "Init",
+    /** On the DOMContentLoaded event, so once the document is ready */
+    DOMContentLoaded = "DOMContentLoaded",
+    /** Once Discord's core webpack modules have finished loading, so as soon as things like react and flux are available */
+    WebpackReady = "WebpackReady"
 }
 
 export const enum OptionType {
