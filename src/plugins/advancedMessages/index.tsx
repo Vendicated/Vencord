@@ -138,6 +138,16 @@ export default definePlugin({
             ]
         },
         {
+            find: '"?use_nested_fields=true"',
+            replacement: [
+                // Patch sending allowed_messages for forum creation
+                {
+                    match: /(?<=.Endpoints.CHANNEL_THREADS\((\i.id)\)\+"\?use_nested_fields=true".+?message:\{)/,
+                    replace: "allowed_mentions: patchForumAllowedMentions($1),"
+                }
+            ]
+        },
+        {
             find: ".Messages.UPLOAD_TO.format({",
             replacement: [
                 // Patch drag-to-upload to append to editing message instead of new message
@@ -326,6 +336,16 @@ export default definePlugin({
             roles: mentions.roles ? Array.from(mentions.roles) : undefined,
             // Don't override this for send! Discord already has a UI for this
             repliedUser: extra.replyOptions.allowedMentions?.repliedUser ?? false,
+        };
+    },
+    patchForumAllowedMentions(channelId: string) {
+        const mentions = this.getAllowedMentions(channelId, false, true);
+        if (!isNonNullish(mentions)) return;
+
+        return {
+            parse: Array.from(mentions.parse),
+            users: mentions.users ? Array.from(mentions.users) : undefined,
+            roles: mentions.roles ? Array.from(mentions.roles) : undefined,
         };
     },
     patchEditAllowedMentions(channelId: string, original: any) {
