@@ -9,7 +9,6 @@ import "./clientTheme.css";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
@@ -36,9 +35,8 @@ function onPickColor(color: number) {
 
 const { saveClientTheme } = findByPropsLazy("saveClientTheme");
 
-function swapTheme() {
-    const isLightTheme = getTheme() === Theme.Light;
-    saveClientTheme({ theme: isLightTheme ? "dark" : "light" });
+function swapTheme(currentTheme: string) {
+    saveClientTheme({ theme: currentTheme === "light" ? "dark" : "light" });
 }
 
 const ThemeStore = findStoreLazy("ThemeStore");
@@ -81,7 +79,7 @@ function ThemeSettings() {
                         <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
                         <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
                     </div>
-                    {!unFixableContrast && <Button onClick={swapTheme}>Swap Theme</Button>}
+                    {!unFixableContrast && <Button onClick={() => swapTheme(theme)}>Swap Theme</Button>}
                 </div>
                 : null
             }
