@@ -217,13 +217,21 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                     try {
                         const newCode = executePatch(replacement.match, replacement.replace as string);
-                        if (newCode === code && !patch.noWarn) {
-                            (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
-                            logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
-                            if (IS_DEV) {
-                                logger.debug("Function Source:\n", code);
+                        if (newCode === code) {
+                            if (!patch.noWarn) {
+                                (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
+                                logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                if (IS_DEV) {
+                                    logger.debug("Function Source:\n", code);
+                                }
                             }
-                            if (patch.group) throw new Error("Group patch had no effect");
+
+                            if (patch.group) {
+                                code = preCode;
+                                mod = preMod;
+                                patchedBy.delete(patch.plugin);
+                                break;
+                            }
                         } else {
                             code = newCode;
                             mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
@@ -263,15 +271,16 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
                             logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                         }
-                        code = lastCode;
-                        mod = lastMod;
-                        patchedBy.delete(patch.plugin);
 
+                        patchedBy.delete(patch.plugin);
                         if (patch.group) {
                             code = preCode;
                             mod = preMod;
                             break;
                         }
+
+                        code = lastCode;
+                        mod = lastMod;
                     }
                 }
 
