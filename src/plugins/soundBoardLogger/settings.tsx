@@ -75,15 +75,6 @@ const settings = definePluginSettings({
         }
 
     },
-    FileType: {
-        description: "the format that you want to save your file",
-        type: OptionType.SELECT,
-        options: [
-            { label: ".ogg", value: ".ogg", default: true },
-            { label: ".mp3", value: ".mp3" },
-            { label: ".wav", value: ".wav" },
-        ],
-    },
     IconLocation: {
         description: "choose where to show the SoundBoard Log icon (requires restart)",
         type: OptionType.SELECT,

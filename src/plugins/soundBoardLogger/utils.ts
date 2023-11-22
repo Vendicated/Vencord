@@ -64,7 +64,7 @@ export const playSound = id => {
 const saveFileModule = findByPropsLazy("saveFile");
 
 export async function downloadAudio(id: string): Promise<void> {
-    const filename = id + settings.store.FileType;
+    const filename = id + ".ogg";
     const uri = `https://cdn.discordapp.com/soundboard-sounds/${id}`;
     const data = await fetch(uri).then(e => e.arrayBuffer());
 
