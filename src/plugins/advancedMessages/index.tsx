@@ -140,7 +140,7 @@ export default definePlugin({
         {
             find: '"?use_nested_fields=true"',
             replacement: [
-                // Patch sending allowed_messages for forum creation
+                // Patch sending allowed_mentions for forum creation
                 {
                     match: /(?<=.Endpoints.CHANNEL_THREADS\((\i.id)\)\+"\?use_nested_fields=true".+?message:\{)/,
                     replace: "allowed_mentions: patchForumAllowedMentions($1),"
