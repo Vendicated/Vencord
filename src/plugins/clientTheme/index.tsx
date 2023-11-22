@@ -74,7 +74,7 @@ function ThemeSettings() {
             </div>
             {contrastWarning && (<>
                 <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
-                <div className="client-theme-contrast-warning">
+                <div className={`client-theme-contrast-warning ${isLightTheme ? "theme-dark" : "theme-light"}`}>
                     <div>
                         <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
                         <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>

@@ -24,7 +24,7 @@
 }
 
 .client-theme-contrast-warning {
-    background-color: #313338;
+    background-color: var(--background-primary);
     padding: 0.5rem;
     border-radius: .5rem;
     display: flex;
