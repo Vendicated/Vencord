@@ -13,15 +13,16 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCode } from "@webpack";
-import { Button, Forms } from "@webpack/common";
+import { findByCode, findByPropsLazy, findStoreLazy } from "@webpack";
+import { Button, Forms, useStateFromStores } from "@webpack/common";
 
 const ColorPicker = LazyComponent(() => findByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR"));
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
     "#3A483D", "#344242", "#313D4B", "#2D2F47", "#322B42",
-    "#3C2E42", "#422938"
+    "#3C2E42", "#422938", "#b6908f", "#bfa088", "#d3c77d",
+    "#86ac86", "#88aab3", "#8693b5", "#8a89ba", "#ad94bb",
 ];
 
 function onPickColor(color: number) {
@@ -31,9 +32,26 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
+const saveClientTheme = findByPropsLazy("saveClientTheme");
+
+function swapTheme() {
+    const isLightTheme = getTheme() === Theme.Light;
+    saveClientTheme.saveClientTheme({ theme: isLightTheme ? "dark" : "light" });
+}
+
+const ThemeStore = findStoreLazy("ThemeStore");
+
 function ThemeSettings() {
-    const lightnessWarning = hexToLightness(settings.store.color) > 45;
-    const lightModeWarning = getTheme() === Theme.Light;
+    const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
+    const isLightTheme = theme === "light";
+
+    const selectedLightness = hexToLightness(settings.store.color);
+
+    let contrastWarning, unFixableContrast = false;
+    if ((isLightTheme && selectedLightness < 60) || !isLightTheme && selectedLightness > 40)
+        contrastWarning = true;
+    if (selectedLightness < 60 && selectedLightness > 40)
+        unFixableContrast = true;
 
     return (
         <div className="client-theme-settings">
@@ -49,12 +67,12 @@ function ThemeSettings() {
                     suggestedColors={colorPresets}
                 />
             </div>
-            {lightnessWarning || lightModeWarning
+            {contrastWarning
                 ? <div>
                     <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
                     <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
-                    {lightnessWarning && <Forms.FormText className="client-theme-warning">Selected color is very light</Forms.FormText>}
-                    {lightModeWarning && <Forms.FormText className="client-theme-warning">Light mode isn't supported</Forms.FormText>}
+                    <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
+                    {!unFixableContrast && <Button onClick={swapTheme}>Swap Theme</Button>}
                 </div>
                 : null
             }
@@ -99,10 +117,24 @@ export default definePlugin({
     }
 });
 
-const variableRegex = /(--primary-[5-9]\d{2}-hsl):.*?(\S*)%;/g;
+const variableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
+const lightVariableRegex = /^--primary-[1-5]\d{2}-hsl/g;
+const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
+
+// generates variables per theme by:
+// - matching regex (so we can limit what variables are included in light/dark theme, otherwise text becomes unreadable)
+// - offset from specified center (light/dark theme get different offsets because light uses 100 for background-primary, while dark uses 600)
+function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp, centerVariable: string): string {
+    return Object.entries(variableLightness).filter(([key]) => key.search(regex) > -1)
+        .map(([key, lightness]) => {
+            const lightnessOffset = lightness - variableLightness[centerVariable];
+            const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
+            return `${key}: var(--theme-h) var(--theme-s) calc(var(--theme-l) ${plusOrMinus} ${Math.abs(lightnessOffset).toFixed(2)}%);`;
+        })
+        .join("");
+}
 
 async function generateColorOffsets() {
-
     const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
     const variableLightness = {} as Record<string, number>;
 
@@ -114,7 +146,7 @@ async function generateColorOffsets() {
         const res = await fetch(cssLink);
         const cssString = await res.text();
 
-        // Get lightness values of --primary variables >=500
+        // Get lightness values of --primary variables
         let variableMatch = variableRegex.exec(cssString);
         while (variableMatch !== null) {
             const [, variable, lightness] = variableMatch;
@@ -123,20 +155,12 @@ async function generateColorOffsets() {
         }
     }
 
-    // Generate offsets
-    const lightnessOffsets = Object.entries(variableLightness)
-        .map(([key, lightness]) => {
-            const lightnessOffset = lightness - variableLightness["--primary-600-hsl"];
-            const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
-            return `${key}: var(--theme-h) var(--theme-s) calc(var(--theme-l) ${plusOrMinus} ${Math.abs(lightnessOffset).toFixed(2)}%);`;
-        })
-        .join("\n");
-
     const style = document.createElement("style");
     style.setAttribute("id", "clientThemeOffsets");
-    style.textContent = `:root:root {
-        ${lightnessOffsets}
-    }`;
+    style.textContent = `.theme-light.theme-light { ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} }`;
+    style.textContent += `.theme-dark.theme-dark { ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} }`;
+    style.textContent = style.textContent.trim();
+
     document.head.appendChild(style);
 }
 
