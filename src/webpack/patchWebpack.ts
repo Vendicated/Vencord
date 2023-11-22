@@ -204,8 +204,8 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
             if (code.includes(patch.find)) {
                 patchedBy.add(patch.plugin);
 
-                const preMod = mod;
-                const preCode = code;
+                const previousMod = mod;
+                const previousCode = code;
 
                 // we change all patch.replacement to array in plugins/index
                 for (const replacement of patch.replacement as PatchReplacement[]) {
@@ -227,8 +227,8 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             }
 
                             if (patch.group) {
-                                code = preCode;
-                                mod = preMod;
+                                code = previousCode;
+                                mod = previousMod;
                                 patchedBy.delete(patch.plugin);
                                 break;
                             }
@@ -274,8 +274,8 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                         patchedBy.delete(patch.plugin);
                         if (patch.group) {
-                            code = preCode;
-                            mod = preMod;
+                            code = previousCode;
+                            mod = previousMod;
                             break;
                         }
 
