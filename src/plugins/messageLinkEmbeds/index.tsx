@@ -22,9 +22,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { findComponentByCodeLazy } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,

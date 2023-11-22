@@ -20,9 +20,9 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
-import { findComponentByCodeLazy, useAwaiter } from "@utils/react";
+import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");

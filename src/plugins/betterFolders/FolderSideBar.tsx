@@ -17,8 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findComponentByCodeLazy } from "@utils/react";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 

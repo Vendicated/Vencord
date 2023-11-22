@@ -18,9 +18,8 @@
 
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findComponentByCodeLazy, findComponentLazy } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findComponentLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
