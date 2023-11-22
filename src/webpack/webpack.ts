@@ -386,7 +386,7 @@ export function findStore(name: string) {
 }
 
 /**
- * findByDisplayName but lazy
+ * findStore but lazy
  */
 export function findStoreLazy(name: string) {
     return proxyLazy(() => findStore(name));
