@@ -1,0 +1,39 @@
+.vc-advanced-messages-media-name {
+    --spacing: 0.4rem;
+
+    position: absolute;
+    z-index: 2;
+    left: var(--spacing);
+    bottom: var(--spacing);
+    margin-top: var(--spacing);
+    margin-right: var(--spacing);
+    padding: var(--spacing);
+    border-radius: var(--spacing);
+    background: var(--background-primary);
+    opacity: 0;
+
+    /*
+      Lets users open image by clicking on the decoration, helpful when the
+      image is small and the decoration covers the entire image
+    */
+    pointer-events: none;
+
+    /* Maximum width for the media name decoration */
+    max-width: fit-content;
+
+    /*
+      Width (clamped by max-width)
+      100% - 2 * 0.4rem padding - 0.4rem left - 0.4rem gutter size
+    */
+    width: calc(100% - (var(--spacing) * 4));
+
+    /* Make text overflow ellipsis instead of breaking into multiple lines */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.vc-advanced-messages-media-name:hover,
+:hover ~ .vc-advanced-messages-media-name {
+    opacity: 1;
+}
