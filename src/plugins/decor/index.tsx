@@ -14,6 +14,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Forms, NavigationRouter, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
@@ -23,6 +24,7 @@ import { useUserDecorAvatarDecoration, useUsersDecorationsStore } from "./lib/st
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import DecorSection from "./ui/components/DecorSection";
 
+const { isAnimatedAvatarDecoration } = findByPropsLazy("isAnimatedAvatarDecoration");
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -151,12 +153,12 @@ export default definePlugin({
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 
-    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate: boolean; }) {
+    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate?: boolean; }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
-            const parts = avatarDecoration.asset.split("_");
-            if (!canAnimate && parts[0] === "a") parts.shift();
-            return CDN_URL + `/${parts.join("_")}.png`;
+            const url = new URL(`${CDN_URL}/${avatarDecoration.asset}.png`);
+            url.searchParams.set("animate", (!!canAnimate && isAnimatedAvatarDecoration(avatarDecoration.asset)).toString());
+            return url.toString();
         } else if (avatarDecoration?.skuId === RAW_SKU_ID) {
             return avatarDecoration.asset;
         }
