@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByProps, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -78,13 +77,15 @@ export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores: <T>(
-    stores: t.FluxStore[],
-    mapper: () => T,
-    idk?: any,
-    isEqual?: (old: T, newer: T) => boolean
-) => T
-    = proxyLazy(() => findByProps("useStateFromStores").useStateFromStores);
+export const { useStateFromStores }: {
+    useStateFromStores: <T>(
+        stores: t.FluxStore[],
+        mapper: () => T,
+        idk?: any,
+        isEqual?: (old: T, newer: T) => boolean
+    ) => T;
+}
+    = findByPropsLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
