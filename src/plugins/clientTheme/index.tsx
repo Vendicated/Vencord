@@ -45,15 +45,16 @@ function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
     const isLightTheme = theme === "light";
 
-    const selectedLightness = hexToLightness(settings.store.color);
+    const selectedLuminance = relativeLuminance(settings.store.color);
+    console.log(selectedLuminance);
 
-    let contrastWarning, unFixableContrast = false;
-    if ((isLightTheme && selectedLightness < 55) || !isLightTheme && selectedLightness > 40)
+    let contrastWarning = false, unFixableContrast = false;
+    if ((isLightTheme && selectedLuminance < 0.35) || !isLightTheme && selectedLuminance > 0.12)
         contrastWarning = true;
-    if (selectedLightness < 55 && selectedLightness > 40)
+    if (selectedLuminance < 0.35 && selectedLuminance > 0.12)
         unFixableContrast = true;
-    // light mode with values greater than 70 leads to background colors getting crushed together and poor text contrast for muted channels
-    if (isLightTheme && selectedLightness > 70) {
+    // light mode with values greater than 65 leads to background colors getting crushed together and poor text contrast for muted channels
+    if (isLightTheme && selectedLuminance > 0.65) {
         contrastWarning = true;
         unFixableContrast = true;
     }
@@ -231,17 +232,14 @@ function hexToHSL(hexCode: string) {
     return { hue, saturation, lightness };
 }
 
-// Minimized math just for lightness, lowers lag when changing colors
-function hexToLightness(hexCode: string) {
-    // Hex => RGB normalized to 0-1
-    const r = parseInt(hexCode.substring(0, 2), 16) / 255;
-    const g = parseInt(hexCode.substring(2, 4), 16) / 255;
-    const b = parseInt(hexCode.substring(4, 6), 16) / 255;
+// https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+function relativeLuminance(hexCode: string) {
+    const normalize = (x: number) =>
+        x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
 
-    const cMax = Math.max(r, g, b);
-    const cMin = Math.min(r, g, b);
+    const r = normalize(parseInt(hexCode.substring(0, 2), 16) / 255);
+    const g = normalize(parseInt(hexCode.substring(2, 4), 16) / 255);
+    const b = normalize(parseInt(hexCode.substring(4, 6), 16) / 255);
 
-    const lightness = 100 * ((cMax + cMin) / 2);
-
-    return lightness;
+    return r * 0.2126 + g * 0.7152 + b * 0.0722;
 }
