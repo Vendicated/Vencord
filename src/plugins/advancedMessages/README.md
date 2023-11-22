@@ -1,6 +1,6 @@
 # AdvancedMessages
 
-power utilities for sending/editing messages.
+Power utilities for sending/editing messages.
 
 ## Allowed Mentions
 
