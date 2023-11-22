@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findComponentByCodeLazy } from "@utils/react";
-import { findLazy } from "@webpack";
+import { findComponentByCodeLazy, findLazy } from "@webpack";
 import { i18n, useToken } from "@webpack/common";
 
 const ColorMap = findLazy(m => m.colors?.INTERACTIVE_MUTED?.css);

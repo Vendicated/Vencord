@@ -18,6 +18,7 @@
 
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
+import { LazyComponent, NoopComponent } from "@utils/react";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -390,6 +391,41 @@ export function findStore(name: string) {
  */
 export function findStoreLazy(name: string) {
     return proxyLazy(() => findStore(name));
+}
+
+/**
+ * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
+ */
+export function findComponentByCode(...code: string[]) {
+    const filter = filters.byCode(...code);
+    return find(m => {
+        if (filter(m)) return true;
+        if (!m.$$typeof) return false;
+        if (m.type) return filter(m.type); // memos
+        if (m.render) return filter(m.render); // forwardRefs
+        return false;
+    }) ?? NoopComponent;
+}
+
+/**
+ * Finds the first component that matches the filter, lazily.
+ */
+export function findComponentLazy<T extends object = any>(filter: FilterFn) {
+    return LazyComponent<T>(() => find(filter));
+}
+
+/**
+ * Finds the first component that includes all the given code, lazily
+ */
+export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
+    return LazyComponent<T>(() => findComponentByCode(...code));
+}
+
+/**
+ * Finds the first component that is exported by the first prop name, lazily
+ */
+export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
+    return LazyComponent<T>(() => findByProps(...props)?.[props[0]]);
 }
 
 /**
