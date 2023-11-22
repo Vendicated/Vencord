@@ -41,7 +41,7 @@ export interface Patch {
     all?: boolean;
     /** Do not warn if this patch did no changes */
     noWarn?: boolean;
-    /** Only apply the patches inside this find if all replacements succeed */
+    /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
     predicate?(): boolean;
 }
