@@ -27,6 +27,8 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
+import { StartAt } from "@utils/types";
+
 import { get as dsGet } from "./api/DataStore";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/Settings";
@@ -79,7 +81,7 @@ async function syncSettings() {
 
 async function init() {
     await onceReady;
-    startAllPlugins();
+    startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
 
@@ -130,13 +132,17 @@ async function init() {
     }
 }
 
+startAllPlugins(StartAt.Init);
 init();
 
-if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+    startAllPlugins(StartAt.DOMContentLoaded);
+
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",
             textContent: "[class*=titleBar]{display: none!important}"
         }));
-    }, { once: true });
-}
+    }
+}, { once: true });
+

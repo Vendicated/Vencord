@@ -19,7 +19,7 @@
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { Patch, Plugin } from "@utils/types";
+import { Patch, Plugin, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -85,9 +85,15 @@ for (const p of pluginsValues) {
     }
 }
 
-export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
+export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
+    logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins)
         if (isPluginEnabled(name)) {
+            const p = Plugins[name];
+
+            const startAt = p.startAt ?? StartAt.WebpackReady;
+            if (startAt !== target) continue;
+
             startPlugin(Plugins[name]);
         }
 });
