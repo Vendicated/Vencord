@@ -119,12 +119,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
         // Additionally, `[actual newline]` is one less char than "\n", so if Discord
         // ever targets newer browsers, the minifier could potentially use this trick and
         // cause issues.
-        let code: string = mod.toString().replaceAll("\n", "");
-        // a very small minority of modules use function() instead of arrow functions,
-        // but, unnamed toplevel functions aren't valid. However 0, function() makes it a statement
-        if (code.startsWith("function(")) {
-            code = "0," + code;
-        }
+        //
+        // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
+        let code: string = "0," + mod.toString().replaceAll("\n", "");
         const originalMod = mod;
         const patchedBy = new Set();
 
@@ -182,10 +179,8 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
         // for some reason throws some error on which calling .toString() leads to infinite recursion
         // when you force load all chunks???
-        try {
-            factory.toString = () => mod.toString();
-            factory.original = originalMod;
-        } catch { }
+        factory.toString = () => mod.toString();
+        factory.original = originalMod;
 
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
@@ -210,7 +205,6 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                         const newCode = executePatch(replacement.match, replacement.replace as string);
                         if (newCode === code) {
                             if (!patch.noWarn) {
-                                (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
                                 logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
                                 if (IS_DEV) {
                                     logger.debug("Function Source:\n", code);
