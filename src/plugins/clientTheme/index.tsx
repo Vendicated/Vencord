@@ -32,28 +32,33 @@ function onPickColor(color: number) {
 
 const { saveClientTheme } = findByPropsLazy("saveClientTheme");
 
-function swapTheme(currentTheme: string) {
-    saveClientTheme({ theme: currentTheme === "light" ? "dark" : "light" });
+function setTheme(theme: string) {
+    saveClientTheme({ theme });
 }
 
 const ThemeStore = findStoreLazy("ThemeStore");
+const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
     const isLightTheme = theme === "light";
+    const oppositeTheme = isLightTheme ? "dark" : "light";
+
+    const nitroTheme = useStateFromStores([NitroThemeStore], () => NitroThemeStore.gradientPreset);
+    const nitroThemeEnabled = nitroTheme !== undefined;
 
     const selectedLuminance = relativeLuminance(settings.store.color);
     console.log(selectedLuminance);
 
-    let contrastWarning = false, unFixableContrast = false;
-    if ((isLightTheme && selectedLuminance < 0.35) || !isLightTheme && selectedLuminance > 0.12)
+    let contrastWarning = false, fixableContrast = true;
+    if ((isLightTheme && selectedLuminance < 0.26) || !isLightTheme && selectedLuminance > 0.12)
         contrastWarning = true;
-    if (selectedLuminance < 0.35 && selectedLuminance > 0.12)
-        unFixableContrast = true;
+    if (selectedLuminance < 0.26 && selectedLuminance > 0.12)
+        fixableContrast = false;
     // light mode with values greater than 65 leads to background colors getting crushed together and poor text contrast for muted channels
     if (isLightTheme && selectedLuminance > 0.65) {
         contrastWarning = true;
-        unFixableContrast = true;
+        fixableContrast = false;
     }
 
     return (
@@ -70,14 +75,16 @@ function ThemeSettings() {
                     suggestedColors={colorPresets}
                 />
             </div>
-            {contrastWarning && (<>
+            {(contrastWarning || nitroThemeEnabled) && (<>
                 <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
-                <div className={`client-theme-contrast-warning ${isLightTheme ? "theme-dark" : "theme-light"}`}>
-                    <div>
-                        <Forms.FormText className="client-theme-warning">Your theme won't look good:</Forms.FormText>
-                        <Forms.FormText className="client-theme-warning">Selected color won't contrast well with text</Forms.FormText>
+                <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
+                    <div className="client-theme-warning">
+                        <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
+                        {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
+                        {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
                     </div>
-                    {!unFixableContrast && <Button onClick={() => swapTheme(theme)} color={Button.Colors.RED}>Swap Theme</Button>}
+                    {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>Switch to {oppositeTheme} mode</Button>}
+                    {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>Disable Nitro Theme</Button>}
                 </div>
             </>)}
         </div>

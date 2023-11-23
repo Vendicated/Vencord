@@ -19,7 +19,7 @@
     border: thin solid var(--background-modifier-accent) !important;
 }
 
-.client-theme-warning {
+.client-theme-warning * {
     color: var(--text-danger);
 }
 
