@@ -170,18 +170,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                     if (filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, numberId);
-                    } else if (typeof exports === "object") {
-                        if (exports.default && filter(exports.default)) {
-                            subscriptions.delete(filter);
-                            callback(exports.default, numberId);
-                        }
-
-                        for (const nested in exports) if (nested.length <= 3) {
-                            if (exports[nested] && filter(exports[nested])) {
-                                subscriptions.delete(filter);
-                                callback(exports[nested], numberId);
-                            }
-                        }
+                    } else if (exports.default && filter(exports.default)) {
+                        subscriptions.delete(filter);
+                        callback(exports.default, numberId);
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for webpack chunk", err);
