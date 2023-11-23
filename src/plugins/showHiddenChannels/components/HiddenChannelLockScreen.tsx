@@ -18,9 +18,8 @@
 
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { find, findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findComponentLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
@@ -81,17 +80,17 @@ const enum ChannelFlags {
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
 const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
-const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE"));
-const TagComponent = LazyComponent(() => find(m => {
+const ChannelBeginHeader = findComponentByCodeLazy(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
+const TagComponent = findComponentLazy(m => {
     if (typeof m !== "function") return false;
 
     const code = Function.prototype.toString.call(m);
     // Get the component which doesn't include increasedActivity
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
-}));
+});
 
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
-const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
+const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
