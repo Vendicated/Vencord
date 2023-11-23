@@ -18,7 +18,7 @@
 
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
-import { LazyComponent, NoopComponent } from "@utils/react";
+import { LazyComponent } from "@utils/react";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -398,13 +398,18 @@ export function findStoreLazy(name: string) {
  */
 export function findComponentByCode(...code: string[]) {
     const filter = filters.byCode(...code);
-    return find(m => {
+    const res = find(m => {
         if (filter(m)) return true;
         if (!m.$$typeof) return false;
         if (m.type) return filter(m.type); // memos
         if (m.render) return filter(m.render); // forwardRefs
         return false;
-    }) ?? NoopComponent;
+    }, { isIndirect: true });
+
+    if (!res)
+        handleModuleNotFound("findComponentByCode", ...code);
+
+    return res;
 }
 
 /**
