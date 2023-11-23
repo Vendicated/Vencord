@@ -14,7 +14,7 @@ import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout as Discord
 import { Channel } from "discord-types/general";
 import { CSSProperties, ReactNode } from "react";
 
-import { AllowedMentions, EditAllowedMentionsStore, SendAllowedMentionsStore } from "../stores";
+import { AllowedMentions, AllowedMentionsParsables, EditAllowedMentionsStore, SendAllowedMentionsStore } from "../stores";
 
 export interface AllowedMentionsProps {
     mentions: AllowedMentions,
@@ -216,9 +216,9 @@ function Popout({
                         return <Menu.MenuCheckboxItem
                             id={`vc-allowed-mentions-${title}-popout-${object.id}`}
                             label={object.name!}
-                            checked={ids.has(object.id)}
+                            checked={all || ids.has(object.id)}
                             action={() => {
-                                ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
+                                all || ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
                                 setAll(ids.size === rawIds.size);
                                 update();
                             }}
@@ -243,20 +243,27 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
     const [users] = useState(mentions.users ?? new Set<string>());
     const [roles] = useState(mentions.roles ?? new Set<string>());
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
-    const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
-    const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);
+    const [allUsers, setAllUsers] = useState(users.size !== 0 && users.size === mentions.meta.userIds.size);
+    const [allRoles, setAllRoles] = useState(roles.size !== 0 && roles.size === mentions.meta.roleIds.size);
     const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
 
     useEffect(() => {
-        setAllUsers(users.size === mentions.meta.userIds.size);
-        setAllRoles(roles.size === mentions.meta.roleIds.size);
-
         store.set(channel.id, {
-            parse: new Set(everyone ? ["everyone"] : []),
-            users: users,
-            roles: roles,
+            parse: new Set(
+                [
+                    everyone && "everyone",
+                    allUsers && "users",
+                    allRoles && "roles"
+                ].filter(v => v) as AllowedMentionsParsables[]
+            ),
+            users: allUsers || users.size === 0 ? undefined : users,
+            roles: allRoles || roles.size === 0 ? undefined : roles,
             repliedUser,
-            meta: mentions.meta
+            meta: {
+                ...mentions.meta,
+                tooManyUsers: users.size > 100,
+                tooManyRoles: roles.size > 100,
+            }
         });
     }, [
         mentions,

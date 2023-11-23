@@ -10,7 +10,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, GuildStore, MessageStore, PermissionsBits, PermissionStore } from "@webpack/common";
+import { Alerts, GuildStore, MessageStore, PermissionsBits, PermissionStore, Toasts } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { AllowedMentionsBar, AllowedMentionsProps } from "./components/AllowedMentions";
@@ -191,6 +191,20 @@ export default definePlugin({
             ]
         },
         {
+            find: ".ComponentActions.FOCUS_COMPOSER_TITLE,",
+            replacement: [
+                // Clear entry on cancelling new forum post
+                {
+                    match: /.trackForumNewPostCleared\)\(\{guildId:\i.guild_id,channelId:(\i.id)\}\)/,
+                    replace: "$&; $self.onForumCancel($1);"
+                },
+                {
+                    match: /applyChatRestrictions\)\(\{.+?channel:(\i)\}\);if\(!\i/,
+                    replace: "$& || !$self.validateForum($1.id)"
+                }
+            ]
+        },
+        {
             find: '..."IMAGE"===',
             replacement: [
                 // Override renderImageComponent and renderVideoComponent functions
@@ -244,7 +258,9 @@ export default definePlugin({
                 isEdit: isNonNullish(message),
                 isReply: message?.type === 19,
                 userIds: new Set(),
-                roleIds: new Set()
+                roleIds: new Set(),
+                tooManyUsers: false,
+                tooManyRoles: false,
             }
         };
 
@@ -299,19 +315,9 @@ export default definePlugin({
             mentions.users = new Set(message.mentions.filter(userId => mentions.meta.userIds.has(userId)));
             mentions.roles = new Set(message.mentionRoles.filter(roleId => mentions.meta.roleIds.has(roleId)));
         } else {
-            if (this.settings.store.pingAllUsers) {
-                const newMentions = Array.from(mentions.meta.userIds).filter(userId => !previous?.meta.userIds.has(userId));
-                newMentions.forEach(userId => mentions.users?.add(userId));
-            }
-            if (this.settings.store.pingAllRoles) {
-                const newMentions = Array.from(mentions.meta.roleIds).filter(roleId => !previous?.meta.roleIds.has(roleId));
-                newMentions.forEach(roleId => mentions.roles?.add(roleId));
-            }
+            if (this.settings.store.pingAllUsers) { mentions.users = mentions.meta.userIds; }
+            if (this.settings.store.pingAllRoles) { mentions.roles = mentions.meta.roleIds; }
         }
-
-        // Remove erased mentions
-        mentions?.users?.forEach(userId => { if (!mentions.meta.userIds.has(userId)) mentions?.users?.delete(userId); });
-        mentions?.roles?.forEach(roleId => { if (!mentions.meta.roleIds.has(roleId)) mentions?.roles?.delete(roleId); });
 
         if (
             !mentions.meta.hasEveryone
@@ -329,25 +335,41 @@ export default definePlugin({
         const mentions = SendAllowedMentionsStore.get(channelId);
         return isNonNullish(mentions) && !mentions.parse.has("everyone");
     },
-    patchSendAllowedMentions(channelId: string, extra: MessageExtra) {
+    validateForum(channelId: string) {
         const mentions = this.getAllowedMentions(channelId, false, true);
         if (!isNonNullish(mentions)) return;
 
-        const mentionAllUsers = mentions?.users?.size === mentions.meta.userIds.size;
-        const mentionAllRoles = mentions?.roles?.size === mentions.meta.roleIds.size;
-        // Replace individual ids with parse variants
-        // if all ids are selected.
-        if (mentionAllUsers) { mentions.parse.add("users"); delete mentions.users; }
-        if (mentionAllRoles) { mentions.parse.add("roles"); delete mentions.roles; }
+        if (mentions.meta.tooManyUsers || mentions.meta.tooManyRoles) {
+            const type = [
+                mentions.meta.tooManyUsers && "users",
+                mentions.meta.tooManyRoles && "roles"
+            ].filter(x => x).join(" and ");
 
-        const tooManyUsers = mentions.users && mentions.users.size > 100;
-        const tooManyRoles = mentions.roles && mentions.roles.size > 100;
-        if (tooManyUsers || tooManyRoles) {
-            const type = [tooManyUsers && "users", tooManyRoles && "roles"].filter(x => x).join(" and ");
             Alerts.show({
                 title: "Uh oh!",
                 body: `You've selected too many individual ${type} to mention!\nYou may only select all or up to 100 items in each category.`
             });
+
+            return false;
+        }
+
+        return true;
+    },
+    patchSendAllowedMentions(channelId: string, extra: MessageExtra) {
+        const mentions = this.getAllowedMentions(channelId, false, true);
+        if (!isNonNullish(mentions)) return;
+
+        if (mentions.meta.tooManyUsers || mentions.meta.tooManyRoles) {
+            const type = [
+                mentions.meta.tooManyUsers && "users",
+                mentions.meta.tooManyRoles && "roles"
+            ].filter(x => x).join(" and ");
+
+            Alerts.show({
+                title: "Uh oh!",
+                body: `You've selected too many individual ${type} to mention!\nYou may only select all or up to 100 items in each category.`
+            });
+
             return { cancel: true };
         }
 
@@ -359,6 +381,30 @@ export default definePlugin({
             repliedUser: extra.replyOptions.allowedMentions?.repliedUser ?? false,
         };
     },
+    patchEditAllowedMentions(channelId: string, original: any) {
+        const mentions = this.getAllowedMentions(channelId, true, true);
+        if (!isNonNullish(mentions)) return original;
+
+        if (mentions.meta.tooManyUsers || mentions.meta.tooManyRoles) {
+            const type = [
+                mentions.meta.tooManyUsers && "users",
+                mentions.meta.tooManyRoles && "roles"
+            ].filter(x => x).join(" and ");
+
+            Toasts.show({
+                id: Toasts.genId(),
+                message: `You've selected too many individual ${type} to mention! All will be mentioned.`,
+                type: Toasts.Type.FAILURE,
+            });
+        }
+
+        return {
+            parse: Array.from(mentions.parse),
+            users: mentions.users ? Array.from(mentions.users) : undefined,
+            roles: mentions.roles ? Array.from(mentions.roles) : undefined,
+            replied_user: mentions.repliedUser,
+        };
+    },
     patchForumAllowedMentions(channelId: string) {
         const mentions = this.getAllowedMentions(channelId, false, true);
         if (!isNonNullish(mentions)) return;
@@ -367,17 +413,6 @@ export default definePlugin({
             parse: Array.from(mentions.parse),
             users: mentions.users ? Array.from(mentions.users) : undefined,
             roles: mentions.roles ? Array.from(mentions.roles) : undefined,
-        };
-    },
-    patchEditAllowedMentions(channelId: string, original: any) {
-        const mentions = this.getAllowedMentions(channelId, true, true);
-        if (!isNonNullish(mentions)) return original;
-
-        return {
-            parse: Array.from(mentions.parse),
-            users: mentions.users ? Array.from(mentions.users) : undefined,
-            roles: mentions.roles ? Array.from(mentions.roles) : undefined,
-            replied_user: mentions.repliedUser,
         };
     },
     createEditAttachmentEntry(channelId: string) {
@@ -450,6 +485,9 @@ export default definePlugin({
     onEditCancel(channelId: string) {
         EditAllowedMentionsStore.delete(channelId);
         EditAttachmentsStore.delete(channelId);
+    },
+    onForumCancel(channelId: string) {
+        SendAllowedMentionsStore.delete(channelId);
     },
     AllowedMentionsBar(props: AllowedMentionsProps) {
         return <Flex style={{ padding: "0.45rem 1rem", lineHeight: "16px" }}>
