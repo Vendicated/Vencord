@@ -79,44 +79,6 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (!wreq) return false;
 
     cache = wreq.c;
-
-    for (const id in cache) {
-        const { exports } = cache[id];
-        if (!exports) continue;
-
-        const numberId = Number(id);
-
-        for (const callback of listeners) {
-            try {
-                callback(exports, numberId);
-            } catch (err) {
-                logger.error("Error in webpack listener", err);
-            }
-        }
-
-        for (const [filter, callback] of subscriptions) {
-            try {
-                if (filter(exports)) {
-                    subscriptions.delete(filter);
-                    callback(exports, numberId);
-                } else if (typeof exports === "object") {
-                    if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, numberId);
-                    }
-
-                    for (const nested in exports) if (nested.length <= 3) {
-                        if (exports[nested] && filter(exports[nested])) {
-                            subscriptions.delete(filter);
-                            callback(exports[nested], numberId);
-                        }
-                    }
-                }
-            } catch (err) {
-                logger.error("Error while firing callback for webpack chunk", err);
-            }
-        }
-    }
     return true;
 }
 
@@ -152,19 +114,9 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
             return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
         }
 
-        if (typeof mod.exports !== "object") continue;
-
         if (mod.exports.default && filter(mod.exports.default)) {
             const found = mod.exports.default;
             return isWaitFor ? [found, Number(key)] : found;
-        }
-
-        // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) {
-                return isWaitFor ? [nested, Number(key)] : nested;
-            }
         }
     }
 
@@ -193,15 +145,9 @@ export function findAll(filter: FilterFn) {
 
         if (filter(mod.exports))
             ret.push(mod.exports);
-        else if (typeof mod.exports !== "object")
-            continue;
 
         if (mod.exports.default && filter(mod.exports.default))
             ret.push(mod.exports.default);
-        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) ret.push(nested);
-        }
     }
 
     return ret;
@@ -251,26 +197,12 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
                 break;
             }
 
-            if (typeof mod.exports !== "object")
-                continue;
-
             if (mod.exports.default && filter(mod.exports.default)) {
                 results[j] = mod.exports.default;
                 filters[j] = undefined;
                 if (++found === length) break outer;
                 break;
             }
-
-            for (const nestedMod in mod.exports)
-                if (nestedMod.length <= 3) {
-                    const nested = mod.exports[nestedMod];
-                    if (nested && filter(nested)) {
-                        results[j] = nested;
-                        filters[j] = undefined;
-                        if (++found === length) break outer;
-                        continue outer;
-                    }
-                }
         }
     }
 
