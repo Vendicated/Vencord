@@ -81,6 +81,8 @@ async function printReport() {
     console.log("## Bad Webpack Finds");
     report.badWebpackFinds.forEach(p => console.log("- " + p));
 
+    console.log();
+
     console.log("## Bad Patches");
     report.badPatches.forEach(p => {
         console.log(`- ${p.plugin} (${p.type})`);
