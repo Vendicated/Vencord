@@ -188,12 +188,12 @@ page.on("console", async e => {
         process.exitCode = 1;
 
         const jsonArgs = await Promise.all(args.map(a => a.jsonValue()));
-        const [, tag, message] = jsonArgs;
+        const [, tag, message] = jsonArgs as Array<string>;
         const cause = await maybeGetError(args[3]);
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const [, plugin, type, id, regex] = (message as string).match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const [, plugin, type, id, regex] = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
                 report.badPatches.push({
                     plugin,
                     type,
@@ -203,11 +203,15 @@ page.on("console", async e => {
                 });
                 break;
             case "PluginManager:":
-                const [, name] = (message as string).match(/Failed to start (.+)/)!;
+                const failedToStartMatch = message.match(/Failed to start (.+)/);
+                if (!failedToStartMatch) break;
+
+                const [, name] = failedToStartMatch;
                 report.badStarts.push({
                     plugin: name,
                     error: cause
                 });
+
                 break;
         }
     } else if (isDebug) {
@@ -315,7 +319,7 @@ function runTime(token: string) {
                     const result = Vencord.Webpack[method](...args);
                     if (!result) throw "a rock at ben shapiro";
                 } catch (e) {
-                    console.error("[PUP_WEBPACK_FIND_FAIL", `${searchType}(${args.map(String).join(", ")})`);
+                    console.error("[PUP_WEBPACK_FIND_FAIL]", `${searchType}(${args.map(String).join(", ")})`);
                 }
             }
 
