@@ -18,8 +18,9 @@
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 
-import { makeLazy } from "./lazy";
 import { checkIntersecting } from "./misc";
+
+export * from "./lazyReact";
 
 export const NoopComponent = () => null;
 
@@ -142,18 +143,4 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     }, deps);
 
     return time;
-}
-
-/**
- * A lazy component. The factory method is called on first render.
- * @param factory Function returning a Component
- * @param attempts How many times to try to get the component before giving up
- * @returns Result of factory function
- */
-export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
-    const get = makeLazy(factory, attempts);
-    return (props: T) => {
-        const Component = get() ?? NoopComponent;
-        return <Component {...props} />;
-    };
 }
