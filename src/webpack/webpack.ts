@@ -17,8 +17,8 @@
 */
 
 import { proxyLazy } from "@utils/lazy";
+import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
-import { LazyComponent } from "@utils/react";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
