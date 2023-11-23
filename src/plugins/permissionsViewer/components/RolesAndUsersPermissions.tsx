@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
@@ -111,7 +111,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
                                                 if ((settings.store as any).unsafeViewAsRole && permission.type === PermissionType.Role)
-                                                    ContextMenu.open(e, () => (
+                                                    ContextMenuApi.openContextMenu(e, () => (
                                                         <RoleContextMenu
                                                             guild={guild}
                                                             roleId={permission.id!}
@@ -194,7 +194,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     return (
         <Menu.Menu
             navId={cl("role-context-menu")}
-            onClose={ContextMenu.close}
+            onClose={ContextMenuApi.closeContextMenu}
             aria-label="Role Options"
         >
             <Menu.MenuItem

@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenu, Menu, React, ReactDOM } from "@webpack/common";
+import { ContextMenuApi, Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -89,7 +89,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 checked={settings.store.square}
                 action={() => {
                     settings.store.square = !settings.store.square;
-                    ContextMenu.close();
+                    ContextMenuApi.closeContextMenu();
                 }}
             />
             <Menu.MenuCheckboxItem
@@ -98,7 +98,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 checked={settings.store.nearestNeighbour}
                 action={() => {
                     settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
-                    ContextMenu.close();
+                    ContextMenuApi.closeContextMenu();
                 }}
             />
             <Menu.MenuControlItem
