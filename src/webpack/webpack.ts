@@ -52,7 +52,18 @@ export const filters = {
         return true;
     },
     byStoreName: (name: string): FilterFn => m =>
-        m.constructor?.displayName === name
+        m.constructor?.displayName === name,
+
+    componentByCode: (...code: string[]): FilterFn => {
+        const filter = filters.byCode(...code);
+        return m => {
+            if (filter(m)) return true;
+            if (!m.$$typeof) return false;
+            if (m.type) return filter(m.type); // memos
+            if (m.render) return filter(m.render); // forwardRefs
+            return false;
+        };
+    }
 };
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
@@ -397,18 +408,9 @@ export function findStoreLazy(name: string) {
  * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
  */
 export function findComponentByCode(...code: string[]) {
-    const filter = filters.byCode(...code);
-    const res = find(m => {
-        if (filter(m)) return true;
-        if (!m.$$typeof) return false;
-        if (m.type) return filter(m.type); // memos
-        if (m.render) return filter(m.render); // forwardRefs
-        return false;
-    }, { isIndirect: true });
-
+    const res = find(filters.componentByCode(...code), { isIndirect: true });
     if (!res)
         handleModuleNotFound("findComponentByCode", ...code);
-
     return res;
 }
 
