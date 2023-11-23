@@ -17,8 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { LazyComponent } from "@utils/react";
-import { find, findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
@@ -26,7 +25,7 @@ import { ExpandedGuildFolderStore, settings } from ".";
 
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
-const GuildsBar = LazyComponent(() => find(m => m.type?.toString().includes('("guildsnav")')));
+const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());

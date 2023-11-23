@@ -46,7 +46,7 @@ const Classes = proxyLazy(() => {
     return Object.assign({}, ...modules);
 }) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
-function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
+function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -76,7 +76,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         sortUserRoles(userRoles);
 
         for (const [permission, bit] of Object.entries(PermissionsBits)) {
-            for (const { permissions, colorString, position, name } of userRoles) {
+            for (const { permissions, colorString, position } of userRoles) {
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
                         permission: getPermissionString(permission),
@@ -133,7 +133,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             {userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
                     {userPermissions.map(({ permission, roleColor }) => (
-                        <div className={classes(role, rolePill, rolePillBorder)}>
+                        <div className={classes(role, rolePill, showBorder ? rolePillBorder : null)}>
                             <div className={roleRemoveButton}>
                                 <span
                                     className={roleCircle}
