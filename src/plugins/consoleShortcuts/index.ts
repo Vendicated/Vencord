@@ -62,23 +62,27 @@ export default definePlugin({
         }
 
         let fakeRenderWin: WeakRef<Window> | undefined;
+        const find = newFindWrapper(f => f);
         return {
+            ...Vencord.Webpack.Common,
             wp: Vencord.Webpack,
             wpc: Webpack.wreq.c,
             wreq: Webpack.wreq,
             wpsearch: search,
             wpex: extract,
-            wpexs: (code: string) => Vencord.Webpack.extract(Vencord.Webpack.findModuleId(code)!),
-            find: newFindWrapper(f => f),
+            wpexs: (code: string) => extract(Webpack.findModuleId(code)!),
+            find,
             findAll,
             findByProps: newFindWrapper(filters.byProps),
             findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
             findAllByCode: (code: string) => findAll(filters.byCode(code)),
+            findComponentByCode: newFindWrapper(filters.componentByCode),
+            findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
+            findExportedComponent: (...props: string[]) => find(...props)[props[0]],
             findStore: newFindWrapper(filters.byStoreName),
             PluginsApi: Vencord.Plugins,
             plugins: Vencord.Plugins.plugins,
-            React,
             Settings: Vencord.Settings,
             Api: Vencord.Api,
             reload: () => location.reload(),
@@ -92,7 +96,25 @@ export default definePlugin({
                 fakeRenderWin = new WeakRef(win);
                 win.focus();
 
-                ReactDOM.render(React.createElement(component, props), win.document.body);
+                const doc = win.document;
+                doc.body.style.margin = "1em";
+
+                if (!win.prepared) {
+                    win.prepared = true;
+
+                    [...document.querySelectorAll("style"), ...document.querySelectorAll("link[rel=stylesheet]")].forEach(s => {
+                        const n = s.cloneNode(true) as HTMLStyleElement | HTMLLinkElement;
+
+                        if (s.parentElement?.tagName === "HEAD")
+                            doc.head.append(n);
+                        else if (n.id?.startsWith("vencord-") || n.id?.startsWith("vcd-"))
+                            doc.documentElement.append(n);
+                        else
+                            doc.body.append(n);
+                    });
+                }
+
+                ReactDOM.render(React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
             }
         };
     },
