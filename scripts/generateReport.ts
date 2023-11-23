@@ -58,7 +58,8 @@ const report = {
         plugin: string;
         error: string;
     }[],
-    otherErrors: [] as string[]
+    otherErrors: [] as string[],
+    badWebpackFinds: [] as string[]
 };
 
 const IGNORED_DISCORD_ERRORS = [
@@ -76,6 +77,9 @@ function toCodeBlock(s: string) {
 async function printReport() {
     console.log("# Vencord Report" + (CANARY ? " (Canary)" : ""));
     console.log();
+
+    console.log("## Bad Webpack Finds");
+    report.badWebpackFinds.forEach(p => console.log("- " + p));
 
     console.log("## Bad Patches");
     report.badPatches.forEach(p => {
@@ -112,6 +116,11 @@ async function printReport() {
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
                 avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/f0204a918c6c9c9a43195997e97d8adf.webp",
                 embeds: [
+                    {
+                        title: "Bad Webpack Finds",
+                        description: report.badWebpackFinds.map(toCodeBlock).join("\n") || "None",
+                        color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
+                    },
                     {
                         title: "Bad Patches",
                         description: report.badPatches.map(p => {
@@ -164,7 +173,14 @@ page.on("console", async e => {
 
     const isVencord = (await args[0]?.jsonValue()) === "[Vencord]";
     const isDebug = (await args[0]?.jsonValue()) === "[PUP_DEBUG]";
+    const isWebpackFindFail = (await args[0]?.jsonValue()) === "[PUP_WEBPACK_FIND_FAIL]";
 
+    if (isWebpackFindFail) {
+        process.exitCode = 1;
+
+        const data = await args[1].jsonValue();
+        report.badWebpackFinds.push(data as string);
+    }
     if (isVencord) {
         // make ci fail
         process.exitCode = 1;
@@ -286,6 +302,21 @@ function runTime(token: string) {
                     new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
                 }
             }
+
+            for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
+                try {
+                    let method = searchType;
+                    if (method === "findComponent") method = "find";
+                    else if (method === "findExportedComponent") method = "findByProps";
+
+                    // @ts-ignore
+                    const result = Vencord.Webpack[method](...args);
+                    if (!result) throw "a rock at ben shapiro";
+                } catch (e) {
+                    console.error("[PUP_WEBPACK_FIND_FAIL", `${searchType}(${args.map(String).join(", ")})`);
+                }
+            }
+
             setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
         }, 1000));
     } catch (e) {

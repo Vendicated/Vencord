@@ -25,7 +25,7 @@ import { BUILD_TIMESTAMP, commonOpts, existsAsync, globPlugins, isStandalone, up
 
 const defines = {
     IS_STANDALONE: isStandalone,
-    IS_DEV: JSON.stringify(watch),
+    IS_DEV: JSON.stringify(isDev),
     IS_UPDATER_DISABLED: updaterDisabled,
     IS_WEB: false,
     IS_EXTENSION: false,

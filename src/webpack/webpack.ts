@@ -127,13 +127,6 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
     return isWaitFor ? [null, null] : null;
 });
 
-/**
- * find but lazy
- */
-export function findLazy(filter: FilterFn) {
-    return proxyLazy(() => find(filter));
-}
-
 export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
@@ -244,6 +237,17 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     return null;
 });
 
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent", any[]]>;
+
+/**
+ * find but lazy
+ */
+export function findLazy(filter: FilterFn) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["find", [filter]]);
+
+    return proxyLazy(() => find(filter));
+}
+
 /**
  * Find the first module that has the specified properties
  */
@@ -258,6 +262,8 @@ export function findByProps(...props: string[]) {
  * findByProps but lazy
  */
 export function findByPropsLazy(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findByProps", props]);
+
     return proxyLazy(() => findByProps(...props));
 }
 
@@ -275,6 +281,8 @@ export function findByCode(...code: string[]) {
  * findByCode but lazy
  */
 export function findByCodeLazy(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findByCode", code]);
+
     return proxyLazy(() => findByCode(...code));
 }
 
@@ -292,6 +300,8 @@ export function findStore(name: string) {
  * findStore but lazy
  */
 export function findStoreLazy(name: string) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findStore", [name]]);
+
     return proxyLazy(() => findStore(name));
 }
 
@@ -309,6 +319,8 @@ export function findComponentByCode(...code: string[]) {
  * Finds the first component that matches the filter, lazily.
  */
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", ["filter"]]);
+
     return LazyComponent<T>(() => find(filter));
 }
 
@@ -316,6 +328,8 @@ export function findComponentLazy<T extends object = any>(filter: FilterFn) {
  * Finds the first component that includes all the given code, lazily
  */
 export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
+
     return LazyComponent<T>(() => findComponentByCode(...code));
 }
 
@@ -323,6 +337,8 @@ export function findComponentByCodeLazy<T extends object = any>(...code: string[
  * Finds the first component that is exported by the first prop name, lazily
  */
 export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
+
     return LazyComponent<T>(() => findByProps(...props)?.[props[0]]);
 }
 
