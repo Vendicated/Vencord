@@ -104,6 +104,18 @@
     flex-shrink: 0;
 }
 
+.vc-permviewer-perms-list-item:has(.vc-permviewer-perms-role-image)
+    .vc-permviewer-perms-role-circle {
+    margin-right: 6px;
+}
+
+.vc-permviewer-perms-role-image {
+    width: fit-content;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 0 !important;
+}
+
 .vc-permviewer-perms-user-img {
     border-radius: 50%;
     width: 20px;

@@ -126,6 +126,12 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
                                                 />
                                             )}
+                                            {(permission.type === PermissionType.Role || permission.type === PermissionType.Owner) && role.icon && (
+                                                <img
+                                                    className={cl("perms-role-image")}
+                                                    src={"https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + ".webp?size=32&quality=lossless"}
+                                                />
+                                            )}
                                             {permission.type === PermissionType.User && user !== undefined && (
                                                 <img
                                                     className={cl("perms-user-img")}
