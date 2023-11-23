@@ -319,7 +319,7 @@ export function findComponentByCode(...code: string[]) {
  * Finds the first component that matches the filter, lazily.
  */
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", ["filter"]]);
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
     return LazyComponent<T>(() => find(filter));
 }
