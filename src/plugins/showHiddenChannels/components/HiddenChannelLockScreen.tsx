@@ -90,7 +90,7 @@ const TagComponent = findComponentLazy(m => {
 });
 
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
-const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
+const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
