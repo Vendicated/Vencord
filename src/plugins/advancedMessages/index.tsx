@@ -225,8 +225,10 @@ export default definePlugin({
         const store = this.getAllowedMentionsStore(isNonNullish(message));
         const previous = store.get(channelId);
 
+        const canMentionEveryone = isNonNullish(guildId) ? PermissionStore.can(PermissionsBits.MENTION_EVERYONE, GuildStore.getGuild(guildId)) as boolean : true;
+
         const mentions: AllowedMentions = {
-            parse: new Set(),
+            parse: new Set(canMentionEveryone && message?.mentionEveryone ? ["everyone"] : []),
             users: previous?.users ?? new Set(),
             roles: previous?.roles ?? new Set(),
             repliedUser: isNonNullish(message) && isNonNullish(message.messageReference)
@@ -270,9 +272,6 @@ export default definePlugin({
             return;
         }
 
-
-        const canMentionEveryone = isNonNullish(guildId) ? PermissionStore.can(PermissionsBits.MENTION_EVERYONE, GuildStore.getGuild(guildId)) as boolean : true;
-
         for (const node of richValue[0].children) {
             switch (node.type) {
                 case "userMention":
@@ -285,7 +284,7 @@ export default definePlugin({
                     if (node.name === "@everyone" || node.name === "@here") {
                         mentions.meta.hasEveryone = canMentionEveryone;
 
-                        if (canMentionEveryone && (message?.mentionEveryone ?? previous?.parse.has?.("everyone") ?? this.settings.store.pingEveryone)) {
+                        if (canMentionEveryone && (previous?.parse.has?.("everyone") ?? this.settings.store.pingEveryone)) {
                             mentions.parse.add("everyone");
                         }
                     }

@@ -14,7 +14,7 @@ import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout as Discord
 import { Channel } from "discord-types/general";
 import { CSSProperties, ReactNode } from "react";
 
-import { AllowedMentions, AllowedMentionsParsables, EditAllowedMentionsStore, SendAllowedMentionsStore } from "../stores";
+import { AllowedMentions, EditAllowedMentionsStore, SendAllowedMentionsStore } from "../stores";
 
 export interface AllowedMentionsProps {
     mentions: AllowedMentions,
@@ -250,15 +250,7 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
         setAllRoles(mentions?.roles?.size === mentions.meta.roleIds.size);
 
         store.set(channel.id, {
-            parse: new Set(
-                (
-                    [
-                        [everyone, "everyone"],
-                    ] satisfies [boolean, AllowedMentionsParsables][]
-                )
-                    .filter(([b]) => b)
-                    .map(([, v]) => v)
-            ),
+            parse: new Set(everyone ? ["everyone"] : []),
             users: users,
             roles: roles,
             repliedUser,
