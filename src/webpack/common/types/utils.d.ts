@@ -161,3 +161,24 @@ export interface i18n {
 
     Messages: Record<i18nMessages, any>;
 }
+
+export interface Clipboard {
+    copy(text: string): void;
+    SUPPORTS_COPY: boolean;
+}
+
+export interface NavigationRouter {
+    back(): void;
+    forward(): void;
+    hasNavigated(): boolean;
+    getHistory(): {
+        action: string;
+        length: 50;
+        [key: string]: any;
+    };
+    transitionTo(path: string, ...args: unknown[]): void;
+    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    replaceWith(...args: unknown[]): void;
+    getLastRouteChangeSource(): any;
+    getLastRouteChangeSourceLocationStack(): any;
+}
