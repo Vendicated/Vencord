@@ -158,9 +158,11 @@ function Popout({
                         if (ids.size === rawIds.size) {
                             ids.clear();
                             setAll(false);
+                            update();
                         } else {
                             rawIds.forEach(id => ids.add(id));
                             setAll(true);
+                            update();
                         }
                     }}
                 />
@@ -238,16 +240,16 @@ function Popout({
 export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: AllowedMentionsProps) {
     const store = mentions.meta.isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
 
-    const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
-    const [allUsers, setAllUsers] = useState(mentions?.users?.size === mentions.meta.userIds.size);
-    const [allRoles, setAllRoles] = useState(mentions?.roles?.size === mentions.meta.roleIds.size);
-    const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
     const [users] = useState(mentions.users ?? new Set<string>());
     const [roles] = useState(mentions.roles ?? new Set<string>());
+    const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
+    const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
+    const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);
+    const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
 
     useEffect(() => {
-        setAllUsers(mentions?.users?.size === mentions.meta.userIds.size);
-        setAllRoles(mentions?.roles?.size === mentions.meta.roleIds.size);
+        setAllUsers(users.size === mentions.meta.userIds.size);
+        setAllRoles(roles.size === mentions.meta.roleIds.size);
 
         store.set(channel.id, {
             parse: new Set(everyone ? ["everyone"] : []),
