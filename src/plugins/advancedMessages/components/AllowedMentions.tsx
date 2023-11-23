@@ -7,11 +7,9 @@
 import "./AllowedMentions.css";
 
 import { Flex } from "@components/Flex";
-import { Switch } from "@components/Switch";
 import { isNonNullish } from "@utils/guards";
-import { proxyLazy } from "@utils/lazy";
 import { useForceUpdater } from "@utils/react";
-import { findByPropsLazy, wreq } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout as DiscordPopout, React, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { CSSProperties, ReactNode } from "react";
@@ -25,14 +23,6 @@ export interface AllowedMentionsProps {
 }
 
 const replyClasses = findByPropsLazy("replyBar", "replyLabel", "separator");
-const AtIcon = proxyLazy(() => {
-    for (const id in wreq.m) {
-        const module = wreq.m[id].toString();
-        if (module.includes(".replaceIcon") && module.includes(".AtIcon")) {
-            return wreq(id as any).default;
-        }
-    }
-});
 
 function getDisplayableUserNameParts(userId: string, guildId: string | null) {
     // @ts-ignore discord-types doesn't have globalName
@@ -81,8 +71,38 @@ function fuzzySearch(searchQuery: string, searchString: string) {
     return null;
 }
 
+function AtIcon({ width, height }: { width: number, height: number; }) {
+    return <svg width={width} height={height} viewBox="0 0 24 24">
+        <path
+            fill="currentColor"
+            d="M12 2C6.486 2 2 6.486 2 12C2 17.515 6.486 22 12 22C14.039 22 15.993
+            21.398 17.652 20.259L16.521 18.611C15.195 19.519 13.633 20 12 20C7.589
+            20 4 16.411 4 12C4 7.589 7.589 4 12 4C16.411 4 20 7.589 20 12V12.782C20
+            14.17 19.402 15 18.4 15L18.398 15.018C18.338 15.005 18.273 15 18.209
+            15H18C17.437 15 16.6 14.182 16.6 13.631V12C16.6 9.464 14.537 7.4 12
+            7.4C9.463 7.4 7.4 9.463 7.4 12C7.4 14.537 9.463 16.6 12 16.6C13.234 16.6
+            14.35 16.106 15.177 15.313C15.826 16.269 16.93 17 18 17L18.002
+            16.981C18.064 16.994 18.129 17 18.195 17H18.4C20.552 17 22 15.306 22
+            12.782V12C22 6.486 17.514 2 12 2ZM12 14.599C10.566 14.599 9.4 13.433 9.4
+            11.999C9.4 10.565 10.566 9.399 12 9.399C13.434 9.399 14.6 10.565 14.6
+            11.999C14.6 13.433 13.434 14.599 12 14.599Z"
+        />
+    </svg>;
+}
+
 function Title({ children, pointer, style }: { children: ReactNode; pointer?: boolean; style?: CSSProperties; }) {
     return <Forms.FormTitle style={{ margin: 0, cursor: pointer ? "pointer" : "default", ...style }}>{children}</Forms.FormTitle>;
+}
+
+function TitleSwitch({ state, setState, children }: { state: boolean, setState: (value: boolean) => void; children: ReactNode; }) {
+    return <Clickable onClick={() => setState(!state)}>
+        <Title
+            style={{ ...(state ? { color: "var(--text-link)" } : {}), display: "flex", gap: "0.2rem", userSelect: "none" }}
+            pointer
+        >
+            {children}
+        </Title>
+    </Clickable>;
 }
 
 function Separator() {
@@ -265,8 +285,12 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
 
     return <Flex style={{ gap: "1rem", alignItems: "center" }}>
         {displayEveryone && <>
-            <Title>@everyone / @here</Title>
-            <Switch checked={everyone} onChange={setEveryone} />
+            <TitleSwitch state={everyone} setState={setEveryone}>
+                <AtIcon width={16} height={16} />
+                everyone /
+                <AtIcon width={16} height={16} />
+                here
+            </TitleSwitch>
         </>}
         {displayUserIds && <>
             {displayEveryone && <Separator />}
@@ -308,17 +332,10 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
         </>}
         {displayReply && <>
             {(displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
-            <Clickable
-                onClick={() => setRepliedUser(!repliedUser)}
-            >
-                <Title
-                    style={{ color: repliedUser ? "var(--text-link)" : "inherit", display: "flex", gap: "0.2rem", userSelect: "none" }}
-                    pointer
-                >
-                    <AtIcon width="16" height="16" />
-                    {repliedUser ? "ON" : "OFF"}
-                </Title>
-            </Clickable>
+            <TitleSwitch state={repliedUser} setState={setRepliedUser}>
+                <AtIcon width={16} height={16} />
+                {repliedUser ? "ON" : "OFF"}
+            </TitleSwitch>
         </>}
         {trailingSeparator && (displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
     </Flex>;
