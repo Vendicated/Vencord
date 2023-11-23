@@ -19,7 +19,7 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -61,10 +61,6 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
-
-export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
-    openUntrustedLink: filters.byCode(".apply(this,arguments)")
-});
 
 /**
  * React hook that returns stateful data for one or more stores

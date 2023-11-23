@@ -313,47 +313,6 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
 });
 
 /**
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers
- * @param code Code snippet
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
- *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
- *          })
- */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
-
-    const id = findModuleId(code);
-    if (id === null)
-        return exports;
-
-    const mod = wreq(id);
-    outer:
-    for (const key in mod) {
-        const member = mod[key];
-        for (const newName in mappers) {
-            // if the current mapper matches this module
-            if (mappers[newName](member)) {
-                exports[newName] = member;
-                continue outer;
-            }
-        }
-    }
-    return exports;
-});
-
-/**
- * Same as {@link mapMangledModule} but lazy
- */
-export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    return proxyLazy(() => mapMangledModule(code, mappers));
-}
-
-/**
  * Find the first module that has the specified properties
  */
 export function findByProps(...props: string[]) {

@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ContextMenu, FluxDispatcher, Menu } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 interface Sticker {
@@ -183,6 +183,6 @@ export default definePlugin({
         }
     ) {
         if (!(props.message as any).deleted)
-            ContextMenu.open(event, () => <GreetMenu {...props} />);
+            ContextMenuApi.openContextMenu(event, () => <GreetMenu {...props} />);
     }
 });
