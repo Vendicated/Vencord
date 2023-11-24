@@ -411,7 +411,7 @@ function runTime(token: string) {
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null) throw "a rock at ben shapiro";
+                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
