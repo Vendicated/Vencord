@@ -13,26 +13,20 @@ interface ColorPickerModalProps {
     onClose: () => void;
     onSubmit: (v: number) => void;
     initialColor: number;
-    suggestedColors: Array<string>;
+    suggestedColors: string[];
 }
 
-export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, initialColor = 0, suggestedColors = [] }: ColorPickerModalProps): JSX.Element {
+export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, initialColor = 0, suggestedColors = [] }: ColorPickerModalProps) {
     const [color, setColor] = useState(initialColor);
-    const [pos, setPos] = useState([-1, -1]);
+    const [pos, setPos] = useState<[number, number]>([-1, -1]);
     const headerRef = useRef<HTMLDivElement>(null);
 
     return (
         <div
             style={{
                 position: pos[0] === -1 || pos[1] === -1 ? "revert" : "fixed",
-                left: "clamp(0px, " + pos[0] + "px, calc(100vw - " + (() => {
-                    const ref: HTMLDivElement | null = headerRef.current;
-                    if (ref !== null) return ref.getBoundingClientRect().width;
-                })() + "px))",
-                top: "clamp(22px, " + pos[1] + "px, calc(100vh - " + (() => {
-                    const ref: HTMLDivElement | null = headerRef.current;
-                    if (ref !== null) return ref.getBoundingClientRect().height;
-                })() + "px))"
+                left: `clamp(0px, ${pos[0]}px, calc(100vw - ${headerRef.current?.getBoundingClientRect().width ?? 0}px))`,
+                top: `clamp(22px, ${pos[1]}px, calc(100vh - ${headerRef.current?.getBoundingClientRect().height ?? 0}px))`
             }}
         >
             <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
@@ -40,16 +34,16 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                 <div
                     ref={headerRef}
                     style={{ cursor: "move" }}
-                    onMouseDown={(e: React.MouseEvent) => {
-                        const ref: HTMLDivElement | null = headerRef.current;
+                    onMouseDown={e => {
+                        const ref = headerRef.current;
                         if (ref === null) return;
-                        const rect: DOMRect = ref.getBoundingClientRect();
-                        const offsetX: number = e.pageX - rect.left;
-                        const offsetY: number = e.pageY - rect.top;
+                        const rect = ref.getBoundingClientRect();
+                        const offsetX = e.pageX - rect.left;
+                        const offsetY = e.pageY - rect.top;
                         const onDrag = (e: MouseEvent) => { setPos([e.pageX - offsetX, e.pageY - offsetY]); };
                         document.addEventListener("mousemove", onDrag);
                         document.addEventListener("mouseup",
-                            (): void => { document.removeEventListener("mousemove", onDrag); },
+                            () => { document.removeEventListener("mousemove", onDrag); },
                             { once: true }
                         );
                     }}
@@ -66,7 +60,7 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                             <Text style={{ color: "var(--header-primary)", fontSize: "20px", fontWeight: "600" }}>
                                 {"Color Picker"}
                             </Text>
-                            <div onMouseDown={(e: React.MouseEvent) => { e.stopPropagation(); }}>
+                            <div onMouseDown={e => { e.stopPropagation(); }}>
                                 <ModalCloseButton onClick={onClose} />
                             </div>
                         </div>
@@ -92,8 +86,8 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
     );
 }
 
-export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => void, initialColor: number = 0, suggestedColors: Array<string> = []): string {
-    const key: string = openModal(modalProps =>
+export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => void, initialColor: number = 0, suggestedColors: string[] = []) {
+    const key = openModal(modalProps =>
         <ColorPickerModal
             modalProps={modalProps}
             ColorPicker={ColorPicker}

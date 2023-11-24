@@ -24,289 +24,217 @@ interface UserProfile extends User {
 type RGBColor = [number, number, number];
 
 let ColorPicker: React.ComponentType<any> = () => null;
-let getPaletteForAvatar: (v: string) => Promise<RGBColor[]>;
-let getComplimentaryPaletteForColor: (v: RGBColor) => RGBColor[];
-let [primaryColor, setPrimaryColor] = [-1, (v: number): void => { }];
-let [accentColor, setAccentColor] = [-1, (v: number): void => { }];
-let [effectID, setEffectID] = ["", (v: string): void => { }];
-let [preview, setPreview] = [true, (v: boolean): void => { }];
+let getPaletteForAvatar = (v: string) => Promise.resolve<RGBColor[]>([]);
+let getComplimentaryPaletteForColor = (v: RGBColor): RGBColor[] => [];
+let [primaryColor, setPrimaryColor] = [-1, (v: number) => { }];
+let [accentColor, setAccentColor] = [-1, (v: number) => { }];
+let [effectID, setEffectID] = ["", (v: string) => { }];
+let [preview, setPreview] = [true, (v: boolean) => { }];
 
 /**
- * Converts the given base10 number to a base125 string
- * @param {number} base10 - The base10 number to be converted
- * @returns {string} The converted base125 string
+ * Builds a profile theme color string in the legacy format, [#primary,#accent] where
+ * primary and accent are base-16 24-bit colors, with each code point offset by +0xE0000
+ * @param primary The base-10 24-bit primary color to be encoded
+ * @param accent The base-10 24-bit accent color to be encoded
+ * @returns The legacy encoded profile theme color string
  */
-function base10NumToBase125Str(base10: number): string {
-    if (base10 === 0) return "\u{00001}";
-    const base125CPs: number[] = [];
-    for (let i: number = base10; i > 0; i = Math.trunc(i / 125))
-        base125CPs.unshift(i % 125 + 1);
-    return String.fromCodePoint(...base125CPs);
+function encodeColorsLegacy(primary: number, accent: number) {
+    return String.fromCodePoint(...[...`[#${primary.toString(16)},#${accent.toString(16)}]`]
+        .map(c => c.codePointAt(0)! + 0xE0000));
 }
 
 /**
- * Converts the given base10 BigInt to a base125 string
- * @param {bigint} base10 - The base10 BigInt to be converted
- * @returns {string} The converted base125 string
+ * Extracts profile theme colors from given legacy-format string
+ * @param str The legacy-format string to extract profile theme colors from
+ * @returns The profile theme colors. Colors will be -1 if not found.
  */
-function base10BigIntToBase125Str(base10: bigint): string {
-    if (base10 === 0n) return "\u{00001}";
-    const base125CPs: number[] = [];
-    for (let i: bigint = base10; i > 0n; i /= 125n)
-        base125CPs.unshift(Number(i % 125n + 1n));
-    return String.fromCodePoint(...base125CPs);
+function decodeColorsLegacy(str: string): [number, number] {
+    const colors = str.matchAll(/(?<=#)[\dA-Fa-f]{1,6}/g);
+    return [parseInt(colors.next().value?.[0], 16) || -1, parseInt(colors.next().value?.[0], 16) || -1];
 }
 
 /**
- * Converts the given base125 string to a base10 number
- * @param {string} str - The base125 string to be converted
- * @param {number} lim - The upper limit of the conversion
- * @returns {number} The converted base10 number. Will be -1 if the given string is empty and -2 if greater
- *     than the given upper limit.
+ * Converts the given base-10 24-bit color to a base-4096 string with each code point offset by +0xE0000
+ * @param color The base-10 24-bit color to be converted
+ * @returns The converted base-4096 string with +0xE0000 offset
  */
-function base125StrToBase10Num(str: string, lim: number): number {
-    if (str === "") return -1;
-    let base10: number = 0;
-    for (let i: number = 0; i < str.length; i++) {
-        if (base10 > lim) return -2;
-        base10 += (str.codePointAt(i)! - 1) * 125 ** (str.length - 1 - i);
-    }
-    return base10;
-}
-
-/**
- * Converts the given base125 string to a base10 BigInt
- * @param {string} str - The base125 string to be converted
- * @param {bigint} lim - The upper limit of the conversion
- * @returns {bigint} The converted base10 BigInt. Will be -1n if the given string is empty and -2n if greater
- *     than the given upper limit.
- */
-function base125StrToBase10BigInt(str: string, lim: bigint): bigint {
-    if (str === "") return -1n;
-    let base10: bigint = 0n;
-    for (let i: number = 0; i < str.length; i++) {
-        if (base10 > lim) return -2n;
-        base10 += BigInt(str.codePointAt(i)! - 1) * 125n ** BigInt(str.length - 1 - i);
-    }
-    return base10;
-}
-
-/**
- * Converts the given base125 color string to a base10 number
- * @param {string} str - The base125 color to be converted
- * @returns {number} - The converted base10 number. Will be -1 if the given string is empty and -2 if greater than the
- *     maximum 24 bit color.
- */
-function base125StrToBase10Color(str: string): number {
-    return base125StrToBase10Num(str, 16_777_215);
-}
-
-/**
- * Converts the given base125 item ID string to a base10 BigInt
- * @param {string} str - The base125 item ID to be converted
- * @returns {bigint} - The converted base10 BigInt. Will be -1n if the given string is empty and -2n if greater than the
- *     maximum item ID.
- */
-function base125StrToBase10ItemID(str: string): bigint {
-    return base125StrToBase10BigInt(str, 1_200_000_000_000_000_000n);
-}
-
-/**
- * Encodes the given string to 3y3 characters.
- * @param {string} str - The string to be 3y3 encoded
- * @returns {string} - The encoded 3y3 string
- */
-function encode3y3(str: string): string {
+function encodeColor(color: number) {
+    if (color === 0) return "\u{e0000}";
     const encodedCPs: number[] = [];
-    for (let i: number = 0; i < str.length; i++)
-        encodedCPs.push(str.codePointAt(i)! + 0xE0000);
+    for (; color > 0; color = Math.trunc(color / 4096))
+        encodedCPs.unshift(color % 4096 + 0xE0000);
     return String.fromCodePoint(...encodedCPs);
 }
 
 /**
- * Decodes the first string of 3y3 characters in the given user bio string.
- * @param {string} bio - The user bio string to be decoded
- * @returns {[string, string, string]} - The primary / accent colors and effect. Will be empty if not found.
+ * Converts the given no-offset base-4096 string to a base-10 24-bit color
+ * @param str The no-offset base-4096 string to be converted
+ * @returns The converted base-10 24-bit color
+ *          Will be -1 if the given string is empty and -2 if greater than the maximum 24-bit color, 16,777,215
  */
-function decode3y3(bio: string): [string, string, string] {
-    const decoded3y3: [string, string, string] = ["", "", ""]; // The primary / accent colors and effect to be returned
-
-    const bioCPs: string[] = [...bio]; // An array containing the individual code points of the user bio string
-    if (bioCPs.length === 0) return decoded3y3;
-
-    let tempCPs: number[] = []; // An array to hold the current index of decoded3y3 getting decoded
-    let i: number = 0; // The index of decoded3y3
-
-    for (let j: number = 0; j < bioCPs.length; j++) {
-        const currCP: number = bioCPs[j].codePointAt(0)!; // The current code point in the user bio code point array
-        if (currCP === 0xE007E) {
-            if (tempCPs.length > 0)
-                decoded3y3[i] = String.fromCodePoint(...tempCPs);
-            if (i > 1) break;
-            tempCPs = [];
-            i++;
-        } else if (currCP > 0xE0000 && currCP < 0xE007E) {
-            tempCPs.push(currCP - 0xE0000);
-            if (j === bioCPs.length - 1)
-                decoded3y3[i] = String.fromCodePoint(...tempCPs);
-        } else if (i > 0) {
-            if (tempCPs.length > 0)
-                decoded3y3[i] = String.fromCodePoint(...tempCPs);
-            break;
-        }
+function decodeColor(str: string) {
+    if (str === "") return -1;
+    let color = 0;
+    for (let i = 0; i < str.length; i++) {
+        if (color > 16_777_215) return -2;
+        color += str.codePointAt(i)! * 4096 ** (str.length - 1 - i);
     }
-
-    return decoded3y3;
+    return color;
 }
 
 /**
- * Legacy decodes the given string
- * @param {string} str - The string to be legacy decoded
- * @returns {[number, number]} - The primary / accent colors. Will be -1 if not found.
+ * Converts the given base-10 profile effect ID to a base-4096 string with each code point offset by +0xE0000
+ * @param effect The base-10 profile effect ID to be converted
+ * @returns The converted base-4096 string with +0xE0000 offset
  */
-function decodeLegacy3y3(str: string): [number, number] {
-    const themeColors: [number, number] = [-1, -1];
-    let numSignIndex: number = -1;
-    for (let i: number = 0; i < str.length; i++) {
-        if (str[i] === "#") {
-            numSignIndex = i;
-            break;
-        }
-    }
-
-    if (numSignIndex !== -1) {
-        let tempStr: string = "";
-        let lim: number = numSignIndex + 7 < str.length ? numSignIndex + 7 : str.length;
-        for (let i: number = numSignIndex + 1; i < lim; i++) {
-            if (str[i] === "," || str[i] === "]") break;
-            tempStr += str[i];
-        }
-
-        let color: number = parseInt(tempStr, 16);
-        if (!Number.isNaN(color)) {
-            themeColors[0] = color;
-            numSignIndex = -1;
-            for (let i: number = lim; i < str.length; i++) {
-                if (str[i] === "#") {
-                    numSignIndex = i;
-                    break;
-                }
-            }
-
-            if (numSignIndex !== -1) {
-                tempStr = "";
-                lim = numSignIndex + 7 < str.length ? numSignIndex + 7 : str.length;
-                for (let i: number = numSignIndex + 1; i < lim; i++) {
-                    if (str[i] === "]" || str[i] === ",") break;
-                    tempStr += str[i];
-                }
-
-                color = parseInt(tempStr, 16);
-                if (!Number.isNaN(color))
-                    themeColors[1] = color;
-            }
-        }
-    }
-
-    return themeColors;
+function encodeEffect(effect: bigint) {
+    if (effect === 0n) return "\u{e0000}";
+    const encodedCPs: number[] = [];
+    for (; effect > 0n; effect /= 4096n)
+        encodedCPs.unshift(Number(effect % 4096n) + 0xE0000);
+    return String.fromCodePoint(...encodedCPs);
 }
 
 /**
- * Generates a 3y3 string containing the given primary / accent colors and effect. If the 3y3 Builder is NOT set to
- * backwards compatibility mode, the primary and accent colors will be converted to base125 before they are encoded to 3y3.
- * @param {number} primary - The primary profile theme color. Must be -1 if unset.
- * @param {number} accent - The accent profile theme color. Must be -1 if unset.
- * @param {string} effect - The profile effect ID. Must be empty if unset.
- * @param {boolean} legacy - Whether the primary and accent colors should be legacy encoded
- * @returns {string} The generated 3y3 string. Will be empty if the given colors and effect are all unset.
+ * Converts the given no-offset base-4096 string to a base-10 profile effect ID
+ * @param str The no-offset base-4096 string to be converted
+ * @returns The converted base-10 profile effect ID
+ *          Will be -1n if the given string is empty and -2n if greater than the maximum profile effect ID, 1.2 quintillion
  */
-function generate3y3(primary: number, accent: number, effect: string, legacy: boolean): string {
-    const sep = "\u{e007e}"; // The 3y3 separator
+function decodeEffect(str: string) {
+    if (str === "") return -1n;
+    let effect = 0n;
+    for (let i = 0; i < str.length; i++) {
+        if (effect > 1_200_000_000_000_000_000n) return -2n;
+        effect += BigInt(str.codePointAt(i)!) * 4096n ** BigInt(str.length - 1 - i);
+    }
+    return effect;
+}
 
-    let str: string = ""; // The 3y3 string to be returned
+/**
+ * Builds a FPTE string containing the given primary / accent colors and effect. If the FPTE Builder is NOT set to
+ * backwards compatibility mode, the primary and accent colors will be converted to base-4096 before they are encoded.
+ * @param primary The primary profile theme color. Must be -1 if unset.
+ * @param accent The accent profile theme color. Must be -1 if unset.
+ * @param effect The profile effect ID. Must be empty if unset.
+ * @param legacy Whether the primary and accent colors should be legacy encoded
+ * @returns The generated FPTE string. Will be empty if the given colors and effect are all unset.
+ */
+function buildFPTE(primary: number, accent: number, effect: string, legacy: boolean) {
+    const SEP = "\u200b"; // The FPTE separator (zero-width space)
 
-    // If the 3y3 Builder is set to backwards compatibility mode,
+    let str = ""; // The FPTE string to be returned
+
+    // If the FPTE Builder is set to backwards compatibility mode,
     // the primary and accent colors, if set, will be legacy encoded.
     if (legacy) {
-        // Legacy 3y3 strings must include both the primary and accent colors even if they are the same.
+        // Legacy FPTE strings must include both the primary and accent colors even if they are the same.
 
         if (primary !== -1) {
             // If both the primary and accent colors are set, they will be legacy encoded and added to the
             // string; otherwise, if the accent color is unset, the primary color will be used in its place.
             if (accent !== -1)
-                str = encode3y3("[#" + primary.toString(16) + ",#" + accent.toString(16) + "]");
+                str = encodeColorsLegacy(primary, accent);
             else
-                str = encode3y3("[#" + primary.toString(16) + ",#" + primary.toString(16) + "]");
+                str = encodeColorsLegacy(primary, primary);
 
             // If the effect is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
-                str += sep + encode3y3(base10BigIntToBase125Str(BigInt(effect)));
+                str += SEP + encodeEffect(BigInt(effect));
 
             return str;
         }
 
         // Since the primary color is unset, the accent color, if set, will be used in its place.
         if (accent !== -1) {
-            str = encode3y3("[#" + accent.toString(16) + ",#" + accent.toString(16) + "]");
+            str = encodeColorsLegacy(accent, accent);
 
             // If the effect is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
-                str += sep + encode3y3(base10BigIntToBase125Str(BigInt(effect)));
+                str += SEP + encodeEffect(BigInt(effect));
 
             return str;
         }
     }
     // If the primary color is set, it will be encoded and added to the string.
     else if (primary !== -1) {
-        str = encode3y3(base10NumToBase125Str(primary));
+        str = encodeColor(primary);
 
         // If the accent color is set and different from the primary color, it
         // will be encoded and added to the string prefixed by one separator.
         if (accent !== -1 && primary !== accent) {
-            str += sep + encode3y3(base10NumToBase125Str(accent));
+            str += SEP + encodeColor(accent);
 
             // If the effect is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
-                str += sep + encode3y3(base10BigIntToBase125Str(BigInt(effect)));
+                str += SEP + encodeEffect(BigInt(effect));
 
             return str;
         }
     }
     // If only the accent color is set, it will be encoded and added to the string.
     else if (accent !== -1)
-        str = encode3y3(base10NumToBase125Str(accent));
+        str = encodeColor(accent);
 
     // Since either the primary / accent colors are the same, both are unset, or just one is set, only one color will be added
-    // to the string; therefore, if the effect is set, it will be encoded and added to the string prefixed by two separators.
+    // to the string; therefore, the effect, if set, will be encoded and added to the string prefixed by two separators.
     if (effect !== "")
-        str += sep + sep + encode3y3(base10BigIntToBase125Str(BigInt(effect)));
+        str += SEP + SEP + encodeEffect(BigInt(effect));
 
     return str;
 }
 
-function RGBtoHex(rgb: RGBColor): string {
+/**
+ * Extracts the values of the first FPTE string found in the given string
+ * @param str The string to be searched for a FPTE string
+ * @returns An array of the extracted FPTE string's values. Values will be empty if not found.
+ */
+function extractFPTE(str: string) {
+    const fpte: [string, string, string] = ["", "", ""];
+    let i = 0;
+
+    for (const char of str) {
+        const cp = char.codePointAt(0)!;
+        if (cp === 0x200B) {
+            if (i > 1) break;
+            i++;
+        } else if (cp >= 0xE0000 && cp <= 0xE0FFF)
+            fpte[i] += String.fromCodePoint(cp - 0xE0000);
+        else break;
+    }
+
+    return fpte;
+}
+
+/**
+ * Converts the given RGB color to a hexadecimal string
+ * @param rgb The RGB color to be converted
+ * @returns The converted hexadecimal string
+ * @example
+ * // returns #ff0000
+ * RGBtoHex([255, 0, 0])
+ */
+function RGBtoHex(rgb: RGBColor) {
     return "#" + ((rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).padStart(6, "0");
 }
 
 function getSuggestedColors(callback: (v: string[]) => void) {
-    const user: User = UserStore.getCurrentUser();
-    const avatarURL: string = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".webp?size=80";
-    getPaletteForAvatar(avatarURL).then((avatarColors: RGBColor[]) => {
-        const suggestedColors: string[] = [];
-        for (let i: number = 0; i < 2; i++)
-            suggestedColors.push(RGBtoHex(avatarColors[i]));
-        const compColors: RGBColor[] = getComplimentaryPaletteForColor(avatarColors[0]);
-        for (let i: number = 0; i < compColors.length; i++)
-            suggestedColors.push(RGBtoHex(compColors[i]));
-        callback(suggestedColors);
-    }).catch(e => {
-        console.error(e);
-        showToast("Unable to retrieve suggested colors.", Toasts.Type.FAILURE);
-        callback([]);
-    });
+    const user = UserStore.getCurrentUser();
+    getPaletteForAvatar(`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=80`)
+        .then(avatarColors => {
+            callback([
+                ...avatarColors.slice(0, 2),
+                ...getComplimentaryPaletteForColor(avatarColors[0]).slice(0, 3)
+            ].map(e => RGBtoHex(e)));
+        })
+        .catch(e => {
+            console.error(e);
+            showToast("Unable to retrieve suggested colors.", Toasts.Type.FAILURE);
+            callback([]);
+        });
 }
 
-function fetchProfileEffects(callback: (v: any) => void): void {
+function fetchProfileEffects(callback: (v: any[]) => void) {
     RestAPI.get({ url: "/user-profile-effects" })
         .then(res => { callback(res.body.profile_effect_configs); })
         .catch(e => {
@@ -315,7 +243,7 @@ function fetchProfileEffects(callback: (v: any) => void): void {
         });
 }
 
-function updateUserThemeColors(user: UserProfile, primary: number, accent: number): void {
+function updateUserThemeColors(user: UserProfile, primary: number, accent: number) {
     if (primary > -1) {
         user.themeColors = [primary, accent > -1 ? accent : primary];
         user.premiumType = 2;
@@ -325,14 +253,14 @@ function updateUserThemeColors(user: UserProfile, primary: number, accent: numbe
     }
 }
 
-function updateUserEffectID(user: UserProfile, id: bigint): void {
+function updateUserEffectID(user: UserProfile, id: bigint) {
     if (id > -1n) {
         user.profileEffectID = id.toString();
         user.premiumType = 2;
     }
 }
 
-function updatePreview(): void {
+function updatePreview() {
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SUBMIT_SUCCESS" });
 }
 
@@ -345,8 +273,8 @@ const settings = definePluginSettings({
             { label: "About Me", value: false, default: true },
         ]
     },
-    "Hide 3y3 Builder": {
-        description: "Hide the 3y3 Builder in the profiles settings page",
+    hideBuilder: {
+        description: "Hide the FPTE Builder in the profiles settings page",
         type: OptionType.BOOLEAN,
         default: false
     }
@@ -354,21 +282,21 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "FakeProfileThemesAndEffects",
-    description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible 3y3 encoded characters",
+    description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible, zero-width characters",
     authors: [Devs.ryan],
     patches: [
         {
             find: "UserProfileStore",
             replacement: {
                 match: /(?<=getUserProfile\(\i\){return )(\i\[\i])/,
-                replace: "$self.decodeUserBio3y3Hook($1)"
+                replace: "$self.decodeUserBioFPTEHook($1)"
             }
         },
         {
             find: "DefaultCustomizationSections",
             replacement: {
                 match: /\.sectionsContainer,children:\[/,
-                replace: "$&$self.add3y3Builder(),"
+                replace: "$&$self.addFPTEBuilder(),"
             }
         },
         {
@@ -381,8 +309,8 @@ export default definePlugin({
         {
             find: '"Input data is not a valid image."',
             replacement: {
-                match: /\.palette\(\)}let \i/,
-                replace: "$&=$self.getPaletteForAvatar"
+                match: /\.palette\(\)}let \i=/,
+                replace: "$&$self.getPaletteForAvatar="
             }
         },
         {
@@ -395,12 +323,12 @@ export default definePlugin({
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /let{[^}]*pendingThemeColors[^}]*pendingProfileEffectID/,
-                replace: "$self.profilePreviewHook(arguments[0]);$&"
+                match: /let{(?:[^}]*,)?pendingThemeColors:[^}]+,pendingProfileEffectID:[^}]+}=(\i)[,;]/,
+                replace: "$self.profilePreviewHook($1);$&"
             }
         }
     ],
-    set ColorPicker(e: any) {
+    set ColorPicker(e: React.ComponentType<any>) {
         ColorPicker = e;
     },
     set getPaletteForAvatar(f: (v: string) => Promise<RGBColor[]>) {
@@ -409,7 +337,7 @@ export default definePlugin({
     set getComplimentaryPaletteForColor(f: (v: RGBColor) => RGBColor[]) {
         getComplimentaryPaletteForColor = f;
     },
-    settingsAboutComponent: (): JSX.Element => {
+    settingsAboutComponent: () => {
         return (
             <Forms.FormSection>
                 <Forms.FormTitle tag={"h3"}>{"Usage"}</Forms.FormTitle>
@@ -423,8 +351,8 @@ export default definePlugin({
                         style={{ listStyle: "decimal", paddingLeft: "40px" }}
                     >
                         <li>{"Go to your profile settings"}</li>
-                        <li>{"Use the 3y3 Builder to choose your profile theme colors and effect"}</li>
-                        <li>{'Click the "Copy 3y3" button'}</li>
+                        <li>{"Use the FPTE Builder to choose your profile theme colors and effect"}</li>
+                        <li>{'Click the "Copy FPTE" button'}</li>
                         <li>{"Paste the invisible text anywhere in your About Me"}</li>
                     </ol>
                 </Forms.FormText>
@@ -432,38 +360,38 @@ export default definePlugin({
         );
     },
     settings,
-    decodeUserBio3y3Hook(user: UserProfile | undefined): UserProfile | undefined {
+    decodeUserBioFPTEHook(user: UserProfile | undefined) {
         if (user === undefined) return user;
 
         if (settings.store.prioritizeNitro) {
             if (user.themeColors !== undefined) {
                 if (user.profileEffectID === undefined) {
-                    const decoded3y3: [string, string, string] = decode3y3(user.bio);
-                    if (base125StrToBase10Color(decoded3y3[0]) === -2)
-                        updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[1]));
+                    const fpte = extractFPTE(user.bio);
+                    if (decodeColor(fpte[0]) === -2)
+                        updateUserEffectID(user, decodeEffect(fpte[1]));
                     else
-                        updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[2]));
+                        updateUserEffectID(user, decodeEffect(fpte[2]));
                 }
                 return user;
             } else if (user.profileEffectID !== undefined) {
-                const decoded3y3: [string, string, string] = decode3y3(user.bio);
-                const primaryColor: number = base125StrToBase10Color(decoded3y3[0]);
+                const fpte = extractFPTE(user.bio);
+                const primaryColor = decodeColor(fpte[0]);
                 if (primaryColor === -2)
-                    updateUserThemeColors(user, ...decodeLegacy3y3(decoded3y3[0]));
+                    updateUserThemeColors(user, ...decodeColorsLegacy(fpte[0]));
                 else
-                    updateUserThemeColors(user, primaryColor, base125StrToBase10Color(decoded3y3[1]));
+                    updateUserThemeColors(user, primaryColor, decodeColor(fpte[1]));
                 return user;
             }
         }
 
-        const decoded3y3: [string, string, string] = decode3y3(user.bio);
-        const primaryColor: number = base125StrToBase10Color(decoded3y3[0]);
+        const fpte = extractFPTE(user.bio);
+        const primaryColor = decodeColor(fpte[0]);
         if (primaryColor === -2) {
-            updateUserThemeColors(user, ...decodeLegacy3y3(decoded3y3[0]));
-            updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[1]));
+            updateUserThemeColors(user, ...decodeColorsLegacy(fpte[0]));
+            updateUserEffectID(user, decodeEffect(fpte[1]));
         } else {
-            updateUserThemeColors(user, primaryColor, base125StrToBase10Color(decoded3y3[1]));
-            updateUserEffectID(user, base125StrToBase10ItemID(decoded3y3[2]));
+            updateUserThemeColors(user, primaryColor, decodeColor(fpte[1]));
+            updateUserEffectID(user, decodeEffect(fpte[2]));
         }
 
         return user;
@@ -483,28 +411,28 @@ export default definePlugin({
             }
         }
     },
-    add3y3Builder(): JSX.Element | null {
-        if (settings.store["Hide 3y3 Builder"]) return null;
+    addFPTEBuilder() {
+        if (settings.store.hideBuilder) return null;
 
         [primaryColor, setPrimaryColor] = useState(-1);
         [accentColor, setAccentColor] = useState(-1);
         [effectID, setEffectID] = useState("");
         const [effectName, setEffectName] = useState("");
         [preview, setPreview] = useState(true);
-        const [buildLegacy3y3, setBuildLegacy3y3] = useState(false);
+        const [buildLegacyFPTE, setBuildLegacyFPTE] = useState(false);
         const currModal = useRef("");
 
         useEffect(() => { return () => { closeModal(currModal.current); }; }, []);
 
         return (
             <>
-                <style>{"." + this.name + "TextOverflow{white-space:normal!important;text-overflow:clip!important}"}</style>
+                <style>{`.${this.name}TextOverflow{white-space:normal!important;text-overflow:clip!important}`}</style>
                 <Text
                     tag={"h3"}
                     variant={"eyebrow"}
                     style={{ display: "inline" }}
                 >
-                    {"3y3 Builder"}
+                    {"FPTE Builder"}
                 </Text>
                 <Button
                     look={Button.Looks.LINK}
@@ -545,14 +473,14 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            getSuggestedColors((colors: string[]) => {
+                            getSuggestedColors(colors => {
                                 closeModal(currModal.current);
                                 currModal.current = openColorPickerModal(
                                     ColorPicker,
-                                    (color: number) => {
+                                    color => {
                                         setPrimaryColor(color);
                                         if (preview) updatePreview();
-                                        showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                        showToast("FPTE updated!", Toasts.Type.SUCCESS);
                                     },
                                     primaryColor === -1 ? 0 : primaryColor,
                                     colors
@@ -571,14 +499,14 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            getSuggestedColors((colors: string[]) => {
+                            getSuggestedColors(colors => {
                                 closeModal(currModal.current);
                                 currModal.current = openColorPickerModal(
                                     ColorPicker,
-                                    (color: number) => {
+                                    color => {
                                         setAccentColor(color);
                                         if (preview) updatePreview();
-                                        showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                        showToast("FPTE updated!", Toasts.Type.SUCCESS);
                                     },
                                     accentColor === -1 ? 0 : accentColor,
                                     colors
@@ -597,15 +525,15 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            fetchProfileEffects((data: any) => {
+                            fetchProfileEffects(data => {
                                 if (data) {
                                     closeModal(currModal.current);
                                     currModal.current = openProfileEffectModal(
-                                        (id: string, name: string) => {
+                                        (id, name) => {
                                             setEffectID(id);
                                             setEffectName(name);
                                             if (preview) updatePreview();
-                                            showToast("3y3 updated!", Toasts.Type.SUCCESS);
+                                            showToast("FPTE updated!", Toasts.Type.SUCCESS);
                                         },
                                         data
                                     );
@@ -626,32 +554,32 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            const stringToCopy: string = generate3y3(primaryColor, accentColor, effectID, buildLegacy3y3);
-                            if (stringToCopy === "")
-                                showToast("3y3 Builder is empty; nothing to copy!");
+                            const strToCopy = buildFPTE(primaryColor, accentColor, effectID, buildLegacyFPTE);
+                            if (strToCopy === "")
+                                showToast("FPTE Builder is empty; nothing to copy!");
                             else
-                                copyWithToast(stringToCopy, "3y3 copied to clipboard!");
+                                copyWithToast(strToCopy, "FPTE copied to clipboard!");
                         }}
                     >
-                        {"Copy 3y3"}
+                        {"Copy FPTE"}
                     </Button>
                 </div>
                 <Forms.FormDivider className={Margins.bottom20 + " " + Margins.top20} />
                 <Switch
                     value={preview}
-                    onChange={(value: boolean) => {
+                    onChange={value => {
                         setPreview(value);
                         updatePreview();
                     }}
                 >
-                    {"3y3 Builder Preview"}
+                    {"FPTE Builder Preview"}
                 </Switch>
                 <Switch
-                    value={buildLegacy3y3}
+                    value={buildLegacyFPTE}
                     note={"Will use more characters"}
-                    onChange={(value: boolean) => { setBuildLegacy3y3(value); }}
+                    onChange={value => { setBuildLegacyFPTE(value); }}
                 >
-                    {"Build backwards compatible 3y3"}
+                    {"Build backwards compatible FPTE"}
                 </Switch>
             </>
         );

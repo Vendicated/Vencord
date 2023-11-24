@@ -11,10 +11,10 @@ interface ProfileEffectModalProps {
     modalProps: ModalProps;
     onClose: () => void;
     onSubmit: (i: string, n: string) => void;
-    profileEffects: any;
+    profileEffects: any[];
 }
 
-export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects }: ProfileEffectModalProps): JSX.Element {
+export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects }: ProfileEffectModalProps) {
     const [selected, setSelected] = useState(-1);
 
     return (
@@ -41,10 +41,10 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                     justifyContent: "center"
                 }}
             >
-                {profileEffects.map((e, i): JSX.Element =>
+                {profileEffects.map((e, i) =>
                     <div
                         style={{
-                            background: "top / cover url(" + e.thumbnailPreviewSrc + "), top / cover url(/assets/f328a6f8209d4f1f5022.png)",
+                            background: `top / cover url(${e.thumbnailPreviewSrc}), top / cover url(/assets/f328a6f8209d4f1f5022.png)`,
                             borderRadius: "4px",
                             boxShadow: i === selected ? "0 0 0 2px var(--brand-experiment-500, #5865f2)" : "none",
                             cursor: "pointer",
@@ -86,8 +86,8 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
     );
 }
 
-export function openProfileEffectModal(onSubmit: (i: string, n: string) => void, profileEffects: any): string {
-    const key: string = openModal(modalProps =>
+export function openProfileEffectModal(onSubmit: (i: string, n: string) => void, profileEffects: any[]) {
+    const key = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
             onClose={() => { closeModal(key); }}
