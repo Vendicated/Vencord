@@ -1,19 +1,19 @@
 [class*="characterCount_"] {
-    inset: -24px 8px auto auto;
+    inset: -24px 8px auto auto !important;
 }
 
 :has([class*="bioTextArea_"]) > [class*="characterCount_"] {
-    inset: auto 3px -24px auto;
+    inset: auto 3px -24px auto !important;
 }
 
 [class*="messagesWrapper_"]:has([class*="jumpToPresentBar__"]) + * [class*="characterCount_"] {
-    top: -48px;
+    top: -48px !important;
 }
 
 [class*="messagesWrapper_"]:has([class*="jumpToPresentBar__"]) + * :has([class*="attachedBars_"]) [class*="characterCount_"] {
-    top: -45px;
+    top: -45px !important;
 }
 
 [class*="messagesWrapper_"]:has(+ * [class*="characterCount_"]) [class*="container__"]:has(+ [class*="emptyForum__"]) {
-    margin-bottom: 20px;
+    margin-bottom: 20px !important;
 }
