@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import axios from "axios";
 import { session } from "electron";
 import { unzip } from "fflate";
 import { constants as fsConstants } from "fs";
@@ -24,7 +25,6 @@ import { join } from "path";
 
 import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";
-import { get } from "./simpleGet";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
 
@@ -73,12 +73,15 @@ export async function installExt(id: string) {
             // Unfortunately, Google does not serve old versions, so this is the only way
             ? "https://raw.githubusercontent.com/Vendicated/random-files/f6f550e4c58ac5f2012095a130406c2ab25b984d/fmkadmapgofadopljbjfkapdkoienihi.zip"
             : `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&x=id%3D${id}%26uc&prodversion=32`;
-        const buf = await get(url, {
+        const response = await axios({
+            method: "get",
+            responseType: "blob",
+            url: url,
             headers: {
                 "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)"
             }
         });
-        await extract(crxToZip(buf), extDir).catch(console.error);
+        await extract(crxToZip(Buffer.from(response.data, "binary")), extDir).catch(console.error);
     }
 
     session.defaultSession.loadExtension(extDir);
