@@ -265,28 +265,31 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
     const [users] = useState(mentions.users ?? new Set<string>());
     const [roles] = useState(mentions.roles ?? new Set<string>());
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
-    const [allUsers, setAllUsers] = useState(users.size !== 0 && users.size === mentions.meta.userIds.size);
-    const [allRoles, setAllRoles] = useState(roles.size !== 0 && roles.size === mentions.meta.roleIds.size);
+    const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
+    const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);
     const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
 
     useEffect(() => {
-        store.set(channel.id, {
-            parse: new Set(
-                [
-                    everyone && "everyone",
-                    allUsers && "users",
-                    allRoles && "roles"
-                ].filter(v => v) as AllowedMentionsParsables[]
-            ),
-            users: allUsers || users.size === 0 ? undefined : users,
-            roles: allRoles || roles.size === 0 ? undefined : roles,
-            repliedUser,
-            meta: {
-                ...mentions.meta,
-                tooManyUsers: users.size > 100,
-                tooManyRoles: roles.size > 100,
+        store.set(
+            channel.id,
+            {
+                parse: new Set(
+                    [
+                        everyone && "everyone",
+                        allUsers && "users",
+                        allRoles && "roles"
+                    ].filter(v => v) as AllowedMentionsParsables[]
+                ),
+                users: allUsers || users.size === 0 ? undefined : users,
+                roles: allRoles || roles.size === 0 ? undefined : roles,
+                repliedUser,
+                meta: {
+                    ...mentions.meta,
+                    tooManyUsers: users.size > 100,
+                    tooManyRoles: roles.size > 100,
+                }
             }
-        });
+        );
     }, [
         mentions,
         everyone,
