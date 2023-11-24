@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./AllowedMentionsUI.css";
+import "./AllowedMentions.css";
 
 import { Flex } from "@components/Flex";
 import { isNonNullish } from "@utils/guards";
