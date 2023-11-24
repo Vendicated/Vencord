@@ -7,33 +7,44 @@
 import "./AllowedMentionsUI.css";
 
 import { Flex } from "@components/Flex";
-import { Switch } from "@components/Switch";
 import { isNonNullish } from "@utils/guards";
 import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Clickable, Forms, GuildMemberStore, GuildStore, Menu, Popout as DiscordPopout, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Channel } from "discord-types/general";
+import { CSSProperties, ReactNode } from "react";
 
-export interface Mentions {
-    hasEveryone: boolean,
-    everyone: boolean,
-    userIds: string[],
-    roleIds: string[],
-    allUsers: boolean,
-    allRoles: boolean,
-    editSource?: {
-        users: Set<string>,
-        roles: Set<string>;
-    },
+export type AllowedMentionsParsables = "everyone" | "users" | "roles";
+
+export interface AllowedMentions {
+    parse: Set<AllowedMentionsParsables>,
+    users?: Set<string>,
+    roles?: Set<string>,
+    repliedUser: boolean,
+    meta: {
+        hasEveryone: boolean,
+        isEdit: boolean,
+        isReply: boolean,
+        userIds: Set<string>,
+        roleIds: Set<string>;
+        tooManyUsers: boolean;
+        tooManyRoles: boolean;
+    };
+}
+
+export interface EditAttachments {
+    attachments: File[];
 }
 
 export interface AllowedMentionsProps {
-    mentions: Mentions;
-    channel: any;
+    mentions: AllowedMentions,
+    channel: Channel;
     trailingSeparator?: boolean;
-    setMentionsForChannel: (channelId: string, mentions: Mentions) => void;
 }
 
 const replyClasses = findByPropsLazy("replyBar", "replyLabel", "separator");
+export const SendAllowedMentionsStore = new Map<string, AllowedMentions>();
+export const EditAllowedMentionsStore = new Map<string, AllowedMentions>();
 
 function getDisplayableUserNameParts(userId: string, guildId: string | null) {
     // @ts-ignore discord-types doesn't have globalName
@@ -58,7 +69,8 @@ function getDisplayableRoleName(roleId: string, guildId: string | null) {
     // it in DMs
     const role = guildId ? Object.values(GuildStore.getGuild(guildId).roles).find(r => r.id === roleId)?.name : undefined;
 
-    return role ?? "@deleted-role";
+    // Role id if not cached or not from current guild
+    return role ?? roleId;
 }
 
 function fuzzySearch(searchQuery: string, searchString: string) {
@@ -81,8 +93,38 @@ function fuzzySearch(searchQuery: string, searchString: string) {
     return null;
 }
 
-function Title({ children, pointer }: { children: string; pointer?: boolean; }) {
-    return <Forms.FormTitle style={{ margin: 0, cursor: pointer ? "pointer" : "default" }}>{children}</Forms.FormTitle>;
+function AtIcon({ width, height }: { width: number, height: number; }) {
+    return <svg width={width} height={height} viewBox="0 0 24 24">
+        <path
+            fill="currentColor"
+            d="M12 2C6.486 2 2 6.486 2 12C2 17.515 6.486 22 12 22C14.039 22 15.993
+            21.398 17.652 20.259L16.521 18.611C15.195 19.519 13.633 20 12 20C7.589
+            20 4 16.411 4 12C4 7.589 7.589 4 12 4C16.411 4 20 7.589 20 12V12.782C20
+            14.17 19.402 15 18.4 15L18.398 15.018C18.338 15.005 18.273 15 18.209
+            15H18C17.437 15 16.6 14.182 16.6 13.631V12C16.6 9.464 14.537 7.4 12
+            7.4C9.463 7.4 7.4 9.463 7.4 12C7.4 14.537 9.463 16.6 12 16.6C13.234 16.6
+            14.35 16.106 15.177 15.313C15.826 16.269 16.93 17 18 17L18.002
+            16.981C18.064 16.994 18.129 17 18.195 17H18.4C20.552 17 22 15.306 22
+            12.782V12C22 6.486 17.514 2 12 2ZM12 14.599C10.566 14.599 9.4 13.433 9.4
+            11.999C9.4 10.565 10.566 9.399 12 9.399C13.434 9.399 14.6 10.565 14.6
+            11.999C14.6 13.433 13.434 14.599 12 14.599Z"
+        />
+    </svg>;
+}
+
+function Title({ children, pointer, style }: { children: ReactNode; pointer?: boolean; style?: CSSProperties; }) {
+    return <Forms.FormTitle style={{ margin: 0, cursor: pointer ? "pointer" : "default", ...style }}>{children}</Forms.FormTitle>;
+}
+
+function TitleSwitch({ state, setState, children }: { state: boolean, setState: (value: boolean) => void; children: ReactNode; }) {
+    return <Clickable onClick={() => setState(!state)}>
+        <Title
+            style={{ ...(state ? { color: "var(--text-link)" } : {}), display: "flex", gap: "0.2rem", userSelect: "none" }}
+            pointer
+        >
+            {children}
+        </Title>
+    </Clickable>;
 }
 
 function Separator() {
@@ -108,7 +150,7 @@ function Popout({
     update: () => void,
     fuzzy: (search: string, id: string) => number | null,
     ids: Set<string>,
-    rawIds: string[],
+    rawIds: Set<string>,
     guildId: string | null,
     getDisplayableName: (userId: string, guildId: string | null) => string | undefined,
     all: boolean,
@@ -131,9 +173,20 @@ function Popout({
                 <Menu.MenuCheckboxItem
                     id={`vc-allowed-mentions-${title}-popout-all`}
                     label="All"
-                    disabled={ids.size > 0}
                     checked={all}
-                    action={() => setAll(!all)}
+                    action={() => {
+                        // If all are selected, deselect them,
+                        // otherwise select the remaining ones.
+                        if (ids.size === rawIds.size) {
+                            ids.clear();
+                            setAll(false);
+                            update();
+                        } else {
+                            rawIds.forEach(id => ids.add(id));
+                            setAll(true);
+                            update();
+                        }
+                    }}
                 />
                 <Menu.MenuSeparator />
                 <Menu.MenuItem
@@ -146,7 +199,6 @@ function Popout({
                             maxLength={32}
                             role="combobox"
                             value={search}
-                            disabled={all}
                             onChange={value => setSearch(value.trim())}
                             style={{ margin: "2px 0", padding: "6px 8px" }}
                             onKeyDown={e => {
@@ -169,14 +221,14 @@ function Popout({
                     }}
                 />
                 {(isNonNullish(search) ?
-                    rawIds.map(id => ({
+                    Array.from(rawIds).map(id => ({
                         score: fuzzy(search, id),
                         name: getDisplayableName(id, guildId),
                         id: id
                     })
                     ).filter(o => isNonNullish(o.score))
                         .sort((a, b) => b.score! - a.score!)
-                    : rawIds.map(id => ({
+                    : Array.from(rawIds).map(id => ({
                         score: 0,
                         name: getDisplayableName(id, guildId),
                         id: id
@@ -186,17 +238,10 @@ function Popout({
                         return <Menu.MenuCheckboxItem
                             id={`vc-allowed-mentions-${title}-popout-${object.id}`}
                             label={object.name!}
-                            disabled={
-                                /*
-                                    API allows only 100, athough do not disable
-                                    already checked ids because that would cause a
-                                    hard lock in the menu
-                                */
-                                all || (ids.size >= 100 && !ids.has(object.id))
-                            }
-                            checked={ids.has(object.id)}
+                            checked={all || ids.has(object.id)}
                             action={() => {
-                                ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
+                                all || ids.has(object.id) ? ids.delete(object.id) : ids.add(object.id);
+                                setAll(ids.size === rawIds.size);
                                 update();
                             }}
                         />;
@@ -214,45 +259,61 @@ function Popout({
     </DiscordPopout>;
 }
 
-export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMentionsForChannel }: AllowedMentionsProps) {
-    const [everyone, setEveryone] = useState(mentions.everyone);
-    // When editing a message, it can (potentially) aready have mentioned users/roles
-    const [userIds, _setUserIds] = useState(mentions.editSource ? mentions.editSource.users : new Set<string>());
-    const [roleIds, _setRoleIds] = useState(mentions.editSource ? mentions.editSource.roles : new Set<string>());
-    const [allUsers, setAllUsers] = useState(mentions.allUsers);
-    const [allRoles, setAllRoles] = useState(mentions.allRoles);
+export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: AllowedMentionsProps) {
+    const store = mentions.meta.isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
+
+    const [users] = useState(mentions.users ?? new Set<string>());
+    const [roles] = useState(mentions.roles ?? new Set<string>());
+    const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
+    const [allUsers, setAllUsers] = useState(users.size !== 0 && users.size === mentions.meta.userIds.size);
+    const [allRoles, setAllRoles] = useState(roles.size !== 0 && roles.size === mentions.meta.roleIds.size);
+    const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
 
     useEffect(() => {
-        setMentionsForChannel(channel.id, {
-            hasEveryone: mentions.hasEveryone,
-            everyone,
-            userIds: Array.from(userIds),
-            roleIds: Array.from(roleIds),
-            allUsers,
-            allRoles,
-            editSource: mentions.editSource,
+        store.set(channel.id, {
+            parse: new Set(
+                [
+                    everyone && "everyone",
+                    allUsers && "users",
+                    allRoles && "roles"
+                ].filter(v => v) as AllowedMentionsParsables[]
+            ),
+            users: allUsers || users.size === 0 ? undefined : users,
+            roles: allRoles || roles.size === 0 ? undefined : roles,
+            repliedUser,
+            meta: {
+                ...mentions.meta,
+                tooManyUsers: users.size > 100,
+                tooManyRoles: roles.size > 100,
+            }
         });
     }, [
         mentions,
         everyone,
-        userIds,
-        roleIds,
         allUsers,
         allRoles,
+        repliedUser,
+        users,
+        roles,
     ]);
 
     const [shouldShowUsersPopout, setShouldShowUsersPopout] = useState(false);
     const [shouldShowRolesPopout, setShouldShowRolesPopout] = useState(false);
     const update = useForceUpdater();
 
-    const displayEveryone = mentions.hasEveryone;
-    const displayUserIds = mentions.userIds.length > 0;
-    const displayRoleIds = mentions.roleIds.length > 0;
+    const displayEveryone = mentions.meta.hasEveryone;
+    const displayReply = mentions.meta.isReply;
+    const displayUserIds = mentions.meta.userIds.size > 0;
+    const displayRoleIds = mentions.meta.roleIds.size > 0;
 
     return <Flex style={{ gap: "1rem", alignItems: "center" }}>
         {displayEveryone && <>
-            <Title>@everyone / @here</Title>
-            <Switch checked={everyone} onChange={setEveryone} />
+            <TitleSwitch state={everyone} setState={setEveryone}>
+                <AtIcon width={16} height={16} />
+                everyone /
+                <AtIcon width={16} height={16} />
+                here
+            </TitleSwitch>
         </>}
         {displayUserIds && <>
             {displayEveryone && <Separator />}
@@ -268,8 +329,8 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
                         .filter(isNonNullish) as number[];
                     return samples.length > 0 ? Math.max(...samples) : null;
                 }}
-                ids={userIds}
-                rawIds={mentions.userIds}
+                ids={users}
+                rawIds={mentions.meta.userIds}
                 guildId={channel.guild_id}
                 getDisplayableName={getDisplayableUserName}
                 all={allUsers}
@@ -284,13 +345,20 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator, setMe
                 setShouldShow={setShouldShowRolesPopout}
                 update={update}
                 fuzzy={(search, roleId) => fuzzySearch(search, getDisplayableRoleName(roleId, channel.guild_id).toLowerCase())}
-                ids={roleIds}
-                rawIds={mentions.roleIds}
+                ids={roles}
+                rawIds={mentions.meta.roleIds}
                 guildId={channel.guild_id}
                 getDisplayableName={getDisplayableRoleName}
                 all={allRoles}
                 setAll={setAllRoles}
             />
+        </>}
+        {displayReply && <>
+            {(displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
+            <TitleSwitch state={repliedUser} setState={setRepliedUser}>
+                <AtIcon width={16} height={16} />
+                {repliedUser ? "ON" : "OFF"}
+            </TitleSwitch>
         </>}
         {trailingSeparator && (displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
     </Flex>;
