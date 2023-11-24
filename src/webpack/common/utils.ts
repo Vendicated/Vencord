@@ -20,7 +20,7 @@ import { proxyLazy } from "@utils/lazy";
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, find, findByPropsLazy, findLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -31,7 +31,7 @@ waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
@@ -102,17 +102,9 @@ export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetI
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
-export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".copy("),
-    SUPPORTS_COPY: x => typeof x === "boolean",
-});
+export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
 
-export const NavigationRouter = mapMangledModuleLazy("transitionToGuild - ", {
-    transitionTo: filters.byCode("transitionTo -"),
-    transitionToGuild: filters.byCode("transitionToGuild -"),
-    goBack: filters.byCode("goBack()"),
-    goForward: filters.byCode("goForward()"),
-});
+export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
 
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
