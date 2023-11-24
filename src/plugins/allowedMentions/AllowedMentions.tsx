@@ -17,15 +17,12 @@ import { CSSProperties, ReactNode } from "react";
 export type AllowedMentionsParsables = "everyone" | "users" | "roles";
 
 export interface AllowedMentions {
-    parse: Set<AllowedMentionsParsables>,
-    users?: Set<string>,
-    roles?: Set<string>,
-    repliedUser: boolean,
+    parse: Set<AllowedMentionsParsables>;
+    users?: Set<string>;
+    roles?: Set<string>;
     meta: {
-        hasEveryone: boolean,
-        isEdit: boolean,
-        isReply: boolean,
-        userIds: Set<string>,
+        hasEveryone: boolean;
+        userIds: Set<string>;
         roleIds: Set<string>;
         tooManyUsers: boolean;
         tooManyRoles: boolean;
@@ -43,34 +40,29 @@ export interface AllowedMentionsProps {
 }
 
 const replyClasses = findByPropsLazy("replyBar", "replyLabel", "separator");
-export const SendAllowedMentionsStore = createStore();
-export const EditAllowedMentionsStore = createStore();
-
-function createStore() {
-    return {
-        store: new Map<string, AllowedMentions>(),
-        callbacks: new Map<string, (mentions: AllowedMentions) => void>,
-        get(channelId: string) {
-            return this.store.get(channelId);
-        },
-        set(channelId: string, mentions: AllowedMentions, dispatch: boolean) {
-            this.store.set(channelId, mentions);
-            dispatch && this.callbacks.get(channelId)?.(mentions);
-        },
-        delete(channelId: string) {
-            return this.store.delete(channelId);
-        },
-        clear() {
-            return this.store.clear();
-        },
-        subscribe(channelId: string, callback: (mentions: AllowedMentions) => void) {
-            return this.callbacks.set(channelId, callback);
-        },
-        unsubscribe(channelId: string) {
-            return this.callbacks.delete(channelId);
-        }
-    };
-}
+export const AllowedMentionsStore = {
+    store: new Map<string, AllowedMentions>(),
+    callbacks: new Map<string, (mentions: AllowedMentions) => void>,
+    get(channelId: string) {
+        return this.store.get(channelId);
+    },
+    set(channelId: string, mentions: AllowedMentions, dispatch: boolean) {
+        this.store.set(channelId, mentions);
+        dispatch && this.callbacks.get(channelId)?.(mentions);
+    },
+    delete(channelId: string) {
+        return this.store.delete(channelId);
+    },
+    clear() {
+        return this.store.clear();
+    },
+    subscribe(channelId: string, callback: (mentions: AllowedMentions) => void) {
+        return this.callbacks.set(channelId, callback);
+    },
+    unsubscribe(channelId: string) {
+        return this.callbacks.delete(channelId);
+    }
+};
 
 function getDisplayableUserNameParts(userId: string, guildId: string | null) {
     // @ts-ignore discord-types doesn't have globalName
@@ -286,17 +278,14 @@ function Popout({
 }
 
 export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: AllowedMentionsProps) {
-    const store = mentions.meta.isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
-
-    const [users, setUsers] = useState(new Set(mentions.users ?? []));
-    const [roles, setRoles] = useState(new Set(mentions.roles ?? []));
+    const [users, setUsers] = useState(new Set(mentions.users));
+    const [roles, setRoles] = useState(new Set(mentions.users));
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
     const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
     const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);
-    const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
 
     useEffect(() => {
-        store.subscribe(
+        AllowedMentionsStore.subscribe(
             channel.id,
             mentions => {
                 allUsers && mentions.users && setUsers(new Set(mentions.users));
@@ -304,11 +293,11 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
             }
         );
 
-        return () => { store.unsubscribe(channel.id); };
+        return () => { AllowedMentionsStore.unsubscribe(channel.id); };
     });
 
     useEffect(() => {
-        store.set(
+        AllowedMentionsStore.set(
             channel.id,
             {
                 parse: new Set(
@@ -320,7 +309,6 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
                 ),
                 users: allUsers || users.size === 0 ? undefined : users,
                 roles: allRoles || roles.size === 0 ? undefined : roles,
-                repliedUser,
                 meta: {
                     ...mentions.meta,
                     tooManyUsers: users.size > 100,
@@ -334,7 +322,6 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
         everyone,
         allUsers,
         allRoles,
-        repliedUser,
         users,
         roles,
     ]);
@@ -344,7 +331,6 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
     const update = useForceUpdater();
 
     const displayEveryone = mentions.meta.hasEveryone;
-    const displayReply = mentions.meta.isReply;
     const displayUserIds = mentions.meta.userIds.size > 0;
     const displayRoleIds = mentions.meta.roleIds.size > 0;
 
@@ -394,13 +380,6 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
                 all={allRoles}
                 setAll={setAllRoles}
             />
-        </>}
-        {displayReply && <>
-            {(displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
-            <TitleSwitch state={repliedUser} setState={setRepliedUser}>
-                <AtIcon width={16} height={16} />
-                {repliedUser ? "ON" : "OFF"}
-            </TitleSwitch>
         </>}
         {trailingSeparator && (displayEveryone || displayUserIds || displayRoleIds) && <Separator />}
     </Flex>;
