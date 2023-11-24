@@ -16,12 +16,12 @@ const NoopComponent = () => null;
  */
 export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
     const get = makeLazy(factory, attempts);
-    const component = (props: T) => {
+    const LazyComponent = (props: T) => {
         const Component = get() ?? NoopComponent;
         return <Component {...props} />;
     };
 
-    component.$$get = get;
+    LazyComponent.$$get = get;
 
-    return component;
+    return LazyComponent;
 }

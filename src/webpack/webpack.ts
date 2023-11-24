@@ -91,7 +91,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
 }
 
 function handleModuleNotFound(method: string, ...filter: unknown[]) {
-    const err = new Error(`webpack.${method} found no module.`);
+    const err = new Error(`webpack.${method} found no module`);
     logger.error(err, "Filter:", filter);
 
     // Strict behaviour in DevBuilds to fail early and make sure the issue is found
