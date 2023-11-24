@@ -380,8 +380,6 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     subscriptions.set(filter, callback);
 }
 
-
-
 export function addListener(callback: CallbackFn) {
     listeners.add(callback);
 }
