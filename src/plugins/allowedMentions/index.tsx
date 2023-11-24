@@ -244,7 +244,7 @@ export default definePlugin({
 
             // Replying is a special case where we don't need extra ast nodes
             if (mentions.meta.isReply) {
-                store.set(channelId, mentions);
+                store.set(channelId, mentions, true);
             } else {
                 store.delete(channelId);
             }
@@ -292,7 +292,7 @@ export default definePlugin({
 
             store.delete(channelId);
         } else {
-            store.set(channelId, mentions);
+            store.set(channelId, mentions, true);
         }
     },
     skipEveryoneContentWarningPopout(channelId: string) {
