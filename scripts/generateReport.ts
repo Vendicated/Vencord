@@ -403,7 +403,7 @@ function runTime(token: string) {
                 try {
                     let result: any;
 
-                    if (method === "proxyLazyWebpack") {
+                    if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
                     } else {
@@ -411,10 +411,10 @@ function runTime(token: string) {
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (!result) throw "a rock at ben shapiro";
+                    if (result == null) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
-                    if (method === "find" || method === "proxyLazyWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
                     else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
