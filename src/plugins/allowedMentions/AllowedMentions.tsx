@@ -43,8 +43,34 @@ export interface AllowedMentionsProps {
 }
 
 const replyClasses = findByPropsLazy("replyBar", "replyLabel", "separator");
-export const SendAllowedMentionsStore = new Map<string, AllowedMentions>();
-export const EditAllowedMentionsStore = new Map<string, AllowedMentions>();
+export const SendAllowedMentionsStore = createStore();
+export const EditAllowedMentionsStore = createStore();
+
+function createStore() {
+    return {
+        store: new Map<string, AllowedMentions>(),
+        callbacks: new Map<string, (mentions: AllowedMentions) => void>,
+        get(channelId: string) {
+            return this.store.get(channelId);
+        },
+        set(channelId: string, mentions: AllowedMentions, dispatch: boolean) {
+            this.store.set(channelId, mentions);
+            dispatch && this.callbacks.get(channelId)?.(mentions);
+        },
+        delete(channelId: string) {
+            return this.store.delete(channelId);
+        },
+        clear() {
+            return this.store.clear();
+        },
+        subscribe(channelId: string, callback: (mentions: AllowedMentions) => void) {
+            return this.callbacks.set(channelId, callback);
+        },
+        unsubscribe(channelId: string) {
+            return this.callbacks.delete(channelId);
+        }
+    };
+}
 
 function getDisplayableUserNameParts(userId: string, guildId: string | null) {
     // @ts-ignore discord-types doesn't have globalName
@@ -262,12 +288,24 @@ function Popout({
 export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: AllowedMentionsProps) {
     const store = mentions.meta.isEdit ? EditAllowedMentionsStore : SendAllowedMentionsStore;
 
-    const [users] = useState(mentions.users ?? new Set<string>());
-    const [roles] = useState(mentions.roles ?? new Set<string>());
+    const [users, setUsers] = useState(new Set(mentions.users ?? []));
+    const [roles, setRoles] = useState(new Set(mentions.roles ?? []));
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
     const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
     const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);
     const [repliedUser, setRepliedUser] = useState(mentions.repliedUser);
+
+    useEffect(() => {
+        store.subscribe(
+            channel.id,
+            mentions => {
+                allUsers && mentions.users && setUsers(new Set(mentions.users));
+                allRoles && mentions.roles && setRoles(new Set(mentions.roles));
+            }
+        );
+
+        return () => { store.unsubscribe(channel.id); };
+    });
 
     useEffect(() => {
         store.set(
@@ -288,7 +326,8 @@ export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: All
                     tooManyUsers: users.size > 100,
                     tooManyRoles: roles.size > 100,
                 }
-            }
+            },
+            false
         );
     }, [
         mentions,
