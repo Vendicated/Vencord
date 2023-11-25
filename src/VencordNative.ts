@@ -8,7 +8,6 @@ import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
 import { PluginIpcMappings } from "main/ipcPlugins";
-import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
