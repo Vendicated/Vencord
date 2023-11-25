@@ -16,14 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, find, findByPropsLazy, findLazy, waitFor } from "../webpack";
+import { _resolveReady, findByPropsLazy, findLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
+
+waitFor(["dispatch", "subscribe"], m => {
+    FluxDispatcher = m;
+    const cb = () => {
+        m.unsubscribe("CONNECTION_OPEN", cb);
+        _resolveReady();
+    };
+    m.subscribe("CONNECTION_OPEN", cb);
+});
+
 export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
@@ -41,7 +50,9 @@ export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
 export let Parser: t.Parser;
+waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
+waitFor(["show", "close"], m => Alerts = m);
 
 const ToastType = {
     MESSAGE: 0,
@@ -82,6 +93,13 @@ export const Toasts = {
     }
 };
 
+// This is the same module but this is easier
+waitFor("showToast", m => {
+    Toasts.show = m.showToast;
+    Toasts.pop = m.popToast;
+});
+
+
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
@@ -106,26 +124,8 @@ export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
 
 export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
 
-waitFor(["dispatch", "subscribe"], m => {
-    FluxDispatcher = m;
-    const cb = () => {
-        m.unsubscribe("CONNECTION_OPEN", cb);
-        _resolveReady();
-    };
-    m.subscribe("CONNECTION_OPEN", cb);
-});
-
-
-// This is the same module but this is easier
-waitFor("showToast", m => {
-    Toasts.show = m.showToast;
-    Toasts.pop = m.popToast;
-});
-
-waitFor(["show", "close"], m => Alerts = m);
-waitFor("parseTopic", m => Parser = m);
-
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const PermissionsBits: t.PermissionsBits = proxyLazy(() => find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint").Permissions);
+const { Permissions } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export { Permissions as PermissionsBits };

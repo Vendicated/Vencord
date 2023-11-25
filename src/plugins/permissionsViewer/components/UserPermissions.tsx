@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
-import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { filters, findBulk } from "@webpack";
+import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -36,7 +35,7 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const Classes = proxyLazy(() => {
+const Classes = proxyLazyWebpack(() => {
     const modules = findBulk(
         filters.byProps("roles", "rolePill", "rolePillBorder"),
         filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
