@@ -355,7 +355,6 @@ function runTime(token: string) {
                 try {
                     // Loads all chunks required for an entry point
                     await (wreq as any).el(entryPoint);
-                    await new Promise(r => setTimeout(r, 150));
                 } catch (err) { }
             }
 
