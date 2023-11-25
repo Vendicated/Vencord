@@ -19,9 +19,8 @@ let regexes = [];
 
 const MenuHeader = findByCodeLazy("useInDesktopNotificationCenterExperiment)(");
 const Popout = findByPropsLazy("ItemsPopout");
-const popoutClasses = findByPropsLazy("recentMentionsPopout");
-const MessageObject = findByCodeLazy("}isFirstMessageInForumPost");
-const createMessageRecord = findByPropsLazy("createMessageRecord", "updateMessageRecord");
+const { recentMentionsPopout } = findByPropsLazy("recentMentionsPopout");
+const { createMessageRecord } = findByPropsLazy("createMessageRecord", "updateMessageRecord");
 
 
 async function setRegexes(idx: number, reg: string) {
@@ -185,7 +184,7 @@ export default definePlugin({
         if (m == null || this.keywordLog.some((e) => e.id == m.id))
             return;
 
-        let thing = createMessageRecord.createMessageRecord(m);
+        let thing = createMessageRecord(m);
         this.keywordLog.push(thing);
         this.keywordLog.sort((a, b) => b.timestamp - a.timestamp);
 
@@ -245,7 +244,7 @@ export default definePlugin({
         return (
             <>
                 <Popout.default
-                    className={popoutClasses.recentMentionsPopout}
+                    className={recentMentionsPopout}
                     renderHeader={() => header}
                     renderMessage={messageRender}
                     channel={channel}
