@@ -239,7 +239,7 @@ page.on("console", async e => {
         ).then(a => a.join(" ").trim());
 
 
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module. Filter:")) {
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module Filter:")) {
             console.error("[Unexpected Error]", text);
             report.otherErrors.push(text);
         }
@@ -338,6 +338,8 @@ function runTime(token: string) {
                         .then(r => r.text())
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
+                    await new Promise(r => setTimeout(r, 150));
+
                     if (isWasm) {
                         invalidChunks.push(id);
                         continue chunksLoop;
@@ -353,6 +355,7 @@ function runTime(token: string) {
                 try {
                     // Loads all chunks required for an entry point
                     await (wreq as any).el(entryPoint);
+                    await new Promise(r => setTimeout(r, 150));
                 } catch (err) { }
             }
 
@@ -369,6 +372,8 @@ function runTime(token: string) {
 
                 // Loads a chunk
                 if (!isWasm) await wreq.e(id as any);
+
+                await new Promise(r => setTimeout(r, 150));
             }
 
             // Make sure every chunk has finished loading
