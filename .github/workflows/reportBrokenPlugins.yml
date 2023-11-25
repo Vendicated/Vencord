@@ -12,6 +12,12 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
+              if: ${{ github.event_name == 'schedule' }}
+              with:
+                  ref: dev
+
+            - uses: actions/checkout@v3
+              if: ${{ github.event_name == 'workflow_dispatch' }}
 
             - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
