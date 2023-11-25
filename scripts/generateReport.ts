@@ -338,8 +338,6 @@ function runTime(token: string) {
                         .then(r => r.text())
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
-                    await new Promise(r => setTimeout(r, 150));
-
                     if (isWasm) {
                         invalidChunks.push(id);
                         continue chunksLoop;
@@ -371,8 +369,6 @@ function runTime(token: string) {
 
                 // Loads a chunk
                 if (!isWasm) await wreq.e(id as any);
-
-                await new Promise(r => setTimeout(r, 150));
             }
 
             // Make sure every chunk has finished loading
