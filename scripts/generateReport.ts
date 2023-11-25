@@ -226,7 +226,7 @@ page.on("console", async e => {
     }
 
     if (isDebug) {
-        console.log(e.text());
+        console.error(e.text());
     } else if (level === "error") {
         const text = await Promise.all(
             e.args().map(async a => {
