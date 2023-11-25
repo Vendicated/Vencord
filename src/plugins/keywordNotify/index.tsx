@@ -21,7 +21,7 @@ const MenuHeader = findByCodeLazy("useInDesktopNotificationCenterExperiment)(");
 const Popout = findByPropsLazy("ItemsPopout");
 const popoutClasses = findByPropsLazy("recentMentionsPopout");
 const MessageObject = findByCodeLazy("}isFirstMessageInForumPost");
-const createMessageRecord = mapMangledModuleLazy("createMessageRecord:", {fn: filters.byCode("MessageTypes.THREAD_CREATED")})
+const createMessageRecord = findByPropsLazy("createMessageRecord", "updateMessageRecord");
 
 
 async function setRegexes(idx: number, reg: string) {
@@ -182,10 +182,10 @@ export default definePlugin({
     },
 
     addToLog(m) {
-        if (this.keywordLog.some((e) => e.id == m.id))
+        if (m == null || this.keywordLog.some((e) => e.id == m.id))
             return;
 
-        let thing = createMessageRecord.fn(m);
+        let thing = createMessageRecord.createMessageRecord(m);
         this.keywordLog.push(thing);
         this.keywordLog.sort((a, b) => b.timestamp - a.timestamp);
 
@@ -225,7 +225,6 @@ export default definePlugin({
         };
 
         let messageRender = (e, t) => {
-            console.log("Message: ", e.content);
             let msg = this.renderMsg({
                 message: e,
                 gotoMessage: t,
