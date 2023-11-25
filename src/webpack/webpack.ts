@@ -237,7 +237,39 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     return null;
 });
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent", any[]]>;
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
+
+/**
+ * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
+ *
+ * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the lazy is evaluated
+ * @param factory lazy factory
+ * @param attempts how many times to try to evaluate the lazy before giving up
+ * @returns Proxy
+ *
+ * Note that the example below exists already as an api, see {@link findByPropsLazy}
+ * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
+ */
+export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
+
+    return proxyLazy<T>(factory, attempts);
+}
+
+/**
+ * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
+ *
+ * A lazy component. The factory method is called on first render.
+ * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
+ * @returns Result of factory function
+ */
+export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+
+    return LazyComponent<T>(factory, attempts);
+}
 
 /**
  * find but lazy
@@ -346,7 +378,9 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
  * Wait for a module that matches the provided filter to be registered,
  * then call the callback with the module as the first argument
  */
-export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
+export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
+
     if (typeof filter === "string")
         filter = filters.byProps(filter);
     else if (Array.isArray(filter))
