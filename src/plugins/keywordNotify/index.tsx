@@ -232,6 +232,9 @@ export default definePlugin({
                 dismissible: true
             });
 
+            if (msg == null)
+                return [null];
+
             msg.props.children[0].props.children.props.onClick = () => onDelete(e);
             msg.props.children[1].props.children[1].props.message.customRenderedContent = {
                 content: highlightKeywords(e.content, regexes)
