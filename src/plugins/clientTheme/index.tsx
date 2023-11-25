@@ -11,11 +11,11 @@ import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
 import { Button, Forms } from "@webpack/common";
 
-const ColorPicker = findByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
+const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
@@ -24,11 +24,7 @@ const colorPresets = [
 ];
 
 function onPickColor(color: number) {
-    let hexColor = color.toString(16);
-
-    while (hexColor.length < 6) {
-        hexColor = "0" + hexColor;
-    }
+    const hexColor = color.toString(16).padStart(6, "0");
 
     settings.store.color = hexColor;
     updateColorVars(hexColor);
@@ -59,7 +55,8 @@ function ThemeSettings() {
                     {lightnessWarning && <Forms.FormText className="client-theme-warning">Selected color is very light</Forms.FormText>}
                     {lightModeWarning && <Forms.FormText className="client-theme-warning">Light mode isn't supported</Forms.FormText>}
                 </div>
-                : null}
+                : null
+            }
         </div>
     );
 }
@@ -85,36 +82,25 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ClientTheme",
-    authors: [Devs.F53],
+    authors: [Devs.F53, Devs.Nuckyz],
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
 
-    patches: [
-        {
-            find: "Could not find app-mount",
-            replacement: {
-                match: /(?<=Could not find app-mount"\))/,
-                replace: ",$self.addThemeInitializer()"
-            }
-        }
-    ],
-
-    addThemeInitializer() {
-        document.addEventListener("DOMContentLoaded", this.themeInitializer = () => {
-            updateColorVars(settings.store.color);
-            generateColorOffsets();
-        });
+    startAt: StartAt.DOMContentLoaded,
+    start() {
+        updateColorVars(settings.store.color);
+        generateColorOffsets();
     },
 
     stop() {
-        document.removeEventListener("DOMContentLoaded", this.themeInitializer);
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
     }
 });
 
+const variableRegex = /(--primary-[5-9]\d{2}-hsl):.*?(\S*)%;/g;
+
 async function generateColorOffsets() {
-    const variableRegex = /(--primary-[5-9]\d{2}-hsl):.*?(\S*)%;/g;
 
     const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
     const variableLightness = {} as Record<string, number>;
@@ -213,7 +199,7 @@ function hexToHSL(hexCode: string) {
 }
 
 // Minimized math just for lightness, lowers lag when changing colors
-function hexToLightness(hexCode) {
+function hexToLightness(hexCode: string) {
     // Hex => RGB normalized to 0-1
     const r = parseInt(hexCode.substring(0, 2), 16) / 255;
     const g = parseInt(hexCode.substring(2, 4), 16) / 255;
