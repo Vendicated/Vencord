@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { openModal, ModalRoot, ModalContent, closeModal, ModalSize, ModalHeader, ModalCloseButton, ModalFooter } from "@utils/modal";
-import { UserUtils, Clickable, Tooltip, Forms, Button, Text, useState, useEffect, ContextMenu, Menu, FluxDispatcher } from "@webpack/common";
+import { UserUtils, Clickable, Tooltip, Forms, Button, Text, useState, useEffect, ContextMenuApi, Menu, FluxDispatcher } from "@webpack/common";
 import { Flex } from "@components/Flex";
 import { User } from "discord-types/general";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
