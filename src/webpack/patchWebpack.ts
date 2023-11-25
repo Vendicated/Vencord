@@ -212,7 +212,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             }
 
                             if (patch.group) {
-                                logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
                                 code = previousCode;
                                 mod = previousMod;
                                 patchedBy.delete(patch.plugin);
@@ -260,7 +260,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                         patchedBy.delete(patch.plugin);
                         if (patch.group) {
-                            logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                            logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
                             code = previousCode;
                             mod = previousMod;
                             break;
