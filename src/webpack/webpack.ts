@@ -69,7 +69,7 @@ export const filters = {
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const listeners = new Set<CallbackFn>();
 
-export type CallbackFn = (mod: any, id: number) => void;
+export type CallbackFn = (mod: any, id: string) => void;
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
@@ -111,12 +111,12 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
         if (!mod?.exports) continue;
 
         if (filter(mod.exports)) {
-            return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
+            return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
         if (mod.exports.default && filter(mod.exports.default)) {
             const found = mod.exports.default;
-            return isWaitFor ? [found, Number(key)] : found;
+            return isWaitFor ? [found, key] : found;
         }
     }
 
@@ -202,11 +202,11 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
         if (IS_DEV) {
+            logger.warn(err);
+
             if (!devToolsOpen)
                 // Strict behaviour in DevBuilds to fail early and make sure the issue is found
                 throw err;
-        } else {
-            logger.warn(err);
         }
     }
 
@@ -214,30 +214,44 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 });
 
 /**
- * Find the id of a module by its code
- * @param code Code
- * @returns number or null
+ * Find the id of the first module factory that includes all the given code
+ * @returns string or null
  */
-export const findModuleId = traceFunction("findModuleId", function findModuleId(code: string) {
+export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
+    const filter = filters.byCode(...code);
+
     for (const id in wreq.m) {
-        if (wreq.m[id].toString().includes(code)) {
-            return Number(id);
+        const mod = wreq.m[id].original ?? wreq.m[id];
+
+        if (filter(mod)) {
+            return id;
         }
     }
 
-    const err = new Error("Didn't find module with code:\n" + code);
+    const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
     if (IS_DEV) {
+        logger.warn(err);
+
         if (!devToolsOpen)
             // Strict behaviour in DevBuilds to fail early and make sure the issue is found
             throw err;
-    } else {
-        logger.warn(err);
     }
 
     return null;
 });
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
+/**
+ * Find the first module factory that includes all the given code
+ * @returns The module factory or null
+ */
+export function findModule(...code: string[]) {
+    const id = findModuleId(...code);
+    if (!id) return null;
+
+    return wreq.m[id].original ?? wreq.m[id];
+}
+
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks", any[]]>;
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -272,7 +286,7 @@ export function LazyComponentWebpack<T extends object = any>(factory: () => any,
 }
 
 /**
- * find but lazy
+ * Find the first module that matches the filter, lazily
  */
 export function findLazy(filter: FilterFn) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["find", [filter]]);
@@ -280,18 +294,20 @@ export function findLazy(filter: FilterFn) {
     return proxyLazy(() => find(filter));
 }
 
-/**
- * Find the first module that has the specified properties
- */
-export function findByProps(...props: string[]) {
-    const res = find(filters.byProps(...props), { isIndirect: true });
+function indirectFind(name: string, filter: FilterFn) {
+    const res = find(filter, { isIndirect: true });
     if (!res)
-        handleModuleNotFound("findByProps", ...props);
+        handleModuleNotFound(name, filter);
     return res;
 }
 
 /**
- * findByProps but lazy
+ * Find the first module that has the specified properties
+ */
+export const findByProps = (...props: string[]) => indirectFind("findByProps", filters.byProps(...props));
+
+/**
+ * Find the first module that has the specified properties, lazily
  */
 export function findByPropsLazy(...props: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findByProps", props]);
@@ -300,17 +316,12 @@ export function findByPropsLazy(...props: string[]) {
 }
 
 /**
- * Find a function by its code
+ * Find the first function that includes all the given code
  */
-export function findByCode(...code: string[]) {
-    const res = find(filters.byCode(...code), { isIndirect: true });
-    if (!res)
-        handleModuleNotFound("findByCode", ...code);
-    return res;
-}
+const findByCode = (...code: string[]) => indirectFind("findByCode", filters.byCode(...code));
 
 /**
- * findByCode but lazy
+ * Find the first function that includes all the given code, lazily
  */
 export function findByCodeLazy(...code: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findByCode", code]);
@@ -321,15 +332,10 @@ export function findByCodeLazy(...code: string[]) {
 /**
  * Find a store by its displayName
  */
-export function findStore(name: string) {
-    const res = find(filters.byStoreName(name), { isIndirect: true });
-    if (!res)
-        handleModuleNotFound("findStore", name);
-    return res;
-}
+export const findStore = (name: string) => indirectFind("findStore", filters.byStoreName(name));
 
 /**
- * findStore but lazy
+ * Find a store by its displayName, lazily
  */
 export function findStoreLazy(name: string) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findStore", [name]]);
@@ -340,12 +346,7 @@ export function findStoreLazy(name: string) {
 /**
  * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
  */
-export function findComponentByCode(...code: string[]) {
-    const res = find(filters.componentByCode(...code), { isIndirect: true });
-    if (!res)
-        handleModuleNotFound("findComponentByCode", ...code);
-    return res;
-}
+export const findComponentByCode = (...code: string[]) => indirectFind("findComponentByCode", filters.componentByCode(...code));
 
 /**
  * Finds the first component that matches the filter, lazily.
@@ -353,8 +354,9 @@ export function findComponentByCode(...code: string[]) {
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
-    return LazyComponent<T>(() => find(filter));
+    return LazyComponent<T>(() => indirectFind("findComponent", filter));
 }
+
 
 /**
  * Finds the first component that includes all the given code, lazily
@@ -362,7 +364,7 @@ export function findComponentLazy<T extends object = any>(filter: FilterFn) {
 export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
 
-    return LazyComponent<T>(() => findComponentByCode(...code));
+    return LazyComponent<T>(() => indirectFind("findComponentByCode", filters.componentByCode(...code)));
 }
 
 /**
@@ -371,7 +373,46 @@ export function findComponentByCodeLazy<T extends object = any>(...code: string[
 export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
 
-    return LazyComponent<T>(() => findByProps(...props)?.[props[0]]);
+    return LazyComponent<T>(() => indirectFind("findExportedComponent", filters.byProps(...props))?.[props[0]]);
+}
+
+/**
+ * Extract and load chunks using their entry point
+ * @param code An array of all the code the module factory containing entry point (as of using it to load chunks) must include
+ * @param matcher A RegExp that returns the entry point id as the first capture group
+ */
+export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
+    const module = findModule(...code);
+
+    const match = module.toString().match(matcher);
+    if (!match) {
+        if (IS_DEV) {
+            const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
+            logger.warn(err, "Code:", code.join(", "), "Matcher:", matcher);
+
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        }
+        return;
+    }
+
+    const [, id] = match;
+    return (wreq as any).el(id).then(wreq.bind(wreq, id as any));
+}
+
+/**
+ * This is just a wrapper around {@link extractAndLoadChunks} to make our reporter test for your webpack finds.
+ *
+ * Extract and load chunks using their entry point
+ * @param code An array of all the code the module factory containing entry point (as of using it to load chunks) must include
+ * @param matcher A RegExp that returns the entry point id as the first capture group
+ * @returns A function that loads the chunks on first call
+ */
+export async function extractAndLoadChunksLazy(code: string[], matcher: RegExp) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
+
+    return () => extractAndLoadChunks(code, matcher);
 }
 
 /**
@@ -433,7 +474,7 @@ export function search(...filters: Array<string | RegExp>) {
  * so putting breakpoints or similar will have no effect.
  * @param id The id of the module to extract
  */
-export function extract(id: number) {
+export function extract(id: string | number) {
     const mod = wreq.m[id] as Function;
     if (!mod) return null;
 
