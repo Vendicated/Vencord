@@ -137,7 +137,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                         <div
                             className={cl("sound")}
                             onContextMenu={(e) =>
-                                ContextMenu.open(e, () => <SoundContextMenu item={item} />)
+                                ContextMenuApi.openContextMenu(e, () => <SoundContextMenu item={item} />)
                             }
                         >
                             <Flex flexDirection="row" className={cl("sound-info")}>
