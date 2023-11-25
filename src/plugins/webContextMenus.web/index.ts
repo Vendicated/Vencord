@@ -118,11 +118,12 @@ export default definePlugin({
         // Add back image context menu
         {
             find: 'navId:"image-context"',
+            all: true,
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?/,
-                replace: "return true?"
+                match: /return \i\.\i(?=\?|&&)/,
+                replace: "return true"
             }
         },
 
