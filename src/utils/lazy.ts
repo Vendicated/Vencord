@@ -76,7 +76,7 @@ handler.getOwnPropertyDescriptor = (target, p) => {
 };
 
 /**
- * Wraps the result of {@see makeLazy} in a Proxy you can consume as if it wasn't lazy.
+ * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the lazy is evaluated
  * @param factory lazy factory
  * @param attempts how many times to try to evaluate the lazy before giving up
