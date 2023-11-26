@@ -201,13 +201,11 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
-        if (IS_DEV) {
-            logger.warn(err);
+        logger.warn(err);
 
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
-        }
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        if (IS_DEV && !devToolsOpen)
+            throw err;
     }
 
     return results;
@@ -229,13 +227,11 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
-    if (IS_DEV) {
-        logger.warn(err);
+    logger.warn(err);
 
-        if (!devToolsOpen)
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
-    }
+    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+    if (IS_DEV && !devToolsOpen)
+        throw err;
 
     return null;
 });
@@ -385,14 +381,13 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
 
     const match = module.toString().match(matcher);
     if (!match) {
-        if (IS_DEV) {
-            const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
-            logger.warn(err, "Code:", code.join(", "), "Matcher:", matcher);
+        const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
+        logger.warn(err);
 
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
-        }
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        if (IS_DEV && !devToolsOpen)
+            throw err;
+
         return;
     }
 
