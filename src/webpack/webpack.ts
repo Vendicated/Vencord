@@ -201,11 +201,13 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
-        logger.warn(err);
-
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        if (IS_DEV && !devToolsOpen)
-            throw err;
+        if (IS_DEV) {
+            if (!devToolsOpen)
+                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+                throw err;
+        } else {
+            logger.warn(err);
+        }
     }
 
     return results;
@@ -219,7 +221,7 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     const filter = filters.byCode(...code);
 
     for (const id in wreq.m) {
-        const mod = wreq.m[id].original ?? wreq.m[id];
+        const mod = wreq.m[id];
 
         if (filter(mod)) {
             return id;
@@ -227,11 +229,13 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
-    logger.warn(err);
-
-    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-    if (IS_DEV && !devToolsOpen)
-        throw err;
+    if (IS_DEV) {
+        if (!devToolsOpen)
+            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            throw err;
+    } else {
+        logger.warn(err);
+    }
 
     return null;
 });
@@ -240,11 +244,11 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
  * Find the first module factory that includes all the given code
  * @returns The module factory or null
  */
-export function findModule(...code: string[]) {
+export function findModuleFactory(...code: string[]) {
     const id = findModuleId(...code);
     if (!id) return null;
 
-    return wreq.m[id].original ?? wreq.m[id];
+    return wreq.m[id];
 }
 
 export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks", any[]]>;
@@ -290,17 +294,15 @@ export function findLazy(filter: FilterFn) {
     return proxyLazy(() => find(filter));
 }
 
-function indirectFind(name: string, filter: FilterFn) {
-    const res = find(filter, { isIndirect: true });
-    if (!res)
-        handleModuleNotFound(name, filter);
-    return res;
-}
-
 /**
  * Find the first module that has the specified properties
  */
-export const findByProps = (...props: string[]) => indirectFind("findByProps", filters.byProps(...props));
+export function findByProps(...props: string[]) {
+    const res = find(filters.byProps(...props), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByProps", ...props);
+    return res;
+}
 
 /**
  * Find the first module that has the specified properties, lazily
@@ -314,7 +316,12 @@ export function findByPropsLazy(...props: string[]) {
 /**
  * Find the first function that includes all the given code
  */
-const findByCode = (...code: string[]) => indirectFind("findByCode", filters.byCode(...code));
+export function findByCode(...code: string[]) {
+    const res = find(filters.byCode(...code), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findByCode", ...code);
+    return res;
+}
 
 /**
  * Find the first function that includes all the given code, lazily
@@ -328,7 +335,12 @@ export function findByCodeLazy(...code: string[]) {
 /**
  * Find a store by its displayName
  */
-export const findStore = (name: string) => indirectFind("findStore", filters.byStoreName(name));
+export function findStore(name: string) {
+    const res = find(filters.byStoreName(name), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findStore", name);
+    return res;
+}
 
 /**
  * Find a store by its displayName, lazily
@@ -342,7 +354,12 @@ export function findStoreLazy(name: string) {
 /**
  * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
  */
-export const findComponentByCode = (...code: string[]) => indirectFind("findComponentByCode", filters.componentByCode(...code));
+export function findComponentByCode(...code: string[]) {
+    const res = find(filters.componentByCode(...code), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findComponentByCode", ...code);
+    return res;
+}
 
 /**
  * Finds the first component that matches the filter, lazily.
@@ -350,7 +367,13 @@ export const findComponentByCode = (...code: string[]) => indirectFind("findComp
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
-    return LazyComponent<T>(() => indirectFind("findComponent", filter));
+
+    return LazyComponent<T>(() => {
+        const res = find(filter, { isIndirect: true });
+        if (!res)
+            handleModuleNotFound("findComponent", filter);
+        return res;
+    });
 }
 
 /**
@@ -359,7 +382,12 @@ export function findComponentLazy<T extends object = any>(filter: FilterFn) {
 export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
 
-    return LazyComponent<T>(() => indirectFind("findComponentByCode", filters.componentByCode(...code)));
+    return LazyComponent<T>(() => {
+        const res = find(filters.componentByCode(...code), { isIndirect: true });
+        if (!res)
+            handleModuleNotFound("findComponentByCode", ...code);
+        return res;
+    });
 }
 
 /**
@@ -368,7 +396,12 @@ export function findComponentByCodeLazy<T extends object = any>(...code: string[
 export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
 
-    return LazyComponent<T>(() => indirectFind("findExportedComponent", filters.byProps(...props))?.[props[0]]);
+    return LazyComponent<T>(() => {
+        const res = find(filters.byProps(...props), { isIndirect: true });
+        if (!res)
+            handleModuleNotFound("findExportedComponent", ...props);
+        return res[props[0]];
+    });
 }
 
 /**
@@ -377,7 +410,7 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
  * @param matcher A RegExp that returns the entry point id as the first capture group
  */
 export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
-    const module = findModule(...code);
+    const module = findModuleFactory(...code);
 
     const match = module.toString().match(matcher);
     if (!match) {
