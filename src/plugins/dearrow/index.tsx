@@ -50,7 +50,7 @@ async function embedDidMount(this: Component<Props>) {
         const { titles, thumbnails } = await res.json();
 
         const hasTitle = titles[0]?.votes >= 0;
-        const hasThumb = thumbnails[0]?.votes >= 0;
+        const hasThumb = thumbnails[0]?.votes >= 0 && !thumbnails[0].original;
 
         if (!hasTitle && !hasThumb) return;
 
@@ -58,12 +58,12 @@ async function embedDidMount(this: Component<Props>) {
             enabled: true
         };
 
-        if (titles[0]?.votes >= 0) {
+        if (hasTitle) {
             embed.dearrow.oldTitle = embed.rawTitle;
             embed.rawTitle = titles[0].title;
         }
 
-        if (thumbnails[0]?.votes >= 0) {
+        if (hasThumb) {
             embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
             embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
         }
