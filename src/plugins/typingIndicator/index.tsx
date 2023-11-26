@@ -19,19 +19,13 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findStoreLazy } from "@webpack";
+import { findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = LazyComponent(() => {
-    // This doesn't really need to explicitly find Dots' own module, but it's fine
-    const res = find(m => m.Dots && !m.Menu);
-
-    return res?.Dots;
-});
+const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
