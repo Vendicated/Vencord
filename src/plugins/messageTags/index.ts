@@ -25,10 +25,6 @@ import definePlugin, { OptionType } from "@utils/types";
 const EMOTE = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";
 const MessageTagsMarker = Symbol("MessageTags");
-const author = {
-    id: "821472922140803112",
-    bot: false
-};
 
 interface Tag {
     name: string;
@@ -59,14 +55,12 @@ function createTagCommand(tag: Tag) {
         execute: async (_, ctx) => {
             if (!await getTag(tag.name)) {
                 sendBotMessage(ctx.channel.id, {
-                    author,
                     content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
                 });
                 return { content: `/${tag.name}` };
             }
 
             if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
-                author,
                 content: `${EMOTE} The tag **${tag.name}** has been sent!`
             });
             return { content: tag.message.replaceAll("\\n", "\n") };
@@ -162,7 +156,6 @@ export default definePlugin({
 
                         if (await getTag(name))
                             return sendBotMessage(ctx.channel.id, {
-                                author,
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
 
@@ -176,7 +169,6 @@ export default definePlugin({
                         await addTag(tag);
 
                         sendBotMessage(ctx.channel.id, {
-                            author,
                             content: `${EMOTE} Successfully created the tag **${name}**!`
                         });
                         break; // end 'create'
@@ -186,7 +178,6 @@ export default definePlugin({
 
                         if (!await getTag(name))
                             return sendBotMessage(ctx.channel.id, {
-                                author,
                                 content: `${EMOTE} A Tag with the name **${name}** does not exist!`
                             });
 
@@ -194,14 +185,12 @@ export default definePlugin({
                         await removeTag(name);
 
                         sendBotMessage(ctx.channel.id, {
-                            author,
                             content: `${EMOTE} Successfully deleted the tag **${name}**!`
                         });
                         break; // end 'delete'
                     }
                     case "list": {
                         sendBotMessage(ctx.channel.id, {
-                            author,
                             embeds: [
                                 {
                                     // @ts-ignore
@@ -224,12 +213,10 @@ export default definePlugin({
 
                         if (!tag)
                             return sendBotMessage(ctx.channel.id, {
-                                author,
                                 content: `${EMOTE} A Tag with the name **${name}** does not exist!`
                             });
 
                         sendBotMessage(ctx.channel.id, {
-                            author,
                             content: tag.message.replaceAll("\\n", "\n")
                         });
                         break; // end 'preview'
@@ -237,7 +224,6 @@ export default definePlugin({
 
                     default: {
                         sendBotMessage(ctx.channel.id, {
-                            author,
                             content: "Invalid sub-command"
                         });
                         break;
