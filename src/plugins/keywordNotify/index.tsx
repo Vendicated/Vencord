@@ -74,7 +74,13 @@ function highlightKeywords(s: string, r: Array<string>) {
 }
 
 const settings = definePluginSettings({
-    replace: {
+    ignoreBots: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore messages from bots",
+        default: true
+    },
+
+    keywords: {
         type: OptionType.COMPONENT,
         description: "",
         component: () => {
@@ -172,6 +178,9 @@ export default definePlugin({
     },
 
     applyRegexes(m) {
+        if (settings.store.ignoreBots && m.author.bot)
+            return;
+
         if (regexes.some(r => r != "" && safeMatchesRegex(m.content, r))) {
             m.mentions.push(this.me);
 
