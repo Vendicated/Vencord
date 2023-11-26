@@ -19,6 +19,7 @@
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
+import { canonicalizeMatch } from "@utils/patches";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -411,11 +412,17 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
  */
 export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
     const module = findModuleFactory(...code);
+    if (!module) {
+        const err = new Error("extractAndLoadChunks: Couldn't find module factory");
+        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-    const match = module.toString().match(matcher);
+        return;
+    }
+
+    const match = module.toString().match(canonicalizeMatch(matcher));
     if (!match) {
         const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
-        logger.warn(err);
+        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
         // Strict behaviour in DevBuilds to fail early and make sure the issue is found
         if (IS_DEV && !devToolsOpen)
@@ -425,7 +432,9 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
     }
 
     const [, id] = match;
-    return (wreq as any).el(id).then(wreq.bind(wreq, id as any));
+
+    await (wreq as any).el(id);
+    return wreq(id as any);
 }
 
 /**
@@ -436,7 +445,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
  * @param matcher A RegExp that returns the entry point id as the first capture group
  * @returns A function that loads the chunks on first call
  */
-export async function extractAndLoadChunksLazy(code: string[], matcher: RegExp) {
+export function extractAndLoadChunksLazy(code: string[], matcher: RegExp) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return () => extractAndLoadChunks(code, matcher);
