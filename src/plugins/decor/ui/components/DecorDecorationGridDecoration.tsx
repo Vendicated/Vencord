@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ContextMenu } from "@webpack/common";
+import { ContextMenuApi } from "@webpack/common";
 import type { HTMLProps } from "react";
 
 import { Decoration } from "../../lib/api";
@@ -24,7 +24,7 @@ export default function DecorDecorationGridDecoration(props: DecorDecorationGrid
     return <DecorationGridDecoration
         {...props}
         onContextMenu={e => {
-            ContextMenu.open(e, () => (
+            ContextMenuApi.openContextMenu(e, () => (
                 <DecorationContextMenu
                     decoration={decoration}
                 />

@@ -5,7 +5,7 @@
  */
 
 import { CopyIcon, DeleteIcon } from "@components/Icons";
-import { Alerts, Clipboard, ContextMenu, Menu, UserStore } from "webpack/common";
+import { Alerts, Clipboard, ContextMenuApi, Menu, UserStore } from "webpack/common";
 
 import { Decoration } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
@@ -15,7 +15,7 @@ export default function DecorationContextMenu({ decoration }: { decoration: Deco
     const { delete: deleteDecoration } = useCurrentUserDecorationsStore();
     return <Menu.Menu
         navId={cl("decoration-context-menu")}
-        onClose={ContextMenu.close}
+        onClose={ContextMenuApi.closeContextMenu}
         aria-label="Decoration Options"
     >
         <Menu.MenuItem
