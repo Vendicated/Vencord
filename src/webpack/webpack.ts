@@ -218,14 +218,14 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
-    const filter = filters.byCode(...code);
-
+    outer:
     for (const id in wreq.m) {
-        const mod = wreq.m[id];
+        const str = wreq.m[id].toString();
 
-        if (filter(mod)) {
-            return id;
+        for (const c of code) {
+            if (!str.includes(c)) continue outer;
         }
+        return id;
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
