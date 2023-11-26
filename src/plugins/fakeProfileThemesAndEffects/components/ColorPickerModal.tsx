@@ -5,7 +5,7 @@
  */
 
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Text, useRef, useState } from "@webpack/common";
+import { Button, Flex, Text, useRef, useState } from "@webpack/common";
 
 interface ColorPickerModalProps {
     modalProps: ModalProps;
@@ -48,21 +48,12 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                         );
                     }}
                 >
-                    <ModalHeader>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                width: "100%",
-                            }}
-                        >
-                            <Text style={{ color: "var(--header-primary)", fontSize: "20px", fontWeight: "600" }}>
-                                {"Color Picker"}
-                            </Text>
-                            <div onMouseDown={e => { e.stopPropagation(); }}>
-                                <ModalCloseButton onClick={onClose} />
-                            </div>
+                    <ModalHeader justify={Flex.Justify.BETWEEN}>
+                        <Text color="header-primary" variant="heading-lg/semibold" tag="h1">
+                            {"Color Picker"}
+                        </Text>
+                        <div onMouseDown={e => { e.stopPropagation(); }}>
+                            <ModalCloseButton onClick={onClose} />
                         </div>
                     </ModalHeader>
                 </div>
@@ -73,11 +64,7 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                     onChange={(e: number) => { setColor(e); }}
                 />
                 <ModalFooter>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        onClick={() => { onSubmit(color); }}
-                    >
+                    <Button onClick={() => { onSubmit(color); }}>
                         {"Apply"}
                     </Button>
                 </ModalFooter>

@@ -26,6 +26,7 @@ type RGBColor = [number, number, number];
 let ColorPicker: React.ComponentType<any> = () => null;
 let getPaletteForAvatar = (v: string) => Promise.resolve<RGBColor[]>([]);
 let getComplimentaryPaletteForColor = (v: RGBColor): RGBColor[] => [];
+const profileEffectModalClassNames: { [k: string]: string; } = {};
 let [primaryColor, setPrimaryColor] = [-1, (v: number) => { }];
 let [accentColor, setAccentColor] = [-1, (v: number) => { }];
 let [effectID, setEffectID] = ["", (v: string) => { }];
@@ -112,7 +113,7 @@ function decodeEffect(str: string) {
 }
 
 /**
- * Builds a FPTE string containing the given primary / accent colors and effect. If the FPTE Builder is NOT set to
+ * Builds a FPTE string containing the given primary / accent colors and effect ID. If the FPTE Builder is NOT set to
  * backwards compatibility mode, the primary and accent colors will be converted to base-4096 before they are encoded.
  * @param primary The primary profile theme color. Must be -1 if unset.
  * @param accent The accent profile theme color. Must be -1 if unset.
@@ -138,7 +139,7 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
             else
                 str = encodeColorsLegacy(primary, primary);
 
-            // If the effect is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
                 str += SEP + encodeEffect(BigInt(effect));
 
@@ -149,7 +150,7 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         if (accent !== -1) {
             str = encodeColorsLegacy(accent, accent);
 
-            // If the effect is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
                 str += SEP + encodeEffect(BigInt(effect));
 
@@ -165,7 +166,7 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         if (accent !== -1 && primary !== accent) {
             str += SEP + encodeColor(accent);
 
-            // If the effect is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
             if (effect !== "")
                 str += SEP + encodeEffect(BigInt(effect));
 
@@ -177,7 +178,7 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         str = encodeColor(accent);
 
     // Since either the primary / accent colors are the same, both are unset, or just one is set, only one color will be added
-    // to the string; therefore, the effect, if set, will be encoded and added to the string prefixed by two separators.
+    // to the string; therefore, the effect ID, if set, will be encoded and added to the string prefixed by two separators.
     if (effect !== "")
         str += SEP + SEP + encodeEffect(BigInt(effect));
 
@@ -185,22 +186,29 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
 }
 
 /**
- * Extracts the values of the first FPTE string found in the given string
+ * Extracts the delimiter-separated values of the first FPTE string found in the given string
  * @param str The string to be searched for a FPTE string
  * @returns An array of the extracted FPTE string's values. Values will be empty if not found.
  */
 function extractFPTE(str: string) {
-    const fpte: [string, string, string] = ["", "", ""];
-    let i = 0;
+    const fpte: [string, string, string] = ["", "", ""]; // The array containing extracted FPTE values
+    let i = 0; // The current index of fpte getting extracted
 
     for (const char of str) {
-        const cp = char.codePointAt(0)!;
+        const cp = char.codePointAt(0)!; // The current character's code point
+
+        // If the current character is a delimiter, then the current index of fpte has been completed.
         if (cp === 0x200B) {
-            if (i > 1) break;
-            i++;
-        } else if (cp >= 0xE0000 && cp <= 0xE0FFF)
+            // If the current index of fpte is the last, then the extraction is done.
+            if (i >= 2) break;
+            i++; // Start extracting the next index of fpte
+        }
+        // If the current character is not a delimiter but a valid FPTE
+        // character, it will be added to the current index of fpte.
+        else if (cp >= 0xE0000 && cp <= 0xE0FFF)
             fpte[i] += String.fromCodePoint(cp - 0xE0000);
-        else break;
+        // If an FPTE string has been found and its end has been reached, then the extraction is done.
+        else if (i > 0 || fpte[0] !== "") break;
     }
 
     return fpte;
@@ -286,44 +294,51 @@ export default definePlugin({
     authors: [Devs.ryan],
     patches: [
         {
-            find: "UserProfileStore",
+            find: '"UserProfileStore"',
             replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(\i\[\i])/,
-                replace: "$self.decodeUserBioFPTEHook($1)"
+                match: /(?<=getUserProfile\(\i\){return )\i\[\i](?=})/,
+                replace: "$self.decodeUserBioFPTEHook($&)"
             }
         },
         {
-            find: "DefaultCustomizationSections",
+            find: '"DefaultCustomizationSections"',
             replacement: {
                 match: /\.sectionsContainer,children:\[/,
                 replace: "$&$self.addFPTEBuilder(),"
             }
         },
         {
-            find: ".PICK_A_COLOR_FROM_THE_PAGE",
+            find: "CustomColorPicker:function(){",
             replacement: {
-                match: /\i\.memo\(\i=>/,
-                replace: "$self.ColorPicker=$&"
+                match: /CustomColorPicker:function\(\){return (\i)}.*? \1=(?=[^=])/,
+                replace: "$&$self.ColorPicker="
             }
         },
         {
-            find: '"Input data is not a valid image."',
+            find: "getPaletteForAvatar:function(){",
             replacement: {
-                match: /\.palette\(\)}let \i=/,
+                match: /getPaletteForAvatar:function\(\){return (\i)}.*? \1=(?=[^=])/,
                 replace: "$&$self.getPaletteForAvatar="
             }
         },
         {
-            find: "getComplimentaryPaletteForColor:function()",
+            find: "getComplimentaryPaletteForColor:function(){",
             replacement: {
-                match: /function \i\(\i\){let \i=arguments\.length.*?}(?=function)/,
-                replace: "$self.getComplimentaryPaletteForColor=$&;$&"
+                match: /getComplimentaryPaletteForColor:function\(\){return (\i)}.*?;/,
+                replace: "$&$self.getComplimentaryPaletteForColor=$1;"
+            }
+        },
+        {
+            find: "effectGridItem:",
+            replacement: {
+                match: new RegExp('([A-Za-z]+):"(.+?)"', "g"),
+                replace: (m, k, v) => { profileEffectModalClassNames[k] = v; return m; }
             }
         },
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /let{(?:[^}]*,)?pendingThemeColors:[^}]+,pendingProfileEffectID:[^}]+}=(\i)[,;]/,
+                match: /let{(?:[^}]+,)?pendingThemeColors:[^}]+,pendingProfileEffectID:[^}]+}=(\i)[,;]/,
                 replace: "$self.profilePreviewHook($1);$&"
             }
         }
@@ -428,8 +443,9 @@ export default definePlugin({
             <>
                 <style>{`.${this.name}TextOverflow{white-space:normal!important;text-overflow:clip!important}`}</style>
                 <Text
-                    tag={"h3"}
+                    color="header-secondary"
                     variant={"eyebrow"}
+                    tag={"h3"}
                     style={{ display: "inline" }}
                 >
                     {"FPTE Builder"}
@@ -525,8 +541,8 @@ export default definePlugin({
                             paddingRight: "0"
                         }}
                         onClick={() => {
-                            fetchProfileEffects(data => {
-                                if (data) {
+                            fetchProfileEffects(profileEffects => {
+                                if (profileEffects) {
                                     closeModal(currModal.current);
                                     currModal.current = openProfileEffectModal(
                                         (id, name) => {
@@ -535,7 +551,8 @@ export default definePlugin({
                                             if (preview) updatePreview();
                                             showToast("FPTE updated!", Toasts.Type.SUCCESS);
                                         },
-                                        data
+                                        profileEffects,
+                                        profileEffectModalClassNames
                                     );
                                 } else
                                     showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
