@@ -226,7 +226,7 @@ page.on("console", async e => {
     }
 
     if (isDebug) {
-        console.log(e.text());
+        console.error(e.text());
     } else if (level === "error") {
         const text = await Promise.all(
             e.args().map(async a => {
@@ -338,8 +338,6 @@ function runTime(token: string) {
                         .then(r => r.text())
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
-                    await new Promise(r => setTimeout(r, 150));
-
                     if (isWasm) {
                         invalidChunks.push(id);
                         continue chunksLoop;
@@ -371,8 +369,6 @@ function runTime(token: string) {
 
                 // Loads a chunk
                 if (!isWasm) await wreq.e(id as any);
-
-                await new Promise(r => setTimeout(r, 150));
             }
 
             // Make sure every chunk has finished loading
@@ -410,15 +406,21 @@ function runTime(token: string) {
                     if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
+                    } else if (method === "extractAndLoadChunks") {
+                        const [code, matcher] = args;
+
+                        const module = Vencord.Webpack.findModuleFactory(...code);
+                        if (module) result = module.toString().match(matcher);
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
+                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                     else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
