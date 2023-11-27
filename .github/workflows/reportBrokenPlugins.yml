@@ -12,6 +12,12 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
+              if: ${{ github.event_name == 'schedule' }}
+              with:
+                  ref: dev
+
+            - uses: actions/checkout@v3
+              if: ${{ github.event_name == 'workflow_dispatch' }}
 
             - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
 
@@ -29,7 +35,7 @@ jobs:
                   sudo apt-get install -y chromium-browser
 
             - name: Build web
-              run: pnpm buildWeb --standalone
+              run: pnpm buildWeb --standalone --dev
 
             - name: Create Report
               timeout-minutes: 10
