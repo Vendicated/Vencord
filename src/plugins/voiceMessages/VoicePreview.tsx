@@ -25,7 +25,7 @@ interface VoiceMessageProps {
     src: string;
     waveform: string;
 }
-const VoiceMessage = findComponentByCodeLazy<VoiceMessageProps>("waveform:");
+const VoiceMessage = findComponentByCodeLazy<VoiceMessageProps>("waveform:", "onVolumeChange");
 
 export type VoicePreviewOptions = {
     src?: string;
