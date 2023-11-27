@@ -5,7 +5,7 @@
  */
 
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Flex, showToast, Text, Toasts, useState } from "@webpack/common";
+import { Button, Flex, showToast, Text, useState } from "@webpack/common";
 
 interface ProfileEffectModalProps {
     modalProps: ModalProps;
@@ -22,7 +22,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
             <ModalHeader justify={Flex.Justify.BETWEEN}>
                 <Text color="header-primary" variant="heading-lg/semibold" tag="h1">
-                    {"Add Profile Effect"}
+                    Add Profile Effect
                 </Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
@@ -42,7 +42,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                         role="button"
                         tabIndex={0}
                         style={{ width: "80px", height: "80px" }}
-                        onClick={() => { setSelected(i); }}
+                        onClick={() => setSelected(i)}
                     >
                         <img
                             className={classNames.presetEffectBackground}
@@ -70,10 +70,10 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                         if (selected !== -1)
                             onSubmit(profileEffects[selected].id, profileEffects[selected].title);
                         else
-                            showToast("No effect selected!", Toasts.Type.MESSAGE);
+                            showToast("No effect selected!");
                     }}
                 >
-                    {"Apply"}
+                    Apply
                 </Button>
             </ModalFooter>
         </ModalRoot>
@@ -84,7 +84,7 @@ export function openProfileEffectModal(onSubmit: (i: string, n: string) => void,
     const key = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
-            onClose={() => { closeModal(key); }}
+            onClose={() => closeModal(key)}
             onSubmit={onSubmit}
             profileEffects={profileEffects}
             classNames={classNames}

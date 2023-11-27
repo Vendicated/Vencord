@@ -40,7 +40,7 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                         const rect = ref.getBoundingClientRect();
                         const offsetX = e.pageX - rect.left;
                         const offsetY = e.pageY - rect.top;
-                        const onDrag = (e: MouseEvent) => { setPos([e.pageX - offsetX, e.pageY - offsetY]); };
+                        const onDrag = (e: MouseEvent) => setPos([e.pageX - offsetX, e.pageY - offsetY]);
                         document.addEventListener("mousemove", onDrag);
                         document.addEventListener("mouseup",
                             () => { document.removeEventListener("mousemove", onDrag); },
@@ -50,9 +50,9 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                 >
                     <ModalHeader justify={Flex.Justify.BETWEEN}>
                         <Text color="header-primary" variant="heading-lg/semibold" tag="h1">
-                            {"Color Picker"}
+                            Color Picker
                         </Text>
-                        <div onMouseDown={e => { e.stopPropagation(); }}>
+                        <div onMouseDown={e => e.stopPropagation()}>
                             <ModalCloseButton onClick={onClose} />
                         </div>
                     </ModalHeader>
@@ -61,11 +61,11 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
                     value={color}
                     showEyeDropper={true}
                     suggestedColors={suggestedColors}
-                    onChange={(e: number) => { setColor(e); }}
+                    onChange={(e: number) => setColor(e)}
                 />
                 <ModalFooter>
-                    <Button onClick={() => { onSubmit(color); }}>
-                        {"Apply"}
+                    <Button onClick={() => onSubmit(color)}>
+                        Apply
                     </Button>
                 </ModalFooter>
             </ModalRoot>
@@ -78,7 +78,7 @@ export function openColorPickerModal(ColorPicker: any, onSubmit: (v: number) => 
         <ColorPickerModal
             modalProps={modalProps}
             ColorPicker={ColorPicker}
-            onClose={() => { closeModal(key); }}
+            onClose={() => closeModal(key)}
             onSubmit={onSubmit}
             initialColor={initialColor}
             suggestedColors={suggestedColors}

@@ -61,10 +61,10 @@ function decodeColorsLegacy(str: string): [number, number] {
  */
 function encodeColor(color: number) {
     if (color === 0) return "\u{e0000}";
-    const encodedCPs: number[] = [];
+    let str = "";
     for (; color > 0; color = Math.trunc(color / 4096))
-        encodedCPs.unshift(color % 4096 + 0xE0000);
-    return String.fromCodePoint(...encodedCPs);
+        str += String.fromCodePoint(color % 4096 + 0xE0000);
+    return str;
 }
 
 /**
@@ -90,10 +90,10 @@ function decodeColor(str: string) {
  */
 function encodeEffect(effect: bigint) {
     if (effect === 0n) return "\u{e0000}";
-    const encodedCPs: number[] = [];
+    let str = "";
     for (; effect > 0n; effect /= 4096n)
-        encodedCPs.unshift(Number(effect % 4096n) + 0xE0000);
-    return String.fromCodePoint(...encodedCPs);
+        str += String.fromCodePoint(Number(effect % 4096n) + 0xE0000);
+    return str;
 }
 
 /**
@@ -122,7 +122,7 @@ function decodeEffect(str: string) {
  * @returns The generated FPTE string. Will be empty if the given colors and effect are all unset.
  */
 function buildFPTE(primary: number, accent: number, effect: string, legacy: boolean) {
-    const SEP = "\u200b"; // The FPTE separator (zero-width space)
+    const DELIM = "\u200b"; // The FPTE delimiter (zero-width space)
 
     let str = ""; // The FPTE string to be returned
 
@@ -139,9 +139,9 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
             else
                 str = encodeColorsLegacy(primary, primary);
 
-            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += SEP + encodeEffect(BigInt(effect));
+                str += DELIM + encodeEffect(BigInt(effect));
 
             return str;
         }
@@ -150,9 +150,9 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         if (accent !== -1) {
             str = encodeColorsLegacy(accent, accent);
 
-            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += SEP + encodeEffect(BigInt(effect));
+                str += DELIM + encodeEffect(BigInt(effect));
 
             return str;
         }
@@ -162,13 +162,13 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         str = encodeColor(primary);
 
         // If the accent color is set and different from the primary color, it
-        // will be encoded and added to the string prefixed by one separator.
+        // will be encoded and added to the string prefixed by one delimiter.
         if (accent !== -1 && primary !== accent) {
-            str += SEP + encodeColor(accent);
+            str += DELIM + encodeColor(accent);
 
-            // If the effect ID is set, it will be encoded and added to the string prefixed by one separator.
+            // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += SEP + encodeEffect(BigInt(effect));
+                str += DELIM + encodeEffect(BigInt(effect));
 
             return str;
         }
@@ -178,9 +178,9 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
         str = encodeColor(accent);
 
     // Since either the primary / accent colors are the same, both are unset, or just one is set, only one color will be added
-    // to the string; therefore, the effect ID, if set, will be encoded and added to the string prefixed by two separators.
+    // to the string; therefore, the effect ID, if set, will be encoded and added to the string prefixed by two delimiters.
     if (effect !== "")
-        str += SEP + SEP + encodeEffect(BigInt(effect));
+        str += DELIM + DELIM + encodeEffect(BigInt(effect));
 
     return str;
 }
@@ -329,9 +329,9 @@ export default definePlugin({
             }
         },
         {
-            find: "effectGridItem:",
+            find: 'effectGridItem:"',
             replacement: {
-                match: new RegExp('([A-Za-z]+):"(.+?)"', "g"),
+                match: /(\i):"(.+?)"/g,
                 replace: (m, k, v) => { profileEffectModalClassNames[k] = v; return m; }
             }
         },
@@ -355,20 +355,20 @@ export default definePlugin({
     settingsAboutComponent: () => {
         return (
             <Forms.FormSection>
-                <Forms.FormTitle tag={"h3"}>{"Usage"}</Forms.FormTitle>
+                <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
                 <Forms.FormText>
-                    {"After enabling this plugin, you will see custom theme colors and effects in the profiles of other people using this plugin."}
+                    After enabling this plugin, you will see custom theme colors and effects in the profiles of other people using this plugin.
                     <div className={Margins.top8}>
-                        <b>{"To set your own profile theme colors and effect:"}</b>
+                        <b>To set your own profile theme colors and effect:</b>
                     </div>
                     <ol
                         className={Margins.bottom8}
                         style={{ listStyle: "decimal", paddingLeft: "40px" }}
                     >
-                        <li>{"Go to your profile settings"}</li>
-                        <li>{"Use the FPTE Builder to choose your profile theme colors and effect"}</li>
-                        <li>{'Click the "Copy FPTE" button'}</li>
-                        <li>{"Paste the invisible text anywhere in your About Me"}</li>
+                        <li>Go to your profile settings</li>
+                        <li>Use the FPTE Builder to choose your profile theme colors and effect</li>
+                        <li>Click the "Copy FPTE" button</li>
+                        <li>Paste the invisible text anywhere in your About Me</li>
                     </ol>
                 </Forms.FormText>
             </Forms.FormSection>
@@ -437,18 +437,18 @@ export default definePlugin({
         const [buildLegacyFPTE, setBuildLegacyFPTE] = useState(false);
         const currModal = useRef("");
 
-        useEffect(() => { return () => { closeModal(currModal.current); }; }, []);
+        useEffect(() => () => closeModal(currModal.current), []);
 
         return (
             <>
                 <style>{`.${this.name}TextOverflow{white-space:normal!important;text-overflow:clip!important}`}</style>
                 <Text
                     color="header-secondary"
-                    variant={"eyebrow"}
-                    tag={"h3"}
+                    variant="eyebrow"
+                    tag="h3"
                     style={{ display: "inline" }}
                 >
-                    {"FPTE Builder"}
+                    FPTE Builder
                 </Text>
                 <Button
                     look={Button.Looks.LINK}
@@ -470,7 +470,7 @@ export default definePlugin({
                         if (preview) updatePreview();
                     }}
                 >
-                    {"Reset"}
+                    Reset
                 </Button>
                 <div
                     className={Margins.bottom8 + " " + Margins.top8}
@@ -578,7 +578,7 @@ export default definePlugin({
                                 copyWithToast(strToCopy, "FPTE copied to clipboard!");
                         }}
                     >
-                        {"Copy FPTE"}
+                        Copy FPTE
                     </Button>
                 </div>
                 <Forms.FormDivider className={Margins.bottom20 + " " + Margins.top20} />
@@ -589,14 +589,14 @@ export default definePlugin({
                         updatePreview();
                     }}
                 >
-                    {"FPTE Builder Preview"}
+                    FPTE Builder Preview
                 </Switch>
                 <Switch
                     value={buildLegacyFPTE}
-                    note={"Will use more characters"}
-                    onChange={value => { setBuildLegacyFPTE(value); }}
+                    note="Will use more characters"
+                    onChange={value => setBuildLegacyFPTE(value)}
                 >
-                    {"Build backwards compatible FPTE"}
+                    Build backwards compatible FPTE
                 </Switch>
             </>
         );
