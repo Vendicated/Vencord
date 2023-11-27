@@ -4,21 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { filters, findByPropsLazy, findLazy } from "@webpack";
+import { extractAndLoadChunksLazy } from "@webpack";
 
-import extractAndRequireModuleId from "./extractAndRequireModuleId";
+export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["openAvatarDecorationModal:"]);
 
-// Cannot destructure this, otherwise extractAndRequire tries to run on the proxy
-const AvatarDecorationModalOpener = findByPropsLazy("openAvatarDecorationModal");
-
-export function requireAvatarDecorationModal() {
-    return extractAndRequireModuleId(AvatarDecorationModalOpener.openAvatarDecorationModal);
-}
-
-const filter = filters.byCode("isDisplayingIndividualStickers");
-const { default: StickerPickerPreview } = findLazy(m => m.default?.type && filter(m.default.type));
-
-export function requireCreateStickerModal() {
-    return extractAndRequireModuleId(StickerPickerPreview.type);
-
-}
+export const requireCreateStickerModal = extractAndLoadChunksLazy(["isDisplayingIndividualStickers:", ".CREATE_STICKER_MODAL"]);
