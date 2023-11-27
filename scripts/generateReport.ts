@@ -409,7 +409,7 @@ function runTime(token: string) {
                     } else if (method === "extractAndLoadChunks") {
                         const [code, matcher] = args;
 
-                        const module = Vencord.Webpack.findModule(...code);
+                        const module = Vencord.Webpack.findModuleFactory(...code);
                         if (module) result = module.toString().match(matcher);
                     } else {
                         // @ts-ignore
