@@ -152,11 +152,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 return;
             }
 
-            const numberId = Number(id);
-
             for (const callback of listeners) {
                 try {
-                    callback(exports, numberId);
+                    callback(exports, id);
                 } catch (err) {
                     logger.error("Error in webpack listener", err);
                 }
@@ -166,10 +164,10 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 try {
                     if (filter(exports)) {
                         subscriptions.delete(filter);
-                        callback(exports, numberId);
+                        callback(exports, id);
                     } else if (exports.default && filter(exports.default)) {
                         subscriptions.delete(filter);
-                        callback(exports.default, numberId);
+                        callback(exports.default, id);
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for webpack chunk", err);
