@@ -407,10 +407,10 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
 
 /**
  * Extract and load chunks using their entry point
- * @param code An array of all the code the module factory containing entry point (as of using it to load chunks) must include
- * @param matcher A RegExp that returns the entry point id as the first capture group
+ * @param code An array of all the code the module factory containing the entry point (as of using it to load chunks) must include
+ * @param matcher A RegExp that returns the entry point id as the first capture group. Defaults to a matcher that captures the first entry point found in the module factory
  */
-export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
+export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.el\("(.+?)"\)(?<=(\i)\.el.+?)\.then\(\2\.bind\(\2,"\1"\)\)/) {
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -432,6 +432,16 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
     }
 
     const [, id] = match;
+    if (!id || !Number(id)) {
+        const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the entry point, or the entry point returned wasn't a number");
+        logger.warn(err, "Code:", code, "Matcher:", matcher);
+
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        if (IS_DEV && !devToolsOpen)
+            throw err;
+
+        return;
+    }
 
     await (wreq as any).el(id);
     return wreq(id as any);
@@ -441,11 +451,11 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp) {
  * This is just a wrapper around {@link extractAndLoadChunks} to make our reporter test for your webpack finds.
  *
  * Extract and load chunks using their entry point
- * @param code An array of all the code the module factory containing entry point (as of using it to load chunks) must include
- * @param matcher A RegExp that returns the entry point id as the first capture group
+ * @param code An array of all the code the module factory containing the entry point (as of using it to load chunks) must include
+ * @param matcher A RegExp that returns the entry point id as the first capture group. Defaults to a matcher that captures the first entry point found in the module factory
  * @returns A function that loads the chunks on first call
  */
-export function extractAndLoadChunksLazy(code: string[], matcher: RegExp) {
+export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /\.el\("(.+?)"\)(?<=(\i)\.el.+?)\.then\(\2\.bind\(\2,"\1"\)\)/) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return () => extractAndLoadChunks(code, matcher);
