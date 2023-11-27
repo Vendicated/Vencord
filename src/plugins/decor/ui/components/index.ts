@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCode, LazyComponentWebpack } from "@webpack";
+import { findComponentByCode, LazyComponentWebpack } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
@@ -19,7 +19,7 @@ export let DecorationGridItem: DecorationGridItemComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
 export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
-    const component = findByCode("AvatarDecorationModalPreview");
+    const component = findComponentByCode("AvatarDecorationModalPreview");
     return React.memo(component);
 });
 
