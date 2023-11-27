@@ -8,4 +8,4 @@ import { extractAndLoadChunksLazy } from "@webpack";
 
 export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["openAvatarDecorationModal:"]);
 
-export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerPadding"]);
+export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
