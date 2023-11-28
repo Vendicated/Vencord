@@ -19,7 +19,8 @@ let regexes = [];
 
 const MenuHeader = findByCodeLazy("useInDesktopNotificationCenterExperiment)(");
 const Popout = findByPropsLazy("ItemsPopout");
-const { recentMentionsPopout } = findByPropsLazy("recentMentionsPopout");
+const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
+
 const { createMessageRecord } = findByPropsLazy("createMessageRecord", "updateMessageRecord");
 
 
@@ -253,7 +254,7 @@ export default definePlugin({
         return (
             <>
                 <Popout.default
-                    className={recentMentionsPopout}
+                    className={recentMentionsPopoutClass.recentMentionsPopout}
                     renderHeader={() => header}
                     renderMessage={messageRender}
                     channel={channel}
