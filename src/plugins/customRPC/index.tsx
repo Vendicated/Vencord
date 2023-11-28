@@ -22,14 +22,15 @@ import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
-const ActivityComponent = findByCodeLazy("onOpenGameProfile");
+const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
 
 async function getApplicationAsset(key: string): Promise<string> {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
     return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
 }
 

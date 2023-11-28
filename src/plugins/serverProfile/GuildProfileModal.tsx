@@ -10,14 +10,14 @@ import { classNameFactory } from "@api/Styles";
 import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { LazyComponent, useAwaiter } from "@utils/react";
-import { findByProps, findByPropsLazy } from "@webpack";
+import { useAwaiter } from "@utils/react";
+import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, moment, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconUtils = findByPropsLazy("getGuildBannerURL");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = LazyComponent(() => findByProps("FriendRow").FriendRow);
+const FriendRow = findExportedComponentLazy("FriendRow");
 
 const cl = classNameFactory("vc-gp-");
 
