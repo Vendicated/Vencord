@@ -18,7 +18,7 @@
 
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
-import { Button, ContextMenu, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
@@ -100,7 +100,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
     return <div
         className={cl("container")}
         ref={ref}
-        onContextMenu={e => ContextMenu.open(e, () => <BasicContextMenu />)}
+        onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
     >
         <div className={cl("tab-container")}>
             {openTabs.map((tab, i) => <div
@@ -110,7 +110,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
                     if (e.button === 1 /* middle click */)
                         closeTab(tab.id);
                 }}
-                onContextMenu={e => ContextMenu.open(e, () => <TabContextMenu tab={tab} />)}
+                onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={tab} />)}
             >
                 <button
                     className={classes(cl("button"), cl("channel-info"))}

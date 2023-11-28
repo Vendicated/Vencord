@@ -21,6 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useCallback, UserStore, useState } from "@webpack/common";
 
 import { ChannelTabsPreview } from "./components/ChannelTabsContainer";
@@ -126,6 +127,8 @@ export const channelTabsSettings = definePluginSettings({
         default: true
     }
 });
+
+export const { ackChannel } = findByPropsLazy("ackChannel");
 
 function replaceArray<T>(array: T[], ...values: T[]) {
     const len = array.length;

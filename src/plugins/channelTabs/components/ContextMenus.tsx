@@ -19,16 +19,11 @@
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import { filters, mapMangledModuleLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
-import { Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { ackChannel, Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
 
 const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab, reopenClosedTab } = ChannelTabsUtils;
-
-export const ReadStateUtils = mapMangledModuleLazy('"ENABLE_AUTOMATIC_ACK",', {
-    markAsRead: filters.byCode(".getActiveJoinedThreadsForParent")
-});
 
 export function BasicContextMenu() {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
@@ -171,7 +166,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 id="mark-as-read"
                 label={i18n.Messages.MARK_AS_READ}
                 disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
-                action={() => ReadStateUtils.markAsRead(ChannelStore.getChannel(bookmark.channelId))}
+                action={() => ackChannel(ChannelStore.getChannel(bookmark.channelId))}
             />
         </Menu.MenuGroup>}
         <Menu.MenuGroup>
@@ -270,7 +265,7 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                     id="mark-as-read"
                     label={i18n.Messages.MARK_AS_READ}
                     disabled={!ReadStateStore.hasUnread(channel.id)}
-                    action={() => ReadStateUtils.markAsRead(channel)}
+                    action={() => ackChannel(channel)}
                 />
             }
             <Menu.MenuCheckboxItem

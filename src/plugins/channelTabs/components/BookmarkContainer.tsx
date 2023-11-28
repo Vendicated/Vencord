@@ -18,11 +18,11 @@
 
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
-import { Avatar, ChannelStore, ContextMenu, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
 
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import { ackChannel, BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
 import { NotificationDot } from "./ChannelTab";
-import { BookmarkContextMenu, EditModal, ReadStateUtils } from "./ContextMenus";
+import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
 const { switchChannel, useBookmarks } = ChannelTabsUtils;
 const cl = (name: string) => `vc-channeltabs-${name}`;
@@ -113,7 +113,7 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                         id="mark-as-read"
                         label={i18n.Messages.MARK_AS_READ}
                         disabled={!ReadStateStore.hasUnread(bkm.channelId)}
-                        action={() => ReadStateUtils.markAsRead(ChannelStore.getChannel(bkm.channelId))}
+                        action={() => ackChannel(ChannelStore.getChannel(bkm.channelId))}
                     />
                 </Menu.MenuGroup>),
                 <Menu.MenuGroup>
@@ -208,10 +208,10 @@ function Bookmark(props: BookmarkProps) {
         className={classes(cl("bookmark"), cl("hoverable"))}
         ref={ref}
         onClick={e => "bookmarks" in bookmark
-            ? ContextMenu.open(e, () => <BookmarkFolderOpenMenu {...props} />)
+            ? ContextMenuApi.openContextMenu(e, () => <BookmarkFolderOpenMenu {...props} />)
             : switchChannel(bookmark)
         }
-        onContextMenu={e => ContextMenu.open(e, () =>
+        onContextMenu={e => ContextMenuApi.openContextMenu(e, () =>
             <BookmarkContextMenu {...props} />
         )}
     >
