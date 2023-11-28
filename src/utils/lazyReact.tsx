@@ -23,7 +23,7 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         return <Component {...props} />;
     };
 
-    LazyComponent.$$get = get;
+    LazyComponent.$$vencordInternal = get;
 
     return LazyComponent as ComponentType<T>;
 }
