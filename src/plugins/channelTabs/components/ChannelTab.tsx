@@ -31,8 +31,6 @@ const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 const { useChannelEmojiAndColor } = findByPropsLazy("useChannelEmojiAndColor");
 
 const Emoji = findComponentByCodeLazy(".autoplay,allowAnimatedEmoji:");
-// @ts-ignore
-const { Dots } = Menu;
 const FriendsIcon = () => <svg
     height={24}
     width={24}
@@ -72,7 +70,10 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
 
 function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
     return isTyping
-        ? <div className={cl("typing-indicator")}><Dots dotRadius={3} themed={true} /></div>
+        ? <div className={cl("typing-indicator")}>
+            {/* @ts-ignore */}
+            <Menu.Dots dotRadius={3} themed={true} />
+        </div>
         : null;
 }
 
