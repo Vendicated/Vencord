@@ -25,52 +25,54 @@ import type { Promisable } from "type-fest";
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
 export interface MessageObject {
-    content: string,
-    validNonShortcutEmojis: CustomEmoji[];
-    invalidEmojis: any[];
-    tts: boolean;
+	content: string,
+	validNonShortcutEmojis: CustomEmoji[];
+	invalidEmojis: any[];
+	tts: boolean;
 }
 
 export interface Upload {
-    classification: string;
-    currentSize: number;
-    description: string | null;
-    filename: string;
-    id: string;
-    isImage: boolean;
-    isVideo: boolean;
-    item: {
-        file: File;
-        platform: number;
-    };
-    loaded: number;
-    mimeType: string;
-    preCompressionSize: number;
-    responseUrl: string;
-    sensitive: boolean;
-    showLargeMessageDialog: boolean;
-    spoiler: boolean;
-    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
-    uniqueId: string;
-    uploadedFilename: string;
+	classification: string;
+	currentSize: number;
+	description: string | null;
+	filename: string;
+	id: string;
+	isImage: boolean;
+	isVideo: boolean;
+	item: {
+		file: File;
+		platform: number;
+	};
+	loaded: number;
+	mimeType: string;
+	preCompressionSize: number;
+	responseUrl: string;
+	sensitive: boolean;
+	showLargeMessageDialog: boolean;
+	spoiler: boolean;
+	status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
+	uniqueId: string;
+	uploadedFilename: string;
 }
 
 export interface MessageReplyOptions {
-    messageReference: Message["messageReference"];
-    allowedMentions?: {
-        parse: Array<string>;
-        repliedUser: boolean;
-    };
+	messageReference: Message["messageReference"];
+	allowedMentions?: {
+		parse: Array<string>;
+		users?: Array<string>;
+		roles?: Array<string>;
+		repliedUser: boolean;
+	};
 }
 
 export interface MessageExtra {
-    stickers?: string[];
-    uploads?: Upload[];
-    replyOptions: MessageReplyOptions;
-    content: string;
-    channel: Channel;
-    type?: any;
-    openWarningPopout: (props: any) => any;
+	stickers?: string[];
+	uploads?: Upload[];
+	replyOptions: MessageReplyOptions;
+	content: string;
+	channel: Channel;
+	type?: any;
+	openWarningPopout: (props: any) => any;
 }
 
 export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
@@ -80,49 +82,49 @@ const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
 export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
-    extra.replyOptions = replyOptions;
-    for (const listener of sendListeners) {
-        try {
-            const result = await listener(channelId, messageObj, extra);
-            if (result && result.cancel === true) {
-                return true;
-            }
-        } catch (e) {
-            MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e);
-        }
-    }
-    return false;
+	extra.replyOptions = replyOptions;
+	for (const listener of sendListeners) {
+		try {
+			const result = await listener(channelId, messageObj, extra);
+			if (result && result.cancel === true) {
+				return true;
+			}
+		} catch (e) {
+			MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e);
+		}
+	}
+	return false;
 }
 
 export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
-    for (const listener of editListeners) {
-        try {
-            await listener(channelId, messageId, messageObj);
-        } catch (e) {
-            MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
-        }
-    }
+	for (const listener of editListeners) {
+		try {
+			await listener(channelId, messageId, messageObj);
+		} catch (e) {
+			MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
+		}
+	}
 }
 
 /**
  * Note: This event fires off before a message is sent, allowing you to edit the message.
  */
 export function addPreSendListener(listener: SendListener) {
-    sendListeners.add(listener);
-    return listener;
+	sendListeners.add(listener);
+	return listener;
 }
 /**
  * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
  */
 export function addPreEditListener(listener: EditListener) {
-    editListeners.add(listener);
-    return listener;
+	editListeners.add(listener);
+	return listener;
 }
 export function removePreSendListener(listener: SendListener) {
-    return sendListeners.delete(listener);
+	return sendListeners.delete(listener);
 }
 export function removePreEditListener(listener: EditListener) {
-    return editListeners.delete(listener);
+	return editListeners.delete(listener);
 }
 
 
@@ -132,22 +134,22 @@ type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => 
 const listeners = new Set<ClickListener>();
 
 export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
-    // message object may be outdated, so (try to) fetch latest one
-    message = MessageStore.getMessage(channel.id, message.id) ?? message;
-    for (const listener of listeners) {
-        try {
-            listener(message, channel, event);
-        } catch (e) {
-            MessageEventsLogger.error("MessageClickHandler: Listener encountered an unknown error\n", e);
-        }
-    }
+	// message object may be outdated, so (try to) fetch latest one
+	message = MessageStore.getMessage(channel.id, message.id) ?? message;
+	for (const listener of listeners) {
+		try {
+			listener(message, channel, event);
+		} catch (e) {
+			MessageEventsLogger.error("MessageClickHandler: Listener encountered an unknown error\n", e);
+		}
+	}
 }
 
 export function addClickListener(listener: ClickListener) {
-    listeners.add(listener);
-    return listener;
+	listeners.add(listener);
+	return listener;
 }
 
 export function removeClickListener(listener: ClickListener) {
-    return listeners.delete(listener);
+	return listeners.delete(listener);
 }
