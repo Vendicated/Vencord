@@ -121,7 +121,7 @@ export default definePlugin({
                 // Fail creating forum if tooManyUsers or tooManyRoles
                 {
                     match: /applyChatRestrictions\)\(\{.+?channel:(\i)\}\);if\(!\i/,
-                    replace: "$& || !$self.validateForum($1.id)"
+                    replace: "$& && !$self.validateForum($1.id)"
                 }
             ]
         }
@@ -217,7 +217,7 @@ export default definePlugin({
     },
     validateForum(channelId: string) {
         const mentions = this.getAllowedMentions(channelId, true);
-        if (!isNonNullish(mentions)) return;
+        if (!isNonNullish(mentions)) return true;
 
         if (mentions.meta.tooManyUsers || mentions.meta.tooManyRoles) {
             this.tooManyAlert(mentions.meta.tooManyUsers, mentions.meta.tooManyRoles);
