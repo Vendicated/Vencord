@@ -29,10 +29,6 @@ export interface AllowedMentions {
     };
 }
 
-export interface EditAttachments {
-    attachments: File[];
-}
-
 export interface AllowedMentionsProps {
     mentions: AllowedMentions,
     channel: Channel;
