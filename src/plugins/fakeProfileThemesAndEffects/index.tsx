@@ -63,7 +63,7 @@ function encodeColor(color: number) {
     if (color === 0) return "\u{e0000}";
     let str = "";
     for (; color > 0; color = Math.trunc(color / 4096))
-        str += String.fromCodePoint(color % 4096 + 0xE0000);
+        str = String.fromCodePoint(color % 4096 + 0xE0000) + str;
     return str;
 }
 
@@ -85,14 +85,14 @@ function decodeColor(str: string) {
 
 /**
  * Converts the given base-10 profile effect ID to a base-4096 string with each code point offset by +0xE0000
- * @param effect The base-10 profile effect ID to be converted
+ * @param id The base-10 profile effect ID to be converted
  * @returns The converted base-4096 string with +0xE0000 offset
  */
-function encodeEffect(effect: bigint) {
-    if (effect === 0n) return "\u{e0000}";
+function encodeEffect(id: bigint) {
+    if (id === 0n) return "\u{e0000}";
     let str = "";
-    for (; effect > 0n; effect /= 4096n)
-        str += String.fromCodePoint(Number(effect % 4096n) + 0xE0000);
+    for (; id > 0n; id /= 4096n)
+        str = String.fromCodePoint(Number(id % 4096n) + 0xE0000) + str;
     return str;
 }
 
@@ -104,12 +104,12 @@ function encodeEffect(effect: bigint) {
  */
 function decodeEffect(str: string) {
     if (str === "") return -1n;
-    let effect = 0n;
+    let id = 0n;
     for (let i = 0; i < str.length; i++) {
-        if (effect > 1_200_000_000_000_000_000n) return -2n;
-        effect += BigInt(str.codePointAt(i)!) * 4096n ** BigInt(str.length - 1 - i);
+        if (id > 1_200_000_000_000_000_000n) return -2n;
+        id += BigInt(str.codePointAt(i)!) * 4096n ** BigInt(str.length - 1 - i);
     }
-    return effect;
+    return id;
 }
 
 /**
