@@ -188,10 +188,10 @@ export default definePlugin({
     presetRow(channel: Channel) {
         if (!presets || (presets.length === 1 && presets[0].name === "" && presets[0].text === "")) return null;
 
-        return <ul style={{ display: "flex", width: "100%", gap: "0.5rem", alignItems: "center", paddingTop: "16px" }}>
+        return <ul style={{ display: "flex", width: "100%", gap: "0.5rem", alignItems: "center", paddingTop: "16px", maxWidth: "100%", flexWrap: "wrap" }}>
             {
                 presets.map((preset, index) => preset.name && preset.text &&
-                    <li key={`${preset.name}-${index}`}>
+                    <li key={`${preset.name}-${index}`} style={{ listStyle: "none", maxWidth: "100%", overflow: "hidden" }}>
                         <Button
                             size={Button.Sizes.SMALL}
                             onClick={() => {
