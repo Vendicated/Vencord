@@ -71,7 +71,7 @@ export const SpotifyStore = proxyLazy(() => {
     const { Store } = Flux;
 
     const SpotifySocket = findByPropsLazy("getActiveSocketAndDevice");
-    const SpotifyAPI = findByPropsLazy("SpotifyAPIMarker");
+    const SpotifyUtils = findByPropsLazy("SpotifyAPI");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
@@ -169,7 +169,7 @@ export const SpotifyStore = proxyLazy(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            return SpotifyUtils.SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });

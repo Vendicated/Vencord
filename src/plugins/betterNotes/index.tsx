@@ -32,10 +32,16 @@ export default definePlugin({
         {
             find: "hideNote:",
             all: true,
+            // Some modules match the find but the replacement is returned untouched
+            noWarn: true,
             predicate: () => Vencord.Settings.plugins.BetterNotesBox.hide,
             replacement: {
-                match: /hideNote:.+?(?=[,}])/g,
-                replace: "hideNote:true",
+                match: /hideNote:.+?(?=([,}].*?\)))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return "hideNote:!0";
+                    return m;
+                }
             }
         },
         {
@@ -48,8 +54,8 @@ export default definePlugin({
         {
             find: ".Messages.NOTE}",
             replacement: {
-                match: /(\i)\.hideNote\?null/,
-                replace: "$1.hideNote?$self.patchPadding($1)"
+                match: /(?<=return \i\?)null(?=:\(0,\i\.jsxs)/,
+                replace: "$self.patchPadding(arguments[0])"
             }
         }
     ],

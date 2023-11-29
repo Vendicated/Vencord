@@ -6,14 +6,14 @@
 
 import "./SoundOverrideComponent.css";
 
+import { Flex } from "@components/Flex";
 import { makeRange } from "@components/PluginSettings/components";
 import { Margins } from "@utils/margins";
-import { findByCodeLazy, findLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, Slider, Switch, TextInput, useRef } from "@webpack/common";
+import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { SoundOverride, SoundPlayer, SoundType } from "../types";
-import { Flex } from "@components/Flex";
-import { ComponentType, Ref, SyntheticEvent } from "react";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -22,7 +22,7 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const playSound: (id: string) => SoundPlayer = findByCodeLazy(".playWithListener().then");
+const Sounds: { playSound(id: string): SoundPlayer; } = findByPropsLazy("createSoundForPack", "createSound", "playSound");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 
 export function SoundOverrideComponent({ type, override }: { type: SoundType; override: SoundOverride; }) {
@@ -44,7 +44,7 @@ export function SoundOverrideComponent({ type, override }: { type: SoundType; ov
                 onClick={() => {
                     if (sound.current != null)
                         sound.current.stop();
-                    sound.current = playSound(type.id);
+                    sound.current = Sounds.playSound(type.id);
                 }}
                 disabled={!override.enabled}
             >
