@@ -387,6 +387,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ant0n",
         id: 145224646868860928n
     },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
     arHSM: {
         name: "arHSM",
         id: 841509053422632990n
