@@ -12,7 +12,7 @@ import { findOverride, settings } from "./settings";
 export default definePlugin({
     name: "CustomSounds",
     description: "Replace Discord's sounds with your own.",
-    authors: [Devs.TheKodeToad],
+    authors: [Devs.TheKodeToad, Devs.SpikeHD],
     patches: [
         {
             find: "Error(\"could not play audio\")",
