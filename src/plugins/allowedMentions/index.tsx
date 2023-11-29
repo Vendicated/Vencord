@@ -18,7 +18,7 @@ import { AllowedMentions, AllowedMentionsBar, AllowedMentionsProps, AllowedMenti
 export default definePlugin({
     name: "AllowedMentions",
     authors: [Devs.arHSM, Devs.amia],
-    description: "Fine grained control over whom to ping when sending or editing a message.",
+    description: "Fine grained control over whom to ping when sending a message.",
     dependencies: ["MessageEventsAPI"],
     settings: definePluginSettings({
         pingEveryone: {
