@@ -76,7 +76,7 @@ export default definePlugin({
                 match: /repeat:"off"!==(.{1,3}),/,
                 replace: "actual_repeat:$1,$&"
             }
-        },
+        }
     ],
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
     renderPlayer: () => <Player />
