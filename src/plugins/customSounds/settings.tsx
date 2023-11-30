@@ -31,6 +31,10 @@ export const settings = definePluginSettings({
     }
 });
 
+export function isOverriden(id: string): boolean {
+    return settings.store.overrides[id]?.enabled ?? false;
+}
+
 export function findOverride(id: string): SoundOverride | null {
     const result = settings.store.overrides[id];
     if (!result?.enabled)
