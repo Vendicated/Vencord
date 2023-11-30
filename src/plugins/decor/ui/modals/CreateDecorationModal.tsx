@@ -32,7 +32,7 @@ function useObjectURL(object: Blob | MediaSource | null) {
 
         return () => {
             URL.revokeObjectURL(objectUrl);
-            if (!object) setUrl(null);
+            setUrl(null);
         };
     }, [object]);
 

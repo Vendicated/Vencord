@@ -88,7 +88,7 @@ export default function ChangeDecorationModal(props: any) {
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
     const isTryingDecoration = typeof tryingDecoration !== "undefined";
 
-    const avatarDecorationOverride = isTryingDecoration ? tryingDecoration ? decorationToAvatarDecoration(tryingDecoration) : null : undefined;
+    const avatarDecorationOverride = tryingDecoration != null ? decorationToAvatarDecoration(tryingDecoration) : tryingDecoration;
 
     const {
         decorations,
