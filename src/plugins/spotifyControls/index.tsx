@@ -55,13 +55,19 @@ export default definePlugin({
                 replace: "return [$self.renderPlayer(),$1]"
             }
         },
-        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
         {
             find: ".PLAYER_DEVICES",
-            replacement: {
+            replacement: [{
+                // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
                 replace: "post:$1.bind(null,$2.post),$&"
-            }
+            },
+            {
+                // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
+                // Discord rejects 202 which causes the request to send twice. This patch prevents this.
+                match: /202===\i\.status/,
+                replace: "false",
+            }]
         },
         // Discord doesn't give you the repeat kind, only a boolean
         {
