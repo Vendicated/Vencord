@@ -88,6 +88,15 @@ export async function compileUsercss(fileName: string) {
                 varsToPass[k] = `${varsToPass[k]}${v.units ?? "px"}`;
                 break;
             }
+
+            case "text": {
+                if (preprocessor === "stylus") {
+                    varsToPass[k] = `"${varsToPass[k].replace(/"/g, "\" + '\"' + \"")}"`;
+                } else {
+                    varsToPass[k] = `"${varsToPass[k].replace(/\//g, "\\\\").replace(/"/g, '\\"')}"`;
+                }
+                break;
+            }
         }
     }
 
