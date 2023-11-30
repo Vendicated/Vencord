@@ -19,7 +19,7 @@
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, findByPropsLazy, findLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -127,5 +127,9 @@ export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionT
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-const { Permissions } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
-export { Permissions as PermissionsBits };
+export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+
+export const zustandCreate: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
+
+const persistFilter = filters.byCode("[zustand persist middleware]");
+export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
