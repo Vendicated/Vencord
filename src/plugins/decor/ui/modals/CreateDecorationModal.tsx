@@ -120,7 +120,6 @@ export default function CreateDecorationModal(props) {
                         e.preventDefault();
                         if (!GuildStore.getGuild(GUILD_ID)) {
                             const inviteAccepted = await openInviteModal(INVITE_KEY);
-                            console.log(inviteAccepted);
                             if (inviteAccepted) {
                                 closeAllModals();
                                 FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
