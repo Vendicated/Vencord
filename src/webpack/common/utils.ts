@@ -131,5 +131,5 @@ export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissio
 
 export const zustandCreate: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
 
-const persistFilter = filters.byCode("zustand");
-export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter);
+const persistFilter = filters.byCode("[zustand persist middleware]");
+export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
