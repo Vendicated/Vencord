@@ -23,8 +23,21 @@ import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
-const MessageActions = findByPropsLazy("editMessage", "sendMessage");
-const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const InviteActions = findByPropsLazy("resolveInvite");
+
+export async function openInviteModal(code: string) {
+    const { invite } = await InviteActions.resolveInvite(code, "Desktop Modal");
+    if (!invite) throw new Error("Invalid invite: " + code);
+
+    FluxDispatcher.dispatch({
+        type: "INVITE_MODAL_OPEN",
+        invite,
+        code,
+        context: "APP"
+    });
+}
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
