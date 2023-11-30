@@ -5,14 +5,14 @@
  */
 
 import { Link } from "@components/Link";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Forms, GuildStore, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { Button, Forms, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
+import { INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import openInviteModal from "../../lib/utils/openInviteModal";
 import { cl, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 
@@ -114,16 +114,15 @@ export default function CreateDecorationModal(props) {
                 >
                     the guidelines
                 </Link> before creating your decoration.
-                {typeof GuildStore.getGuild(GUILD_ID) === "undefined" && <>
-                    <br />You can recieve updates on your decoration's review by joining <Link
-                        href={`https://discord.gg/${INVITE_KEY}`}
-                        onClick={async e => {
-                            e.preventDefault();
-                            await openInviteModal(INVITE_KEY);
-                        }}
-                    >Decor's Discord server
-                    </Link>.
-                </>}
+                <br />You can receive updates on your decoration's review by joining <Link
+                    href={`https://discord.gg/${INVITE_KEY}`}
+                    onClick={async e => {
+                        e.preventDefault();
+                        await openInviteModal(INVITE_KEY);
+                    }}
+                >
+                    Decor's Discord server
+                </Link>.
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>

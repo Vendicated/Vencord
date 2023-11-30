@@ -5,6 +5,7 @@
  */
 
 import { Flex } from "@components/Flex";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -17,7 +18,6 @@ import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
-import openInviteModal from "../../lib/utils/openInviteModal";
 import { cl, requireAvatarDecorationModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
