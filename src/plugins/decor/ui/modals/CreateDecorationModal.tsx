@@ -9,9 +9,9 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Forms, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import { cl, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
@@ -118,7 +118,13 @@ export default function CreateDecorationModal(props) {
                     href={`https://discord.gg/${INVITE_KEY}`}
                     onClick={async e => {
                         e.preventDefault();
-                        await openInviteModal(INVITE_KEY);
+                        if (!GuildStore.getGuild(GUILD_ID)) {
+                            openInviteModal(INVITE_KEY);
+                        } else {
+                            props.onClose();
+                            FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                            NavigationRouter.transitionToGuild(GUILD_ID);
+                        }
                     }}
                 >
                     Decor's Discord server
