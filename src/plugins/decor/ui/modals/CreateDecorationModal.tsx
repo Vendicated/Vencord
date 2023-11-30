@@ -12,9 +12,8 @@ import { Button, Forms, GuildStore, Text, TextInput, useEffect, useMemo, UserSto
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import cl from "../../lib/utils/cl";
 import openInviteModal from "../../lib/utils/openInviteModal";
-import { requireAvatarDecorationModal, requireCreateStickerModal } from "../../lib/utils/requireModals";
+import { cl, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 
 

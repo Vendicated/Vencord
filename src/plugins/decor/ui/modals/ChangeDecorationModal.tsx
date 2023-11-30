@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -15,10 +16,9 @@ import { Decoration, getPresets, Preset } from "../../lib/api";
 import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import cl from "../../lib/utils/cl";
 import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
 import openInviteModal from "../../lib/utils/openInviteModal";
-import { requireAvatarDecorationModal } from "../../lib/utils/requireModals";
+import { cl, requireAvatarDecorationModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
@@ -61,7 +61,7 @@ function SectionHeader({ section }: { section: Section; }) {
     }, [section.authorIds]);
 
     return <div>
-        <div style={{ display: "flex" }}>
+        <Flex>
             <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
@@ -74,7 +74,7 @@ function SectionHeader({ section }: { section: Section; }) {
                 className={Margins.bottom8}
             />
             }
-        </div>
+        </Flex>
         {hasSubtitle &&
             <Forms.FormText type="description" className={Margins.bottom8}>
                 {section.subtitle}

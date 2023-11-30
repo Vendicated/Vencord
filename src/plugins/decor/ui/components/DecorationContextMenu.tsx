@@ -9,10 +9,11 @@ import { Alerts, Clipboard, ContextMenuApi, Menu, UserStore } from "webpack/comm
 
 import { Decoration } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import cl from "../../lib/utils/cl";
+import { cl } from "../";
 
 export default function DecorationContextMenu({ decoration }: { decoration: Decoration; }) {
     const { delete: deleteDecoration } = useCurrentUserDecorationsStore();
+
     return <Menu.Menu
         navId={cl("decoration-context-menu")}
         onClose={ContextMenuApi.closeContextMenu}

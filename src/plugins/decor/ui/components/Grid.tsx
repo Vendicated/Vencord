@@ -6,7 +6,7 @@
 
 import { React } from "@webpack/common";
 
-import cl from "../../lib/utils/cl";
+import { cl } from "../";
 
 export interface GridProps<ItemT> {
     renderItem: (item: ItemT) => JSX.Element;

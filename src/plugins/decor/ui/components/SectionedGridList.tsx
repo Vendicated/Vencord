@@ -8,7 +8,7 @@ import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
-import cl from "../../lib/utils/cl";
+import { cl } from "../";
 import Grid, { GridProps } from "./Grid";
 
 const ScrollerClasses = findByPropsLazy("managedReactiveScroller");
@@ -16,6 +16,7 @@ const ScrollerClasses = findByPropsLazy("managedReactiveScroller");
 type Section<SectionT, ItemT> = SectionT & {
     items: Array<ItemT>;
 };
+
 interface SectionedGridListProps<ItemT, SectionT, SectionU = Section<SectionT, ItemT>> extends Omit<GridProps<ItemT>, "items"> {
     renderSectionHeader: (section: SectionU) => JSX.Element;
     getSectionKey: (section: SectionU) => string;

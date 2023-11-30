@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Flex } from "@components/Flex";
 import { findByCodeLazy } from "@webpack";
 import { Button, useEffect } from "@webpack/common";
 
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import cl from "../../lib/utils/cl";
+import { cl } from "../";
 import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
 
 const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
@@ -34,7 +35,7 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         hideDivider={hideDivider}
         className={noMargin && cl("section-remove-margin")}
     >
-        <div style={{ display: "flex" }}>
+        <Flex>
             <Button
                 onClick={() => {
                     if (!authorization.isAuthorized()) {
@@ -53,6 +54,6 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
             >
                 Remove Decoration
             </Button>}
-        </div>
+        </Flex>
     </CustomizationSection>;
 }
