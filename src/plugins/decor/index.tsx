@@ -15,7 +15,7 @@ import { classes } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Forms, NavigationRouter, UserStore } from "@webpack/common";
+import { FluxDispatcher, Forms, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
@@ -43,7 +43,7 @@ const settings = definePluginSettings({
                         onClick={e => {
                             e.preventDefault();
                             closeAllModals();
-                            NavigationRouter.transitionTo("/settings/profile-customization");
+                            FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Profile Customization" });
                         }}
                     >Profiles</Link> page.
                 </Forms.FormText>
