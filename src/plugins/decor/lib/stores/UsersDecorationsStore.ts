@@ -70,10 +70,11 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
 
         const newFetchQueue = new Set(fetchQueue);
 
+        const now = Date.now();
         for (const userId of userIds) {
             const { fetchedAt } = usersDecorations.get(userId) ?? {};
             if (fetchedAt) {
-                if (Date.now() - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) continue;
+                if (now - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) continue;
             }
             newFetchQueue.add(userId);
         }
