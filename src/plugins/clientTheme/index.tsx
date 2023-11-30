@@ -48,7 +48,6 @@ function ThemeSettings() {
     const nitroThemeEnabled = nitroTheme !== undefined;
 
     const selectedLuminance = relativeLuminance(settings.store.color);
-    console.log(selectedLuminance);
 
     let contrastWarning = false, fixableContrast = true;
     if ((isLightTheme && selectedLuminance < 0.26) || !isLightTheme && selectedLuminance > 0.12)
