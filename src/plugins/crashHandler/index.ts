@@ -23,15 +23,26 @@ import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
-import { findByPropsLazy } from "@webpack";
+import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 import type { ReactElement } from "react";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
-const ModalStack = findByPropsLazy("pushLazy", "popAll");
-const DraftManager = findByPropsLazy("clearDraft", "saveDraft");
-const { DraftType } = findByPropsLazy("DraftType");
-const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker", "openExpressionPicker");
+const { ModalStack, DraftManager, DraftType, closeExpressionPicker } = proxyLazyWebpack(() => {
+    const modules = findBulk(
+        filters.byProps("pushLazy", "popAll"),
+        filters.byProps("clearDraft", "saveDraft"),
+        filters.byProps("DraftType"),
+        filters.byProps("closeExpressionPicker", "openExpressionPicker"),
+    );
+
+    return {
+        ModalStack: modules[0],
+        DraftManager: modules[1],
+        DraftType: modules[2]?.DraftType,
+        closeExpressionPicker: modules[3]?.closeExpressionPicker,
+    };
+});
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
@@ -138,7 +149,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to close open context menu.", err);
         }
         try {
-            ModalStack?.popAll();
+            ModalStack.popAll();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close old modals.", err);
         }
