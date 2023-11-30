@@ -8,7 +8,7 @@ import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -242,9 +242,13 @@ export default function ChangeDecorationModal(props: any) {
                 <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
                     {tooltipProps => <Button
                         {...tooltipProps}
-                        onClick={() => {
+                        onClick={async () => {
                             if (!GuildStore.getGuild(GUILD_ID)) {
-                                openInviteModal(INVITE_KEY);
+                                const inviteAccepted = await openInviteModal(INVITE_KEY);
+                                if (inviteAccepted) {
+                                    closeAllModals();
+                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                }
                             } else {
                                 props.onClose();
                                 FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
