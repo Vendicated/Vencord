@@ -52,7 +52,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate<Authorization
                 init();
             },
             async authorize() {
-                return new Promise(r => openModal(props =>
+                return new Promise((resolve, reject) => openModal(props =>
                     <OAuth2AuthorizeModal
                         {...props}
                         scopes={["identify"]}
@@ -74,15 +74,20 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate<Authorization
                                 } else {
                                     throw new Error("Request not OK");
                                 }
-                                r(void 0);
+                                resolve(void 0);
                             } catch (e) {
                                 if (e instanceof Error) {
                                     showToast(`Failed to authorize: ${e.message}`, Toasts.Type.FAILURE);
                                     new Logger("Decor").error("Failed to authorize", e);
+                                    reject(e);
                                 }
                             }
                         }}
-                    />
+                    />, {
+                    onCloseCallback() {
+                        reject(new Error("Authorization cancelled"));
+                    },
+                }
                 ));
             },
             isAuthorized: () => !!get().token,
