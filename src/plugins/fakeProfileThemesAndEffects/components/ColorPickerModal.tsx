@@ -6,10 +6,11 @@
 
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Flex, Text, useRef, useState } from "@webpack/common";
+import type { ComponentType } from "react";
 
 interface ColorPickerModalProps {
     modalProps: ModalProps;
-    ColorPicker: any;
+    ColorPicker: ComponentType<any>;
     onClose: () => void;
     onSubmit: (v: number) => void;
     initialColor: number;
@@ -74,7 +75,7 @@ export function ColorPickerModal({ modalProps, ColorPicker, onClose, onSubmit, i
 }
 
 export function openColorPickerModal(
-    ColorPicker: any,
+    ColorPicker: ComponentType<any>,
     onSubmit: (v: number) => void,
     initialColor: number = 0,
     suggestedColors: string[] = []

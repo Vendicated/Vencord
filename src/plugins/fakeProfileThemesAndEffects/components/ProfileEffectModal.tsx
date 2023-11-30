@@ -12,7 +12,7 @@ import type { ProfileEffect } from "../types";
 interface ProfileEffectModalProps {
     modalProps: ModalProps;
     onClose: () => void;
-    onSubmit: (v: any) => void;
+    onSubmit: (v: ProfileEffect) => void;
     classNames: { [k: string]: string; };
     profileEffects: ProfileEffect[];
     initialEffectID?: string;
