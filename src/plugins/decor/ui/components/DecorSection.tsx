@@ -10,7 +10,6 @@ import { Button, useEffect } from "@webpack/common";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import cl from "../../lib/utils/cl";
-import showAuthorizationModal from "../../lib/utils/showAuthorizationModal";
 import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
 
 const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
@@ -39,7 +38,7 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
             <Button
                 onClick={() => {
                     if (!authorization.isAuthorized()) {
-                        showAuthorizationModal().then(openChangeDecorationModal);
+                        authorization.authorize().then(openChangeDecorationModal);
                     } else openChangeDecorationModal();
                 }}
                 size={Button.Sizes.SMALL}

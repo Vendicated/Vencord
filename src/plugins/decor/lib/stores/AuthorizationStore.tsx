@@ -6,17 +6,19 @@
 
 import { DataStore } from "@api/index";
 import { proxyLazy } from "@utils/lazy";
-import { UserStore } from "@webpack/common";
+import { Logger } from "@utils/Logger";
+import { openModal } from "@utils/modal";
+import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
 import type { StateStorage } from "zustand/middleware";
 
-import showAuthorizationModal from "../utils/showAuthorizationModal";
+import { AUTHORIZE_URL, CLIENT_ID } from "../constants";
 import { create, persist } from "../zustand";
 
 interface AuthorizationState {
     token: string | null;
     tokens: Record<string, string>;
     init: () => void;
-    authorize: () => void;
+    authorize: () => Promise<void>;
     setToken: (token: string) => void;
     remove: (id: string) => void;
     isAuthorized: () => boolean;
@@ -50,7 +52,40 @@ export const useAuthorizationStore = proxyLazy(() => create<AuthorizationState>(
 
                 init();
             },
-            authorize: () => void showAuthorizationModal(),
+            async authorize() {
+                return new Promise(r => openModal(props =>
+                    <OAuth2AuthorizeModal
+                        {...props}
+                        scopes={["identify"]}
+                        responseType="code"
+                        redirectUri={AUTHORIZE_URL}
+                        permissions={0n}
+                        clientId={CLIENT_ID}
+                        cancelCompletesFlow={false}
+                        callback={async (response: any) => {
+                            try {
+                                const url = new URL(response.location);
+                                url.searchParams.append("client", "vencord");
+
+                                const req = await fetch(url);
+
+                                if (req?.ok) {
+                                    const token = await req.text();
+                                    get().setToken(token);
+                                } else {
+                                    throw new Error("Request not OK");
+                                }
+                                r(void 0);
+                            } catch (e) {
+                                if (e instanceof Error) {
+                                    showToast(`Failed to authorize: ${e.message}`, Toasts.Type.FAILURE);
+                                    new Logger("Decor").error("Failed to authorize", e);
+                                }
+                            }
+                        }}
+                    />
+                ));
+            },
             isAuthorized: () => !!get().token,
         }),
         {
