@@ -36,20 +36,19 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
     bulkFetch: debounce(async () => {
         const { fetchQueue, usersDecorations } = get();
 
+        if (fetchQueue.size === 0) return;
+
         set({ fetchQueue: new Set() });
 
         const fetchIds = Array.from(fetchQueue);
-        if (fetchIds.length === 0) return;
         const fetchedUsersDecorations = await getUsersDecorations(fetchIds);
 
         const newUsersDecorations = new Map(usersDecorations);
 
-        for (const [userId, decoration] of Object.entries(fetchedUsersDecorations)) {
-            newUsersDecorations.set(userId, { asset: decoration, fetchedAt: new Date() });
-        }
-
-        for (const fetchedId of fetchIds) {
-            if (!newUsersDecorations.has(fetchedId)) newUsersDecorations.set(fetchedId, { asset: null, fetchedAt: new Date() });
+        const now = new Date();
+        for (const fetchId of fetchIds) {
+            const newDecoration = fetchedUsersDecorations[fetchId] ?? null;
+            newUsersDecorations.set(fetchId, { asset: newDecoration, fetchedAt: now });
         }
 
         set({ usersDecorations: newUsersDecorations });
@@ -57,8 +56,8 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
     async fetch(userId: string, force: boolean = false) {
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
-        if (usersDecorations.has(userId)) {
-            const { fetchedAt } = usersDecorations.get(userId)!;
+        const { fetchedAt } = usersDecorations.get(userId) ?? {};
+        if (fetchedAt) {
             if (!force && Date.now() - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) return;
         }
 
@@ -72,8 +71,8 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
         const newFetchQueue = new Set(fetchQueue);
 
         for (const userId of userIds) {
-            if (usersDecorations.has(userId)) {
-                const { fetchedAt } = usersDecorations.get(userId)!;
+            const { fetchedAt } = usersDecorations.get(userId) ?? {};
+            if (fetchedAt) {
                 if (Date.now() - fetchedAt.getTime() < DECORATION_FETCH_COOLDOWN) continue;
             }
             newFetchQueue.add(userId);
@@ -97,18 +96,21 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
 export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
     const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
-    useEffect(() => useUsersDecorationsStore.subscribe(
-        state => {
-            if (!user) return;
-            const newDecorAvatarDecoration = state.getAsset(user.id);
-            if (!newDecorAvatarDecoration) return;
-            if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
-        }), []);
-
     useEffect(() => {
-        if (!user) return;
-        const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
-        fetchUserDecorAvatarDecoration(user.id);
+        const destructor = useUsersDecorationsStore.subscribe(
+            state => {
+                if (!user) return;
+                const newDecorAvatarDecoration = state.getAsset(user.id);
+                if (!newDecorAvatarDecoration) return;
+                if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+            }
+        );
+
+        if (user) {
+            const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+            fetchUserDecorAvatarDecoration(user.id);
+        }
+        return destructor;
     }, []);
 
     return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
