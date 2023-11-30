@@ -79,7 +79,7 @@ export async function compileUsercss(fileName: string) {
         switch (v.type) {
             case "checkbox": {
                 if (["less", "stylus"].includes(preprocessor)) {
-                    varsToPass[k] = varsToPass[k] ? "1" : "0";
+                    varsToPass[k] = varsToPass[k] === "1" ? "true" : "false";
                 }
                 break;
             }
