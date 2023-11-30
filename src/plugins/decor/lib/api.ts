@@ -6,6 +6,7 @@
 
 import { API_URL } from "./constants";
 import { useAuthorizationStore } from "./stores/AuthorizationStore";
+
 export interface Preset {
     id: string;
     name: string;
@@ -41,13 +42,13 @@ export async function fetchApi(url: RequestInfo, options?: RequestInit) {
     else throw new Error(await res.text());
 }
 
-export const getUsersDecorations = async (ids?: string[]) => {
+export const getUsersDecorations = async (ids?: string[]): Promise<Record<string, string | null>> => {
     if (ids?.length === 0) return {};
 
     const url = new URL(API_URL + "/users");
     if (ids && ids.length !== 0) url.searchParams.set("ids", JSON.stringify(ids));
 
-    return (await fetch(url).then(c => c.json())) as Record<string, string | null>;
+    return await fetch(url).then(c => c.json());
 };
 
 export const getUserDecorations = async (id: string = "@me"): Promise<Decoration[]> =>
@@ -59,19 +60,17 @@ export const getUserDecoration = async (id: string = "@me"): Promise<Decoration 
 export const setUserDecoration = async (decoration: Decoration | NewDecoration | null, id: string = "@me"): Promise<string | Decoration> => {
     const formData = new FormData();
 
-    if (decoration && Object.hasOwn(decoration, "hash")) {
-        decoration = decoration as Decoration;
-        formData.append("hash", decoration.hash);
-    } else if (!decoration) {
+    if (!decoration) {
         formData.append("hash", "null");
-    } else if (decoration && Object.hasOwn(decoration, "file")) {
-        decoration = decoration as NewDecoration;
+    } else if ("hash" in decoration) {
+        formData.append("hash", decoration.hash);
+    } else if ("file" in decoration) {
         formData.append("image", decoration.file);
         formData.append("alt", decoration.alt ?? "null");
     }
 
     return fetchApi(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData }).then(c =>
-        decoration && Object.hasOwn(decoration, "file") ? c.json() : c.text()
+        decoration && "file" in decoration ? c.json() : c.text()
     );
 };
 
