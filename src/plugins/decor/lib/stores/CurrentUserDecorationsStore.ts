@@ -5,11 +5,10 @@
  */
 
 import { proxyLazy } from "@utils/lazy";
-import { UserStore } from "@webpack/common";
+import { UserStore, zustandCreate } from "@webpack/common";
 
 import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
 import { decorationToAsset } from "../utils/decoration";
-import { create } from "../zustand";
 import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
 interface UserDecorationsState {
@@ -22,7 +21,7 @@ interface UserDecorationsState {
     clear: () => void;
 }
 
-export const useCurrentUserDecorationsStore = proxyLazy(() => create<UserDecorationsState>((set, get) => ({
+export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate<UserDecorationsState>((set, get) => ({
     decorations: [],
     selectedDecoration: null,
     async fetch() {

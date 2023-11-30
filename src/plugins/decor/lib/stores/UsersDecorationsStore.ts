@@ -6,13 +6,12 @@
 
 import { debounce } from "@utils/debounce";
 import { proxyLazy } from "@utils/lazy";
-import { useEffect, useState } from "@webpack/common";
+import { useEffect, useState, zustandCreate } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { AvatarDecoration } from "../../";
 import { getUsersDecorations } from "../api";
 import { DECORATION_FETCH_COOLDOWN, SKU_ID } from "../constants";
-import { create } from "../zustand";
 
 interface UserDecorationData {
     asset: string | null;
@@ -31,7 +30,7 @@ interface UsersDecorationsState {
     set: (userId: string, decoration: string | null) => void;
 }
 
-export const useUsersDecorationsStore = proxyLazy(() => create<UsersDecorationsState>((set, get) => ({
+export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecorationsState>((set, get) => ({
     usersDecorations: new Map<string, UserDecorationData>(),
     fetchQueue: new Set(),
     bulkFetch: debounce(async () => {
