@@ -7,7 +7,7 @@
 import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
@@ -121,7 +121,7 @@ export default function CreateDecorationModal(props) {
                         if (!GuildStore.getGuild(GUILD_ID)) {
                             openInviteModal(INVITE_KEY);
                         } else {
-                            props.onClose();
+                            closeAllModals();
                             FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
                             NavigationRouter.transitionToGuild(GUILD_ID);
                         }
