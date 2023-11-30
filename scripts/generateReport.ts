@@ -410,7 +410,7 @@ function runTime(token: string) {
                         const [code, matcher] = args;
 
                         const module = Vencord.Webpack.findModuleFactory(...code);
-                        if (module) result = module.toString().match(matcher);
+                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
