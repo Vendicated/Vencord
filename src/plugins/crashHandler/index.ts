@@ -24,11 +24,14 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, NavigationRouter } from "@webpack/common";
+import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 import type { ReactElement } from "react";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 const ModalStack = findByPropsLazy("pushLazy", "popAll");
+const DraftManager = findByPropsLazy("clearDraft", "saveDraft");
+const { DraftType } = findByPropsLazy("DraftType");
+const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker", "openExpressionPicker");
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
@@ -115,6 +118,20 @@ export default definePlugin({
             } catch { }
         }
 
+        try {
+            const channelId = SelectedChannelStore.getChannelId();
+
+            DraftManager.clearDraft(channelId, DraftType.ChannelMessage);
+            DraftManager.clearDraft(channelId, DraftType.FirstThreadMessage);
+        } catch (err) {
+            CrashHandlerLogger.debug("Failed to clear drafts.", err);
+        }
+        try {
+            closeExpressionPicker();
+        }
+        catch (err) {
+            CrashHandlerLogger.debug("Failed to close expression picker.", err);
+        }
         try {
             FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" });
         } catch (err) {
