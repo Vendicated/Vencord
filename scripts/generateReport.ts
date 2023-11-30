@@ -105,10 +105,24 @@ async function printReport() {
 
     console.log();
 
-    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
+    const ignoredErrors = [] as string[];
+    report.otherErrors = report.otherErrors.filter(e => {
+        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
+            ignoredErrors.push(e);
+            return false;
+        }
+        return true;
+    });
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
+
+    console.log();
+
+    console.log("## Ignored Discord Errors");
+    ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
