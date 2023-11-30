@@ -39,7 +39,7 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
             <Button
                 onClick={() => {
                     if (!authorization.isAuthorized()) {
-                        authorization.authorize().then(openChangeDecorationModal);
+                        authorization.authorize().then(openChangeDecorationModal).catch(() => { });
                     } else openChangeDecorationModal();
                 }}
                 size={Button.Sizes.SMALL}
