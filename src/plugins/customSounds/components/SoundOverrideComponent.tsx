@@ -71,6 +71,7 @@ export function SoundOverrideComponent({ type, override }: { type: SoundType; ov
 
                 <Button
                     className={Margins.bottom16}
+                    disabled={!override.enabled}
                 >
                     Upload
                     <FileInput

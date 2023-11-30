@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { React } from "@webpack/common";
 
 import { SoundOverrideComponent } from "./components/SoundOverrideComponent";
 import { SoundOverride, soundTypes } from "./types";
@@ -17,16 +18,18 @@ export const settings = definePluginSettings({
         default: {},
         component: () =>
             <>{soundTypes.map(type =>
-                <SoundOverrideComponent
-                    type={type}
-                    override={
-                        settings.store.overrides[type.id] ??= {
-                            enabled: false,
-                            url: "",
-                            volume: 100
+                <React.Fragment key={type.id}>
+                    <SoundOverrideComponent
+                        type={type}
+                        override={
+                            settings.store.overrides[type.id] ??= {
+                                enabled: false,
+                                url: "",
+                                volume: 100
+                            }
                         }
-                    }
-                />
+                    />
+                </React.Fragment>
             )}</>
     }
 });
