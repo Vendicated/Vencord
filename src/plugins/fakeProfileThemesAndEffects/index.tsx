@@ -10,26 +10,22 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, FluxDispatcher, Forms, RestAPI, showToast, Switch, Text, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
+import { Button, FluxDispatcher, Forms, RestAPI, showToast, Switch, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import type { ComponentType } from "react";
 
+import { BuilderButton } from "./components/BuilderButton";
 import { openColorPickerModal } from "./components/ColorPickerModal";
 import { openProfileEffectModal } from "./components/ProfileEffectModal";
+import type { ProfileEffect, RGBColor, UserProfile } from "./types";
 
-interface UserProfile extends User {
-    themeColors: [number, number] | undefined;
-    profileEffectID: string | undefined;
-}
-
-type RGBColor = [number, number, number];
-
-let ColorPicker: React.ComponentType<any> = () => null;
+let CustomizationSection: ComponentType<any> = () => null;
+let ColorPicker: ComponentType<any> = () => null;
 let getPaletteForAvatar = (v: string) => Promise.resolve<RGBColor[]>([]);
 let getComplimentaryPaletteForColor = (v: RGBColor): RGBColor[] => [];
 const profileEffectModalClassNames: { [k: string]: string; } = {};
 let [primaryColor, setPrimaryColor] = [-1, (v: number) => { }];
 let [accentColor, setAccentColor] = [-1, (v: number) => { }];
-let [effectID, setEffectID] = ["", (v: string) => { }];
+let [effect, setEffect]: [ProfileEffect | null, (v: ProfileEffect | null) => void] = [null, () => { }];
 let [preview, setPreview] = [true, (v: boolean) => { }];
 
 /**
@@ -119,12 +115,12 @@ function decodeEffect(str: string) {
  * @param accent The accent profile theme color. Must be -1 if unset.
  * @param effect The profile effect ID. Must be empty if unset.
  * @param legacy Whether the primary and accent colors should be legacy encoded
- * @returns The generated FPTE string. Will be empty if the given colors and effect are all unset.
+ * @returns The built FPTE string. Will be empty if the given colors and effect are all unset.
  */
 function buildFPTE(primary: number, accent: number, effect: string, legacy: boolean) {
     const DELIM = "\u200b"; // The FPTE delimiter (zero-width space)
 
-    let str = ""; // The FPTE string to be returned
+    let fpte = ""; // The FPTE string to be returned
 
     // If the FPTE Builder is set to backwards compatibility mode,
     // the primary and accent colors, if set, will be legacy encoded.
@@ -135,54 +131,54 @@ function buildFPTE(primary: number, accent: number, effect: string, legacy: bool
             // If both the primary and accent colors are set, they will be legacy encoded and added to the
             // string; otherwise, if the accent color is unset, the primary color will be used in its place.
             if (accent !== -1)
-                str = encodeColorsLegacy(primary, accent);
+                fpte = encodeColorsLegacy(primary, accent);
             else
-                str = encodeColorsLegacy(primary, primary);
+                fpte = encodeColorsLegacy(primary, primary);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += DELIM + encodeEffect(BigInt(effect));
+                fpte += DELIM + encodeEffect(BigInt(effect));
 
-            return str;
+            return fpte;
         }
 
         // Since the primary color is unset, the accent color, if set, will be used in its place.
         if (accent !== -1) {
-            str = encodeColorsLegacy(accent, accent);
+            fpte = encodeColorsLegacy(accent, accent);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += DELIM + encodeEffect(BigInt(effect));
+                fpte += DELIM + encodeEffect(BigInt(effect));
 
-            return str;
+            return fpte;
         }
     }
     // If the primary color is set, it will be encoded and added to the string.
     else if (primary !== -1) {
-        str = encodeColor(primary);
+        fpte = encodeColor(primary);
 
         // If the accent color is set and different from the primary color, it
         // will be encoded and added to the string prefixed by one delimiter.
         if (accent !== -1 && primary !== accent) {
-            str += DELIM + encodeColor(accent);
+            fpte += DELIM + encodeColor(accent);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
             if (effect !== "")
-                str += DELIM + encodeEffect(BigInt(effect));
+                fpte += DELIM + encodeEffect(BigInt(effect));
 
-            return str;
+            return fpte;
         }
     }
     // If only the accent color is set, it will be encoded and added to the string.
     else if (accent !== -1)
-        str = encodeColor(accent);
+        fpte = encodeColor(accent);
 
     // Since either the primary / accent colors are the same, both are unset, or just one is set, only one color will be added
     // to the string; therefore, the effect ID, if set, will be encoded and added to the string prefixed by two delimiters.
     if (effect !== "")
-        str += DELIM + DELIM + encodeEffect(BigInt(effect));
+        fpte += DELIM + DELIM + encodeEffect(BigInt(effect));
 
-    return str;
+    return fpte;
 }
 
 /**
@@ -242,9 +238,9 @@ function getSuggestedColors(callback: (v: string[]) => void) {
         });
 }
 
-function fetchProfileEffects(callback: (v: any[]) => void) {
+function fetchProfileEffects(callback: (v: ProfileEffect[]) => void) {
     RestAPI.get({ url: "/user-profile-effects" })
-        .then(res => { callback(res.body.profile_effect_configs); })
+        .then(res => callback(res.body.profile_effect_configs))
         .catch(e => {
             console.error(e);
             showToast("Unable to retrieve the list of profile effects.", Toasts.Type.FAILURE);
@@ -308,6 +304,13 @@ export default definePlugin({
             }
         },
         {
+            find: ".customizationSectionBackground",
+            replacement: {
+                match: /default:function\(\){return (\i)}.*?;/,
+                replace: "$&$self.CustomizationSection=$1;"
+            }
+        },
+        {
             find: "CustomColorPicker:function(){",
             replacement: {
                 match: /CustomColorPicker:function\(\){return (\i)}.*? \1=(?=[^=])/,
@@ -330,6 +333,7 @@ export default definePlugin({
         },
         {
             find: 'effectGridItem:"',
+            noWarn: true,
             replacement: {
                 match: /(\i):"(.+?)"/g,
                 replace: (m, k, v) => { profileEffectModalClassNames[k] = v; return m; }
@@ -343,8 +347,11 @@ export default definePlugin({
             }
         }
     ],
-    set ColorPicker(e: React.ComponentType<any>) {
-        ColorPicker = e;
+    set CustomizationSection(c: ComponentType<any>) {
+        CustomizationSection = c;
+    },
+    set ColorPicker(c: ComponentType<any>) {
+        ColorPicker = c;
     },
     set getPaletteForAvatar(f: (v: string) => Promise<RGBColor[]>) {
         getPaletteForAvatar = f;
@@ -420,8 +427,8 @@ export default definePlugin({
                 props.pendingThemeColors = [accentColor, accentColor];
                 props.canUsePremiumCustomization = true;
             }
-            if (effectID !== "") {
-                props.pendingProfileEffectID = effectID;
+            if (effect) {
+                props.pendingProfileEffectID = effect.id;
                 props.canUsePremiumCustomization = true;
             }
         }
@@ -431,157 +438,121 @@ export default definePlugin({
 
         [primaryColor, setPrimaryColor] = useState(-1);
         [accentColor, setAccentColor] = useState(-1);
-        [effectID, setEffectID] = useState("");
-        const [effectName, setEffectName] = useState("");
+        [effect, setEffect] = useState<ProfileEffect | null>(null);
         [preview, setPreview] = useState(true);
-        const [buildLegacyFPTE, setBuildLegacyFPTE] = useState(false);
+        const [buildLegacy, setBuildLegacy] = useState(false);
         const currModal = useRef("");
 
         useEffect(() => () => closeModal(currModal.current), []);
 
         return (
             <>
-                <style>{`.${this.name}TextOverflow{white-space:normal!important;text-overflow:clip!important}`}</style>
-                <Text
-                    color="header-secondary"
-                    variant="eyebrow"
-                    tag="h3"
-                    style={{ display: "inline" }}
-                >
-                    FPTE Builder
-                </Text>
-                <Button
-                    look={Button.Looks.LINK}
-                    color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.TINY}
-                    style={{
-                        display: primaryColor === -1 && accentColor === -1 && effectID === "" ? "none" : "inline",
-                        height: "14px",
-                        marginLeft: "4px",
-                        minHeight: "0",
-                        paddingBottom: "0",
-                        paddingTop: "0"
-                    }}
-                    onClick={() => {
-                        setPrimaryColor(-1);
-                        setAccentColor(-1);
-                        setEffectID("");
-                        setEffectName("");
-                        if (preview) updatePreview();
-                    }}
-                >
-                    Reset
-                </Button>
-                <div
-                    className={Margins.bottom8 + " " + Margins.top8}
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(4, 1fr)"
-                    }}
-                >
-                    <Button
-                        innerClassName={this.name + "TextOverflow"}
-                        color={Button.Colors.PRIMARY}
-                        style={{
-                            borderTopRightRadius: "0",
-                            borderBottomRightRadius: "0",
-                            paddingLeft: "0",
-                            paddingRight: "0"
-                        }}
-                        onClick={() => {
-                            getSuggestedColors(colors => {
-                                closeModal(currModal.current);
-                                currModal.current = openColorPickerModal(
-                                    ColorPicker,
-                                    color => {
-                                        setPrimaryColor(color);
-                                        if (preview) updatePreview();
-                                        showToast("FPTE updated!", Toasts.Type.SUCCESS);
-                                    },
-                                    primaryColor === -1 ? 0 : primaryColor,
-                                    colors
-                                );
-                            });
-                        }}
-                    >
-                        {"Primary: " + (primaryColor === -1 ? "unchanged" : "#" + primaryColor.toString(16).padStart(6, "0"))}
-                    </Button>
-                    <Button
-                        innerClassName={this.name + "TextOverflow"}
-                        color={Button.Colors.PRIMARY}
-                        style={{
-                            borderRadius: "0",
-                            paddingLeft: "0",
-                            paddingRight: "0"
-                        }}
-                        onClick={() => {
-                            getSuggestedColors(colors => {
-                                closeModal(currModal.current);
-                                currModal.current = openColorPickerModal(
-                                    ColorPicker,
-                                    color => {
-                                        setAccentColor(color);
-                                        if (preview) updatePreview();
-                                        showToast("FPTE updated!", Toasts.Type.SUCCESS);
-                                    },
-                                    accentColor === -1 ? 0 : accentColor,
-                                    colors
-                                );
-                            });
-                        }}
-                    >
-                        {"Accent: " + (accentColor === -1 ? "unchanged" : "#" + accentColor.toString(16).padStart(6, "0"))}
-                    </Button>
-                    <Button
-                        innerClassName={this.name + "TextOverflow"}
-                        color={Button.Colors.PRIMARY}
-                        style={{
-                            borderRadius: "0",
-                            paddingLeft: "0",
-                            paddingRight: "0"
-                        }}
-                        onClick={() => {
-                            fetchProfileEffects(profileEffects => {
-                                if (profileEffects) {
+                <CustomizationSection title="FPTE Builder">
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <BuilderButton
+                            label="Primary"
+                            {...primaryColor !== -1 ? (c => ({
+                                tooltip: c,
+                                selectedStyle: { background: c }
+                            }))("#" + primaryColor.toString(16).padStart(6, "0")) : {}}
+                            onClick={() => {
+                                getSuggestedColors(colors => {
                                     closeModal(currModal.current);
-                                    currModal.current = openProfileEffectModal(
-                                        (id, name) => {
-                                            setEffectID(id);
-                                            setEffectName(name);
+                                    currModal.current = openColorPickerModal(
+                                        ColorPicker,
+                                        c => {
+                                            setPrimaryColor(c);
                                             if (preview) updatePreview();
-                                            showToast("FPTE updated!", Toasts.Type.SUCCESS);
                                         },
-                                        profileEffects,
-                                        profileEffectModalClassNames
+                                        primaryColor === -1 ? parseInt(colors[0]?.slice(1), 16) || 0 : primaryColor,
+                                        colors
                                     );
-                                } else
-                                    showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
-                            });
-                        }}
-                    >
-                        {"Effect: " + (effectID === "" ? "unchanged" : effectName)}
-                    </Button>
-                    <Button
-                        innerClassName={this.name + "TextOverflow"}
-                        color={Button.Colors.PRIMARY}
-                        style={{
-                            borderTopLeftRadius: "0",
-                            borderBottomLeftRadius: "0",
-                            paddingLeft: "0",
-                            paddingRight: "0"
-                        }}
-                        onClick={() => {
-                            const strToCopy = buildFPTE(primaryColor, accentColor, effectID, buildLegacyFPTE);
-                            if (strToCopy === "")
-                                showToast("FPTE Builder is empty; nothing to copy!");
-                            else
-                                copyWithToast(strToCopy, "FPTE copied to clipboard!");
-                        }}
-                    >
-                        Copy FPTE
-                    </Button>
-                </div>
-                <Forms.FormDivider className={Margins.bottom20 + " " + Margins.top20} />
+                                });
+                            }}
+                        />
+                        <BuilderButton
+                            label="Accent"
+                            {...accentColor !== -1 ? (c => ({
+                                tooltip: c,
+                                selectedStyle: { background: c }
+                            }))("#" + accentColor.toString(16).padStart(6, "0")) : {}}
+                            onClick={() => {
+                                getSuggestedColors(colors => {
+                                    closeModal(currModal.current);
+                                    currModal.current = openColorPickerModal(
+                                        ColorPicker,
+                                        c => {
+                                            setAccentColor(c);
+                                            if (preview) updatePreview();
+                                        },
+                                        accentColor === -1 ? parseInt(colors[1]?.slice(1), 16) || 0 : accentColor,
+                                        colors
+                                    );
+                                });
+                            }}
+                        />
+                        <BuilderButton
+                            label="Effect"
+                            {...effect && {
+                                tooltip: effect.title,
+                                selectedStyle: {
+                                    background: `top / cover url(${effect.thumbnailPreviewSrc}), top / cover url(/assets/f328a6f8209d4f1f5022.png)`
+                                }
+                            }}
+                            onClick={() => {
+                                fetchProfileEffects(effects => {
+                                    if (effects) {
+                                        closeModal(currModal.current);
+                                        currModal.current = openProfileEffectModal(
+                                            e => {
+                                                setEffect(e);
+                                                if (preview) updatePreview();
+                                            },
+                                            effects,
+                                            profileEffectModalClassNames,
+                                            effect?.id
+                                        );
+                                    } else
+                                        showToast("The retrieved data did not match the expected format.", Toasts.Type.FAILURE);
+                                });
+                            }}
+                        />
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                flexDirection: "column",
+                            }}
+                        >
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                onClick={() => {
+                                    const strToCopy = buildFPTE(primaryColor, accentColor, effect?.id ?? "", buildLegacy);
+                                    if (strToCopy === "")
+                                        showToast("FPTE Builder is empty; nothing to copy!");
+                                    else
+                                        copyWithToast(strToCopy, "FPTE copied to clipboard!");
+                                }}
+                            >
+                                Copy FPTE
+                            </Button>
+                            <Button
+                                look={Button.Looks.LINK}
+                                color={Button.Colors.PRIMARY}
+                                size={Button.Sizes.SMALL}
+                                style={{ display: primaryColor === -1 && accentColor === -1 && !effect ? "none" : "revert" }}
+                                onClick={() => {
+                                    setPrimaryColor(-1);
+                                    setAccentColor(-1);
+                                    setEffect(null);
+                                    if (preview) updatePreview();
+                                }}
+                            >
+                                Reset
+                            </Button>
+                        </div>
+                    </div>
+                </CustomizationSection>
                 <Switch
                     value={preview}
                     onChange={value => {
@@ -592,9 +563,9 @@ export default definePlugin({
                     FPTE Builder Preview
                 </Switch>
                 <Switch
-                    value={buildLegacyFPTE}
+                    value={buildLegacy}
                     note="Will use more characters"
-                    onChange={value => setBuildLegacyFPTE(value)}
+                    onChange={value => setBuildLegacy(value)}
                 >
                     Build backwards compatible FPTE
                 </Switch>

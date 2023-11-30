@@ -7,16 +7,19 @@
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Flex, showToast, Text, useState } from "@webpack/common";
 
+import type { ProfileEffect } from "../types";
+
 interface ProfileEffectModalProps {
     modalProps: ModalProps;
     onClose: () => void;
-    onSubmit: (i: string, n: string) => void;
+    onSubmit: (v: any) => void;
     classNames: { [k: string]: string; };
-    profileEffects: any[];
+    profileEffects: ProfileEffect[];
+    initialEffectID?: string;
 }
 
-export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects, classNames = {} }: ProfileEffectModalProps) {
-    const [selected, setSelected] = useState(-1);
+export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffects, classNames = {}, initialEffectID }: ProfileEffectModalProps) {
+    const [selected, setSelected] = useState(initialEffectID ? profileEffects.findIndex(e => e.id === initialEffectID) : -1);
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
@@ -36,7 +39,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                     padding: "16px 8px 16px 16px"
                 }}
             >
-                {profileEffects.map((e, i) =>
+                {profileEffects.map((e, i) => (
                     <div
                         className={classNames.effectGridItem + (i === selected ? " " + classNames.selected : "")}
                         role="button"
@@ -55,7 +58,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                             alt={e.title}
                         />
                     </div>
-                )}
+                ))}
             </ModalContent>
             <ModalFooter
                 justify={Flex.Justify.BETWEEN}
@@ -68,7 +71,7 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
                 <Button
                     onClick={() => {
                         if (selected !== -1)
-                            onSubmit(profileEffects[selected].id, profileEffects[selected].title);
+                            onSubmit(profileEffects[selected]);
                         else
                             showToast("No effect selected!");
                     }}
@@ -80,7 +83,12 @@ export function ProfileEffectModal({ modalProps, onClose, onSubmit, profileEffec
     );
 }
 
-export function openProfileEffectModal(onSubmit: (i: string, n: string) => void, profileEffects: any[], classNames: { [k: string]: string; } = {}) {
+export function openProfileEffectModal(
+    onSubmit: (v: ProfileEffect) => void,
+    profileEffects: ProfileEffect[],
+    classNames: { [k: string]: string; } = {},
+    initialEffectID?: string
+) {
     const key = openModal(modalProps =>
         <ProfileEffectModal
             modalProps={modalProps}
@@ -88,6 +96,7 @@ export function openProfileEffectModal(onSubmit: (i: string, n: string) => void,
             onSubmit={onSubmit}
             profileEffects={profileEffects}
             classNames={classNames}
+            initialEffectID={initialEffectID}
         />
     );
     return key;
