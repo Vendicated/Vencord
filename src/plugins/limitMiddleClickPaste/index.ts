@@ -49,7 +49,7 @@ let containerEl;
 
 export default definePlugin({
     name: "LimitMiddleClickPaste",
-    description: "For middle-click autoscroll users, prevents middle-click from automatically pasting when clicking something other than an input.",
+    description: "For middle-click autoscroll users, prevents middle-click from making unwanted pastes.",
     authors: [],
 
     settings: settings,
