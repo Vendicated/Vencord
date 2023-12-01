@@ -47,10 +47,9 @@ const XIcon = () => <svg
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
-export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { userId: string; }) {
+export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const { openTabs } = ChannelTabsUtils;
-    const [userId, setUserId] = useState(props.userId);
-    const [ready, setReady] = useState(false);
+    const [userId, setUserId] = useState("");
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
     const _update = useForceUpdater();
@@ -61,12 +60,10 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
 
     useEffect(() => {
         // for some reason, the app directory is it's own page instead of a layer, so when it's opened
-        // everything behind it is destroyed, including our container. when it's closed, this is recreated
-        // since the first render of this is extremely early, it's pretty safe to assume that the user id
-        // will only be present if the component was recreated, not on startup
-        // TODO: maybe find a less scuffed way to do this
-        if (props.userId) {
-            setReady(true);
+        // everything behind it is destroyed, including our container. this workaround is required
+        // to properly add the container back without reinitializing everything
+        if ((Vencord.Plugins.plugins.ChannelTabs as any).appDirectoryClosed) {
+            setUserId(UserStore.getCurrentUser().id);
             update(false);
         }
     }, []);
@@ -80,7 +77,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
             if (id === userId && openTabs.length) return;
             setUserId(id);
 
-            openStartupTabs({ ...props, userId: id }, setReady);
+            openStartupTabs({ ...props, userId: id }, setUserId);
         };
 
         FluxDispatcher.subscribe("CONNECTION_OPEN_SUPPLEMENTAL", onLogin);
@@ -91,9 +88,9 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps & { u
 
     useEffect(() => {
         (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current?.clientHeight;
-    }, [ready, showBookmarkBar]);
+    }, [userId, showBookmarkBar]);
 
-    if (!ready) return null;
+    if (!userId) return null;
     handleChannelSwitch(props);
     saveTabs(userId);
 

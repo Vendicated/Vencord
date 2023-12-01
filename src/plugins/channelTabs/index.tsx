@@ -22,7 +22,7 @@ import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCal
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu, UserStore } from "@webpack/common";
+import { ChannelStore, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
@@ -92,6 +92,14 @@ export default definePlugin({
                 match: /\i&&\((\i).maxHeight-=\d{1,3}\)/,
                 replace: "$&;$1.maxHeight-=$self.containerHeight"
             }
+        },
+        // scuffed workaround for discord shitcode, see comments in ChannelTabContainer.tsx
+        {
+            find: ".ApplicationDirectoryEntrypointNames.EXTERNAL",
+            replacement: {
+                match: /(\.guildSettingsSection\).{0,30})},\[/,
+                replace: "$1;$self.onAppDirectoryClose()},["
+            }
         }
     ],
 
@@ -113,10 +121,9 @@ export default definePlugin({
         currentChannel: BasicChannelTabsProps,
         children: JSX.Element;
     }) {
-        const id = UserStore.getCurrentUser()?.id;
         return <>
             <ErrorBoundary>
-                <ChannelsTabsContainer {...currentChannel} userId={id} />
+                <ChannelsTabsContainer {...currentChannel} />
             </ErrorBoundary>
             {children}
         </>;
@@ -129,6 +136,11 @@ export default definePlugin({
             compact: false
         };
         ChannelTabsUtils.createTab(tab, false, message.id);
+    },
+
+    onAppDirectoryClose() {
+        this.appDirectoryClosed = true;
+        setTimeout(() => this.appDirectoryClosed = false, 0);
     },
 
     util: ChannelTabsUtils,

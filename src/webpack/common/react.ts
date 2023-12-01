@@ -29,8 +29,6 @@ export let useCallback: typeof React.useCallback;
 
 export const ReactDOM: typeof import("react-dom") & typeof import("react-dom/client") = findByPropsLazy("createPortal", "render");
 
-export const ReactDnd = findByPropsLazy("useDrop", "DndProvider");
-
 waitFor("useState", m => {
     React = m;
     ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = React);
