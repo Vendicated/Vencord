@@ -11,15 +11,14 @@ import { copyWithToast } from "@utils/misc";
 import { closeModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, FluxDispatcher, Forms, RestAPI, showToast, Switch, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
-import type { ComponentType } from "react";
 
 import { BuilderButton } from "./components/BuilderButton";
 import { openColorPickerModal } from "./components/ColorPickerModal";
 import { openProfileEffectModal } from "./components/ProfileEffectModal";
-import type { ProfileEffect, RGBColor, UserProfile } from "./types";
+import type { ColorPicker, CustomizationSection, ProfileEffect, RGBColor, UserProfile } from "./types";
 
-let CustomizationSection: ComponentType<any> = () => null;
-let ColorPicker: ComponentType<any> = () => null;
+let CustomizationSection: CustomizationSection = () => null;
+let ColorPicker: ColorPicker = () => null;
 let getPaletteForAvatar = (v: string) => Promise.resolve<RGBColor[]>([]);
 let getComplimentaryPaletteForColor = (v: RGBColor): RGBColor[] => [];
 const profileEffectModalClassNames: { [k: string]: string; } = {};
@@ -342,15 +341,15 @@ export default definePlugin({
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /let{(?:[^}]+,)?pendingThemeColors:[^}]+,pendingProfileEffectID:[^}]+}=(\i)[,;]/,
+                match: /let{(?=(?:[^}]+,)?pendingThemeColors:)(?=(?:[^}]+,)?pendingProfileEffectID:)[^}]+}=(\i)[,;]/,
                 replace: "$self.profilePreviewHook($1);$&"
             }
         }
     ],
-    set CustomizationSection(c: ComponentType<any>) {
+    set CustomizationSection(c: CustomizationSection) {
         CustomizationSection = c;
     },
-    set ColorPicker(c: ComponentType<any>) {
+    set ColorPicker(c: ColorPicker) {
         ColorPicker = c;
     },
     set getPaletteForAvatar(f: (v: string) => Promise<RGBColor[]>) {

@@ -5,6 +5,7 @@
  */
 
 import type { User } from "discord-types/general";
+import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 export interface UserProfile extends User {
     themeColors: [number, number] | undefined;
@@ -37,5 +38,31 @@ export interface ProfileEffect {
     title: string;
     type: number;
 }
+
+export type CustomizationSection = ComponentType<PropsWithChildren<{
+    title?: ReactNode;
+    titleIcon?: ReactNode;
+    titleId?: string;
+    description?: ReactNode;
+    className?: string;
+    errors?: string[];
+    disabled?: boolean;
+    hideDivider?: boolean;
+    showBorder?: boolean;
+    borderType?: "limited" | "premium";
+    hasBackground?: boolean;
+    forcedDivider?: boolean;
+    showPremiumIcon?: boolean;
+}>>;
+
+export type ColorPicker = ComponentType<{
+    value?: number | null;
+    onChange: (v: number) => void;
+    onClose?: () => void;
+    suggestedColors?: string[];
+    middle?: ReactNode;
+    footer?: ReactNode;
+    showEyeDropper?: boolean;
+}>;
 
 export type RGBColor = [number, number, number];
