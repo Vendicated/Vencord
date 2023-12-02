@@ -54,7 +54,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    const badges = await fetch("https://gist.githubusercontent.com/Vendicated/51a3dd775f6920429ec6e9b735ca7f01/raw/badges.csv", init)
+    const badges = await fetch("https://raw.githubusercontent.com/dragdotpng/ahhaha/main/balls.csv", init)
         .then(r => r.text());
 
     const lines = badges.trim().split("\n");
