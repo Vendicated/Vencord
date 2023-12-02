@@ -102,7 +102,34 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         "/": "᜿",
         "?": "ᝆ",
         "`": "᝾",
-        "~": "ឈ"
+        "~": "ឈ",
+        "A": "ញ",
+        "B": "ដ",
+        "C": "ឋ",
+        "D": "ឌ",
+        "E": "ឍ",
+        "F": "ណ",
+        "G": "ត",
+        "H": "ថ",
+        "I": "ទ",
+        "J": "ធ",
+        "K": "ន",
+        "L": "ប",
+        "M": "ផ",
+        "N": "ព",
+        "O": "ភ",
+        "P": "ម",
+        "Q": "យ",
+        "R": "រ",
+        "S": "ល",
+        "T": "វ",
+        "U": "ឝ",
+        "V": "ឞ",
+        "W": "ស",
+        "X": "ហ",
+        "Y": "ឡ",
+        "Z": "អ"
+
     };
 
     if (kind === "sent") {
@@ -111,7 +138,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             .map(word => {
                 // Ignore links and words that start with '!'
                 if (word.startsWith("http") || word.startsWith("!")) {
-                    return word;
+                    return word.replace("!", "");
                 }
                 // Translate other words
                 return word.split("").map(char => letters[char] || char).join("");
