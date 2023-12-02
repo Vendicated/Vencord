@@ -44,7 +44,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             label="Decrypt"
             icon={TranslateIcon}
             action={async () => {
-                const trans = await translate("received", message.content);
+                const trans = await translate("received", message.content, settings.store.version);
                 handleTranslate(message.id, trans);
             }}
         />
@@ -84,7 +84,7 @@ export default definePlugin({
                 message,
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
-                    const trans = await translate("received", message.content);
+                    const trans = await translate("received", message.content, settings.store.version);
                     handleTranslate(message.id, trans);
                 }
             };
@@ -94,7 +94,7 @@ export default definePlugin({
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
 
-            message.content = (await translate("sent", message.content)).text;
+            message.content = (await translate("sent", message.content, settings.store.version)).text;
         });
 
     },

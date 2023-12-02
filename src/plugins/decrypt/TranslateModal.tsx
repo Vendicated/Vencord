@@ -18,7 +18,7 @@
 
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, Switch } from "@webpack/common";
+import { Forms, SearchableSelect, Switch } from "@webpack/common";
 
 import { settings } from "./settings";
 import { cl } from "./utils";
@@ -39,6 +39,32 @@ function AutoTranslateToggle() {
     );
 }
 
+function VersionSelector() {
+    const settingsKey = "version";
+    const currentValue = settings.use([settingsKey])[settingsKey];
+
+    const options = [
+        { label: "Version 1", value: 1 },
+        { label: "Version 2", value: 2 },
+    ];
+
+    return (
+        <section className={Margins.bottom16}>
+            <Forms.FormTitle tag="h3">
+                {settings.def[settingsKey].description}
+            </Forms.FormTitle>
+
+            <SearchableSelect
+                options={options}
+                value={options.find(o => o.value === currentValue)}
+                placeholder={"Select a version"}
+                maxVisibleItems={2}
+                closeOnSelect={true}
+                onChange={v => settings.store[settingsKey] = v}
+            />
+        </section>
+    );
+}
 
 
 export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
@@ -52,10 +78,13 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
-
                 <Forms.FormDivider className={Margins.bottom16} />
 
                 <AutoTranslateToggle />
+
+                <Forms.FormDivider className={Margins.bottom16} />
+
+                <VersionSelector />
             </ModalContent>
         </ModalRoot>
     );

@@ -22,7 +22,12 @@ import { OptionType } from "@utils/types";
 export const settings = definePluginSettings({
     autoTranslate: {
         type: OptionType.BOOLEAN,
-        description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
+        description: "Automatically encrypt your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
-    }
+    },
+    version: {
+        type: OptionType.NUMBER,
+        description: "Version of the encryptor to use",
+        default: 2
+    },
 });

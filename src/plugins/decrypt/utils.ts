@@ -34,8 +34,8 @@ export interface TranslationValue {
     text: string;
 }
 
-export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
-    const letters = {
+export async function translate(kind: "received" | "sent", text: string, version: number): Promise<TranslationValue> {
+    const lettersv1 = {
         "a": "આ",
         "b": "ୈ",
         "c": "உ",
@@ -132,6 +132,108 @@ export async function translate(kind: "received" | "sent", text: string): Promis
 
     };
 
+    const lettersv2 = {
+        "a": "ا",
+        "b": "ب",
+        "c": "ت",
+        "d": "ث",
+        "e": "ج",
+        "f": "ح",
+        "g": "خ",
+        "h": "د",
+        "i": "ذ",
+        "j": "ر",
+        "k": "ز",
+        "l": "س",
+        "m": "ش",
+        "n": "ص",
+        "o": "ض",
+        "p": "ط",
+        "q": "ظ",
+        "r": "ع",
+        "s": "غ",
+        "t": "ف",
+        "u": "ق",
+        "v": "ك",
+        "w": "ل",
+        "x": "م",
+        "y": "ن",
+        "z": "ه",
+        ":": "و",
+        " ": "ى",
+        "0": "ي",
+        "1": "٠",
+        "2": "١",
+        "3": "٢",
+        "4": "٣",
+        "5": "٤",
+        "6": "٥",
+        "7": "٦",
+        "8": "٧",
+        "9": "٨",
+        "!": "٩",
+        "@": "٪",
+        "#": "٫",
+        "$": "٬",
+        "%": "٭",
+        "^": "ٮ",
+        "&": "ٯ",
+        "*": "ٰ",
+        "(": "ٱ",
+        ")": "ٲ",
+        "-": "ٳ",
+        "=": "ٴ",
+        "+": "ٵ",
+        "[": "ٶ",
+        "]": "ٷ",
+        "{": "ٸ",
+        "}": "ٹ",
+        ";": "ٺ",
+        "'": "ٻ",
+        ",": "ټ",
+        ".": "ٽ",
+        "<": "پ",
+        ">": "ٿ",
+        "/": "ڀ",
+        "?": "ځ",
+        "`": "ڂ",
+        "~": "ڃ",
+        "A": "ڄ",
+        "B": "څ",
+        "C": "چ",
+        "D": "ڇ",
+        "E": "ڈ",
+        "F": "ډ",
+        "G": "ڊ",
+        "H": "ڋ",
+        "I": "ڌ",
+        "J": "ڍ",
+        "K": "ڎ",
+        "L": "ڏ",
+        "M": "ڐ",
+        "N": "ڑ",
+        "O": "ڒ",
+        "P": "ړ",
+        "Q": "ڔ",
+        "R": "ڕ",
+        "S": "ږ",
+        "T": "ڗ",
+        "U": "ژ",
+        "V": "ڙ",
+        "W": "ښ",
+        "X": "ڛ",
+        "Y": "ڜ",
+        "Z": "ڝ"
+    };
+
+    let letters;
+
+    if (kind === "sent") {
+        letters = version === 1 ? lettersv1 : lettersv2;
+    } else {
+        letters = text.split("").some(char => Object.values(lettersv2).includes(char)) ? lettersv2 : lettersv1;
+    }
+
     if (kind === "sent") {
         const translatedText = text
             .split(" ")
@@ -150,7 +252,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         };
     }
 
-    const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value]: key }), {});
+    const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
     const translatedText = text
         .split(" ")
         .map(word => {
