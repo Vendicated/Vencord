@@ -4,7 +4,7 @@
 
 The cutest Discord client mod
 
-| ![image](https://github.com/dragdotpng/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
+| ![image](https://private-user-images.githubusercontent.com/45497981/263856239-706722b1-32de-4d99-bee9-93993b504334.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDE1MjczOTQsIm5iZiI6MTcwMTUyNzA5NCwicGF0aCI6Ii80NTQ5Nzk4MS8yNjM4NTYyMzktNzA2NzIyYjEtMzJkZS00ZDk5LWJlZTktOTM5OTNiNTA0MzM0LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzEyMDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMjAyVDE0MjQ1NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWZhMDljMDY0YTk5ZDFmNjNhMmYzMjE1NDBkMmYyNGEyNzkyZDQxMGFjNzZkMGIyYmIwODc3ZTBmZjZmYmI5NGEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.Ocr80P_bfRT1pLGd4Kg8_uPKaIaORw8bf7b6-E_uAco) |
 |:--:|
 | A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme) |
 
@@ -33,7 +33,7 @@ Visit <https://vencord.dev/download>
 
 | **Thanks a lot to all Vencord [sponsors](https://github.com/sponsors/dragdotpng)!!** |
 |:--:|
-| [![](https://meow.dragdotpng.dev/sponsors.png)](https://github.com/sponsors/dragdotpng) |
+| [![](https://meow.vendicated.dev/sponsors.png)](https://github.com/sponsors/dragdotpng) |
 | *generated using [github-sponsor-graph](https://github.com/dragdotpng/github-sponsor-graph)* |
 
 ## Star History
