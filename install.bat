@@ -1,24 +1,28 @@
-
-npm --version >nul 2>&1
+@echo off
+echo Checking npm version
+call npm --version
 IF %ERRORLEVEL% EQU 0 (
     echo npm is installed
 ) ELSE (
     echo npm is not installed
     echo Installing npm
-    winget install OpenJS.NodeJS
-    exit /b
+    call winget install OpenJS.NodeJS
 )
-pnpm --version >nul 2>&1
+echo Checking pnpm version
+call pnpm --version
 IF %ERRORLEVEL% EQU 0 (
     echo pnpm is installed
 ) ELSE (
     echo pnpm is not installed
     echo Installing pnpm
-    npm i -g pnpm
+    call npm i -g pnpm
 )
-git clone https://github.com/drsgdotpng/Vencord
+echo Cloning repository
+call git clone https://github.com/dragdotpng/Vencord
 cd Vencord
-
-pnpm install --frozen-lockfile
-pnpm build
-pnpm inject
+echo Installing dependencies
+call pnpm install --frozen-lockfile
+echo Building project
+call pnpm build
+echo Injecting project
+call pnpm inject
