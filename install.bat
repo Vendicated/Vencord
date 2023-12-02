@@ -1,4 +1,13 @@
 
+npm --version >nul 2>&1
+IF %ERRORLEVEL% EQU 0 (
+    echo npm is installed
+) ELSE (
+    echo npm is not installed
+    echo Installing npm
+    winget install OpenJS.NodeJS
+    exit /b
+)
 pnpm --version >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
     echo pnpm is installed
