@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByProps, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { findByProps, findByPropsLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -49,13 +49,7 @@ export interface ModalOptions {
 
 type RenderFunction = (props: ModalProps) => ReactNode;
 
-export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
-    ModalRoot: filters.byCode(".root"),
-    ModalHeader: filters.byCode(".header"),
-    ModalContent: filters.byCode(".content"),
-    ModalFooter: filters.byCode(".footerSeparator"),
-    ModalCloseButton: filters.byCode(".closeWithCircleBackground"),
-}) as {
+export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{
         transitionState: ModalTransitionState;
         size?: ModalSize;

@@ -17,6 +17,7 @@
 */
 
 import { proxyLazy } from "@utils/lazy";
+import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import type { WebpackInstance } from "discord-types/other";
 
@@ -51,7 +52,18 @@ export const filters = {
         return true;
     },
     byStoreName: (name: string): FilterFn => m =>
-        m.constructor?.displayName === name
+        m.constructor?.displayName === name,
+
+    componentByCode: (...code: string[]): FilterFn => {
+        const filter = filters.byCode(...code);
+        return m => {
+            if (filter(m)) return true;
+            if (!m.$$typeof) return false;
+            if (m.type) return filter(m.type); // memos
+            if (m.render) return filter(m.render); // forwardRefs
+            return false;
+        };
+    }
 };
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
@@ -67,44 +79,6 @@ export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (!wreq) return false;
 
     cache = wreq.c;
-
-    for (const id in cache) {
-        const { exports } = cache[id];
-        if (!exports) continue;
-
-        const numberId = Number(id);
-
-        for (const callback of listeners) {
-            try {
-                callback(exports, numberId);
-            } catch (err) {
-                logger.error("Error in webpack listener", err);
-            }
-        }
-
-        for (const [filter, callback] of subscriptions) {
-            try {
-                if (filter(exports)) {
-                    subscriptions.delete(filter);
-                    callback(exports, numberId);
-                } else if (typeof exports === "object") {
-                    if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, numberId);
-                    }
-
-                    for (const nested in exports) if (nested.length <= 3) {
-                        if (exports[nested] && filter(exports[nested])) {
-                            subscriptions.delete(filter);
-                            callback(exports[nested], numberId);
-                        }
-                    }
-                }
-            } catch (err) {
-                logger.error("Error while firing callback for webpack chunk", err);
-            }
-        }
-    }
     return true;
 }
 
@@ -140,19 +114,9 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
             return isWaitFor ? [mod.exports, Number(key)] : mod.exports;
         }
 
-        if (typeof mod.exports !== "object") continue;
-
         if (mod.exports.default && filter(mod.exports.default)) {
             const found = mod.exports.default;
             return isWaitFor ? [found, Number(key)] : found;
-        }
-
-        // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) {
-                return isWaitFor ? [nested, Number(key)] : nested;
-            }
         }
     }
 
@@ -162,13 +126,6 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     return isWaitFor ? [null, null] : null;
 });
-
-/**
- * find but lazy
- */
-export function findLazy(filter: FilterFn) {
-    return proxyLazy(() => find(filter));
-}
 
 export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
@@ -181,15 +138,9 @@ export function findAll(filter: FilterFn) {
 
         if (filter(mod.exports))
             ret.push(mod.exports);
-        else if (typeof mod.exports !== "object")
-            continue;
 
         if (mod.exports.default && filter(mod.exports.default))
             ret.push(mod.exports.default);
-        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
-            const nested = mod.exports[nestedMod];
-            if (nested && filter(nested)) ret.push(nested);
-        }
     }
 
     return ret;
@@ -239,26 +190,12 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
                 break;
             }
 
-            if (typeof mod.exports !== "object")
-                continue;
-
             if (mod.exports.default && filter(mod.exports.default)) {
                 results[j] = mod.exports.default;
                 filters[j] = undefined;
                 if (++found === length) break outer;
                 break;
             }
-
-            for (const nestedMod in mod.exports)
-                if (nestedMod.length <= 3) {
-                    const nested = mod.exports[nestedMod];
-                    if (nested && filter(nested)) {
-                        results[j] = nested;
-                        filters[j] = undefined;
-                        if (++found === length) break outer;
-                        continue outer;
-                    }
-                }
         }
     }
 
@@ -300,45 +237,47 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     return null;
 });
 
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
+
 /**
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers
- * @param code Code snippet
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
+ * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
- *          })
+ * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the lazy is evaluated
+ * @param factory lazy factory
+ * @param attempts how many times to try to evaluate the lazy before giving up
+ * @returns Proxy
+ *
+ * Note that the example below exists already as an api, see {@link findByPropsLazy}
+ * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
+export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
-    const id = findModuleId(code);
-    if (id === null)
-        return exports;
-
-    const mod = wreq(id);
-    outer:
-    for (const key in mod) {
-        const member = mod[key];
-        for (const newName in mappers) {
-            // if the current mapper matches this module
-            if (mappers[newName](member)) {
-                exports[newName] = member;
-                continue outer;
-            }
-        }
-    }
-    return exports;
-});
+    return proxyLazy<T>(factory, attempts);
+}
 
 /**
- * Same as {@link mapMangledModule} but lazy
+ * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
+ *
+ * A lazy component. The factory method is called on first render.
+ * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
+ * @returns Result of factory function
  */
-export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    return proxyLazy(() => mapMangledModule(code, mappers));
+export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+
+    return LazyComponent<T>(factory, attempts);
+}
+
+/**
+ * find but lazy
+ */
+export function findLazy(filter: FilterFn) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["find", [filter]]);
+
+    return proxyLazy(() => find(filter));
 }
 
 /**
@@ -355,6 +294,8 @@ export function findByProps(...props: string[]) {
  * findByProps but lazy
  */
 export function findByPropsLazy(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findByProps", props]);
+
     return proxyLazy(() => findByProps(...props));
 }
 
@@ -372,6 +313,8 @@ export function findByCode(...code: string[]) {
  * findByCode but lazy
  */
 export function findByCodeLazy(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findByCode", code]);
+
     return proxyLazy(() => findByCode(...code));
 }
 
@@ -386,17 +329,58 @@ export function findStore(name: string) {
 }
 
 /**
- * findByDisplayName but lazy
+ * findStore but lazy
  */
 export function findStoreLazy(name: string) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findStore", [name]]);
+
     return proxyLazy(() => findStore(name));
+}
+
+/**
+ * Finds the component which includes all the given code. Checks for plain components, memos and forwardRefs
+ */
+export function findComponentByCode(...code: string[]) {
+    const res = find(filters.componentByCode(...code), { isIndirect: true });
+    if (!res)
+        handleModuleNotFound("findComponentByCode", ...code);
+    return res;
+}
+
+/**
+ * Finds the first component that matches the filter, lazily.
+ */
+export function findComponentLazy<T extends object = any>(filter: FilterFn) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
+
+    return LazyComponent<T>(() => find(filter));
+}
+
+/**
+ * Finds the first component that includes all the given code, lazily
+ */
+export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
+
+    return LazyComponent<T>(() => findComponentByCode(...code));
+}
+
+/**
+ * Finds the first component that is exported by the first prop name, lazily
+ */
+export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
+
+    return LazyComponent<T>(() => findByProps(...props)?.[props[0]]);
 }
 
 /**
  * Wait for a module that matches the provided filter to be registered,
  * then call the callback with the module as the first argument
  */
-export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn) {
+export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
+
     if (typeof filter === "string")
         filter = filters.byProps(filter);
     else if (Array.isArray(filter))

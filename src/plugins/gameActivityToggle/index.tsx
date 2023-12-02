@@ -20,12 +20,12 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { StatusSettingsStores } from "@webpack/common";
 
 import style from "./style.css?managed";
 
-const Button = findByCodeLazy("Button.Sizes.NONE,disabled:");
+const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
 
 function makeIcon(showCurrentGame?: boolean) {
     return function () {

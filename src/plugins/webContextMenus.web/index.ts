@@ -20,8 +20,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByProps, findLazy } from "@webpack";
-import { Clipboard } from "@webpack/common";
+import { findByProps } from "@webpack";
+import { Clipboard, ComponentDispatch } from "@webpack/common";
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -30,7 +30,6 @@ async function fetchImage(url: string) {
     return await res.blob();
 }
 
-const MiniDispatcher = findLazy(m => m.emitter?._events?.INSERT_TEXT);
 
 const settings = definePluginSettings({
     // This needs to be all in one setting because to enable any of these, we need to make Discord use their desktop context
@@ -119,11 +118,12 @@ export default definePlugin({
         // Add back image context menu
         {
             find: 'navId:"image-context"',
+            all: true,
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?/,
-                replace: "return true?"
+                match: /return \i\.\i(?=\?|&&)/,
+                replace: "return true"
             }
         },
 
@@ -213,7 +213,7 @@ export default definePlugin({
 
     cut() {
         this.copy();
-        MiniDispatcher.dispatch("INSERT_TEXT", { rawText: "" });
+        ComponentDispatch.dispatch("INSERT_TEXT", { rawText: "" });
     },
 
     async paste() {

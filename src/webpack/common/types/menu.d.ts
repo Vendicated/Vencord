@@ -75,14 +75,14 @@ export interface Menu {
 }
 
 export interface ContextMenuApi {
-    close(): void;
-    open(
+    closeContextMenu(): void;
+    openContextMenu(
         event: UIEvent,
         render?: Menu["Menu"],
         options?: { enableSpellCheck?: boolean; },
         renderLazy?: () => Promise<Menu["Menu"]>
     ): void;
-    openLazy(
+    openContextMenuLazy(
         event: UIEvent,
         renderLazy?: () => Promise<Menu["Menu"]>,
         options?: { enableSpellCheck?: boolean; }

@@ -34,7 +34,7 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
 const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
-    headless: true,
+    headless: "new",
     executablePath: process.env.CHROMIUM_BIN
 });
 
@@ -58,14 +58,16 @@ const report = {
         plugin: string;
         error: string;
     }[],
-    otherErrors: [] as string[]
+    otherErrors: [] as string[],
+    badWebpackFinds: [] as string[]
 };
 
 const IGNORED_DISCORD_ERRORS = [
     "KeybindStore: Looking for callback action",
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
-    /\[GatewaySocket\].{0,110}Cannot access '/
+    /\[GatewaySocket\].{0,110}Cannot access '/,
+    "search for 'name' in undefined"
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {
@@ -74,7 +76,10 @@ function toCodeBlock(s: string) {
 }
 
 async function printReport() {
+    console.log();
+
     console.log("# Vencord Report" + (CANARY ? " (Canary)" : ""));
+
     console.log();
 
     console.log("## Bad Patches");
@@ -87,11 +92,18 @@ async function printReport() {
 
     console.log();
 
+    console.log("## Bad Webpack Finds");
+    report.badWebpackFinds.forEach(p => console.log("- " + p));
+
+    console.log();
+
     console.log("## Bad Starts");
     report.badStarts.forEach(p => {
         console.log(`- ${p.plugin}`);
         console.log(`  - Error: ${toCodeBlock(p.error)}`);
     });
+
+    console.log();
 
     report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
 
@@ -100,8 +112,9 @@ async function printReport() {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
+    console.log();
+
     if (process.env.DISCORD_WEBHOOK) {
-        // this code was written almost entirely by Copilot xD
         await fetch(process.env.DISCORD_WEBHOOK, {
             method: "POST",
             headers: {
@@ -110,7 +123,7 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/f0204a918c6c9c9a43195997e97d8adf.webp",
+                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/6101cff21e241cebb60c4a01563d0c01.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
@@ -124,6 +137,11 @@ async function printReport() {
                             return lines.join("\n");
                         }).join("\n\n") || "None",
                         color: report.badPatches.length ? 0xff0000 : 0x00ff00
+                    },
+                    {
+                        title: "Bad Webpack Finds",
+                        description: report.badWebpackFinds.map(toCodeBlock).join("\n") || "None",
+                        color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
                     },
                     {
                         title: "Bad Starts",
@@ -153,29 +171,35 @@ async function printReport() {
 
 page.on("console", async e => {
     const level = e.type();
-    const args = e.args();
+    const rawArgs = e.args();
 
-    const firstArg = (await args[0]?.jsonValue());
-    if (firstArg === "PUPPETEER_TEST_DONE_SIGNAL") {
+    const firstArg = await rawArgs[0]?.jsonValue();
+    if (firstArg === "[PUPPETEER_TEST_DONE_SIGNAL]") {
         await browser.close();
         await printReport();
         process.exit();
     }
 
-    const isVencord = (await args[0]?.jsonValue()) === "[Vencord]";
-    const isDebug = (await args[0]?.jsonValue()) === "[PUP_DEBUG]";
+    const isVencord = firstArg === "[Vencord]";
+    const isDebug = firstArg === "[PUP_DEBUG]";
+    const isWebpackFindFail = firstArg === "[PUP_WEBPACK_FIND_FAIL]";
+
+    if (isWebpackFindFail) {
+        process.exitCode = 1;
+        report.badWebpackFinds.push(await rawArgs[1].jsonValue() as string);
+    }
 
     if (isVencord) {
-        // make ci fail
-        process.exitCode = 1;
+        const args = await Promise.all(e.args().map(a => a.jsonValue()));
 
-        const jsonArgs = await Promise.all(args.map(a => a.jsonValue()));
-        const [, tag, message] = jsonArgs;
-        const cause = await maybeGetError(args[3]);
+        const [, tag, message] = args as Array<string>;
+        const cause = await maybeGetError(e.args()[3]);
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const [, plugin, type, id, regex] = (message as string).match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                process.exitCode = 1;
+
+                const [, plugin, type, id, regex] = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
                 report.badPatches.push({
                     plugin,
                     type,
@@ -183,16 +207,25 @@ page.on("console", async e => {
                     match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
                     error: cause
                 });
+
                 break;
             case "PluginManager:":
-                const [, name] = (message as string).match(/Failed to start (.+)/)!;
+                const failedToStartMatch = message.match(/Failed to start (.+)/);
+                if (!failedToStartMatch) break;
+
+                process.exitCode = 1;
+
+                const [, name] = failedToStartMatch;
                 report.badStarts.push({
                     plugin: name,
                     error: cause
                 });
+
                 break;
         }
-    } else if (isDebug) {
+    }
+
+    if (isDebug) {
         console.error(e.text());
     } else if (level === "error") {
         const text = await Promise.all(
@@ -206,8 +239,8 @@ page.on("console", async e => {
         ).then(a => a.join(" ").trim());
 
 
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of")) {
-            console.error("Got unexpected error", text);
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module Filter:")) {
+            console.error("[Unexpected Error]", text);
             report.otherErrors.push(text);
         }
     }
@@ -219,16 +252,15 @@ page.on("pageerror", e => console.error("[Page Error]", e));
 await page.setBypassCSP(true);
 
 function runTime(token: string) {
-    console.error("[PUP_DEBUG]", "Starting test...");
+    console.log("[PUP_DEBUG]", "Starting test...");
 
     try {
-        // spoof languages to not be suspicious
+        // Spoof languages to not be suspicious
         Object.defineProperty(navigator, "languages", {
             get: function () {
                 return ["en-US", "en"];
             },
         });
-
 
         // Monkey patch Logger to not log with custom css
         // @ts-ignore
@@ -237,7 +269,7 @@ function runTime(token: string) {
                 console[level]("[Vencord]", this.name + ":", ...args);
         };
 
-        // force enable all plugins and patches
+        // Force enable all plugins and patches
         Vencord.Plugins.patches.length = 0;
         Object.values(Vencord.Plugins.plugins).forEach(p => {
             // Needs native server to run
@@ -247,8 +279,14 @@ function runTime(token: string) {
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
+
                 if (!Array.isArray(patch.replacement))
                     patch.replacement = [patch.replacement];
+
+                patch.replacement.forEach(r => {
+                    delete r.predicate;
+                });
+
                 Vencord.Plugins.patches.push(patch);
             });
         });
@@ -256,41 +294,137 @@ function runTime(token: string) {
         Vencord.Webpack.waitFor(
             "loginToken",
             m => {
-                console.error("[PUP_DEBUG]", "Logging in with token...");
+                console.log("[PUP_DEBUG]", "Logging in with token...");
                 m.loginToken(token);
             }
         );
 
-        // force load all chunks
+        // Force load all chunks
         Vencord.Webpack.onceReady.then(() => setTimeout(async () => {
-            console.error("[PUP_DEBUG]", "Webpack is ready!");
+            console.log("[PUP_DEBUG]", "Webpack is ready!");
 
             const { wreq } = Vencord.Webpack;
 
-            console.error("[PUP_DEBUG]", "Loading all chunks...");
-            const ids = Function("return" + wreq.u.toString().match(/(?<=\()\{.+?\}/s)![0])();
-            for (const id in ids) {
+            console.log("[PUP_DEBUG]", "Loading all chunks...");
+
+            let chunks = null as Record<number, string[]> | null;
+            const sym = Symbol("Vencord.chunksExtract");
+
+            Object.defineProperty(Object.prototype, sym, {
+                get() {
+                    chunks = this;
+                },
+                set() { },
+                configurable: true,
+            });
+
+            await (wreq as any).el(sym);
+            delete Object.prototype[sym];
+
+            const validChunksEntryPoints = [] as string[];
+            const validChunks = [] as string[];
+            const invalidChunks = [] as string[];
+
+            if (!chunks) throw new Error("Failed to get chunks");
+
+            chunksLoop:
+            for (const entryPoint in chunks) {
+                const chunkIds = chunks[entryPoint];
+
+                for (const id of chunkIds) {
+                    if (!wreq.u(id)) continue;
+
+                    const isWasm = await fetch(wreq.p + wreq.u(id))
+                        .then(r => r.text())
+                        .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+
+                    if (isWasm) {
+                        invalidChunks.push(id);
+                        continue chunksLoop;
+                    }
+
+                    validChunks.push(id);
+                }
+
+                validChunksEntryPoints.push(entryPoint);
+            }
+
+            for (const entryPoint of validChunksEntryPoints) {
+                try {
+                    // Loads all chunks required for an entry point
+                    await (wreq as any).el(entryPoint);
+                } catch (err) { }
+            }
+
+            const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
+            if (!allChunks) throw new Error("Failed to get all chunks");
+            const chunksLeft = Object.keys(allChunks).filter(id => {
+                return !(validChunks.includes(id) || invalidChunks.includes(id));
+            });
+
+            for (const id of chunksLeft) {
                 const isWasm = await fetch(wreq.p + wreq.u(id))
                     .then(r => r.text())
                     .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
-                if (!isWasm)
-                    await wreq.e(id as any);
-
-                await new Promise(r => setTimeout(r, 150));
+                // Loads a chunk
+                if (!isWasm) await wreq.e(id as any);
             }
-            console.error("[PUP_DEBUG]", "Finished loading chunks!");
+
+            // Make sure every chunk has finished loading
+            await new Promise(r => setTimeout(r, 1000));
+
+            for (const entryPoint of validChunksEntryPoints) {
+                try {
+                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            console.log("[PUP_DEBUG]", "Finished loading all chunks!");
 
             for (const patch of Vencord.Plugins.patches) {
                 if (!patch.all) {
                     new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
                 }
             }
-            setTimeout(() => console.log("PUPPETEER_TEST_DONE_SIGNAL"), 1000);
+
+            for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
+                let method = searchType;
+
+                if (searchType === "findComponent") method = "find";
+                if (searchType === "findExportedComponent") method = "findByProps";
+                if (searchType === "waitFor" || searchType === "waitForComponent" || searchType === "waitForStore") {
+                    if (typeof args[0] === "string") method = "findByProps";
+                    else method = "find";
+                }
+
+                try {
+                    let result: any;
+
+                    if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
+                        const [factory] = args;
+                        result = factory();
+                    } else {
+                        // @ts-ignore
+                        result = Vencord.Webpack[method](...args);
+                    }
+
+                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
+                } catch (e) {
+                    let logMessage = searchType;
+                    if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+
+                    console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
+                }
+            }
+
+            setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
         }, 1000));
     } catch (e) {
-        console.error("[PUP_DEBUG]", "A fatal error occurred");
-        console.error("[PUP_DEBUG]", e);
+        console.log("[PUP_DEBUG]", "A fatal error occurred:", e);
         process.exit(1);
     }
 }

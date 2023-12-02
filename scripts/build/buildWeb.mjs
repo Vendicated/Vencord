@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, isDev, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -43,7 +43,7 @@ const commonOptions = {
         IS_WEB: "true",
         IS_EXTENSION: "false",
         IS_STANDALONE: "true",
-        IS_DEV: JSON.stringify(watch),
+        IS_DEV: JSON.stringify(isDev),
         IS_DISCORD_DESKTOP: "false",
         IS_VESKTOP: "false",
         IS_UPDATER_DISABLED: "true",
