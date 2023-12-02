@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import definePlugin, { OptionType } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
+import definePlugin, { OptionType } from "@utils/types";
 
 
 const settings = definePluginSettings({
