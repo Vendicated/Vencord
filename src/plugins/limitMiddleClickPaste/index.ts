@@ -57,7 +57,7 @@ export default definePlugin({
     start() {
         // Discord adds it's paste listeners to #app-mount. We can intercept them
         // by attaching listeners a child element.
-        containerEl = document.querySelector("[class^=app_]")!;
+        containerEl = document.querySelector("[class^=appAsidePanelWrapper]")!;
         containerEl.addEventListener("mousedown", disablePasteOnMousedown);
         containerEl.addEventListener("paste", blockPastePropogation);
     },
@@ -70,6 +70,7 @@ export default definePlugin({
 });
 
 let pasteDisabled: boolean = false;
+let timeoutID: number | undefined;
 
 function blockPastePropogation(e: ClipboardEvent) {
     if (pasteDisabled) {
@@ -89,8 +90,9 @@ function disablePasteOnMousedown(e: MouseEvent) {
             break;
     }
     if (maybeEditable(testEl as HTMLElement | null)) return;
+    window.clearTimeout(timeoutID);
     pasteDisabled = true;
-    window.setTimeout(() => {
+    timeoutID = window.setTimeout(() => {
         pasteDisabled = false;
     }, settings.store.reenableDelay);
 }
