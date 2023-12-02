@@ -17,9 +17,6 @@ IF %ERRORLEVEL% EQU 0 (
     echo Installing pnpm
     call npm i -g pnpm
 )
-echo Cloning repository
-call git clone https://github.com/dragdotpng/Vencord
-cd Vencord
 echo Installing dependencies
 call pnpm install --frozen-lockfile
 echo Building project
