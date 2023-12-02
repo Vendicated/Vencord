@@ -106,7 +106,17 @@ export async function translate(kind: "received" | "sent", text: string): Promis
     };
 
     if (kind === "sent") {
-        const translatedText = text.split("").map(char => letters[char] || char).join("");
+        const translatedText = text
+            .split(" ")
+            .map(word => {
+                // Ignore links and words that start with '!'
+                if (word.startsWith("http") || word.startsWith("!")) {
+                    return word;
+                }
+                // Translate other words
+                return word.split("").map(char => letters[char] || char).join("");
+            })
+            .join(" ");
         return {
             src: kind,
             text: translatedText
@@ -114,7 +124,17 @@ export async function translate(kind: "received" | "sent", text: string): Promis
     }
 
     const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value]: key }), {});
-    const translatedText = text.split("").map(char => reversedLetters[char] || char).join("");
+    const translatedText = text
+        .split(" ")
+        .map(word => {
+            // Ignore links and words that start with '!'
+            if (word.startsWith("http") || word.startsWith("!")) {
+                return word;
+            }
+            // Translate other words
+            return word.split("").map(char => reversedLetters[char] || char).join("");
+        })
+        .join(" ");
     return {
         src: kind,
         text: translatedText
