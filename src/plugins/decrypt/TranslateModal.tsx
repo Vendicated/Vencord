@@ -59,8 +59,8 @@ function VersionSelector() {
     const currentValue = settings.use([settingsKey])[settingsKey];
 
     const options = [
-        { label: "Version 1", value: 1 },
-        { label: "Version 2", value: 2 },
+        { label: "Daragcrypt", value: 1 },
+        { label: "Jihad", value: 2 },
     ];
 
     return (

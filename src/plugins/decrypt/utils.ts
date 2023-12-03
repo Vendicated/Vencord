@@ -135,106 +135,38 @@ export async function translate(kind: "received" | "sent", text: string, version
     };
 
     const lettersv2 = {
-        "a": "ا",
-        "b": "ب",
-        "c": "ت",
-        "d": "ث",
-        "e": "ج",
-        "f": "ح",
-        "g": "خ",
-        "h": "د",
-        "i": "ذ",
-        "j": "ر",
-        "k": "ز",
-        "l": "س",
-        "m": "ش",
-        "n": "ص",
-        "o": "ض",
-        "p": "ط",
-        "q": "ظ",
-        "r": "ع",
-        "s": "غ",
-        "t": "ف",
-        "u": "ق",
-        "v": "ك",
-        "w": "ل",
-        "x": "م",
-        "y": "ن",
-        "z": "ه",
-        ":": "و",
-        " ": "ى",
-        "0": "ي",
-        "1": "٠",
-        "2": "١",
-        "3": "٢",
-        "4": "٣",
-        "5": "٤",
-        "6": "٥",
-        "7": "٦",
-        "8": "٧",
-        "9": "٨",
-        "!": "٩",
-        "@": "٪",
-        "#": "٫",
-        "$": "٬",
-        "%": "٭",
-        "^": "ٮ",
-        "&": "ٯ",
-        "*": "ٰ",
-        "(": "ٱ",
-        ")": "ٲ",
-        "-": "ٳ",
-        "=": "ٴ",
-        "+": "ٵ",
-        "[": "ٶ",
-        "]": "ٷ",
-        "{": "ٸ",
-        "}": "ٹ",
-        ";": "ٺ",
-        "'": "ٻ",
-        ",": "ټ",
-        ".": "ٽ",
-        "<": "پ",
-        ">": "ٿ",
-        "/": "ڀ",
-        "?": "ځ",
-        "`": "ڂ",
-        "~": "ڃ",
-        "A": "ڄ",
-        "B": "څ",
-        "C": "چ",
-        "D": "ڇ",
-        "E": "ڈ",
-        "F": "ډ",
-        "G": "ڊ",
-        "H": "ڋ",
-        "I": "ڌ",
-        "J": "ڍ",
-        "K": "ڎ",
-        "L": "ڏ",
-        "M": "ڐ",
-        "N": "ڑ",
-        "O": "ڒ",
-        "P": "ړ",
-        "Q": "ڔ",
-        "R": "ڕ",
-        "S": "ږ",
-        "T": "ڗ",
-        "U": "ژ",
-        "V": "ڙ",
-        "W": "ښ",
-        "X": "ڛ",
-        "Y": "ڜ",
-        "Z": "ڝ"
+        "a": "ر",
+        "b": "",
+        "c": "س",
+        "d": "ش",
+        "e": "ص",
+        "f": "",
+        "g": "ط",
+        "h": "ظ",
+        "i": "ع",
+        "j": "غ",
+        "k": "ػ",
+        "l": "ؼ",
+        "m": "ؽ",
+        "n": "ؾ",
+        "o": "ؿ",
+        "p": "ـ",
+        "q": "",
+        "r": "ق",
+        "s": "ك",
+        "t": "ل",
+        "u": "م",
+        "v": "ن",
+        "w": "ه",
+        "x": "",
+        "y": "ى",
+        "z": "",
+        " ": "װ",
+        ",": "׼",
+        "?": "؏",
     };
 
-    let letters;
-
-    if (kind === "received") {
-        letters = version === 1 ? lettersv1 : lettersv2;
-    } else {
-        letters = text.split("").some(char => Object.values(lettersv2).includes(char)) ? lettersv2 : lettersv1;
-    }
+    const letters = version === 1 ? lettersv1 : lettersv2;
 
     if (kind === "sent") {
         const translatedText = text
@@ -250,12 +182,22 @@ export async function translate(kind: "received" | "sent", text: string, version
             .join(" ");
         return {
             src: kind,
-            text: translatedText + "ᯰ"
+            text: translatedText + "​"
         };
     }
 
-    const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
-    const translatedText = text.split("").map(char => reversedLetters[char] || char).join("");
+    const reversedLettersv1 = Object.entries(lettersv1).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
+    const reversedLettersv2 = Object.entries(lettersv2).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
+
+    const translatedTextv1 = text.split("").map(char => reversedLettersv1[char] || char).join("");
+    const translatedTextv2 = text.split("").map(char => reversedLettersv2[char] || char).join("");
+
+    // Count unrecognized characters
+    const unrecognizedCharsv1 = translatedTextv1.split("").filter(char => !Object.keys(lettersv1).includes(char)).length;
+    const unrecognizedCharsv2 = translatedTextv2.split("").filter(char => !Object.keys(lettersv2).includes(char)).length;
+
+    // Choose the translation with fewer unrecognized characters
+    const translatedText = unrecognizedCharsv1 < unrecognizedCharsv2 ? translatedTextv1 : translatedTextv2;
     return {
         src: kind,
         text: translatedText
