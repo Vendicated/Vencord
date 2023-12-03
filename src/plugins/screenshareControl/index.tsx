@@ -17,8 +17,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findBulk, findByPropsLazy, findExportedComponentLazy, proxyLazyWebpack } from "@webpack";
-import { Text, TextInput, useState } from "@webpack/common";
-import { FormText } from "@webpack/types";
+import { Forms, Text, TextInput, useState } from "@webpack/common";
 
 const Classes = proxyLazyWebpack(() => {
     const modules = findBulk(
@@ -43,7 +42,6 @@ const SelectorClasses = proxyLazyWebpack(() => {
 const AppStreamModule = findByPropsLazy("ApplicationStreamFPSButtons");
 const { Messages } = findByPropsLazy("Messages", "initialLanguageLoad");
 
-// components
 const FormItem = findExportedComponentLazy("FormItem");
 const FocusRing = findExportedComponentLazy("FocusRing");
 
@@ -88,9 +86,9 @@ function NumberInput({ defaultValue, changeCallback, title }) {
 
     return (
         <>
-            <FormText tag="h4" titleClassName={formItemTitleVerySlim} className={documentModeGroup}>
+            <Forms.FormText tag="h4" titleClassName={formItemTitleVerySlim} className={documentModeGroup}>
                 {title}
-            </FormText>
+            </Forms.FormText>
             <TextInput
                 value={sanitizeNumber(value) || ""}
                 spellCheck={false}
