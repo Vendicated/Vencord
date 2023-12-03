@@ -67,7 +67,6 @@ export default definePlugin({
     },
 
     stop() {
-        containerEl.removeEventListener("mousedown", disablePasteOnMousedown);
         containerEl.removeEventListener("paste", blockPastePropogation);
 
         document.body.removeEventListener("paste", blockPastePropogation);
