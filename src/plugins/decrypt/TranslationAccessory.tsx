@@ -25,18 +25,8 @@ import { cl, TranslationValue } from "./utils";
 const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
 
 export function handleTranslate(messageId: string, data: TranslationValue) {
+    console.log(TranslationSetters);
     TranslationSetters.get(messageId)!(data);
-}
-
-function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
-    return (
-        <button
-            onClick={onDismiss}
-            className={cl("dismiss")}
-        >
-            Dismiss
-        </button>
-    );
 }
 
 export function TranslationAccessory({ message }: { message: Message; }) {
