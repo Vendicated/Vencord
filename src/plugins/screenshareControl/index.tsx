@@ -10,6 +10,7 @@
         remove repetition on overrideQuality
         maybe change name
         see if quality parameter is worth changing
+        make menu prettier
 */
 
 const CUSTOM_TAB_ID = 4;
@@ -99,21 +100,20 @@ function NumberInput({ defaultValue, changeCallback, title }) {
 }
 
 function SettingInput({ entries }) {
-    var Content: JSX.Element[] = [];
-    entries.forEach(entry => {
-        Content.push(<Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-            <NumberInput
-                title={entry.title}
-                defaultValue={settings.store[entry.id]}
-                changeCallback={(str: string) => {
-                    settings.store[entry.id] = parseInt(str);
-                }}
-            />
-        </Flex>);
-    });
     return (<Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-        {Content}
-    </Flex>);
+        {entries.map(entry =>
+            <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
+                <NumberInput
+                    title={entry.title}
+                    defaultValue={settings.store[entry.id]}
+                    changeCallback={(str: string) => {
+                        settings.store[entry.id] = parseInt(str);
+                    }}
+                    key={entry.id}
+                />
+            </Flex>
+        )}
+    </Flex >);
 }
 
 /*
