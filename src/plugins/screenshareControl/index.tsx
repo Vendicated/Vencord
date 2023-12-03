@@ -48,10 +48,15 @@ const { Messages } = findByPropsLazy("Messages", "initialLanguageLoad");
 const FormItem = findExportedComponentLazy("FormItem");
 const FocusRing = findExportedComponentLazy("FocusRing");
 
-/*
-    custom components
-*/
-function ButtonSelector({ data, setValue, currentValue }) {
+interface ButtonSelectorProps {
+    data: Array<{
+        label: string,
+        value: any;
+    }>,
+    setValue: Function,
+    currentValue: any;
+}
+function ButtonSelector({ data, setValue, currentValue }: ButtonSelectorProps) {
     const { selectorText, selectorTextSelected, selectorButton, selectorButtonSelected } = SelectorClasses;
     const { item, group } = SelectorClasses;
 
@@ -79,7 +84,12 @@ function ButtonSelector({ data, setValue, currentValue }) {
     );
 }
 
-function NumberInput({ defaultValue, changeCallback, title }) {
+interface NumberInputProps {
+    defaultValue: number,
+    changeCallback: Function,
+    title: string;
+}
+function NumberInput({ defaultValue, changeCallback, title }: NumberInputProps): JSX.Element {
     const [value, setValue] = useState(defaultValue);
 
     return (
@@ -88,18 +98,24 @@ function NumberInput({ defaultValue, changeCallback, title }) {
                 {title}
             </Forms.FormText>
             <TextInput
-                value={value || ""}
+                value={value > 0 ? value : ""}
                 spellCheck={false}
                 onChange={(str: string) => {
-                    changeCallback(parseInt(str) || undefined);
-                    setValue(parseInt(str) || undefined);
+                    changeCallback(parseInt(str) || -1);
+                    setValue(parseInt(str) || -1);
                 }}
             />
         </>
     );
 }
 
-function SettingInput({ entries }) {
+interface SettingsInputProps {
+    entries: Array<{
+        id: string,
+        title: string;
+    }>;
+}
+function SettingInput({ entries }: SettingsInputProps) {
     return (<Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
         {entries.map(entry =>
             <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
