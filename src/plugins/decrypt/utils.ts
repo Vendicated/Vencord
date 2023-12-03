@@ -255,17 +255,7 @@ export async function translate(kind: "received" | "sent", text: string, version
     }
 
     const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
-    const translatedText = text
-        .split(" ")
-        .map(word => {
-            // Ignore links and words that start with '!'
-            if (word.startsWith("http") || word.startsWith("!")) {
-                return word;
-            }
-            // Translate other words
-            return word.split("").map(char => reversedLetters[char] || char).join("");
-        })
-        .join(" ");
+    const translatedText = text.split("").map(char => reversedLetters[char] || char).join("");
     return {
         src: kind,
         text: translatedText
