@@ -177,8 +177,8 @@ export default definePlugin({
         {
             find: "Received null target channel ID",
             replacement: {
-                match: /\(0,S\.updateStreamSettings\)\({preset:(.{1,2}),resolution:(.{1,2}),frameRate:(.{1,2})}\);/,
-                replace: "(0,S.updateStreamSettings)({preset:$1,resolution:$2,frameRate:$3});$self.lastPreset = $1;"
+                match: /\(0,(.{1,2})\.updateStreamSettings\)\({preset:(.{1,2}),resolution:(.{1,2}),frameRate:(.{1,2})}\);/,
+                replace: "(0,(.{1,2}).updateStreamSettings)({preset:$2,resolution:$3,frameRate:$4});$self.lastPreset = $2;"
             }
         },
 
