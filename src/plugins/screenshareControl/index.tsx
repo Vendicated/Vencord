@@ -6,8 +6,8 @@
 
 /*
     to-do:
-        maybe patch somewhere else, so that discord's default category buttons can be used
-        organize naming conventions
+        maybe patch somewhere else, so that discord's default category buttons can be used rather than needing to be rebuilt
+        remove repetition on overrideQuality
         maybe change name
 */
 
@@ -16,9 +16,116 @@ const CUSTOM_TAB_ID = 4;
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { filters, findBulk, findByPropsLazy, findExportedComponentLazy, proxyLazyWebpack } from "@webpack";
 import { useState } from "@webpack/common";
 
+const Classes = proxyLazyWebpack(() => {
+    const modules = findBulk(
+        filters.byProps("formItemTitleVerySlim"),
+        filters.byProps("documentModeGroup"),
+        filters.byProps("tooltipBlack"),
+        filters.byProps("item", "group"),
+        filters.byProps("selectorText", "selectorTextSelected", "selectorButton")
+    );
+    return Object.assign({}, ...modules);
+}) as Record<"documentModeGroup" | "settingsGroup" | "formItemTitleSlim" | "formItemTitleVerySlim", string>;
+const { documentModeGroup, settingsGroup, formItemTitleSlim, formItemTitleVerySlim } = Classes;
+
+const SelectorClasses = proxyLazyWebpack(() => {
+    const modules = findBulk(
+        filters.byProps("item", "group"),
+        filters.byProps("selectorText", "selectorTextSelected", "selectorButton")
+    );
+    return Object.assign({}, ...modules);
+}) as Record<"selectorText" | "selectorTextSelected" | "selectorButton" | "selectorButtonSelected" | "item" | "group", string>;
+
+const AppStreamModule = findByPropsLazy("ApplicationStreamFPSButtons");
+const { Messages } = findByPropsLazy("Messages", "initialLanguageLoad");
+
+// components
+const Text = findExportedComponentLazy("Text");
+const TextInput = findExportedComponentLazy("TextInput");
+const FormText = findExportedComponentLazy("FormText");
+const FormItem = findExportedComponentLazy("FormItem");
+const FocusRing = findExportedComponentLazy("FocusRing");
+
+/*
+    custom components
+*/
+function ButtonSelector({ data, setValue, currentValue }) {
+    const { selectorText, selectorTextSelected, selectorButton, selectorButtonSelected } = SelectorClasses;
+    const { item, group } = SelectorClasses;
+
+    var Buttons = data.map(val => (
+        <FocusRing>
+            <button
+                type="button"
+                className={`${item} ${selectorButton} ${val.value === currentValue ? selectorButtonSelected : ""}`}
+                onClick={() => { setValue(val.value); }}
+            >
+                <Text
+                    variant="text-xs/normal"
+                    className={val.value === currentValue ? selectorTextSelected : selectorText}
+                >
+                    {val.label}
+                </Text>
+            </button>
+        </FocusRing>
+    ));
+
+    return (
+        <div className={group} role="group">
+            {Buttons}
+        </div>
+    );
+}
+
+function NumberInput({ defaultValue, changeCallback, title }) {
+    var [value, setValue] = useState(defaultValue);
+
+    function sanitizeNumber(val) {
+        if (val === undefined || val === 0 || isNaN(val) || val == null) return undefined;
+        return val;
+    }
+
+    return (
+        <>
+            <FormText tag="h4" titleClassName={formItemTitleVerySlim} className={documentModeGroup}>
+                {title}
+            </FormText>
+            <TextInput
+                value={sanitizeNumber(value) || ""}
+                spellCheck={false}
+                onChange={(str: string) => {
+                    changeCallback(sanitizeNumber(parseInt(str)));
+                    setValue(sanitizeNumber(parseInt(str)));
+                }}
+            />
+        </>
+    );
+}
+
+function SettingInput({ entries }) {
+    var Content: JSX.Element[] = [];
+    entries.forEach(entry => {
+        Content.push(<Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
+            <NumberInput
+                title={entry.title}
+                defaultValue={settings.store[entry.id]}
+                changeCallback={(str: string) => {
+                    settings.store[entry.id] = parseInt(str);
+                }}
+            />
+        </Flex>);
+    });
+    return (<Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+        {Content}
+    </Flex>);
+}
+
+/*
+    actual module
+*/
 const settings = definePluginSettings({
     width: { description: "Screen width", type: OptionType.NUMBER, default: 1920 },
     height: { description: "Screen height", type: OptionType.NUMBER, default: 1080 },
@@ -92,162 +199,56 @@ export default definePlugin({
     ],
 
     /*
-        components and component helpers
-    */
-    makeSelector(data, setValue, selectedValue) {
-        const ButtonGroup = Vencord.Webpack.wreq(140848).default;
-        var SelectorClasses = Vencord.Webpack.wreq(986916);
-        var { Text } = this.discordComponents;
-
-        var Buttons = data.map(val => ({
-            content: [
-                <Text
-                    variant="text-xs/normal"
-                    className={val.value === selectedValue ? SelectorClasses.selectorTextSelected : SelectorClasses.selectorText}
-                >
-                    {val.label}
-                </Text>,
-            ],
-            className: val.value === selectedValue ? SelectorClasses.selectorButtonSelected : SelectorClasses.selectorButton,
-            onClick: () => { setValue(val.value); },
-        }));
-
-        return <ButtonGroup buttons={Buttons} />;
-    },
-
-    numberInput({ defaultValue, changeCallback, title }) {
-        var [Value, setValue] = useState(defaultValue);
-        var ThisPlugin = Vencord.Plugins.plugins["Screenshare Control"];
-        var { FormText, TextInput } = ThisPlugin.discordComponents;
-
-        function sanitizeNumber(val) {
-            if (val === undefined || val === 0 || isNaN(val) || val == null) return undefined;
-            return val;
-        }
-
-        return (
-            <>
-                <FormText tag="h4" titleClassName={ThisPlugin.discordClasses.formItemTitleVerySlim} className={ThisPlugin.discordClasses2.documentModeGroup}>
-                    {title}
-                </FormText>
-                <TextInput
-                    value={sanitizeNumber(Value) || ""}
-                    spellCheck={false}
-                    onChange={(str: string) => {
-                        changeCallback(sanitizeNumber(parseInt(str)));
-                        setValue(sanitizeNumber(parseInt(str)));
-                    }}
-                />
-            </>
-        );
-    },
-
-    /*
         hook functions
     */
     drawSettings(PresetInfo) {
-        var { FormItem, Text } = this.discordComponents;
-
-        var Localization = Vencord.Webpack.wreq(782340).default.Messages;
+        const { ApplicationStreamFPSButtons, GoLiveDeviceResolutionButtons, ApplicationStreamResolutionButtons } = AppStreamModule;
 
         switch (PresetInfo.selectedPreset) {
             case 1:
             case 3:
-                var Resolutions = PresetInfo.captureDeviceSelected ? this.discordAppStreamStuff.GoLiveDeviceResolutionButtons : this.discordAppStreamStuff.ApplicationStreamResolutionButtons;
-                var ResolutionPicker = this.makeSelector(Resolutions, PresetInfo.onResolutionChange, PresetInfo.selectedResolution);
-
-                var FPSs = this.discordAppStreamStuff.ApplicationStreamFPSButtons;
-                var FPSPicker = this.makeSelector(FPSs, PresetInfo.onFPSChange, PresetInfo.selectedFPS);
-
+                var ResolutionList = PresetInfo.captureDeviceSelected ? GoLiveDeviceResolutionButtons : ApplicationStreamResolutionButtons;
+                var FPSList = ApplicationStreamFPSButtons;
                 return (
                     <>
-                        <FormItem title={Localization.STREAM_RESOLUTION} titleClassName={this.discordClasses2.settingsGroup} className={this.discordClasses.formItemTitleSlim}>
-                            {ResolutionPicker}
+                        <FormItem title={Messages.STREAM_RESOLUTION} titleClassName={settingsGroup} className={formItemTitleSlim}>
+                            <ButtonSelector data={ResolutionList} setValue={PresetInfo.onResolutionChange} currentValue={PresetInfo.selectedResolution} />
                         </FormItem>
-
-                        <FormItem title={Localization.SCREENSHARE_FRAME_RATE} titleClassName={this.discordClasses.formItemTitleSlim} className={this.discordClasses2.documentModeGroup}>
-                            {FPSPicker}
+                        <FormItem title={Messages.SCREENSHARE_FRAME_RATE} titleClassName={formItemTitleSlim} className={documentModeGroup}>
+                            <ButtonSelector data={FPSList} setValue={PresetInfo.onFPSChange} currentValue={PresetInfo.selectedFPS} />
                         </FormItem>
                     </>
                 );
             case 2:
                 return (
-                    <FormItem title={Localization.STREAM_RESOLUTION} titleClassName={this.discordClasses.formItemTitleSlim} className={this.discordClasses2.documentModeGroup}>
-                        <Text variant="text-xs/normal">{Localization.STREAM_PRESET_DOCUMENTS_DESCRIPTION_NITRO.format({ fps: PresetInfo.selectedFPS })}</Text>
+                    <FormItem title={Messages.STREAM_RESOLUTION} titleClassName={formItemTitleSlim} className={documentModeGroup}>
+                        <Text variant="text-xs/normal">{Messages.STREAM_PRESET_DOCUMENTS_DESCRIPTION_NITRO.format({ fps: PresetInfo.selectedFPS })}</Text>
                     </FormItem>
                 );
             case 4:
                 return (
                     <>
                         <FormItem
-                            title={Localization.STREAM_RESOLUTION}
-                            titleClassName={this.discordClasses.formItemTitleSlim}
+                            title={Messages.STREAM_RESOLUTION}
+                            titleClassName={formItemTitleSlim}
                         >
-                            <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="Width"
-                                        defaultValue={this.settings.store.width}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.width = parseInt(str);
-                                        }} />
-                                </Flex>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="Height"
-                                        defaultValue={this.settings.store.height}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.height = parseInt(str);
-                                        }} />
-                                </Flex>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="FPS"
-                                        defaultValue={this.settings.store.fps}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.fps = parseInt(str);
-                                        }} />
-                                </Flex>
-                            </Flex>
+                            <SettingInput entries={[
+                                { id: "width", title: "Width" },
+                                { id: "height", title: "Height" },
+                                { id: "fps", title: "FPS" },
+                            ]} />
                         </FormItem>
 
                         <FormItem
                             title="Bitrate"
-                            titleClassName={this.discordClasses.formItemTitleSlim}
+                            titleClassName={formItemTitleSlim}
                         >
-                            <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="Target bitrate"
-                                        defaultValue={this.settings.store.brtarget}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.brtarget = parseInt(str);
-                                        }} />
-                                </Flex>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="Max bitrate"
-                                        defaultValue={this.settings.store.brmax}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.brmax = parseInt(str);
-                                        }} />
-                                </Flex>
-                                <Flex flexDirection="column" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <this.numberInput
-                                        title="Min bitrate"
-                                        defaultValue={this.settings.store.brmin}
-                                        changeCallback={(str: string) => {
-                                            this.settings.store.brmin = parseInt(str);
-                                        }} />
-                                </Flex>
-                            </Flex>
+                            <SettingInput entries={[
+                                { id: "brtarget", title: "Target" },
+                                { id: "brmax", title: "Max" },
+                                { id: "brmin", title: "Min" },
+                            ]} />
                         </FormItem>
-                    </>
-                );
-            default:
-                return (
-                    <>
-                        o no..,.
                     </>
                 );
         }
@@ -255,13 +256,14 @@ export default definePlugin({
 
     lastPreset: 0,
     overrideQuality(Connection) {
-        // don't affect connections that are not streams
-        if (Connection.context !== "stream")
-            return;
+        if (Connection.context !== "stream") return;
+
+        const { store } = this.settings;
+        const { videoStreamParameters, videoQualityManager } = Connection;
 
         if (this.lastPreset === 4) {
-            for (let i = 0; i < Connection.videoStreamParameters.length; i++) {
-                var Conn = Connection.videoStreamParameters[i];
+            for (let i = 0; i < videoStreamParameters.length; i++) {
+                var Conn = videoStreamParameters[i];
 
                 if (this.settings.store.brmax !== 0) Conn.maxBitRate = this.settings.store.brmax;
 
@@ -272,7 +274,7 @@ export default definePlugin({
                 Conn.maxPixelCount = this.settings.store.width * this.settings.store.height;
                 Conn.quality = 100; // TO-DO: add quality option? still gotta test if it's actually worth it
 
-                Connection.videoStreamParameters[i] = Conn;
+                videoStreamParameters[i] = Conn;
             }
 
             var QualityOverrides = {
@@ -293,38 +295,27 @@ export default definePlugin({
                 bitrateMin: this.settings.store.brmin ? this.settings.store.brmin : undefined,
                 bitrateTarget: this.settings.store.brtarget ? this.settings.store.brtarget : undefined
             };
-            Connection.videoQualityManager.setQuality(QualityOverrides);
+            videoQualityManager.setQuality(QualityOverrides);
         } else {
             // restore quality to what would be expected of the preset
             var QualityDefault = {
                 capture: {
-                    framerate: Connection.videoStreamParameters[0].maxFrameRate,
-                    width: Connection.videoStreamParameters[0].maxResolution.width,
-                    height: Connection.videoStreamParameters[0].maxResolution.height,
-                    pixelCount: Connection.videoStreamParameters[0].maxResolution.width * Connection.videoStreamParameters[0].maxResolution.height
+                    framerate: videoStreamParameters[0].maxFrameRate,
+                    width: videoStreamParameters[0].maxResolution.width,
+                    height: videoStreamParameters[0].maxResolution.height,
+                    pixelCount: videoStreamParameters[0].maxResolution.width * videoStreamParameters[0].maxResolution.height
                 },
                 encode: {
-                    framerate: Connection.videoStreamParameters[0].maxFrameRate,
-                    width: Connection.videoStreamParameters[0].maxResolution.width,
-                    height: Connection.videoStreamParameters[0].maxResolution.height,
-                    pixelCount: Connection.videoStreamParameters[0].maxResolution.width * Connection.videoStreamParameters[0].maxResolution.height
+                    framerate: videoStreamParameters[0].maxFrameRate,
+                    width: videoStreamParameters[0].maxResolution.width,
+                    height: videoStreamParameters[0].maxResolution.height,
+                    pixelCount: videoStreamParameters[0].maxResolution.width * videoStreamParameters[0].maxResolution.height
                 },
-                bitrateMax: Connection.videoStreamParameters[0].maxBitRate,
+                bitrateMax: videoStreamParameters[0].maxBitRate,
                 bitrateMin: undefined,
                 bitrateTarget: undefined
             };
-            Connection.videoQualityManager.setQuality(QualityDefault);
+            videoQualityManager.setQuality(QualityDefault);
         }
     },
-
-    /*
-        discord modules
-    */
-    start() {
-        this.discordComponents = findByPropsLazy("FormItem", "FormText");
-        this.discordClasses = findByPropsLazy("formItemTitleVerySlim");
-        this.discordClasses2 = findByPropsLazy("documentModeGroup");
-        this.discordTooltipClasses = findByPropsLazy("tooltipBlack");
-        this.discordAppStreamStuff = findByPropsLazy("GoLiveDeviceResolutionButtons");
-    }
 });
