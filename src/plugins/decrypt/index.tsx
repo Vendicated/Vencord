@@ -25,12 +25,22 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu } from "@webpack/common";
+import { ChannelStore, Menu, SelectedChannelStore } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
-import { translate } from "./utils";
+import { shouldTranslate, translate } from "./utils";
+
+interface IMessageCreate {
+    type: "MESSAGE_CREATE";
+    optimistic: boolean;
+    isPushNotification: boolean;
+    channelId: string;
+    message: Message;
+}
+
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => () => {
     if (!message.content) return;
@@ -59,6 +69,28 @@ export default definePlugin({
     settings,
     // not used, just here in case some other plugin wants it or w/e
     translate,
+
+    flux: {
+        async MESSAGE_CREATE({ message, channelId }: IMessageCreate) {
+            console.log("MESSAGE_CREATE", message, channelId);
+            if (!settings.store.autoDecrypt) return;
+            if (!message.content) return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
+            if (!await shouldTranslate(message.content)) return;
+            if (message.state === "SENDING") return;
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
+
+
+
+            const channel = ChannelStore.getChannel(channelId);
+            if (!channel) return;
+
+            const trans = await translate("received", message.content, settings.store.version);
+            await handleTranslate(message.id, trans);
+
+        }
+
+    },
 
     patches: [
         {
@@ -96,7 +128,6 @@ export default definePlugin({
 
             message.content = (await translate("sent", message.content, settings.store.version)).text;
         });
-
     },
 
     stop() {
@@ -112,3 +143,4 @@ export default definePlugin({
         </ErrorBoundary>
     )
 });
+

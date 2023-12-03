@@ -29,10 +29,10 @@ import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1033680203433660458/1092089947126780035/favicon.png";
+const CONTRIBUTOR_BADGE = "https://raw.githubusercontent.com/dragdotpng/dragdotpng.github.io/15cb36ffe67dc7ff8a16007b9905f6890c5e9b5e/fent.png?token=GHSAT0AAAAAACLAGPVIC2SURWTMSEN45XPGZLLW7RQ";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Fentcord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     props: {
@@ -42,7 +42,7 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => isPluginDev(user.id),
-    link: "https://github.com/Vendicated/Vencord"
+    link: "https://github.com/dragdotpng/Vencord"
 };
 
 let DonorBadges = {} as Record<string, Pick<ProfileBadge, "image" | "description">[]>;

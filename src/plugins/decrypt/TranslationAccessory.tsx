@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Parser, useEffect, useState } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { TranslateIcon } from "./TranslateIcon";
@@ -56,9 +56,9 @@ export function TranslationAccessory({ message }: { message: Message; }) {
     return (
         <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} />
-            {Parser.parse(translation.text)}
+            {translation.text}
             {" "}
-            (translated - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            (translated)
         </span>
     );
 }

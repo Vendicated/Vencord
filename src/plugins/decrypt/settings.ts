@@ -25,6 +25,11 @@ export const settings = definePluginSettings({
         description: "Automatically encrypt your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
     },
+    autoDecrypt: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically decrypt incoming messages.",
+        default: true
+    },
     version: {
         type: OptionType.NUMBER,
         description: "Version of the encryptor to use",

@@ -34,6 +34,8 @@ export interface TranslationValue {
     text: string;
 }
 
+
+
 export async function translate(kind: "received" | "sent", text: string, version: number): Promise<TranslationValue> {
     const lettersv1 = {
         "a": "આ",
@@ -228,7 +230,7 @@ export async function translate(kind: "received" | "sent", text: string, version
 
     let letters;
 
-    if (kind === "sent") {
+    if (kind === "received") {
         letters = version === 1 ? lettersv1 : lettersv2;
     } else {
         letters = text.split("").some(char => Object.values(lettersv2).includes(char)) ? lettersv2 : lettersv1;
@@ -248,7 +250,7 @@ export async function translate(kind: "received" | "sent", text: string, version
             .join(" ");
         return {
             src: kind,
-            text: translatedText
+            text: translatedText + "ᯰ"
         };
     }
 
@@ -268,4 +270,12 @@ export async function translate(kind: "received" | "sent", text: string, version
         src: kind,
         text: translatedText
     };
+}
+
+export async function shouldTranslate(text: string): Promise<boolean> {
+    if (text.includes("ᯰ")) {
+        return true;
+
+    }
+    return false;
 }

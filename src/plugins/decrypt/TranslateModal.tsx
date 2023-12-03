@@ -39,6 +39,21 @@ function AutoTranslateToggle() {
     );
 }
 
+function AutoDecryptToggle() {
+    const value = settings.use(["autoDecrypt"]).autoDecrypt;
+
+    return (
+        <Switch
+            value={value}
+            onChange={v => settings.store.autoDecrypt = v}
+            note={settings.def.autoDecrypt.description}
+            hideBorder
+        >
+            Auto Decrypt
+        </Switch>
+    );
+}
+
 function VersionSelector() {
     const settingsKey = "version";
     const currentValue = settings.use([settingsKey])[settingsKey];
@@ -81,6 +96,7 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
                 <Forms.FormDivider className={Margins.bottom16} />
 
                 <AutoTranslateToggle />
+                <AutoDecryptToggle />
 
                 <Forms.FormDivider className={Margins.bottom16} />
 
