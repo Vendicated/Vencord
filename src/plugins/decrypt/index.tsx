@@ -24,6 +24,7 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu, SelectedChannelStore } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -86,6 +87,7 @@ export default definePlugin({
             if (!channel) return;
 
             const trans = await translate("received", message.content, settings.store.version);
+            await sleep(300);
             await handleTranslate(message.id, trans);
 
         }
