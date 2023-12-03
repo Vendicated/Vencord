@@ -269,9 +269,7 @@ export default definePlugin({
         var ResAndFPSSettings;
 
         if (this.lastPreset === 4) {
-            for (let i = 0; i < videoStreamParameters.length; i++) {
-                var Conn = videoStreamParameters[i];
-
+            videoStreamParameters.forEach(Conn => {
                 if (settingsStore.brmax > 0) Conn.maxBitRate = settingsStore.brmax;
 
                 Conn.maxFrameRate = settingsStore.fps;
@@ -280,7 +278,7 @@ export default definePlugin({
                 Conn.maxResolution.height = settingsStore.height;
                 Conn.maxPixelCount = settingsStore.width * settingsStore.height;
                 Conn.quality = 100;
-            }
+            });
 
             ResAndFPSSettings = {
                 framerate: settingsStore.fps,
