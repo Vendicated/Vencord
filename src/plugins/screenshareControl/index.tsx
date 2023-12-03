@@ -17,7 +17,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findBulk, findByPropsLazy, findExportedComponentLazy, proxyLazyWebpack } from "@webpack";
-import { useState } from "@webpack/common";
+import { Text, TextInput, useState } from "@webpack/common";
+import { FormText } from "@webpack/types";
 
 const Classes = proxyLazyWebpack(() => {
     const modules = findBulk(
@@ -43,9 +44,6 @@ const AppStreamModule = findByPropsLazy("ApplicationStreamFPSButtons");
 const { Messages } = findByPropsLazy("Messages", "initialLanguageLoad");
 
 // components
-const Text = findExportedComponentLazy("Text");
-const TextInput = findExportedComponentLazy("TextInput");
-const FormText = findExportedComponentLazy("FormText");
 const FormItem = findExportedComponentLazy("FormItem");
 const FocusRing = findExportedComponentLazy("FocusRing");
 
