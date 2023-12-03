@@ -136,7 +136,7 @@ export async function translate(kind: "received" | "sent", text: string, version
 
     const lettersv2 = {
         "a": "ر",
-        "b": "",
+        "b": "ز",
         "c": "س",
         "d": "ش",
         "e": "ص",
