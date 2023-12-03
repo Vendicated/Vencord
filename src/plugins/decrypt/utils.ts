@@ -205,7 +205,7 @@ export async function translate(kind: "received" | "sent", text: string, version
 }
 
 export async function shouldTranslate(text: string): Promise<boolean> {
-    if (text.includes("ᯰ")) {
+    if (text.includes("​")) {
         return true;
 
     }
