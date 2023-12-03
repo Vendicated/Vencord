@@ -9,12 +9,14 @@
         maybe patch somewhere else, so that discord's default category buttons can be used rather than needing to be rebuilt
         remove repetition on overrideQuality
         maybe change name
+        see if quality parameter is worth changing
 */
 
 const CUSTOM_TAB_ID = 4;
 
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, findBulk, findByPropsLazy, findExportedComponentLazy, proxyLazyWebpack } from "@webpack";
 import { Forms, Text, TextInput, useState } from "@webpack/common";
@@ -52,7 +54,7 @@ function ButtonSelector({ data, setValue, currentValue }) {
     const { selectorText, selectorTextSelected, selectorButton, selectorButtonSelected } = SelectorClasses;
     const { item, group } = SelectorClasses;
 
-    var Buttons = data.map(val => (
+    const Buttons = data.map(val => (
         <FocusRing>
             <button
                 type="button"
@@ -77,12 +79,7 @@ function ButtonSelector({ data, setValue, currentValue }) {
 }
 
 function NumberInput({ defaultValue, changeCallback, title }) {
-    var [value, setValue] = useState(defaultValue);
-
-    function sanitizeNumber(val) {
-        if (val === undefined || val === 0 || isNaN(val) || val == null) return undefined;
-        return val;
-    }
+    const [value, setValue] = useState(defaultValue);
 
     return (
         <>
@@ -90,11 +87,11 @@ function NumberInput({ defaultValue, changeCallback, title }) {
                 {title}
             </Forms.FormText>
             <TextInput
-                value={sanitizeNumber(value) || ""}
+                value={value || ""}
                 spellCheck={false}
                 onChange={(str: string) => {
-                    changeCallback(sanitizeNumber(parseInt(str)));
-                    setValue(sanitizeNumber(parseInt(str)));
+                    changeCallback(parseInt(str) || undefined);
+                    setValue(parseInt(str) || undefined);
                 }}
             />
         </>
@@ -135,7 +132,7 @@ export default definePlugin({
     name: "Screenshare Control",
     description: "Allows the use of custom resolutions, bitrate and framerate when screensharing.",
     settings,
-    authors: [{ id: 1104474057916809226n, name: "neru" }],
+    authors: [Devs.neru],
 
     patches: [
         /*
@@ -178,7 +175,7 @@ export default definePlugin({
             find: "Received null target channel ID",
             replacement: {
                 match: /\(0,(.{1,2})\.updateStreamSettings\)\({preset:(.{1,2}),resolution:(.{1,2}),frameRate:(.{1,2})}\);/,
-                replace: "(0,(.{1,2}).updateStreamSettings)({preset:$2,resolution:$3,frameRate:$4});$self.lastPreset = $2;"
+                replace: "(0,$1.updateStreamSettings)({preset:$2,resolution:$3,frameRate:$4});$self.lastPreset = $2;"
             }
         },
 
@@ -207,17 +204,29 @@ export default definePlugin({
                 var FPSList = ApplicationStreamFPSButtons;
                 return (
                     <>
-                        <FormItem title={Messages.STREAM_RESOLUTION} titleClassName={settingsGroup} className={formItemTitleSlim}>
+                        <FormItem
+                            title={Messages.STREAM_RESOLUTION}
+                            titleClassName={settingsGroup}
+                            className={formItemTitleSlim}
+                        >
                             <ButtonSelector data={ResolutionList} setValue={PresetInfo.onResolutionChange} currentValue={PresetInfo.selectedResolution} />
                         </FormItem>
-                        <FormItem title={Messages.SCREENSHARE_FRAME_RATE} titleClassName={formItemTitleSlim} className={documentModeGroup}>
+                        <FormItem
+                            title={Messages.SCREENSHARE_FRAME_RATE}
+                            titleClassName={formItemTitleSlim}
+                            className={documentModeGroup}
+                        >
                             <ButtonSelector data={FPSList} setValue={PresetInfo.onFPSChange} currentValue={PresetInfo.selectedFPS} />
                         </FormItem>
                     </>
                 );
             case 2:
                 return (
-                    <FormItem title={Messages.STREAM_RESOLUTION} titleClassName={formItemTitleSlim} className={documentModeGroup}>
+                    <FormItem
+                        title={Messages.STREAM_RESOLUTION}
+                        titleClassName={formItemTitleSlim}
+                        className={documentModeGroup}
+                    >
                         <Text variant="text-xs/normal">{Messages.STREAM_PRESET_DOCUMENTS_DESCRIPTION_NITRO.format({ fps: PresetInfo.selectedFPS })}</Text>
                     </FormItem>
                 );
@@ -254,64 +263,54 @@ export default definePlugin({
     overrideQuality(Connection) {
         if (Connection.context !== "stream") return;
 
-        const { store } = this.settings;
+        const settingsStore = this.settings.store;
         const { videoStreamParameters, videoQualityManager } = Connection;
+
+        var ResAndFPSSettings;
 
         if (this.lastPreset === 4) {
             for (let i = 0; i < videoStreamParameters.length; i++) {
                 var Conn = videoStreamParameters[i];
 
-                if (this.settings.store.brmax !== 0) Conn.maxBitRate = this.settings.store.brmax;
+                if (settingsStore.brmax > 0) Conn.maxBitRate = settingsStore.brmax;
 
-                Conn.maxFrameRate = this.settings.store.fps;
+                Conn.maxFrameRate = settingsStore.fps;
                 Conn.maxResolution.type = "fixed";
-                Conn.maxResolution.width = this.settings.store.width;
-                Conn.maxResolution.height = this.settings.store.height;
-                Conn.maxPixelCount = this.settings.store.width * this.settings.store.height;
-                Conn.quality = 100; // TO-DO: add quality option? still gotta test if it's actually worth it
-
-                videoStreamParameters[i] = Conn;
+                Conn.maxResolution.width = settingsStore.width;
+                Conn.maxResolution.height = settingsStore.height;
+                Conn.maxPixelCount = settingsStore.width * settingsStore.height;
+                Conn.quality = 100;
             }
 
-            var QualityOverrides = {
-                capture: {
-                    framerate: this.settings.store.fps,
-                    width: this.settings.store.width,
-                    height: this.settings.store.height,
-                    pixelCount: this.settings.store.width * this.settings.store.height
-                },
-                encode: {
-                    framerate: this.settings.store.fps,
-                    width: this.settings.store.width,
-                    height: this.settings.store.height,
-                    pixelCount: this.settings.store.width * this.settings.store.height
-
-                },
-                bitrateMax: this.settings.store.brmax ? this.settings.store.brmax : undefined,
-                bitrateMin: this.settings.store.brmin ? this.settings.store.brmin : undefined,
-                bitrateTarget: this.settings.store.brtarget ? this.settings.store.brtarget : undefined
+            ResAndFPSSettings = {
+                framerate: settingsStore.fps,
+                width: settingsStore.width,
+                height: settingsStore.height,
+                pixelCount: settingsStore.width * settingsStore.height
             };
-            videoQualityManager.setQuality(QualityOverrides);
+
+            videoQualityManager.setQuality({
+                capture: ResAndFPSSettings,
+                encode: ResAndFPSSettings,
+                bitrateMax: settingsStore.brmax ? settingsStore.brmax : undefined,
+                bitrateMin: settingsStore.brmin ? settingsStore.brmin : undefined,
+                bitrateTarget: settingsStore.brtarget ? settingsStore.brtarget : undefined
+            });
         } else {
-            // restore quality to what would be expected of the preset
-            var QualityDefault = {
-                capture: {
-                    framerate: videoStreamParameters[0].maxFrameRate,
-                    width: videoStreamParameters[0].maxResolution.width,
-                    height: videoStreamParameters[0].maxResolution.height,
-                    pixelCount: videoStreamParameters[0].maxResolution.width * videoStreamParameters[0].maxResolution.height
-                },
-                encode: {
-                    framerate: videoStreamParameters[0].maxFrameRate,
-                    width: videoStreamParameters[0].maxResolution.width,
-                    height: videoStreamParameters[0].maxResolution.height,
-                    pixelCount: videoStreamParameters[0].maxResolution.width * videoStreamParameters[0].maxResolution.height
-                },
+            ResAndFPSSettings = {
+                framerate: videoStreamParameters[0].maxFrameRate,
+                width: videoStreamParameters[0].maxResolution.width,
+                height: videoStreamParameters[0].maxResolution.height,
+                pixelCount: videoStreamParameters[0].maxResolution.width * videoStreamParameters[0].maxResolution.height
+            };
+
+            videoQualityManager.setQuality({
+                capture: ResAndFPSSettings,
+                encode: ResAndFPSSettings,
                 bitrateMax: videoStreamParameters[0].maxBitRate,
                 bitrateMin: undefined,
                 bitrateTarget: undefined
-            };
-            videoQualityManager.setQuality(QualityDefault);
+            });
         }
     },
 });
