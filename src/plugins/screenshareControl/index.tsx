@@ -28,8 +28,8 @@ const Classes = proxyLazyWebpack(() => {
         filters.byProps("selectorText", "selectorTextSelected", "selectorButton")
     );
     return Object.assign({}, ...modules);
-}) as Record<"documentModeGroup" | "settingsGroup" | "formItemTitleSlim" | "formItemTitleVerySlim", string>;
-const { documentModeGroup, settingsGroup, formItemTitleSlim, formItemTitleVerySlim } = Classes;
+}) as Record<"documentModeGroup" | "settingsGroup" | "formItemTitleSlim", string>;
+const { documentModeGroup, settingsGroup, formItemTitleSlim } = Classes;
 
 const SelectorClasses = proxyLazyWebpack(() => {
     const modules = findBulk(
@@ -86,7 +86,7 @@ function NumberInput({ defaultValue, changeCallback, title }) {
 
     return (
         <>
-            <Forms.FormText tag="h4" titleClassName={formItemTitleVerySlim} className={documentModeGroup}>
+            <Forms.FormText tag="h4" className={documentModeGroup}>
                 {title}
             </Forms.FormText>
             <TextInput
