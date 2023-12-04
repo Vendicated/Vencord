@@ -61,6 +61,7 @@ function VersionSelector() {
     const options = [
         { label: "Daragcrypt", value: 1 },
         { label: "Jihad", value: 2 },
+        { label: "Cubes", value: 3 },
     ];
 
     return (

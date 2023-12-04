@@ -166,7 +166,39 @@ export async function translate(kind: "received" | "sent", text: string, version
         "?": "؏",
     };
 
-    const letters = version === 1 ? lettersv1 : lettersv2;
+    const cubes = {
+        "a": "",
+        "b": "",
+        "c": "",
+        "d": "🟨",
+        "e": "",
+        "f": "",
+        "g": "",
+        "h": "",
+        "i": "",
+        "j": "🟧",
+        "k": "",
+        "l": "",
+        "m": "",
+        "n": "",
+        "o": "",
+        "p": "🟪",
+        "q": "🟧",
+        "r": "",
+        "s": "",
+        "t": "",
+        "u": "",
+        "v": "🟨",
+        "w": "",
+        "x": "🟧",
+        "y": "",
+        "z": "🟦",
+        " ": "",
+        "?": "",
+        "I": "",
+    };
+
+    const letters = version === 1 ? lettersv1 : version === 2 ? lettersv2 : cubes;
 
     if (kind === "sent") {
         const translatedText = text
@@ -188,16 +220,20 @@ export async function translate(kind: "received" | "sent", text: string, version
 
     const reversedLettersv1 = Object.entries(lettersv1).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
     const reversedLettersv2 = Object.entries(lettersv2).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
+    const reversedcubes = Object.entries(cubes).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
 
     const translatedTextv1 = text.split("").map(char => reversedLettersv1[char] || char).join("");
     const translatedTextv2 = text.split("").map(char => reversedLettersv2[char] || char).join("");
+    const translatedTextv3 = text.split("").map(char => reversedcubes[char] || char).join("");
 
     // Count unrecognized characters
     const unrecognizedCharsv1 = translatedTextv1.split("").filter(char => !Object.keys(lettersv1).includes(char)).length;
     const unrecognizedCharsv2 = translatedTextv2.split("").filter(char => !Object.keys(lettersv2).includes(char)).length;
+    const unrecognizedCharsv3 = translatedTextv3.split("").filter(char => !Object.keys(cubes).includes(char)).length;
 
     // Choose the translation with fewer unrecognized characters
-    const translatedText = unrecognizedCharsv1 < unrecognizedCharsv2 ? translatedTextv1 : translatedTextv2;
+    const minUnrecognizedChars = Math.min(unrecognizedCharsv1, unrecognizedCharsv2, unrecognizedCharsv3);
+    const translatedText = minUnrecognizedChars === unrecognizedCharsv1 ? translatedTextv1 : minUnrecognizedChars === unrecognizedCharsv2 ? translatedTextv2 : translatedTextv3;
     return {
         src: kind,
         text: translatedText
