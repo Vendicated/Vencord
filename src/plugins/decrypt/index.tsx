@@ -45,6 +45,19 @@ interface IMessageCreate {
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => () => {
     if (!message.content) return;
+    if (!settings.store.autoDecrypt) return;
+    if (!message.content) return;
+    if (message.channel_id !== SelectedChannelStore.getChannelId()) return;
+    if (!shouldTranslate(message.content)) return;
+    if (message.state === "SENDING") return;
+
+
+
+    const channel = ChannelStore.getChannel(message.channel_id);
+    if (!channel) return;
+
+    const trans = translate("received", message.content, settings.store.version);
+    handleTranslate(message.id, trans);
 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
@@ -79,7 +92,6 @@ export default definePlugin({
             if (channelId !== SelectedChannelStore.getChannelId()) return;
             if (!await shouldTranslate(message.content)) return;
             if (message.state === "SENDING") return;
-            if (channelId !== SelectedChannelStore.getChannelId()) return;
 
 
 

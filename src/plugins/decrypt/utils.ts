@@ -36,7 +36,7 @@ export interface TranslationValue {
 
 
 
-export async function translate(kind: "received" | "sent", text: string, version: number): Promise<TranslationValue> {
+export function translate(kind: "received" | "sent", text: string, version: number): TranslationValue {
     const lettersv1 = {
         "a": "આ",
         "b": "ୈ",
@@ -240,7 +240,7 @@ export async function translate(kind: "received" | "sent", text: string, version
     };
 }
 
-export async function shouldTranslate(text: string): Promise<boolean> {
+export function shouldTranslate(text: string): boolean {
     if (text.includes("​")) {
         return true;
 
