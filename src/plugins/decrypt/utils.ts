@@ -202,7 +202,7 @@ export async function translate(kind: "received" | "sent", text: string, version
 
     if (kind === "sent") {
         const translatedText = text
-            .split(" ")
+            .split("")
             .map(word => {
                 // Ignore links and words that start with '!'
                 if (word.startsWith("http") || word.startsWith("!")) {
@@ -211,7 +211,7 @@ export async function translate(kind: "received" | "sent", text: string, version
                 // Translate other words
                 return word.split("").map(char => letters[char] || char).join("");
             })
-            .join(" ");
+            .join("");
         return {
             src: kind,
             text: translatedText + "​"
