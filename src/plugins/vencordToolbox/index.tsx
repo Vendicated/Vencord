@@ -22,16 +22,12 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { filters, find } from "@webpack";
+import { findExportedComponentLazy } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
-const HeaderBarIcon = LazyComponent(() => {
-    const filter = filters.byCode(".HEADER_BAR_BADGE");
-    return find(m => m.Icon && filter(m.Icon)).Icon;
-});
+const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
 function VencordPopout(onClose: () => void) {
     const pluginEntries = [] as ReactNode[];

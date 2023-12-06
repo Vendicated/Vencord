@@ -16,14 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, find, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
+
+waitFor(["dispatch", "subscribe"], m => {
+    FluxDispatcher = m;
+    const cb = () => {
+        m.unsubscribe("CONNECTION_OPEN", cb);
+        _resolveReady();
+    };
+    m.subscribe("CONNECTION_OPEN", cb);
+});
+
 export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
@@ -31,7 +40,7 @@ waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m
 export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight");
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
@@ -41,7 +50,9 @@ export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
 export let Parser: t.Parser;
+waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
+waitFor(["show", "close"], m => Alerts = m);
 
 const ToastType = {
     MESSAGE: 0,
@@ -82,6 +93,13 @@ export const Toasts = {
     }
 };
 
+// This is the same module but this is easier
+waitFor("showToast", m => {
+    Toasts.show = m.showToast;
+    Toasts.pop = m.popToast;
+});
+
+
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
@@ -102,38 +120,16 @@ export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetI
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
-export const Clipboard = mapMangledModuleLazy('document.queryCommandEnabled("copy")||document.queryCommandSupported("copy")', {
-    copy: filters.byCode(".copy("),
-    SUPPORTS_COPY: x => typeof x === "boolean",
-});
+export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
 
-export const NavigationRouter = mapMangledModuleLazy("transitionToGuild - ", {
-    transitionTo: filters.byCode("transitionTo -"),
-    transitionToGuild: filters.byCode("transitionToGuild -"),
-    goBack: filters.byCode("goBack()"),
-    goForward: filters.byCode("goForward()"),
-});
-
-waitFor(["dispatch", "subscribe"], m => {
-    FluxDispatcher = m;
-    const cb = () => {
-        m.unsubscribe("CONNECTION_OPEN", cb);
-        _resolveReady();
-    };
-    m.subscribe("CONNECTION_OPEN", cb);
-});
-
-
-// This is the same module but this is easier
-waitFor("showToast", m => {
-    Toasts.show = m.showToast;
-    Toasts.pop = m.popToast;
-});
-
-waitFor(["show", "close"], m => Alerts = m);
-waitFor("parseTopic", m => Parser = m);
+export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const PermissionsBits: t.PermissionsBits = proxyLazy(() => find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint").Permissions);
+export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+
+export const zustandCreate: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
+
+const persistFilter = filters.byCode("[zustand persist middleware]");
+export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
