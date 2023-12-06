@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: "_ensureAudio(){",
             replacement: {
-                match: /_ensureAudio\(\)\{/,
-                replace: "$&this._volume*=$self.settings.store.notificationVolume/100;"
+                match: /onloadeddata=\(\)=>\{.\.volume=/,
+                replace: "$&$self.settings.store.notificationVolume/100*"
             },
         },
     ],
