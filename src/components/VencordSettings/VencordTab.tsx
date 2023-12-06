@@ -48,6 +48,15 @@ function VencordSettings() {
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+
+    // One-time migration of the old setting to the new one if necessary.
+    React.useEffect(() => {
+        if (settings.macosTranslucency === true && !settings.macosVibrancyStyle) {
+            settings.macosVibrancyStyle = "sidebar";
+            settings.macosTranslucency = undefined;
+        }
+    }, []);
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -89,11 +98,6 @@ function VencordSettings() {
                 title: "Disable minimum window size",
                 note: "Requires a full restart"
             },
-            IS_DISCORD_DESKTOP && isMac && {
-                key: "macosTranslucency",
-                title: "Enable translucent window",
-                note: "Requires a full restart"
-            }
         ];
 
     return (
@@ -151,6 +155,71 @@ function VencordSettings() {
                 ))}
             </Forms.FormSection>
 
+
+            {needsVibrancySettings && <>
+                <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+                <Select
+                    className={Margins.bottom20}
+                    placeholder="Window vibrancy style"
+                    options={[
+                        // Sorted from most opaque to most transparent
+                        {
+                            label: "No vibrancy", default: !settings.macosTranslucency, value: undefined
+                        },
+                        {
+                            label: "Under Page (window tinting)",
+                            value: "under-page"
+                        },
+                        {
+                            label: "Content",
+                            value: "content"
+                        },
+                        {
+                            label: "Window",
+                            value: "window"
+                        },
+                        {
+                            label: "Selection",
+                            value: "selection"
+                        },
+                        {
+                            label: "Titlebar",
+                            value: "titlebar"
+                        },
+                        {
+                            label: "Header",
+                            value: "header"
+                        },
+                        {
+                            label: "Sidebar (old value for transparent windows)",
+                            value: "sidebar",
+                            default: settings.macosTranslucency
+                        },
+                        {
+                            label: "Tooltip",
+                            value: "tooltip"
+                        },
+                        {
+                            label: "Menu",
+                            value: "menu"
+                        },
+                        {
+                            label: "Popover",
+                            value: "popover"
+                        },
+                        {
+                            label: "Fullscreen UI (transparent but slightly muted)",
+                            value: "fullscreen-ui"
+                        },
+                        {
+                            label: "HUD (Most transparent)",
+                            value: "hud"
+                        },
+                    ]}
+                    select={v => settings.macosVibrancyStyle = v}
+                    isSelected={v => settings.macosVibrancyStyle === v}
+                    serialize={identity} />
+            </>}
 
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
         </SettingsTab>
