@@ -31,7 +31,7 @@ export default definePlugin({
     start() {
         addButton("QuickMention", msg => {
             const channel = ChannelStore.getChannel(msg.channel_id);
-            if (!PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
+            if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
 
             return {
                 label: "Quick Mention",
