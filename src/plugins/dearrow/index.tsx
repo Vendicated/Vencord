@@ -60,7 +60,7 @@ async function embedDidMount(this: Component<Props>) {
 
         if (hasTitle) {
             embed.dearrow.oldTitle = embed.rawTitle;
-            embed.rawTitle = titles[0].title;
+            embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
         }
 
         if (hasThumb) {
