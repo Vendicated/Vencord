@@ -80,16 +80,15 @@ function SilentMessageToggle(chatBoxProps: {
                         style={{ padding: "0 6px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
-                            <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                            >
-                                <g fill="currentColor">
-                                    <path d="M18 10.7101C15.1085 9.84957 13 7.17102 13 4C13 3.69264 13.0198 3.3899 13.0582 3.093C12.7147 3.03189 12.3611 3 12 3C8.686 3 6 5.686 6 9V14C6 15.657 4.656 17 3 17V18H21V17C19.344 17 18 15.657 18 14V10.7101ZM8.55493 19C9.24793 20.19 10.5239 21 11.9999 21C13.4759 21 14.7519 20.19 15.4449 19H8.55493Z" />
-                                    <path d="M18.2624 5.50209L21 2.5V1H16.0349V2.49791H18.476L16 5.61088V7H21V5.50209H18.2624Z" />
-                                    {!enabled && <line x1="22" y1="2" x2="2" y2="22" stroke="var(--red-500)" stroke-width="2.5" />}
-                                </g>
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor" mask="url(#_)" d="M18 10.7101C15.1085 9.84957 13 7.17102 13 4c0-.30736.0198-.6101.0582-.907C12.7147 3.03189 12.3611 3 12 3 8.686 3 6 5.686 6 9v5c0 1.657-1.344 3-3 3v1h18v-1c-1.656 0-3-1.343-3-3v-3.2899ZM8.55493 19c.693 1.19 1.96897 2 3.44497 2s2.752-.81 3.445-2H8.55493ZM18.2624 5.50209 21 2.5V1h-4.9651v1.49791h2.4411L16 5.61088V7h5V5.50209h-2.7376Z" />
+                                {!enabled && <>
+                                    <mask id="_">
+                                        <path fill="#fff" d="M0 0h24v24H0Z" />
+                                        <path stroke="#000" stroke-width="5.99068" d="M0 24 24 0" />
+                                    </mask>
+                                    <path fill="var(--status-danger)" d="m21.178 1.70703 1.414 1.414L4.12103 21.593l-1.414-1.415L21.178 1.70703Z" />
+                                </>}
                             </svg>
                         </div>
                     </Button>

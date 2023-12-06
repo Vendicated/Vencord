@@ -20,8 +20,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
+
+const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -55,7 +57,6 @@ export default definePlugin({
 
     start() {
         if (settings.store.addBack) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             this.changedListeners = true;
@@ -64,7 +65,6 @@ export default definePlugin({
 
     stop() {
         if (this.changedListeners) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
         }
@@ -118,11 +118,12 @@ export default definePlugin({
         // Add back image context menu
         {
             find: 'navId:"image-context"',
+            all: true,
             predicate: () => settings.store.addBack,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
-                match: /return \i\.\i\?/,
-                replace: "return true?"
+                match: /return \i\.\i(?=\?|&&)/,
+                replace: "return true"
             }
         },
 
