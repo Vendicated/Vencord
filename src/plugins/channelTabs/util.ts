@@ -122,9 +122,9 @@ export const channelTabsSettings = definePluginSettings({
         default: true
     },
     showChannelEmojis: {
-        description: "",
+        description: "Requires a restart to load the right emoji",
         type: OptionType.BOOLEAN,
-        default: true
+        default: false
     }
 });
 

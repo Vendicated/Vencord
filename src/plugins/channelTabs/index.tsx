@@ -26,7 +26,7 @@ import { ChannelStore, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
-import { BasicChannelTabsProps, channelTabsSettings, ChannelTabsUtils } from "./util";
+import { BasicChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "./util";
 
 const contextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
     () => {
@@ -100,10 +100,20 @@ export default definePlugin({
                 match: /(\.guildSettingsSection\).{0,30})},\[/,
                 replace: "$1;$self.onAppDirectoryClose()},["
             }
+        },
+        // always show channel emojis if the option is enabled
+        // for some reason they locked it behind a design toggle even though the api always returns them
+        {
+            find: "useChannelEmojiAndColor:function",
+            predicate: () => settings.store.showChannelEmojis,
+            replacement: {
+                match: /\(0,\i\.default\)\("enable_channel_emojis"\)/,
+                replace: "true"
+            }
         }
     ],
 
-    settings: channelTabsSettings,
+    settings,
 
     start() {
         addContextMenuPatch("channel-mention-context", contextMenuPatch);
