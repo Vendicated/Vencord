@@ -105,10 +105,24 @@ async function printReport() {
 
     console.log();
 
-    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
+    const ignoredErrors = [] as string[];
+    report.otherErrors = report.otherErrors.filter(e => {
+        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
+            ignoredErrors.push(e);
+            return false;
+        }
+        return true;
+    });
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
+
+    console.log();
+
+    console.log("## Ignored Discord Errors");
+    ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -406,15 +420,21 @@ function runTime(token: string) {
                     if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
+                    } else if (method === "extractAndLoadChunks") {
+                        const [code, matcher] = args;
+
+                        const module = Vencord.Webpack.findModuleFactory(...code);
+                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
+                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                     else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
