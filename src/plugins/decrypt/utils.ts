@@ -34,9 +34,27 @@ export interface TranslationValue {
     text: string;
 }
 
+export function encryptDecryptAPI(kind: "encrypt" | "decrypt", text: string): Promise<string> {
+    return fetch(`https://api.dragzte.me/${kind}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+    })
+        .then(response => {
+            console.log(response.text);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => data.text)
+        .catch(error => {
+            console.error("Failed to fetch from API:", error);
+            return text;
+        });
+}
 
-
-export function translate(kind: "received" | "sent", text: string, version: number): TranslationValue {
+export async function translate(kind: "received" | "sent", text: string, version: number): Promise<TranslationValue> {
     const lettersv1 = {
         "a": "આ",
         "b": "ୈ",
@@ -198,45 +216,32 @@ export function translate(kind: "received" | "sent", text: string, version: numb
         "I": "",
     };
 
+    let translatedText = "";
+
     const letters = version === 1 ? lettersv1 : version === 2 ? lettersv2 : cubes;
 
-    if (kind === "sent") {
-        const translatedText = text
-            .split("")
-            .map(word => {
-                // Ignore links and words that start with '!'
-                if (word.startsWith("http") || word.startsWith("!")) {
-                    return word.replace("!", "");
-                }
-                // Translate other words
-                return word.split("").map(char => letters[char] || char).join("");
-            })
-            .join("");
-        return {
-            src: kind,
-            text: translatedText + "​"
-        };
+
+    if (version === 1) {
+        return encryptDecryptAPI(kind === "sent" ? "encrypt" : "decrypt", text)
+            .then(translatedText => {
+                return {
+                    src: kind,
+                    text: translatedText + "​"
+                };
+            });
+    } else {
+
+        if (kind === "sent") {
+            translatedText = await encryptDecryptAPI(kind === "sent" ? "encrypt" : "decrypt", text);
+        } else {
+            const reversedLetters = Object.entries(letters).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
+            translatedText = text.split("").map(char => reversedLetters[char] || char).join("");
+        }
     }
 
-    const reversedLettersv1 = Object.entries(lettersv1).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
-    const reversedLettersv2 = Object.entries(lettersv2).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
-    const reversedcubes = Object.entries(cubes).reduce((acc, [key, value]) => ({ ...acc, [value as string]: key }), {});
-
-    const translatedTextv1 = text.split("").map(char => reversedLettersv1[char] || char).join("");
-    const translatedTextv2 = text.split("").map(char => reversedLettersv2[char] || char).join("");
-    const translatedTextv3 = text.split("").map(char => reversedcubes[char] || char).join("");
-
-    // Count unrecognized characters
-    const unrecognizedCharsv1 = translatedTextv1.split("").filter(char => !Object.keys(lettersv1).includes(char)).length;
-    const unrecognizedCharsv2 = translatedTextv2.split("").filter(char => !Object.keys(lettersv2).includes(char)).length;
-    const unrecognizedCharsv3 = translatedTextv3.split("").filter(char => !Object.keys(cubes).includes(char)).length;
-
-    // Choose the translation with fewer unrecognized characters
-    const minUnrecognizedChars = Math.min(unrecognizedCharsv1, unrecognizedCharsv2, unrecognizedCharsv3);
-    const translatedText = minUnrecognizedChars === unrecognizedCharsv1 ? translatedTextv1 : minUnrecognizedChars === unrecognizedCharsv2 ? translatedTextv2 : translatedTextv3;
     return {
         src: kind,
-        text: translatedText
+        text: translatedText + "​"
     };
 }
 

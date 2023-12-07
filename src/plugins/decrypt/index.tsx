@@ -43,7 +43,7 @@ interface IMessageCreate {
 }
 
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => () => {
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => async () => {
     if (!message.content) return;
     if (!settings.store.autoDecrypt) return;
     if (!message.content) return;
@@ -56,7 +56,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
     const channel = ChannelStore.getChannel(message.channel_id);
     if (!channel) return;
 
-    const trans = translate("received", message.content, settings.store.version);
+    const trans = await translate("received", message.content, settings.store.version);
     handleTranslate(message.id, trans);
 
     const group = findGroupChildrenByChildId("copy-text", children);
