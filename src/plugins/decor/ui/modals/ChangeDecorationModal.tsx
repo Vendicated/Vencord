@@ -18,6 +18,7 @@ import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
+import { settings } from "../../settings";
 import { cl, requireAvatarDecorationModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
@@ -29,7 +30,6 @@ import { openGuidelinesModal } from "./GuidelinesModal";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
-const { impl: localStorage } = findByPropsLazy("ObjectStorage", "impl");
 
 function usePresets() {
     const [presets, setPresets] = useState<Preset[]>([]);
@@ -115,8 +115,6 @@ export default function ChangeDecorationModal(props: any) {
 
     const ownDecorations = decorations.filter(d => !presetDecorations.some(p => p.hash === d.hash));
 
-    const agreedToGuidelines = localStorage.get("DecorGuidelines") === true;
-
     const data = [
         {
             title: "Your Decorations",
@@ -168,7 +166,7 @@ export default function ChangeDecorationModal(props: any) {
                                     {tooltipProps => <DecorationGridCreate
                                         className={cl("change-decoration-modal-decoration")}
                                         {...tooltipProps}
-                                        onSelect={!hasDecorationPendingReview ? (agreedToGuidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
+                                        onSelect={!hasDecorationPendingReview ? (settings.store.guidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
                                     />}
                                 </Tooltip>;
                         }

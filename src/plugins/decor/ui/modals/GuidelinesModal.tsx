@@ -9,11 +9,11 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, Mo
 import { findByPropsLazy } from "@webpack";
 import { Button, Text } from "@webpack/common";
 
+import { settings } from "../../settings";
 import { cl, requireAvatarDecorationModal } from "../";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
-const { impl: localStorage } = findByPropsLazy("ObjectStorage", "impl");
 
 export default function GuidelinesModal(props) {
     return <ModalRoot
@@ -52,7 +52,7 @@ export default function GuidelinesModal(props) {
         <ModalFooter className={cl("modal-footer")}>
             <Button
                 onClick={() => {
-                    localStorage.set("DecorGuidelines", true);
+                    settings.store.guidelines = true;
                     openCreateDecorationModal();
                 }}
             >
