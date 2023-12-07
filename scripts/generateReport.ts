@@ -335,15 +335,15 @@ function runTime(token: string) {
             await (wreq as any).el(sym);
             delete Object.prototype[sym];
 
-            const validChunksEntryPoints = [] as string[];
-            const validChunks = [] as string[];
-            const invalidChunks = [] as string[];
+            const validChunksEntryPoints = new Set<string>();
+            const validChunks = new Set<string>();
+            const invalidChunks = new Set<string>();
 
             if (!chunks) throw new Error("Failed to get chunks");
 
-            chunksLoop:
             for (const entryPoint in chunks) {
                 const chunkIds = chunks[entryPoint];
+                let invalidEntryPoint = false;
 
                 for (const id of chunkIds) {
                     if (!wreq.u(id)) continue;
@@ -353,14 +353,16 @@ function runTime(token: string) {
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
                     if (isWasm) {
-                        invalidChunks.push(id);
-                        continue chunksLoop;
+                        invalidChunks.add(id);
+                        invalidEntryPoint = true;
+                        continue;
                     }
 
-                    validChunks.push(id);
+                    validChunks.add(id);
                 }
 
-                validChunksEntryPoints.push(entryPoint);
+                if (!invalidEntryPoint)
+                    validChunksEntryPoints.add(entryPoint);
             }
 
             for (const entryPoint of validChunksEntryPoints) {
@@ -373,7 +375,7 @@ function runTime(token: string) {
             const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
             if (!allChunks) throw new Error("Failed to get all chunks");
             const chunksLeft = Object.keys(allChunks).filter(id => {
-                return !(validChunks.includes(id) || invalidChunks.includes(id));
+                return !(validChunks.has(id) || invalidChunks.has(id));
             });
 
             for (const id of chunksLeft) {
