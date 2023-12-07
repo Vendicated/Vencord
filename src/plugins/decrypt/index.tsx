@@ -81,8 +81,6 @@ export default definePlugin({
     authors: [Devs.Drag],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
     settings,
-    // not used, just here in case some other plugin wants it or w/e
-    translate,
 
     flux: {
         async MESSAGE_CREATE({ message, channelId }: IMessageCreate) {
@@ -117,11 +115,11 @@ export default definePlugin({
     ],
 
     start() {
-        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+        addAccessory("vc-decryption", props => <TranslationAccessory message={props.message} />);
 
         addContextMenuPatch("message", messageCtxPatch);
 
-        addButton("vc-translate", message => {
+        addButton("vc-decrypt", message => {
             if (!message.content) return null;
 
             return {
@@ -147,8 +145,8 @@ export default definePlugin({
     stop() {
         removePreSendListener(this.preSend);
         removeContextMenuPatch("message", messageCtxPatch);
-        removeButton("vc-translate");
-        removeAccessory("vc-translation");
+        removeButton("vc-decrypt");
+        removeAccessory("vc-decryption");
     },
 
     chatBarIcon: (slateProps: any) => (
