@@ -21,6 +21,8 @@ const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 
+const { default: HelpMessage, HelpMessageTypes } = findByPropsLazy("HelpMessageTypes");
+
 function useObjectURL(object: Blob | MediaSource | null) {
     const [url, setUrl] = useState<string | null>(null);
 
@@ -75,6 +77,13 @@ export default function CreateDecorationModal(props) {
             className={cl("create-decoration-modal-content")}
             scrollbarType="none"
         >
+            <HelpMessage messageType={HelpMessageTypes.WARNING}>
+                Make sure your decoration does not violate <Link
+                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
+                >
+                    the guidelines
+                </Link> before submitting it.
+            </HelpMessage>
             <div className={cl("create-decoration-modal-form-preview-container")}>
                 <div className={cl("create-decoration-modal-form")}>
                     {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
@@ -109,11 +118,6 @@ export default function CreateDecorationModal(props) {
                 </div>
             </div>
             <Forms.FormText type="description" className={Margins.bottom16}>
-                Make sure your decoration does not violate <Link
-                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
-                >
-                    the guidelines
-                </Link> before creating your decoration.
                 <br />You can receive updates on your decoration's review by joining <Link
                     href={`https://discord.gg/${INVITE_KEY}`}
                     onClick={async e => {
@@ -145,7 +149,7 @@ export default function CreateDecorationModal(props) {
                 disabled={!file || !name}
                 submitting={submitting}
             >
-                Create
+                Submit for Review
             </Button>
             <Button
                 onClick={props.onClose}

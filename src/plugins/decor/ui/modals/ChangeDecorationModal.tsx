@@ -25,9 +25,11 @@ import DecorationGridNone from "../components/DecorationGridNone";
 import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
 import SectionedGridList from "../components/SectionedGridList";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
+import { openGuidelinesModal } from "./GuidelinesModal";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
+const { impl: localStorage } = findByPropsLazy("ObjectStorage", "impl");
 
 function usePresets() {
     const [presets, setPresets] = useState<Preset[]>([]);
@@ -113,9 +115,12 @@ export default function ChangeDecorationModal(props: any) {
 
     const ownDecorations = decorations.filter(d => !presetDecorations.some(p => p.hash === d.hash));
 
+    const agreedToGuidelines = localStorage.get("DecorGuidelines") === true;
+
     const data = [
         {
             title: "Your Decorations",
+            subtitle: "You can delete your own decorations by right clicking on them.",
             sectionKey: "ownDecorations",
             items: ["none", ...ownDecorations, "create"]
         },
@@ -163,7 +168,7 @@ export default function ChangeDecorationModal(props: any) {
                                     {tooltipProps => <DecorationGridCreate
                                         className={cl("change-decoration-modal-decoration")}
                                         {...tooltipProps}
-                                        onSelect={!hasDecorationPendingReview ? openCreateDecorationModal : () => { }}
+                                        onSelect={!hasDecorationPendingReview ? (agreedToGuidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
                                     />}
                                 </Tooltip>;
                         }
