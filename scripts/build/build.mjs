@@ -76,7 +76,11 @@ const globNativesPlugin = {
                 if (!await existsAsync(dirPath)) continue;
                 const plugins = await readdir(dirPath);
                 for (const p of plugins) {
-                    if (!await existsAsync(join(dirPath, p, "native.ts"))) continue;
+                    const nativePath = join(dirPath, p, "native.ts");
+                    const indexNativePath = join(dirPath, p, "native/index.ts");
+
+                    if (!(await existsAsync(nativePath)) && !(await existsAsync(indexNativePath)))
+                        continue;
 
                     const nameParts = p.split(".");
                     const namePartsWithoutTarget = nameParts.length === 1 ? nameParts : nameParts.slice(0, -1);

@@ -63,6 +63,7 @@ export default definePlugin({
 
         let fakeRenderWin: WeakRef<Window> | undefined;
         const find = newFindWrapper(f => f);
+        const findByProps = newFindWrapper(filters.byProps);
         return {
             ...Vencord.Webpack.Common,
             wp: Vencord.Webpack,
@@ -73,13 +74,13 @@ export default definePlugin({
             wpexs: (code: string) => extract(Webpack.findModuleId(code)!),
             find,
             findAll,
-            findByProps: newFindWrapper(filters.byProps),
+            findByProps,
             findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
             findAllByCode: (code: string) => findAll(filters.byCode(code)),
             findComponentByCode: newFindWrapper(filters.componentByCode),
             findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
-            findExportedComponent: (...props: string[]) => find(...props)[props[0]],
+            findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
             findStore: newFindWrapper(filters.byStoreName),
             PluginsApi: Vencord.Plugins,
             plugins: Vencord.Plugins.plugins,

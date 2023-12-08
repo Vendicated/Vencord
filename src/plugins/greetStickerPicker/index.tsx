@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { MessageActions } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu } from "@webpack/common";
@@ -49,7 +50,6 @@ const settings = definePluginSettings({
     unholyMultiGreetEnabled?: boolean;
 }>();
 
-const MessageActions = findByPropsLazy("sendGreetMessage");
 const { WELCOME_STICKERS } = findByPropsLazy("WELCOME_STICKERS");
 
 function greet(channel: Channel, message: Message, stickers: string[]) {

@@ -46,10 +46,10 @@ export default definePlugin({
             }
         },
         {
-            find: ".hasAvailableBurstCurrency)",
+            find: ".trackEmojiSearchEmpty,200",
             replacement: {
-                match: /(?<=\.useBurstReactionsExperiment.{0,20})useState\(!1\)(?=.+?(\i===\i\.EmojiIntention.REACTION))/,
-                replace: "useState($self.settings.store.superReactByDefault && $1)"
+                match: /(\.trackEmojiSearchEmpty,200(?=.+?isBurstReaction:(\i).+?(\i===\i\.EmojiIntention.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
+                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.settings.store.superReactByDefault&&${isReactionIntention})`
             }
         }
     ],

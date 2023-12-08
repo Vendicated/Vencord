@@ -15,7 +15,7 @@ import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, Forms } from "@webpack/common";
 
-const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR");
+const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",

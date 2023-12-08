@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByProps, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -118,7 +118,7 @@ export type ImageModal = ComponentType<{
     shouldHideMediaOptions?: boolean;
 }>;
 
-export const ImageModal = LazyComponent(() => findByProps("ImageModal").ImageModal as ImageModal);
+export const ImageModal = findExportedComponentLazy("ImageModal") as ImageModal;
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);

@@ -35,15 +35,13 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const Classes = proxyLazyWebpack(() => {
-    const modules = findBulk(
+const Classes = proxyLazyWebpack(() =>
+    Object.assign({}, ...findBulk(
         filters.byProps("roles", "rolePill", "rolePillBorder"),
         filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
         filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-    );
-
-    return Object.assign({}, ...modules);
-}) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
+    ))
+) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
 function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);

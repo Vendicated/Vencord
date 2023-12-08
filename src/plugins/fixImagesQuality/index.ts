@@ -14,10 +14,12 @@ export default definePlugin({
     patches: [
         {
             find: "handleImageLoad=",
-            replacement: {
-                match: /(?<=getSrc\(\i\){.+?format:)\i/,
-                replace: "null"
-            }
+            replacement: [
+                {
+                    match: /(?<=getSrc\(\i\){.+?return )\i\.SUPPORTS_WEBP.+?:(?=\i&&\(\i="png"\))/,
+                    replace: ""
+                }
+            ]
         }
     ]
 });

@@ -17,14 +17,49 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
-const MessageActions = findByPropsLazy("editMessage", "sendMessage");
-const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const InviteActions = findByPropsLazy("resolveInvite");
+
+const InviteModalStore = findStoreLazy("InviteModalStore");
+
+/**
+ * Open the invite modal
+ * @param code The invite code
+ * @returns Whether the invite was accepted
+ */
+export async function openInviteModal(code: string) {
+    const { invite } = await InviteActions.resolveInvite(code, "Desktop Modal");
+    if (!invite) throw new Error("Invalid invite: " + code);
+
+    FluxDispatcher.dispatch({
+        type: "INVITE_MODAL_OPEN",
+        invite,
+        code,
+        context: "APP"
+    });
+
+    return new Promise<boolean>(r => {
+        let onClose: () => void, onAccept: () => void;
+        let inviteAccepted = false;
+
+        FluxDispatcher.subscribe("INVITE_ACCEPT", onAccept = () => {
+            inviteAccepted = true;
+        });
+
+        FluxDispatcher.subscribe("INVITE_MODAL_CLOSE", onClose = () => {
+            FluxDispatcher.unsubscribe("INVITE_MODAL_CLOSE", onClose);
+            FluxDispatcher.unsubscribe("INVITE_ACCEPT", onAccept);
+            r(inviteAccepted);
+        });
+    });
+}
 
 export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());

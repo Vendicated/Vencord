@@ -126,6 +126,7 @@ export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonEl
 
     buttonRef?: Ref<HTMLButtonElement>;
     focusProps?: any;
+    submitting?: boolean;
 
     submittingStartedLabel?: string;
     submittingFinishedLabel?: string;

@@ -19,7 +19,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
+
+const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 
 const settings = definePluginSettings({
     guild: {
@@ -63,7 +65,7 @@ export default definePlugin({
 
     handleMute(guildId: string | null) {
         if (guildId === "@me" || guildId === "null" || guildId == null) return;
-        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId,
+        updateGuildNotificationSettings(guildId,
             {
                 muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,

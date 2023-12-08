@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 patchedDependencies:
   eslint-plugin-path-alias@1.0.0:
     hash: m6sma4g6bh67km3q6igf6uxaja
@@ -123,6 +119,9 @@ devDependencies:
   zip-local:
     specifier: ^0.3.5
     version: 0.3.5
+  zustand:
+    specifier: ^3.7.2
+    version: 3.7.2
 
 packages:
 
@@ -3450,8 +3449,22 @@ packages:
       q: 1.5.1
     dev: true
 
+  /zustand@3.7.2:
+    resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      react: '>=16.8'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dev: true
+
   github.com/mattdesl/gifenc/64842fca317b112a8590f8fef2bf3825da8f6fe3:
     resolution: {tarball: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3}
     name: gifenc
     version: 1.0.3
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
