@@ -46,6 +46,13 @@ export default definePlugin({
                 match: /(?<=\.activityEmoji,.+?animate:)\i/,
                 replace: "!0"
             }
+        },
+        {
+            find: ".Messages.DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO,",
+            replacement: {
+                match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
+                replace: "!0"
+            }
         }
     ]
 });
