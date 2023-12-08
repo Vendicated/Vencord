@@ -48,7 +48,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO,",
+            find: ".animatedBannerHoverLayer,onMouseEnter:",
             replacement: {
                 match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
                 replace: "!0"
