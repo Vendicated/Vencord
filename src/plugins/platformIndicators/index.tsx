@@ -61,7 +61,7 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`${StatusUtils.useStatusFillColor(status)}`} tooltip={tooltip} small={small} />;
+    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
