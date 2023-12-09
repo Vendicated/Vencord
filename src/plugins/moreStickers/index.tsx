@@ -84,7 +84,7 @@ export default definePlugin({
             replacement: {
                 match: /role:"tablist",.+?\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {
-                    const stickerTabRegex = /(\w+)\?(\(.+?\))\((.{1,2}),.*?isActive:(.)===.*?children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/s;
+                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((\w{1,2}),{.{0,128},isActive:(\w{1,2})===.{1,150},children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/s;
                     const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
                         const isActive = `${currentTab}==="stickers+"`;
                         return (
@@ -94,7 +94,7 @@ export default definePlugin({
                         );
                     });
 
-                    return res.replace(/:null,((.)===.*?\.STICKER&&\w+\?(\(.*?\)).*?(\{.*?,onSelectSticker:.*?\})\):null)/s, (_, _m, currentTab, jsx, props) => {
+                    return res.replace(/:null,((.{1,200})===.{1,30}\.STICKER&&\w+\?(\([^()]{1,10}\)).{1,15}?(\{.*?,onSelectSticker:.*?\})\):null)/s, (_, _m, currentTab, jsx, props) => {
                         return `:null,${currentTab}==="stickers+"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
                     });
                 }
