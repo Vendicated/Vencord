@@ -38,7 +38,6 @@ export default definePlugin({
     ],
 
     async start() {
-        // Moved this into start function because we can't use React top-level, too early
         const CODES_URL = `https://raw.githubusercontent.com/facebook/react/v${React.version}/scripts/error-codes/codes.json`;
 
         ERROR_CODES = await fetch(CODES_URL)
