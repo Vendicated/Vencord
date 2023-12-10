@@ -114,7 +114,14 @@ export function PreviewButton(chatBoxProps: Props) {
                     style={{ padding: "0 2px", height: "100%" }}
                 >
                     <div className={ButtonWrapperClasses.buttonWrapper}>
-                        <img width={24} height={24} src="https://discord.com/assets/4c5a77a89716352686f590a6f014770c.svg" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                        <path d="M 0, 12 a 5.8, 9.3 0 1, 0 11.6, 0 a 5.8, 9.3 0 1, 0 -11.6, 0 Z
+                                 M 1.2, 12 a 3.3, 3.3 0 1, 0 6.6, 0 a 3.3, 3.3 0 1, 0 -6.6, 0 Z
+                                 M 12.4, 12 a 5.8, 9.3 0 1, 0 11.6, 0 a 5.8, 9.3 0 1, 0 -11.6, 0 Z
+                                 M 13.7, 12 a 3.3, 3.3 0 1, 0 6.6, 0 a 3.3, 3.3 0 1, 0 -6.6, 0 Z"
+                            fill="currentColor"
+                            fill-rule="evenodd"/>
+                        </svg>
                     </div>
                 </Button>
             )}
