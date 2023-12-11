@@ -79,29 +79,6 @@ export type EditListener = (channelId: string, messageId: string, messageObj: Me
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
 
-export type ReceivedListener = (message: Message) => Promisable<void>;
-
-const receivedListeners = new Set<ReceivedListener>();
-
-export function addReceivedListener(listener: ReceivedListener) {
-    receivedListeners.add(listener);
-    return listener;
-}
-
-export function removeReceivedListener(listener: ReceivedListener) {
-    return receivedListeners.delete(listener);
-}
-
-export async function _handleReceived(message: Message) {
-    for (const listener of receivedListeners) {
-        try {
-            await listener(message);
-        } catch (e) {
-            MessageEventsLogger.error("MessageReceivedHandler: Listener encountered an unknown error\n", e);
-        }
-    }
-}
-
 export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
     extra.replyOptions = replyOptions;
     for (const listener of sendListeners) {
@@ -117,17 +94,6 @@ export async function _handlePreSend(channelId: string, messageObj: MessageObjec
     return false;
 }
 
-export async function _handleSend(channelId: string, messageObj: MessageObject, extra: MessageExtra) {
-    for (const listener of sendListeners) {
-        try {
-            await listener(channelId, messageObj, extra);
-        }
-        catch (e) {
-            MessageEventsLogger.error("MessageSendHandler: Listener encountered an unknown error\n", e);
-        }
-    }
-}
-
 export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
@@ -138,30 +104,20 @@ export async function _handlePreEdit(channelId: string, messageId: string, messa
     }
 }
 
-export function addSendListener(listener: SendListener) {
-    sendListeners.add(listener);
-    return listener;
-}
-
 /**
-         * Note: This event fires off before a message is sent, allowing you to edit the message.
-         */
+ * Note: This event fires off before a message is sent, allowing you to edit the message.
+ */
 export function addPreSendListener(listener: SendListener) {
     sendListeners.add(listener);
     return listener;
 }
 /**
-         * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
-         */
+ * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
+ */
 export function addPreEditListener(listener: EditListener) {
     editListeners.add(listener);
     return listener;
 }
-
-export function removeSendListener(listener: SendListener) {
-    return sendListeners.delete(listener);
-}
-
 export function removePreSendListener(listener: SendListener) {
     return sendListeners.delete(listener);
 }

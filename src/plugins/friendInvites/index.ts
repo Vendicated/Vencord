@@ -119,4 +119,3 @@ export default definePlugin({
         },
     ]
 });
-
