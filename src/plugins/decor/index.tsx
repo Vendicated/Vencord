@@ -99,7 +99,7 @@ export default definePlugin({
             ]
         }
     ],
-    settings: settings,
+    settings,
 
     flux: {
         CONNECTION_OPEN: () => {
