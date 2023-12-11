@@ -1,7 +1,7 @@
 {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     "[typescript]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
@@ -13,7 +13,6 @@
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",
     "javascript.preferences.quoteStyle": "double",
-
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
