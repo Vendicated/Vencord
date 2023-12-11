@@ -265,7 +265,7 @@ function ThemesTab() {
                                             {...modalProps}
                                             plugin={Vencord.Plugins.plugins.ClientTheme}
                                             onRestartNeeded={() => { }}
-                                        />;
+                                        />
                                     ))}
                                     size={Button.Sizes.SMALL}
                                 >
