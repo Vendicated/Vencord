@@ -16,17 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [
-        {
-            id: 368475654662127616n,
-            name: "Grzesiek11",
-        },
-    ],
+    authors: [Devs.Grzesiek11],
     patches: [
         {
             find: ".useCanSeeRemixBadge)",
