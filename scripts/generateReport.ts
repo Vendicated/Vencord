@@ -105,10 +105,24 @@ async function printReport() {
 
     console.log();
 
-    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
+    const ignoredErrors = [] as string[];
+    report.otherErrors = report.otherErrors.filter(e => {
+        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
+            ignoredErrors.push(e);
+            return false;
+        }
+        return true;
+    });
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
+
+    console.log();
+
+    console.log("## Ignored Discord Errors");
+    ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -321,15 +335,15 @@ function runTime(token: string) {
             await (wreq as any).el(sym);
             delete Object.prototype[sym];
 
-            const validChunksEntryPoints = [] as string[];
-            const validChunks = [] as string[];
-            const invalidChunks = [] as string[];
+            const validChunksEntryPoints = new Set<string>();
+            const validChunks = new Set<string>();
+            const invalidChunks = new Set<string>();
 
             if (!chunks) throw new Error("Failed to get chunks");
 
-            chunksLoop:
             for (const entryPoint in chunks) {
                 const chunkIds = chunks[entryPoint];
+                let invalidEntryPoint = false;
 
                 for (const id of chunkIds) {
                     if (!wreq.u(id)) continue;
@@ -339,14 +353,16 @@ function runTime(token: string) {
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
                     if (isWasm) {
-                        invalidChunks.push(id);
-                        continue chunksLoop;
+                        invalidChunks.add(id);
+                        invalidEntryPoint = true;
+                        continue;
                     }
 
-                    validChunks.push(id);
+                    validChunks.add(id);
                 }
 
-                validChunksEntryPoints.push(entryPoint);
+                if (!invalidEntryPoint)
+                    validChunksEntryPoints.add(entryPoint);
             }
 
             for (const entryPoint of validChunksEntryPoints) {
@@ -359,7 +375,7 @@ function runTime(token: string) {
             const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
             if (!allChunks) throw new Error("Failed to get all chunks");
             const chunksLeft = Object.keys(allChunks).filter(id => {
-                return !(validChunks.includes(id) || invalidChunks.includes(id));
+                return !(validChunks.has(id) || invalidChunks.has(id));
             });
 
             for (const id of chunksLeft) {
@@ -406,15 +422,21 @@ function runTime(token: string) {
                     if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
+                    } else if (method === "extractAndLoadChunks") {
+                        const [code, matcher] = args;
+
+                        const module = Vencord.Webpack.findModuleFactory(...code);
+                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
+                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                     else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);

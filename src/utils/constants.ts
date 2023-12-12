@@ -78,8 +78,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
-    Animal: {
-        name: "Animal",
+    Nyako: {
+        name: "nyako",
         id: 118437263754395652n
     },
     MaiKokain: {
@@ -387,9 +387,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ant0n",
         id: 145224646868860928n
     },
+    philipbry: {
+        name: "philipbry",
+        id: 554994003318276106n
+    },
     Korbo: {
         name: "Korbo",
         id: 455856406420258827n
+    },
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
     },
     skykittenpuppy: {
         name: "skykittenpuppy",
