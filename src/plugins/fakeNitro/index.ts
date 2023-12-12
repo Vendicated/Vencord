@@ -788,11 +788,11 @@ export default definePlugin({
                     break stickerBypass;
 
                 // [12/12/2023] 
-                // Work around an annoying bug where discord API will return StickerType.GIF
-                // but give us a normal non animated png for no reason?
+                // Work around an annoying bug where getStickerLink will return StickerType.GIF,
+                // but will give us a normal non animated png for no reason
                 let link = this.getStickerLink(sticker.id);
                 if (sticker.format_type == StickerType.GIF && link.includes(".png")) {
-                    link = link.replaceAll(".png", ".gif");
+                    link = link.replace(".png", ".gif");
                 }
                 if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
