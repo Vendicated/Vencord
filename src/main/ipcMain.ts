@@ -138,20 +138,26 @@ export function initIpc(mainWindow: BrowserWindow) {
     }));
 }
 
+let monacoEditorWin: BrowserWindow;
+
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
-    const win = new BrowserWindow({
-        title: "Vencord QuickCSS Editor",
-        autoHideMenuBar: true,
-        darkTheme: true,
-        webPreferences: {
-            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
-            contextIsolation: true,
-            nodeIntegration: false,
-            sandbox: false
-        }
-    });
+    if (monacoEditorWin && monacoEditorWin.focusable) {
+        monacoEditorWin.focus();
+    } else {
+        monacoEditorWin = new BrowserWindow({
+            title: "Vencord QuickCSS Editor",
+            autoHideMenuBar: true,
+            darkTheme: true,
+            webPreferences: {
+                preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
+                contextIsolation: true,
+                nodeIntegration: false,
+                sandbox: false
+            }
+        });
 
-    makeLinksOpenExternally(win);
+        makeLinksOpenExternally(monacoEditorWin);
 
-    await win.loadURL(`data:text/html;base64,${monacoHtml}`);
+        await monacoEditorWin.loadURL(`data:text/html;base64,${monacoHtml}`);
+    }
 });
