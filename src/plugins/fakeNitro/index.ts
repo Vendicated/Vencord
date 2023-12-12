@@ -791,7 +791,7 @@ export default definePlugin({
                 // Work around an annoying bug where getStickerLink will return StickerType.GIF,
                 // but will give us a normal non animated png for no reason
                 let link = this.getStickerLink(sticker.id);
-                if (sticker.format_type == StickerType.GIF && link.includes(".png")) {
+                if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
                     link = link.replace(".png", ".gif");
                 }
                 if (sticker.format_type === StickerType.APNG) {
