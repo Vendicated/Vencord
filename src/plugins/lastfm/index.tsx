@@ -239,7 +239,7 @@ export default definePlugin({
             // why does the json api have xml structure
             return {
                 name: trackData.name || "Unknown",
-                album: trackData.album.mbid === "" ? this.name : trackData.album["#text"],
+                album: trackData.album.mbid === "" ? (trackData.name || "Unknown") : trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 url: trackData.url,
                 imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
