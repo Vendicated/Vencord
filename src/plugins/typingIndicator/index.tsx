@@ -56,7 +56,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     }
 
     if (!settings.store.includeCurrentChannel) {
-        if (currentChannelId == channelId) return null;
+        if (currentChannelId === channelId) return null;
     }
 
     const myId = UserStore.getCurrentUser()?.id;
