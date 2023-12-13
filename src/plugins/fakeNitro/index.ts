@@ -359,7 +359,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: "location:\"AppIconHome\"",
+            find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
