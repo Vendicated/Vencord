@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "Swellaby.workspace-config-plus",
         "dbaeumer.vscode-eslint",
         "eamodio.gitlens",
         "EditorConfig.EditorConfig",
