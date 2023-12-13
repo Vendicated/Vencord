@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
@@ -47,12 +47,16 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-
+    const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
+    }
+
+    if (!settings.store.includeCurrentChannel) {
+        if (currentChannelId === channelId) return null;
     }
 
     const myId = UserStore.getCurrentUser()?.id;
@@ -101,6 +105,11 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
 }
 
 const settings = definePluginSettings({
+    includeCurrentChannel: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for the currently selected channel",
+        default: true
+    },
     includeMutedChannels: {
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
