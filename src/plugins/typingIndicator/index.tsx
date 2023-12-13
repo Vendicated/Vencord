@@ -47,7 +47,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-    const { id: currentChannelId, guild_id: currentGuildId } = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
+    const id: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
