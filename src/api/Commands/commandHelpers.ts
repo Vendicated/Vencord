@@ -25,7 +25,7 @@ import type { PartialDeep } from "type-fest";
 
 import { Argument } from "./types";
 
-const MessageSender = findByPropsLazy("receiveMessage");
+const MessageCreator = findByPropsLazy("createBotMessage");
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
@@ -38,9 +38,9 @@ export function generateId() {
  * @returns {Message}
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
-    const botMessage = MessageActions.createBotMessage({ channelId, content: "", embeds: [] });
+    const botMessage = MessageCreator.createBotMessage({ channelId, content: "", embeds: [] });
 
-    MessageSender.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    MessageActions.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
     return message as Message;
 }
