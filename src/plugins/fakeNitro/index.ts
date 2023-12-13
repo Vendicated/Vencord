@@ -787,7 +787,7 @@ export default definePlugin({
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
-                // [12/12/2023] 
+                // [12/12/2023]
                 // Work around an annoying bug where getStickerLink will return StickerType.GIF,
                 // but will give us a normal non animated png for no reason
                 // TODO: Remove this workaround when it's not needed anymore
