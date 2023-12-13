@@ -46,6 +46,13 @@ export default definePlugin({
                 match: /(?<=\.activityEmoji,.+?animate:)\i/,
                 replace: "!0"
             }
+        },
+        {
+            find: ".animatedBannerHoverLayer,onMouseEnter:",
+            replacement: {
+                match: /(?<=guildBanner:\i,animate:)\i/,
+                replace: "!0"
+            }
         }
     ]
 });
