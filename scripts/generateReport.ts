@@ -137,7 +137,7 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/6101cff21e241cebb60c4a01563d0c01.webp?size=512",
+                avatar_url: "https://cdn.discordapp.com/avatars/1017176847865352332/c312b6b44179ae6817de7e4b09e9c6af.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
