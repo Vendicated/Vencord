@@ -75,25 +75,25 @@ const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
-    ignoreBots: {
+    botNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Ignore messages from bots",
+        description: "Allow bot notifications",
         default: false
     },
-    ignoreServers: {
+    serverNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Ignore messages from servers (DMs only)",
-        default: false
+        description: "Allow server notifications, disabling this will only show Direct Messages",
+        default: true
     },
-    ignoreGroupDMs: {
+    groupDmNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Ignore messages from group DMs",
-        default: false
+        description: "Allow Group DM notifications",
+        default: true
     },
-    ignoreCalls: {
+    callNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Ignore call notifications",
-        default: false
+        description: "Allow call notifications",
+        default: true
     },
     pingColor: {
         type: OptionType.STRING,
@@ -139,7 +139,7 @@ export default definePlugin({
     settings,
     flux: {
         CALL_UPDATE({ call }: { call: Call; }) {
-            if (call?.ringing?.includes(UserStore.getCurrentUser().id) && !settings.store.ignoreCalls) {
+            if (call?.ringing?.includes(UserStore.getCurrentUser().id) && settings.store.callNotifications) {
                 const channel = ChannelStore.getChannel(call.channel_id);
                 sendOtherNotif("Incoming call", `${channel.name} is calling you...`);
             }
@@ -248,10 +248,10 @@ export default definePlugin({
 function shouldIgnore(channel: Channel) {
     switch (channel.type) {
         case ChannelTypes.DM:
-            if (settings.store.ignoreServers) return false;
+            if (!settings.store.serverNotifications) return true;
             break;
         case ChannelTypes.GROUP_DM:
-            if (settings.store.ignoreGroupDMs) return true;
+            if (settings.store.groupDmNotifications) return false;
             break;
     }
     return false;
@@ -298,7 +298,7 @@ function sendOtherNotif(content: string, titleString: string) {
 function shouldNotify(message: Message, channel: Channel) {
     const currentUser = UserStore.getCurrentUser();
     if (message.author.id === currentUser.id) return false;
-    if (message.author.bot && settings.store.ignoreBots) return false;
+    if (message.author.bot && !settings.store.botNotifications) return false;
     if (MuteStore.allowAllMessages(channel) || message.mention_everyone && !MuteStore.isSuppressEveryoneEnabled(message.guild_id)) return true;
 
     return message.mentions.some(m => m.id === currentUser.id);
@@ -314,4 +314,3 @@ function calculateHeight(content: string) {
 function cleanMessage(content: string) {
     return content.replace(new RegExp("<[^>]*>", "g"), "");
 }
-
