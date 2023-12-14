@@ -236,7 +236,7 @@ export default definePlugin({
                     }
                 }
 
-                if (shouldIgnore(message, channel)) return;
+                if (shouldIgnore(channel)) return;
                 sendMsgNotif(titleString, finalMsg, message);
             } catch (err) {
                 XSLog.error(`Failed to catch MESSAGE_CREATE: ${err}`);
