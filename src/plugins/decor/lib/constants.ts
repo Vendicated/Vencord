@@ -17,10 +17,14 @@ export const DECORATION_FETCH_COOLDOWN = 1000 * 60 * 60 * 4; // 4 hours
 
 
 export async function setBaseUrl(baseUrl: string) {
-    BASE_URL = baseUrl;
-    API_URL = BASE_URL + "/api";
-    AUTHORIZE_URL = API_URL + "/authorize";
-    const config = await fetch(`${API_URL}/config`).then(res => res.json());
-    CDN_URL = config.CDN_URL;
-    CLIENT_ID = config.CLIENT_ID;
+    try {
+        const config = await fetch(`${baseUrl}/api/config`).then(res => res.json());
+        BASE_URL = baseUrl;
+        API_URL = BASE_URL + "/api";
+        AUTHORIZE_URL = API_URL + "/authorize";
+        CDN_URL = config.CDN_URL;
+        CLIENT_ID = config.CLIENT_ID;
+    } catch (e) {
+        console.error("failed to fetch decor config");
+    }
 }
