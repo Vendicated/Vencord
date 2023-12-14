@@ -55,7 +55,7 @@ export default definePlugin({
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /(let \w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w\.]*?\.STICKER,.*?);/,
+                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w\.]*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
