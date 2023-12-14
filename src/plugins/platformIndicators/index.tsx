@@ -55,13 +55,13 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("getStatusColor", "StatusTypes");
+const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${StatusUtils.getStatusColor(status)}`} tooltip={tooltip} small={small} />;
+    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
