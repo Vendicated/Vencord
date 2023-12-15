@@ -22,9 +22,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -45,9 +44,9 @@ const messageCache = new Map<string, {
     fetched: boolean;
 }>();
 
-const Embed = LazyComponent(() => findByCode(".inlineMediaEmbed"));
-const AutoModEmbed = LazyComponent(() => findByCode(".withFooter]:", "childrenMessageContent:"));
-const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.includes("renderSimpleAccessories)")));
+const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
+const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
+const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 
