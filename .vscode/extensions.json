@@ -6,6 +6,7 @@
         "ExodiusStudios.comment-anchors",
         "formulahendry.auto-rename-tag",
         "GregorBiswanger.json2ts",
-        "stylelint.vscode-stylelint"
+        "stylelint.vscode-stylelint",
+        "macabeus.vscode-fluent"
     ]
 }

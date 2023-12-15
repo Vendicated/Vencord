@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 patchedDependencies:
   eslint-plugin-path-alias@1.0.0:
     hash: m6sma4g6bh67km3q6igf6uxaja
@@ -9,6 +13,15 @@ patchedDependencies:
     path: patches/eslint@8.46.0.patch
 
 dependencies:
+  '@fluent/bundle':
+    specifier: ^0.18.0
+    version: 0.18.0
+  '@fluent/langneg':
+    specifier: ^0.7.0
+    version: 0.7.0
+  '@fluent/sequence':
+    specifier: ^0.8.0
+    version: 0.8.0(@fluent/bundle@0.18.0)
   '@sapphi-red/web-noise-suppressor':
     specifier: 0.3.3
     version: 0.3.3
@@ -466,6 +479,25 @@ packages:
     resolution: {integrity: sha512-a8TLtmPi8xzPkCbp/OGFUo5yhRkHM2Ko9kOWP4znJr0WAhWyThaw3PnwX4vOTWOAMsV2uRt32PPDcEz63esSaA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
+
+  /@fluent/bundle@0.18.0:
+    resolution: {integrity: sha512-8Wfwu9q8F9g2FNnv82g6Ch/E1AW1wwljsUOolH5NEtdJdv0sZTuWvfCM7c3teB9dzNaJA8rn4khpidpozHWYEA==}
+    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
+    dev: false
+
+  /@fluent/langneg@0.7.0:
+    resolution: {integrity: sha512-StAM0vgsD1QK+nFikaKs9Rxe3JGNipiXrpmemNGwM4gWERBXPe9gjzsBoKjgBgq1Vyiy+xy/C652QIWY+MPyYw==}
+    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
+    dev: false
+
+  /@fluent/sequence@0.8.0(@fluent/bundle@0.18.0):
+    resolution: {integrity: sha512-eV5QlEEVV/wR3AFQLXO67x4yPRPQXyqke0c8yucyMSeW36B3ecZyVFlY1UprzrfFV8iPJB4TAehDy/dLGbvQ1Q==}
+    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
+    peerDependencies:
+      '@fluent/bundle': '>= 0.13.0'
+    dependencies:
+      '@fluent/bundle': 0.18.0
+    dev: false
 
   /@humanwhocodes/config-array@0.11.10:
     resolution: {integrity: sha512-KVVjQmNUepDVGXNuoRRdmmEjruj0KfiGSbS8LVc12LMsWDQzRXJ0qdhN8L8uUigKpfEHRhlaQFY0ib1tnUbNeQ==}
@@ -3464,7 +3496,3 @@ packages:
     name: gifenc
     version: 1.0.3
     dev: false
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false

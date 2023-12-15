@@ -206,6 +206,42 @@ export const stylePlugin = {
 };
 
 /**
+ * @type {import("esbuild").Plugin}
+ */
+export const translationPlugin = {
+    name: "translation-plugin",
+    setup: ({ onResolve, onLoad }) => {
+        const filter = /^~translations$/;
+
+        onResolve({ filter }, ({ path }) => ({
+            namespace: "translations", path
+        }));
+        onLoad({ filter, namespace: "translations" }, async () => {
+            const translations = {};
+            const locales = await readdir("./translations");
+
+            for (const locale of locales) {
+                const translationBundles = await readdir(`./translations/${locale}`);
+
+                for (const bundle of translationBundles) {
+                    const name = bundle.replace(/\.ftl$/, "");
+
+                    // we map this in reverse order to the file structure as it's more logical in the code to do it this
+                    // way (translations are retrieved by bundle name, not locale, but on the fs it makes more sense to
+                    // sort them by locale)
+                    translations[name] ??= {};
+                    translations[name][locale] = await readFile(`./translations/${locale}/${bundle}`, "utf-8");
+                }
+            }
+
+            return {
+                contents: `export default ${JSON.stringify(translations)}`,
+            };
+        });
+    }
+};
+
+/**
  * @type {import("esbuild").BuildOptions}
  */
 export const commonOpts = {
@@ -216,8 +252,8 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
-    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
+    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin, translationPlugin],
+    external: ["~plugins", "~git-hash", "~git-remote", "~translations", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
