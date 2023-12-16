@@ -256,9 +256,9 @@ function updateUserThemeColors(user: UserProfile, primary: number, accent: numbe
     }
 }
 
-function updateUserEffectID(user: UserProfile, id: bigint) {
+function updateUserEffectId(user: UserProfile, id: bigint) {
     if (id > -1n) {
-        user.profileEffectID = id.toString();
+        user.profileEffectId = id.toString();
         user.premiumType = 2;
     }
 }
@@ -341,7 +341,7 @@ export default definePlugin({
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /let{(?=(?:[^}]+,)?pendingThemeColors:)(?=(?:[^}]+,)?pendingProfileEffectID:)[^}]+}=(\i)[,;]/,
+                match: /let{(?=(?:[^}]+,)?pendingThemeColors:)(?=(?:[^}]+,)?pendingProfileEffectId:)[^}]+}=(\i)[,;]/,
                 replace: "$self.profilePreviewHook($1);$&"
             }
         }
@@ -386,15 +386,15 @@ export default definePlugin({
 
         if (settings.store.prioritizeNitro) {
             if (user.themeColors !== undefined) {
-                if (user.profileEffectID === undefined) {
+                if (user.profileEffectId === undefined) {
                     const fpte = extractFPTE(user.bio);
                     if (decodeColor(fpte[0]) === -2)
-                        updateUserEffectID(user, decodeEffect(fpte[1]));
+                        updateUserEffectId(user, decodeEffect(fpte[1]));
                     else
-                        updateUserEffectID(user, decodeEffect(fpte[2]));
+                        updateUserEffectId(user, decodeEffect(fpte[2]));
                 }
                 return user;
-            } else if (user.profileEffectID !== undefined) {
+            } else if (user.profileEffectId !== undefined) {
                 const fpte = extractFPTE(user.bio);
                 const primaryColor = decodeColor(fpte[0]);
                 if (primaryColor === -2)
@@ -409,10 +409,10 @@ export default definePlugin({
         const primaryColor = decodeColor(fpte[0]);
         if (primaryColor === -2) {
             updateUserThemeColors(user, ...decodeColorsLegacy(fpte[0]));
-            updateUserEffectID(user, decodeEffect(fpte[1]));
+            updateUserEffectId(user, decodeEffect(fpte[1]));
         } else {
             updateUserThemeColors(user, primaryColor, decodeColor(fpte[1]));
-            updateUserEffectID(user, decodeEffect(fpte[2]));
+            updateUserEffectId(user, decodeEffect(fpte[2]));
         }
 
         return user;
@@ -427,7 +427,7 @@ export default definePlugin({
                 props.canUsePremiumCustomization = true;
             }
             if (effect) {
-                props.pendingProfileEffectID = effect.id;
+                props.pendingProfileEffectId = effect.id;
                 props.canUsePremiumCustomization = true;
             }
         }

@@ -9,7 +9,7 @@ import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 export interface UserProfile extends User {
     themeColors: [number, number] | undefined;
-    profileEffectID: string | undefined;
+    profileEffectId: string | undefined;
 }
 
 export interface ProfileEffect {
