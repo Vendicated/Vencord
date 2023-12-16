@@ -137,7 +137,7 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/6101cff21e241cebb60c4a01563d0c01.webp?size=512",
+                avatar_url: "https://cdn.discordapp.com/avatars/1017176847865352332/c312b6b44179ae6817de7e4b09e9c6af.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
@@ -211,9 +211,12 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                if (!patchFailMatch) break;
+
                 process.exitCode = 1;
 
-                const [, plugin, type, id, regex] = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const [, plugin, type, id, regex] = patchFailMatch;
                 report.badPatches.push({
                     plugin,
                     type,
@@ -253,7 +256,7 @@ page.on("console", async e => {
         ).then(a => a.join(" ").trim());
 
 
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module Filter:")) {
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             console.error("[Unexpected Error]", text);
             report.otherErrors.push(text);
         }
@@ -293,6 +296,7 @@ function runTime(token: string) {
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
+                delete patch.group;
 
                 if (!Array.isArray(patch.replacement))
                     patch.replacement = [patch.replacement];
