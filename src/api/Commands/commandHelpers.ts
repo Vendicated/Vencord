@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MessageActions } from "@utils/discord";
 import { mergeDefaults } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { SnowflakeUtils } from "@webpack/common";
+import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
