@@ -101,86 +101,81 @@ function setActivity(activity: Activity | null) {
 
 const settings = definePluginSettings({
     username: {
-        description: "Last.fm username",
+        description: "last.fm username",
         type: OptionType.STRING,
     },
     apiKey: {
-        description: "Last.fm API Key",
+        description: "last.fm api key",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "Show link to Last.fm profile",
+        description: "show link to last.fm profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
     hideWithSpotify: {
-        description: "Hide Last.fm presence if Spotify is running",
+        description: "hide last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
     statusName: {
-        description: "Custom status text",
+        description: "custom status text",
         type: OptionType.STRING,
-        default: "music",
+        default: "some music",
     },
     nameFormat: {
-        description: "How to display song and artist name in status",
+        description: "Show name of song and artist in status name",
         type: OptionType.SELECT,
         options: [
             {
-                label: "Custom status name",
+                label: "Use custom status name",
                 value: NameFormat.StatusName,
                 default: true
             },
             {
-                label: "'artist - song' format",
+                label: "Use format 'artist - song'",
                 value: NameFormat.ArtistFirst
             },
             {
-                label: "'song - artist' format",
+                label: "Use format 'song - artist'",
                 value: NameFormat.SongFirst
             },
             {
-                label: "Artist name only",
+                label: "Use artist name only",
                 value: NameFormat.ArtistOnly
             },
             {
-                label: "Song name only",
+                label: "Use song name only",
                 value: NameFormat.SongOnly
             }
         ],
     },
     useListeningStatus: {
-        description: 'Show "Listening to" status instead of "Playing"',
+        description: 'show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
     },
     missingArt: {
-        description: "What to display the album or album art as when missing",
+        description: "When album or album art is missing",
         type: OptionType.SELECT,
         options: [
             {
-                label: "Last.fm logo",
+                label: "Use large Last.fm logo",
                 value: "lastfmLogo",
                 default: true
             },
             {
-                label: "Generic vinyl placeholder",
+                label: "Use generic placeholder",
                 value: "placeholder"
             }
         ],
     },
-    statusUpdate: {
-        description: "How long to wait before updating the status (in milliseconds)",
-        type: OptionType.NUMBER,
-        default: 8000
-    }
 });
 
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.Lexi],
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settingsAboutComponent: () => (
         <>
@@ -202,7 +197,7 @@ export default definePlugin({
 
     start() {
         this.updatePresence();
-        this.updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.statusUpdate);
+        this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
 
     stop() {
@@ -239,7 +234,7 @@ export default definePlugin({
             // why does the json api have xml structure
             return {
                 name: trackData.name || "Unknown",
-                album: trackData.album.mbid === "" ? (trackData.name || "Unknown") : trackData.album["#text"],
+                album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 url: trackData.url,
                 imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
