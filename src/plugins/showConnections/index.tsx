@@ -33,6 +33,7 @@ import { VerifiedIcon } from "./VerifiedIcon";
 
 const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
+const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
 
@@ -111,7 +112,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
-    const platform = platforms.get(connection.type);
+    const platform = platforms.get(platformHooks.useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
