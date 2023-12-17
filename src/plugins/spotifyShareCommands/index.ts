@@ -18,10 +18,9 @@
 
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { MessageActions } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, MessageActions } from "@webpack/common";
 
 interface Album {
     id: string;

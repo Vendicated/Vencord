@@ -395,7 +395,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Korbo",
         id: 455856406420258827n
     },
-    ImpishMoxxie: {
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
+    },
+      ImpishMoxxie: {
         name: "Moxxie",
         id: 712653921692155965n
     },

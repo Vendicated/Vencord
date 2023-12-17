@@ -17,17 +17,10 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MaskedLink, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
-
-export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
-export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
-export const InviteActions = findByPropsLazy("resolveInvite");
-
-const InviteModalStore = findStoreLazy("InviteModalStore");
 
 /**
  * Open the invite modal

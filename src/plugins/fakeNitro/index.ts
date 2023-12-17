@@ -359,7 +359,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: "location:\"AppIconHome\"",
+            find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -787,7 +787,14 @@ export default definePlugin({
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
-                const link = this.getStickerLink(sticker.id);
+                // [12/12/2023]
+                // Work around an annoying bug where getStickerLink will return StickerType.GIF,
+                // but will give us a normal non animated png for no reason
+                // TODO: Remove this workaround when it's not needed anymore
+                let link = this.getStickerLink(sticker.id);
+                if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
+                    link = link.replace(".png", ".gif");
+                }
                 if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
                     return { cancel: true };

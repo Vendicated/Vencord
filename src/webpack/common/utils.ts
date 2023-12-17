@@ -133,3 +133,7 @@ export const zustandCreate: typeof import("zustand").default = findByCodeLazy("w
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
 export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
+
+export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const InviteActions = findByPropsLazy("resolveInvite");
