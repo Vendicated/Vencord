@@ -17,11 +17,8 @@
 */
 
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { moment } from "@webpack/common";
-
-const logger = new Logger("DontRoundMyTimestamps");
 
 export default definePlugin({
     name: "DontRoundMyTimestamps",
