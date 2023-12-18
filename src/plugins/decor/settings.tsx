@@ -19,6 +19,10 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Change your avatar decoration",
         component() {
+            if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
+                Enable Decor and restart your client to change your avatar decoration.
+            </Forms.FormText>;
+
             return <div>
                 <DecorSection hideTitle hideDivider noMargin />
                 <Forms.FormText type="description" className={classes(Margins.top8, Margins.bottom8)}>
@@ -34,7 +38,7 @@ export const settings = definePluginSettings({
             </div>;
         }
     },
-    guidelines: {
+    agreedToGuidelines: {
         type: OptionType.BOOLEAN,
         description: "Agreed to guidelines",
         hidden: true,
