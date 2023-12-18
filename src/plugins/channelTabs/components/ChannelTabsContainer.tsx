@@ -18,6 +18,7 @@
 
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
@@ -30,20 +31,8 @@ const {
     moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
 } = ChannelTabsUtils;
 
-const PlusIcon = () => <svg
-    height={20}
-    width={20}
-    viewBox="0 0 18 18"
->
-    <polygon points="15 10 10 10 10 15 8 15 8 10 3 10 3 8 8 8 8 3 10 3 10 8 15 8" fill="currentColor" />
-</svg>;
-const XIcon = () => <svg
-    height={16}
-    width={16}
-    viewBox="0 0 24 24"
->
-    <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" fill="currentColor" />
-</svg>;
+const { PlusSmallIcon } = findByPropsLazy("PlusSmallIcon");
+const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
 
@@ -120,7 +109,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                     className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : cl("hoverable"))}
                     onClick={() => closeTab(tab.id)}
                 >
-                    <XIcon />
+                    <XIcon height={16} width={16} />
                 </button>}
             </div>)
             }
@@ -129,7 +118,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                 onClick={() => createTab(props, true)}
                 className={classes(cl("button"), cl("new-button"), cl("hoverable"))}
             >
-                <PlusIcon />
+                <PlusSmallIcon height={20} width={20} />
             </button>
         </div >
         {showBookmarkBar && <>

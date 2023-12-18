@@ -129,6 +129,7 @@ export const channelTabsSettings = definePluginSettings({
 });
 
 export const { ackChannel } = findByPropsLazy("ackChannel");
+export const { CircleQuestionIcon } = findByPropsLazy("CircleQuestionIcon");
 
 function replaceArray<T>(array: T[], ...values: T[]) {
     const len = array.length;
