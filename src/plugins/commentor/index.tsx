@@ -6,14 +6,14 @@
 
 import "./style.css";
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { sendBotMessage } from "@api/Commands";
 import { DataStore } from "@api/index";
 import { addButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { ChatIcon, DeleteIcon } from "@components/Icons";
-import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { closeAllModals, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, ChannelStore, FluxDispatcher, Forms, MessageStore, TextInput, UserStore } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, TextInput, UserStore } from "@webpack/common";
 import { Channel, Embed, Message, User } from "discord-types/general";
 import { ReactNode } from "react";
 
@@ -119,39 +119,64 @@ function addComment(message: Message, user: User, comment: string, channel: Chan
     FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message: message });
     SaveComments();
 }
-function comment2reactcode(comment: Comment) {
+function Comment2ReactCode(comment: Comment, deletable?: boolean) {
     var { avatarUrl } = comment;
     var { username } = comment.user;
     var userid = comment.user.id;
     var commentstr = comment.comment;
-    /*
-        <div className="embed-footer">
-            <img
-                alt=""
-                className="embed-footer-icon"
-                src="https://cdn.discordapp.com/avatars/983853053948080138/a_7782dd7df8b46ec328bb9cd14abe09c1.png"
-            />
-                <span className="embed-footer-text">{userid}</span>
-        </div> */
-    return (<div className="discord-message">
-        <div className="avatar-container">
-            <img
-                src={avatarUrl}
-                alt=""
-                className="avatar"
-            />
-        </div>
-        <div className="message-content">
-            <div className="username">{username}<div className="embed-footer">
-            </div> </div>
-            <div className="message-text">{commentstr}</div>
-        </div>
-        <div className="embed-footer">
+    if (deletable) {
+        return (<div className="discord-message">
+            <div className="avatar-container">
 
-            <br />
-            <span className="embed-footer-text">{userid}</span>
-        </div>
-    </div>);
+                <img
+                    src={avatarUrl}
+                    alt=""
+                    className="avatar"
+                />
+
+            </div>
+            <div className="message-content">
+                <div className="username">{username}<div className="embed-footer">
+                </div> </div>
+                <div className="message-text">{commentstr}</div>
+            </div>
+            <div className="embed-footer">
+
+                <br />
+                <Button classID="deletecomment" onClick={e => {
+                    DeleteComment(comment);
+
+                    closeAllModals();
+
+                }} > <DeleteIcon />
+                </Button>
+
+            </div>
+
+        </div>);
+    }
+    else {
+        return (<div className="discord-message">
+
+            <div className="avatar-container">
+                <img
+                    src={avatarUrl}
+                    alt=""
+                    className="avatar"
+                />
+            </div>
+            <div className="message-content">
+                <div className="username">{username}<div className="embed-footer">
+                </div> </div>
+                <div className="message-text">{commentstr}</div>
+            </div>
+            <div className="embed-footer">
+
+                <br />
+                <span className="embed-footer-text">{userid}</span>
+            </div>
+        </div>);
+    }
 }
 function listComments(message: Message) {
     if (commentedMessages[message.id]) {
@@ -297,29 +322,48 @@ export default definePlugin({
                 const commentsreact = [] as ReactNode[];
                 if (comments[message.id]) {
                     comments[message.id].forEach(comment => {
-                        commentsreact.push(comment2reactcode(comment));
+                        commentsreact.push(<div className="comment">{Comment2ReactCode(comment, true)}</div>);
                     });
                 }
                 function updatewritingcomment(c: string) {
                     comment = c;
 
                 }
+                var messageascomment = {
+                    user: message.author,
+                    comment: message.content,
+                    avatarUrl: message.author.getAvatarURL(),
+                    originalMessage: message,
+                    channel: ChannelStore.getChannel(message.channel_id)
+                } as Comment;
                 const modal = openModal(props => (
-                    <ModalRoot {...props} >
+                    <ModalRoot {...props}>
                         <ModalHeader>
-                            <Forms.FormTitle><ChatIcon></ChatIcon></Forms.FormTitle>
+                            <Forms.FormDivider />
+                            <Forms.FormTitle><ChatIcon /></Forms.FormTitle>
+                            <Forms.FormDivider />
+
                         </ModalHeader>
                         <ModalContent>
+
+                            <div className="origenal-comment ">
+                                {Comment2ReactCode(messageascomment)}
+                            </div>
+                            <Forms.FormDivider />
                             <div className="scroll-box">
                                 <div className="content">
                                     {commentsreact}
                                 </div>
                             </div>
+                            <Forms.FormDivider />
                             <Button classID="deletecomments" onClick={e => {
-                                wipecommentsfrommsg(message.id as string);
+                                WipeCommentsFromMessage(message.id as string);
 
                                 props.onClose();
-                            }} ><DeleteIcon></DeleteIcon></Button>
+
+                            }} > <DeleteIcon />
+                            </Button>
+                            <Forms.FormDivider />
                             <div className="comment-box">
 
                                 <div className="avatar-container">
@@ -336,13 +380,14 @@ export default definePlugin({
                                     <div className="comment-input">
                                         <TextInput classID="comment" onChange={e => updatewritingcomment(e)} />
                                         <Button classID="submit" onClick={e => {
-                                            addComment(message, UserStore.getCurrentUser(), comment, ChannelStore.getChannel(message.channel_id), message.id, true);
+                                            addComment(message, UserStore.getCurrentUser(), comment, ChannelStore.getChannel(message.channel_id), message.id);
                                             console.log(comment);
                                             props.onClose();
                                         }} >Submit</Button>
 
                                     </div>
                                 </div>
+
                             </div>
                         </ModalContent>
                     </ModalRoot>
@@ -355,7 +400,10 @@ export default definePlugin({
 
     stop() { },
 
-    commands: [{
+    commands: []
+    // removed debug commands
+    /*
+    [{
         name: "comment",
         description: "Add a comment to a message.",
         inputType: ApplicationCommandInputType.BUILT_IN,
@@ -417,7 +465,7 @@ export default definePlugin({
         ],
         execute: async (args, ctx) => {
             if (findOption(args, "msg")) {
-                wipecommentsfrommsg(findOption(args, "msg") as string);
+                WipeCommentsFromMessage(findOption(args, "msg") as string);
                 return;
             }
             else {
@@ -425,8 +473,9 @@ export default definePlugin({
                 SaveComments();
             }
         },
-    }
-    ],
+    }]
+    */
+    ,
 
     async startTyping(channelId: string) {
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
@@ -434,11 +483,18 @@ export default definePlugin({
 
     // chatBarIcon: ErrorBoundary.wrap(SilentTypingToggle, { noop: true }),
 });
-function wipecommentsfrommsg(arg0: string) {
+function WipeCommentsFromMessage(arg0: string) {
     const msgid = arg0;
     if (!msgid) return;
     if (!comments[msgid as string]) return;
     comments[msgid as string] = [];
+    SaveComments();
+}
+function DeleteComment(comment: Comment) {
+    const msgid = comment.originalMessage.id;
+    if (!msgid) return;
+    if (!comments[msgid as string]) return;
+    comments[msgid as string].splice(comments[msgid as string].indexOf(comment), 1);
     SaveComments();
 }
 
