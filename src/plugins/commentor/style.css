@@ -1,0 +1,117 @@
+/* Scroll box container */
+.scroll-box {
+    height: 200px; /* Set the desired height */
+    overflow: auto; /* Enable scrolling when content overflows */
+    border: 1px solid #ccc; /* Optional: Add a border for visual separation */
+  }
+
+/* Content inside the scroll box */
+.content {
+    padding: 10px; /* Optional: Add padding to the content */
+  }
+
+/* Discord message container */
+.discord-message {
+    display: flex;
+    background-color: #36393f; /* Discord's background color */
+    color: #fff; /* Discord's text color */
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Avatar container */
+  .avatar-container {
+    margin-right: 10px;
+  }
+
+  /* Avatar image */
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  /* Message content */
+  .message-content {
+    flex-grow: 1;
+  }
+
+  /* Username */
+  .username {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  /* Message text */
+  .message-text {
+    margin-bottom: 5px;
+  }
+
+  /* Embed footer */
+  .embed-footer {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Embed footer icon */
+  .embed-footer-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+  }
+
+  /* Embed footer text */
+  .embed-footer-text {
+    font-size: 0.8em;
+  }
+
+  /* Comment box container */
+.comment-box {
+    display: flex;
+    background-color: #36393f; /* Discord's background color */
+    color: #fff; /* Discord's text color */
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Avatar container */
+  .avatar-container {
+    margin-right: 10px;
+  }
+
+  /* Avatar image */
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  /* Comment content */
+  .comment-content {
+    flex-grow: 1;
+  }
+
+  /* Username */
+  .username {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  /* Comment input container */
+  .comment-input {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Add Comment text styling */
+  .comment-input FormText {
+    margin-right: 10px;
+    color: #7289da; /* Discord's accent color */
+  }
+
+  /* TextInput styling */
+  .comment-input TextInput {
+    flex-grow: 1;
+  }
