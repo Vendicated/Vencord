@@ -7,9 +7,10 @@
 import "./style.css";
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { DataStore } from "@api/index";
 import { addButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { ChatIcon } from "@components/Icons";
+import { ChatIcon, DeleteIcon } from "@components/Icons";
 import { ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, ChannelStore, FluxDispatcher, Forms, MessageStore, TextInput, UserStore } from "@webpack/common";
@@ -29,7 +30,7 @@ interface Comment {
 
 
 const commentedMessages: Record<string, Embed[]> = {};
-const comments: Record<string, Comment[]> = {};
+let comments: Record<string, Comment[]> = {};
 
 const settings = definePluginSettings({});
 
@@ -116,7 +117,7 @@ function addComment(message: Message, user: User, comment: string, channel: Chan
         }]
     });
     FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message: message });
-
+    SaveComments();
 }
 function comment2reactcode(comment: Comment) {
     var { avatarUrl } = comment;
@@ -242,7 +243,26 @@ function listComments(message: Message) {
 
     }
 }
+function SaveComments() {
 
+    var task = (async () => {
+        await DataStore.update("msg_comments", () => JSON.stringify(comments) as string);
+        // eslint-disable-next-line dot-notation
+        const res = await JSON.parse(await DataStore.get("msg_comments") as string) as Record<string, Comment[]>;
+        console.log("Saved comments \n", res);
+
+    });
+    task().catch(err => console.log(err)).finally(() => console.log("Saved comments finnished \n"));
+}
+async function LoadComments() {
+
+
+    comments = await JSON.parse(await DataStore.get("msg_comments") as string) as Record<string, Comment[]>;
+    console.log("Loaded comments \n", comments);
+
+
+
+}
 export default definePlugin({
     name: "Commentator",
     description: "Add comments to messages.",
@@ -264,6 +284,7 @@ export default definePlugin({
     settings,
     // Delete these two below if you are only using code patches
     start() {
+        LoadComments();
         const avatarUrl = UserStore.getCurrentUser().getAvatarURL();
         addButton("comment", message => ({
             label: "Comment",
@@ -286,7 +307,7 @@ export default definePlugin({
                 const modal = openModal(props => (
                     <ModalRoot {...props} >
                         <ModalHeader>
-                            <Forms.FormTitle>Comments</Forms.FormTitle>
+                            <Forms.FormTitle><ChatIcon></ChatIcon></Forms.FormTitle>
                         </ModalHeader>
                         <ModalContent>
                             <div className="scroll-box">
@@ -294,15 +315,22 @@ export default definePlugin({
                                     {commentsreact}
                                 </div>
                             </div>
+                            <Button classID="deletecomments" onClick={e => {
+                                wipecommentsfrommsg(message.id as string);
+
+                                props.onClose();
+                            }} ><DeleteIcon></DeleteIcon></Button>
                             <div className="comment-box">
-                                <Forms.FormText>Add Comment</Forms.FormText>
+
                                 <div className="avatar-container">
                                     <img
                                         src={avatarUrl} // Use the provided avatarUrl variable
                                         alt=""
                                         className="avatar"
                                     />
+
                                 </div>
+
                                 <div className="comment-content">
                                     <div className="username">{UserStore.getCurrentUser().username}</div>
                                     <div className="comment-input">
@@ -312,6 +340,7 @@ export default definePlugin({
                                             console.log(comment);
                                             props.onClose();
                                         }} >Submit</Button>
+
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +403,29 @@ export default definePlugin({
             addComment(message, user, comment as string, ctx.channel, msgid as string, private);
         },
     },
-
+    {
+        name: "wipecomments",
+        description: "Wipe all comments.",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [
+            {
+                name: "msg",
+                type: ApplicationCommandOptionType.STRING,
+                description: "message to wipe comments from(optional)",
+                required: false,
+            }
+        ],
+        execute: async (args, ctx) => {
+            if (findOption(args, "msg")) {
+                wipecommentsfrommsg(findOption(args, "msg") as string);
+                return;
+            }
+            else {
+                comments = {};
+                SaveComments();
+            }
+        },
+    }
     ],
 
     async startTyping(channelId: string) {
@@ -383,3 +434,11 @@ export default definePlugin({
 
     // chatBarIcon: ErrorBoundary.wrap(SilentTypingToggle, { noop: true }),
 });
+function wipecommentsfrommsg(arg0: string) {
+    const msgid = arg0;
+    if (!msgid) return;
+    if (!comments[msgid as string]) return;
+    comments[msgid as string] = [];
+    SaveComments();
+}
+
