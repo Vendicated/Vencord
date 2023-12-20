@@ -147,7 +147,7 @@ export default definePlugin({
         replacement: [
             // patch componentDidMount to replace embed thumbnail and title
             {
-                match: /render\(\)\{let\{embed:/,
+                match: /render\(\)\{.{0,30}let\{embed:/,
                 replace: "componentDidMount=$self.embedDidMount;$&"
             },
 
