@@ -295,12 +295,7 @@ export default definePlugin({
         {
             id: 983853053948080138n,
             name: "angelfencer",
-        },
-        {
-            id: 1126597615027486801n,
-            name: "cranberryfaith",
         }
-
     ],
     patches: [
 
