@@ -131,7 +131,7 @@ function Controls() {
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => handlePrev()>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
@@ -155,6 +155,19 @@ function Controls() {
 const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
+
+function handlePrev() {
+    const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
+        [SpotifyStore],
+        () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
+    );
+    const [position, setPosition] = useState(storePosition);
+    if (position < 3000) {
+        setPosition(0);
+    } else {
+        SpotifyStore.prev();
+    }
+}
 
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
