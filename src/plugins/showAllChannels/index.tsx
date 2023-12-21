@@ -14,16 +14,7 @@ const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
 export default definePlugin({
     name: "ShowAllChannels",
     description: "Enable show all channels automatically when joining a new guild.",
-    authors: [
-        {
-            id: 1022189106614243350n,
-            name: "Mopigames",
-        },
-        Devs.Glitch,
-        Devs.Nuckyz,
-        Devs.carince,
-        Devs.Alyxia
-    ],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Alyxia, Devs.Mopi],
     patches: [
         {
             find: ",acceptInvite(",
