@@ -226,8 +226,8 @@ export default definePlugin({
         {
             find: ".Messages.GUILD_OWNER,",
             replacement: {
-                match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
-                replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
+                match: /function\(\){var (?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
+                replace: "()=>{var $<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
             }
         },
         // pass channel id down props to be used in profiles
@@ -247,18 +247,11 @@ export default definePlugin({
         },
         // in profiles
         {
-            find: ",overrideDiscriminator:",
-            replacement: [
-                {
-                    // prevent channel id from getting ghosted
-                    // it's either this or extremely long lookbehind
-                    match: /user:\i,nick:\i,/,
-                    replace: "$&moreTags_channelId,"
-                }, {
-                    match: /,botType:(\i\((\i)\)),/g,
-                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
-                }
-            ]
+            find: ".isVerifiedBot(),discriminator",
+            replacement: {
+                match: /,botType:(\i\((\i)\)),/g,
+                replace: ",botType:$self.getTag({user:$2,channelId:arguments[0].moreTags_channelId,origType:$1,location:'not-chat'}),"
+            }
         },
     ],
 
