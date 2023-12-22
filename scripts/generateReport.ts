@@ -350,7 +350,7 @@ function runTime(token: string) {
                 let invalidEntryPoint = false;
 
                 for (const id of chunkIds) {
-                    if (!wreq.u(id)) continue;
+                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
                     const isWasm = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
@@ -376,9 +376,22 @@ function runTime(token: string) {
                 } catch (err) { }
             }
 
-            const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
-            if (!allChunks) throw new Error("Failed to get all chunks");
-            const chunksLeft = Object.keys(allChunks).filter(id => {
+            // Matches "id" or id:
+            const chunkIdRegex = /(?:"(\d+?)")|(?:(\d+?):)/g;
+            const wreqU = wreq.u.toString();
+
+            const allChunks = [] as string[];
+            let currentMatch: RegExpExecArray | null;
+
+            while ((currentMatch = chunkIdRegex.exec(wreqU)) != null) {
+                const id = currentMatch[1] ?? currentMatch[2];
+                if (id == null) continue;
+
+                allChunks.push(id);
+            }
+
+            if (allChunks.length === 0) throw new Error("Failed to get all chunks");
+            const chunksLeft = allChunks.filter(id => {
                 return !(validChunks.has(id) || invalidChunks.has(id));
             });
 
