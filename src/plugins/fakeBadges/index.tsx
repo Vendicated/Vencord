@@ -74,16 +74,16 @@ const badgeSettings = {
     discordBugHunterGoldBadge: "Discord Bug Hunter Gold",
     discordBugHunterGreenBadge: "Discord Bug Hunter Green",
     nitroMemberBadge: "Nitro Member",
-    boostingBadge: OptionType.NUMBER,
+    boostingBadge: "Choose a boosting badge tier (0-9)",
 };
 
 const settings = definePluginSettings(
     Object.entries(badgeSettings).reduce((acc, [setting, badge]) => {
         acc[setting] = {
-            type: badge === OptionType.NUMBER ? OptionType.NUMBER : OptionType.BOOLEAN,
-            description: `${badge} badge`,
-            onChange: () => { updateBadges(badges[badge]); },
-            default: badge === OptionType.NUMBER ? 0 : false,
+            type: badge === "Choose a boosting badge tier (0-9)" ? OptionType.NUMBER : OptionType.BOOLEAN,
+            description: `${badge} ${badge === "Choose a boosting badge tier (0-9)" ? "" : "badge"}`,
+            default: badge === "Choose a boosting badge tier (0-9)" ? 0 : false,
+            restartNeeded: true,
         };
         return acc;
     }, {} as Record<string, any>)
@@ -121,22 +121,6 @@ const addEnabledBadges = () => {
     });
 
     updateBoostingBadge();
-};
-
-
-const updateBadges = (badge: ProfileBadge) => {
-    if (badge.description?.substring(0, 16) === "Server Boosting") {
-        updateBoostingBadge();
-        return;
-    }
-
-    if (EquippedBadges.includes(badge)) {
-        EquippedBadges = EquippedBadges.filter(b => b !== badge);
-        removeBadge(badge);
-    } else {
-        EquippedBadges.push(badge);
-        addBadge(badge);
-    }
 };
 
 const TierToMonths = {
