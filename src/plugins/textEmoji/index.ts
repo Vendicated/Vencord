@@ -29,7 +29,7 @@ export default definePlugin({
         {
             find: "getSrc(){",
             replacement: {
-                match: /(if\(null!=.{1,2}\))return .{1,2}\.default\.getURL\(.{1,2}\)/,
+                match: /(if\(null!=\i\))return \i\.default\.getURL\(\i\)/,
                 replace: "$1return null",
             },
         },
