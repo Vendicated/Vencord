@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: ".useCanSeeRemixBadge)",
             replacement: {
-                match: /style:"username"===.{1,2}&&null!=.{1,2}\?{color:.{1,2}}:void 0/,
+                match: /style:"username"===\i&&null!=\i\?{color:\i}:void 0/,
                 replace: "style:{color:$self.calculateNameColor(BigInt(arguments[0].message.author.id))}"
             },
         },
