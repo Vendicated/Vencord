@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { FluentBundle, FluentResource } from "@fluent/bundle";
+import { FluentBundle, FluentResource, type FluentVariable } from "@fluent/bundle";
 import { negotiateLanguages } from "@fluent/langneg";
 import { mapBundleSync } from "@fluent/sequence";
 import { FluxDispatcher, i18n } from "@webpack/common";
@@ -45,7 +45,7 @@ export function getTranslations(context: string) {
      * @param variables The variables to interpolate into the resultant string.
      * @returns A translated string.
      */
-    return function t(key: string, variables?: Record<string, any>): string {
+    return function t(key: string, variables?: Record<string, FluentVariable>): string {
         // adding the caching here speeds up retrieving translations for this key later
         if (messageCache[key]) {
             const bundle = messageCache[key];
