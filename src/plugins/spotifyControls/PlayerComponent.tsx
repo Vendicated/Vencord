@@ -108,10 +108,12 @@ function makeContextMenu(name: string, path: string) {
 }
 
 function Controls() {
-    const [isPlaying, shuffle, repeat] = useStateFromStores(
+    const [isPlaying, shuffle, repeat, storePosition] = useStateFromStores(
         [SpotifyStore],
-        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat]
+        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat, SpotifyStore.mPosition]
     );
+    
+    const [position, setPosition] = useState(storePosition);
 
     const [nextRepeat, repeatClassName] = (() => {
         switch (repeat) {
@@ -131,7 +133,14 @@ function Controls() {
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => handlePrev()>
+            <Button onClick={() => {
+                if (position < 3000) {
+                    setPosition(0);
+                    seek(0);
+                } else {
+                    SpotifyStore.prev();
+                }
+            })>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
@@ -156,18 +165,6 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-function handlePrev() {
-    const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
-        [SpotifyStore],
-        () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
-    );
-    const [position, setPosition] = useState(storePosition);
-    if (position < 3000) {
-        setPosition(0);
-    } else {
-        SpotifyStore.prev();
-    }
-}
 
 function SeekBar() {
     const { duration } = SpotifyStore.track!;
