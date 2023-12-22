@@ -16,6 +16,11 @@ import { Logger } from "./Logger";
 // same color as pontoon's logo
 const logger = new Logger("Translations", "#7bc876");
 
+let subscribed = false;
+
+let bundleCache: Record<string, FluentBundle[]> = {};
+let messageCache: Record<string, Record<string, FluentBundle>> = {};
+
 /**
  * Gets a function that translates strings.
  * @param context The context to use for translation (e.g., `vencord`).
@@ -24,20 +29,22 @@ const logger = new Logger("Translations", "#7bc876");
 export function getTranslations(context: string) {
     if (!translations[context]) throw new Error(`No translations for ${context}`);
 
-    let localeCache: FluentBundle[] = [];
-    let messageCache: Record<string, FluentBundle> = {};
+    if (!subscribed) {
+        let lastLocale = i18n.getLocale();
 
-    let lastLocale = i18n.getLocale();
-    FluxDispatcher.subscribe("USER_SETTINGS_PROTO_UPDATE", ({ settings }) => {
-        if (settings.proto.localization.locale.value !== lastLocale) {
-            // locale was updated, clear our caches
+        FluxDispatcher.subscribe("USER_SETTINGS_PROTO_UPDATE", ({ settings }) => {
+            if (settings.proto.localization.locale.value !== lastLocale) {
+                // locale was updated, clear our caches
 
-            lastLocale = settings.proto.localization.locale.value;
+                lastLocale = settings.proto.localization.locale.value;
 
-            localeCache = [];
-            messageCache = {};
-        }
-    });
+                bundleCache = {};
+                messageCache = {};
+            }
+        });
+
+        subscribed = true;
+    }
 
     /**
      * Translates a key. Soft-fails and returns a fallback error string if the key could not be loaded.
@@ -46,11 +53,15 @@ export function getTranslations(context: string) {
      * @returns A translated string.
      */
     return function t(key: string, variables?: Record<string, FluentVariable>): string {
+        const msgCache = messageCache[context] ??= {};
+
         // adding the caching here speeds up retrieving translations for this key later
-        if (messageCache[key]) {
-            const bundle = messageCache[key];
+        if (msgCache[key]) {
+            const bundle = msgCache[key];
             return bundle.formatPattern(bundle.getMessage(key)!.value!, variables);
         }
+
+        const localeCache = bundleCache[context] ??= [];
 
         // we've never loaded this context's translations
         if (localeCache.length === 0) {
@@ -85,7 +96,7 @@ export function getTranslations(context: string) {
 
         const message = bundle.getMessage(key);
         if (message?.value) {
-            messageCache[key] = bundle;
+            msgCache[key] = bundle;
             return bundle.formatPattern(message.value, variables);
         }
 
