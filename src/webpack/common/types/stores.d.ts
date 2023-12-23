@@ -95,7 +95,6 @@ export interface UnicodeEmoji {
 export class EmojiStore extends FluxStore {
     getCustomEmojiById(id?: string | null): CustomEmoji;
     getUsableCustomEmojiById(id?: string | null): CustomEmoji;
-    getUsableGuildEmoji(id?: string | null): CustomEmoji[];
     getGuilds(): Record<string, {
         id: string;
         _emojiMap: Record<string, CustomEmoji>;
@@ -172,46 +171,4 @@ export class DraftStore extends FluxStore {
     getState(): DraftState;
     getThreadDraftWithParentMessageId?(arg: any): any;
     getThreadSettings(channelId: string): any | null;
-}
-
-type PackEmoji = Omit<CustomEmoji, "guildId" | "managed" | "originalName" | "roles"> & { packId: string, type: "PACK_EMOJI"; };
-
-interface Pack {
-    name: string,
-    id: string,
-    icon: string,
-    author: {
-        id: string,
-        type: number,
-    },
-    content: { emojis: PackEmoji[]; },
-    emojiById: Record<string, PackEmoji>;
-}
-
-export class InventoryStore extends FluxStore {
-    countPacksCollected(): number;
-    getHasPackAddedNotification(): boolean;
-    getIsFetching(): boolean;
-    getPackByPackId({ packId: string }): Pack | undefined;
-    getPackEmojisTTL(): number;
-    getPacksById(): Map<string, Pack>;
-    getPacksForUser(): Pack[];
-    getSortedPackIds(): string[];
-    _isADuplicateGuildPack(guildId: string): boolean;
-}
-
-interface GuildFolder {
-    folderId: number | undefined,
-    guildIds: string[],
-    expanded?: boolean;
-    folderColor?: number;
-    folderName?: string;
-}
-
-export class SortedGuildStore extends FluxStore {
-    getCompatibleGuildFolders(): GuildFolder[];
-    getFlattenedGuildIds(): string[];
-    getGuildFolderById(id: number): GuildFolder;
-    getGuildFolders(): GuildFolder[];
-    // getGuildsTree();
 }

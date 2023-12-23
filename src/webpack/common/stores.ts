@@ -61,8 +61,6 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
-export let InventoryStore: t.InventoryStore;
-export let SortedGuildStore: t.SortedGuildStore;
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -101,5 +99,3 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
-waitForStore("InventoryStore", m => InventoryStore = m);
-waitForStore("SortedGuildStore", m => SortedGuildStore = m);
