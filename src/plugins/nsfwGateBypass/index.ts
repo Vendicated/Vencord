@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: ".nsfwAllowed=null",
             replacement: {
-                match: /(\w+)\.nsfwAllowed=/,
-                replace: "$1.nsfwAllowed=true;",
+                match: /(?<=\.nsfwAllowed=)null!==.+?(?=[,;])/,
+                replace: "!0",
             },
         },
     ],

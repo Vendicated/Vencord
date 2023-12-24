@@ -328,6 +328,7 @@ export default definePlugin({
             // Attachment renderer
             // Module 96063
             find: ".removeAttachmentHoverButton",
+            group: true,
             replacement: [
                 {
                     match: /(className:\i,attachment:\i),/,
