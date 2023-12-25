@@ -4854,15 +4854,15 @@ packages:
             q: 1.5.1
         dev: true
 
-  /zustand@3.7.2:
-    resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
-    engines: {node: '>=12.7.0'}
-    peerDependencies:
-      react: '>=16.8'
-    peerDependenciesMeta:
-      react:
-        optional: true
-    dev: true
+    /zustand@3.7.2:
+        resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
+        engines: {node: '>=12.7.0'}
+        peerDependencies:
+            react: '>=16.8'
+        peerDependenciesMeta:
+            react:
+                optional: true
+        dev: true
 
   github.com/mattdesl/gifenc/64842fca317b112a8590f8fef2bf3825da8f6fe3:
     resolution: {tarball: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3}
