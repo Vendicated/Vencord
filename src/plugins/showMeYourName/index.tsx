@@ -65,6 +65,11 @@ export default definePlugin({
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
+            if (Vencord.Webpack.findStore("StreamerModeStore").enabled) {
+                console.log("test");
+                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username[0]}...</span></>;
+            }
+
             if (username === nick || isRepliedMessage && !settings.store.inReplies)
                 return prefix + nick;
             if (settings.store.mode === "user-nick")
