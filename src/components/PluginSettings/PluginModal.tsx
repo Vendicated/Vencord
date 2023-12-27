@@ -24,9 +24,8 @@ import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
@@ -42,7 +41,7 @@ import {
 } from "./components";
 import { openContributorModal } from "./ContributorModal";
 
-const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
@@ -94,7 +93,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id
-                    ? await UserUtils.fetchUser(`${user.id}`)
+                    ? await UserUtils.getUser(`${user.id}`)
                         .catch(() => makeDummyUser({ username: user.name }))
                     : makeDummyUser({ username: user.name });
 

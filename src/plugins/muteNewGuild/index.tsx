@@ -19,7 +19,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
+
+const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 
 const settings = definePluginSettings({
     guild: {
@@ -45,16 +47,16 @@ export default definePlugin({
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
     patches: [
         {
-            find: ",acceptInvite:function",
+            find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?;(\i)=null.+?;/,
+                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!==.+?;/,
                 replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
             }
         },
         {
-            find: "{joinGuild:function",
+            find: "{joinGuild:",
             replacement: {
-                match: /guildId:(\w+),lurker:(\w+).{0,20}\)}\)\);/,
+                match: /guildId:(\i),lurker:(\i).{0,20}}\)\);/,
                 replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
             }
         }
@@ -63,7 +65,7 @@ export default definePlugin({
 
     handleMute(guildId: string | null) {
         if (guildId === "@me" || guildId === "null" || guildId == null) return;
-        findByProps("updateGuildNotificationSettings").updateGuildNotificationSettings(guildId,
+        updateGuildNotificationSettings(guildId,
             {
                 muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,

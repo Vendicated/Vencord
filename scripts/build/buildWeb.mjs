@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, isDev, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -43,7 +43,7 @@ const commonOptions = {
         IS_WEB: "true",
         IS_EXTENSION: "false",
         IS_STANDALONE: "true",
-        IS_DEV: JSON.stringify(watch),
+        IS_DEV: JSON.stringify(isDev),
         IS_DISCORD_DESKTOP: "false",
         IS_VESKTOP: "false",
         IS_UPDATER_DISABLED: "true",
@@ -145,11 +145,11 @@ async function loadDir(dir, basePath = "") {
 /**
   * @type {(target: string, files: string[]) => Promise<void>}
  */
-async function buildExtension(target, files, noMonaco = false) {
+async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...(noMonaco ? {} : await loadDir("dist/monaco")),
+        ...await loadDir("dist/monaco"),
         ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
             [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
         ))),
@@ -195,8 +195,11 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 await Promise.all([
     appendCssRuntime,
     buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
-    buildExtension("firefox-unpacked", ["content.js", "manifestv2.json", "icon.png"], true),
+    buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
 ]);
 
-Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension.zip");
-console.info("Packed Chromium Extension written to dist/extension.zip");
+Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
+console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+
+Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
+console.info("Packed Firefox Extension written to dist/extension-firefox.zip");

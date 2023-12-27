@@ -78,8 +78,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
-    Animal: {
-        name: "Animal",
+    Nyako: {
+        name: "nyako",
         id: 118437263754395652n
     },
     MaiKokain: {
@@ -267,6 +267,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Dziurwa",
         id: 1001086404203389018n
     },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
+    },
     AutumnVN: {
         name: "AutumnVN",
         id: 393694671383166998n
@@ -329,7 +333,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     ImLvna: {
         name: "Luna <3",
-        id: 174200708818665472n
+        id: 799319081723232267n
     },
     rad: {
         name: "rad",
@@ -379,6 +383,22 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+    philipbry: {
+        name: "philipbry",
+        id: 554994003318276106n
+    },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
@@ -389,5 +409,3 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
-
-export const IsFirefox = IS_EXTENSION && navigator.userAgent.toLowerCase().includes("firefox");

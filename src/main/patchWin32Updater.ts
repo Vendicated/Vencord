@@ -17,7 +17,7 @@
 */
 
 import { app } from "electron";
-import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "original-fs";
 import { basename, dirname, join } from "path";
 
 function isNewer($new: string, old: string) {
@@ -32,6 +32,8 @@ function isNewer($new: string, old: string) {
 }
 
 function patchLatest() {
+    if (process.env.DISABLE_UPDATER_AUTO_PATCHING) return;
+
     try {
         const currentAppPath = dirname(process.execPath);
         const currentVersion = basename(currentAppPath);

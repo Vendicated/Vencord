@@ -37,12 +37,19 @@ export default definePlugin({
     authors: [Devs.Vap],
     patches: [
         {
-            find: "codeBlock:{react:function",
+            find: "codeBlock:{react(",
             replacement: {
-                match: /codeBlock:\{react:function\((\i),(\i),(\i)\)\{/,
-                replace: "$&return $self.renderHighlighter($1,$2,$3);",
-            },
+                match: /codeBlock:\{react\((\i),(\i),(\i)\)\{/,
+                replace: "$&return $self.renderHighlighter($1,$2,$3);"
+            }
         },
+        {
+            find: ".PREVIEW_NUM_LINES",
+            replacement: {
+                match: /(?<=function \i\((\i)\)\{)(?=let\{text:\i,language:)/,
+                replace: "return $self.renderHighlighter({lang:$1.language,content:$1.text});"
+            }
+        }
     ],
     start: async () => {
         if (settings.store.useDevIcon !== DeviconSetting.Disabled)
@@ -67,7 +74,7 @@ export default definePlugin({
     createHighlighter,
     renderHighlighter: ({ lang, content }: { lang: string; content: string; }) => {
         return createHighlighter({
-            lang,
+            lang: lang?.toLowerCase(),
             content,
             isPreview: false,
         });

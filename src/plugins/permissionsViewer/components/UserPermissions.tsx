@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
-import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { filters, findBulk } from "@webpack";
+import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -36,17 +35,15 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const Classes = proxyLazy(() => {
-    const modules = findBulk(
+const Classes = proxyLazyWebpack(() =>
+    Object.assign({}, ...findBulk(
         filters.byProps("roles", "rolePill", "rolePillBorder"),
         filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
         filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-    );
+    ))
+) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
-    return Object.assign({}, ...modules);
-}) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
-
-function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) {
+function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -76,7 +73,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
         sortUserRoles(userRoles);
 
         for (const [permission, bit] of Object.entries(PermissionsBits)) {
-            for (const { permissions, colorString, position, name } of userRoles) {
+            for (const { permissions, colorString, position } of userRoles) {
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
                         permission: getPermissionString(permission),
@@ -133,7 +130,7 @@ function UserPermissionsComponent({ guild, guildMember }: { guild: Guild; guildM
             {userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
                     {userPermissions.map(({ permission, roleColor }) => (
-                        <div className={classes(role, rolePill, rolePillBorder)}>
+                        <div className={classes(role, rolePill, showBorder ? rolePillBorder : null)}>
                             <div className={roleRemoveButton}>
                                 <span
                                     className={roleCircle}

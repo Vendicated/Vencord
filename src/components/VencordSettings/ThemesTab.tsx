@@ -18,17 +18,16 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import { IsFirefox } from "@utils/constants";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import { UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
@@ -43,7 +42,7 @@ type FileInput = ComponentType<{
 }>;
 
 const InviteActions = findByPropsLazy("resolveInvite");
-const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
+const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
@@ -127,15 +126,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                const { invite } = await InviteActions.resolveInvite(theme.invite, "Desktop Modal");
-                                if (!invite) return showToast("Invalid or expired invite");
-
-                                FluxDispatcher.dispatch({
-                                    type: "INVITE_MODAL_OPEN",
-                                    invite,
-                                    code: theme.invite,
-                                    context: "APP"
-                                });
+                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
                             }}
                         >
                             Discord Server
@@ -251,14 +242,12 @@ function ThemesTab() {
                             >
                                 Load missing Themes
                             </Button>
-                            {!IsFirefox && (
-                                <Button
-                                    onClick={() => VencordNative.quickCss.openEditor()}
-                                    size={Button.Sizes.SMALL}
-                                >
-                                    Edit QuickCSS
-                                </Button>
-                            )}
+                            <Button
+                                onClick={() => VencordNative.quickCss.openEditor()}
+                                size={Button.Sizes.SMALL}
+                            >
+                                Edit QuickCSS
+                            </Button>
                         </>
                     </Card>
 
@@ -320,15 +309,6 @@ function ThemesTab() {
 
     return (
         <SettingsTab title="Themes">
-            {IsFirefox && (
-                <ErrorCard>
-                    <Forms.FormTitle tag="h5">Warning</Forms.FormTitle>
-                    <Forms.FormText>
-                        You are using Firefox. Expect the vast majority of themes to not work.
-                        If this is a problem, use a chromium browser or Discord Desktop / Vesktop.
-                    </Forms.FormText>
-                </ErrorCard>
-            )}
             <TabBar
                 type="top"
                 look="brand"
