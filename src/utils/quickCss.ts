@@ -19,8 +19,10 @@
 import { addSettingsListener, Settings } from "@api/Settings";
 import { Toasts } from "@webpack/common";
 
+import { Logger } from "./Logger";
 import { compileUsercss } from "./themes/usercss/compiler";
 
+const logger = new Logger("QuickCSS");
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -66,7 +68,11 @@ async function initThemes() {
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
-            const themeData = await VencordNative.themes.getThemeData(theme);
+            try {
+                var themeData = await VencordNative.themes.getThemeData(theme);
+            } catch (e) {
+                logger.error("Failed to get theme data for", theme, e);
+            }
             if (!themeData) continue;
 
             const blob = new Blob([themeData], { type: "text/css" });
