@@ -75,7 +75,9 @@ export async function compileUsercss(fileName: string) {
         return null;
     }
 
-    const varsToPass = {};
+    const varsToPass = {
+        vencord: "true"
+    };
 
     for (const [k, v] of Object.entries(vars)) {
         varsToPass[k] = Settings.userCssVars[id]?.[k] ?? v.default;
