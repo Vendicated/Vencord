@@ -46,7 +46,7 @@ window.VencordNative = {
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
         getThemesDir: async () => "",
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
-            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
+            entries.map(([name, css]) => ({ fileName: name as string, content: css }))
         ),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
