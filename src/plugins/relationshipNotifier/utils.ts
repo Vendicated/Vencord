@@ -78,6 +78,20 @@ export async function syncAndRunChecks() {
             }
         }
 
+        if (settings.store.friends && friends.friends.length) {
+            for (const id of friends.friends) {
+                if (oldFriends === undefined) return;
+                if (oldFriends.friends.includes(id)) continue;
+                const user = await UserUtils.fetchUser(id).catch(() => void 0);
+                if (user)
+                    notify(
+                        `You are now friends with ${getUniqueUsername(user)}.`,
+                        user.getAvatarURL(undefined, undefined, false),
+                        () => openUserProfile(user.id)
+                    );
+            }
+        }
+
         if (settings.store.friendRequestCancels && oldFriends?.requests?.length) {
             for (const id of oldFriends.requests) {
                 if (

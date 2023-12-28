@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { onChannelDelete, onGuildDelete, onRelationshipRemove, removeFriend, removeGroup, removeGuild } from "./functions";
+import { onChannelDelete, onGuildDelete, onRelationshipAdd, onRelationshipRemove, removeFriend, removeGroup, removeGuild } from "./functions";
 import settings from "./settings";
 import { syncAndRunChecks, syncFriends, syncGroups, syncGuilds } from "./utils";
 
@@ -58,7 +58,10 @@ export default definePlugin({
         GUILD_DELETE: onGuildDelete,
         CHANNEL_CREATE: syncGroups,
         CHANNEL_DELETE: onChannelDelete,
-        RELATIONSHIP_ADD: syncFriends,
+        RELATIONSHIP_ADD(e) {
+            onRelationshipAdd(e);
+            syncFriends();
+        },
         RELATIONSHIP_UPDATE: syncFriends,
         RELATIONSHIP_REMOVE(e) {
             onRelationshipRemove(e);

@@ -22,18 +22,23 @@ import { OptionType } from "@utils/types";
 export default definePluginSettings({
     notices: {
         type: OptionType.BOOLEAN,
-        description: "Also show a notice at the top of your screen when removed (use this if you don't want to miss any notifications).",
+        description: "Also show a notice at the top of your screen when removed/added (use this if you don't want to miss any notifications).",
         default: false
     },
-    offlineRemovals: {
+    offlineRemovalsAndAdds: {
         type: OptionType.BOOLEAN,
-        description: "Notify you when starting discord if you were removed while offline.",
+        description: "Notify you when starting discord if you were removed or added while offline.",
         default: true
     },
-    friends: {
+    friendsRemove: {
         type: OptionType.BOOLEAN,
         description: "Notify when a friend removes you",
         default: true
+    },
+    friendsAdd: {
+        type: OptionType.BOOLEAN,
+        description: "Notify when a friend adds you (notice: if you enable this for the first time, you may get a lot of notifications, this is due to the friends database syncing. this will only happen once)",
+        default: false
     },
     friendRequestCancels: {
         type: OptionType.BOOLEAN,
