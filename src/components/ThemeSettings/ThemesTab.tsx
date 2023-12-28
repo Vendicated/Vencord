@@ -129,13 +129,14 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
             author={theme.author ?? "Unknown"}
             enabled={enabled}
             setEnabled={onChange}
+            disabled={missingPlugins && missingPlugins.length > 0}
             infoButton={
                 <>
                     {missingPlugins && missingPlugins.length > 0 && (
                         <Tooltip text={"The following plugins are required, but aren't enabled: " + missingPlugins.join(", ")}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <div
-                                    style={{ color: "var(--status-warning" }}
+                                    style={{ color: "var(--status-danger" }}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
                                 >
