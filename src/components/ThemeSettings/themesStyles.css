@@ -28,8 +28,13 @@
     content: "by ";
 }
 
-.vc-settings-usercss-ie-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 12px; /* matching the flex gap */
+.vc-settings-usercss-ie-buttons > div {
+    color: var(--interactive-normal);
+    opacity: .5;
+    padding: 4px;
+}
+
+.vc-settings-usercss-ie-buttons > div:hover {
+    color: var(--interactive-hover);
+    opacity: 1;
 }

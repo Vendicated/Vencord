@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import { CopyIcon, PasteIcon } from "@components/Icons";
 import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, showToast, Text, Toasts } from "@webpack/common";
+import { showToast, Text, Toasts, Tooltip } from "@webpack/common";
 import { type ReactNode } from "react";
 import { UserstyleHeader } from "usercss-meta";
 
@@ -17,6 +18,59 @@ import { SettingBooleanComponent, SettingColorComponent, SettingNumberComponent,
 interface UserCSSSettingsModalProps {
     modalProps: ModalProps;
     theme: UserstyleHeader;
+}
+
+function ExportButton({ themeSettings }: { themeSettings: Settings["userCssVars"][""]; }) {
+    return <Tooltip text={"Copy theme settings"}>
+        {({ onMouseLeave, onMouseEnter }) => (
+            <div
+                style={{ cursor: "pointer" }}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+
+                onClick={() => {
+                    copyWithToast(JSON.stringify(themeSettings), "Copied theme settings to clipboard.");
+                }}>
+                <CopyIcon />
+            </div>
+        )}
+    </Tooltip>;
+}
+
+function ImportButton({ themeSettings }: { themeSettings: Settings["userCssVars"][""]; }) {
+    return <Tooltip text={"Paste theme settings"}>
+        {({ onMouseLeave, onMouseEnter }) => (
+            <div
+                style={{ cursor: "pointer" }}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+
+                onClick={async () => {
+                    const clip = (await navigator.clipboard.read())[0];
+
+                    if (!clip) return showToast("Your clipboard is empty.", Toasts.Type.FAILURE);
+
+                    if (!clip.types.includes("text/plain"))
+                        return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
+
+                    try {
+                        var potentialSettings: Record<string, string> =
+                            JSON.parse(await clip.getType("text/plain").then(b => b.text()));
+                    } catch (e) {
+                        return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
+                    }
+
+                    for (const [key, value] of Object.entries(potentialSettings)) {
+                        if (Object.prototype.hasOwnProperty.call(themeSettings, key))
+                            themeSettings[key] = value;
+                    }
+
+                    showToast("Pasted theme settings from clipboard.", Toasts.Type.SUCCESS);
+                }}>
+                <PasteIcon />
+            </div>
+        )}
+    </Tooltip>;
 }
 
 export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) {
@@ -105,37 +159,14 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
         <ModalRoot {...modalProps}>
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Settings for {theme.name}</Text>
+                <Flex style={{ gap: 4, marginRight: 4 }} className="vc-settings-usercss-ie-buttons">
+                    <ExportButton themeSettings={themeSettings} />
+                    <ImportButton themeSettings={themeSettings} />
+                </Flex>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent>
                 <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>
-                    <div className="vc-settings-usercss-ie-grid">
-                        <Button size={Button.Sizes.SMALL} onClick={() => {
-                            copyWithToast(JSON.stringify(themeSettings), "Copied theme settings to clipboard.");
-                        }}>Export</Button>
-                        <Button size={Button.Sizes.SMALL} onClick={async () => {
-                            const clip = (await navigator.clipboard.read())[0];
-
-                            if (!clip) return showToast("Your clipboard is empty.", Toasts.Type.FAILURE);
-
-                            if (!clip.types.includes("text/plain"))
-                                return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
-
-                            try {
-                                var potentialSettings: Record<string, string> =
-                                    JSON.parse(await clip.getType("text/plain").then(b => b.text()));
-                            } catch (e) {
-                                return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
-                            }
-
-                            for (const [key, value] of Object.entries(potentialSettings)) {
-                                if (Object.prototype.hasOwnProperty.call(themeSettings, key))
-                                    themeSettings[key] = value;
-                            }
-
-                            showToast("Imported theme settings from clipboard.", Toasts.Type.SUCCESS);
-                        }}>Import</Button>
-                    </div>
                     {controls}
                 </Flex>
             </ModalContent>
