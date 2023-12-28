@@ -142,7 +142,7 @@ export default definePlugin({
 
     start() {
         this.listener = addPreSendListener((_, msg) => {
-            if (settings.store.replaceMessageContent) {
+            if (settings.store.replaceMessageContents) {
                 msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
             }
         });
