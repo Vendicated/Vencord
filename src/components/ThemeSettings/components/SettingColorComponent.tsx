@@ -8,7 +8,7 @@ import "./colorStyles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, useMemo, useState } from "@webpack/common";
+import { Forms, useMemo } from "@webpack/common";
 
 interface ColorPickerProps {
     color: number | null;
@@ -29,17 +29,13 @@ interface Props {
 }
 
 export function SettingColorComponent({ label, name, themeSettings }: Props) {
-    const [value, setValue] = useState(themeSettings[name]);
-
     function handleChange(value: number) {
         const corrected = "#" + (value?.toString(16).padStart(6, "0") ?? "000000");
-
-        setValue(corrected);
 
         themeSettings[name] = corrected;
     }
 
-    const normalizedValue = useMemo(() => parseInt(TinyColor(value).toHex(), 16), [value]);
+    const normalizedValue = useMemo(() => parseInt(TinyColor(themeSettings[name]).toHex(), 16), [themeSettings[name]]);
 
     return (
         <Forms.FormSection>

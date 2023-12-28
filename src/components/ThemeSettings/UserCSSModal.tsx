@@ -6,9 +6,10 @@
 
 import { useSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Text } from "@webpack/common";
-import type { ReactNode } from "react";
+import { Button, showToast, Text, Toasts } from "@webpack/common";
+import { type ReactNode } from "react";
 import { UserstyleHeader } from "usercss-meta";
 
 import { SettingBooleanComponent, SettingColorComponent, SettingNumberComponent, SettingRangeComponent, SettingSelectComponent, SettingTextComponent } from "./components";
@@ -107,7 +108,36 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent>
-                <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{controls}</Flex>
+                <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>
+                    <div className="vc-settings-usercss-ie-grid">
+                        <Button size={Button.Sizes.SMALL} onClick={() => {
+                            copyWithToast(JSON.stringify(themeSettings), "Copied theme settings to clipboard.");
+                        }}>Export</Button>
+                        <Button size={Button.Sizes.SMALL} onClick={async () => {
+                            const clip = (await navigator.clipboard.read())[0];
+
+                            if (!clip) return showToast("Your clipboard is empty.", Toasts.Type.FAILURE);
+
+                            if (!clip.types.includes("text/plain"))
+                                return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
+
+                            try {
+                                var potentialSettings: Record<string, string> =
+                                    JSON.parse(await clip.getType("text/plain").then(b => b.text()));
+                            } catch (e) {
+                                return showToast("Your clipboard doesn't have valid settings data.", Toasts.Type.FAILURE);
+                            }
+
+                            for (const [key, value] of Object.entries(potentialSettings)) {
+                                if (Object.prototype.hasOwnProperty.call(themeSettings, key))
+                                    themeSettings[key] = value;
+                            }
+
+                            showToast("Imported theme settings from clipboard.", Toasts.Type.SUCCESS);
+                        }}>Import</Button>
+                    </div>
+                    {controls}
+                </Flex>
             </ModalContent>
         </ModalRoot>
     );

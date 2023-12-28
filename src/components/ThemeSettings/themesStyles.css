@@ -27,3 +27,9 @@
 .vc-settings-theme-author::before {
     content: "by ";
 }
+
+.vc-settings-usercss-ie-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 12px; /* matching the flex gap */
+}
