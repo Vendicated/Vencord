@@ -86,7 +86,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                 />
 
                 <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
-                <Selec
+                <Select
                     options={
                         Formats.map(m => ({
                             label: m,
