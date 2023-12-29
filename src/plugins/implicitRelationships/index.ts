@@ -36,72 +36,89 @@ export default definePlugin({
     description: "Shows your implicit relationships in the Friends tab.",
     authors: [Devs.Dolfies],
     patches: [
+        // Counts header
+        {
+            find: ".FRIENDS_ALL_HEADER",
+            replacement: {
+                match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
+                replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
+            },
+        },
+        // No friends page
         {
             find: "FriendsEmptyState: Invalid empty state",
-            replacement: [
-                // Counts header
-                {
-                    match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
-                    replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
-                },
-                // No friends page
-                {
-                    match: /case (\i\.\i)\.ONLINE:return (\i)\.SECTION_ONLINE/,
-                    replace: "case $1.ONLINE:case $1.IMPLICIT:return $2.SECTION_ONLINE"
-                },
-                // Sections header
-                {
-                    match: /\(0,(\i)\.jsx\)\((\i)\.TabBar\.Item,\{id:(\i)\.(\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
-                    replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,className:$5.item,children:\"Implicit\"}),$&"
-                },
-                // Sections content
-                {
-                    match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
-                    replace: ";case $1.IMPLICIT:return $2.type===5"
-                },
-                // Piggyback relationship fetch
-                {
-                    match: /(\i\.\i)\.fetchRelationships\(\)/,
-                    // This relationship fetch is actually completely useless, but whatevs
-                    replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
-                },
-                // Modify sort -- thanks megu for the patch (from sortFriendRequests)
-                {
-                    predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
-                    match: /\.sortBy\(\(function\((\w)\){return \w{1,3}\.comparator}\)\)/,
-                    replace: (_, row) => `.sortBy((function(${row}) {
-                        return ${row}.type === 5
-                            ? -Vencord.Plugins.plugins.ImplicitRelationships.getAffinity(${row}.user)
-                            : ${row}.comparator
+            replacement: {
+                match: /case (\i\.\i)\.ONLINE:return (\i)\.SECTION_ONLINE/,
+                replace: "case $1.ONLINE:case $1.IMPLICIT:return $2.SECTION_ONLINE"
+            },
+        },
+        // Sections header
+        {
+            find: ".FRIENDS_SECTION_ONLINE",
+            replacement: {
+                match: /\(0,(\i)\.jsx\)\((\i)\.TabBar\.Item,\{id:(\i)\.(\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
+                replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,className:$5.item,children:\"Implicit\"}),$&"
+            },
+        },
+        // Sections content
+        {
+            find: '"FriendsStore"',
+            replacement: {
+                match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
+                replace: ";case $1.IMPLICIT:return $2.type===5"
+            },
+        },
+        // Piggyback relationship fetch
+        {
+            find: ".fetchRelationships()",
+            replacement: {
+                match: /(\i\.\i)\.fetchRelationships\(\)/,
+                // This relationship fetch is actually completely useless, but whatevs
+                replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
+            },
+        },
+        // Modify sort -- thanks megu for the patch (from sortFriendRequests)
+        {
+            find: "getRelationshipCounts(){",
+            replacement: {
+                predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
+                match: /\.sortBy\(\i=>\i\.comparator\)/,
+                replace: `.sortBy((function(r) {
+                        return r.type === 5
+                            ? -$self.getAffinity(r.user)
+                            : r.comparator
                     }))`
-                }
-            ],
+            }
         },
 
         // Add support for the nonce parameter to Discord's shitcode
         {
             find: ".REQUEST_GUILD_MEMBERS",
-            replacement: [
-                {
-                    match: /presences:!!(\i)\.presences/,
-                    replace: "$&,nonce:$1.nonce"
-                },
-                {
-                    match: /\.send\((\i)\.REQUEST_GUILD_MEMBERS,{/,
-                    replace: "$&nonce:arguments[1].nonce,"
-                },
-                {
-                    match: /notFound:(\i)\.not_found/,
-                    replace: "$&,nonce:$1.nonce"
-                },
-            ]
+            replacement: {
+                match: /\.send\(8,{/,
+                replace: "$&nonce:arguments[1].nonce,"
+            }
+        },
+        {
+            find: "GUILD_MEMBERS_REQUEST:",
+            replacement: {
+                match: /presences:!!(\i)\.presences/,
+                replace: "$&,nonce:$1.nonce"
+            },
+        },
+        {
+            find: 'case"GUILD_MEMBERS_CHUNK"',
+            replacement: {
+                match: /notFound:(\i)\.not_found/,
+                replace: "$&,nonce:$1.nonce"
+            },
         }
     ],
     settings: definePluginSettings(
         {
             sortByAffinity: {
                 type: OptionType.BOOLEAN,
-                default: false,
+                default: true,
                 description: "Whether to sort implicit relationships by their affinity to you.",
                 restartNeeded: true
             },
@@ -164,7 +181,7 @@ export default definePlugin({
     },
 
     start() {
-        const FriendsSections = findByProps("ONLINE", "ALL", "PENDING", "BLOCKED");
+        const { FriendsSections } = findByProps("FriendsSections");
         FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });
