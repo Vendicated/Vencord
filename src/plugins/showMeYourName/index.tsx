@@ -69,18 +69,21 @@ export default definePlugin({
                 return prefix + nick;
             if (settings.store.mode === "user-nick")
                 if (StreamerMode.enabled) {
-                    return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}...</span></>;
+                    return <>{prefix}{username[0]}... <span className="vc-smyn-suffix">{nick}</span></>;
                 } else {
                     return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
                 }
             if (settings.store.mode === "nick-user")
                 if (StreamerMode.enabled) {
-                    console.log("yeah");
                     return <>{prefix}{nick} <span className="vc-smyn-suffix">{username[0]}...</span></>;
                 } else {
                     return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
                 }
-            return prefix + username;
+            if (StreamerMode.enabled) {
+                return prefix + username[0] + "...";
+            } else {
+                return prefix + username;
+            }
         } catch {
             return author?.nick;
         }
