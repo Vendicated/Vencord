@@ -19,6 +19,9 @@ interface UsernameProps {
     userOverride?: User;
 }
 
+if (Vencord.Webpack.findStoreLazy("StreamerModeStore").enabled) {
+    var Streamer = new Boolean(true);
+}
 const settings = definePluginSettings({
     mode: {
         type: OptionType.SELECT,
@@ -65,17 +68,16 @@ export default definePlugin({
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
-
             if (username === nick || isRepliedMessage && !settings.store.inReplies)
                 return prefix + nick;
             if (settings.store.mode === "user-nick")
-                if (Vencord.Webpack.findStore("StreamerModeStore").enabled) {
+                if (Streamer) {
                     return <>{prefix}{nick} <span className="vc-smyn-suffix">{username[0]}...</span></>;
                 } else {
                     return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
                 }
             if (settings.store.mode === "nick-user")
-                if (Vencord.Webpack.findStore("StreamerModeStore").enabled) {
+                if (Streamer) {
                     return <>{prefix}{nick} <span className="vc-smyn-suffix">{username[0]}...</span></>;
                 } else {
                     return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
