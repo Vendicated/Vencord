@@ -8,7 +8,7 @@ import {
     ModalProps,
     ModalRoot,
 } from "@utils/modal";
-import { findByCode } from "@webpack";
+import { wreq } from "@webpack";
 import {
     Clipboard,
     Forms,
@@ -21,7 +21,6 @@ import {
 
 import { LazySwatchLoaded } from "..";
 import { colorVariables } from "../css";
-import extractAndRequireModuleIds from "../util/requireModule";
 
 interface ToolboxItem {
     title: string;
@@ -161,13 +160,7 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
 
     useEffect(() => {
         if (!LazySwatchLoaded) {
-            extractAndRequireModuleIds(
-                findByCode(
-                    "Promise.all",
-                    "openModalLazy",
-                    "location_page"
-                )
-            );
+            wreq.e(409214);
         }
     });
 

@@ -127,10 +127,10 @@ export default function SelectorModal({
                             className="colorwaySelector-search"
                             placeholder="Search for Colorways..."
                             value={searchString}
-                            onChange={(e: string) => {
-                                searchColorways(e);
-                                setSearchString(e);
-                            }}
+                            onChange={(e: string) => [
+                                searchColorways,
+                                setSearchString
+                            ].forEach(t => t(e))}
                         />
                     ) : (
                         <div className="colorwaySelector-pillWrapper">
@@ -303,8 +303,7 @@ export default function SelectorModal({
                                             onMouseEnter={onMouseEnter}
                                             onMouseLeave={onMouseLeave}
                                             onClick={() => {
-                                                searchColorways("");
-                                                setSearchString("");
+                                                [searchColorways, setSearchString].forEach(t => t(""));
                                                 setSearchBarVisibility(false);
                                             }}
                                         >

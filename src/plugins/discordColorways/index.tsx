@@ -22,7 +22,6 @@ import {
     PermissionStore,
     SelectedChannelStore,
     SettingsRouter,
-    Text,
 } from "@webpack/common";
 
 import { ColorPickerModal } from "./components/colorPicker";
@@ -30,6 +29,7 @@ import ColorwaysButton from "./components/colorwaysButton";
 import CreatorModal from "./components/creatorModal";
 import Selector from "./components/selector";
 import { SettingsPage } from "./components/settingsPage";
+import Spinner from "./components/spinner";
 import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
 import { ColorPickerProps } from "./types";
@@ -38,15 +38,7 @@ import { getHex, stringToHex } from "./utils";
 export let LazySwatchLoaded = false;
 
 export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
-    return (
-        <Text
-            tag="h2"
-            variant="heading-md/semibold"
-            className="colorways-creator-module-warning"
-        >
-            Module is loading, please wait...
-        </Text>
-    );
+    return <Spinner className="colorways-creator-module-warning" />;
 };
 
 (async function () {

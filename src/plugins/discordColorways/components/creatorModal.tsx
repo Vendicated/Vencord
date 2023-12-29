@@ -59,8 +59,7 @@ export default function CreatorModal({
         if (!LazySwatchLoaded) {
             extractAndRequireModuleIds(
                 findByCode(
-                    "Promise.all",
-                    "openModalLazy"
+                    "hasFullScreenLayer"
                 )
             );
         }
