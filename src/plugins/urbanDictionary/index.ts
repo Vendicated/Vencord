@@ -18,22 +18,24 @@
 
 import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { ApplicationCommandInputType } from "@api/Commands/types";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    resultsAmount: {
+        type: OptionType.NUMBER,
+        description: "The amount of results you want to get (more gives better results, but is slower)",
+        default: 10
+    }
+});
 
 export default definePlugin({
     name: "UrbanDictionary",
     description: "Search for a word on Urban Dictionary via /urban slash command",
     authors: [Devs.jewdev],
     dependencies: ["CommandsAPI"],
-    options: {
-        resultsAmount: {
-            type: OptionType.NUMBER,
-            description: "The amount of results you want to get (+ Better results, - Slower)",
-            default: 10
-        }
-    },
+    settings,
     commands: [
         {
             name: "urban",
@@ -50,9 +52,7 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 try {
                     const query: string = encodeURIComponent(args[0].value);
-                    const resultsAmount: number = Settings.plugins.UrbanDictionary.resultsAmount || 10;
-                    const response: Response = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${resultsAmount}`);
-                    const { list } = await response.json();
+                    const { list } = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`).then(response => response.json());
 
                     if (!list.length)
                         return void sendBotMessage(ctx.channel.id, { content: "No results found." });
