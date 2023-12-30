@@ -26,10 +26,11 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, Toasts, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
@@ -44,7 +45,10 @@ function addDeleteStyle() {
 }
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
-const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
+const TOGGLE_STYLE_ID = "ml-toggle-style";
+const ADD_USER_ID = "ml-add-user";
+const REMOVE_USER_ID = "ml-remove-user";
+
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
@@ -59,8 +63,8 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 
         children.push((
             <Menu.MenuItem
-                id={TOGGLE_DELETE_STYLE_ID}
-                key={TOGGLE_DELETE_STYLE_ID}
+                id={TOGGLE_STYLE_ID}
+                key={TOGGLE_STYLE_ID}
                 label="Toggle Deleted Highlight"
                 action={() => domElement.classList.toggle("messagelogger-deleted")}
             />
@@ -89,6 +93,53 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     ));
 };
 
+const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+    const { user } = props;
+
+    const ignoreUsersRaw = Settings.plugins.MessageLogger.ignoreUsers as string;
+    const ignoreUsers = ignoreUsersRaw.split(",") as string[];
+    const shouldIgnore = ignoreUsersRaw.includes(user?.id);
+
+    if (shouldIgnore) {
+        children.push((
+            <Menu.MenuItem
+                id={REMOVE_USER_ID}
+                key={REMOVE_USER_ID}
+                label="Remove user from whitelist"
+                color="danger"
+                action={() => {
+                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.filter((id) => id !== user?.id).join(",");
+                    Toasts.show({
+                        message: `Removed from whitelist`,
+                        type: Toasts.Type.SUCCESS,
+                        id: Toasts.genId()
+                    });
+                }}
+                icon={DeleteIcon}
+            />
+        ));
+    } else {
+        children.push((
+            <Menu.MenuItem
+                id={ADD_USER_ID}
+                key={ADD_USER_ID}
+                label="Whitelist user from MessageLogger"
+                action={() => {
+                    ignoreUsers.push(user?.id);
+                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.join(",");
+                    Toasts.show({
+                        message: `Added to whitelist; MessageLogger will not display future edits/deletes`,
+                        type: Toasts.Type.SUCCESS,
+                        id: Toasts.genId()
+                    });
+                }}
+                icon={PlusIcon}
+            />
+        ));
+    }
+};
+
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
@@ -97,11 +148,16 @@ export default definePlugin({
     start() {
         addDeleteStyle();
         addContextMenuPatch("message", patchMessageContextMenu);
+        addContextMenuPatch("user-context", patchUserContextMenu);
     },
 
     stop() {
         removeContextMenuPatch("message", patchMessageContextMenu);
+        removeContextMenuPatch("user-context", patchUserContextMenu);
     },
+
+
+
 
     renderEdit(edit: { timestamp: any, content: string; }) {
         return (
