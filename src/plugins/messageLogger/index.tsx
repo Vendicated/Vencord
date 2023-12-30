@@ -96,6 +96,12 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
     const { user } = props;
     const ignoreUsersRaw = Settings.plugins.MessageLogger.ignoreUsers as string;
+    const myId = UserStore.getCurrentUser().id;
+
+    if (user?.id === myId) {
+        return;
+    }
+
     const shouldIgnore = ignoreUsersRaw.includes(user?.id);
     var ignoreUsers = ignoreUsersRaw.split(",") as string[];
 
