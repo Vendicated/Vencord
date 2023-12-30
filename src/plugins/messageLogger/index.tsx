@@ -22,6 +22,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +31,6 @@ import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, To
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
@@ -95,30 +95,17 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 
 const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
     const { user } = props;
-
     const ignoreUsersRaw = Settings.plugins.MessageLogger.ignoreUsers as string;
-    const ignoreUsers = ignoreUsersRaw.split(",") as string[];
     const shouldIgnore = ignoreUsersRaw.includes(user?.id);
+    var ignoreUsers = ignoreUsersRaw.split(",") as string[];
 
-    if (shouldIgnore) {
-        children.push((
-            <Menu.MenuItem
-                id={REMOVE_USER_ID}
-                key={REMOVE_USER_ID}
-                label="Remove user from whitelist"
-                color="danger"
-                action={() => {
-                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.filter((id) => id !== user?.id).join(",");
-                    Toasts.show({
-                        message: `Removed from whitelist`,
-                        type: Toasts.Type.SUCCESS,
-                        id: Toasts.genId()
-                    });
-                }}
-                icon={DeleteIcon}
-            />
-        ));
-    } else {
+    // for some reason ignoreUsers has a blank string as its first element, which causes .join() to produce this: ,[userid]
+    // this patches that
+    if (ignoreUsers[0] === "") {
+        ignoreUsers.shift();
+    }
+
+    if (!shouldIgnore) {
         children.push((
             <Menu.MenuItem
                 id={ADD_USER_ID}
@@ -128,12 +115,30 @@ const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => (
                     ignoreUsers.push(user?.id);
                     Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.join(",");
                     Toasts.show({
-                        message: `Added to whitelist; MessageLogger will not display future edits/deletes`,
+                        message: "Added to whitelist; MessageLogger will not display future edits/deletes",
                         type: Toasts.Type.SUCCESS,
                         id: Toasts.genId()
                     });
                 }}
                 icon={PlusIcon}
+            />
+        ));
+    } else {
+        children.push((
+            <Menu.MenuItem
+                id={REMOVE_USER_ID}
+                key={REMOVE_USER_ID}
+                label="Remove user from whitelist"
+                color="danger"
+                action={() => {
+                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.filter(id => id !== user?.id).join(",");
+                    Toasts.show({
+                        message: "Removed from whitelist",
+                        type: Toasts.Type.SUCCESS,
+                        id: Toasts.genId()
+                    });
+                }}
+                icon={DeleteIcon}
             />
         ));
     }
