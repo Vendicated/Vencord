@@ -22,6 +22,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +31,6 @@ import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, To
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
@@ -108,9 +108,9 @@ const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => (
                 label="Remove user from whitelist"
                 color="danger"
                 action={() => {
-                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.filter((id) => id !== user?.id).join(",");
+                    Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.filter(id => id !== user?.id).join(",");
                     Toasts.show({
-                        message: `Removed from whitelist`,
+                        message: "Removed from whitelist",
                         type: Toasts.Type.SUCCESS,
                         id: Toasts.genId()
                     });
@@ -128,7 +128,7 @@ const patchUserContextMenu: NavContextMenuPatchCallback = (children, props) => (
                     ignoreUsers.push(user?.id);
                     Settings.plugins.MessageLogger.ignoreUsers = ignoreUsers.join(",");
                     Toasts.show({
-                        message: `Added to whitelist; MessageLogger will not display future edits/deletes`,
+                        message: "Added to whitelist; MessageLogger will not display future edits/deletes",
                         type: Toasts.Type.SUCCESS,
                         id: Toasts.genId()
                     });
