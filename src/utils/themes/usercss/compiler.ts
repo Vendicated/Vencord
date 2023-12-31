@@ -58,7 +58,7 @@ export async function compileUsercss(fileName: string) {
     try {
         var themeData = await VencordNative.themes.getThemeData(fileName);
     } catch (e) {
-        UserCSSLogger.error("Failed to get theme data for", fileName, e);
+        UserCSSLogger.warn("Failed to get theme data for", fileName, "(has it gone missing?)", e);
     }
     if (!themeData) return null;
 
