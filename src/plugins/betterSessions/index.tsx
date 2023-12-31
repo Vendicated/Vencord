@@ -64,16 +64,16 @@ export default definePlugin({
             replacement: [
                 // Replace children with a single label with state
                 {
-                    match: /({variant:"eyebrow",className:\i\(\)\.sessionInfoRow,children:).{70,110}{children:"·"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
+                    match: /({variant:"eyebrow",className:\i\.sessionInfoRow,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
                     replace: "$1$self.renderName(arguments[0])"
                 },
                 {
-                    match: /({variant:"text-sm\/medium",className:\i\(\)\.sessionInfoRow,children:.{70,110}{children:"·"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
+                    match: /({variant:"text-sm\/medium",className:\i\.sessionInfoRow,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
                     replace: "$1$self.renderTimestamp(arguments[0], $2)}"
                 },
                 // Replace the icon
                 {
-                    match: /(currentSession:null\),children:\[)\(0,\w+\.\w+\)\("div",{className:\w+\(\)\.sessionIcon,children:\(0,\w+\.\w+\)\(\w+,{width:"32",height:"32"}\)}\),/,
+                    match: /(currentSession:null\),children:\[)\(0,\i\.\i\)\("div",{className:\w+\.sessionIcon,children:\(0,\i\.\i\)\(\i,{width:\i,height:\i}\)}\),/,
                     replace: "$1$self.renderIcon(arguments[0]),"
                 }
             ]
