@@ -29,7 +29,7 @@ import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const UserSettingsAccountActionCreators = findByPropsLazy("saveAccountChanges", "open");
-const UserSettingsSections = findByPropsLazy("ACCOUNT_BACKUP_CODES");
+const Constants = findByPropsLazy("UserSettingsSections");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
@@ -175,7 +175,7 @@ export default definePlugin({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
-                onClick: () => UserSettingsAccountActionCreators.open(UserSettingsSections.SESSIONS)
+                onClick: () => UserSettingsAccountActionCreators.open(Constants.UserSettingsSections.SESSIONS)
             });
         }
     },
