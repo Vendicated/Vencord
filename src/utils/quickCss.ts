@@ -66,11 +66,11 @@ async function initThemes() {
 
     const links: string[] = [...themeLinks];
 
-    const enabledThemesClone = enabledThemes.slice();
-
     if (IS_WEB) {
         // make copy so we can remove themes that are missing
-        for (const theme of enabledThemesClone) {
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
             try {
                 var themeData = await VencordNative.themes.getThemeData(theme);
             } catch (e) {
@@ -87,7 +87,11 @@ async function initThemes() {
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        for (const theme of enabledThemesClone) if (!theme.endsWith(".user.css")) {
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
+            if (theme.endsWith(".user.css")) continue;
+
             try {
                 // whilst this is unnecessary here, we're doing it to make sure the theme is valid
                 await VencordNative.themes.getThemeData(theme);
@@ -102,7 +106,11 @@ async function initThemes() {
     }
 
     if (!IS_WEB || "armcord" in window) {
-        for (const theme of enabledThemesClone) if (theme.endsWith(".user.css")) {
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
+            if (!theme.endsWith(".user.css")) continue;
+
             // UserCSS goes through a compile step first
             const css = await compileUsercss(theme);
             if (!css) {
