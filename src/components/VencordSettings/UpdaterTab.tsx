@@ -113,7 +113,7 @@ function Updatable(props: CommonProps) {
                 </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
+                    {isOutdated ? (updates.length > 1) ? `There are ${updates.length} Updates` : `There is ${updates.length} Update` : "Up to Date!"}
                 </Forms.FormText>
             )}
 
