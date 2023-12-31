@@ -23,7 +23,8 @@ import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
-import { saveFile } from "./web";
+import { relaunch } from "./native";
+import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
     try {
@@ -41,10 +42,10 @@ export async function importSettings(data: string) {
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
-export async function exportSettings() {
+export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
     const settings = JSON.parse(VencordNative.settings.get());
     const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ settings, quickCss }, null, 4);
+    return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
 }
 
 export async function downloadSettingsBackup() {
@@ -91,38 +92,28 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
             }
         }
     } else {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.style.display = "none";
-        input.accept = "application/json";
-        input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return;
+        const file = await chooseFile("application/json");
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async () => {
-                try {
-                    await importSettings(reader.result as string);
-                    if (showToast) toastSuccess();
-                } catch (err) {
-                    new Logger("SettingsSync").error(err);
-                    if (showToast) toastFailure(err);
-                }
-            };
-            reader.readAsText(file);
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                await importSettings(reader.result as string);
+                if (showToast) toastSuccess();
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+                if (showToast) toastFailure(err);
+            }
         };
-
-        document.body.appendChild(input);
-        input.click();
-        setImmediate(() => document.body.removeChild(input));
+        reader.readAsText(file);
     }
 }
 
 // Cloud settings
 const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
-export async function putCloudSettings() {
-    const settings = await exportSettings();
+export async function putCloudSettings(manual?: boolean) {
+    const settings = await exportSettings({ minify: true });
 
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
@@ -149,6 +140,14 @@ export async function putCloudSettings() {
         VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
+
+        if (manual) {
+            showNotification({
+                title: "Cloud Settings",
+                body: "Synchronized settings to the cloud!",
+                noPersist: true,
+            });
+        }
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
@@ -231,7 +230,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch(),
+                onClick: IS_WEB ? () => location.reload() : relaunch,
                 noPersist: true
             });
 

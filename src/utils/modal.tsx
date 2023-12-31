@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByCode, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -49,13 +49,7 @@ export interface ModalOptions {
 
 type RenderFunction = (props: ModalProps) => ReactNode;
 
-export const Modals = mapMangledModuleLazy(".closeWithCircleBackground", {
-    ModalRoot: filters.byCode(".root"),
-    ModalHeader: filters.byCode(".header"),
-    ModalContent: filters.byCode(".content"),
-    ModalFooter: filters.byCode(".footerSeparator"),
-    ModalCloseButton: filters.byCode(".closeWithCircleBackground"),
-}) as {
+export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{
         transitionState: ModalTransitionState;
         size?: ModalSize;
@@ -124,7 +118,7 @@ export type ImageModal = ComponentType<{
     shouldHideMediaOptions?: boolean;
 }>;
 
-export const ImageModal = LazyComponent(() => findByCode(".renderLinkComponent", ".responsive") as ImageModal);
+export const ImageModal = findExportedComponentLazy("ImageModal") as ImageModal;
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
@@ -132,12 +126,7 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-const ModalAPI = mapMangledModuleLazy("onCloseRequest:null!=", {
-    openModal: filters.byCode("onCloseRequest:null!="),
-    closeModal: filters.byCode("onCloseCallback&&"),
-    openModalLazy: m => m?.length === 1 && filters.byCode(".apply(this,arguments)")(m),
-    closeAllModals: filters.byCode(".value.key,")
-});
+const ModalAPI = findByPropsLazy("openModalLazy");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.

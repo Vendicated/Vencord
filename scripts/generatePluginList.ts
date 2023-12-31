@@ -18,8 +18,11 @@
 
 import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
-import { join } from "path";
+import { join, sep } from "path";
+import { normalize as posixNormalize, sep as posixSep } from "path/posix";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+
+import { getPluginTarget } from "./utils.mjs";
 
 interface Dev {
     name: string;
@@ -37,6 +40,7 @@ interface PluginData {
     required: boolean;
     enabledByDefault: boolean;
     target: "discordDesktop" | "vencordDesktop" | "web" | "dev";
+    filePath: string;
 }
 
 const devs = {} as Record<string, Dev>;
@@ -151,21 +155,29 @@ async function parseFile(fileName: string) {
                 case "required":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
-                    if (!data[key] && value.kind !== SyntaxKind.FalseKeyword) throw fail(`${key} is not a boolean literal`);
                     break;
             }
         }
 
         if (!data.name || !data.description || !data.authors) throw fail("name, description or authors are missing");
 
-        const fileBits = fileName.split(".");
-        if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1)!)) {
-            const mod = fileBits.at(-2)!;
-            if (!["web", "discordDesktop", "vencordDesktop", "dev"].includes(mod)) throw fail(`invalid target ${fileBits.at(-2)}`);
-            data.target = mod as any;
+        const target = getPluginTarget(fileName);
+        if (target) {
+            if (!["web", "discordDesktop", "vencordDesktop", "desktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
+            data.target = target as any;
         }
 
-        return data;
+        data.filePath = posixNormalize(fileName)
+            .split(sep)
+            .join(posixSep)
+            .replace(/\/index\.([jt]sx?)$/, "")
+            .replace(/^src\/plugins\//, "");
+
+        let readme = "";
+        try {
+            readme = readFileSync(join(fileName, "..", "README.md"), "utf-8");
+        } catch { }
+        return [data, readme] as const;
     }
 
     throw fail("no default export called 'definePlugin' found");
@@ -194,18 +206,24 @@ function isPluginFile({ name }: { name: string; }) {
 (async () => {
     parseDevs();
 
-    const plugins = ["src/plugins", "src/plugins/_core"].flatMap(dir =>
+    const plugins = [] as PluginData[];
+    const readmes = {} as Record<string, string>;
+
+    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
-            .map(async dirent =>
-                parseFile(await getEntryPoint(dir, dirent))
-            )
-    );
+            .map(async dirent => {
+                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
+                plugins.push(data);
+                if (readme) readmes[data.name] = readme;
+            })
+    ));
 
-    const data = JSON.stringify(await Promise.all(plugins));
+    const data = JSON.stringify(plugins);
 
-    if (process.argv.length > 2) {
+    if (process.argv.length > 3) {
         writeFileSync(process.argv[2], data);
+        writeFileSync(process.argv[3], JSON.stringify(readmes));
     } else {
         console.log(data);
     }

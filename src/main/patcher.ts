@@ -71,7 +71,7 @@ if (!IS_VANILLA) {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, "preload.js");
+                options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
                 options.webPreferences.sandbox = false;
                 if (settings.frameless) {
                     options.frame = false;
@@ -85,9 +85,15 @@ if (!IS_VANILLA) {
                     options.backgroundColor = "#00000000";
                 }
 
-                if (settings.macosTranslucency && process.platform === "darwin") {
+                const needsVibrancy = process.platform === "darwin" || (settings.macosVibrancyStyle || settings.macosTranslucency);
+
+                if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = "sidebar";
+                    if (settings.macosTranslucency) {
+                        options.vibrancy = "sidebar";
+                    } else if (settings.macosVibrancyStyle) {
+                        options.vibrancy = settings.macosVibrancyStyle;
+                    }
                 }
 
                 process.env.DISCORD_PRELOAD = original;

@@ -96,6 +96,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "MANAGE_ROLES"
     | "MANAGE_WEBHOOKS"
     | "MANAGE_GUILD_EXPRESSIONS"
+    | "CREATE_GUILD_EXPRESSIONS"
     | "VIEW_AUDIT_LOG"
     | "VIEW_CHANNEL"
     | "VIEW_GUILD_ANALYTICS"
@@ -116,6 +117,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "CREATE_PRIVATE_THREADS"
     | "USE_EXTERNAL_STICKERS"
     | "SEND_MESSAGES_IN_THREADS"
+    | "SEND_VOICE_MESSAGES"
     | "CONNECT"
     | "SPEAK"
     | "MUTE_MEMBERS"
@@ -125,8 +127,11 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "PRIORITY_SPEAKER"
     | "STREAM"
     | "USE_EMBEDDED_ACTIVITIES"
+    | "USE_SOUNDBOARD"
+    | "USE_EXTERNAL_SOUNDS"
     | "REQUEST_TO_SPEAK"
-    | "MANAGE_EVENTS";
+    | "MANAGE_EVENTS"
+    | "CREATE_EVENTS";
 
 export type PermissionsBits = Record<Permissions, bigint>;
 
@@ -154,5 +159,26 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, string>;
+    Messages: Record<i18nMessages, any>;
+}
+
+export interface Clipboard {
+    copy(text: string): void;
+    SUPPORTS_COPY: boolean;
+}
+
+export interface NavigationRouter {
+    back(): void;
+    forward(): void;
+    hasNavigated(): boolean;
+    getHistory(): {
+        action: string;
+        length: 50;
+        [key: string]: any;
+    };
+    transitionTo(path: string, ...args: unknown[]): void;
+    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    replaceWith(...args: unknown[]): void;
+    getLastRouteChangeSource(): any;
+    getLastRouteChangeSourceLocationStack(): any;
 }
