@@ -178,6 +178,8 @@ export default definePlugin({
                 onClick: () => UserSettingsAccountActionCreators.open(Constants.UserSettingsSections.SESSIONS)
             });
         }
+
+        saveSessionsToDataStore();
     },
 
     flux: {
