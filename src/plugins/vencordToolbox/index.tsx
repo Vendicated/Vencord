@@ -33,7 +33,7 @@ function VencordPopout(onClose: () => void) {
     const pluginEntries = [] as ReactNode[];
 
     for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions) {
+        if (plugin.toolboxActions && Settings.plugins[plugin.name].enabled) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
