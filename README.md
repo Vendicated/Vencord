@@ -4,6 +4,10 @@ The cutest Discord client mod ([Vencord](https://github.com/Vendicated/Vencord) 
 
 ## [INSTALLATION GUIDE](https://github.com/sinjs/Sencord/blob/main/INSTALLING.md)
 
+## Plugins added
+
+-   **NoGiftButton:** Removes the Gift and Boost Button from the messaging bar (thanks airbus)
+
 ## Disclaimer
 
 Discord is trademark of Discord Inc. and solely mentioned for the sake of descriptivity.
