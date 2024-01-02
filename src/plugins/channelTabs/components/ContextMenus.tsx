@@ -17,7 +17,6 @@
 */
 
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
@@ -47,7 +46,7 @@ export function BasicContextMenu() {
     </Menu.Menu>;
 }
 
-export function EditModal({ modalProps, bookmark, onSave }) {
+export function EditModal({ modalProps, modalKey, bookmark, onSave }) {
     const [name, setName] = useState(bookmark.name);
     const [color, setColor] = useState(bookmark.iconColor);
     const placeholder = bookmarkPlaceholderName(bookmark);
@@ -78,16 +77,23 @@ export function EditModal({ modalProps, bookmark, onSave }) {
                     serialize={String}
                 />
             </>}
+        </ModalContent>
+        <ModalFooter>
             <Button
-                className={classes(Margins.top20, Margins.bottom20)}
                 onClick={() => onSave(name || placeholder, color)}
             >Save</Button>
-        </ModalContent>
+            <Button
+                color={Button.Colors.TRANSPARENT}
+                look={Button.Looks.LINK}
+                onClick={() => closeModal(modalKey)}
+            >Cancel</Button>
+        </ModalFooter>
     </ModalRoot>;
 }
 
-function AddToFolderModal({ modalProps, bookmarks, onSave }: {
+function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
     modalProps: any,
+    modalKey: string,
     bookmarks: Bookmarks,
     onSave: (folderIndex: number) => void;
 }) {
@@ -114,11 +120,17 @@ function AddToFolderModal({ modalProps, bookmarks, onSave }: {
                 select={setIndex}
                 serialize={String}
             />
+        </ModalContent>
+        <ModalFooter>
             <Button
-                className={classes(Margins.top20, Margins.bottom20)}
                 onClick={() => onSave(folderIndex)}
             >Save</Button>
-        </ModalContent>
+            <Button
+                color={Button.Colors.TRANSPARENT}
+                look={Button.Looks.LINK}
+                onClick={() => closeModal(modalKey)}
+            >Cancel</Button>
+        </ModalFooter>
     </ModalRoot>;
 }
 
@@ -178,6 +190,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                     const key = openModal(modalProps =>
                         <EditModal
                             modalProps={modalProps}
+                            modalKey={key}
                             bookmark={bookmark}
                             onSave={(name, color) => {
                                 methods.editBookmark(index, { name });
@@ -217,6 +230,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                     const key = openModal(modalProps =>
                         <AddToFolderModal
                             modalProps={modalProps}
+                            modalKey={key}
                             bookmarks={bookmarks}
                             onSave={index => {
                                 if (index === -1) {
