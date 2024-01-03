@@ -19,7 +19,7 @@ export let DecorationGridItem: DecorationGridItemComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
 export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
-    const component = findComponentByCode("AvatarDecorationModalPreview");
+    const component = findComponentByCode(".shopPreviewBanner");
     return React.memo(component);
 });
 
