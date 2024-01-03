@@ -44,7 +44,7 @@ async function syncSettings() {
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
-        await dsGet("Vencord_cloudSecret") === null // this has been enabled due to local settings share or some other bug
+        !await dsGet("Vencord_cloudSecret") // this has been enabled due to local settings share or some other bug
     ) {
         // show a notification letting them know and tell them how to fix it
         showNotification({
@@ -145,4 +145,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
     }
 }, { once: true });
-
