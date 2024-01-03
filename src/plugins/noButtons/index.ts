@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -43,10 +44,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoButtons",
     description: "Removes annoying buttons that you don't need",
-    authors: [{
-        id: 551041413043978242n,
-        name: "sin",
-    }],
+    authors: [Devs.sin],
     patches: [],
     settings,
     start() {
