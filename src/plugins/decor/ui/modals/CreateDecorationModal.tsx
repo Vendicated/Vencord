@@ -14,11 +14,8 @@ import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, Text
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
-
-
-const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 

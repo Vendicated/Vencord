@@ -10,7 +10,7 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -20,7 +20,7 @@ import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
 import { settings } from "../../settings";
-import { cl, requireAvatarDecorationModal } from "../";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
@@ -30,7 +30,6 @@ import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 function usePresets() {
     const [presets, setPresets] = useState<Preset[]>([]);
