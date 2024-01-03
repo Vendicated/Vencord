@@ -6,14 +6,11 @@
 
 import { Link } from "@components/Link";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
 import { Button, Forms, Text } from "@webpack/common";
 
 import { settings } from "../../settings";
-import { cl, requireAvatarDecorationModal } from "../";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
-
-const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 function GuidelinesModal(props: ModalProps) {
     return <ModalRoot
