@@ -6,7 +6,7 @@ The cutest Discord client mod ([Vencord](https://github.com/Vendicated/Vencord) 
 
 ## Plugins added
 
--   **NoGiftButton:** Removes the Gift and Boost Button from the messaging bar (thanks airbus)
+-   **NoButtons:** Removes annoying buttons from the message bar (configure in settings)
 
 ## Disclaimer
 
