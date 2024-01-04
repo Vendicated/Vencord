@@ -182,7 +182,18 @@ export default definePlugin({
         if (settings.store.ignoreBots && m.author.bot)
             return;
 
-        if (regexes.some(r => r != "" && safeMatchesRegex(m.content, r))) {
+        let matches = false;
+
+        if (regexes.some(r => r != "" && (safeMatchesRegex(m.content, r)))) {
+            matches = true;
+        }
+        for (let embed of m.embeds) {
+            if (regexes.some(r => r != "" && (safeMatchesRegex(embed.description, r) || safeMatchesRegex(embed.title, r)))) {
+                matches = true;
+            }
+        }
+
+        if (matches) {
             m.mentions.push(this.me);
 
             if (m.author.id != this.me.id)
