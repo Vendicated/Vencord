@@ -33,7 +33,7 @@ pnpm inject
 
 # Updating
 
-> :warning: **DO NOT USE THE IN-APP UPDATER FEATURE, IT WILL BREAK THE MODIFICATIONS**
+> :warning: The in-app updater might work, or not, honestly no idea. Try your luck :^) (or use the manual method)
 
 ## Pulling
 
