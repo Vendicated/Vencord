@@ -41,7 +41,8 @@
 }
 
 .expression-picker-chat-input-button:nth-child(5) svg {
-    padding-top: 4px;
+    padding-top: 3px;
+    padding-left: 2px;
 }
 
 .expression-picker-chat-input-button:nth-child(5) path {
