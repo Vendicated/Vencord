@@ -105,10 +105,24 @@ async function printReport() {
 
     console.log();
 
-    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
+    const ignoredErrors = [] as string[];
+    report.otherErrors = report.otherErrors.filter(e => {
+        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
+            ignoredErrors.push(e);
+            return false;
+        }
+        return true;
+    });
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
+
+    console.log();
+
+    console.log("## Ignored Discord Errors");
+    ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -123,7 +137,7 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/6101cff21e241cebb60c4a01563d0c01.webp?size=512",
+                avatar_url: "https://cdn.discordapp.com/avatars/1017176847865352332/c312b6b44179ae6817de7e4b09e9c6af.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
@@ -197,9 +211,12 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                if (!patchFailMatch) break;
+
                 process.exitCode = 1;
 
-                const [, plugin, type, id, regex] = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const [, plugin, type, id, regex] = patchFailMatch;
                 report.badPatches.push({
                     plugin,
                     type,
@@ -239,7 +256,7 @@ page.on("console", async e => {
         ).then(a => a.join(" ").trim());
 
 
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module Filter:")) {
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             console.error("[Unexpected Error]", text);
             report.otherErrors.push(text);
         }
@@ -279,6 +296,7 @@ function runTime(token: string) {
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
+                delete patch.group;
 
                 if (!Array.isArray(patch.replacement))
                     patch.replacement = [patch.replacement];
@@ -321,32 +339,34 @@ function runTime(token: string) {
             await (wreq as any).el(sym);
             delete Object.prototype[sym];
 
-            const validChunksEntryPoints = [] as string[];
-            const validChunks = [] as string[];
-            const invalidChunks = [] as string[];
+            const validChunksEntryPoints = new Set<string>();
+            const validChunks = new Set<string>();
+            const invalidChunks = new Set<string>();
 
             if (!chunks) throw new Error("Failed to get chunks");
 
-            chunksLoop:
             for (const entryPoint in chunks) {
                 const chunkIds = chunks[entryPoint];
+                let invalidEntryPoint = false;
 
                 for (const id of chunkIds) {
-                    if (!wreq.u(id)) continue;
+                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
                     const isWasm = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
                         .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
                     if (isWasm) {
-                        invalidChunks.push(id);
-                        continue chunksLoop;
+                        invalidChunks.add(id);
+                        invalidEntryPoint = true;
+                        continue;
                     }
 
-                    validChunks.push(id);
+                    validChunks.add(id);
                 }
 
-                validChunksEntryPoints.push(entryPoint);
+                if (!invalidEntryPoint)
+                    validChunksEntryPoints.add(entryPoint);
             }
 
             for (const entryPoint of validChunksEntryPoints) {
@@ -356,10 +376,23 @@ function runTime(token: string) {
                 } catch (err) { }
             }
 
-            const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
-            if (!allChunks) throw new Error("Failed to get all chunks");
-            const chunksLeft = Object.keys(allChunks).filter(id => {
-                return !(validChunks.includes(id) || invalidChunks.includes(id));
+            // Matches "id" or id:
+            const chunkIdRegex = /(?:"(\d+?)")|(?:(\d+?):)/g;
+            const wreqU = wreq.u.toString();
+
+            const allChunks = [] as string[];
+            let currentMatch: RegExpExecArray | null;
+
+            while ((currentMatch = chunkIdRegex.exec(wreqU)) != null) {
+                const id = currentMatch[1] ?? currentMatch[2];
+                if (id == null) continue;
+
+                allChunks.push(id);
+            }
+
+            if (allChunks.length === 0) throw new Error("Failed to get all chunks");
+            const chunksLeft = allChunks.filter(id => {
+                return !(validChunks.has(id) || invalidChunks.has(id));
             });
 
             for (const id of chunksLeft) {
@@ -406,15 +439,21 @@ function runTime(token: string) {
                     if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
+                    } else if (method === "extractAndLoadChunks") {
+                        const [code, matcher] = args;
+
+                        const module = Vencord.Webpack.findModuleFactory(...code);
+                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null || ("$$get" in result && result.$$get() == null)) throw "a rock at ben shapiro";
+                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                     else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
