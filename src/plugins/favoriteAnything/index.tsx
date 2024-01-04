@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory, disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
+
+import style from "./styles.css?managed";
 
 const GifAccessory = findComponentByCodeLazy("GIF_TOOLTIP_REMOVE_FROM_FAVORITES");
 
@@ -103,12 +103,12 @@ export default definePlugin({
                 }
             ]
         },
-        // favorite star
+        // favorite star, works by just rendering it always and letting css do the rest
         {
-            find: "/\\.(mp3|m4a|ogg|wav|flac)$/i",
+            find: ".IMAGE_OPEN_DIALOG_DESCRIPTION",
             replacement: {
-                match: /children:(\i)=>\i\(\i\)\}\):\i\(\)\}\),\i/g,
-                replace: "$&,$self.gifAccessoryRender({src:$1.attachment.url,width:$1.maxWidth,height:$1.maxHeight,url:$1.attachment.url,format:2})"
+                match: /children:\i\}\):null/g,
+                replace: "$&,(this.props.alt==\"GIF\"?null:$self.gifAccessoryRender({src:this.props.src,width:this.props.width,height:this.props.height,url:this.props.src,format:2}))"
             }
         },
         // gif icon
@@ -121,9 +121,17 @@ export default definePlugin({
                 },
                 {
                     match: /width:e,height:i/g,
-                    replace: "width:\"200px\",height:\"200px\""
+                    replace: "$&,className:\"vc-favorite-anything-gif-icon\""
                 }
             ]
         }
-    ]
+    ],
+
+    start() {
+        enableStyle(style);
+    },
+
+    stop() {
+        disableStyle(style);
+    }
 });

@@ -22,7 +22,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
-import { Plugins } from "Vencord";
 
 interface SearchBarComponentProps {
     ref?: React.MutableRefObject<any>;
@@ -193,7 +192,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
                 }
             }}
             query={query}
-            placeholder={Plugins.isPluginEnabled("FavoriteAnything") ? "Search Favorite Media" : "Search Favorite GIFs"}
+            placeholder={Vencord.Plugins.isPluginEnabled("FavoriteAnything") ? "Search Favorite Media" : "Search Favorite GIFs"}
         />
     );
 }
