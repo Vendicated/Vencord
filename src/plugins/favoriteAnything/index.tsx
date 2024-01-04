@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory, disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 
 import style from "./styles.css?managed";
@@ -48,10 +49,25 @@ function getFileType(url: string) {
     return split[split.length - 1];
 }
 
+function stripUrl(url: string) {
+    return url.split("?")[0];
+}
+
+const settings = definePluginSettings({
+    allowSound: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        name: "Allow Sound",
+        description: "Allow videos to play sound in the GIF picker."
+    }
+});
+
 export default definePlugin({
     name: "FavoriteAnything",
     authors: [Devs.MrDiamond],
     description: "Allows you to save images/videos to their favorite GIFs.",
+
+    settings,
 
     menuGifElement(props: MenuGifProps) {
         const gif = props.item;
@@ -65,7 +81,7 @@ export default definePlugin({
                     height={props.coords.height}
                     autoPlay
                     loop
-                    muted
+                    muted={!settings.store.allowSound}
                     controls={false}
                     preload="auto"
                     className={cl("gif")}
@@ -85,6 +101,9 @@ export default definePlugin({
 
     gifAccessoryRender(props: { width: number; height: number; src: string; url: string; format: GIFType; }) {
         if (getFileType(props.src) === "gif") return null;
+        props.src = stripUrl(props.src);
+        props.url = stripUrl(props.url);
+        console.log(props.src, props.url);
         return <GifAccessory {...props} className={cl("accessory")} />;
     },
 
