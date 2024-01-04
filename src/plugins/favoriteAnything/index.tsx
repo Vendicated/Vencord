@@ -110,6 +110,20 @@ export default definePlugin({
                 match: /children:(\i)=>\i\(\i\)\}\):\i\(\)\}\),\i/g,
                 replace: "$&,$self.gifAccessoryRender({src:$1.attachment.url,width:$1.maxWidth,height:$1.maxHeight,url:$1.attachment.url,format:2})"
             }
+        },
+        // gif icon
+        {
+            find: "GifIcon:",
+            replacement: [
+                {
+                    match: /viewBox:"0 0 24 24",/g,
+                    replace: "viewbox:\"0 0 576 512\","
+                },
+                {
+                    match: /width:e,height:i/g,
+                    replace: "width:\"200px\",height:\"200px\""
+                }
+            ]
         }
     ]
 });
