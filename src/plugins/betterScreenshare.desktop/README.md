@@ -1,4 +1,4 @@
-# sBetter Screenshare Plugin
+# Better Screenshare Plugin
 
 ## How to use each Setting?
 
