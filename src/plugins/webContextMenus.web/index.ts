@@ -169,6 +169,15 @@ export default definePlugin({
                 match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
             }
+        },
+
+        // Add back "Show My Camera" context menu
+        {
+            find: '.default("MediaEngineWebRTC");',
+            replacement: {
+                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
+                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+            }
         }
     ],
 
