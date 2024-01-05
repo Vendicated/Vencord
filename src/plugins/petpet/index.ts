@@ -21,11 +21,9 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { UploadHandler, UserUtils } from "@webpack/common";
+import { DraftType, UploadHandler, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
-const DRAFT_TYPE = 0;
-const SLASH_COMMAND_DRAFT_TYPE = 5;
 const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
 const FRAMES = 10;
@@ -60,7 +58,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUploads(ctx.channel.id, SLASH_COMMAND_DRAFT_TYPE)[0];
+                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
                 if (upload) {
                     if (!upload.isImage) throw "Upload is not an image";
                     return upload.item.file;
@@ -175,7 +173,7 @@ export default definePlugin({
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
-                setTimeout(() => UploadHandler.promptToUpload([file], cmdCtx.channel, DRAFT_TYPE), 10);
+                setTimeout(() => UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.ChannelMessage), 10);
             },
         },
     ]
