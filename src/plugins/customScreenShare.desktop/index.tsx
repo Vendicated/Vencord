@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
-import cooldown from "./utils";
+import cooldown, { denormalize, normalize } from "./utils";
 import { goofs } from "./goofs";
 
 const settings = definePluginSettings({
@@ -112,14 +112,14 @@ export default definePlugin({
         {
             find: "\"Discord_Clip_\".concat",
             replacement: {
-                match: /(=15e)3/,
+                match: /(=15e)3/, // disable discord idle fps reduction
                 replace: "$18"
             }
         },
         {
             find: "updateRemoteWantsFramerate(){",
             replacement: {
-                match: /updateRemoteWantsFramerate..\{/,
+                match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
                 replace: "$&return;"
             }
         }
@@ -129,10 +129,10 @@ export default definePlugin({
         const { maxFPS, maxResolution, roundValues } = settings.store;
 
         let maxValue = group === "fps" ? maxFPS : maxResolution,
-            minValue = group === "fps" ? 1 : 22;
+            minValue = group === "fps" ? 1 : 22; // 0 FPS freezes (obviously) and anything less than 22p doesn't work
 
         let onChange = (number: number) => {
-            let tmp = number * (maxValue - minValue) / 100 + minValue;
+            let tmp = denormalize(number, minValue, maxValue);
             if (roundValues)
                 tmp = Math.round(tmp);
             setValue(tmp);
@@ -142,7 +142,7 @@ export default definePlugin({
             <Menu.MenuSliderControl
                 onChange={onChange}
                 renderValue={() => value + (group === "fps" ? " FPS" : "p")}
-                value={((group === "fps" ? fps : res) - minValue) / (maxValue - minValue) * 100}>
+                value={normalize((group === "fps" ? fps : res), minValue, maxValue)}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
     },
@@ -151,4 +151,5 @@ export default definePlugin({
     },
     startAt: StartAt.DOMContentLoaded
 });
+
 
