@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: ".default.Messages.DELETED_ROLE_PLACEHOLDER",
             replacement: {
-                match: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}/`,
-                replace: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}\n?/`,
+                match: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}`,
+                replace: "$&\\n?",
             },
         },
     ],
