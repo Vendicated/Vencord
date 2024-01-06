@@ -57,6 +57,7 @@ const settings = definePluginSettings({
         description: "Goofs and gags :^)",
         default: false,
         type: OptionType.BOOLEAN,
+        restartNeeded: true,
     },
 });
 
