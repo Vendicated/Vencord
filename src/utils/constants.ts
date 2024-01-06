@@ -387,6 +387,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ant0n",
         id: 145224646868860928n
     },
+    nexpid: {
+        name: "nexpid",
+        id: 853550207039832084n
+    },
     philipbry: {
         name: "philipbry",
         id: 554994003318276106n
