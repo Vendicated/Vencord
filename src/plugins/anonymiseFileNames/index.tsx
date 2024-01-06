@@ -38,7 +38,7 @@ const tarExtMatcher = /\.tar\.\w+$/;
 
 const settings = definePluginSettings({
     anonymiseByDefault: {
-        description: "Whether to anonymise or keep original file name by default",
+        description: "Whether to anonymise file names by default",
         type: OptionType.BOOLEAN,
         default: true,
     },
