@@ -13,10 +13,7 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
-const enum ChannelTypes {
-    DM = 1,
-    GROUP_DM = 3
-}
+const { ChannelTypes } = findByPropsLazy("ChannelTypes");
 
 interface Message {
     guild_id: string,
@@ -82,7 +79,12 @@ const settings = definePluginSettings({
     },
     serverNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Allow server notifications, disabling this will only show Direct Messages",
+        description: "Allow server notifications",
+        default: true
+    },
+    dmNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow Direct Message notifications",
         default: true
     },
     groupDmNotifications: {
@@ -246,15 +248,9 @@ export default definePlugin({
 });
 
 function shouldIgnore(channel: Channel) {
-    switch (channel.type) {
-        case ChannelTypes.DM:
-            if (!settings.store.serverNotifications) return true;
-            break;
-        case ChannelTypes.GROUP_DM:
-            if (settings.store.groupDmNotifications) return false;
-            break;
-    }
-    return false;
+    if (channel.type === ChannelTypes.DM && settings.store.dmNotifications) return false;
+    if (channel.type === ChannelTypes.GROUP_DM && settings.store.groupDmNotifications) return false;
+    else return !settings.store.serverNotifications;
 }
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
