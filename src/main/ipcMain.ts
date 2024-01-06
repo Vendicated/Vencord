@@ -138,11 +138,11 @@ export function initIpc(mainWindow: BrowserWindow) {
     }));
 }
 
-let monacoEditorWin: BrowserWindow;
+let monacoEditorWin: BrowserWindow | null = null;
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
-    if (monacoEditorWin && monacoEditorWin.focusable) {
-        monacoEditorWin.focus();
+    if (monacoEditorWin) {
+        monacoEditorWin.show();
     } else {
         monacoEditorWin = new BrowserWindow({
             title: "Vencord QuickCSS Editor",
@@ -157,6 +157,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         });
 
         makeLinksOpenExternally(monacoEditorWin);
+        monacoEditorWin.once("close", () => { monacoEditorWin = null; });
 
         await monacoEditorWin.loadURL(`data:text/html;base64,${monacoHtml}`);
     }
