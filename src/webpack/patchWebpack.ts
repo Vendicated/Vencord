@@ -58,6 +58,9 @@ if (window[WEBPACK_CHUNK]) {
     // normally, this is populated via webpackGlobal.push, which we patch below.
     // However, Discord has their .m prepopulated.
     // Thus, we use this hack to immediately access their wreq.m and patch all already existing factories
+    //
+    // Update: Discord now has TWO webpack instances. Their normal one and sentry
+    // Sentry does not push chunks to the global at all, so this same patch now also handles their sentry modules
     Object.defineProperty(Function.prototype, "m", {
         set(v: any) {
             // When using react devtools or other extensions, we may also catch their webpack here.
@@ -65,8 +68,6 @@ if (window[WEBPACK_CHUNK]) {
             if (new Error().stack?.includes("discord.com")) {
                 logger.info("Found webpack module factory");
                 patchFactories(v);
-
-                delete (Function.prototype as any).m;
             }
 
             Object.defineProperty(this, "m", {
@@ -119,12 +120,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
         // Additionally, `[actual newline]` is one less char than "\n", so if Discord
         // ever targets newer browsers, the minifier could potentially use this trick and
         // cause issues.
-        let code: string = mod.toString().replaceAll("\n", "");
-        // a very small minority of modules use function() instead of arrow functions,
-        // but, unnamed toplevel functions aren't valid. However 0, function() makes it a statement
-        if (code.startsWith("function(")) {
-            code = "0," + code;
-        }
+        //
+        // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
+        let code: string = "0," + mod.toString().replaceAll("\n", "");
         const originalMod = mod;
         const patchedBy = new Set();
 
@@ -145,7 +143,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (exports === window) {
+            if (exports === window && require.c) {
                 Object.defineProperty(require.c, id, {
                     value: require.c[id],
                     enumerable: false,
@@ -155,11 +153,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 return;
             }
 
-            const numberId = Number(id);
-
             for (const callback of listeners) {
                 try {
-                    callback(exports, numberId);
+                    callback(exports, id);
                 } catch (err) {
                     logger.error("Error in webpack listener", err);
                 }
@@ -169,19 +165,10 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 try {
                     if (filter(exports)) {
                         subscriptions.delete(filter);
-                        callback(exports, numberId);
-                    } else if (typeof exports === "object") {
-                        if (exports.default && filter(exports.default)) {
-                            subscriptions.delete(filter);
-                            callback(exports.default, numberId);
-                        }
-
-                        for (const nested in exports) if (nested.length <= 3) {
-                            if (exports[nested] && filter(exports[nested])) {
-                                subscriptions.delete(filter);
-                                callback(exports[nested], numberId);
-                            }
-                        }
+                        callback(exports, id);
+                    } else if (exports.default && filter(exports.default)) {
+                        subscriptions.delete(filter);
+                        callback(exports.default, id);
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for webpack chunk", err);
@@ -191,10 +178,8 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
         // for some reason throws some error on which calling .toString() leads to infinite recursion
         // when you force load all chunks???
-        try {
-            factory.toString = () => mod.toString();
-            factory.original = originalMod;
-        } catch { }
+        factory.toString = () => mod.toString();
+        factory.original = originalMod;
 
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
@@ -203,6 +188,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
             if (code.includes(patch.find)) {
                 patchedBy.add(patch.plugin);
+
+                const previousMod = mod;
+                const previousCode = code;
 
                 // we change all patch.replacement to array in plugins/index
                 for (const replacement of patch.replacement as PatchReplacement[]) {
@@ -214,11 +202,20 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                     try {
                         const newCode = executePatch(replacement.match, replacement.replace as string);
-                        if (newCode === code && !patch.noWarn) {
-                            (window.explosivePlugins ??= new Set<string>()).add(patch.plugin);
-                            logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
-                            if (IS_DEV) {
-                                logger.debug("Function Source:\n", code);
+                        if (newCode === code) {
+                            if (!patch.noWarn) {
+                                logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                if (IS_DEV) {
+                                    logger.debug("Function Source:\n", code);
+                                }
+                            }
+
+                            if (patch.group) {
+                                logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                code = previousCode;
+                                mod = previousMod;
+                                patchedBy.delete(patch.plugin);
+                                break;
                             }
                         } else {
                             code = newCode;
@@ -259,9 +256,17 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
                             logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                         }
+
+                        patchedBy.delete(patch.plugin);
+                        if (patch.group) {
+                            logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                            code = previousCode;
+                            mod = previousMod;
+                            break;
+                        }
+
                         code = lastCode;
                         mod = lastMod;
-                        patchedBy.delete(patch.plugin);
                     }
                 }
 

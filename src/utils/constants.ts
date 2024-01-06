@@ -78,8 +78,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
-    Animal: {
-        name: "Animal",
+    Nyako: {
+        name: "nyako",
         id: 118437263754395652n
     },
     MaiKokain: {
@@ -267,6 +267,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Dziurwa",
         id: 1001086404203389018n
     },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
+    },
     AutumnVN: {
         name: "AutumnVN",
         id: 393694671383166998n
@@ -378,6 +382,26 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     ProffDea: {
         name: "ProffDea",
         id: 609329952180928513n
+    },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+    philipbry: {
+        name: "philipbry",
+        id: 554994003318276106n
+    },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
+    },
+    Grzesiek11: {
+        name: "Grzesiek11",
+        id: 368475654662127616n,
     },
 } satisfies Record<string, Dev>);
 
