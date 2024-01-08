@@ -2,6 +2,7 @@
     position: relative;
 }
 
+[class^="nonMediaAttachmentsContainer_"],
 [class^="nonMediaAttachmentItem_"]:has([class^="messageAttachment_"][style^="max-width"]) {
     width: 100%;
 }

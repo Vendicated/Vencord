@@ -74,12 +74,14 @@ export default definePlugin({
     style({ width, height }) {
         if (!width || !height) return {};
 
-        if (width / height > MAX_WIDTH / MAX_HEIGHT) {
-            height = Math.ceil(MAX_WIDTH / (width / height));
-            width = MAX_WIDTH;
-        } else {
-            width = Math.ceil(MAX_HEIGHT * (width / height));
-            height = MAX_HEIGHT;
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if (width / height > MAX_WIDTH / MAX_HEIGHT) {
+                height = Math.ceil(MAX_WIDTH / (width / height));
+                width = MAX_WIDTH;
+            } else {
+                width = Math.ceil(MAX_HEIGHT * (width / height));
+                height = MAX_HEIGHT;
+            }
         }
 
         return {
