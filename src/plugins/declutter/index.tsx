@@ -51,6 +51,21 @@ const settings = definePluginSettings({
         description: "Server Discovery button in the server list",
         default: true,
         type: OptionType.BOOLEAN,
+    },
+    nitroButton: {
+        description: "Nitro button in the home page",
+        default: true,
+        type: OptionType.BOOLEAN,
+    },
+    shopButton: {
+        description: "Shop button in the home page",
+        default: true,
+        type: OptionType.BOOLEAN,
+    },
+    helpButton: {
+        description: "Help button on the toolbar",
+        default: true,
+        type: OptionType.BOOLEAN,
     }
 });
 
@@ -121,6 +136,27 @@ export default definePlugin({
             replacement: {
                 match: /,(.{1,2}\|\|.+?guildDiscoveryRef.+?),/,
                 replace: ",$self.settings.store.discoverButton&&($1),"
+            }
+        },
+        {
+            find: ".HOME_PAGE_SHOP_TAB,",
+            replacement: {
+                match: /,(.0.{53,59}APPLICATION_STORE.+?"premium")/,
+                replace: ",$self.settings.store.nitroButton&&$1"
+            }
+        },
+        {
+            find: ".HOME_PAGE_SHOP_TAB,",
+            replacement: {
+                match: /,(.0.{33,36}COLLECTIBLES_SHOP.+?"discord-shop")/,
+                replace: ",$self.settings.store.shopButton&&$1"
+            }
+        },
+        {
+            find: "HeaderBarLoggedIn",
+            replacement: {
+                match: /:(.0.{10,12}default.{4})\]/,
+                replace: ":$self.settings.store.helpButton?$1:null]"
             }
         }
     ]
