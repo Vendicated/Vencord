@@ -1,16 +1,21 @@
 let isOnCooldown = false;
-let upNext: Function | undefined = undefined;
-export default function cooldown(func: Function | undefined) {
+let nextFunction: Function | undefined = undefined;
+
+export function cooldown(func: Function | undefined) {
     if (isOnCooldown) {
-        upNext = func;
+        nextFunction = func;
         return;
     }
     isOnCooldown = true;
-    upNext = undefined;
-    func && func();
-    setTimeout(function () {
+    nextFunction = undefined;
+
+    if (func && typeof func === 'function')
+        func();
+
+    setTimeout(() => {
         isOnCooldown = false;
-        upNext && cooldown(upNext);
+        if (nextFunction)
+            cooldown(nextFunction);
     }, 1000);
 }
 

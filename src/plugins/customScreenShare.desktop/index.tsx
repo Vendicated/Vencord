@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
-import cooldown, { denormalize, normalize } from "./utils";
+import { cooldown, denormalize, normalize } from "./utils";
 import { goofs } from "./goofs";
 
 const settings = definePluginSettings({
@@ -122,6 +122,13 @@ export default definePlugin({
                 match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
                 replace: "$&return;"
             }
+        },
+        {
+            find: "=8e6",
+            replacement: {
+                match: /=8e6/,
+                replace: "=10e6"
+            }
         }
     ],
     CustomRange(changeRes: Function, res: number, fps: number, analytics: string, group: "fps" | "resolution") {
@@ -136,7 +143,7 @@ export default definePlugin({
             if (roundValues)
                 tmp = Math.round(tmp);
             setValue(tmp);
-            cooldown(() => changeRes(true, group === "fps" ? res : tmp, group === "resolution" ? fps : tmp, analytics));
+            cooldown(() => changeRes(true, group === "resolution" ? tmp : res, group === "fps" ? tmp : fps, analytics));
         };
         return (<Menu.MenuControlItem group={`stream-settings-${group}`} id={`stream-settings-${group}-custom`}>
             <Menu.MenuSliderControl
@@ -147,7 +154,8 @@ export default definePlugin({
         </Menu.MenuControlItem>);
     },
     start() {
-        settings.store.goofs && goofs();
+        if (settings.store.goofs)
+            goofs();
     },
     startAt: StartAt.DOMContentLoaded
 });
