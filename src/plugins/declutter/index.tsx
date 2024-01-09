@@ -153,10 +153,10 @@ export default definePlugin({
             }
         },
         {
-            find: "HeaderBarLoggedIn",
+            find: "toolbar:function",
             replacement: {
-                match: /:(.0.{10,12}default.{4})\]/,
-                replace: ":$self.settings.store.helpButton?$1:null]"
+                match: /,(.{1,2}\?[^:]+?:.0.{10,12}default.{4})\]/,
+                replace: ",$self.settings.store.helpButton?($1):null]"
             }
         }
     ]
