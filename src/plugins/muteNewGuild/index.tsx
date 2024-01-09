@@ -22,6 +22,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
+const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
+const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
+
 
 const settings = definePluginSettings({
     guild: {
@@ -38,13 +41,18 @@ const settings = definePluginSettings({
         description: "Suppress All Role @mentions",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    showAllChannels: {
+        description: "Show all channels automatically when joining a new guild.",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
 export default definePlugin({
     name: "MuteNewGuild",
     description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Alyxia, Devs.Mopi],
     patches: [
         {
             find: ",acceptInvite(",
@@ -70,7 +78,11 @@ export default definePlugin({
                 muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role
-            }
-        );
+            });
+        if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
+            toggleShowAllChannels(guildId);
+        } else if (settings.store.showAllChannels && !isOptInEnabledForGuild(guildId)) {
+            return;
+        }
     }
 });
