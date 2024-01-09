@@ -68,6 +68,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             <ReviewComponent
                                 refetch={refetch}
                                 review={ownReview}
+                                profileId={discordId}
                             />
                         )}
                         <ReviewsInputComponent
