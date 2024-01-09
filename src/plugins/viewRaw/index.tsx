@@ -117,22 +117,26 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: string) {
+function MakeContextCallback(name: "Guild" | "User" | "Channel") {
     const callback: NavContextMenuPatchCallback = (children, props) => () => {
-        if ((name === "Guild" && !props.guild) || (name === "User" && !props.user)) return;
+        const value = props[name.toLowerCase()];
+        if (!value) return;
+        if (props.label === "Channel Actions") return; // random shit like notification settings
+
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
             const p = lastChild.props;
             if (!Array.isArray(p.children))
                 p.children = [p.children];
-            ({ children } = p);
+
+            children = p.children;
         }
 
         children.splice(-1, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(props[name.toLowerCase()], null, 4), name)}
+                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
                 icon={CopyIcon}
             />
         );
