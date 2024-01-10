@@ -37,7 +37,7 @@ export default definePlugin({
     start() {
         const coinsEnabled = settings.store.coinsEnabled;
         if (coinsEnabled) {
-            fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/3de1bf554bb82b58a2c70f828e2420a881e5f283/oneko.js")
+            fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/00531f4417dd92330e9d128d4f003fbd95edc0fe/oneko.js")
                 .then(x => x.text())
                 .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
                     .replace("(isReducedMotion)", "(false)"))
