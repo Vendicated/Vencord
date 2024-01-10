@@ -17,23 +17,55 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
+
+// Define a new setting for enabling coins
+const settings = definePluginSettings({
+    coinsEnabled: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Enable coins feature"
+    }
+});
 
 export default definePlugin({
     name: "oneko",
-    description: "cat follow mouse (real)",
-    // Listing adryd here because this literally just evals her script
-    authors: [Devs.Ven, Devs.adryd],
+    description: "cat follow mouse (real) with optional coins",
+    authors: [Devs.Ven, Devs.adryd, Devs.Gingi],
+    settings,
+    patches: [{
+    }],
 
     start() {
+        const coinsEnabled = settings.store.coinsEnabled;
+
         fetch("https://raw.githubusercontent.com/adryd325/oneko.js/8fa8a1864aa71cd7a794d58bc139e755e96a236c/oneko.js")
             .then(x => x.text())
             .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
                 .replace("(isReducedMotion)", "(false)"))
             .then(eval);
+
+        if (coinsEnabled) {
+            const coinCounterEl = document.createElement('div');
+            coinCounterEl.id = 'coin-counter';
+            coinCounterEl.style.position = 'fixed';
+            coinCounterEl.style.right = '10px';
+            coinCounterEl.style.bottom = '10px';
+            coinCounterEl.textContent = 'Coins: 0';
+
+            document.body.appendChild(coinCounterEl);
+            fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.js")
+                .then(x => x.text())
+                .then(x => x.replace("./coin.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/main/coin.gif"))
+                .then(eval);
+        }
     },
 
     stop() {
         document.getElementById("oneko")?.remove();
+        if (settings.store.coinsEnabled) {
+            document.getElementById("coin-counter")?.remove();
+        }
     }
 });
