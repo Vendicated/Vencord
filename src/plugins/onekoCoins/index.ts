@@ -31,6 +31,14 @@ export default definePlugin({
     ],
 
     start() {
+        const coinCounterEl = document.createElement('div');
+        coinCounterEl.id = 'coin-counter';
+        coinCounterEl.style.position = 'fixed';
+        coinCounterEl.style.right = '10px';
+        coinCounterEl.style.bottom = '10px';
+        coinCounterEl.textContent = 'Coins: 0';
+
+        document.body.appendChild(coinCounterEl);
         fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.js")
             .then(x => x.text())
             .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.gif")
@@ -41,5 +49,6 @@ export default definePlugin({
 
     stop() {
         document.getElementById("oneko")?.remove();
+        document.getElementById("coin-counter")?.remove();
     }
 });
