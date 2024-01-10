@@ -34,8 +34,6 @@ export default definePlugin({
     description: "cat follow mouse (real) with optional coins",
     authors: [Devs.Ven, Devs.adryd, Devs.Gingi],
     settings,
-    patches: [{
-    }],
 
     start() {
         const coinsEnabled = settings.store.coinsEnabled;
@@ -47,14 +45,6 @@ export default definePlugin({
             .then(eval);
 
         if (coinsEnabled) {
-            const coinCounterEl = document.createElement('div');
-            coinCounterEl.id = 'coin-counter';
-            coinCounterEl.style.position = 'fixed';
-            coinCounterEl.style.right = '10px';
-            coinCounterEl.style.bottom = '10px';
-            coinCounterEl.textContent = 'Coins: 0';
-
-            document.body.appendChild(coinCounterEl);
             fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.js")
                 .then(x => x.text())
                 .then(x => x.replace("./coin.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/main/coin.gif"))
@@ -64,8 +54,5 @@ export default definePlugin({
 
     stop() {
         document.getElementById("oneko")?.remove();
-        if (settings.store.coinsEnabled) {
-            document.getElementById("coin-counter")?.remove();
-        }
     }
 });
