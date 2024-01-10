@@ -24,7 +24,7 @@ const settings = definePluginSettings({
     coinsEnabled: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Enable coins feature"
+        description: "Enable coins feature (Requires reload)"
     }
 });
 
@@ -37,11 +37,11 @@ export default definePlugin({
     start() {
         const coinsEnabled = settings.store.coinsEnabled;
         if (coinsEnabled) {
-            fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.js")
+            fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/3de1bf554bb82b58a2c70f828e2420a881e5f283/oneko.js")
                 .then(x => x.text())
                 .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
                     .replace("(isReducedMotion)", "(false)"))
-                .then(x => x.replace("./coin.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/main/coin.gif"))
+                .then(x => x.replace("./coin.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/3de1bf554bb82b58a2c70f828e2420a881e5f283/coin.gif"))
                 .then(eval);
         }
         if (!coinsEnabled) {
@@ -51,9 +51,7 @@ export default definePlugin({
                     .replace("(isReducedMotion)", "(false)"))
                 .then(eval);
         }
-
     },
-
     stop() {
         document.getElementById("oneko")?.remove();
     }
