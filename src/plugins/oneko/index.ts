@@ -20,7 +20,6 @@ import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
-// Define a new setting for enabling coins
 const settings = definePluginSettings({
     coinsEnabled: {
         type: OptionType.BOOLEAN,
@@ -31,25 +30,28 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "oneko",
-    description: "cat follow mouse (real) with optional coins",
+    description: "cat follow mouse (real)",
     authors: [Devs.Ven, Devs.adryd, Devs.Gingi],
     settings,
 
     start() {
         const coinsEnabled = settings.store.coinsEnabled;
-
-        fetch("https://raw.githubusercontent.com/adryd325/oneko.js/8fa8a1864aa71cd7a794d58bc139e755e96a236c/oneko.js")
-            .then(x => x.text())
-            .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
-                .replace("(isReducedMotion)", "(false)"))
-            .then(eval);
-
         if (coinsEnabled) {
             fetch("https://raw.githubusercontent.com/0xGingi/oneko.js/main/oneko.js")
                 .then(x => x.text())
+                .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
+                    .replace("(isReducedMotion)", "(false)"))
                 .then(x => x.replace("./coin.gif", "https://raw.githubusercontent.com/0xGingi/oneko.js/main/coin.gif"))
                 .then(eval);
         }
+        if (!coinsEnabled) {
+            fetch("https://raw.githubusercontent.com/adryd325/oneko.js/8fa8a1864aa71cd7a794d58bc139e755e96a236c/oneko.js")
+                .then(x => x.text())
+                .then(s => s.replace("./oneko.gif", "https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif")
+                    .replace("(isReducedMotion)", "(false)"))
+                .then(eval);
+        }
+
     },
 
     stop() {
