@@ -11,6 +11,7 @@ export interface SoundType {
 
 export interface SoundOverride {
     enabled: boolean;
+    useFile: boolean;
     url: string;
     volume: number;
 }
@@ -46,3 +47,12 @@ export const soundTypes: readonly SoundType[] = [
     { name: "Activity User Leave", id: "activity_user_left" },
     { name: "Invited to Speak", id: "reconnect" }
 ] as const;
+
+export function makeEmptyOverride(): SoundOverride {
+    return {
+        enabled: false,
+        useFile: false,
+        url: "",
+        volume: 100
+    };
+}

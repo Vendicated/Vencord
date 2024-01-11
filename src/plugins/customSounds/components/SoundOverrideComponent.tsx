@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./SoundOverrideComponent.css";
-
-import { Flex } from "@components/Flex";
 import { makeRange } from "@components/PluginSettings/components";
 import { Margins } from "@utils/margins";
+import { classes, identity } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, Slider, Switch, TextInput, useRef } from "@webpack/common";
+import { Button, Card, Forms, Select, Slider, Switch, TextInput, useRef } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { SoundOverride, SoundPlayer, SoundType } from "../types";
@@ -25,15 +24,21 @@ type FileInput = ComponentType<{
 const Sounds: { playSound(id: string): SoundPlayer; } = findByPropsLazy("createSoundForPack", "createSound", "playSound");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 
-export function SoundOverrideComponent({ type, override }: { type: SoundType; override: SoundOverride; }) {
+export function SoundOverrideComponent({ type, override, onChange }: { type: SoundType; override: SoundOverride; onChange: () => Promise<void>; }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const sound: React.MutableRefObject<SoundPlayer | null> = useRef(null);
+    const update = useForceUpdater();
 
     return (
         <Card style={{ padding: "1em 1em 0" }}>
             <Switch
                 value={override.enabled}
-                onChange={value => override.enabled = value}
+                onChange={value => {
+                    override.enabled = value;
+                    onChange();
+                    update();
+                }}
+                className={Margins.bottom16}
                 hideBorder={true}
             >
                 {type.name} <span style={{ color: "var(--text-muted)" }}>({type.id})</span>
@@ -50,55 +55,95 @@ export function SoundOverrideComponent({ type, override }: { type: SoundType; ov
             >
                 Preview
             </Button>
-            <Forms.FormTitle>Link or File</Forms.FormTitle>
-            <Flex
-                flexDirection="row"
-                className={Margins.bottom16}
-                style={{
-                    justifyContent: "space-between",
-                    alignItems: "center"
+            <Forms.FormTitle>Replacement Sound</Forms.FormTitle>
+            <Select
+                options={[
+                    { label: "URL", value: false },
+                    { label: "File", value: true }
+                ]}
+                select={value => {
+                    override.useFile = value;
+                    override.url = "";
+                    onChange();
+                    update();
                 }}
-            >
-                <TextInput
-                    type="text"
-                    value={override.url}
-                    onChange={value => override.url = value}
-                    placeholder="Leave blank to use the default..."
-                    className={Margins.bottom16 + " sound-override-input"}
-                    disabled={!override.enabled}
-                    maxLength={999_999}
-                />
-
-                <Button
-                    className={Margins.bottom16}
-                    disabled={!override.enabled}
-                >
-                    Upload
-                    <FileInput
-                        ref={fileInputRef}
-                        onChange={e => {
-                            e.stopPropagation();
-                            e.preventDefault();
-
-                            if (!e.currentTarget?.files?.length) return;
-                            const { files } = e.currentTarget;
-                            const file = files[0];
-
-                            // Set override URL to a data URI
-                            const reader = new FileReader();
-                            reader.onload = () => override.url = reader.result as string;
-                            reader.readAsDataURL(file);
+                className={Margins.bottom16 + " sound-override-input"}
+                isSelected={value => override.useFile === value}
+                isDisabled={!override.enabled}
+                serialize={identity}
+            />
+            {
+                !override.useFile ? <>
+                    <TextInput
+                        type="text"
+                        value={override.url}
+                        onChange={value => {
+                            override.url = value;
+                            onChange();
+                            update();
                         }}
-                        // Sorry .caf lovers, https://en.wikipedia.org/wiki/HTML5_audio#Supported_audio_coding_formats
-                        filters={[{ extensions: ["mp3", "wav", "ogg", "webm", "flac"] }]}
+                        placeholder="Leave blank to use the default..."
+                        className={Margins.bottom16 + " sound-override-input"}
+                        disabled={!override.enabled}
+                        maxLength={999_999}
                     />
-                </Button>
-            </Flex>
+                </> : <>
+                    <Button
+                        color={Button.Colors.PRIMARY}
+                        disabled={!override.enabled}
+                        style={{ display: "inline" }}
+                        className={classes(Margins.right8, Margins.bottom16)}
+                    >
+                        Upload
+                        <FileInput
+                            ref={fileInputRef}
+                            onChange={event => {
+                                event.stopPropagation();
+                                event.preventDefault();
+
+                                if (!event.currentTarget?.files?.length)
+                                    return;
+
+                                const { files } = event.currentTarget;
+                                const file = files[0];
+
+                                // Set override URL to a data URI
+                                const reader = new FileReader;
+                                reader.onload = () => {
+                                    override.url = reader.result as string;
+                                    onChange();
+                                    update();
+                                };
+                                reader.readAsDataURL(file);
+                            }}
+                            // Sorry .caf lovers, https://en.wikipedia.org/wiki/HTML5_audio#Supported_audio_coding_formats
+                            filters={[{ extensions: ["mp3", "wav", "ogg", "webm", "flac"] }]}
+                        />
+                    </Button>
+                    <Button
+                        color={Button.Colors.RED}
+                        onClick={() => {
+                            override.url = "";
+                            onChange();
+                            update();
+                        }}
+                        disabled={!(override.enabled && override.url.length !== 0)}
+                        style={{ display: "inline" }}
+                        className={classes(Margins.right8, Margins.bottom16)}
+                    >
+                        Clear
+                    </Button>
+                </>
+            }
             <Forms.FormTitle>Volume</Forms.FormTitle>
             <Slider
                 markers={makeRange(0, 100, 10)}
                 initialValue={override.volume}
-                onValueChange={value => override.volume = value}
+                onValueChange={value => {
+                    override.volume = value;
+                    onChange();
+                    update();
+                }}
                 className={Margins.bottom16}
                 disabled={!override.enabled}
             />

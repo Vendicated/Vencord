@@ -256,7 +256,6 @@ interface IPluginOptionComponentProps {
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
     component: (props: IPluginOptionComponentProps) => JSX.Element;
-    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
