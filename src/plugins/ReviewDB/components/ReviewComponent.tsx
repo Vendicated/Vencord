@@ -84,7 +84,7 @@ export default LazyComponent(() => {
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: async () => {
                     if (!(await getToken())) {
-                        return showToast("You must be logged in to delete reviews.");
+                        return showToast("You must be logged in to report reviews.");
                     } else {
                         reportReview(review.id);
                     }
