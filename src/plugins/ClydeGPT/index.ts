@@ -16,10 +16,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { sendBotMessage } from "@api/Commands";
+import { UserStore, FluxDispatcher } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, UserStore } from "@webpack/common";
+
+const runGPT = async (msg) => {
+    const message = msg.message;
+        
+    if (!message.content.includes("@Clyde")) {
+        return;
+    }
+
+    if (message.author.id == UserStore.getCurrentUser().id && !msg?.sendMessageOptions?.nonce) {
+        return;
+    }
+
+    if (message.author?.bot) {
+        return;
+    }
+
+    FluxDispatcher.dispatch({
+        type: "TYPING_START", 
+        channelId: message.channel_id,
+        userId: "1081004946872352958",
+    });
+
+    const rawResponse = await fetch("https://ai.techfun.me/gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q: message.content })
+    });
+
+    const response = await rawResponse.json();
+
+    if (!response.success) {
+        response.result = "Failed to obtain AI result."
+    }
+
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_CREATE", 
+        channelId: message.channel_id,
+        message: {
+            id: (BigInt(Date.now() - 1420070400000) << 22n).toString(),
+            channel_id: message.channel_id,
+            author: {
+                id: "1081004946872352958"
+            },
+            content: response.result,
+            timestamp: new Date().toISOString()
+        }
+    });
+}
 
 export default definePlugin({
     name: "ClydeGPT",
@@ -27,35 +74,9 @@ export default definePlugin({
     authors: [Devs.TechFun, Devs.Airbus],
     dependencies: ["MessageEventsAPI"],
     start: () => {
-        FluxDispatcher.subscribe("MESSAGE_CREATE", async msg => {
-            const { message } = msg;
-
-            if (!message.content.includes("@Clyde")) {
-                return;
-            }
-
-            if (message.author.id === UserStore.getCurrentUser().id && !msg.sendMessageOptions.nonce) {
-                return;
-            }
-
-            const rawResponse = await fetch("https://ai.techfun.me/gpt", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ q: message.content })
-            });
-
-            const response = await rawResponse.json();
-
-            if (response.success) {
-                sendBotMessage(message.channel_id, {
-                    content: response.result,
-                });
-            } else {
-                sendBotMessage(message.channel_id, {
-                    content: "Failed to obtain AI result.",
-                });
-            }
-
-        });
+        FluxDispatcher.subscribe("MESSAGE_CREATE", runGPT);
+    },
+    stop: () => {
+        FluxDispatcher.unsubscribe("MESSAGE_CREATE", runGPT);
     }
 });
