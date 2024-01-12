@@ -25,7 +25,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ClydeGPT",
     description: "The ultimate return of Clyde!",
-    authors: [Devs.TechFun],
+    authors: [Devs.TechFun, Devs.Airbus],
     dependencies: ["MessageEventsAPI"],
     start: () => {
         FluxDispatcher.subscribe("MESSAGE_CREATE", async msg => {

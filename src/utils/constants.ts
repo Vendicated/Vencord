@@ -46,6 +46,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "TechFun",
         id: 412734949716656129n
     },
+    Airbus: {
+        name: "Airbus A330-200",
+        id: 437019658374348801n
+    },
     Ven: {
         name: "Vendicated",
         id: 343383572805058560n
