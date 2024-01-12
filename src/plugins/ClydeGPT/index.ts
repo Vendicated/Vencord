@@ -35,9 +35,9 @@ export default definePlugin({
                 return;
             }
 
-            if (message.author.id == client.user.id && !msg.sendMessageOptions.nonce) {
-                return;
-            }
+            //if (message.author.id == client.user.id && !msg.sendMessageOptions.nonce) {
+            //    return;
+            //}
 
             const rawResponse = await fetch('https://ai.techfun.me/gpt', {
                 method: 'POST',
