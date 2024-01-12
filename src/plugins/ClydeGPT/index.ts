@@ -17,10 +17,9 @@
 */
 
 import { sendBotMessage } from "@api/Commands";
-import { UserStore } from "@webpack/common";
-import { FluxDispatcher } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { FluxDispatcher, UserStore } from "@webpack/common";
 
 export default definePlugin({
     name: "ClydeGPT",
@@ -29,20 +28,20 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
     start: () => {
         FluxDispatcher.subscribe("MESSAGE_CREATE", async msg => {
-            const message = msg.message;
-            
+            const { message } = msg;
+
             if (!message.content.includes("@Clyde")) {
                 return;
             }
 
-            if (message.author.id == UserStore.getCurrentUser().id && !msg.sendMessageOptions.nonce) {
+            if (message.author.id === UserStore.getCurrentUser().id && !msg.sendMessageOptions.nonce) {
                 return;
             }
 
-            const rawResponse = await fetch('https://ai.techfun.me/gpt', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({q: message.content})
+            const rawResponse = await fetch("https://ai.techfun.me/gpt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ q: message.content })
             });
 
             const response = await rawResponse.json();
@@ -56,7 +55,7 @@ export default definePlugin({
                     content: "Failed to obtain AI result.",
                 });
             }
-          
+
         });
     }
 });
