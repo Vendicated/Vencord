@@ -17,7 +17,7 @@
 */
 
 import { sendBotMessage } from "@api/Commands";
-import { Message } from "discord-types/general";
+import { UserStore } from "@webpack/common";
 import { FluxDispatcher } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -35,9 +35,9 @@ export default definePlugin({
                 return;
             }
 
-            //if (message.author.id == client.user.id && !msg.sendMessageOptions.nonce) {
-            //    return;
-            //}
+            if (message.author.id == UserStore.getCurrentUser().id && !msg.sendMessageOptions.nonce) {
+                return;
+            }
 
             const rawResponse = await fetch('https://ai.techfun.me/gpt', {
                 method: 'POST',
