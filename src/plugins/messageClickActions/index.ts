@@ -24,15 +24,32 @@ import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
-const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
-const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
+const keydown = (e: KeyboardEvent) => e.key === settings.store.changeDeleteModifier && (isDeletePressed = true);
+const keyup = (e: KeyboardEvent) => e.key === settings.store.changeDeleteModifier && (isDeletePressed = false);
 
+const enum Modifiers {
+    SHIFT = "Shift",
+    CTRL = "Control",
+    ALT = "Alt",
+    BACKSPACE = "Backspace"
+}
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
         type: OptionType.BOOLEAN,
         description: "Enable delete on click while holding backspace",
         default: true
+    },
+    changeDeleteModifier: {
+        type: OptionType.SELECT,
+        description: "Change the modifier for delete on click",
+        default: Modifiers.BACKSPACE,
+        options: [
+            { label: "Backspace Key", value: Modifiers.BACKSPACE, default: true },
+            { label: "Shift Key", value: Modifiers.SHIFT },
+            { label: "Ctrl Key", value: Modifiers.CTRL },
+            { label: "Alt Key", value: Modifiers.ALT },
+        ]
     },
     enableDoubleClickToEdit: {
         type: OptionType.BOOLEAN,
