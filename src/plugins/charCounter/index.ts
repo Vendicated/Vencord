@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -11,14 +11,42 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./styles.css?managed";
 
-let maxChars = 2000;
-let currChars = 0;
+class ValuePointer {
+    value: number;
+
+    constructor(value = 0) {
+        this.value = value;
+    }
+
+    toString() {
+        return `${this.value}`;
+    }
+}
+
+const maxChars = new ValuePointer();
+const currChars = new ValuePointer();
+const remChars = new ValuePointer();
+
+let charCounterTemplate: (string | ValuePointer)[] = [];
+
+function compileCharCounterTemplate(value: string) {
+    charCounterTemplate = value
+        .split(/(?<!(?:^|[^\\])\\(?:\\\\)*)(\$[mMcCrR])/)
+        .map(s => s.match(/^\$[mM]$/) ?
+            maxChars
+            : s.match(/^\$[cC]$/) ?
+                currChars
+                : s.match(/^\$[rR]$/) ?
+                    remChars
+                    : s.replaceAll(/\\(.|$)/g, "$1"));
+}
 
 const settings = definePluginSettings({
     characterCounterText: {
         type: OptionType.STRING,
         description: "$m = Max character count, $c = Current character count, $r = Remaining character count, \\ = Escape character",
-        default: "$c/$m, $r characters remaining"
+        default: "$c/$m, $r characters remaining",
+        onChange: compileCharCounterTemplate
     },
     compareCurrWithRemaining: {
         type: OptionType.SELECT,
@@ -56,12 +84,8 @@ export default definePlugin({
                     replace: "$1.type.upsellLongMessages=null;$&"
                 },
                 {
-                    match: /(?<=[, ]\i=)null!=\i\?\i:\i[,;]/,
-                    replace: "$self.maxChars=$&"
-                },
-                {
-                    match: /(?<=[, ]\i=)\i\.length[,;]/,
-                    replace: "$self.currChars=$&"
+                    match: /(?<=[, ]\i=(\i)-(\i)[,;].*)return /,
+                    replace: "$self.setValues($1,$2);$&"
                 },
                 {
                     match: /(?<=\i=)\i>\i(?=,|;)/,
@@ -79,29 +103,25 @@ export default definePlugin({
         }
     ],
     settings,
-    set maxChars(n: number) {
-        maxChars = n;
-    },
-    set currChars(n: number) {
-        currChars = n;
+    setValues(max: number, curr: number) {
+        maxChars.value = max;
+        currChars.value = curr;
+        remChars.value = max - curr;
     },
     get shouldShowCharCounter() {
         return settings.store.compareCurrWithRemaining ?
             settings.store.interpretAsPercentage ?
-                (maxChars - currChars) / maxChars <= settings.store.charCountToShowCounterAt / 100
-                : maxChars - currChars <= settings.store.charCountToShowCounterAt
+                remChars.value / maxChars.value <= settings.store.charCountToShowCounterAt / 100
+                : remChars.value <= settings.store.charCountToShowCounterAt
             : settings.store.interpretAsPercentage ?
-                currChars / maxChars >= settings.store.charCountToShowCounterAt / 100
-                : currChars >= settings.store.charCountToShowCounterAt;
+                currChars.value / maxChars.value >= settings.store.charCountToShowCounterAt / 100
+                : currChars.value >= settings.store.charCountToShowCounterAt;
     },
     get charCounterText() {
-        return settings.store.characterCounterText
-            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[mM]/g, maxChars.toString())
-            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[cC]/g, currChars.toString())
-            .replaceAll(/(?<!(?:^|[^\\])\\(?:\\\\)*)\$[rR]/g, (maxChars - currChars).toString())
-            .replaceAll(/\\(.|$)/g, "$1");
+        return charCounterTemplate.join("");
     },
     start() {
+        compileCharCounterTemplate(settings.store.characterCounterText);
         enableStyle(style);
     },
     stop() {
