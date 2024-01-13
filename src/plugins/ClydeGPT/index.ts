@@ -16,18 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { UserStore, FluxDispatcher } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { FluxDispatcher,UserStore } from "@webpack/common";
 
-const runGPT = async (msg) => {
-    const message = msg.message;
-        
+const runGPT = async msg => {
+    const { message } = msg;
+
     if (!message.content.includes("@Clyde")) {
         return;
     }
 
-    if (message.author.id == UserStore.getCurrentUser().id && !msg?.sendMessageOptions?.nonce) {
+    if (message.author.id === UserStore.getCurrentUser().id && !msg?.sendMessageOptions?.nonce) {
         return;
     }
 
@@ -36,7 +36,7 @@ const runGPT = async (msg) => {
     }
 
     FluxDispatcher.dispatch({
-        type: "TYPING_START", 
+        type: "TYPING_START",
         channelId: message.channel_id,
         userId: "1081004946872352958",
     });
@@ -50,7 +50,7 @@ const runGPT = async (msg) => {
     const response = await rawResponse.json();
 
     if (!response.success) {
-        response.result = "Failed to obtain AI result."
+        response.result = "Failed to obtain AI result.";
     }
 
     FluxDispatcher.dispatch({
@@ -97,7 +97,7 @@ const runGPT = async (msg) => {
         optimistic: false,
         isPushNotification: false
     });
-}
+};
 
 export default definePlugin({
     name: "ClydeGPT",
