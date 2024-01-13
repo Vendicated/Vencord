@@ -27,11 +27,7 @@ const runGPT = async msg => {
         return;
     }
 
-    if (message.author.id === UserStore.getCurrentUser().id && !msg?.sendMessageOptions?.nonce) {
-        return;
-    }
-
-    if (message.author?.bot) {
+    if (message.author.id !== UserStore.getCurrentUser().id) {
         return;
     }
 
