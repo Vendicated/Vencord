@@ -27,6 +27,7 @@ const enum Methods {
 }
 
 const tarExtMatcher = /\.tar\.\w+$/;
+const excludedExtensions = [".zip", ".rar", ".7z"];
 
 export default definePlugin({
     name: "AnonymiseFileNames",
@@ -65,9 +66,20 @@ export default definePlugin({
             default: "image",
             disabled: () => Settings.plugins.AnonymiseFileNames.method !== Methods.Consistent,
         },
+        excludeArchives: {
+            description: "Exclude Archive Files",
+            type: OptionType.BOOLEAN,
+            default: false,
+        },
     },
 
     anonymise(file: string) {
+        if (Settings.plugins.AnonymiseFileNames.excludeArchives) {
+            if (excludedExtensions.some(ext => file.toLowerCase().endsWith(ext))) {
+                return file; // Exclude files with specified extensions
+            }
+        }
+        
         let name = "image";
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
