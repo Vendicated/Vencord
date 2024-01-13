@@ -53,22 +53,6 @@ const runGPT = async (msg) => {
         response.result = "Failed to obtain AI result."
     }
 
-    /*
-    FluxDispatcher.dispatch({
-        type: "MESSAGE_CREATE", 
-        channelId: message.channel_id,
-        message: {
-            id: (BigInt(Date.now() - 1420070400000) << 22n).toString(),
-            channel_id: message.channel_id,
-            author: {
-                id: "1081004946872352958"
-            },
-            content: response.result,
-            timestamp: new Date().toISOString()
-        }
-    });
-    */
-
     FluxDispatcher.dispatch({
         type: "MESSAGE_CREATE",
         channelId: message.channel_id,
