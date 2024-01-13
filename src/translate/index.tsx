@@ -67,8 +67,8 @@ const autoTranslate = async ( msg ) => {
 
 
 export default definePlugin({
-    name: "Translate",
-    description: "Translate messages with Google Translate",
+    name: "EnhancedTranslate",
+    description: "Translate messages with Google Translate\nEnhanced by TechFun",
     authors: [Devs.Ven, Devs.TechFun],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
     settings,
