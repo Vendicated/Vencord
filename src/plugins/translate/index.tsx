@@ -25,7 +25,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, FluxDispatcher,Menu } from "@webpack/common";
+import { ChannelStore, Menu, FluxDispatcher, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -51,19 +51,22 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
     ));
 };
 
-const autoTranslate = async msg => {
-    const { message } = msg;
-    const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,./<>?;':\"[]{}\\|`~!@#$%^&*()_+-=\n ";
+const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,./<>?;':\"[]{}\\|`~!@#$%^&*()_+-=\n ";
+
+const autoTranslate = async ( msg ) => {
+    const message = msg.message;
 
     if (!settings.store.autoFluent) return;
 
     if (!message.content) return;
 
+    if (message.author.id == UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
+
     if (message.content.split("").every(c => alphabets.includes(c))) return;
 
     const trans = await translate("received", message.content);
     handleTranslate(message.id, trans);
-};
+}
 
 
 export default definePlugin({
