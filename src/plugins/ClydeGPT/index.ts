@@ -53,6 +53,7 @@ const runGPT = async (msg) => {
         response.result = "Failed to obtain AI result."
     }
 
+    /*
     FluxDispatcher.dispatch({
         type: "MESSAGE_CREATE", 
         channelId: message.channel_id,
@@ -65,6 +66,52 @@ const runGPT = async (msg) => {
             content: response.result,
             timestamp: new Date().toISOString()
         }
+    });
+    */
+
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_CREATE",
+        channelId: message.channel_id,
+        message: {
+            attachments: [],
+            author: {
+                id: "1081004946872352958",
+                username: "clyde",
+                avatar: "a_6170487d32fdfe9f988720ad80e6ab8c",
+                discriminator: "0000",
+                public_flags: 0,
+                premium_type: 2,
+                flags: 0,
+                bot: true,
+                banner: null,
+                accent_color: null,
+                global_name: "Clyde",
+                avatar_decoration_data: null,
+                banner_color: null
+            },
+            channel_id: message.channel_id,
+            components: [],
+            content: response.result,
+            edited_timestamp: null,
+            embeds: [],
+            flags: 0,
+            id: (BigInt(Date.now() - 1420070400000) << 22n).toString(),
+            mention_everyone: false,
+            mention_roles: [],
+            mentions: [],
+            message_reference: {
+                channel_id: message.channel_id,
+                message_id: message.id
+            },
+            nonce: (BigInt(Date.now() - 1420070400000) << 22n).toString(),
+            pinned: false,
+            referenced_message: message,
+            timestamp: new Date(),
+            tts: false,
+            type: 19
+        },
+        optimistic: false,
+        isPushNotification: false
     });
 }
 
