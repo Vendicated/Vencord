@@ -73,6 +73,8 @@ async function build() {
     const command = isFlatpak ? "flatpak-spawn" : "node";
     const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
 
+    if (IS_DEV) args.push("--dev");
+
     const res = await execFile(command, args, opts);
 
     return !res.stderr.includes("Build failed");
