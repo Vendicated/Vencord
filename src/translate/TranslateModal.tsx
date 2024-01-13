@@ -72,6 +72,20 @@ function AutoTranslateToggle() {
     );
 }
 
+function AutoFluencyToggle() {
+    const value = settings.use(["autoFluent"]).autoFluent;
+
+    return (
+        <Switch
+            value={value}
+            onChange={v => settings.store.autoFluent = v}
+            note={settings.def.autoFluent.description}
+            hideBorder
+        >
+            Auto Fluent
+        </Switch>
+    );
+}
 
 export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
     return (
@@ -95,6 +109,8 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
                 <Forms.FormDivider className={Margins.bottom16} />
 
                 <AutoTranslateToggle />
+
+                <AutoFluencyToggle />
             </ModalContent>
         </ModalRoot>
     );

@@ -39,11 +39,13 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
 
 export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { analyticsName: string; }; }; }) {
     const { autoTranslate } = settings.use(["autoTranslate"]);
+    const { autoFluent } = settings.use(["autoFluent"]);
 
     if (slateProps.type.analyticsName !== "normal")
         return null;
 
     const toggle = () => settings.store.autoTranslate = !autoTranslate;
+    const toggle2 = () => settings.store.autoFluent = !autoFluent;
 
     return (
         <Tooltip text="Open Translate Modal">
@@ -60,6 +62,8 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
                         onClick={e => {
                             if (e.shiftKey) return toggle();
 
+                            if (e.ctrlKey) return toggle2();
+
                             openModal(props => (
                                 <TranslateModal rootProps={props} />
                             ));
@@ -68,7 +72,7 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
                         style={{ padding: "0 4px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
-                            <TranslateIcon className={cl({ "auto-translate": autoTranslate })} />
+                            <TranslateIcon className={cl({ "auto-translate": autoTranslate, "auto-fluent": autoFluent })} />
                         </div>
                     </Button>
                 </div>

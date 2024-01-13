@@ -25,7 +25,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu } from "@webpack/common";
+import { ChannelStore, Menu, FluxDispatcher } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -51,10 +51,25 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
     ));
 };
 
+const autoTranslate = async ( msg ) => {
+    const message = msg.message;
+    const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,./<>?;':\"[]{}\\|`~!@#$%^&*()_+-=\n ";
+
+    if (!settings.store.autoFluent) return;
+
+    if (!message.content) return;
+
+    if (message.content.split("").every(c => alphabets.includes(c))) return;
+
+    const trans = await translate("received", message.content);
+    handleTranslate(message.id, trans);
+}
+
+
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.TechFun],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
     settings,
     // not used, just here in case some other plugin wants it or w/e
@@ -71,6 +86,7 @@ export default definePlugin({
     ],
 
     start() {
+        FluxDispatcher.subscribe("MESSAGE_CREATE", autoTranslate);
         addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
 
         addContextMenuPatch("message", messageCtxPatch);
@@ -99,6 +115,7 @@ export default definePlugin({
     },
 
     stop() {
+        FluxDispatcher.unsubscribe("MESSAGE_CREATE", autoTranslate);
         removePreSendListener(this.preSend);
         removeContextMenuPatch("message", messageCtxPatch);
         removeButton("vc-translate");

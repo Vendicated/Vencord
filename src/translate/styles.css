@@ -32,6 +32,14 @@
     text-decoration: underline;
 }
 
+.vc-trans-auto-translate.vc-trans-auto-fluent {
+    color: var(--blue-360);
+}
+
 .vc-trans-auto-translate {
     color: var(--green-360);
+}
+
+.vc-trans-auto-fluent {
+    color: var(--red-360);
 }

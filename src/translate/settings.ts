@@ -48,5 +48,10 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
+    },
+    autoFluent: {
+        type: OptionType.BOOLEAN,
+        description: "Instantly become fluent in all languages. You can also ctrl + click the translate button to toggle this",
+        default: false
     }
 });
