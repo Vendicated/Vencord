@@ -116,9 +116,10 @@ interface UserCSSCardProps {
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
+    onSettingsReset: () => void;
 }
 
-function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardProps) {
+function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
     const missingPlugins = useMemo(() =>
         theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
 
@@ -148,7 +149,7 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
                     {theme.vars && (
                         <div style={{ cursor: "pointer" }} onClick={
                             () => openModal(modalProps =>
-                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} />)
+                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} onSettingsReset={onSettingsReset} />)
                         }>
                             <CogWheel />
                         </div>
@@ -392,6 +393,7 @@ function ThemesTab() {
                                         await VencordNative.themes.deleteTheme(theme.fileName);
                                         refreshLocalThemes();
                                     }}
+                                    onSettingsReset={refreshLocalThemes}
                                     theme={theme as UserstyleHeader}
                                 />
                             )))}

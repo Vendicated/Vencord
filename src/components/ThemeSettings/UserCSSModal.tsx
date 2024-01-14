@@ -18,6 +18,7 @@ import { SettingBooleanComponent, SettingColorComponent, SettingNumberComponent,
 interface UserCSSSettingsModalProps {
     modalProps: ModalProps;
     theme: UserstyleHeader;
+    onSettingsReset: () => void;
 }
 
 function ExportButton({ themeSettings }: { themeSettings: Settings["userCssVars"][""]; }) {
@@ -73,7 +74,14 @@ function ImportButton({ themeSettings }: { themeSettings: Settings["userCssVars"
     </Tooltip>;
 }
 
-function ResetButton({ themeSettings, themeId }: { themeSettings: Settings["userCssVars"]; themeId: string; }) {
+interface ResetButtonProps {
+    themeSettings: Settings["userCssVars"];
+    themeId: string;
+    close: () => Promise<void>;
+    onReset: () => void;
+}
+
+function ResetButton({ themeSettings, themeId, close, onReset }: ResetButtonProps) {
     return <Tooltip text={"Reset settings to default"}>
         {({ onMouseLeave, onMouseEnter }) => (
             <div
@@ -82,7 +90,9 @@ function ResetButton({ themeSettings, themeId }: { themeSettings: Settings["user
                 onMouseLeave={onMouseLeave}
 
                 onClick={async () => {
+                    await close(); // close the modal first to stop rendering
                     delete themeSettings[themeId];
+                    onReset();
                 }}>
                 <ResetIcon />
             </div>
@@ -90,7 +100,7 @@ function ResetButton({ themeSettings, themeId }: { themeSettings: Settings["user
     </Tooltip>;
 }
 
-export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) {
+export function UserCSSSettingsModal({ modalProps, theme, onSettingsReset }: UserCSSSettingsModalProps) {
     // @ts-expect-error UseSettings<> can't determine this is a valid key
     const { userCssVars } = useSettings(["userCssVars"], false);
 
@@ -181,7 +191,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                 <Flex style={{ gap: 4, marginRight: 4 }} className="vc-settings-usercss-ie-buttons">
                     <ExportButton themeSettings={themeVars} />
                     <ImportButton themeSettings={themeVars} />
-                    <ResetButton themeSettings={userCssVars} themeId={theme.id} />
+                    <ResetButton themeSettings={userCssVars} themeId={theme.id} close={modalProps.onClose} onReset={onSettingsReset} />
                 </Flex>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
