@@ -25,7 +25,6 @@ import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
-import { getThemeInfo } from "../src/utils/themes/bd";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
