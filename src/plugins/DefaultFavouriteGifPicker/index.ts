@@ -1,12 +1,11 @@
 import definePlugin from "@utils/types";
+import { Devs } from "@utils/constants";
 export default definePlugin({
-    name: "DefaultFavourite",
+    name: "DefaultFavouriteGifPicker",
     description: "Makes the gifs button default to favourites.",
-    authors: [
-        {
-            id: 1045027228150419580n,
-            name: "Samwich",
-        },
+    authors: 
+    [
+        Devs.Samwich
     ],
     patches: [
         {
