@@ -1,0 +1,11 @@
+.vc-auto-encrypt.vc-auto-decrypt {
+  color: var(--blue-360);
+}
+
+.vc-auto-encrypt {
+  color: var(--green-360);
+}
+
+.vc-auto-decrypt {
+  color: var(--red-360);
+}

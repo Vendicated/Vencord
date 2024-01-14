@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -24,6 +26,7 @@ import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -46,10 +49,10 @@ function PopOverIcon() {
 
 function Indicator() {
     return (
-        <Tooltip text="This message has a hidden message! (InvisibleChat)">
+        <Tooltip text="This message has a hidden message! (EnhancedEncryption)">
             {({ onMouseEnter, onMouseLeave }) => (
                 <img
-                    aria-label="Hidden Message Indicator (InvisibleChat)"
+                    aria-label="Hidden Message Indicator (EnhancedEncryption)"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
@@ -71,9 +74,16 @@ function ChatBarIcon(chatBoxProps: {
 }) {
     if (chatBoxProps.type.analyticsName !== "normal") return null;
 
+    const { autoEncrypt } = settings.use(["autoEncrypt"]);
+    const { autoDecrypt } = settings.use(["autoDecrypt"]);
+
+    const toggle = () => settings.store.autoEncrypt = !autoEncrypt;
+    const toggle2 = () => settings.store.autoDecrypt = !autoDecrypt;
+
     return (
         <Tooltip text="Encrypt Message">
             {({ onMouseEnter, onMouseLeave }) => (
+
                 // size="" = Button.Sizes.NONE
                 /*
                     many themes set "> button" to display: none, as the gift button is
@@ -90,7 +100,15 @@ function ChatBarIcon(chatBoxProps: {
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         innerClassName={ButtonWrapperClasses.button}
-                        onClick={() => buildEncModal()}
+                        onClick={e => {
+                            if (e.shiftKey) return toggle();
+
+                            if (e.ctrlKey) return toggle2();
+
+                            buildEncModal();
+                        }}
+                        onContextMenu={() => toggle()}
+                        onAuxClick={e => { if (e.button == 1) toggle2() } }
                         style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
@@ -101,6 +119,7 @@ function ChatBarIcon(chatBoxProps: {
                                 height="32"
                                 viewBox={"0 0 64 64"}
                                 style={{ scale: "1.1" }}
+                                className={ `${autoEncrypt ? "vc-auto-encrypt" : ""} ${autoDecrypt ? "vc-auto-decrypt" : ""}` }
                             >
                                 <path fill="currentColor" d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
                             </svg>
@@ -113,26 +132,41 @@ function ChatBarIcon(chatBoxProps: {
     );
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     savedPasswords: {
         type: OptionType.STRING,
-        default: "password, Password",
-        description: "Saved Passwords (Seperated with a , )"
+        default: "password",
+        description: "Encryption key"
+    },
+    cover: {
+        type: OptionType.STRING,
+        default: "cat cat",
+        description: "Cover"
+    },
+    autoEncrypt: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Automatically encrypt messages"
+    },
+    autoDecrypt: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Automatically decrypt messages"
     }
 });
 
 export default definePlugin({
-    name: "InvisibleChat",
-    description: "Encrypt your Messages in a non-suspicious way!",
-    authors: [Devs.SammCheese],
-    dependencies: ["MessagePopoverAPI"],
+    name: "EnhancedEncryption",
+    description: "Encrypt your Messages in a non-suspicious way!\nEnhanced by TechFun",
+    authors: [Devs.SammCheese, Devs.TechFun],
+    dependencies: ["MessagePopoverAPI", "MessageEventsAPI"],
     patches: [
         {
             // Indicator
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
-                replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
+                replace: "try {if($1 && $self.INV_REGEX.test($1.message.content)){$1.content.push($self.indicator());(async () => {await $self.tryMasterPassword($1.message).then(res=> {if (res) return void $self.buildEmbed($1.message, res)})})()}else null } catch {};$&"
             }
         },
         {
@@ -149,14 +183,16 @@ export default definePlugin({
     URL_REGEX: new RegExp(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
+    tryMasterPassword: tryMasterPassword,
+    steggo: steggo,
     settings,
     async start() {
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
 
         addButton("invDecrypt", message => {
-            return this.INV_REGEX.test(message?.content)
-                ? {
+            if (this.INV_REGEX.test(message?.content)) {
+                return {
                     label: "Decrypt Message",
                     icon: this.popOverIcon,
                     message: message,
@@ -167,13 +203,22 @@ export default definePlugin({
                             return void buildDecModal({ message });
                         });
                     }
-                }
-                : null;
+                };
+            } else return null;
+        });
+
+        this.preSend = addPreSendListener(async (_, message) => {
+
+            if (!settings.store.autoEncrypt) return;
+            if (!message.content) return;
+
+            message.content = (await encrypt(message.content, settings.store.savedPasswords, settings.store.cover));
         });
     },
 
     stop() {
         removeButton("invDecrypt");
+        removePreSendListener(this.preSend);
     },
 
     // Gets the Embed of a Link
@@ -192,12 +237,8 @@ export default definePlugin({
 
         message.embeds.push({
             type: "rich",
-            title: "Decrypted Message",
-            color: "0x45f5f5",
+            color: "0xffad01",
             description: revealed,
-            footer: {
-                text: "Made with ❤️ by c0dine and Sammy!",
-            },
         });
 
         if (urlCheck?.length) {
@@ -234,22 +275,23 @@ export function isCorrectPassword(result: string): boolean {
     return result.endsWith("\u200b");
 }
 
-export async function iteratePasswords(message: Message): Promise<string | false> {
-    const passwords = settings.store.savedPasswords.split(",").map(s => s.trim());
+export async function tryMasterPassword(message) {
+    const password = settings.store.savedPasswords;
+    const autoDecrypt = settings.store.autoDecrypt;
 
-    if (!message?.content || !passwords?.length) return false;
+    if (!autoDecrypt) return false;
+
+    if (message.embeds.length || !message?.content || !password) return false;
 
     let { content } = message;
 
     // we use an extra variable so we dont have to edit the message content directly
     if (/^\W/.test(message.content)) content = `d ${message.content}d`;
 
-    for (let i = 0; i < passwords.length; i++) {
-        const result = decrypt(content, passwords[i], false);
-        if (isCorrectPassword(result)) {
-            return result;
-        }
-    }
+    const result = decrypt(content, password, false);
+    return result;
+}
 
+export async function iteratePasswords(message: Message): Promise<string | false> {
     return false;
 }
