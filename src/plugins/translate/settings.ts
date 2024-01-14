@@ -51,7 +51,7 @@ export const settings = definePluginSettings({
     },
     autoFluent: {
         type: OptionType.BOOLEAN,
-        description: "Instantly become fluent in all languages. You can also ctrl + click the translate button to toggle this",
+        description: "Instantly become fluent in all languages. You can also ctrl/scroll click the translate button to toggle this",
         default: false
     }
 });

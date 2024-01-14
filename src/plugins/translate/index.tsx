@@ -62,6 +62,8 @@ const autoTranslate = async ( msg ) => {
 
     if (message.author.id == UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
 
+    if (new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/).test(message.content)) return;
+
     if (message.content.split("").every(c => alphabets.includes(c))) return;
 
     const trans = await translate("received", message.content);

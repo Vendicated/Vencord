@@ -69,6 +69,7 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
                             ));
                         }}
                         onContextMenu={() => toggle()}
+                        onAuxClick={e => { if (e.button == 1) toggle2() } }
                         style={{ padding: "0 4px" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
