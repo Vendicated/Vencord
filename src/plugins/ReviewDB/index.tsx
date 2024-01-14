@@ -57,7 +57,7 @@ export default definePlugin({
         {
             find: "showBorder:null",
             replacement: {
-                match: /user:(.{1,3}),setNote:.{1,3},canDM.+?\}\)/,
+                match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
             }
         }
