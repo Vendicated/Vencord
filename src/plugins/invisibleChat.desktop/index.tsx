@@ -279,9 +279,6 @@ const cache = new Set();
 
 export async function tryMasterPassword(message) {
 
-    if (cache.has(message.id)) return;
-    cache.add(message.id);
-
     try {
         const password = settings.store.savedPasswords;
         const autoDecrypt = settings.store.autoDecrypt;
@@ -289,6 +286,9 @@ export async function tryMasterPassword(message) {
         if (!autoDecrypt) return false;
 
         if (message.embeds.length || !message?.content || !password) return false;
+
+        if (cache.has(message.id)) return;
+        cache.add(message.id);
 
         let { content } = message;
 
