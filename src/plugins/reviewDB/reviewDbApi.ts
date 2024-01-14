@@ -19,7 +19,7 @@
 import { showToast, Toasts } from "@webpack/common";
 
 import { Auth, authorize, getToken, updateAuth } from "./auth";
-import { Review, ReviewDBUser } from "./entities";
+import { Review, ReviewDBCurrentUser, ReviewDBUser } from "./entities";
 import { settings } from "./settings";
 
 const API_URL = "https://manti.vendicated.dev";
@@ -167,7 +167,20 @@ async function patchBlock(action: "block" | "unblock", userId: string) {
 export const blockUser = (userId: string) => patchBlock("block", userId);
 export const unblockUser = (userId: string) => patchBlock("unblock", userId);
 
-export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
+export async function fetchBlocks(): Promise<ReviewDBUser[]> {
+    const res = await fetch(API_URL + "/api/reviewdb/blocks", {
+        method: "GET",
+        headers: new Headers({
+            Accept: "application/json",
+            Authorization: await getToken() || ""
+        })
+    });
+
+    if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+    return res.json();
+}
+
+export function getCurrentUserInfo(token: string): Promise<ReviewDBCurrentUser> {
     return fetch(API_URL + "/api/reviewdb/users", {
         body: JSON.stringify({ token }),
         method: "POST",

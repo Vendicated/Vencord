@@ -27,6 +27,7 @@ import { Review, ReviewType } from "../entities";
 import { blockUser, deleteReview, reportReview, unblockUser } from "../reviewDbApi";
 import { settings } from "../settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl } from "../utils";
+import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
@@ -154,6 +155,7 @@ export default LazyComponent(() => {
                         description="You have blocked this user"
                         icon="/assets/aaee57e0090991557b66.svg"
                         type={0}
+                        onClick={() => openBlockModal()}
                     />
                 )}
                 {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
