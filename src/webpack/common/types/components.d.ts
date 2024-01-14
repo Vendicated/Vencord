@@ -406,7 +406,7 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     title?: string,
     className?: string;
     tabIndex?: number;
-    onClick?: MouseEventHandler<HTMLAnchorElement>;
+    onClick?(): void;
     trusted?: boolean;
     messageId?: string;
     channelId?: string;
