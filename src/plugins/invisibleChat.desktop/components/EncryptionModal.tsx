@@ -25,7 +25,7 @@ import {
     openModal,
     ModalCloseButton
 } from "@utils/modal";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { Button, Forms, React, Switch, TextInput, TextArea } from "@webpack/common";
 
 import { encrypt, settings } from "../index";
 
@@ -44,7 +44,7 @@ function EncModal(props: ModalProps) {
 
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Cover</Forms.FormTitle>
-                <TextInput
+                <TextArea
                     value={cover}
                     onChange={v => settings.store.cover = v}
                 />
