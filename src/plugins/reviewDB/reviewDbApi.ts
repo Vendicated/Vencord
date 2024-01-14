@@ -18,7 +18,7 @@
 
 import { showToast, Toasts } from "@webpack/common";
 
-import { authorize, getToken } from "./auth";
+import { Auth, authorize, getToken, updateAuth } from "./auth";
 import { Review, ReviewDBUser } from "./entities";
 import { settings } from "./settings";
 
@@ -135,6 +135,37 @@ export async function reportReview(id: number) {
 
     showToast(res.message);
 }
+
+async function patchBlock(action: "block" | "unblock", userId: string) {
+    const res = await fetch(API_URL + "/api/reviewdb/blocks", {
+        method: "PATCH",
+        headers: new Headers({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: await getToken() || ""
+        }),
+        body: JSON.stringify({
+            action: action,
+            discordId: userId
+        })
+    });
+
+    if (!res.ok) {
+        showToast(`Failed to ${action} user`, Toasts.Type.FAILURE);
+    } else {
+        showToast(`Successfully ${action}ed user`, Toasts.Type.SUCCESS);
+
+        if (Auth?.user?.blockedUsers) {
+            const newBlockedUsers = action === "block"
+                ? [...Auth.user.blockedUsers, userId]
+                : Auth.user.blockedUsers.filter(id => id !== userId);
+            updateAuth({ user: { ...Auth.user, blockedUsers: newBlockedUsers } });
+        }
+    }
+}
+
+export const blockUser = (userId: string) => patchBlock("block", userId);
+export const unblockUser = (userId: string) => patchBlock("unblock", userId);
 
 export function getCurrentUserInfo(token: string): Promise<ReviewDBUser> {
     return fetch(API_URL + "/api/reviewdb/users", {

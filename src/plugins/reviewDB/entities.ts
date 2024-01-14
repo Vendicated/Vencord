@@ -45,7 +45,7 @@ export interface Badge {
     name: string;
     description: string;
     icon: string;
-    redirectURL: string;
+    redirectURL?: string;
     type: number;
 }
 
@@ -76,6 +76,7 @@ export interface ReviewDBUser {
     notification: Notification | null;
     lastReviewID: number;
     type: UserType;
+    blockedUsers?: string[];
 }
 
 export interface ReviewAuthor {

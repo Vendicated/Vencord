@@ -21,6 +21,7 @@ import { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
 import { authorize, getToken } from "./auth";
+import { openBlockModal } from "./components/BlockedUserModal";
 
 export const settings = definePluginSettings({
     authorize: {
@@ -51,6 +52,13 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Hide reviews from blocked users",
         default: true,
+    },
+    manageBlocks: {
+        type: OptionType.COMPONENT,
+        description: "Manage Blocked Users",
+        component: () => (
+            <Button onClick={openBlockModal}>Manage Blocked Users</Button>
+        )
     },
     website: {
         type: OptionType.COMPONENT,
