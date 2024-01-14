@@ -100,7 +100,7 @@ export default LazyComponent(() => {
 
             Alerts.show({
                 title: "Are you sure?",
-                body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile.",
+                body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
                 confirmText: "Block",
                 cancelText: "Nevermind",
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
