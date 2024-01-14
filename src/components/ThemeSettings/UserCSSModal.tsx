@@ -6,7 +6,7 @@
 
 import { Settings, useSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
-import { CopyIcon, PasteIcon } from "@components/Icons";
+import { CopyIcon, PasteIcon, ResetIcon } from "@components/Icons";
 import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { showToast, Text, Toasts, Tooltip } from "@webpack/common";
@@ -73,9 +73,28 @@ function ImportButton({ themeSettings }: { themeSettings: Settings["userCssVars"
     </Tooltip>;
 }
 
+function ResetButton({ themeSettings, themeId }: { themeSettings: Settings["userCssVars"]; themeId: string; }) {
+    return <Tooltip text={"Reset settings to default"}>
+        {({ onMouseLeave, onMouseEnter }) => (
+            <div
+                style={{ cursor: "pointer" }}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+
+                onClick={async () => {
+                    delete themeSettings[themeId];
+                }}>
+                <ResetIcon />
+            </div>
+        )}
+    </Tooltip>;
+}
+
 export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModalProps) {
     // @ts-expect-error UseSettings<> can't determine this is a valid key
-    const themeSettings = useSettings(["userCssVars"], false).userCssVars[theme.id];
+    const { userCssVars } = useSettings(["userCssVars"], false);
+
+    const themeVars = userCssVars[theme.id];
 
     const controls: ReactNode[] = [];
 
@@ -86,7 +105,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                     <SettingTextComponent
                         label={varInfo.label}
                         name={name}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -97,7 +116,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                     <SettingBooleanComponent
                         label={varInfo.label}
                         name={name}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -108,7 +127,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                     <SettingColorComponent
                         label={varInfo.label}
                         name={name}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -119,7 +138,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                     <SettingNumberComponent
                         label={varInfo.label}
                         name={name}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -132,7 +151,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                         name={name}
                         options={varInfo.options}
                         default={varInfo.default}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -147,7 +166,7 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
                         min={varInfo.min}
                         max={varInfo.max}
                         step={varInfo.step}
-                        themeSettings={themeSettings}
+                        themeSettings={themeVars}
                     />
                 );
                 break;
@@ -160,8 +179,9 @@ export function UserCSSSettingsModal({ modalProps, theme }: UserCSSSettingsModal
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Settings for {theme.name}</Text>
                 <Flex style={{ gap: 4, marginRight: 4 }} className="vc-settings-usercss-ie-buttons">
-                    <ExportButton themeSettings={themeSettings} />
-                    <ImportButton themeSettings={themeSettings} />
+                    <ExportButton themeSettings={themeVars} />
+                    <ImportButton themeSettings={themeVars} />
+                    <ResetButton themeSettings={userCssVars} themeId={theme.id} />
                 </Flex>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>

@@ -77,7 +77,7 @@ export interface Settings {
     };
 
     userCssVars: {
-        [fileName: string]: {
+        [themeId: string]: {
             [varName: string]: string;
         };
     };
