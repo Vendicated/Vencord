@@ -235,11 +235,11 @@ export default definePlugin({
     async buildEmbed(message: any, revealed: string): Promise<void> {
         const urlCheck = revealed.match(this.URL_REGEX);
 
-        message.embeds.push({
+        message.embeds[0] = {
             type: "rich",
             color: "0xffad01",
             description: revealed,
-        });
+        };
 
         if (urlCheck?.length) {
             const embed = await this.getEmbed(new URL(urlCheck[0]));
@@ -275,21 +275,33 @@ export function isCorrectPassword(result: string): boolean {
     return result.endsWith("\u200b");
 }
 
+const cache = new Set();
+
 export async function tryMasterPassword(message) {
-    const password = settings.store.savedPasswords;
-    const autoDecrypt = settings.store.autoDecrypt;
 
-    if (!autoDecrypt) return false;
+    if (cache.has(message.id)) return;
+    cache.add(message.id);
 
-    if (message.embeds.length || !message?.content || !password) return false;
+    try {
+        const password = settings.store.savedPasswords;
+        const autoDecrypt = settings.store.autoDecrypt;
 
-    let { content } = message;
+        if (!autoDecrypt) return false;
 
-    // we use an extra variable so we dont have to edit the message content directly
-    if (/^\W/.test(message.content)) content = `d ${message.content}d`;
+        if (message.embeds.length || !message?.content || !password) return false;
 
-    const result = decrypt(content, password, false);
-    return result;
+        let { content } = message;
+
+        // we use an extra variable so we dont have to edit the message content directly
+        if (/^\W/.test(message.content)) content = `d ${message.content}d`;
+
+        const result = decrypt(content, password, false);
+        cache.delete(message.id);
+        return result;
+    } catch (e) {
+        cache.delete(message.id);
+        return false;
+    }
 }
 
 export async function iteratePasswords(message: Message): Promise<string | false> {
