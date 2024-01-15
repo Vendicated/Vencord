@@ -24,15 +24,19 @@ import definePlugin from "@utils/types";
 const change = async (_, message) => {
     if (!message.content) return;
     message.content = message.content
-    .replace(/\b(digger|digga)\b/gi, function(match) {
+    .replace(/\b(digger|nigger)\b/gi, function(match) {
         return match.replace(/./g, function(char, index) {
           if (match[index] == "d") return "n"
           if (match[index] == "D") return "N"
+          if (match[index] == "n") return "d"
+          if (match[index] == "N") return "D"
           return match[index];
         });
     })
-    .replace(/\b(nigger|nigga)\b/gi, function(match) {
+    .replace(/\b(digga|nigga)\b/gi, function(match) {
         return match.replace(/./g, function(char, index) {
+            if (match[index] == "d") return "n"
+            if (match[index] == "D") return "N"
             if (match[index] == "n") return "d"
             if (match[index] == "N") return "D"
             return match[index];
