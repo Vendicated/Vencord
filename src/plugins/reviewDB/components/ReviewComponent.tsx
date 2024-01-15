@@ -32,7 +32,7 @@ import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 export default LazyComponent(() => {
-    // this is terrible, blame ven
+    // this is terrible, blame mantika
     const p = filters.byProps;
     const [
         { cozyMessage, buttons, message, buttonsInner, groupStart },
