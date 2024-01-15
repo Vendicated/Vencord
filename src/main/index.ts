@@ -23,6 +23,14 @@ import { ensureSafePath, getSettings } from "./ipcMain";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
+const patchedCspDirectives: Record<string, Set<string>> = {};
+export const patchCspDirective = (directive: string, values: string[]) => {
+    patchedCspDirectives[directive] ??= new Set();
+    for (const value of values) {
+        patchedCspDirectives[directive].add(value);
+    }
+};
+
 if (IS_VESKTOP || !IS_VANILLA) {
     app.whenReady().then(() => {
         // Source Maps! Maybe there's a better way but since the renderer is executed
@@ -95,6 +103,11 @@ if (IS_VESKTOP || !IS_VANILLA) {
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
                     csp[directive] ??= [];
                     csp[directive].push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
+                }
+
+                for (const directive of Object.keys(patchedCspDirectives)) {
+                    csp[directive] ??= [];
+                    csp[directive].push(...patchedCspDirectives[directive]);
                 }
 
                 // TODO: Restrict this to only imported packages with fixed version.
