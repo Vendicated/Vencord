@@ -75,7 +75,7 @@ export default definePlugin({
         if (guildId === "@me" || guildId === "null" || guildId == null) return;
         updateGuildNotificationSettings(guildId,
             {
-                muted: settings.store.guild,
+                muted: settings.store.muteGuild,
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role
             });
