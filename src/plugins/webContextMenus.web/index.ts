@@ -182,6 +182,12 @@ export default definePlugin({
     ],
 
     async copyImage(url: string) {
+        if (IS_VESKTOP && VesktopNative.clipboard) {
+            const data = await fetch(url).then(r => r.arrayBuffer());
+            VesktopNative.clipboard.copyImage(data, url);
+            return;
+        }
+
         // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
         // via canvas first
         const img = new Image();
