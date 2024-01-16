@@ -27,8 +27,8 @@ const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
 
 
 const settings = definePluginSettings({
-    guild: {
-        description: "Mute Guild",
+    muteGuild: {
+        description: "Mute Guild automatically",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -43,15 +43,15 @@ const settings = definePluginSettings({
         default: true
     },
     showAllChannels: {
-        description: "Show all channels automatically when joining a new guild.",
+        description: "Show all channels automatically",
         type: OptionType.BOOLEAN,
         default: true
     }
 });
 
 export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
+    name: "NewGuildSettings",
+    description: "Settings related to joining new guilds",
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Alyxia, Devs.Mopi],
     patches: [
         {
