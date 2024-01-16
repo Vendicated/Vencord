@@ -18,14 +18,24 @@
 
 import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { ApplicationCommandInputType } from "@api/Commands/types";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    resultsAmount: {
+        type: OptionType.NUMBER,
+        description: "The amount of results you want to get (more gives better results, but is slower)",
+        default: 10
+    }
+});
 
 export default definePlugin({
     name: "UrbanDictionary",
     description: "Search for a word on Urban Dictionary via /urban slash command",
     authors: [Devs.jewdev],
     dependencies: ["CommandsAPI"],
+    settings,
     commands: [
         {
             name: "urban",
@@ -41,11 +51,15 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
-                    const query = encodeURIComponent(args[0].value);
-                    const { list: [definition] } = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${query}`)).json();
+                    const query: string = encodeURIComponent(args[0].value);
+                    const { list } = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`).then(response => response.json());
 
-                    if (!definition)
+                    if (!list.length)
                         return void sendBotMessage(ctx.channel.id, { content: "No results found." });
+
+                    const definition = list.reduce((prev, curr) => {
+                        return prev.thumbs_up > curr.thumbs_up ? prev : curr;
+                    });
 
                     const linkify = (text: string) => text
                         .replaceAll("\r\n", "\n")

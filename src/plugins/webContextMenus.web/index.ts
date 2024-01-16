@@ -20,8 +20,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
+
+const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -55,7 +57,6 @@ export default definePlugin({
 
     start() {
         if (settings.store.addBack) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             this.changedListeners = true;
@@ -64,7 +65,6 @@ export default definePlugin({
 
     stop() {
         if (this.changedListeners) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
         }
@@ -169,10 +169,25 @@ export default definePlugin({
                 match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
             }
+        },
+
+        // Add back "Show My Camera" context menu
+        {
+            find: '.default("MediaEngineWebRTC");',
+            replacement: {
+                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
+                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+            }
         }
     ],
 
     async copyImage(url: string) {
+        if (IS_VESKTOP && VesktopNative.clipboard) {
+            const data = await fetch(url).then(r => r.arrayBuffer());
+            VesktopNative.clipboard.copyImage(data, url);
+            return;
+        }
+
         // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
         // via canvas first
         const img = new Image();
