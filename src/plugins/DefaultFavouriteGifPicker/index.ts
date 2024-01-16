@@ -8,11 +8,9 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "DefaultFavouriteGifPicker",
-    description: "Makes the gifs button default to favourites.",
-    authors: [
-        Devs.Samwich
-    ],
+    name: "DefaultFavoriteGifPicker",
+    description: "Makes the gif picker open the favourite category by default",
+    authors: [Devs.Samwich],
     patches: [
         {
             find: ".GIFPickerResultTypes.SEARCH",
