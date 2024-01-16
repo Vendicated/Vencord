@@ -60,7 +60,7 @@ async function embedDidMount(this: Component<Props>) {
 
         if (hasTitle) {
             embed.dearrow.oldTitle = embed.rawTitle;
-            embed.rawTitle = titles[0].title;
+            embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
         }
 
         if (hasThumb) {
@@ -147,7 +147,7 @@ export default definePlugin({
         replacement: [
             // patch componentDidMount to replace embed thumbnail and title
             {
-                match: /render\(\)\{let\{embed:/,
+                match: /render\(\)\{.{0,30}let\{embed:/,
                 replace: "componentDidMount=$self.embedDidMount;$&"
             },
 
