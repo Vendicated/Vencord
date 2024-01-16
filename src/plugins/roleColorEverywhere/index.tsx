@@ -73,12 +73,18 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /\i.roleIcon,\.\.\.\i/,
-                    replace: "$&,color:$self.roleGroupColor(arguments[0])"
-                },
-                {
                     match: /null,\i," — ",\i\]/,
                     replace: "null,$self.roleGroupColor(arguments[0])]"
+                },
+            ],
+            predicate: () => settings.store.memberList,
+        },
+        {
+            find: ".Messages.THREAD_BROWSER_PRIVATE",
+            replacement: [
+                {
+                    match: /children:\[\i," — ",\i\]/,
+                    replace: "children:[$self.roleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList,
