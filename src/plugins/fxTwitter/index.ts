@@ -34,10 +34,8 @@ export default definePlugin({
 
         fxtwtListener = addPreSendListener((_, ctx) => {
             // console.log(ctx);
-            if (twregex.test(ctx.content) || xregex.test(ctx.content)) {
-                ctx.content = ctx.content.replace(twregex, "https://fxtwitter.com");
-                ctx.content = ctx.content.replace(xregex, "https://fxtwitter.com");
-            }
+            ctx.content = ctx.content.replace(twregex, "https://fxtwitter.com");
+            ctx.content = ctx.content.replace(xregex, "https://fxtwitter.com");
         });
     },
     stop() {
