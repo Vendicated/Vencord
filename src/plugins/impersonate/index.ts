@@ -61,6 +61,10 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
+                    sendBotMessage(ctx.channel.id, {
+                        content: "```JSON\n" + JSON.stringify(args, undefined, 4) + "```",
+                    });
+
                     let channel = args.filter(x => x.name == "channel") ?? { value: ctx.channel.id };
                     let delay = args.filter(x => x.name == "delay");
                     let user = UserStore.getUser(args[0].value);
@@ -68,7 +72,7 @@ export default definePlugin({
                     if (delay) {
                         FluxDispatcher.dispatch({
                             type: "TYPING_START",
-                            channelId: ctx.channel.id,
+                            channelId: channel.value,
                             userId: user.id,
                         });
                     }
