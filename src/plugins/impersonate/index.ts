@@ -56,9 +56,7 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 try {
                     setTimeout(() => {
-                        sendBotMessage(ctx.channel.id, {
-                            content: "```JSON\n" + `${JSON.stringify(UserStore.getUser(args[0].value), null, 4)}` + "```",
-                        });
+                        let user = UserStore.getUser(args[0].value)
 
                         FluxDispatcher.dispatch({
                             type: "MESSAGE_CREATE",
@@ -66,18 +64,17 @@ export default definePlugin({
                             message: {
                                 attachments: [],
                                 author: {
-                                    id: args[0].value,
-                                    username: "clyde",
-                                    avatar: "a_6170487d32fdfe9f988720ad80e6ab8c",
-                                    discriminator: "0000",
-                                    public_flags: 0,
-                                    premium_type: 2,
-                                    flags: 0,
-                                    bot: true,
-                                    banner: null,
+                                    id: user.id,
+                                    username: user.username,
+                                    avatar: user.avatar,
+                                    discriminator: user.discriminator,
+                                    public_flags: user.publicFlags,
+                                    premium_type: user.premiumType,
+                                    flags: user.flags,
+                                    banner: user.banner,
                                     accent_color: null,
-                                    global_name: "Clyde",
-                                    avatar_decoration_data: null,
+                                    global_name: user.globalName,
+                                    avatar_decoration_data: (user.avatarDecorationData) ? { asset: user.avatarDecorationData.asset, sku_id: user.avatarDecorationData.skuId } : null,
                                     banner_color: null
                                 },
                                 channel_id: ctx.channel.id,
