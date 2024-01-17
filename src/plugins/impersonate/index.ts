@@ -66,7 +66,7 @@ export default definePlugin({
                             message: {
                                 attachments: [],
                                 author: {
-                                    id: args[0].id,
+                                    id: args[0].value,
                                     username: "clyde",
                                     avatar: "a_6170487d32fdfe9f988720ad80e6ab8c",
                                     discriminator: "0000",
