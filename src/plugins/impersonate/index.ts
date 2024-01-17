@@ -61,12 +61,11 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
+                    let channel = args.filter(x => x.name == "channel") ?? { value: ctx.channel.id };
+                    let delay = args.filter(x => x.name == "delay");
                     let user = UserStore.getUser(args[0].value);
-                    sendBotMessage(ctx.channel.id, {
-                        content: "```JSON\n" + JSON.stringify(args, undefined, 4) + "```",
-                    });
                     
-                    if (args[2]) {
+                    if (delay) {
                         FluxDispatcher.dispatch({
                             type: "TYPING_START",
                             channelId: ctx.channel.id,
@@ -77,7 +76,7 @@ export default definePlugin({
                     setTimeout(() => {
                         FluxDispatcher.dispatch({
                             type: "MESSAGE_CREATE",
-                            channelId: ctx.channel.id,
+                            channelId: channel.value,
                             message: {
                                 attachments: [],
                                 author: {
@@ -94,7 +93,7 @@ export default definePlugin({
                                     avatar_decoration_data: (user.avatarDecorationData) ? { asset: user.avatarDecorationData.asset, sku_id: user.avatarDecorationData.skuId } : null,
                                     banner_color: null
                                 },
-                                channel_id: ctx.channel.id,
+                                channel_id: channel.value,
                                 components: [],
                                 content: args[1].value,
                                 edited_timestamp: null,
@@ -113,7 +112,7 @@ export default definePlugin({
                             optimistic: false,
                             isPushNotification: false
                         });
-                    }, (Number(args[2]?.value ?? 0.5) * 1000));
+                    }, (Number(delay?.value ?? 0.5) * 1000));
                 } catch (error) {
                     sendBotMessage(ctx.channel.id, {
                         content: `Something went wrong: \`${error}\``,
