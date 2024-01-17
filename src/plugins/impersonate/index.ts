@@ -47,6 +47,12 @@ export default definePlugin({
                     required: true
                 },
                 {
+                    type: ApplicationCommandOptionType.CHANNEL,
+                    name: "channel",
+                    description: "Channel the impersonated message should be sent in.",
+                    required: false
+                },
+                {
                     type: ApplicationCommandOptionType.INTEGER,
                     name: "delay",
                     description: "Delay for the impersonated message to appear on your client (in seconds).",
@@ -56,6 +62,9 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 try {
                     let user = UserStore.getUser(args[0].value);
+                    sendBotMessage(ctx.channel.id, {
+                        content: "```JSON\n" + JSON.stringify(args, undefined, 4) + "```",
+                    });
                     
                     if (args[2]) {
                         FluxDispatcher.dispatch({
