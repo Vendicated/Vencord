@@ -61,14 +61,10 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
-                    let channel = args.filter(x => x.name == "channel") ?? { value: ctx.channel.id };
-                    let delay = args.filter(x => x.name == "delay");
+                    let channel = args.find(x => x.name == "channel") ?? { value: ctx.channel.id };
+                    let delay = args.find(x => x.name == "delay");
                     let user = UserStore.getUser(args[0].value);
 
-                    sendBotMessage(ctx.channel.id, {
-                        content: "```JSON\n" + JSON.stringify(channel, undefined, 4) + "```",
-                    });
-                    
                     if (delay) {
                         FluxDispatcher.dispatch({
                             type: "TYPING_START",
