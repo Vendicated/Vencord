@@ -169,10 +169,25 @@ export default definePlugin({
                 match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
             }
+        },
+
+        // Add back "Show My Camera" context menu
+        {
+            find: '.default("MediaEngineWebRTC");',
+            replacement: {
+                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
+                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+            }
         }
     ],
 
     async copyImage(url: string) {
+        if (IS_VESKTOP && VesktopNative.clipboard) {
+            const data = await fetch(url).then(r => r.arrayBuffer());
+            VesktopNative.clipboard.copyImage(data, url);
+            return;
+        }
+
         // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
         // via canvas first
         const img = new Image();
