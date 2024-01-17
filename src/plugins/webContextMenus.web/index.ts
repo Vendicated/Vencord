@@ -49,7 +49,7 @@ const settings = definePluginSettings({
 const MEDIA_PROXY_URL = "https://media.discordapp.net";
 const CDN_URL = "https://cdn.discordapp.com";
 
-function fixImageUrl(urlString: string) {
+function fixImageUrl(urlString: string, explodeWebp: boolean) {
     const url = new URL(urlString);
     if (url.origin === CDN_URL) return urlString;
     if (url.origin === MEDIA_PROXY_URL) return CDN_URL + url.pathname;
@@ -57,7 +57,9 @@ function fixImageUrl(urlString: string) {
     url.searchParams.delete("width");
     url.searchParams.delete("height");
     url.searchParams.set("quality", "lossless");
-    if (url.searchParams.get("format") === "webp") url.searchParams.set("format", "png");
+    if (explodeWebp && url.searchParams.get("format") === "webp")
+        url.searchParams.set("format", "png");
+
     return url.toString();
 }
 
@@ -197,7 +199,7 @@ export default definePlugin({
     ],
 
     async copyImage(url: string) {
-        url = fixImageUrl(url);
+        url = fixImageUrl(url, true);
 
         let imageData = await fetch(url).then(r => r.blob());
         if (imageData.type !== "image/png") {
@@ -229,7 +231,7 @@ export default definePlugin({
     },
 
     async saveImage(url: string) {
-        url = fixImageUrl(url);
+        url = fixImageUrl(url, false);
 
         const data = await fetchImage(url);
         if (!data) return;
