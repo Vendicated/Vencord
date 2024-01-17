@@ -214,9 +214,6 @@ export default function PluginSettings() {
         return o;
     }, []);
 
-    const sortedPlugins = React.useMemo(() => Object.values(Plugins)
-        .sort((a, b) => a.name.localeCompare(b.name)), []);
-
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
@@ -237,6 +234,9 @@ export default function PluginSettings() {
         );
     };
 
+    let sortedPlugins = React.useMemo(() => Object.values(Plugins)
+        .sort((a, b) => a.name.localeCompare(b.name)), []);
+
     const [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
         const now = Date.now() / 1000;
         const existingTimestamps: Record<string, number> = {};
@@ -253,6 +253,12 @@ export default function PluginSettings() {
 
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
+    if (newPlugins != null) {
+        const combinedArray = [...new Set([...newPlugins, ...sortedPlugins.map(obj => obj.name)])];
+        sortedPlugins = combinedArray
+            .map(name => sortedPlugins.find(obj => obj.name === name)!);
+    }
+
 
     type P = JSX.Element | JSX.Element[];
     let plugins: P, requiredPlugins: P;
