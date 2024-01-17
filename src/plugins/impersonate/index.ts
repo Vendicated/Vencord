@@ -57,7 +57,7 @@ export default definePlugin({
                 try {
                     setTimeout(() => {
                         sendBotMessage(ctx.channel.id, {
-                            content: "```JSON\n" + `${JSON.stringify(UserStore.getUser(args[0]), null, 4)}` + "```",
+                            content: "```JSON\n" + `${JSON.stringify(UserStore.getUser(args[0].value), null, 4)}` + "```",
                         });
 
                         FluxDispatcher.dispatch({
