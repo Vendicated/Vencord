@@ -9,6 +9,9 @@ import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import PluginModal from "@components/PluginSettings/PluginModal";
+import { openInviteModal } from "@utils/discord";
+import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -23,15 +26,12 @@ import {
     useRef,
     useState
 } from "@webpack/common";
-import PluginModal from "@components/PluginSettings/PluginModal";
-import { openModal } from "@utils/modal";
 import { UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
 import { OnlineThemes } from "./OnlineThemes";
 import { SettingsTab, wrapTab } from "./shared";
-import { openInviteModal } from "@utils/discord";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
