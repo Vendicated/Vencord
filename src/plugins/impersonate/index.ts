@@ -55,9 +55,17 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
-                    setTimeout(() => {
-                        let user = UserStore.getUser(args[0].value)
+                    let user = UserStore.getUser(args[0].value);
+                    
+                    if (args[2]) {
+                        FluxDispatcher.dispatch({
+                            type: "TYPING_START",
+                            channelId: ctx.channel.id,
+                            userId: user.id,
+                        });
+                    }
 
+                    setTimeout(() => {
                         FluxDispatcher.dispatch({
                             type: "MESSAGE_CREATE",
                             channelId: ctx.channel.id,
