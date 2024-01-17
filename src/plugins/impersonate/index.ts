@@ -20,6 +20,7 @@ import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { ApplicationCommandInputType } from "@api/Commands/types";
 import { Devs } from "@utils/constants";
 import { FluxDispatcher } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
@@ -56,7 +57,7 @@ export default definePlugin({
                 try {
                     setTimeout(() => {
                         sendBotMessage(ctx.channel.id, {
-                            content: "```JSON\n" + `${JSON.stringify(args[0], null, 4)}` + "```",
+                            content: "```JSON\n" + `${JSON.stringify(UserStore.getUser(args[0]), null, 4)}` + "```",
                         });
 
                         FluxDispatcher.dispatch({
@@ -65,7 +66,7 @@ export default definePlugin({
                             message: {
                                 attachments: [],
                                 author: {
-                                    id: "1081004946872352958",
+                                    id: args[0].id,
                                     username: "clyde",
                                     avatar: "a_6170487d32fdfe9f988720ad80e6ab8c",
                                     discriminator: "0000",
