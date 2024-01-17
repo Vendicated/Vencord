@@ -6,7 +6,10 @@ The cutest Discord client mod ([Vencord](https://github.com/Vendicated/Vencord) 
 
 ## Plugins added
 
+-   **ClydeGPT:** Bring back Clyde on Discord
+-   **Impersonate:** Impersonate a user by "sending" a fake message on their behalf
 -   **NoButtons:** Removes annoying buttons from the message bar (configure in settings)
+-   **NoMoreRacism:** Learn to be an anti-racist fast and quick
 
 ## Disclaimer
 
