@@ -21,10 +21,9 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
-import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -48,9 +47,9 @@ function searchProtoClassField(localName: string, protoClass: any) {
     return fieldGetter?.();
 }
 
-const PreloadedUserSettingsActionCreators = proxyLazy(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
-const AppearanceSettingsActionCreators = proxyLazy(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
-const ClientThemeSettingsActionsCreators = proxyLazy(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
+const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
+const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
+const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
 const USE_EXTERNAL_EMOJIS = 1n << 18n;
 const USE_EXTERNAL_STICKERS = 1n << 37n;
@@ -206,10 +205,10 @@ export default definePlugin({
         },
         // Allow stickers to be sent everywhere
         {
-            find: "canUseStickersEverywhere:function",
+            find: "canUseCustomStickersEverywhere:function",
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /canUseStickersEverywhere:function\(\i\){/,
+                match: /canUseCustomStickersEverywhere:function\(\i\){/,
                 replace: "$&return true;"
             },
         },
@@ -360,7 +359,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: "location:\"AppIconHome\"",
+            find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -788,7 +787,14 @@ export default definePlugin({
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
-                const link = this.getStickerLink(sticker.id);
+                // [12/12/2023]
+                // Work around an annoying bug where getStickerLink will return StickerType.GIF,
+                // but will give us a normal non animated png for no reason
+                // TODO: Remove this workaround when it's not needed anymore
+                let link = this.getStickerLink(sticker.id);
+                if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
+                    link = link.replace(".png", ".gif");
+                }
                 if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
                     return { cancel: true };

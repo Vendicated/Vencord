@@ -15,7 +15,6 @@ import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import {
     Button,
     Card,
-    FluxDispatcher,
     Forms,
     React,
     showToast,
@@ -24,12 +23,15 @@ import {
     useRef,
     useState
 } from "@webpack/common";
+import PluginModal from "@components/PluginSettings/PluginModal";
+import { openModal } from "@utils/modal";
 import { UserThemeHeader } from "main/themes";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
 import { OnlineThemes } from "./OnlineThemes";
 import { SettingsTab, wrapTab } from "./shared";
+import { openInviteModal } from "@utils/discord";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -81,18 +83,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete, showDelete, extr
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                const { invite } = await InviteActions.resolveInvite(
-                                    theme.invite,
-                                    "Desktop Modal"
-                                );
-                                if (!invite) return showToast("Invalid or expired invite");
-
-                                FluxDispatcher.dispatch({
-                                    type: "INVITE_MODAL_OPEN",
-                                    invite,
-                                    code: theme.invite,
-                                    context: "APP"
-                                });
+                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
                             }}
                         >
                             Discord Server
@@ -210,6 +201,21 @@ function ThemesTab() {
                             >
                                 Edit QuickCSS
                             </Button>
+
+                            {Vencord.Settings.plugins.ClientTheme.enabled && (
+                                <Button
+                                    onClick={() => openModal(modalProps => (
+                                        <PluginModal
+                                            {...modalProps}
+                                            plugin={Vencord.Plugins.plugins.ClientTheme}
+                                            onRestartNeeded={() => { }}
+                                        />
+                                    ))}
+                                    size={Button.Sizes.SMALL}
+                                >
+                                    Edit ClientTheme
+                                </Button>
+                            )}
                         </>
                     </Card>
 
