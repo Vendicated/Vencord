@@ -3,6 +3,8 @@
     inset: 0;
     z-index: 9999;
     border: 2px solid grey;
+    /* negate the border offsetting the lens */
+    margin: -2px;
     border-radius: 50%;
     overflow: hidden;
     cursor: none;
