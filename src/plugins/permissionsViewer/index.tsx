@@ -126,7 +126,9 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => () => {
-        if (!props || (type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild)) return children;
+        if (!props) return;
+        if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
+            return children;
 
         const group = findGroupChildrenByChildId(childId, children);
 

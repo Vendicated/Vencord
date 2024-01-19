@@ -19,6 +19,16 @@
     border: thin solid var(--background-modifier-accent) !important;
 }
 
-.client-theme-warning {
+.client-theme-warning * {
     color: var(--text-danger);
+}
+
+.client-theme-contrast-warning {
+    background-color: var(--background-primary);
+    padding: 0.5rem;
+    border-radius: .5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
