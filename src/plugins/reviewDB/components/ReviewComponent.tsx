@@ -121,6 +121,7 @@ export default LazyComponent(() => {
                 {
                     marginLeft: "0px",
                     paddingLeft: "52px", // wth is this
+                    // nobody knows anymore
                 }
             }>
 
