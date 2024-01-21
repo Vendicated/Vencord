@@ -36,62 +36,68 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (!props) return;
-    const { reverseImageSearchType, itemHref, itemSrc } = props;
+function makeSearchItem(src: string) {
+    return (
+        <Menu.MenuItem
+            label="Search Image"
+            key="search-image"
+            id="search-image"
+        >
+            {Object.keys(Engines).map((engine, i) => {
+                const key = "search-image-" + engine;
+                return (
+                    <Menu.MenuItem
+                        key={key}
+                        id={key}
+                        label={
+                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                                <img
+                                    style={{
+                                        borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
+                                            ? "50%"
+                                            : void 0
+                                    }}
+                                    aria-hidden="true"
+                                    height={16}
+                                    width={16}
+                                    src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
+                                />
+                                {engine}
+                            </Flex>
+                        }
+                        action={() => search(src, Engines[engine])}
+                    />
+                );
+            })}
+            <Menu.MenuItem
+                key="search-image-all"
+                id="search-image-all"
+                label={
+                    <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                        <OpenExternalIcon height={16} width={16} />
+                        All
+                    </Flex>
+                }
+                action={() => Object.values(Engines).forEach(e => search(src, e))}
+            />
+        </Menu.MenuItem>
+    );
+}
 
-    if (!reverseImageSearchType || reverseImageSearchType !== "img") return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (props?.reverseImageSearchType !== "img") return;
 
-    const src = itemHref ?? itemSrc;
+    const src = props.itemHref ?? props.itemSrc;
 
     const group = findGroupChildrenByChildId("copy-link", children);
-    if (group) {
-        group.push((
-            <Menu.MenuItem
-                label="Search Image"
-                key="search-image"
-                id="search-image"
-            >
-                {Object.keys(Engines).map((engine, i) => {
-                    const key = "search-image-" + engine;
-                    return (
-                        <Menu.MenuItem
-                            key={key}
-                            id={key}
-                            label={
-                                <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                                    <img
-                                        style={{
-                                            borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
-                                                ? "50%"
-                                                : void 0
-                                        }}
-                                        aria-hidden="true"
-                                        height={16}
-                                        width={16}
-                                        src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
-                                    />
-                                    {engine}
-                                </Flex>
-                            }
-                            action={() => search(src, Engines[engine])}
-                        />
-                    );
-                })}
-                <Menu.MenuItem
-                    key="search-image-all"
-                    id="search-image-all"
-                    label={
-                        <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                            <OpenExternalIcon height={16} width={16} />
-                            All
-                        </Flex>
-                    }
-                    action={() => Object.values(Engines).forEach(e => search(src, e))}
-                />
-            </Menu.MenuItem>
-        ));
-    }
+    group?.push(makeSearchItem(src));
+};
+
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (!props?.src) return;
+
+    const group = findGroupChildrenByChildId("copy-native-link", children) ?? children;
+    group.push(makeSearchItem(props.src));
 };
 
 export default definePlugin({
@@ -111,10 +117,12 @@ export default definePlugin({
     ],
 
     start() {
-        addContextMenuPatch("message", imageContextMenuPatch);
+        addContextMenuPatch("message", messageContextMenuPatch);
+        addContextMenuPatch("image-context", imageContextMenuPatch);
     },
 
     stop() {
-        removeContextMenuPatch("message", imageContextMenuPatch);
+        removeContextMenuPatch("message", messageContextMenuPatch);
+        removeContextMenuPatch("image-context", imageContextMenuPatch);
     }
 });
