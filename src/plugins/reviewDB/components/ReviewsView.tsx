@@ -18,13 +18,13 @@
 
 import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { Forms, React, RelationshipStore, showToast, useRef, UserStore } from "@webpack/common";
+import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { cl } from "../utils";
+import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 
@@ -168,7 +168,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                                 comment: res.value,
                             });
 
-                            if (response?.success) {
+                            if (response) {
                                 refetch();
 
                                 const slateEditor = editorRef.current.ref.current.getSlateEditor();
@@ -180,8 +180,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                                         focus: Editor.end(slateEditor, []),
                                     }
                                 });
-                            } else if (response?.message) {
-                                showToast(response.message);
                             }
 
                             // even tho we need to return this, it doesnt do anything
