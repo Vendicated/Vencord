@@ -62,14 +62,14 @@ export const settings = definePluginSettings({
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>
 
                 <Button
-                    color={Button.Colors.CUSTOM}
-                    style={{ backgroundColor: "deeppink", color: "#fff" }}
+                    color={Button.Colors.GREEN}
                     onClick={() => {
                         VencordNative.native.openExternal("https://github.com/sponsors/mantikafasi");
                     }}
                 >
-                    <span>Support ReviewDB development</span>
+                    Support ReviewDB development
                 </Button>
+
                 <Button onClick={async () => {
                     let url = "https://reviewdb.mantikafasi.dev/";
                     const token = await getToken();
