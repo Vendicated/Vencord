@@ -65,7 +65,7 @@
 }
 
 .vc-rdb-review:hover {
-    background: var(--background-modifier-hover) !important;
+    background: var(--background-message-hover) !important;
     border-radius: 8px;
 }
 
