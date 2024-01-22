@@ -35,7 +35,7 @@ export default definePlugin({
     ],
     main(query){
         if (query.offset > 5000) {
-            query.sort_order === "asc" ? "desc" : "asc";
+            query.sort_order = query.sort_order === "asc" ? "desc" : "asc";
 
             if (query.offset > 5000 - 5000) {
                 query.offset = 0;
