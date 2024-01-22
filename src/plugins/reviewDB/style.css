@@ -59,8 +59,14 @@
 }
 
 .vc-rdb-review {
-    margin-top: 8px;
-    margin-bottom: 8px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    padding-right: 32px !important;
+}
+
+.vc-rdb-review:hover {
+    background: var(--background-message-hover) !important;
+    border-radius: 8px;
 }
 
 .vc-rdb-review-comment img {
@@ -89,6 +95,19 @@
     padding: 1em;
     display: grid;
     gap: 0.75em;
+}
+
+.vc-rdb-button-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* stylelint-disable-next-line media-feature-range-notation */
+@media (max-width: 600px) {
+    .vc-rdb-button-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .vc-rdb-block-modal-row {
