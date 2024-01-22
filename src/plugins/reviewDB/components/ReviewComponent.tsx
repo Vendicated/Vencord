@@ -20,13 +20,13 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Parser, showToast, Timestamp } from "@webpack/common";
+import { Alerts, moment, Parser, Timestamp, useState } from "@webpack/common";
 
 import { Auth, getToken } from "../auth";
 import { Review, ReviewType } from "../entities";
 import { blockUser, deleteReview, reportReview, unblockUser } from "../reviewDbApi";
 import { settings } from "../settings";
-import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl } from "../utils";
+import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "../utils";
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
@@ -51,6 +51,8 @@ export default LazyComponent(() => {
     const dateFormat = new Intl.DateTimeFormat();
 
     return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
+        const [showAll, setShowAll] = useState(false);
+
         function openModal() {
             openUserProfile(review.sender.discordID);
         }
@@ -66,10 +68,9 @@ export default LazyComponent(() => {
                         return showToast("You must be logged in to delete reviews.");
                     } else {
                         deleteReview(review.id).then(res => {
-                            if (res.success) {
+                            if (res) {
                                 refetch();
                             }
-                            showToast(res.message);
                         });
                     }
                 }
@@ -116,11 +117,11 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, cl("review"))} style={
+            <div className={classes(cl("review"), cozyMessage, wrapper, message, groupStart, cozy)} style={
                 {
                     marginLeft: "0px",
                     paddingLeft: "52px", // wth is this
-                    paddingRight: "16px"
+                    // nobody knows anymore
                 }
             }>
 
@@ -168,7 +169,9 @@ export default LazyComponent(() => {
                 }
 
                 <div className={cl("review-comment")}>
-                    {Parser.parseGuildEventDescription(review.comment)}
+                    {(review.comment.length > 200 && !showAll)
+                        ? [Parser.parseGuildEventDescription(review.comment.substring(0, 200)), "...", <br />, (<a onClick={() => setShowAll(true)}>Read more</a>)]
+                        : Parser.parseGuildEventDescription(review.comment)}
                 </div>
 
                 {review.id !== 0 && (
