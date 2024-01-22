@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+
 export default definePlugin({
     name: "SearchFix",
     description: 'Fixes the annoying "We dropped the magnifying glass!" error.',
@@ -34,11 +35,7 @@ export default definePlugin({
     ],
     main(query){
         if (query.offset > 5000) {
-            if (query.sort_order === "asc") {
-                query.sort_order = "desc";
-            } else {
-                query.sort_order = "asc";
-            }
+            query.sort_order === "asc" ? "desc" : "asc";
 
             if (query.offset > 5000 - 5000) {
                 query.offset = 0;
