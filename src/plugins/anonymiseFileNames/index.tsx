@@ -81,7 +81,7 @@ export default definePlugin({
         {
             find: ".Messages.ATTACHMENT_UTILITIES_SPOILER",
             replacement: {
-                match: /(?<=children:\[)(?=.{10,80}tooltip:\i\.\i\.Messages\.ATTACHMENT_UTILITIES_SPOILER)/,
+                match: /(?<=children:\[)(?=.{10,80}tooltip:.{0,100}\i\.\i\.Messages\.ATTACHMENT_UTILITIES_SPOILER)/,
                 replace: "arguments[0].canEdit!==false?$self.renderIcon(arguments[0]):null,"
             },
         },
