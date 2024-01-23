@@ -46,6 +46,23 @@ const settings = definePluginSettings({
     }
 });
 
+const MEDIA_PROXY_URL = "https://media.discordapp.net";
+const CDN_URL = "https://cdn.discordapp.com";
+
+function fixImageUrl(urlString: string, explodeWebp: boolean) {
+    const url = new URL(urlString);
+    if (url.origin === CDN_URL) return urlString;
+    if (url.origin === MEDIA_PROXY_URL) return CDN_URL + url.pathname;
+
+    url.searchParams.delete("width");
+    url.searchParams.delete("height");
+    url.searchParams.set("quality", "lossless");
+    if (explodeWebp && url.searchParams.get("format") === "webp")
+        url.searchParams.set("format", "png");
+
+    return url.toString();
+}
+
 export default definePlugin({
     name: "WebContextMenus",
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
@@ -182,28 +199,40 @@ export default definePlugin({
     ],
 
     async copyImage(url: string) {
-        // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
-        // via canvas first
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            canvas.getContext("2d")!.drawImage(img, 0, 0);
+        url = fixImageUrl(url, true);
 
-            canvas.toBlob(data => {
-                navigator.clipboard.write([
-                    new ClipboardItem({
-                        "image/png": data!
-                    })
-                ]);
-            }, "image/png");
-        };
-        img.crossOrigin = "anonymous";
-        img.src = url;
+        let imageData = await fetch(url).then(r => r.blob());
+        if (imageData.type !== "image/png") {
+            const bitmap = await createImageBitmap(imageData);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
+
+            await new Promise<void>(done => {
+                canvas.toBlob(data => {
+                    imageData = data!;
+                    done();
+                }, "image/png");
+            });
+        }
+
+        if (IS_VESKTOP && VesktopNative.clipboard) {
+            VesktopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
+            return;
+        } else {
+            navigator.clipboard.write([
+                new ClipboardItem({
+                    "image/png": imageData
+                })
+            ]);
+        }
     },
 
     async saveImage(url: string) {
+        url = fixImageUrl(url, false);
+
         const data = await fetchImage(url);
         if (!data) return;
 
