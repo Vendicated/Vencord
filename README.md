@@ -25,6 +25,25 @@ The cutest Discord client mod
 ## Installing / Uninstalling
 
 Visit https://vencord.dev/download
+<details>
+<summary>Installing Vencord plugin in Firefox</summary>
+<h4>You can install Vencord for Firefox by following these steps</h4>
+<ol>
+  <li>Keep in mind that you'll need <b>Firefox ESR/Dev Edition/Nightly</b> or <b>Librewolf</b></li>
+  <li>If you have one of these, download the zip file <a href="https://raw.githubusercontent.com/Vencord/builds/main/extension-firefox.zip">here</a></li>
+  <li>Enter <code>about:config</code> to the address bar and press enter</li>
+  <li>Search for <code>xpinstall.signatures.required</code> and set it to <b>false</b></li>
+  <ul>
+    <li><em><strong>This will allow other unsigned addons to be installed from file which could pose a security threat so be mindful about addons you're installing using the next step</strong></em></li>
+  </ul>
+  <li>After that, go to <b>Settings->Extensions & Themes</b> and click on the cogwheel button</li>
+  <li>Select <b>Install Add-On From File...</b> and search for the downloaded zip file</li>
+  <li>Vencord should now be installed, if you receive a notification saying</li>
+  <ul>
+    <li><code>This addon could not be installed because it has not been verified</code> double check that you have <b>Firefox ESR/Dev Edition/Nightly</b> or <b>Librewolf</b></li>
+  </ul>
+</ol>
+</details>
 
 ## Join our Support/Community Server
 
