@@ -112,6 +112,7 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                             const key = openModal(modalProps =>
                                 <EditModal
                                     modalProps={modalProps}
+                                    modalKey={key}
                                     bookmark={bkm}
                                     onSave={name => {
                                         const newBookmarks = [...bookmark.bookmarks];
