@@ -35,11 +35,11 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "VencordInstaller.exe";
+            return "VencordInstallerCli.exe";
         case "darwin":
             return "VencordInstaller.MacOS.zip";
         case "linux":
-            return "VencordInstaller-" + (process.env.WAYLAND_DISPLAY ? "wayland" : "x11");
+            return "VencordInstallerCli-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
