@@ -5,14 +5,14 @@
  */
 
 import { useTimer } from "@utils/react";
+import { formatDurationMs } from "@utils/text";
 import { Tooltip } from "@webpack/common";
 
 import { EyeIcon } from "./EyeIcon";
 import { settings } from "./index";
 
 export function Timer({ time }: Readonly<{ time: number; }>) {
-    const timer = useTimer({});
-    const formatted = new Date(Date.now() - time).toISOString().substring(11, 19);
+    const durationMs = useTimer({ deps: [time] });
 
     if (settings.store.alwaysShow) {
         return <p style={{
@@ -29,12 +29,12 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
             background: "rgba(0,0,0,.5)",
             borderRadius: 3
         }
-        }> {formatted}</p>;
+        }> {formatDurationMs(durationMs)}</p>;
     } else {
         // show as a tooltip
         // TODO: should probably get the icon class dynamically
         return (
-            <Tooltip text={formatted}>
+            <Tooltip text={formatDurationMs(durationMs)}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
                         onMouseEnter={onMouseEnter}

@@ -8,11 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import { UserStore } from "@webpack/common";
+import { VoiceState } from "@webpack/types";
 
 import { Timer } from "./Timer";
-
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 export const settings = definePluginSettings({
     alwaysShow: {
@@ -21,7 +20,21 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: false
     },
+    trackSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Also track for yourself",
+        restartNeeded: true,
+        default: false
+    },
 });
+
+// Save the join time of all users in a Map
+const userJoinTimes = new Map<string, number>();
+
+// For every user, channelId and oldChannelId will differ when moving channel.
+// Only for the local user, channelId and oldChannelId will be the same when moving channel,
+// for some ungodly reason
+let myLastChannelId: string | undefined;
 
 export default definePlugin({
     name: "AllCallTimers",
@@ -42,90 +55,52 @@ export default definePlugin({
         }
     ],
 
-    allUsers(guilds: Record<string, any>) {
-        // return an array of all users in all guilds
-        const users: string[] = [];
-        for (const guildId in guilds) {
-            const guild = guilds[guildId];
-            for (const userId in guild) {
-                users.push(userId);
-            }
-        }
-        return users;
-    },
+    flux: {
+        VOICE_STATE_UPDATES({ voiceStates }: {voiceStates: VoiceState[];}) {
+            const myId = UserStore.getCurrentUser().id;
 
-    updateListings() {
-        const states = VoiceStateStore.getAllVoiceStates();
-
-        const currentUsers = this.allUsers(states);
-        for (const userId in this.users) {
-            if (!currentUsers.includes(userId)) {
-                delete this.users[userId];
-            }
-        }
-
-        // states is an array of {guildId: {userId: {channelId: channelId}}}
-        // iterate through all guilds and update the users, check if the user is in the same channel as before
-        // if userId is not in any guild it should be deleted from the users object
-        for (const guildId in states) {
-            const guild = states[guildId];
-            for (const userId in guild) {
-                const { channelId } = guild[userId];
-                if (!channelId) {
-                    return;
+            for (const state of voiceStates) {
+                const { userId, channelId } = state;
+                const isMe = userId === myId;
+                if (!settings.store.trackSelf && isMe) {
+                    continue;
                 }
-                if (this.users[userId]) {
-                    // user is already in the users object
-                    if (this.users[userId].channelId !== channelId) {
-                        // user changed the channel
-                        this.users[userId].channelId = channelId;
-                        this.users[userId].joinTime = Date.now();
+
+                let { oldChannelId } = state;
+                if (isMe && channelId !== myLastChannelId) {
+                    oldChannelId = myLastChannelId;
+                    myLastChannelId = channelId;
+                }
+
+                if (channelId !== oldChannelId) {
+                    if (channelId) {
+                        // move or join
+                        userJoinTimes.set(userId, Date.now());
+                    } else if (oldChannelId) {
+                        // leave
+                        userJoinTimes.delete(userId);
                     }
-                } else {
-                    // user is not in the users object
-                    this.users[userId] = {
-                        channelId: channelId,
-                        joinTime: Date.now()
-                    };
                 }
             }
-        }
-    },
-
-    start() {
-        this.users = {};
-
-        // start a timeout that runs every second and calls updateListings
-        this.timeout = setInterval(() => this.updateListings(), 1000);
-    },
-
-    stop() {
-        // clear the timeout
-        clearInterval(this.timeout);
+        },
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
         const userId = property.props.user.id;
-
-        if (VoiceStateStore == null) {
-            console.log("VoiceStateStore is null");
-            return;
-        }
-
         return this.renderTimer(userId);
     },
 
     renderTimer(userId: string) {
-        // get the user from the users object
-        const user = this.users[userId];
-        if (!user) {
+        // get the user join time from the users object
+        const joinTime = userJoinTimes.get(userId);
+        if (!joinTime) {
+            // join time is unknown
             return;
         }
-        const startTime = user.joinTime;
 
         return (
             <ErrorBoundary>
-                <Timer time={startTime} />
+                <Timer time={joinTime} />
             </ErrorBoundary>
         );
     },
