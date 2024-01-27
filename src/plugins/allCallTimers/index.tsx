@@ -51,23 +51,23 @@ export default definePlugin({
         for (const guildId in states) {
             const guild = states[guildId];
             for (const userId in guild) {
-                const user = guild[userId];
-                const { channelId } = user;
-                if (channelId) {
-                    if (this.users[userId]) {
-                        // user is already in the users object
-                        if (this.users[userId]["channelId"] !== channelId) {
-                            // user changed the channel
-                            this.users[userId]["channelId"] = channelId;
-                            this.users[userId]["joinTime"] = Date.now();
-                        }
-                    } else {
-                        // user is not in the users object
-                        this.users[userId] = {
-                            "channelId": channelId,
-                            "joinTime": Date.now()
-                        };
+                const { channelId } = guild[userId];
+                if (!channelId) {
+                    return;
+                }
+                if (this.users[userId]) {
+                    // user is already in the users object
+                    if (this.users[userId].channelId !== channelId) {
+                        // user changed the channel
+                        this.users[userId].channelId = channelId;
+                        this.users[userId].joinTime = Date.now();
                     }
+                } else {
+                    // user is not in the users object
+                    this.users[userId] = {
+                        channelId: channelId,
+                        joinTime: Date.now()
+                    };
                 }
             }
         }
@@ -104,7 +104,7 @@ export default definePlugin({
         if (!user) {
             return;
         }
-        const startTime = user["joinTime"];
+        const startTime = user.joinTime;
         return <ErrorBoundary>
             <this.Timer time={startTime} />
         </ErrorBoundary>;
