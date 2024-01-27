@@ -1,9 +1,15 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import { useTimer } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findStore } from "@webpack";
 import { React } from "@webpack/common";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { useTimer } from "@utils/react";
-import { Devs } from "@utils/constants";
 
 
 export default definePlugin({
@@ -23,7 +29,7 @@ export default definePlugin({
         }
     ],
 
-    allUsers(guilds) {
+    allUsers(guilds: Record<string, any>) {
         // return an array of all users in all guilds
         const users: string[] = [];
         for (const guildId in guilds) {
@@ -87,7 +93,7 @@ export default definePlugin({
         clearInterval(this.timeout);
     },
 
-    showInjection(property) {
+    showInjection(property: { props: { user: { id: string; }; }; }) {
         const userId = property.props.user.id;
 
         if (this.VoiceStateStore == null) {
