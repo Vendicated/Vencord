@@ -9,8 +9,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStore, } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { Tooltip } from "@webpack/common";
+
+
+const VoiceStateStore = findStoreLazy("VoiceStateStore");
+
 
 export const settings = definePluginSettings({
     alwaysShow: {
@@ -54,7 +58,7 @@ export default definePlugin({
     },
 
     updateListings() {
-        const states = this.VoiceStateStore.getAllVoiceStates();
+        const states = VoiceStateStore.getAllVoiceStates();
 
         const currentUsers = this.allUsers(states);
         for (const userId in this.users) {
@@ -92,8 +96,6 @@ export default definePlugin({
     },
 
     start() {
-        this.VoiceStateStore = findStore("VoiceStateStore");
-
         this.users = {};
 
         // start a timeout that runs every second and calls updateListings
@@ -108,7 +110,7 @@ export default definePlugin({
     showInjection(property: { props: { user: { id: string; }; }; }) {
         const userId = property.props.user.id;
 
-        if (this.VoiceStateStore == null) {
+        if (VoiceStateStore == null) {
             console.log("VoiceStateStore is null");
             return;
         }
@@ -141,7 +143,7 @@ export default definePlugin({
             } > {formatted}</p >;
         } else {
             // show as a tooltip
-            const icon = <svg className="icon__1d60c" height="16" width="16" viewBox="0 0 455 455" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve">
+            const icon = <svg className="icon__1d60c" height="10" width="10" viewBox="0 0 455 455" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve">
                 <path fill="currentColor" d="M332.229,90.04l14.238-27.159l-26.57-13.93L305.67,76.087c-19.618-8.465-40.875-13.849-63.17-15.523V30h48.269V0H164.231v30
         H212.5v30.563c-22.295,1.674-43.553,7.059-63.171,15.523L135.103,48.95l-26.57,13.93l14.239,27.16
         C67.055,124.958,30,186.897,30,257.5C30,366.576,118.424,455,227.5,455S425,366.576,425,257.5
