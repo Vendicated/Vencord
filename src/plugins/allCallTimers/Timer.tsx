@@ -32,6 +32,7 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
         }> {formatted}</p>;
     } else {
         // show as a tooltip
+        // TODO: should probably get the icon class dynamically
         return (
             <Tooltip text={formatted}>
                 {({ onMouseEnter, onMouseLeave }) => (
@@ -40,7 +41,7 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
                         onMouseLeave={onMouseLeave}
                         role="tooltip"
                     >
-                        <EyeIcon />
+                        <EyeIcon className="icon__1d60c" />
                     </div>
                 )}
             </Tooltip>
