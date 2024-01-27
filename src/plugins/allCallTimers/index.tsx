@@ -3,18 +3,14 @@ import { findStore } from "@webpack";
 import { React } from "@webpack/common";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useTimer } from "@utils/react";
-
+import { Devs } from "@utils/constants";
 
 
 export default definePlugin({
     name: "AllCallTimeCounter",
     description: "Add call timer to all users in a server voice channel.",
-    authors: [
-        {
-            id: 0n,
-            name: "Max",
-        },
-    ],
+    authors: [Devs.Max],
+
     patches: [
         {
             find: "renderPrioritySpeaker",
