@@ -12,9 +12,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { Tooltip } from "@webpack/common";
 
+import { EyeIcon } from "./EyeIcon";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
-
 
 export const settings = definePluginSettings({
     alwaysShow: {
@@ -25,11 +25,10 @@ export const settings = definePluginSettings({
     },
 });
 
-
 export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
-    authors: [Devs.Max],
+    authors: [Devs.Max, Devs.D3SOX],
 
     settings,
 
@@ -132,32 +131,35 @@ export default definePlugin({
 
     Timer({ time }: { time: number; }) {
         const timer = useTimer({});
-        const startTime = time;
-
-        const formatted = new Date(Date.now() - startTime).toISOString().substr(11, 8);
+        const formatted = new Date(Date.now() - time).toISOString().substring(11, 19);
 
         if (settings.store.alwaysShow) {
             return <p style={{
-                margin: 0, fontWeight: "bold", letterSpacing: -2, fontFamily: "monospace", fontSize: 12, color: "red", position: "absolute", bottom: 0, right: 0, padding: 2, background: "rgba(0,0,0,.5)", borderRadius: 3
+                margin: 0,
+                fontWeight: "bold",
+                letterSpacing: -2,
+                fontFamily: "monospace",
+                fontSize: 12,
+                color: "red",
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                padding: 2,
+                background: "rgba(0,0,0,.5)",
+                borderRadius: 3
             }
-            } > {formatted}</p >;
+            }> {formatted}</p>;
         } else {
             // show as a tooltip
-            const icon = <svg className="icon__1d60c" height="10" width="10" viewBox="0 0 455 455" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve">
-                <path fill="currentColor" d="M332.229,90.04l14.238-27.159l-26.57-13.93L305.67,76.087c-19.618-8.465-40.875-13.849-63.17-15.523V30h48.269V0H164.231v30
-        H212.5v30.563c-22.295,1.674-43.553,7.059-63.171,15.523L135.103,48.95l-26.57,13.93l14.239,27.16
-        C67.055,124.958,30,186.897,30,257.5C30,366.576,118.424,455,227.5,455S425,366.576,425,257.5
-        C425,186.896,387.944,124.958,332.229,90.04z M355,272.5H212.5V130h30v112.5H355V272.5z"/>
-            </svg>;
-
             return (
                 <Tooltip text={formatted}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
+                            role="tooltip"
                         >
-                            {icon}
+                            <EyeIcon />
                         </div>
                     )}
                 </Tooltip>
