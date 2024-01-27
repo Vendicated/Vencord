@@ -121,7 +121,7 @@ export default definePlugin({
         const formatted = new Date(Date.now() - start_time).toISOString().substr(11, 8);
 
         return <p style={{
-            margin: 0, fontWeight: "bold", letterSpacing: -1, fontFamily: "var(--font-code)", fontSize: 12, color: "red", position: "absolute", bottom: 0, right: 0, padding: 2, background: "rgba(0,0,0,.5)", borderRadius: 3
+            margin: 0, fontWeight: "bold", letterSpacing: -2, fontFamily: "monospace", fontSize: 12, color: "red", position: "absolute", bottom: 0, right: 0, padding: 2, background: "rgba(0,0,0,.5)", borderRadius: 3
         }
         } > {formatted}</p >;
     }
