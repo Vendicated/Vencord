@@ -8,8 +8,8 @@ import { useFixedTimer } from "@utils/react";
 import { formatDurationMs } from "@utils/text";
 import { Tooltip } from "@webpack/common";
 
-import { EyeIcon } from "./EyeIcon";
 import { settings } from "./index";
+import { TimerIcon } from "./TimerIcon";
 
 export function Timer({ time }: Readonly<{ time: number; }>) {
     const durationMs = useFixedTimer({ initialTime: time });
@@ -40,7 +40,7 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
                         onMouseLeave={onMouseLeave}
                         role="tooltip"
                     >
-                        <EyeIcon />
+                        <TimerIcon />
                     </div>
                 )}
             </Tooltip>

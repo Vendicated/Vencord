@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export function EyeIcon({ height = 16, width = 16, className }: Readonly<{
+export function TimerIcon({ height = 16, width = 16, className }: Readonly<{
     height?: number;
     width?: number;
     className?: string;
