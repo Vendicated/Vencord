@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { useTimer } from "@utils/react";
+import { useFixedTimer } from "@utils/react";
 import { formatDurationMs } from "@utils/text";
 import { Tooltip } from "@webpack/common";
 
@@ -12,7 +12,7 @@ import { EyeIcon } from "./EyeIcon";
 import { settings } from "./index";
 
 export function Timer({ time }: Readonly<{ time: number; }>) {
-    const durationMs = useTimer({ deps: [time] });
+    const durationMs = useFixedTimer({ initialTime: time });
 
     if (settings.store.alwaysShow) {
         return <p style={{
