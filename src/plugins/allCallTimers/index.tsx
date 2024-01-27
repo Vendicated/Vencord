@@ -25,22 +25,22 @@ export default definePlugin({
 
     allUsers(guilds) {
         // return an array of all users in all guilds
-        let users: string[] = [];
-        for (let guildId in guilds) {
-            let guild = guilds[guildId];
-            for (let userId in guild) {
+        const users: string[] = [];
+        for (const guildId in guilds) {
+            const guild = guilds[guildId];
+            for (const userId in guild) {
                 users.push(userId);
             }
         }
         return users;
     },
 
-    update_listings() {
+    updateListings() {
         const states = this.VoiceStateStore.getAllVoiceStates();
 
-        let current_users = this.allUsers(states);
-        for (let userId in this.users) {
-            if (!current_users.includes(userId)) {
+        const currentUsers = this.allUsers(states);
+        for (const userId in this.users) {
+            if (!currentUsers.includes(userId)) {
                 delete this.users[userId];
             }
         }
@@ -48,24 +48,24 @@ export default definePlugin({
         // states is an array of {guildId: {userId: {channelId: channelId}}}
         // iterate through all guilds and update the users, check if the user is in the same channel as before
         // if userId is not in any guild it should be deleted from the users object
-        for (let guildId in states) {
-            let guild = states[guildId];
-            for (let userId in guild) {
-                let user = guild[userId];
-                let { channelId } = user;
+        for (const guildId in states) {
+            const guild = states[guildId];
+            for (const userId in guild) {
+                const user = guild[userId];
+                const { channelId } = user;
                 if (channelId) {
                     if (this.users[userId]) {
                         // user is already in the users object
                         if (this.users[userId]["channelId"] !== channelId) {
                             // user changed the channel
                             this.users[userId]["channelId"] = channelId;
-                            this.users[userId]["join_time"] = Date.now();
+                            this.users[userId]["joinTime"] = Date.now();
                         }
                     } else {
                         // user is not in the users object
                         this.users[userId] = {
                             "channelId": channelId,
-                            "join_time": Date.now()
+                            "joinTime": Date.now()
                         };
                     }
                 }
@@ -78,8 +78,8 @@ export default definePlugin({
 
         this.users = {};
 
-        // start a timeout that runs every second and calls update_listings
-        this.timeout = setInterval(() => this.update_listings(), 1000);
+        // start a timeout that runs every second and calls updateListings
+        this.timeout = setInterval(() => this.updateListings(), 1000);
     },
 
     stop() {
@@ -100,21 +100,21 @@ export default definePlugin({
 
     renderTimer(userId: string) {
         // get the user from the users object
-        let user = this.users[userId];
+        const user = this.users[userId];
         if (!user) {
             return;
         }
-        let start_time = user["join_time"];
+        const startTime = user["joinTime"];
         return <ErrorBoundary>
-            <this.Timer time={start_time} />
+            <this.Timer time={startTime} />
         </ErrorBoundary>;
     },
 
     Timer({ time }: { time: number; }) {
         const timer = useTimer({});
-        const start_time = time;
+        const startTime = time;
 
-        const formatted = new Date(Date.now() - start_time).toISOString().substr(11, 8);
+        const formatted = new Date(Date.now() - startTime).toISOString().substr(11, 8);
 
         return <p style={{
             margin: 0, fontWeight: "bold", letterSpacing: -2, fontFamily: "monospace", fontSize: 12, color: "red", position: "absolute", bottom: 0, right: 0, padding: 2, background: "rgba(0,0,0,.5)", borderRadius: 3
