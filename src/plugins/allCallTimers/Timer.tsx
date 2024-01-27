@@ -32,7 +32,6 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
         }> {formatDurationMs(durationMs)}</p>;
     } else {
         // show as a tooltip
-        // TODO: should probably get the icon class dynamically
         return (
             <Tooltip text={formatDurationMs(durationMs)}>
                 {({ onMouseEnter, onMouseLeave }) => (
