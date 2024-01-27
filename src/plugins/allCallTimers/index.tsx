@@ -7,7 +7,7 @@ import { Devs } from "@utils/constants";
 
 
 export default definePlugin({
-    name: "AllCallTimeCounter",
+    name: "allCallTimers",
     description: "Add call timer to all users in a server voice channel.",
     authors: [Devs.Max],
 
