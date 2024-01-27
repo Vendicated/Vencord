@@ -21,4 +21,5 @@ export * from "./fluxEvents";
 export * from "./menu";
 export * from "./stores";
 export * from "./utils";
+export * from "./voicestate";
 
