@@ -41,7 +41,7 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
                         onMouseLeave={onMouseLeave}
                         role="tooltip"
                     >
-                        <EyeIcon className="icon__1d60c" />
+                        <EyeIcon />
                     </div>
                 )}
             </Tooltip>
