@@ -412,8 +412,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 696392247205298207n,
     },
     Max: {
-        id: 0n,
         name: "Max",
+        id: 0n,
     },
 } satisfies Record<string, Dev>);
 
