@@ -5,14 +5,21 @@
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, useSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { FollowIcon, UnfollowIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { filters, find, findByPropsLazy } from "@webpack";
+import { Menu, React, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 import type { Channel, User } from "discord-types/general";
+
+const HeaderBarIcon = LazyComponent(() => {
+    const filter = filters.byCode(".HEADER_BAR_BADGE");
+    return find(m => m.Icon && filter(m.Icon)).Icon;
+});
 
 export const settings = definePluginSettings({
     followLeave: {
@@ -21,6 +28,13 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: false
     },
+    followUserId: {
+        type: OptionType.STRING,
+        description: "Followed User ID",
+        restartNeeded: false,
+        hidden: true, // Managed via context menu and indicator
+        default: "",
+    }
 });
 
 const ChannelActions: {
@@ -29,10 +43,10 @@ const ChannelActions: {
 } = findByPropsLazy("disconnect", "selectVoiceChannel");
 
 function toggleFollow(userId: string) {
-    if (followedUserId === userId) {
-        followedUserId = null;
+    if (settings.store.followUserId === userId) {
+        settings.store.followUserId = "";
     } else {
-        followedUserId = userId;
+        settings.store.followUserId = userId;
     }
 }
 
@@ -44,7 +58,7 @@ interface UserContextProps {
 
 const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
     if (!user || !guildId || user.id === UserStore.getCurrentUser().id) return;
-    const isFollowed = followedUserId === user.id;
+    const isFollowed = settings.store.followUserId === user.id;
     const label = isFollowed ? "Unfollow User" : "Follow User";
     const icon = isFollowed ? UnfollowIcon : FollowIcon;
 
@@ -60,15 +74,22 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     ));
 };
 
-// Save the followed user id
-let followedUserId: string | null = null;
-
 export default definePlugin({
     name: "FollowUser",
     description: "Adds a follow user option in the guild user context menu to always be in the same VC as them",
     authors: [Devs.D3SOX],
 
     settings,
+
+    patches: [
+        {
+            find: "toolbar:function",
+            replacement: {
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
+                replace: "$1$self.addIconToToolBar(arguments[0]);$2"
+            }
+        },
+    ],
 
     start() {
         addContextMenuPatch("user-context", UserContext);
@@ -80,12 +101,12 @@ export default definePlugin({
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            if (!followedUserId) {
+            if (!settings.store.followUserId) {
                 return;
             }
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
-                const isFollowed = followedUserId === userId;
+                const isFollowed = settings.store.followUserId === userId;
 
                 if (!isFollowed) {
                     continue;
@@ -102,6 +123,41 @@ export default definePlugin({
                 }
             }
         },
+    },
+
+    FollowIndicator() {
+        const { plugins: { FollowUser: { followUserId } } } = useSettings(["plugins.FollowUser.followUserId"]);
+        if (followUserId) {
+            return (
+                <HeaderBarIcon
+                    className="vc-follow-user-indicator"
+                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to unfollow)`}
+                    icon={UnfollowIcon}
+                    onClick={() => {
+                        settings.store.followUserId = "";
+                    }}
+                />
+            );
+        }
+
+        return null;
+    },
+
+    addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
+        if (Array.isArray(e.toolbar)) {
+            return e.toolbar.push(
+                <ErrorBoundary noop={true} key="follow-indicator">
+                    <this.FollowIndicator/>
+                </ErrorBoundary>
+            );
+        }
+
+        e.toolbar = [
+            <ErrorBoundary noop={true} key="follow-indicator">
+                <this.FollowIndicator />
+            </ErrorBoundary>,
+            e.toolbar,
+        ];
     },
 
 });
