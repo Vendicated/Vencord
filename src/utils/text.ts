@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { moment } from "@webpack/common";
 
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
@@ -93,14 +92,20 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
 
     return res.length ? res : `0 ${getUnitStr(unit, false, short)}`;
 }
-/**
- * Formats a duration in milliseconds into a human-readable string
- * @param ms The duration in milliseconds
- */
-export function formatDurationMs(ms: number) {
-    // here be dragons (moment fucking sucks)
-    const human = Settings.plugins.CallTimer.format === "human";
 
+/**
+ * The `formatDurationMs` function formats a duration in milliseconds into a human-readable string,
+ * with the option to include units such as days, hours, minutes, and seconds.
+ * @param {number} ms - The `ms` parameter represents the duration in milliseconds that you want to
+ * format.
+ * @param {boolean} [human=false] - The `human` parameter is a boolean flag that determines whether the
+ * duration should be formatted in a human-readable format or not. If `human` is set to `true`, the
+ * duration will be formatted as "Xd Xh Xm Xs". If `human` is set to `false` (the default), the
+ * duration will be formatted as "XX:XX:XX:XX".
+ * @returns The function `formatDurationMs` returns a formatted string representing the duration in
+ * milliseconds.
+ */
+export function formatDurationMs(ms: number, human: boolean = false) {
     const format = (n: number) => human ? n : n.toString().padStart(2, "0");
     const unit = (s: string) => human ? s : "";
     const delim = human ? " " : ":";
@@ -112,7 +117,7 @@ export function formatDurationMs(ms: number) {
     const s = Math.floor((((ms % 86400000) % 3600000) % 60000) / 1000);
 
     let res = "";
-    if (d) res += `${d}d `;
+    if (d) res += `${d}${unit("d")}${delim}`;
     if (h || res) res += `${format(h)}${unit("h")}${delim}`;
     if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
     res += `${format(s)}${unit("s")}`;
