@@ -40,6 +40,12 @@ export const settings = definePluginSettings({
                 value: "human"
             }
         ]
+    },
+    watchLargeGuilds: {
+        type: OptionType.BOOLEAN,
+        description: "Watch large guilds. This may cause lag if you're in a lot of large guilds. with active voice users. Tested with up to 2000 active voice users with no issues.",
+        restartNeeded: true,
+        default: false
     }
 });
 
@@ -97,11 +103,17 @@ export default definePlugin({
         },
     },
 
-    start() {
+    subscribeToAllGuilds() {
         // we need to subscribe to all guilds' events because otherwise we would miss updates on large guilds
         const guilds = Object.values(GuildStore.getGuilds()).map(guild => guild.id);
         const subscriptions = guilds.reduce((acc, id) => ({ ...acc, [id]: { typing: true } }), {});
         FluxDispatcher.dispatch({ type: "GUILD_SUBSCRIPTIONS_FLUSH", subscriptions });
+    },
+
+    start() {
+        if (settings.store.watchLargeGuilds) {
+            this.subscribeToAllGuilds();
+        }
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
