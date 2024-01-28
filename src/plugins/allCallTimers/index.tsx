@@ -16,13 +16,13 @@ import { Timer } from "./Timer";
 export const settings = definePluginSettings({
     showWithoutHover: {
         type: OptionType.BOOLEAN,
-        description: "Always show the timer without hover (not as pretty)!",
+        description: "Always show the timer without needing to hover (not as pretty)!",
         restartNeeded: false,
         default: false
     },
     trackSelf: {
         type: OptionType.BOOLEAN,
-        description: "Also track for yourself",
+        description: "Also track yourself",
         restartNeeded: false,
         default: true
     },
@@ -43,7 +43,7 @@ export const settings = definePluginSettings({
     },
     watchLargeGuilds: {
         type: OptionType.BOOLEAN,
-        description: "Watch large guilds. This may cause lag if you're in a lot of large guilds. with active voice users. Tested with up to 2000 active voice users with no issues.",
+        description: "Track users in large guilds. This may cause lag if you're in a lot of large guilds with active voice users. Tested with up to 2000 active voice users with no issues.",
         restartNeeded: true,
         default: false
     }
