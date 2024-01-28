@@ -8,10 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
-import { VoiceState } from "@webpack/types";
 
 import { Timer } from "./Timer";
+
+const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 export const settings = definePluginSettings({
     alwaysShow: {
@@ -28,16 +30,8 @@ export const settings = definePluginSettings({
     },
 });
 
-// Save the join time of all users in a Map
-const userJoinTimes = new Map<string, number>();
-
-// For every user, channelId and oldChannelId will differ when moving channel.
-// Only for the local user, channelId and oldChannelId will be the same when moving channel,
-// for some ungodly reason
-let myLastChannelId: string | undefined;
-
-// Allow user updates on discord first load
-let runOneTime = true;
+type ValueTuple = { channelId: string, time: number; };
+const userJoinTimes = new Map<string, ValueTuple>();
 
 export default definePlugin({
     name: "AllCallTimers",
@@ -58,39 +52,66 @@ export default definePlugin({
         }
     ],
 
-    flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            const myId = UserStore.getCurrentUser().id;
+    allUsers(guilds: Record<string, any>) {
+        // return an array of all users in all guilds
+        const users: string[] = [];
+        for (const guildId in guilds) {
+            const guild = guilds[guildId];
+            for (const userId in guild) {
+                users.push(userId);
+            }
+        }
+        return users;
+    },
 
-            for (const state of voiceStates) {
-                const { userId, channelId } = state;
-                const isMe = userId === myId;
+    updateListings() {
+        const states = VoiceStateStore.getAllVoiceStates();
 
-                // check if the state does not actually has a `oldChannelId` property
-                if (!("oldChannelId" in state) && !runOneTime) {
-                    // batch update triggered. This is ignored because it
-                    // is caused by opening a previously unopened guild
-                    continue;
+        const currentUsers = this.allUsers(states);
+        for (const userId in userJoinTimes) {
+            if (!currentUsers.includes(userId)) {
+                // user left the channel
+                userJoinTimes.delete(userId);
+            }
+        }
+        // states is an array of {guildId: {userId: {channelId: channelId}}}
+        // iterate through all guilds and update the users, check if the user is in the same channel as before
+        // if userId is not in any guild it should be deleted from the users object
+        for (const guildId in states) {
+            const guild = states[guildId];
+            for (const userId in guild) {
+                const { channelId } = guild[userId];
+                if (!channelId) {
+                    return;
                 }
-
-                let { oldChannelId } = state;
-                if (isMe && channelId !== myLastChannelId) {
-                    oldChannelId = myLastChannelId;
-                    myLastChannelId = channelId;
-                }
-
-                if (channelId !== oldChannelId) {
-                    if (channelId) {
-                        // move or join
-                        userJoinTimes.set(userId, Date.now());
-                    } else if (oldChannelId) {
-                        // leave
-                        userJoinTimes.delete(userId);
+                if (userJoinTimes.has(userId)) {
+                    // user is already in the users object
+                    if (userJoinTimes.get(userId)?.channelId !== channelId) {
+                        // user changed the channel
+                        userJoinTimes.set(userId, {
+                            channelId,
+                            time: Date.now()
+                        });
                     }
+                } else {
+                    // user is not in the users object
+                    userJoinTimes.set(userId, {
+                        channelId,
+                        time: Date.now()
+                    });
                 }
             }
-            runOneTime = false;
-        },
+        }
+    },
+
+    start() {
+        // start a timeout that runs every second and calls updateListings
+        this.timeout = setInterval(() => this.updateListings(), 1000);
+    },
+
+    stop() {
+        // clear the timeout
+        clearInterval(this.timeout);
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
@@ -112,7 +133,7 @@ export default definePlugin({
 
         return (
             <ErrorBoundary>
-                <Timer time={joinTime} />
+                <Timer time={joinTime.time} />
             </ErrorBoundary>
         );
     },
