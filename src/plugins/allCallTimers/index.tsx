@@ -88,7 +88,7 @@ export default definePlugin({
                 const isMe = userId === myId;
 
                 // check if the state does not actually has a `oldChannelId` property
-                if (!("oldChannelId" in state) && !runOneTime) {
+                if (!("oldChannelId" in state) && !runOneTime && !settings.store.watchLargeGuilds) {
                     // batch update triggered. This is ignored because it
                     // is caused by opening a previously unopened guild
                     continue;
