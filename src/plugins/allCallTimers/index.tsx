@@ -23,8 +23,8 @@ export const settings = definePluginSettings({
     trackSelf: {
         type: OptionType.BOOLEAN,
         description: "Also track for yourself",
-        restartNeeded: true,
-        default: false
+        restartNeeded: false,
+        default: true
     },
 });
 
@@ -35,6 +35,9 @@ const userJoinTimes = new Map<string, number>();
 // Only for the local user, channelId and oldChannelId will be the same when moving channel,
 // for some ungodly reason
 let myLastChannelId: string | undefined;
+
+// Allow user updates on discord first load
+let runOneTime = true;
 
 export default definePlugin({
     name: "AllCallTimers",
@@ -56,13 +59,17 @@ export default definePlugin({
     ],
 
     flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: {voiceStates: VoiceState[];}) {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myId = UserStore.getCurrentUser().id;
 
             for (const state of voiceStates) {
                 const { userId, channelId } = state;
                 const isMe = userId === myId;
-                if (!settings.store.trackSelf && isMe) {
+
+                // check if the state does not actually has a `oldChannelId` property
+                if (!("oldChannelId" in state) && !runOneTime) {
+                    // batch update triggered. This is ignored because it
+                    // is caused by opening a previously unopened guild
                     continue;
                 }
 
@@ -82,6 +89,7 @@ export default definePlugin({
                     }
                 }
             }
+            runOneTime = false;
         },
     },
 
@@ -95,6 +103,10 @@ export default definePlugin({
         const joinTime = userJoinTimes.get(userId);
         if (!joinTime) {
             // join time is unknown
+            return;
+        }
+        if (userId === UserStore.getCurrentUser().id && !settings.store.trackSelf) {
+            // don't show for self
             return;
         }
 
