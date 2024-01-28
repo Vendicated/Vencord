@@ -67,6 +67,9 @@ const autoTranslate = async ( msg ) => {
     if (message.content.split("").every(c => alphabets.includes(c))) return;
 
     const trans = await translate("received", message.content);
+
+    if (trans.src == "en") return;
+
     handleTranslate(message.id, trans);
 }
 
