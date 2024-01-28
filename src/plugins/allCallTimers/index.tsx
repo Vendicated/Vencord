@@ -26,6 +26,21 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: true
     },
+    format: {
+        type: OptionType.SELECT,
+        description: "The timer format",
+        options: [
+            {
+                label: "30:23:00:42",
+                value: "stopwatch",
+                default: true
+            },
+            {
+                label: "30d 23h 00m 42s",
+                value: "human"
+            }
+        ]
+    }
 });
 
 // Save the join time of all users in a Map

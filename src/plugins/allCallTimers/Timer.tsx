@@ -13,6 +13,7 @@ import { TimerIcon } from "./TimerIcon";
 
 export function Timer({ time }: Readonly<{ time: number; }>) {
     const durationMs = useFixedTimer({ initialTime: time });
+    const formatted = formatDurationMs(durationMs, settings.store.format === "human");
 
     if (settings.store.alwaysShow) {
         return <p style={{
@@ -29,11 +30,11 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
             background: "rgba(0,0,0,.5)",
             borderRadius: 3
         }
-        }> {formatDurationMs(durationMs)}</p>;
+        }>{formatted}</p>;
     } else {
         // show as a tooltip
         return (
-            <Tooltip text={formatDurationMs(durationMs)}>
+            <Tooltip text={formatted}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
                         onMouseEnter={onMouseEnter}
