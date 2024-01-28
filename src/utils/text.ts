@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/Settings";
 import { moment } from "@webpack/common";
 
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
@@ -91,6 +92,32 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     }
 
     return res.length ? res : `0 ${getUnitStr(unit, false, short)}`;
+}
+/**
+ * Formats a duration in milliseconds into a human-readable string
+ * @param ms The duration in milliseconds
+ */
+export function formatDurationMs(ms: number) {
+    // here be dragons (moment fucking sucks)
+    const human = Settings.plugins.CallTimer.format === "human";
+
+    const format = (n: number) => human ? n : n.toString().padStart(2, "0");
+    const unit = (s: string) => human ? s : "";
+    const delim = human ? " " : ":";
+
+    // thx copilot
+    const d = Math.floor(ms / 86400000);
+    const h = Math.floor((ms % 86400000) / 3600000);
+    const m = Math.floor(((ms % 86400000) % 3600000) / 60000);
+    const s = Math.floor((((ms % 86400000) % 3600000) % 60000) / 1000);
+
+    let res = "";
+    if (d) res += `${d}d `;
+    if (h || res) res += `${format(h)}${unit("h")}${delim}`;
+    if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
+    res += `${format(s)}${unit("s")}`;
+
+    return res;
 }
 
 /**

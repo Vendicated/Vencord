@@ -7,14 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useTimer } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Tooltip } from "@webpack/common";
+import { UserStore } from "@webpack/common";
+import { VoiceState } from "@webpack/types";
 
-
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
-
+import { Timer } from "./Timer";
 
 export const settings = definePluginSettings({
     alwaysShow: {
@@ -23,13 +20,26 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: false
     },
+    trackSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Also track for yourself",
+        restartNeeded: true,
+        default: false
+    },
 });
 
+// Save the join time of all users in a Map
+const userJoinTimes = new Map<string, number>();
+
+// For every user, channelId and oldChannelId will differ when moving channel.
+// Only for the local user, channelId and oldChannelId will be the same when moving channel,
+// for some ungodly reason
+let myLastChannelId: string | undefined;
 
 export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
-    authors: [Devs.Max],
+    authors: [Devs.Max, Devs.D3SOX],
 
     settings,
 
@@ -45,123 +55,53 @@ export default definePlugin({
         }
     ],
 
-    allUsers(guilds: Record<string, any>) {
-        // return an array of all users in all guilds
-        const users: string[] = [];
-        for (const guildId in guilds) {
-            const guild = guilds[guildId];
-            for (const userId in guild) {
-                users.push(userId);
-            }
-        }
-        return users;
-    },
+    flux: {
+        VOICE_STATE_UPDATES({ voiceStates }: {voiceStates: VoiceState[];}) {
+            const myId = UserStore.getCurrentUser().id;
 
-    updateListings() {
-        const states = VoiceStateStore.getAllVoiceStates();
-
-        const currentUsers = this.allUsers(states);
-        for (const userId in this.users) {
-            if (!currentUsers.includes(userId)) {
-                delete this.users[userId];
-            }
-        }
-
-        // states is an array of {guildId: {userId: {channelId: channelId}}}
-        // iterate through all guilds and update the users, check if the user is in the same channel as before
-        // if userId is not in any guild it should be deleted from the users object
-        for (const guildId in states) {
-            const guild = states[guildId];
-            for (const userId in guild) {
-                const { channelId } = guild[userId];
-                if (!channelId) {
-                    return;
+            for (const state of voiceStates) {
+                const { userId, channelId } = state;
+                const isMe = userId === myId;
+                if (!settings.store.trackSelf && isMe) {
+                    continue;
                 }
-                if (this.users[userId]) {
-                    // user is already in the users object
-                    if (this.users[userId].channelId !== channelId) {
-                        // user changed the channel
-                        this.users[userId].channelId = channelId;
-                        this.users[userId].joinTime = Date.now();
+
+                let { oldChannelId } = state;
+                if (isMe && channelId !== myLastChannelId) {
+                    oldChannelId = myLastChannelId;
+                    myLastChannelId = channelId;
+                }
+
+                if (channelId !== oldChannelId) {
+                    if (channelId) {
+                        // move or join
+                        userJoinTimes.set(userId, Date.now());
+                    } else if (oldChannelId) {
+                        // leave
+                        userJoinTimes.delete(userId);
                     }
-                } else {
-                    // user is not in the users object
-                    this.users[userId] = {
-                        channelId: channelId,
-                        joinTime: Date.now()
-                    };
                 }
             }
-        }
-    },
-
-    start() {
-        this.users = {};
-
-        // start a timeout that runs every second and calls updateListings
-        this.timeout = setInterval(() => this.updateListings(), 1000);
-    },
-
-    stop() {
-        // clear the timeout
-        clearInterval(this.timeout);
+        },
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
         const userId = property.props.user.id;
-
-        if (VoiceStateStore == null) {
-            console.log("VoiceStateStore is null");
-            return;
-        }
-
         return this.renderTimer(userId);
     },
 
     renderTimer(userId: string) {
-        // get the user from the users object
-        const user = this.users[userId];
-        if (!user) {
+        // get the user join time from the users object
+        const joinTime = userJoinTimes.get(userId);
+        if (!joinTime) {
+            // join time is unknown
             return;
         }
-        const startTime = user.joinTime;
-        return <ErrorBoundary>
-            <this.Timer time={startTime} />
-        </ErrorBoundary>;
+
+        return (
+            <ErrorBoundary>
+                <Timer time={joinTime} />
+            </ErrorBoundary>
+        );
     },
-
-    Timer({ time }: { time: number; }) {
-        const timer = useTimer({});
-        const startTime = time;
-
-        const formatted = new Date(Date.now() - startTime).toISOString().substr(11, 8);
-
-        if (settings.store.alwaysShow) {
-            return <p style={{
-                margin: 0, fontWeight: "bold", letterSpacing: -2, fontFamily: "monospace", fontSize: 12, color: "red", position: "absolute", bottom: 0, right: 0, padding: 2, background: "rgba(0,0,0,.5)", borderRadius: 3
-            }
-            } > {formatted}</p >;
-        } else {
-            // show as a tooltip
-            const icon = <svg className="icon__1d60c" height="10" width="10" viewBox="0 0 455 455" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve">
-                <path fill="currentColor" d="M332.229,90.04l14.238-27.159l-26.57-13.93L305.67,76.087c-19.618-8.465-40.875-13.849-63.17-15.523V30h48.269V0H164.231v30
-        H212.5v30.563c-22.295,1.674-43.553,7.059-63.171,15.523L135.103,48.95l-26.57,13.93l14.239,27.16
-        C67.055,124.958,30,186.897,30,257.5C30,366.576,118.424,455,227.5,455S425,366.576,425,257.5
-        C425,186.896,387.944,124.958,332.229,90.04z M355,272.5H212.5V130h30v112.5H355V272.5z"/>
-            </svg>;
-
-            return (
-                <Tooltip text={formatted}>
-                    {({ onMouseEnter, onMouseLeave }) => (
-                        <div
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                        >
-                            {icon}
-                        </div>
-                    )}
-                </Tooltip>
-            );
-        }
-    }
 });
