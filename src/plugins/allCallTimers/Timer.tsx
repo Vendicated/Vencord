@@ -15,7 +15,7 @@ export function Timer({ time }: Readonly<{ time: number; }>) {
     const durationMs = useFixedTimer({ initialTime: time });
     const formatted = formatDurationMs(durationMs, settings.store.format === "human");
 
-    if (settings.store.alwaysShow) {
+    if (settings.store.showWithoutHover) {
         return <p style={{
             margin: 0,
             fontWeight: "bold",

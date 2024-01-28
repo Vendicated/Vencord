@@ -14,9 +14,9 @@ import { VoiceState } from "@webpack/types";
 import { Timer } from "./Timer";
 
 export const settings = definePluginSettings({
-    alwaysShow: {
+    showWithoutHover: {
         type: OptionType.BOOLEAN,
-        description: "Always show the timer or have it as a tooltip icon",
+        description: "Always show the timer without hover (not as pretty)!",
         restartNeeded: false,
         default: false
     },
