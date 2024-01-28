@@ -57,6 +57,9 @@ const userJoinTimes = new Map<string, number>();
 // for some ungodly reason
 let myLastChannelId: string | undefined;
 
+// Allow user updates on discord first load
+let runOneTime = true;
+
 export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
@@ -84,6 +87,13 @@ export default definePlugin({
                 const { userId, channelId } = state;
                 const isMe = userId === myId;
 
+                // check if the state does not actually has a `oldChannelId` property
+                if (!("oldChannelId" in state) && !runOneTime) {
+                    // batch update triggered. This is ignored because it
+                    // is caused by opening a previously unopened guild
+                    continue;
+                }
+
                 let { oldChannelId } = state;
                 if (isMe && channelId !== myLastChannelId) {
                     oldChannelId = myLastChannelId;
@@ -100,6 +110,7 @@ export default definePlugin({
                     }
                 }
             }
+            runOneTime = false;
         },
     },
 
