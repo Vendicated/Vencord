@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 
 import { Timer } from "./Timer";
@@ -51,9 +51,6 @@ const userJoinTimes = new Map<string, number>();
 // for some ungodly reason
 let myLastChannelId: string | undefined;
 
-// Allow user updates on discord first load
-let runOneTime = true;
-
 export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
@@ -81,13 +78,6 @@ export default definePlugin({
                 const { userId, channelId } = state;
                 const isMe = userId === myId;
 
-                // check if the state does not actually has a `oldChannelId` property
-                if (!("oldChannelId" in state) && !runOneTime) {
-                    // batch update triggered. This is ignored because it
-                    // is caused by opening a previously unopened guild
-                    continue;
-                }
-
                 let { oldChannelId } = state;
                 if (isMe && channelId !== myLastChannelId) {
                     oldChannelId = myLastChannelId;
@@ -104,8 +94,14 @@ export default definePlugin({
                     }
                 }
             }
-            runOneTime = false;
         },
+    },
+
+    start() {
+        // we need to subscribe to all guilds' events because otherwise we would miss updates on large guilds
+        const guilds = Object.values(GuildStore.getGuilds()).map(guild => guild.id);
+        const subscriptions = guilds.reduce((acc, id) => ({ ...acc, [id]: { typing: true } }), {});
+        FluxDispatcher.dispatch({ type: "GUILD_SUBSCRIPTIONS_FLUSH", subscriptions });
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
