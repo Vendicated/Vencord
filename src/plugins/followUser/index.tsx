@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
 import { filters, find, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Menu, React, SelectedChannelStore, UserStore } from "@webpack/common";
+import { Menu, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 import type { Channel, User } from "discord-types/general";
 
@@ -71,22 +71,45 @@ function getChannelId(userId: string) {
     } catch(e) {}
 }
 
+function triggerFollow() {
+    if (settings.store.followUserId) {
+        const userChannelId = getChannelId(settings.store.followUserId);
+        const myChanId = SelectedChannelStore.getVoiceChannelId();
+        if (userChannelId) {
+            // join on follow when not already in the same channel
+            if (userChannelId !== myChanId) {
+                ChannelActions.selectVoiceChannel(userChannelId);
+                Toasts.show({
+                    message: "Followed user in a new voice channel",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.SUCCESS
+                });
+            } else {
+                Toasts.show({
+                    message: "You are already in the same channel",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.FAILURE
+                });
+            }
+        } else if (!userChannelId && myChanId && settings.store.followLeave) {
+            // if not in a voice channel on follow disconnect
+            ChannelActions.disconnect();
+            Toasts.show({
+                message: "Followed user left, disconnected",
+                id: Toasts.genId(),
+                type: Toasts.Type.SUCCESS
+            });
+        }
+    }
+}
+
 function toggleFollow(userId: string) {
     if (settings.store.followUserId === userId) {
         settings.store.followUserId = "";
     } else {
         settings.store.followUserId = userId;
-
         if (settings.store.executeOnFollow) {
-            const userChannelId = getChannelId(userId);
-            const myChanId = SelectedChannelStore.getVoiceChannelId();
-            if (userChannelId && userChannelId !== myChanId) {
-                // join on follow when not already in the same channel
-                ChannelActions.selectVoiceChannel(userChannelId);
-            } else if (!userChannelId && myChanId && settings.store.followLeave) {
-                // if not in a voice channel on follow disconnect
-                ChannelActions.disconnect();
-            }
+            triggerFollow();
         }
     }
 }
@@ -172,9 +195,12 @@ export default definePlugin({
             return (
                 <HeaderBarIcon
                     className="vc-follow-user-indicator"
-                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to unfollow)`}
+                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to trigger manually, right-click to unfollow)`}
                     icon={UnfollowIcon}
                     onClick={() => {
+                        triggerFollow();
+                    }}
+                    onContextMenu={() => {
                         settings.store.followUserId = "";
                     }}
                 />
