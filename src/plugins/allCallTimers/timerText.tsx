@@ -13,7 +13,7 @@ export function TimerText({ text }: Readonly<{ text: string; }>) {
         fontSize: 12,
         position: "absolute",
         bottom: -8,
-        right: 129,
+        left: 37,
         padding: 2,
         borderRadius: 3
     }}>{text}</p>;
