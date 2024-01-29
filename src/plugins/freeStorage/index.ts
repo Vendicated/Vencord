@@ -19,35 +19,30 @@
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import { OptionType } from "@utils/types";
+
+export const settings = definePluginSettings({
+  totalSize: {
+      type: OptionType.NUMBER,
+      description: "Total Message Size",
+      default: 2000,
+      hidden: false
+  }
+})
 
 const change = async (_, message) => {
     if (!message.content) return;
-    message.content = message.content
-    .replace(/\b([dn]iggers?)\b/gi, function(match) {
-        return match.replace(/./g, function(char, index) {
-          if (match[index] == "d") return "n"
-          if (match[index] == "D") return "N"
-          if (match[index] == "n") return "d"
-          if (match[index] == "N") return "D"
-          return match[index];
-        });
-    })
-    .replace(/\b([dn]iggas?)\b/gi, function(match) {
-        return match.replace(/./g, function(char, index) {
-            if (match[index] == "d") return "n"
-            if (match[index] == "D") return "N"
-            if (match[index] == "n") return "d"
-            if (match[index] == "N") return "D"
-            return match[index];
-        });
-    })
+
+    message.content = message.content + "­".repeat(settings.store.totalSize-message.content.length)
 }
 
 export default definePlugin({
-    name: "NoMoreRacism",
-    description: "Helps you no longer be a racist",
+    name: "FreeStorage",
+    description: "Discord is FREE Storage",
     authors: [Devs.TechFun],
     dependencies: ["MessageEventsAPI"],
+    settings,
     start: () => {
         addPreSendListener(change);
     },
