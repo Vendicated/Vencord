@@ -105,7 +105,7 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
  * @returns The function `formatDurationMs` returns a formatted string representing the duration in
  * milliseconds.
  */
-export function formatDurationMs(ms: number, human: boolean = false) {
+export function formatDurationMs(ms: number, human: boolean = false, seconds: boolean = true) {
     const format = (n: number) => human ? n : n.toString().padStart(2, "0");
     const unit = (s: string) => human ? s : "";
     const delim = human ? " " : ":";
@@ -119,8 +119,9 @@ export function formatDurationMs(ms: number, human: boolean = false) {
     let res = "";
     if (d) res += `${d}${unit("d")}${delim}`;
     if (h || res) res += `${format(h)}${unit("h")}${delim}`;
-    if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
-    res += `${format(s)}${unit("s")}`;
+    if (m || res || !human) res += `${format(m)}${unit("m")}`;
+    if (seconds && (m || res || !human)) res += `${delim}`;
+    if (seconds) res += `${format(s)}${unit("s")}`;
 
     return res;
 }

@@ -14,7 +14,7 @@ import { TimerText } from "./timerText";
 
 export function Timer({ time }: Readonly<{ time: number; }>) {
     const durationMs = useFixedTimer({ initialTime: time });
-    const formatted = formatDurationMs(durationMs, settings.store.format === "human");
+    const formatted = formatDurationMs(durationMs, settings.store.format === "human", settings.store.showSeconds);
 
     if (settings.store.showWithoutHover) {
         return <TimerText text={formatted} />;

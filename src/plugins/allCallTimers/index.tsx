@@ -26,6 +26,12 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: true
     },
+    showSeconds: {
+        type: OptionType.BOOLEAN,
+        description: "Show seconds in the timer",
+        restartNeeded: false,
+        default: true
+    },
     format: {
         type: OptionType.SELECT,
         description: "The timer format",
