@@ -28,6 +28,12 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: true
     },
+    onlyManualTrigger: {
+        type: OptionType.BOOLEAN,
+        description: "Only trigger on indicator click",
+        restartNeeded: false,
+        default: false
+    },
     followLeave: {
         type: OptionType.BOOLEAN,
         description: "Also leave when the followed user leaves",
@@ -165,7 +171,7 @@ export default definePlugin({
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            if (!settings.store.followUserId) {
+            if (settings.store.onlyManualTrigger || !settings.store.followUserId) {
                 return;
             }
             for (const state of voiceStates) {
