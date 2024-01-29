@@ -9,7 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
-import { VoiceState } from "@webpack/types";
+import { PassiveUpdateState, VoiceState } from "@webpack/types";
 
 import { Timer } from "./Timer";
 
@@ -49,8 +49,10 @@ export const settings = definePluginSettings({
     }
 });
 
+
 // Save the join time of all users in a Map
-const userJoinTimes = new Map<string, number>();
+type userJoinData = { channelId: string, time: number; guildId: string; };
+const userJoinTimes = new Map<string, userJoinData>();
 
 // For every user, channelId and oldChannelId will differ when moving channel.
 // Only for the local user, channelId and oldChannelId will be the same when moving channel,
@@ -84,8 +86,13 @@ export default definePlugin({
             const myId = UserStore.getCurrentUser().id;
 
             for (const state of voiceStates) {
-                const { userId, channelId } = state;
+                const { userId, channelId, guildId } = state;
                 const isMe = userId === myId;
+
+                if (!guildId) {
+                    // guildId is never undefined here
+                    continue;
+                }
 
                 // check if the state does not actually has a `oldChannelId` property
                 if (!("oldChannelId" in state) && !runOneTime && !settings.store.watchLargeGuilds) {
@@ -103,7 +110,7 @@ export default definePlugin({
                 if (channelId !== oldChannelId) {
                     if (channelId) {
                         // move or join
-                        userJoinTimes.set(userId, Date.now());
+                        userJoinTimes.set(userId, { channelId, time: Date.now(), guildId: guildId });
                     } else if (oldChannelId) {
                         // leave
                         userJoinTimes.delete(userId);
@@ -111,6 +118,54 @@ export default definePlugin({
                 }
             }
             runOneTime = false;
+        },
+        PASSIVE_UPDATE_V1(passiveUpdate: PassiveUpdateState) {
+            if (settings.store.watchLargeGuilds) {
+                return;
+            }
+
+            const { voiceStates } = passiveUpdate;
+            if (!voiceStates) {
+                // if there are no users in a voice call
+                return;
+            }
+
+            // find all users that have the same guildId and if that user is not in the voiceStates, remove them from the map
+            const { guildId } = passiveUpdate;
+
+            // check the guildId in the userJoinTimes map
+            for (const [userId, data] of userJoinTimes) {
+                if (data.guildId === guildId) {
+                    // check if the user is in the voiceStates
+                    const userInVoiceStates = voiceStates.find(state => state.userId === userId);
+                    if (!userInVoiceStates) {
+                        // remove the user from the map
+                        userJoinTimes.delete(userId);
+                    }
+                }
+            }
+
+            // since we were gifted this data let's use it to update our join times
+            for (const state of voiceStates) {
+                const { userId, channelId } = state;
+
+                if (!channelId) {
+                    // channelId is never undefined here
+                    continue;
+                }
+
+                // check if the user is in the map
+                if (userJoinTimes.has(userId)) {
+                    // check if the user is in a channel
+                    if (channelId !== userJoinTimes.get(userId)?.channelId) {
+                        // update the user's join time
+                        userJoinTimes.set(userId, { channelId, time: Date.now(), guildId: passiveUpdate.guildId });
+                    }
+                } else {
+                    // user wasn't previously tracked, add the user to the map
+                    userJoinTimes.set(userId, { channelId, time: Date.now(), guildId: passiveUpdate.guildId });
+                }
+            }
         },
     },
 
@@ -135,7 +190,7 @@ export default definePlugin({
     renderTimer(userId: string) {
         // get the user join time from the users object
         const joinTime = userJoinTimes.get(userId);
-        if (!joinTime) {
+        if (!joinTime?.time) {
             // join time is unknown
             return;
         }
@@ -146,7 +201,7 @@ export default definePlugin({
 
         return (
             <ErrorBoundary>
-                <Timer time={joinTime} />
+                <Timer time={joinTime.time} />
             </ErrorBoundary>
         );
     },

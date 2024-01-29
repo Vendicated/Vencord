@@ -8,6 +8,7 @@ export interface VoiceState {
     userId: string;
     channelId?: string;
     oldChannelId?: string;
+    guildId?: string;
     deaf: boolean;
     mute: boolean;
     selfDeaf: boolean;
