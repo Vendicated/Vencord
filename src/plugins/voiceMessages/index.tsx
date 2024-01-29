@@ -19,15 +19,14 @@
 import "./styles.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -36,9 +35,9 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
-const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
+const CloudUtils = findByPropsLazy("CloudUpload");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
+const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
@@ -76,7 +75,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
     const reply = PendingReplyStore.getPendingReply(channelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
-    const upload = new CloudUpload({
+    const upload = new CloudUtils.CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isClip: false,
         isThumbnail: false,
@@ -100,7 +99,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply)?.messageReference : null,
+                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });
@@ -138,7 +137,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         const channelData = audioBuffer.getChannelData(0);
 
         // average the samples into much lower resolution bins, maximum of 256 total bins
-        const bins = new Uint8Array(window._.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+        const bins = new Uint8Array(lodash.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
         const samplesPerBin = Math.floor(channelData.length / bins.length);
 
         // Get root mean square of each bin
@@ -226,12 +225,10 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
         <Menu.MenuItem
             id="vc-send-vmsg"
             label={
-                <>
-                    <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
-                        <Microphone height={24} width={24} />
-                        Send voice message
-                    </Flex>
-                </>
+                <div className={OptionClasses.optionLabel}>
+                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
+                    <div className={OptionClasses.optionName}>Send voice message</div>
+                </div>
             }
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />

@@ -17,6 +17,7 @@
 */
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { CodeBlock } from "@components/CodeBlock";
 import { debounce } from "@utils/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
@@ -107,7 +108,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     function renderDiff() {
         return diff?.map(p => {
             const color = p.added ? "lime" : p.removed ? "red" : "grey";
-            return <div style={{ color, userSelect: "text" }}>{p.value}</div>;
+            return <div style={{ color, userSelect: "text", wordBreak: "break-all", lineBreak: "anywhere" }}>{p.value}</div>;
         });
     }
 
@@ -299,7 +300,7 @@ function PatchHelper() {
             {!!(find && match && replacement) && (
                 <>
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
-                    <div style={{ userSelect: "text" }}>{Parser.parse(makeCodeblock(code, "ts"))}</div>
+                    <CodeBlock lang="js" content={code} />
                     <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
                 </>
             )}

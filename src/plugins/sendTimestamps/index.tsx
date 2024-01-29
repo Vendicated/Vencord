@@ -19,13 +19,22 @@
 import "./styles.css";
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
+
+const settings = definePluginSettings({
+    replaceMessageContents: {
+        description: "Replace timestamps in message contents",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+});
 
 function parseTime(time: string) {
     const cleanTime = time.slice(1, -1).replace(/(\d)(AM|PM)$/i, "$1 $2");
@@ -116,22 +125,26 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
 export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
-    authors: [Devs.Ven, Devs.Tyler],
+    authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
     dependencies: ["MessageEventsAPI"],
+
+    settings: settings,
 
     patches: [
         {
-            find: ".activeCommandOption",
+            find: "ChannelTextAreaButtons",
             replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon())}catch{}",
+                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
+                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],
 
     start() {
         this.listener = addPreSendListener((_, msg) => {
-            msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+            if (settings.store.replaceMessageContents) {
+                msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+            }
         });
     },
 
@@ -139,14 +152,16 @@ export default definePlugin({
         removePreSendListener(this.listener);
     },
 
-    chatBarIcon() {
+    chatBarIcon(chatBoxProps: { type: { analyticsName: string; }; }) {
+        if (chatBoxProps.type.analyticsName !== "normal") return null;
+
         return (
             <Tooltip text="Insert Timestamp">
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div style={{ display: "flex" }}>
                         <Button
                             aria-haspopup="dialog"
-                            aria-label=""
+                            aria-label="Insert Timestamp"
                             size=""
                             look={ButtonLooks.BLANK}
                             onMouseEnter={onMouseEnter}

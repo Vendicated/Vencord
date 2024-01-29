@@ -49,7 +49,9 @@ async function getRepo() {
 async function calculateGitChanges() {
     await git("fetch");
 
-    const res = await git("log", "HEAD...origin/main", "--pretty=format:%an/%h/%s");
+    const branch = await git("branch", "--show-current");
+
+    const res = await git("log", `HEAD...origin/${branch.stdout.trim()}`, "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
@@ -70,6 +72,8 @@ async function build() {
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
     const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
+
+    if (IS_DEV) args.push("--dev");
 
     const res = await execFile(command, args, opts);
 

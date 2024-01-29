@@ -16,9 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function makeLazy<T>(factory: () => T): () => T {
+export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
+    let tries = 0;
     let cache: T;
-    return () => cache ?? (cache = factory());
+    return () => {
+        if (!cache && attempts > tries++) {
+            cache = factory();
+            if (!cache && attempts === tries)
+                console.error("Lazy factory failed:", factory);
+        }
+        return cache;
+    };
 }
 
 // Proxies demand that these properties be unmodified, so proxyLazy
@@ -35,7 +43,6 @@ for (const method of [
     "construct",
     "defineProperty",
     "deleteProperty",
-    "get",
     "getOwnPropertyDescriptor",
     "getPrototypeOf",
     "has",
@@ -69,7 +76,7 @@ handler.getOwnPropertyDescriptor = (target, p) => {
 };
 
 /**
- * Wraps the result of {@see makeLazy} in a Proxy you can consume as if it wasn't lazy.
+ * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the lazy is evaluated
  * @param factory lazy factory
  * @param attempts how many times to try to evaluate the lazy before giving up
@@ -78,17 +85,39 @@ handler.getOwnPropertyDescriptor = (target, p) => {
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazy<T>(factory: () => T, attempts = 5): T {
+export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T {
+    let isSameTick = true;
+    if (!isChild)
+        setTimeout(() => isSameTick = false, 0);
+
     let tries = 0;
     const proxyDummy = Object.assign(function () { }, {
         [kCACHE]: void 0 as T | undefined,
         [kGET]() {
             if (!proxyDummy[kCACHE] && attempts > tries++) {
                 proxyDummy[kCACHE] = factory();
+                if (!proxyDummy[kCACHE] && attempts === tries)
+                    console.error("Lazy factory failed:", factory);
             }
             return proxyDummy[kCACHE];
         }
     });
 
-    return new Proxy(proxyDummy, handler) as any;
+    return new Proxy(proxyDummy, {
+        ...handler,
+        get(target, p, receiver) {
+            // if we're still in the same tick, it means the lazy was immediately used.
+            // thus, we lazy proxy the get access to make things like destructuring work as expected
+            // meow here will also be a lazy
+            // `const { meow } = findByPropsLazy("meow");`
+            if (!isChild && isSameTick)
+                return proxyLazy(
+                    () => Reflect.get(target[kGET](), p, receiver),
+                    attempts,
+                    true
+                );
+
+            return Reflect.get(target[kGET](), p, receiver);
+        }
+    }) as any;
 }

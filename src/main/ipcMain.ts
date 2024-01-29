@@ -22,12 +22,12 @@ import "./ipcPlugins";
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
-import { BrowserWindow, ipcMain, shell } from "electron";
+import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
 import { join, normalize } from "path";
 
-import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
+import monacoHtml from "~fileContent/monacoWin.html;base64";
 
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
@@ -53,10 +53,12 @@ async function listThemes(): Promise<UserThemeHeader[]> {
     const themeInfo: UserThemeHeader[] = [];
 
     for (const fileName of files) {
+        if (!fileName.endsWith(".css")) continue;
+
         const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
-        if (!data) continue;
-        const parsed = getThemeInfo(data, fileName);
-        themeInfo.push(parsed);
+        if (data == null) continue;
+
+        themeInfo.push(getThemeInfo(data, fileName));
     }
 
     return themeInfo;
@@ -110,6 +112,10 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
 ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
+ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
+    // win & mac only
+    "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
+}));
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
@@ -133,12 +139,19 @@ export function initIpc(mainWindow: BrowserWindow) {
 }
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
+    const title = "Vencord QuickCSS Editor";
+    const existingWindow = BrowserWindow.getAllWindows().find(w => w.title === title);
+    if (existingWindow && !existingWindow.isDestroyed()) {
+        existingWindow.focus();
+        return;
+    }
+
     const win = new BrowserWindow({
-        title: "Vencord QuickCSS Editor",
+        title,
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {
-            preload: join(__dirname, "preload.js"),
+            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: false

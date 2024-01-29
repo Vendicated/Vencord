@@ -20,15 +20,16 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
-import { ReviewDBUser } from "./entities";
-import { authorize } from "./utils";
+import { authorize, getToken } from "./auth";
+import { openBlockModal } from "./components/BlockedUserModal";
+import { cl } from "./utils";
 
 export const settings = definePluginSettings({
     authorize: {
         type: OptionType.COMPONENT,
         description: "Authorize with ReviewDB",
         component: () => (
-            <Button onClick={authorize}>
+            <Button onClick={() => authorize()}>
                 Authorize with ReviewDB
             </Button>
         )
@@ -48,35 +49,48 @@ export const settings = definePluginSettings({
         description: "Hide timestamps on reviews",
         default: false,
     },
-    website: {
-        type: OptionType.COMPONENT,
-        description: "ReviewDB website",
-        component: () => (
-            <Button onClick={() => {
-                let url = "https://reviewdb.mantikafasi.dev/";
-                if (settings.store.token)
-                    url += "/api/redirect?token=" + encodeURIComponent(settings.store.token);
-
-                VencordNative.native.openExternal(url);
-            }}>
-                ReviewDB website
-            </Button>
-        )
+    hideBlockedUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Hide reviews from blocked users",
+        default: true,
     },
-    supportServer: {
+    buttons: {
         type: OptionType.COMPONENT,
-        description: "ReviewDB Support Server",
+        description: "ReviewDB buttons",
         component: () => (
-            <Button onClick={() => {
-                VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
-            }}>
-                ReviewDB Support Server
-            </Button>
+            <div className={cl("button-grid")} >
+                <Button onClick={openBlockModal}>Manage Blocked Users</Button>
+
+                <Button
+                    color={Button.Colors.GREEN}
+                    onClick={() => {
+                        VencordNative.native.openExternal("https://github.com/sponsors/mantikafasi");
+                    }}
+                >
+                    Support ReviewDB development
+                </Button>
+
+                <Button onClick={async () => {
+                    let url = "https://reviewdb.mantikafasi.dev/";
+                    const token = await getToken();
+                    if (token)
+                        url += "/api/redirect?token=" + encodeURIComponent(token);
+
+                    VencordNative.native.openExternal(url);
+                }}>
+                    ReviewDB website
+                </Button>
+
+
+                <Button onClick={() => {
+                    VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
+                }}>
+                    ReviewDB Support Server
+                </Button>
+            </div >
         )
     }
 }).withPrivateSettings<{
-    token?: string;
-    user?: ReviewDBUser;
     lastReviewId?: number;
     reviewsDropdownState?: boolean;
 }>();

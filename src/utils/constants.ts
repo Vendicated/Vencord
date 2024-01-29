@@ -78,8 +78,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
-    Animal: {
-        name: "Animal",
+    Nyako: {
+        name: "nyako",
         id: 118437263754395652n
     },
     MaiKokain: {
@@ -265,7 +265,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Dziurwa: {
         name: "Dziurwa",
-        id: 1034579679526526976n
+        id: 1001086404203389018n
+    },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -325,15 +329,87 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     ImLvna: {
         name: "Luna <3",
-        id: 174200708818665472n
+        id: 799319081723232267n
     },
     rad: {
         name: "rad",
         id: 610945092504780823n
     },
+    AndrewDLO: {
+        name: "Andrew-DLO",
+        id: 434135504792059917n
+    },
     HypedDomi: {
         name: "HypedDomi",
         id: 354191516979429376n
+    },
+    Rini: {
+        name: "Rini",
+        id: 1079479184478441643n
+    },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n
+    },
+    Arrow: {
+        name: "arrow",
+        id: 958158495302176778n
+    },
+    bb010g: {
+        name: "bb010g",
+        id: 72791153467990016n,
+    },
+    Lumap: {
+        name: "lumap",
+        id: 635383782576357407n
+    },
+    Dolfies: {
+        name: "Dolfies",
+        id: 852892297661906993n,
+    },
+    RuukuLada: {
+        name: "RuukuLada",
+        id: 119705748346241027n,
+    },
+    blahajZip: {
+        name: "blahaj.zip",
+        id: 683954422241427471n,
+    },
+    archeruwu: {
+        name: "archer_uwu",
+        id: 160068695383736320n
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
+    },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+    philipbry: {
+        name: "philipbry",
+        id: 554994003318276106n
+    },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
+    },
+    Grzesiek11: {
+        name: "Grzesiek11",
+        id: 368475654662127616n,
+    },
+    Samwich: {
+        name: "Samwich",
+        id: 976176454511509554n,
+    },
+    coolelectronics: {
+        name: "coolelectronics",
+        id: 696392247205298207n,
     }
 } satisfies Record<string, Dev>);
 

@@ -22,20 +22,25 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MemberListDecoratorsAPI",
     description: "API to add decorators to member list (both in servers and DMs)",
-    authors: [Devs.TheSun],
+    authors: [Devs.TheSun, Devs.Ven],
     patches: [
         {
-            find: "lostPermissionTooltipText,",
-            replacement: {
-                match: /Fragment,{children:\[(.{30,80})\]/,
-                replace: "Fragment,{children:Vencord.Api.MemberListDecorators.__addDecoratorsToList(this.props).concat($1)"
-            }
+            find: ".lostPermission)",
+            replacement: [
+                {
+                    match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
+                    replace: "$&vencordProps=$1,"
+                }, {
+                    match: /decorators:.{0,100}?children:\[/,
+                    replace: "$&...(typeof vencordProps=='undefined'?[]:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                }
+            ]
         },
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /(subText:(.{1,2})\.renderSubtitle\(\).{1,50}decorators):(.{30,100}:null)/,
-                replace: "$1:Vencord.Api.MemberListDecorators.__addDecoratorsToList($2.props).concat($3)"
+                match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
+                replace: "decorators:[...Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]), $1?$2:null]"
             }
         }
     ],
