@@ -56,9 +56,7 @@ interface VoiceStateStore {
 
 interface VoiceStateEntry {
     [guildIdOrMe: string]: {
-        [userId: string]: {
-            channelId: string;
-        };
+        [userId: string]: VoiceState;
     }
 }
 
