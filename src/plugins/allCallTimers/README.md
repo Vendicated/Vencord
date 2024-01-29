@@ -2,7 +2,7 @@
 
 Adds a timer to each user in a guild voice call.
 
-![image](https://github.com/Max-Herbold/Vencord/assets/49804267/fc359f95-0214-4a85-aefe-bb641fecfbfc) ![image](https://github.com/Max-Herbold/Vencord/assets/49804267/fe81d597-4ad5-47a7-a2ad-769bca88b270)
+<img height="500rem" alt="image" src="https://github.com/Max-Herbold/Vencord/assets/49804267/b11a5845-1bf1-42fe-8d83-65b51c50b60c"> <img height="500rem" alt="image" src="https://github.com/Max-Herbold/Vencord/assets/49804267/28c28fa3-1a26-4563-8dbf-6d283d3f7630">
 
 Potential improvements:
 
