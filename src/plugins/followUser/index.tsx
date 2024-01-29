@@ -99,8 +99,8 @@ interface UserContextProps {
     user: User;
 }
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
-    if (!user || !guildId || user.id === UserStore.getCurrentUser().id) return;
+const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => () => {
+    if (!user || user.id === UserStore.getCurrentUser().id) return;
     const isFollowed = settings.store.followUserId === user.id;
     const label = isFollowed ? "Unfollow User" : "Follow User";
     const icon = isFollowed ? UnfollowIcon : FollowIcon;
@@ -119,7 +119,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
 
 export default definePlugin({
     name: "FollowUser",
-    description: "Adds a follow user option in the guild user context menu to always be in the same VC as them",
+    description: "Adds a follow user option in the user context menu to always be in the same guild VC as them",
     authors: [Devs.D3SOX],
 
     settings,
