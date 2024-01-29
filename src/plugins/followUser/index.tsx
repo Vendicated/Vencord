@@ -55,7 +55,7 @@ interface VoiceStateStore {
 }
 
 interface VoiceStateEntry {
-    [guildId: string]: {
+    [guildIdOrMe: string]: {
         [userId: string]: {
             channelId: string;
         };
@@ -65,9 +65,9 @@ interface VoiceStateEntry {
 function getChannelId(userId: string) {
     try {
         const states = VoiceStateStore.getAllVoiceStates();
-        for (const guild of Object.values(states)) {
-            if (guild[userId]) {
-                return guild[userId].channelId;
+        for (const users of Object.values(states)) {
+            if (users[userId]) {
+                return users[userId].channelId;
             }
         }
     } catch(e) {}
@@ -119,7 +119,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContex
 
 export default definePlugin({
     name: "FollowUser",
-    description: "Adds a follow user option in the user context menu to always be in the same guild VC as them",
+    description: "Adds a follow user option in the user context menu to always be in the same VC as them",
     authors: [Devs.D3SOX],
 
     settings,
