@@ -11,8 +11,8 @@ import { FollowIcon, UnfollowIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
-import { filters, find, findByPropsLazy } from "@webpack";
-import { Menu, React, UserStore } from "@webpack/common";
+import { filters, find, findByPropsLazy, findStoreLazy } from "@webpack";
+import { Menu, React, SelectedChannelStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 import type { Channel, User } from "discord-types/general";
 
@@ -22,6 +22,12 @@ const HeaderBarIcon = LazyComponent(() => {
 });
 
 export const settings = definePluginSettings({
+    executeOnFollow: {
+        type: OptionType.BOOLEAN,
+        description: "Make sure to be in the same VC when following a user",
+        restartNeeded: false,
+        default: true
+    },
     followLeave: {
         type: OptionType.BOOLEAN,
         description: "Also leave when the followed user leaves",
@@ -42,11 +48,48 @@ const ChannelActions: {
     selectVoiceChannel: (channelId: string) => void;
 } = findByPropsLazy("disconnect", "selectVoiceChannel");
 
+const VoiceStateStore: VoiceStateStore = findStoreLazy("VoiceStateStore");
+
+interface VoiceStateStore {
+    getAllVoiceStates(): VoiceStateEntry;
+}
+
+interface VoiceStateEntry {
+    [guildId: string]: {
+        [userId: string]: {
+            channelId: string;
+        };
+    }
+}
+
+function getChannelId(userId: string) {
+    try {
+        const states = VoiceStateStore.getAllVoiceStates();
+        for (const guild of Object.values(states)) {
+            if (guild[userId]) {
+                return guild[userId].channelId;
+            }
+        }
+    } catch(e) {}
+}
+
 function toggleFollow(userId: string) {
     if (settings.store.followUserId === userId) {
         settings.store.followUserId = "";
     } else {
         settings.store.followUserId = userId;
+
+        if (settings.store.executeOnFollow) {
+            const userChannelId = getChannelId(userId);
+            const myChanId = SelectedChannelStore.getVoiceChannelId();
+            if (userChannelId && userChannelId !== myChanId) {
+                // join on follow when not already in the same channel
+                ChannelActions.selectVoiceChannel(userChannelId);
+            } else if (!userChannelId && myChanId && settings.store.followLeave) {
+                // if not in a voice channel on follow disconnect
+                ChannelActions.disconnect();
+            }
+        }
     }
 }
 
