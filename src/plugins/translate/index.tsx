@@ -64,6 +64,8 @@ const autoTranslate = async ( msg ) => {
 
     if (new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/).test(message.content)) return;
 
+    message.content = message.content.replaceAll("­", "")
+
     if (message.content.split("").every(c => alphabets.includes(c))) return;
 
     const trans = await translate("received", message.content);

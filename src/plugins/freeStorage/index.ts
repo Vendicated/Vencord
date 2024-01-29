@@ -34,7 +34,7 @@ export const settings = definePluginSettings({
 const change = async (_, message) => {
     if (!message.content) return;
 
-    message.content = message.content + "­".repeat(settings.store.totalSize-message.content.length)
+    message.content = "­".repeat(settings.store.totalSize-message.content.length) + message.content
 }
 
 export default definePlugin({
@@ -42,6 +42,16 @@ export default definePlugin({
     description: "Discord is FREE Storage",
     authors: [Devs.TechFun],
     dependencies: ["MessageEventsAPI"],
+    patches: [
+        {
+            // Indicator
+            find: ".Messages.MESSAGE_EDITED,",
+            replacement: {
+                match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
+                replace: "try {$1.message.content=$1.message.content.replaceAll('­', '')} catch {};$&"
+            }
+        }
+    ],
     settings,
     start: () => {
         addPreSendListener(change);
