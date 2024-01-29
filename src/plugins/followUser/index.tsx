@@ -86,7 +86,7 @@ function triggerFollow() {
             if (userChannelId !== myChanId) {
                 ChannelActions.selectVoiceChannel(userChannelId);
                 Toasts.show({
-                    message: "Followed user in a new voice channel",
+                    message: "Followed user into a new voice channel",
                     id: Toasts.genId(),
                     type: Toasts.Type.SUCCESS
                 });
@@ -97,13 +97,27 @@ function triggerFollow() {
                     type: Toasts.Type.FAILURE
                 });
             }
-        } else if (!userChannelId && myChanId && settings.store.followLeave) {
+        } else if (myChanId) {
             // if not in a voice channel on follow disconnect
-            ChannelActions.disconnect();
+            if (settings.store.followLeave) {
+                ChannelActions.disconnect();
+                Toasts.show({
+                    message: "Followed user left, disconnected",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.SUCCESS
+                });
+            } else {
+                Toasts.show({
+                    message: "Followed user left, but not following disconnect",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.FAILURE
+                });
+            }
+        } else {
             Toasts.show({
-                message: "Followed user left, disconnected",
+                message: "Followed user is not in a voice channel",
                 id: Toasts.genId(),
-                type: Toasts.Type.SUCCESS
+                type: Toasts.Type.FAILURE
             });
         }
     }
@@ -186,9 +200,27 @@ export default definePlugin({
                     if (channelId) {
                         // move or join new channel -> also join
                         ChannelActions.selectVoiceChannel(channelId);
-                    } else if (oldChannelId && settings.store.followLeave) {
+                        Toasts.show({
+                            message: "Followed user into a new voice channel",
+                            id: Toasts.genId(),
+                            type: Toasts.Type.SUCCESS
+                        });
+                    } else if (oldChannelId) {
                         // leave -> disconnect
-                        ChannelActions.disconnect();
+                        if (settings.store.followLeave) {
+                            ChannelActions.disconnect();
+                            Toasts.show({
+                                message: "Followed user left, disconnected",
+                                id: Toasts.genId(),
+                                type: Toasts.Type.SUCCESS
+                            });
+                        } else {
+                            Toasts.show({
+                                message: "Followed user left, but not following disconnect",
+                                id: Toasts.genId(),
+                                type: Toasts.Type.FAILURE
+                            });
+                        }
                     }
                 }
             }
