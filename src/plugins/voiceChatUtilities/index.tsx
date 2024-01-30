@@ -48,7 +48,8 @@ interface VoiceChannelContextProps {
 }
 
 const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }: VoiceChannelContextProps) => () => {
-    if (!channel) return;
+    // only for voice and stage channels
+    if (!channel || (channel.type !== 2 && channel.type !== 13)) return;
     const guildChannels: { VOCAL: { channel: Channel, comparator: number }[] } = GuildChannelStore.getChannels(channel.guild_id);
     const voiceChannels = guildChannels.VOCAL.map(({ channel }) => channel).filter(({ id }) => id !== channel.id);
 
