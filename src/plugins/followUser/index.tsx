@@ -197,18 +197,16 @@ export default definePlugin({
             if (settings.store.onlyManualTrigger || !settings.store.followUserId) {
                 return;
             }
-            for (const state of voiceStates) {
-                const { userId, channelId, oldChannelId } = state;
-                const isMe = userId === UserStore.getCurrentUser().id;
-                const isFollowed = settings.store.followUserId === userId;
-
+            for (const { userId, channelId, oldChannelId } of voiceStates) {
                 if (channelId !== oldChannelId) {
+                    const isMe = userId === UserStore.getCurrentUser().id;
                     // move back if the setting is on and you were moved
                     if (isMe && channelId && settings.store.autoMoveBack) {
                         triggerFollow();
                         continue;
                     }
 
+                    const isFollowed = settings.store.followUserId === userId;
                     if (!isFollowed) {
                         continue;
                     }
