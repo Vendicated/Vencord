@@ -1,0 +1,30 @@
+/* cl = vc-command-palette- */
+
+.vc-command-palette-root {
+    border-radius: 10px;
+}
+
+.vc-command-palette-option {
+    padding: 5px;
+    background-color: var(--background-tertiary);
+    color: var(--white-500);
+    font-family: var(--font-display);
+}
+
+/* .vc-command-palette-option:hover {
+    color: var(--interactive-hover);
+    border: 1.5px solid var(--interactive-hover);
+} */
+
+.vc-command-palette-key-hover {
+    padding: 5px;
+    background-color: var(--background-tertiary);
+    font-family: var(--font-display);
+    color: var(--interactive-hover);
+    border: 1.5px solid var(--interactive-hover);
+}
+
+.vc-command-palette-option-container{
+    display: grid;
+    gap: 2px;
+}
