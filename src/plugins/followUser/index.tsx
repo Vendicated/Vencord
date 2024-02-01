@@ -40,6 +40,12 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: false
     },
+    autoMoveBack: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically move back to the VC of the followed user when you got moved",
+        restartNeeded: false,
+        default: false
+    },
     followUserId: {
         type: OptionType.STRING,
         description: "Followed User ID",
@@ -193,13 +199,20 @@ export default definePlugin({
             }
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
+                const isMe = userId === UserStore.getCurrentUser().id;
                 const isFollowed = settings.store.followUserId === userId;
 
-                if (!isFollowed) {
-                    continue;
-                }
-
                 if (channelId !== oldChannelId) {
+                    // move back if the setting is on and you were moved
+                    if (isMe && channelId && settings.store.autoMoveBack) {
+                        triggerFollow();
+                        continue;
+                    }
+
+                    if (!isFollowed) {
+                        continue;
+                    }
+
                     if (channelId) {
                         // move or join new channel -> also join
                         triggerFollow(channelId);
