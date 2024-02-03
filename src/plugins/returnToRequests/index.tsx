@@ -32,7 +32,7 @@ function rtrMenuItem(channelId: string) {
         <>
             <Menu.MenuItem
                 id="car-dm"
-                label="Return DM to Requests"
+                label="Move to Message Requests"
                 action={() => returnDMtoRequests(channelId)}
             />
         </>
@@ -57,7 +57,7 @@ export function removeContextMenus() {
 
 export default definePlugin({
     name: "ReturnToRequests",
-    description: "Adds a right click option to Close a DM, as well as send it back into the Message Requests queue.",
+    description: "Right-click any DM and select 'Move to Message Requests' to return DMs to the Message Requests queue. This works similarly to ignoring incoming message requests, where any new messages from the sender will appear in the Message Requests queue. Will appear in the Message Requests queue.",
     authors: [Devs.SUDO],
 
     start: addContextMenus,
