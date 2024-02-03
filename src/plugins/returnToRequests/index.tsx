@@ -19,7 +19,7 @@
 import { Menu, RestAPI } from "@webpack/common";
 import definePlugin from "@utils/types";
 import { Devs } from "@utils/constants";
-import { NavContextMenuPatchCallback, addContextMenuPatch, findGroupChildrenByChildId } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback, addContextMenuPatch, findGroupChildrenByChildId, removeContextMenuPatch } from "@api/ContextMenu";
 
 async function returnDMtoRequests(id: string) {
     await RestAPI.delete({
@@ -51,10 +51,15 @@ export function addContextMenus() {
     addContextMenuPatch("user-context", UserContext);
 }
 
+export function removeContextMenus() {
+    removeContextMenuPatch("user-context", UserContext);
+}
+
 export default definePlugin({
     name: "ReturnToRequests",
     description: "Adds a right click option to Close a DM, as well as send it back into the Message Requests queue.",
     authors: [Devs.SUDO],
 
-    start: addContextMenus
+    start: addContextMenus,
+    stop: removeContextMenus
 });
