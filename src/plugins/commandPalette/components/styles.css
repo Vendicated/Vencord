@@ -9,12 +9,9 @@
     background-color: var(--background-tertiary);
     color: var(--white-500);
     font-family: var(--font-display);
+    text-align: left;
+    padding-left: 0.8rem;
 }
-
-/* .vc-command-palette-option:hover {
-    color: var(--interactive-hover);
-    border: 1.5px solid var(--interactive-hover);
-} */
 
 .vc-command-palette-key-hover {
     padding: 5px;
