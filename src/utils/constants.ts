@@ -410,6 +410,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     coolelectronics: {
         name: "coolelectronics",
         id: 696392247205298207n,
+    },
+    SUDO:{
+        name:"SUDO",
+        id: 480495309491798037n,
     }
 } satisfies Record<string, Dev>);
 
