@@ -31,11 +31,11 @@ export function SimpleTextInput({ modalProps, onSelect, placeholder }: SimpleTex
     }, []);
 
     return (
-        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.DYNAMIC} onKeyDown={handleKeyDown}>
+        <ModalRoot {...modalProps} size={ModalSize.DYNAMIC} onKeyDown={handleKeyDown}>
             <TextInput
                 value={inputValue}
                 onChange={(e) => setInputValue(e as unknown as string)}
-                style={{ width: "405px", borderRadius: "15px" }}
+                style={{ width: "405px", borderRadius: "1px" }}
                 placeholder={placeholder ?? "Type and press Enter"}
             />
         </ModalRoot>
