@@ -82,7 +82,7 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
     }, [queryEh]);
 
     return (
-        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM} onKeyDown={handleKeyDown}>
+        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM}>
             <div>
                 <TextInput
                     value={queryEh}

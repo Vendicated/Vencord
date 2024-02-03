@@ -31,7 +31,7 @@ export function SimpleTextInput({ modalProps, onSelect, placeholder }: SimpleTex
     }, []);
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.DYNAMIC} onKeyDown={handleKeyDown}>
+        <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
             <TextInput
                 value={inputValue}
                 onChange={(e) => setInputValue(e as unknown as string)}
