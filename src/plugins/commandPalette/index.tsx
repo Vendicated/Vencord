@@ -31,7 +31,7 @@ export const settings = definePluginSettings({
     allowMouseControl: {
         description: "Allow the mouse to control the command palette.",
         type: OptionType.BOOLEAN,
-        default: false
+        default: true
     }
 });
 
@@ -109,7 +109,8 @@ export default definePlugin({
             registerAction({
                 id: 'openDevSettings',
                 label: 'Open Dev tab',
-                callback: () => SettingsRouter.open("VencordPatchHelper")
+                callback: () => SettingsRouter.open("VencordPatchHelper"),
+                registrar: "Vencord"
             });
         }
     },

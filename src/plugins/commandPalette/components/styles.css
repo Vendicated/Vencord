@@ -44,6 +44,14 @@
     width: 30wh;
 }
 
+.vc-command-palette-registrar {
+    position: absolute;
+    color: var(--interactive-normal);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    right: 1.6rem;
+}
+
 .vc-command-palette-key-recorder-container {
     position: relative;
     display: block;

@@ -17,19 +17,20 @@ export interface ButtonAction {
     id: string;
     label: string;
     callback?: () => void;
+    registrar?: string;
 }
 
 export let actions: ButtonAction[] = [
-    { id: 'openVencordSettings', label: 'Open Vencord tab', callback: async () => await SettingsRouter.open("VencordSettings") },
-    { id: 'openPluginSettings', label: 'Open Plugin tab', callback: () => SettingsRouter.open("VencordPlugins") },
-    { id: 'openThemesSettings', label: 'Open Themes tab', callback: () => SettingsRouter.open("VencordThemes") },
-    { id: 'openUpdaterSettings', label: 'Open Updater tab', callback: () => SettingsRouter.open("VencordUpdater") },
-    { id: 'openVencordCloudSettings', label: 'Open Cloud tab', callback: () => SettingsRouter.open("VencordCloud") },
-    { id: 'openBackupSettings', label: 'Open Backup & Restore tab', callback: () => SettingsRouter.open("VencordSettingsSync") },
-    { id: 'restartClient', label: 'Restart Client', callback: () => relaunch() },
-    { id: 'openQuickCSSFile', label: 'Open Quick CSS File', callback: () => VencordNative.quickCss.openEditor() },
-    { id: 'openSettingsFolder', label: 'Open Settings Folder', callback: async () => showItemInFolder(await VencordNative.settings.getSettingsDir()) },
-    { id: 'openInGithub', label: 'Open in Github', callback: async () => VencordNative.native.openExternal(await getRepo()) },
+    { id: 'openVencordSettings', label: 'Open Vencord tab', callback: async () => await SettingsRouter.open("VencordSettings"), registrar: "Vencord" },
+    { id: 'openPluginSettings', label: 'Open Plugin tab', callback: () => SettingsRouter.open("VencordPlugins"), registrar: "Vencord" },
+    { id: 'openThemesSettings', label: 'Open Themes tab', callback: () => SettingsRouter.open("VencordThemes"), registrar: "Vencord" },
+    { id: 'openUpdaterSettings', label: 'Open Updater tab', callback: () => SettingsRouter.open("VencordUpdater"), registrar: "Vencord" },
+    { id: 'openVencordCloudSettings', label: 'Open Cloud tab', callback: () => SettingsRouter.open("VencordCloud"), registrar: "Vencord" },
+    { id: 'openBackupSettings', label: 'Open Backup & Restore tab', callback: () => SettingsRouter.open("VencordSettingsSync"), registrar: "Vencord" },
+    { id: 'restartClient', label: 'Restart Client', callback: () => relaunch(), registrar: "Vencord" },
+    { id: 'openQuickCSSFile', label: 'Open Quick CSS File', callback: () => VencordNative.quickCss.openEditor(), registrar: "Vencord" },
+    { id: 'openSettingsFolder', label: 'Open Settings Folder', callback: async () => showItemInFolder(await VencordNative.settings.getSettingsDir()), registrar: "Vencord" },
+    { id: 'openInGithub', label: 'Open in Github', callback: async () => VencordNative.native.openExternal(await getRepo()), registrar: "Vencord" },
 
     {
         id: 'openInBrowser', label: 'Open in Browser', callback: async () => {
@@ -49,7 +50,7 @@ export let actions: ButtonAction[] = [
                     }
                 });
             }
-        }
+        }, registrar: "Vencord"
     },
 
     {
@@ -74,7 +75,7 @@ export let actions: ButtonAction[] = [
             if (choice && enabled) {
                 return togglePlugin(choice, enabled.id === 'enable');
             }
-        }
+        }, registrar: "Vencord"
     },
 
     {
@@ -105,7 +106,7 @@ export let actions: ButtonAction[] = [
                     }
                 });
             }
-        }
+        }, registrar: "Vencord"
     },
 
     {
@@ -132,7 +133,7 @@ export let actions: ButtonAction[] = [
                     }
                 });
             }
-        }
+        }, registrar: "Vencord"
     },
 
     {
@@ -152,7 +153,7 @@ export let actions: ButtonAction[] = [
             if (choice) {
                 NavigationRouter.transitionToGuild(choice.id);
             }
-        }
+        }, registrar: "Vencord"
     }
 ];
 

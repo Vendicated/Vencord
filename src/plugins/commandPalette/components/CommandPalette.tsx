@@ -109,8 +109,10 @@ export function CommandPalette({ modalProps }) {
                             className={cl("option", { "key-hover": index === focusedIndex })}
                             onClick={() => { if (allowMouse) handleButtonClick(action.id, index); }}
                             onMouseMove={() => { if (allowMouse) setFocusedIndex(index); }}
+                            style={allowMouse ? { cursor: "pointer" } : { cursor: "default" }}
                         >
                             {action.label}
+                            {action.registrar && <span className={cl("registrar")}>{action.registrar}</span>}
                         </button>
                     ))}
                 </div>
