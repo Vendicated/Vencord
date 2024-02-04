@@ -85,7 +85,7 @@ export function CommandPalette({ modalProps }) {
                 <TextInput
                     value={queryEh}
                     onChange={(e) => setQuery(e)}
-                    style={{ width: "100%", borderRadius: "0" }}
+                    style={{ width: "100%", borderBottomLeftRadius: "0", borderBottomRightRadius: "0" }}
                     placeholder="Search the Command Palette"
                 />
                 <div className={cl("option-container")}>

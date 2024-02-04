@@ -1,5 +1,5 @@
 import { relaunch, showItemInFolder } from "@utils/native";
-import { GuildStore, NavigationRouter, SettingsRouter, Toasts, UserStore } from "@webpack/common";
+import { Alerts, GuildStore, NavigationRouter, Parser, SettingsRouter, Toasts, UserStore, React } from "@webpack/common";
 import { openSimpleTextInput } from "./components/TextInput";
 import { checkForUpdates, getRepo } from "@utils/updater";
 import Plugins from "~plugins";
@@ -11,15 +11,7 @@ import { PresenceStore, Tooltip } from "@webpack/common";
 import { findStore } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 import { ChannelStore } from "@webpack/common";
-
-const selfPresenceStore = findStore("SelfPresenceStore");
-
-enum Status {
-    ONLINE = "online",
-    IDLE = "idle",
-    DND = "dnd",
-    INVISIBLE = "invisible"
-}
+import { ChangeList } from "@utils/ChangeList";
 
 export interface ButtonAction {
     id: string;
@@ -79,12 +71,8 @@ export let actions: ButtonAction[] = [
                 { id: 'disable', label: 'Disable' }
             ]);
 
-            if (choice) {
-                if (enabled.id === 'enable') {
-                    Settings.plugins[choice.id].enabled = true;
-                } else {
-                    Settings.plugins[choice.id].enabled = false;
-                }
+            if (choice && enabled) {
+                return togglePlugin(choice, enabled.id === 'enable');
             }
         }
     },
@@ -167,6 +155,20 @@ export let actions: ButtonAction[] = [
         }
     }
 ];
+
+function togglePlugin(plugin: ButtonAction, enabled: boolean) {
+
+    Settings.plugins[plugin.id].enabled = enabled;
+
+    Toasts.show({
+        message: `Successfully ${enabled ? 'enabled' : 'disabled'} ${plugin.id}`,
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            position: Toasts.Position.BOTTOM
+        }
+    });
+}
 
 export function registerAction(action: ButtonAction) {
     actions.push(action);

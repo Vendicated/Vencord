@@ -2,6 +2,7 @@
 
 .vc-command-palette-root {
     border-radius: 10px;
+    overflow: hidden;
 }
 
 .vc-command-palette-option {
@@ -19,9 +20,23 @@
     font-family: var(--font-display);
     color: var(--interactive-hover);
     border: 1.5px solid var(--interactive-hover);
+    padding-left: 0.8rem;
 }
 
 .vc-command-palette-option-container{
     display: grid;
     gap: 2px;
+}
+
+.vc-command-palette-textinfo {
+    font-family: var(--font-display);
+    color: var(--white-500);
+    margin-left: 0.8rem;
+    margin-right: 0.8rem;
+    padding: 0.8rem 0;
+}
+
+.vc-command-palette-simple-text {
+    background-color: var(--input-background);
+    width: 30wh;
 }
