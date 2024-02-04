@@ -135,6 +135,30 @@ export type Permissions = "CREATE_INSTANT_INVITE"
 
 export type PermissionsBits = Record<Permissions, bigint>;
 
+type ASTNode = {
+    type: string;
+    content: string | ASTNode;
+}[];
+
+export class FormattedMessage<T extends boolean | undefined = boolean> {
+    /**
+     * @throws {SyntaxError} Argument `message` must follow the proper syntax.
+     */
+    constructor(message: string, locale?: string, hasMarkdown?: T);
+
+    format(values: Record<string, any>): T extends true ? (string | React.ReactElement)[] : string;
+    astFormat(values: Record<string, any>): ASTNode;
+    plainFormat(values: Record<string, any>): string;
+    getContext<V extends Record<string, any>>(values: V): [Record<keyof V, number>, Record<number, V[keyof V]>];
+
+    message: string;
+    hasMarkdown: T;
+    intlMessage: {
+        _locale: string;
+        format(values: Record<string, any>): string;
+    };
+}
+
 export interface Locale {
     name: string;
     value: string;
@@ -159,7 +183,7 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, any>;
+    Messages: Record<i18nMessages, string | FormattedMessage>;
 }
 
 export interface Clipboard {
