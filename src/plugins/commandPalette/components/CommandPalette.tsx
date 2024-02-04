@@ -4,6 +4,7 @@ import { closeAllModals, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { React, TextInput, useState } from "@webpack/common";
 import { useEffect } from "@webpack/common";
 import { actions } from "../commands";
+import { settings } from "..";
 
 import "./styles.css";
 
@@ -13,6 +14,8 @@ export function CommandPalette({ modalProps }) {
     const cl = classNameFactory("vc-command-palette-");
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [startIndex, setStartIndex] = useState(0);
+
+    const allowMouse = settings.store.allowMouseControl;
 
     const sortedActions = actions.slice().sort((a, b) => a.label.localeCompare(b.label));
 
@@ -25,6 +28,16 @@ export function CommandPalette({ modalProps }) {
     const visibleActions = filteredActions.slice(startIndex, startIndex + 20);
 
     const totalActions = filteredActions.length;
+
+    const handleWheel = (e: React.WheelEvent) => {
+        if (allowMouse && filteredActions.length > 20) {
+            if (e.deltaY > 0) {
+                setStartIndex((prev) => Math.min(prev + 2, filteredActions.length - 20));
+            } else {
+                setStartIndex((prev) => Math.max(prev - 2, 0));
+            }
+        }
+    };
 
     const handleButtonClick = (actionId: string, index: number) => {
         const selectedAction = filteredActions.find((action) => action.id === actionId);
@@ -81,7 +94,7 @@ export function CommandPalette({ modalProps }) {
     }, [queryEh]);
 
     return (
-        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM} onKeyDown={handleKeyDown}>
+        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM} onKeyDown={handleKeyDown} onWheel={handleWheel}>
             <div>
                 <TextInput
                     value={queryEh}
@@ -94,8 +107,8 @@ export function CommandPalette({ modalProps }) {
                         <button
                             key={action.id}
                             className={cl("option", { "key-hover": index === focusedIndex })}
-                            onClick={() => handleButtonClick(action.id, index)}
-                            onMouseMove={() => setFocusedIndex(index)}
+                            onClick={() => { if (allowMouse) handleButtonClick(action.id, index); }}
+                            onMouseMove={() => { if (allowMouse) setFocusedIndex(index); }}
                         >
                             {action.label}
                         </button>

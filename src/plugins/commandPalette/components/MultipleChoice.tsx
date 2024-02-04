@@ -6,6 +6,7 @@ import { useEffect } from "@webpack/common";
 import { ButtonAction } from "../commands";
 
 import "./styles.css";
+import { settings } from "..";
 
 interface MultipleChoiceProps {
     modalProps: ModalProps;
@@ -18,6 +19,8 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
     const [queryEh, setQuery] = useState("");
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [startIndex, setStartIndex] = useState(0);
+
+    const allowMouse = settings.store.allowMouseControl;
 
     const sortedActions = choices.slice().sort((a, b) => a.label.localeCompare(b.label));
 
@@ -76,13 +79,23 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
         }
     };
 
+    const handleWheel = (e: React.WheelEvent) => {
+        if (allowMouse && filteredActions.length > 20) {
+            if (e.deltaY > 0) {
+                setStartIndex((prev) => Math.min(prev + 2, filteredActions.length - 20));
+            } else {
+                setStartIndex((prev) => Math.max(prev - 2, 0));
+            }
+        }
+    };
+
     useEffect(() => {
         setFocusedIndex(0);
         setStartIndex(0);
     }, [queryEh]);
 
     return (
-        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM} onKeyDown={handleKeyDown}>
+        <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.MEDIUM} onKeyDown={handleKeyDown} onWheel={handleWheel}>
             <div>
                 <TextInput
                     value={queryEh}
@@ -95,8 +108,8 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
                         <button
                             key={action.id}
                             className={cl("option", { "key-hover": index === focusedIndex })}
-                            onClick={() => handleButtonClick(action.id, index)}
-                            onMouseMove={() => setFocusedIndex(index)}
+                            onClick={() => { if (allowMouse) handleButtonClick(action.id, index); }}
+                            onMouseMove={() => { if (allowMouse) setFocusedIndex(index); }}
                         >
                             {action.label}
                         </button>

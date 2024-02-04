@@ -10,7 +10,7 @@ import { classNameFactory } from "@api/Styles";
 const cl = classNameFactory("vc-command-palette-");
 let recording: boolean = false;
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hotkey: {
         description: "The hotkey to open the command palette.",
         type: OptionType.COMPONENT,
@@ -27,6 +27,11 @@ const settings = definePluginSettings({
                 </div>
             </>
         )
+    },
+    allowMouseControl: {
+        description: "Allow the mouse to control the command palette.",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
