@@ -140,7 +140,7 @@ type ASTNode = {
     content: string | ASTNode;
 }[];
 
-export class FormattedMessage<T extends boolean | undefined = boolean> {
+export class FormattedMessage<T extends boolean | undefined = undefined> {
     /**
      * @throws {SyntaxError} Argument `message` must follow the proper syntax.
      */
@@ -183,7 +183,7 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, string | FormattedMessage>;
+    Messages: Record<i18nMessages, string | FormattedMessage<boolean>>;
 }
 
 export interface Clipboard {
