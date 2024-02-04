@@ -96,7 +96,7 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
                             key={action.id}
                             className={cl("option", { "key-hover": index === focusedIndex })}
                             onClick={() => handleButtonClick(action.id, index)}
-                            onMouseEnter={() => setFocusedIndex(index)}
+                            onMouseMove={() => setFocusedIndex(index)}
                         >
                             {action.label}
                         </button>

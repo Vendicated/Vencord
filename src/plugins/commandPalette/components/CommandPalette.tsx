@@ -11,11 +11,12 @@ const logger = new Logger("CommandPalette", "#e5c890");
 
 export function CommandPalette({ modalProps }) {
     const cl = classNameFactory("vc-command-palette-");
-    const [queryEh, setQuery] = useState("");
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [startIndex, setStartIndex] = useState(0);
 
     const sortedActions = actions.slice().sort((a, b) => a.label.localeCompare(b.label));
+
+    const [queryEh, setQuery] = useState("");
 
     const filteredActions = sortedActions.filter(
         (action) => action.label.toLowerCase().includes(queryEh.toLowerCase())
@@ -94,7 +95,7 @@ export function CommandPalette({ modalProps }) {
                             key={action.id}
                             className={cl("option", { "key-hover": index === focusedIndex })}
                             onClick={() => handleButtonClick(action.id, index)}
-                            onMouseEnter={() => setFocusedIndex(index)} // Add this line
+                            onMouseMove={() => setFocusedIndex(index)}
                         >
                             {action.label}
                         </button>
