@@ -85,7 +85,7 @@ export function CommandPalette({ modalProps }) {
                 <TextInput
                     value={queryEh}
                     onChange={(e) => setQuery(e)}
-                    style={{ width: "100%", borderBottomLeftRadius: "0", borderBottomRightRadius: "0" }}
+                    style={{ width: "100%", borderBottomLeftRadius: "0", borderBottomRightRadius: "0", paddingLeft: "0.9rem" }}
                     placeholder="Search the Command Palette"
                 />
                 <div className={cl("option-container")}>
@@ -94,6 +94,7 @@ export function CommandPalette({ modalProps }) {
                             key={action.id}
                             className={cl("option", { "key-hover": index === focusedIndex })}
                             onClick={() => handleButtonClick(action.id, index)}
+                            onMouseEnter={() => setFocusedIndex(index)} // Add this line
                         >
                             {action.label}
                         </button>

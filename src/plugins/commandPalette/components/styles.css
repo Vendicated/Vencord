@@ -3,6 +3,7 @@
 .vc-command-palette-root {
     border-radius: 10px;
     overflow: hidden;
+    background-color: var(--background-tertiary)
 }
 
 .vc-command-palette-option {
@@ -16,16 +17,18 @@
 
 .vc-command-palette-key-hover {
     padding: 5px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-modifier-selected);
+    border-radius: 3px;
     font-family: var(--font-display);
     color: var(--interactive-hover);
-    border: 1.5px solid var(--interactive-hover);
     padding-left: 0.8rem;
 }
 
 .vc-command-palette-option-container{
     display: grid;
     gap: 2px;
+    margin-left: 0.8rem;
+    margin-right: 0.8rem;
 }
 
 .vc-command-palette-textinfo {
