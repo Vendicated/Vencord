@@ -78,11 +78,10 @@ export const TranslateChatBarIcon: ChatBarButton = (props, isMainChat) => {
             }}
             onContextMenu={() => toggle()}
             buttonProps={{
-                "aria-haspopup": "dialog",
-                style: { padding: "0 4px" }
+                "aria-haspopup": "dialog"
             }}
         >
-            <TranslateIcon className={cl({ "auto-translate": autoTranslate })} />
+            <TranslateIcon className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
         </ChatBarButton>
     );
 };
