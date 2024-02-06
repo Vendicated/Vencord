@@ -9,12 +9,11 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { Text } from "@webpack/common";
 import { Switch } from "@webpack/common";
 import { useState } from "@webpack/common";
-import { Message } from "discord-types/general";
 import { getCurrentChannel, openImageModal } from "@utils/discord";
 import { useEffect } from "@webpack/common";
 import { UploadHandler } from "@webpack/common";
 
-let recentmessage : Message;
+let recentmessage;
 let grayscale;
 
 export default definePlugin({
