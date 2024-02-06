@@ -26,6 +26,7 @@ export default definePlugin({
     description: "Prevents Discord from replacing emoji with images, leaving it up to the browser to render them",
     authors: [Devs.Grzesiek11],
     patches: [
+        // Reactions
         {
             find: "getSrc(){",
             replacement: {
@@ -33,6 +34,7 @@ export default definePlugin({
                 replace: "$1return null",
             },
         },
+        // Messages
         {
             find: ",findInlineEmojisFromSurrogates:",
             replacement: {
