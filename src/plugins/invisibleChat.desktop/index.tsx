@@ -123,9 +123,6 @@ export default definePlugin({
     ),
     settings,
     async start() {
-        const { default: StegCloak } = await getStegCloak();
-        steggo = new StegCloak(true, false);
-
         addButton("InvisibleChat", message => {
             return this.INV_REGEX.test(message?.content)
                 ? {
@@ -144,6 +141,9 @@ export default definePlugin({
         });
 
         addChatBarButton("InvisibleChat", ChatBarIcon);
+
+        const { default: StegCloak } = await getStegCloak();
+        steggo = new StegCloak(true, false);
     },
 
     stop() {
