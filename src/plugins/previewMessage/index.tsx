@@ -16,21 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
-
-interface Props {
-    type: {
-        analyticsName: string;
-        isEmpty: boolean;
-        attachments: boolean;
-    };
-}
 
 const UploadStore = findByPropsLazy("getUploads");
 
@@ -81,13 +73,13 @@ const getAttachments = async (channelId: string) =>
     );
 
 
-export function PreviewButton(chatBoxProps: Props) {
-    const { isEmpty, attachments } = chatBoxProps.type;
+const PreviewButton: ChatBarButton = (props, isMainChat) => {
+    const { isEmpty, type: { attachments } } = props;
 
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
-    if (chatBoxProps.type.analyticsName !== "normal") return null;
+    if (!isMainChat) return null;
 
     const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
@@ -95,47 +87,33 @@ export function PreviewButton(chatBoxProps: Props) {
     if (!hasContent && !hasAttachments) return null;
 
     return (
-        <Tooltip text="Preview Message">
-            {tooltipProps => (
-                <Button
-                    {...tooltipProps}
-                    onClick={async () =>
-                        sendBotMessage(
-                            channelId,
-                            {
-                                content: getDraft(channelId),
-                                author: UserStore.getCurrentUser(),
-                                attachments: hasAttachments ? await getAttachments(channelId) : undefined,
-                            }
-                        )}
-                    size=""
-                    look={ButtonLooks.BLANK}
-                    innerClassName={ButtonWrapperClasses.button}
-                    style={{ padding: "0 2px", height: "100%" }}
-                >
-                    <div className={ButtonWrapperClasses.buttonWrapper}>
-                        <img width={24} height={24} src="https://discord.com/assets/4c5a77a89716352686f590a6f014770c.svg" />
-                    </div>
-                </Button>
-            )}
-        </Tooltip>
+        <ChatBarButton
+            tooltip="Preview Message"
+            onClick={async () =>
+                sendBotMessage(
+                    channelId,
+                    {
+                        content: getDraft(channelId),
+                        author: UserStore.getCurrentUser(),
+                        attachments: hasAttachments ? await getAttachments(channelId) : undefined,
+                    }
+                )}
+            buttonProps={{
+                style: { padding: "0 2px", height: "100%" }
+            }}
+        >
+            <img width={24} height={24} src="https://discord.com/assets/4c5a77a89716352686f590a6f014770c.svg" />
+        </ChatBarButton>
     );
 
-}
+};
 
 export default definePlugin({
     name: "PreviewMessage",
     description: "Lets you preview your message before sending it.",
     authors: [Devs.Aria],
-    patches: [
-        {
-            find: "ChannelTextAreaButtons",
-            replacement: {
-                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
-            }
-        },
-    ],
+    dependencies: ["ChatInputButtonAPI"],
 
-    chatBarIcon: ErrorBoundary.wrap(PreviewButton, { noop: true }),
+    start: () => addChatBarButton("previewMessage", PreviewButton),
+    stop: () => removeChatBarButton("previewMessage"),
 });
