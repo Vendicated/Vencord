@@ -80,8 +80,6 @@ const buttonFactories = new Map<string, ChatBarButton>();
 const logger = new Logger("ChatButtons");
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
-    if (props.type.analyticsName !== "normal") return;
-
     for (const [key, makeButton] of buttonFactories) {
         try {
             const res = makeButton(props, props.type.analyticsName === "normal");
