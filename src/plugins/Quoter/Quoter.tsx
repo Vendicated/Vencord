@@ -1,7 +1,5 @@
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { OptionType } from "@utils/types";
 import { Menu } from "@webpack/common";
 import definePlugin from "@utils/types";
 import { Button, } from "@webpack/common";
@@ -9,7 +7,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { Text } from "@webpack/common";
 import { Switch } from "@webpack/common";
 import { useState } from "@webpack/common";
-import { getCurrentChannel, openImageModal } from "@utils/discord";
+import { getCurrentChannel } from "@utils/discord";
 import { useEffect } from "@webpack/common";
 import { UploadHandler } from "@webpack/common";
 
