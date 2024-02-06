@@ -16,8 +16,9 @@ app.on("browser-window-created", (_, win) => {
 
                 frame.executeJavaScript(`
                 new MutationObserver(() => {
-                    let err = document.querySelector(".ytp-error-content-wrap-subreason span")?.textContent;
-                    if (err && err.includes("blocked it from display")) window.location.reload()
+                    if(
+                        document.querySelector('div.ytp-error-content-wrap-subreason a[href^="https://www.youtube.com/watch?v="]')
+                    ) location.reload()
                 }).observe(document.body, { childList: true, subtree:true });
                 `);
             }
