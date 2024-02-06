@@ -65,7 +65,7 @@ function Indicator() {
 
 }
 
-const ChatBarIcon: ChatBarButton = (_, isMainChat) => {
+const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     return (
