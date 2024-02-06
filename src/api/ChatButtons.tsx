@@ -4,11 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./ChatButton.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import { waitFor } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { HTMLProps, MouseEventHandler, ReactNode } from "react";
+
+let CssClasses: { buttonContainer: string; };
+waitFor(["buttonContainer", "channelTextArea"], m => CssClasses = m);
 
 export interface ChatBarProps {
     channel: Channel;
@@ -100,7 +106,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
             {({ onMouseEnter, onMouseLeave }) => (
-                <div style={{ display: "flex" }}>
+                <div className={`expression-picker-chat-input-button ${CssClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
                     <Button
                         aria-label={props.tooltip}
                         size=""
