@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "HideServerAvatars",
+    name: "NoServerAvatars",
     description: "Disables server avatars.",
     authors: [Devs.crwn],
     patches: [
