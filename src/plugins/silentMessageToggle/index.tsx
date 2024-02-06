@@ -41,7 +41,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentMessageToggle: ChatBarButton = (_, isMainChat) => {
+const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
 
     function setEnabledValue(value: boolean) {

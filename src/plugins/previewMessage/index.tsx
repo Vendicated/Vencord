@@ -73,9 +73,7 @@ const getAttachments = async (channelId: string) =>
     );
 
 
-const PreviewButton: ChatBarButton = (props, isMainChat) => {
-    const { isEmpty, type: { attachments } } = props;
-
+const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
