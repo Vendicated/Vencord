@@ -19,7 +19,7 @@
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
@@ -99,7 +99,10 @@ const PreviewButton: ChatBarButton = (props, isMainChat) => {
                     }
                 )}
             buttonProps={{
-                style: { padding: "0 2px", height: "100%" }
+                style: {
+                    padding: "0 6px",
+                    translate: "0 2px"
+                }
             }}
         >
             <img width={24} height={24} src="https://discord.com/assets/4c5a77a89716352686f590a6f014770c.svg" />
@@ -113,6 +116,9 @@ export default definePlugin({
     description: "Lets you preview your message before sending it.",
     authors: [Devs.Aria],
     dependencies: ["ChatInputButtonAPI"],
+    // start early to ensure we're the first plugin to add our button
+    // This makes the popping in less awkward
+    startAt: StartAt.Init,
 
     start: () => addChatBarButton("previewMessage", PreviewButton),
     stop: () => removeChatBarButton("previewMessage"),
