@@ -25,16 +25,17 @@ function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: string; }; }) => {
-            if (!ReadStateStore.hasUnread(c.channel.id)) return;
+        GuildChannelStore.getChannels(guild.id).SELECTABLE
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+            .forEach((c: { channel: { id: string; }; }) => {
+                if (!ReadStateStore.hasUnread(c.channel.id)) return;
 
-            channels.push({
-                channelId: c.channel.id,
-                // messageId: c.channel?.lastMessageId,
-                messageId: ReadStateStore.lastMessageId(c.channel.id),
-                readStateType: 0
+                channels.push({
+                    channelId: c.channel.id,
+                    messageId: ReadStateStore.lastMessageId(c.channel.id),
+                    readStateType: 0
+                });
             });
-        });
     });
 
     FluxDispatcher.dispatch({
