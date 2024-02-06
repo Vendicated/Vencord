@@ -1,27 +1,14 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { classNameFactory } from "@api/Styles";
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/react";
 import { saveFile } from "@utils/web";
 import { findByCode, findByProps, findByPropsLazy } from "@webpack";
-import settings from "./settings";
 import type { User } from "discord-types/general";
 
 export { User };
@@ -46,9 +33,9 @@ export const cl = classNameFactory("vc-soundlog-");
 
 export function getEmojiUrl(emoji) {
     const { getURL } = proxyLazy(() => findByProps("getEmojiColors", "getURL"));
-    if (!emoji) return getURL('❓'); // If the sound doesn't have a related emoji
+    if (!emoji) return getURL("❓"); // If the sound doesn't have a related emoji
     return emoji.id ? `https://cdn.discordapp.com/emojis/${emoji.id}.png?size=32` : getURL(emoji.name);
-};
+}
 
 const v1 = findByPropsLazy("amplitudeToPerceptual");
 const v2 = findByPropsLazy("getAmplitudinalSoundboardVolume");
@@ -56,7 +43,7 @@ const v2 = findByPropsLazy("getAmplitudinalSoundboardVolume");
 export const getSoundboardVolume = () => v1.amplitudeToPerceptual(v2.getAmplitudinalSoundboardVolume());
 
 export const playSound = id => {
-    let audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
+    const audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
     audio.volume = getSoundboardVolume() / 100;
     audio.play();
 };

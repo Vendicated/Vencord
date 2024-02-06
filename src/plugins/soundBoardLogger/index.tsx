@@ -1,32 +1,21 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { FluxDispatcher } from "@webpack/common";
-import { enableStyle, disableStyle } from "@api/Styles";
-import definePlugin from "@utils/types";
+import { disableStyle,enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import styles from "./styles.css?managed";
-import settings from "./settings";
-import { getListeners } from "./utils";
-import { LogIcon, IconWithTooltip } from "./components/Icons";
-import { updateLoggedSounds } from "./store";
+import definePlugin from "@utils/types";
+import { FluxDispatcher } from "@webpack/common";
+
+import { IconWithTooltip,LogIcon } from "./components/Icons";
 import { openSoundBoardLog } from "./components/SoundBoardLog";
+import settings from "./settings";
+import { updateLoggedSounds } from "./store";
+import styles from "./styles.css?managed";
+import { getListeners } from "./utils";
 
 export default definePlugin({
     name: "SoundBoardLogger",
@@ -57,7 +46,7 @@ export default definePlugin({
     description: "Logs all soundboards that are played in a voice chat and allows you to download them",
     start() {
         enableStyle(styles);
-        FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", async (sound) => {
+        FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", async sound => {
             if (!sound?.soundId) return;
             await updateLoggedSounds(sound);
             getListeners().forEach(cb => cb());
@@ -71,7 +60,7 @@ export default definePlugin({
             <IconWithTooltip text="Open SoundBoard Log" icon={<LogIcon className="chatBarLogIcon" />} onClick={openSoundBoardLog} />
         </ErrorBoundary>
     ),
-    toolbarPatch: (obj) => {
+    toolbarPatch: obj => {
         if (!obj?.props?.children) return obj;
         obj.props.children = [<IconWithTooltip text="Open SoundBoard Log" icon={<LogIcon className="chatBarLogIcon" />} onClick={openSoundBoardLog} />, ...obj.props.children];
         return obj;

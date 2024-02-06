@@ -1,27 +1,15 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { ModalContent, ModalRoot, ModalSize, closeModal, openModal } from "@utils/modal";
-import { Forms, Clickable } from "@webpack/common";
-import { Flex } from "@components/Flex";
-import { cl, getEmojiUrl } from "../utils";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { SoundLogEntry, User } from "../utils";
+import { Flex } from "@components/Flex";
+import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { Clickable, Forms } from "@webpack/common";
+
+import { cl, getEmojiUrl, SoundLogEntry, User } from "../utils";
 
 export function openMoreUsersModal(item: SoundLogEntry, users: User[], onClickUser: Function) {
     const key = openModal(props => (
@@ -47,7 +35,7 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
             </div>
             <div className={cl("more-users")}>
                 {users.map(user => {
-                    const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: '', plays: [0] };
+                    const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: "", plays: [0] };
                     return (
                         <Clickable onClick={() => {
                             closeModal();
@@ -63,7 +51,7 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
                                     />
                                     <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>{user.username}</Forms.FormText>
                                 </Flex>
-                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>Played {currentUser.plays.length} {currentUser.plays.length === 1 ? 'time' : 'times'}</Forms.FormText>
+                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>Played {currentUser.plays.length} {currentUser.plays.length === 1 ? "time" : "times"}</Forms.FormText>
                             </div>
                         </Clickable>
                     );

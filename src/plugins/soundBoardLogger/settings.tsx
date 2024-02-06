@@ -1,24 +1,13 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
-import { Forms, TextInput, Button, useState } from "@webpack/common";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
+
 import { openSoundBoardLog } from "./components/SoundBoardLog";
 
 const settings = definePluginSettings({
@@ -34,12 +23,12 @@ const settings = definePluginSettings({
             function handleChange(newValue) {
                 const changed = Number(newValue);
 
-                if (Number.isNaN(changed) || changed % 1 != 0 || changed < 0) {
+                if (Number.isNaN(changed) || changed % 1 !== 0 || changed < 0) {
                     setError(true);
                     let errorMsg = "";
-                    errorMsg += Number.isNaN(changed) ? "The value is not a number.\n" : '';
-                    errorMsg += (changed % 1 != 0) ? "The value can't be a decimal number.\n" : '';
-                    errorMsg += (changed < 0) ? "The value can't be a negative number.\n" : '';
+                    errorMsg += Number.isNaN(changed) ? "The value is not a number.\n" : "";
+                    errorMsg += (changed % 1 !== 0) ? "The value can't be a decimal number.\n" : "";
+                    errorMsg += (changed < 0) ? "The value can't be a negative number.\n" : "";
                     setErrorMessage(errorMsg);
                     return;
                 } else {
@@ -55,7 +44,7 @@ const settings = definePluginSettings({
                 }
                 setState(newValue);
                 setValue(changed);
-            };
+            }
 
 
             return (

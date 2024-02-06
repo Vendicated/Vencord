@@ -1,32 +1,20 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { Button, Clickable, Forms, GuildStore, PermissionStore, PermissionsBits, Popout, SearchableSelect, Select, Text, TextInput, Toasts, UserStore, showToast, useMemo, useState } from "@webpack/common";
 import { Flex } from "@components/Flex";
-import { openModal, ModalRoot, closeModal, ModalContent, ModalHeader, ModalCloseButton } from "@utils/modal";
-import ExpandableHeader from "@components/ExpandableHeader";
-import { Guild } from "discord-types/general";
 import { Margins } from "@utils/margins";
-import { HtmlHTMLAttributes } from "react";
-import { SoundEvent, cl, getEmojiUrl } from "../utils";
+import { classes } from "@utils/misc";
+import { closeModal, ModalCloseButton,ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { classes } from "@utils/misc";
+import { Button, Clickable, Forms, GuildStore, PermissionsBits, PermissionStore, Popout, SearchableSelect, showToast, Text, TextInput, Toasts, useMemo, UserStore, useState } from "@webpack/common";
+import { Guild } from "discord-types/general";
+import { HtmlHTMLAttributes } from "react";
+
+import { cl, getEmojiUrl,SoundEvent } from "../utils";
 
 export function openCloneSoundModal(item) {
     const key = openModal(props =>
@@ -115,7 +103,7 @@ export function CloneSoundModal({ item, closeModal }: { item: SoundEvent, closeM
                     key: "selected"
                 }) : undefined}
 
-                onChange={v =>  setSelectedGuild(v)}
+                onChange={v => setSelectedGuild(v)}
                 closeOnSelect={true}
                 renderOptionPrefix={v => v ? (
                     v.value.icon ?
@@ -165,7 +153,7 @@ export function CloneSoundModal({ item, closeModal }: { item: SoundEvent, closeM
                         setLoadingButton(false);
                         showToast("Error fetching the sound", Toasts.Type.FAILURE);
                         return;
-                    };
+                    }
                     response.body.getReader().read().then(function(result) {
                         if (!result.value) {
                             setLoadingButton(false);
@@ -174,12 +162,12 @@ export function CloneSoundModal({ item, closeModal }: { item: SoundEvent, closeM
                         }
                         return btoa(String.fromCharCode(...result.value));
                     }).then(function (b64) {
-                        
+
                         sounds.uploadSound({
                             guildId: selectedGuild?.id,
                             name: soundName,
                             sound: `data:audio/ogg;base64,${b64}`,
-                            ...(soundEmoji.id ? {emojiId: soundEmoji.id} : {emojiName: soundEmoji.surrogates}),
+                            ...(soundEmoji.id ? { emojiId: soundEmoji.id } : { emojiName: soundEmoji.surrogates }),
                             volume: 1
                         }).then(() => {
                             showToast(`Sound added to ${selectedGuild?.name}`, Toasts.Type.SUCCESS);
@@ -188,18 +176,18 @@ export function CloneSoundModal({ item, closeModal }: { item: SoundEvent, closeM
                             setLoadingButton(false);
                             showToast("Error while adding sound", Toasts.Type.FAILURE);
                         });
-                        
+
                     });
                 }).catch(e => {
                     setLoadingButton(false);
                     showToast("Error fetching the sound", Toasts.Type.FAILURE);
                     return;
-                })
+                });
             }}
-                disabled={(!(selectedGuild && soundName && isEmojiValid)) || loadingButton}
-                size={Button.Sizes.MEDIUM}
-                style={{ width: "100%" }}
-                className={Margins.bottom16}>Add to Server</Button>
+            disabled={(!(selectedGuild && soundName && isEmojiValid)) || loadingButton}
+            size={Button.Sizes.MEDIUM}
+            style={{ width: "100%" }}
+            className={Margins.bottom16}>Add to Server</Button>
         </ModalContent>
     </>;
-} //a
+}

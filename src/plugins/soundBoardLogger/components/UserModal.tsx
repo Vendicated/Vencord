@@ -1,32 +1,20 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
+import { Flex } from "@components/Flex";
 import { CopyIcon } from "@components/Icons";
 import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
-import { ModalRoot, ModalContent, closeModal, openModal } from "@utils/modal";
-import { Clickable, Forms, Timestamp, Text } from "@webpack/common";
-import { Flex } from "@components/Flex";
-import { SoundLogEntry, User, playSound } from "../utils";
+import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { Clickable, Forms, Text, Timestamp } from "@webpack/common";
 import moment from "moment";
-import { AvatarStyles, UserSummaryItem, cl, downloadAudio, getEmojiUrl } from "../utils";
-import { DownloadIcon, PlayIcon, IconWithTooltip } from "./Icons";
+
+import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "../utils";
+import { DownloadIcon, IconWithTooltip, PlayIcon } from "./Icons";
 
 export function openUserModal(item, user, sounds) {
     const key = openModal(props =>
@@ -37,8 +25,8 @@ export function openUserModal(item, user, sounds) {
 }
 
 export default function UserModal({ item, user, sounds, closeModal }: { item: SoundLogEntry, user: User, sounds: SoundLogEntry[], closeModal: Function; }) {
-    const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: '', plays: [0] };
-    const soundsDoneByCurrentUser = sounds.filter(sound => sound.users.some(itemUser => itemUser.id === user.id) && sound.soundId != item.soundId);
+    const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: "", plays: [0] };
+    const soundsDoneByCurrentUser = sounds.filter(sound => sound.users.some(itemUser => itemUser.id === user.id) && sound.soundId !== item.soundId);
 
     return (
         <ModalContent className={cl("user")}>
@@ -64,12 +52,12 @@ export default function UserModal({ item, user, sounds, closeModal }: { item: So
                 />
                 <Flex flexDirection="column" style={{ gap: "7px", height: "68px", justifyContent: "space-between" }}>
                     <Text variant="text-md/bold" style={{ height: "20px" }}>{item.soundId}</Text>
-                    <Text variant="text-md/normal">Played {currentUser.plays.length} {currentUser.plays.length === 1 ? 'time' : 'times'}.</Text>
+                    <Text variant="text-md/normal">Played {currentUser.plays.length} {currentUser.plays.length === 1 ? "time" : "times"}.</Text>
                     <Text variant="text-md/normal">Last played: <Timestamp timestamp={moment(currentUser.plays.at(-1))} /></Text>
                 </Flex>
             </Flex>
             <Text variant="heading-lg/semibold" tag="h2" className={classes(Margins.top16, Margins.bottom8)}>
-                {soundsDoneByCurrentUser.length ? 'Also played:' : ' '}
+                {soundsDoneByCurrentUser.length ? "Also played:" : " "}
             </Text>
             <Flex style={{ justifyContent: "space-between" }}>
                 <UserSummaryItem

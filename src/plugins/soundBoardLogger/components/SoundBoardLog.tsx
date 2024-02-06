@@ -1,34 +1,22 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
-import { openModal, ModalRoot, ModalContent, closeModal, ModalSize, ModalHeader, ModalCloseButton, ModalFooter } from "@utils/modal";
-import { UserUtils, Clickable, Tooltip, Forms, Button, Text, useState, useEffect, ContextMenuApi, Menu, FluxDispatcher } from "@webpack/common";
-import { Flex } from "@components/Flex";
+import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Button, Clickable, ContextMenuApi, FluxDispatcher, Forms, Menu, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
+
 import { clearLoggedSounds, getLoggedSounds } from "../store";
-import { SoundLogEntry, getSoundboardVolume, playSound } from "../utils";
-import { AvatarStyles, cl, getEmojiUrl, UserSummaryItem, downloadAudio, addListener, removeListener } from "../utils";
+import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, getSoundboardVolume, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
+import { openCloneSoundModal } from "./CloneSoundModal";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
-import { openCloneSoundModal } from "./CloneSoundModal";
 
 export async function openSoundBoardLog(): Promise<void> {
 
@@ -60,16 +48,16 @@ export default function SoundBoardLog({ data, closeModal }) {
         (async () => {
             /** Array of user IDs without a resolved user object */
             const missing = sounds
-                .flatMap(sound => sound.users)                              // Get all users who have used any sound
-                .map(user => user.id)                                       // Get their ID ( user is {id: string, plays: number[]} )
-                .filter((id, index, self) => index === self.indexOf(id))    // Filter the array to remove non unique values
-                .filter(id => !users.map(user => user.id).includes(id));    // Filter the IDs to only get the ones not already in the users state
-            if (!missing.length) return;                                    // return if every user ID is already in users
+                .flatMap(sound => sound.users) // Get all users who have used any sound
+                .map(user => user.id) // Get their ID ( user is {id: string, plays: number[]} )
+                .filter((id, index, self) => index === self.indexOf(id)) // Filter the array to remove non unique values
+                .filter(id => !users.map(user => user.id).includes(id)); // Filter the IDs to only get the ones not already in the users state
+            if (!missing.length) return; // return if every user ID is already in users
 
             for (const id of missing) {
                 const user = await UserUtils.getUser(id).catch(() => void 0);
                 if (user) setUsers(u => [...u, user]);
-            };
+            }
         })();
     }, [sounds]);
 
@@ -99,7 +87,7 @@ export default function SoundBoardLog({ data, closeModal }) {
     /** This function is called when you click the "Show more users" button. */
     function onClickShowMoreUsers(item: SoundLogEntry, users: User[]): void {
         openMoreUsersModal(item, users, onClickUser);
-    };
+    }
 
     function onClickUser(item: SoundLogEntry, user: User) {
         openUserModal(item, user, sounds);
@@ -114,7 +102,7 @@ export default function SoundBoardLog({ data, closeModal }) {
             >
                 <Menu.MenuGroup label="Extra buttons">
                     <Menu.MenuItem
-                        id={label('clone')}
+                        id={label("clone")}
                         label="Clone sound"
                         action={() => openCloneSoundModal(item)}
                     />
@@ -136,7 +124,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                     return (
                         <div
                             className={cl("sound")}
-                            onContextMenu={(e) =>
+                            onContextMenu={e =>
                                 ContextMenuApi.openContextMenu(e, () => <SoundContextMenu item={item} />)
                             }
                         >
@@ -148,8 +136,8 @@ export default function SoundBoardLog({ data, closeModal }) {
                                 <Forms.FormText variant="text-xs/medium" className={cl("sound-id")}>{item.soundId}</Forms.FormText>
                             </Flex>
                             <UserSummaryItem
-                                users={itemUsers.slice(0, avatarsMax)}  // Trimmed array to the size of max
-                                count={item.users.length - 1}           // True size (counting users that aren't rendered) - 1
+                                users={itemUsers.slice(0, avatarsMax)} // Trimmed array to the size of max
+                                count={item.users.length - 1} // True size (counting users that aren't rendered) - 1
                                 guildId={undefined}
                                 renderIcon={false}
                                 max={avatarsMax}
@@ -201,4 +189,4 @@ export default function SoundBoardLog({ data, closeModal }) {
             </ModalFooter>
         </>
     );
-};
+}
