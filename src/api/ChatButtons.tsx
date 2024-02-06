@@ -13,8 +13,8 @@ import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/com
 import { Channel } from "discord-types/general";
 import { HTMLProps, MouseEventHandler, ReactNode } from "react";
 
-let CssClasses: { buttonContainer: string; };
-waitFor(["buttonContainer", "channelTextArea"], m => CssClasses = m);
+let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
+waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
 
 export interface ChatBarProps {
     channel: Channel;
@@ -106,14 +106,14 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
             {({ onMouseEnter, onMouseLeave }) => (
-                <div className={`expression-picker-chat-input-button ${CssClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
+                <div className={`expression-picker-chat-input-button ${ChannelTextAreaClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
                     <Button
                         aria-label={props.tooltip}
                         size=""
                         look={ButtonLooks.BLANK}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
-                        innerClassName={ButtonWrapperClasses.button}
+                        innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
                         {...props.buttonProps}
