@@ -37,7 +37,7 @@ export default definePlugin({
             find: ",findInlineEmojisFromSurrogates:",
             replacement: {
                 match: /if\(!0!==.{1,2}&&!.{1,2}\.test\(.{1,2}\)\)/,
-                replace: "",
+                replace: "if(true)",
             },
         },
     ],
