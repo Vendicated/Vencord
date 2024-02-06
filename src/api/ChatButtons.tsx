@@ -74,7 +74,7 @@ export interface ChatBarProps {
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps, isMainChat: boolean) => ReactNode;
+export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
 
 const buttonFactories = new Map<string, ChatBarButton>();
 const logger = new Logger("ChatButtons");
@@ -82,13 +82,12 @@ const logger = new Logger("ChatButtons");
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
 
-    for (const [key, makeButton] of buttonFactories) {
-        try {
-            const res = makeButton(props, props.type.analyticsName === "normal");
-            if (res) buttons.push(res);
-        } catch (e) {
-            logger.error(`Failed to render button ${key}`, e);
-        }
+    for (const [key, Button] of buttonFactories) {
+        buttons.push(
+            <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
+                <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
+            </ErrorBoundary>
+        );
     }
 }
 

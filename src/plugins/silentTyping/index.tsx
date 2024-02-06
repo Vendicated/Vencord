@@ -37,7 +37,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentTypingToggle: ChatBarButton = (_, isMainChat) => {
+const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
     const { isEnabled, showIcon } = settings.use(["isEnabled", "showIcon"]);
     const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
 

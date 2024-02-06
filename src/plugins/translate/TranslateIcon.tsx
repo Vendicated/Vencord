@@ -39,7 +39,7 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
     );
 }
 
-export const TranslateChatBarIcon: ChatBarButton = (props, isMainChat) => {
+export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
 
     if (!isMainChat) return null;
