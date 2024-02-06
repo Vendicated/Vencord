@@ -35,3 +35,7 @@
 .vc-trans-auto-translate {
     color: var(--green-360);
 }
+
+.vc-trans-chat-button {
+    scale: 1.085;
+}

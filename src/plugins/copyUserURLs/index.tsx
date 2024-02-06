@@ -30,6 +30,8 @@ interface UserContextProps {
 }
 
 const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => () => {
+    if (!user) return;
+
     children.push(
         <Menu.MenuItem
             id="vc-copy-user-url"

@@ -82,7 +82,7 @@ export const streamContextPatch: NavContextMenuPatchCallback = (children, { stre
 };
 
 export const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
-    return addViewStreamContext(children, { userId: user.id });
+    if (user) return addViewStreamContext(children, { userId: user.id });
 };
 
 export default definePlugin({
