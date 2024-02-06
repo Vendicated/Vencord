@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ChatBarButton } from "@api/ChatButtons";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
@@ -37,42 +37,30 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
     );
 }
 
-export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { analyticsName: string; }; }; }) {
+export const TranslateChatBarIcon: ChatBarButton = (props, isMainChat) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
 
-    if (slateProps.type.analyticsName !== "normal")
-        return null;
+    if (!isMainChat) return null;
 
     const toggle = () => settings.store.autoTranslate = !autoTranslate;
 
     return (
-        <Tooltip text="Open Translate Modal">
-            {({ onMouseEnter, onMouseLeave }) => (
-                <div style={{ display: "flex" }}>
-                    <Button
-                        aria-haspopup="dialog"
-                        aria-label="Open Translate Modal"
-                        size=""
-                        look={ButtonLooks.BLANK}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        innerClassName={ButtonWrapperClasses.button}
-                        onClick={e => {
-                            if (e.shiftKey) return toggle();
+        <ChatBarButton
+            tooltip="Open Translate Modal"
+            onClick={e => {
+                if (e.shiftKey) return toggle();
 
-                            openModal(props => (
-                                <TranslateModal rootProps={props} />
-                            ));
-                        }}
-                        onContextMenu={() => toggle()}
-                        style={{ padding: "0 4px" }}
-                    >
-                        <div className={ButtonWrapperClasses.buttonWrapper}>
-                            <TranslateIcon className={cl({ "auto-translate": autoTranslate })} />
-                        </div>
-                    </Button>
-                </div>
-            )}
-        </Tooltip>
+                openModal(props => (
+                    <TranslateModal rootProps={props} />
+                ));
+            }}
+            onContextMenu={() => toggle()}
+            buttonProps={{
+                "aria-haspopup": "dialog",
+                style: { padding: "0 4px" }
+            }}
+        >
+            <TranslateIcon className={cl({ "auto-translate": autoTranslate })} />
+        </ChatBarButton>
     );
-}
+};
