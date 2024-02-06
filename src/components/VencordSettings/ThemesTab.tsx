@@ -21,9 +21,11 @@ import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import PluginModal from "@components/PluginSettings/PluginModal";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
@@ -248,6 +250,21 @@ function ThemesTab() {
                             >
                                 Edit QuickCSS
                             </Button>
+
+                            {Vencord.Settings.plugins.ClientTheme.enabled && (
+                                <Button
+                                    onClick={() => openModal(modalProps => (
+                                        <PluginModal
+                                            {...modalProps}
+                                            plugin={Vencord.Plugins.plugins.ClientTheme}
+                                            onRestartNeeded={() => { }}
+                                        />
+                                    ))}
+                                    size={Button.Sizes.SMALL}
+                                >
+                                    Edit ClientTheme
+                                </Button>
+                            )}
                         </>
                     </Card>
 
