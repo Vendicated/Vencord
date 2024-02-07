@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useState } from "webpack/common";
+import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -85,7 +85,6 @@ function ImportCustomRPCComponent() {
                     }
 
                     settings.store.allowedIds += `${settings.store.allowedIds.length > 0 ? "," : ""}${id}`;
-                    allowedIdsSetState(settings.store.allowedIds);
                 }}
             >
                 Import CustomRPC
@@ -94,14 +93,10 @@ function ImportCustomRPCComponent() {
     );
 }
 
-let allowedIdsSetState: React.Dispatch<string>;
-
 function AllowedIdsComponent() {
-    const [state, setState] = useState(settings.store.allowedIds ?? "");
-    allowedIdsSetState = setState;
+    const { allowedIds } = settings.use(["allowedIds"]);
 
-    function handleChange(newValue) {
-        setState(newValue);
+    function handleChange(newValue: string) {
         settings.store.allowedIds = newValue;
     }
 
@@ -110,7 +105,7 @@ function AllowedIdsComponent() {
             <Forms.FormTitle>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)</Forms.FormTitle>
             <TextInput
                 type="text"
-                value={state}
+                value={allowedIds ?? ""}
                 onChange={handleChange}
                 placeholder="Enter a value"
             />
@@ -122,7 +117,6 @@ const settings = definePluginSettings({
     importCustomRPC: {
         type: OptionType.COMPONENT,
         description: "",
-        default: "",
         component: () => <ImportCustomRPCComponent />
     },
     allowedIds: {
