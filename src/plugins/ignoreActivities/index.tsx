@@ -191,7 +191,7 @@ export default definePlugin({
         if (isActivityTypeIgnored(props.type, props.application_id)) return false;
 
         if (props.application_id != null) {
-            return !getIgnoredActivities().some(activity => activity.id === props.application_id) && !settings.store.allowedIds.includes(props.application_id);
+            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || settings.store.allowedIds.includes(props.application_id);
         } else {
             const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
             if (exePath) {
