@@ -5,12 +5,12 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { StatusSettingsStores, Tooltip } from "webpack/common";
+import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -69,35 +69,91 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     StatusSettingsStores.ShowCurrentGame.updateSetting(old => old);
 }
 
+function ImportCustomRPCComponent() {
+    return (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Forms.FormText>Import the application id of the CustomRPC plugin to the allowed list</Forms.FormText>
+            <Button
+                onClick={() => {
+                    let id: string | undefined;
+                    if (!(id = Settings.plugins.CustomRPC?.appID)) {
+                        return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
+                    }
+
+                    if (settings.store.allowedIds.includes(id)) {
+                        return showToast("CustomRPC application ID is already allowed.", Toasts.Type.FAILURE);
+                    }
+
+                    settings.store.allowedIds += `${settings.store.allowedIds.length > 0 ? "," : ""}${id}`;
+                    allowedIdsSetState(settings.store.allowedIds);
+                }}
+            >
+                Import CustomRPC
+            </Button>
+        </div>
+    );
+}
+
+let allowedIdsSetState: React.Dispatch<string>;
+
+function AllowedIdsComponent() {
+    const [state, setState] = useState(settings.store.allowedIds ?? "");
+    allowedIdsSetState = setState;
+
+    function handleChange(newValue) {
+        setState(newValue);
+        settings.store.allowedIds = newValue;
+    }
+
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)</Forms.FormTitle>
+            <TextInput
+                type="text"
+                value={state}
+                onChange={handleChange}
+                placeholder="Enter a value"
+            />
+        </Forms.FormSection>
+    );
+}
+
 const settings = definePluginSettings({
+    importCustomRPC: {
+        type: OptionType.COMPONENT,
+        description: "",
+        default: "",
+        component: () => <ImportCustomRPCComponent />
+    },
     allowedIds: {
-        description: "A comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)",
-        type: OptionType.STRING,
-        default: ""
+        type: OptionType.COMPONENT,
+        description: "",
+        default: "",
+        component: () => <AllowedIdsComponent />
     },
     ignorePlaying: {
-        description: "Ignore all playing activities (These are usually game and RPC activities)",
         type: OptionType.BOOLEAN,
+        description: "Ignore all playing activities (These are usually game and RPC activities)",
         default: false
     },
     ignoreStreaming: {
-        description: "Ignore all streaming activities",
         type: OptionType.BOOLEAN,
+        description: "Ignore all streaming activities",
         default: false
     },
     ignoreListening: {
-        description: "Ignore all listening activities (These are usually spotify activities)",
         type: OptionType.BOOLEAN,
+        description: "Ignore all listening activities (These are usually spotify activities)",
         default: false
     },
     ignoreWatching: {
-        description: "Ignore all watching activities",
         type: OptionType.BOOLEAN,
+        description: "Ignore all watching activities",
         default: false
     },
     ignoreCompeting: {
-        description: "Ignore all competing activities (These are normally special game activities)",
         type: OptionType.BOOLEAN,
+        description: "Ignore all competing activities (These are normally special game activities)",
         default: false
     }
 }).withPrivateSettings<{
