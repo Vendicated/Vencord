@@ -16,21 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, DraftStore, DraftType, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
-
-interface Props {
-    type: {
-        analyticsName: string;
-        isEmpty: boolean;
-        attachments: boolean;
-    };
-}
 
 const UploadStore = findByPropsLazy("getUploads");
 
@@ -81,13 +73,11 @@ const getAttachments = async (channelId: string) =>
     );
 
 
-export function PreviewButton(chatBoxProps: Props) {
-    const { isEmpty, attachments } = chatBoxProps.type;
-
+const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
-    if (chatBoxProps.type.analyticsName !== "normal") return null;
+    if (!isMainChat) return null;
 
     const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
@@ -95,47 +85,47 @@ export function PreviewButton(chatBoxProps: Props) {
     if (!hasContent && !hasAttachments) return null;
 
     return (
-        <Tooltip text="Preview Message">
-            {tooltipProps => (
-                <Button
-                    {...tooltipProps}
-                    onClick={async () =>
-                        sendBotMessage(
-                            channelId,
-                            {
-                                content: getDraft(channelId),
-                                author: UserStore.getCurrentUser(),
-                                attachments: hasAttachments ? await getAttachments(channelId) : undefined,
-                            }
-                        )}
-                    size=""
-                    look={ButtonLooks.BLANK}
-                    innerClassName={ButtonWrapperClasses.button}
-                    style={{ padding: "0 2px", height: "100%" }}
-                >
-                    <div className={ButtonWrapperClasses.buttonWrapper}>
-                        <img width={24} height={24} src="https://discord.com/assets/4c5a77a89716352686f590a6f014770c.svg" />
-                    </div>
-                </Button>
-            )}
-        </Tooltip>
+        <ChatBarButton
+            tooltip="Preview Message"
+            onClick={async () =>
+                sendBotMessage(
+                    channelId,
+                    {
+                        content: getDraft(channelId),
+                        author: UserStore.getCurrentUser(),
+                        attachments: hasAttachments ? await getAttachments(channelId) : undefined,
+                    }
+                )}
+            buttonProps={{
+                style: {
+                    translate: "0 2px"
+                }
+            }}
+        >
+            <svg
+                fill="currentColor"
+                fillRule="evenodd"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                style={{ scale: "1.096", translate: "0 -1px" }}
+            >
+                <path d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08ZM15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z" />
+            </svg>
+        </ChatBarButton>
     );
 
-}
+};
 
 export default definePlugin({
     name: "PreviewMessage",
     description: "Lets you preview your message before sending it.",
     authors: [Devs.Aria],
-    patches: [
-        {
-            find: "ChannelTextAreaButtons",
-            replacement: {
-                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
-            }
-        },
-    ],
+    dependencies: ["ChatInputButtonAPI"],
+    // start early to ensure we're the first plugin to add our button
+    // This makes the popping in less awkward
+    startAt: StartAt.Init,
 
-    chatBarIcon: ErrorBoundary.wrap(PreviewButton, { noop: true }),
+    start: () => addChatBarButton("previewMessage", PreviewButton),
+    stop: () => removeChatBarButton("previewMessage"),
 });
