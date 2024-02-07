@@ -8,7 +8,7 @@ import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { StatusSettingsStores, Tooltip } from "webpack/common";
 
@@ -69,7 +69,38 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     StatusSettingsStores.ShowCurrentGame.updateSetting(old => old);
 }
 
-const settings = definePluginSettings({}).withPrivateSettings<{
+const settings = definePluginSettings({
+    allowedIds: {
+        description: "A comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)",
+        type: OptionType.STRING,
+        default: ""
+    },
+    ignorePlaying: {
+        description: "Ignore all playing activities (These are usually game and RPC activities)",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    ignoreStreaming: {
+        description: "Ignore all streaming activities",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    ignoreListening: {
+        description: "Ignore all listening activities (These are usually spotify activities)",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    ignoreWatching: {
+        description: "Ignore all watching activities",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    ignoreCustom: {
+        description: "Ignore all Competing activities (These are normally special game activities)",
+        type: OptionType.BOOLEAN,
+        default: false
+    }
+}).withPrivateSettings<{
     ignoredActivities: IgnoredActivity[];
 }>();
 
@@ -77,10 +108,26 @@ function getIgnoredActivities() {
     return settings.store.ignoredActivities ??= [];
 }
 
+function isActivityTypeIgnored(type: number, id?: string) {
+    if (id && settings.store.allowedIds.includes(id)) {
+        return false;
+    }
+
+    switch (type) {
+        case 0: return settings.store.ignorePlaying;
+        case 1: return settings.store.ignoreStreaming;
+        case 2: return settings.store.ignoreListening;
+        case 3: return settings.store.ignoreWatching;
+        case 4: return settings.store.ignoreCustom;
+    }
+
+    return false;
+}
+
 export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
-    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are ignored from the Registered Games and Activities tabs.",
+    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
 
     settings,
 
@@ -141,13 +188,17 @@ export default definePlugin({
     },
 
     isActivityNotIgnored(props: { type: number; application_id?: string; name?: string; }) {
-        if (props.type === 0 || props.type === 3) {
-            if (props.application_id != null) return !getIgnoredActivities().some(activity => activity.id === props.application_id);
-            else {
-                const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
-                if (exePath) return !getIgnoredActivities().some(activity => activity.id === exePath);
+        if (isActivityTypeIgnored(props.type, props.application_id)) return false;
+
+        if (props.application_id != null) {
+            return !getIgnoredActivities().some(activity => activity.id === props.application_id) && !settings.store.allowedIds.includes(props.application_id);
+        } else {
+            const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
+            if (exePath) {
+                return !getIgnoredActivities().some(activity => activity.id === exePath);
             }
         }
+
         return true;
     },
 
