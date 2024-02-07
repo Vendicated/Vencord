@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
             replacement: {
-                match: /(?<=function \i\(\){)(?=.{1,120}\.Messages\.BOT_CALL_IDLE_DISCONNECT)/,
-                replace: "return;"
+                match: /,?(?=this\.idleTimeout=new \i\.Timeout)/,
+                replace: ";return;"
             }
         }
     ]
