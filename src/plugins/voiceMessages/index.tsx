@@ -26,7 +26,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, lodash, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -36,7 +36,6 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUtils = findByPropsLazy("CloudUpload");
-const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
@@ -100,7 +99,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply)?.messageReference : null,
+                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });
