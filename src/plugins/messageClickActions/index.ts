@@ -72,6 +72,7 @@ export default definePlugin({
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
                 if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+                if (msg.deleted === true) return;
 
                 if (isMe) {
                     if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
@@ -80,6 +81,9 @@ export default definePlugin({
                     event.preventDefault();
                 } else {
                     if (!settings.store.enableDoubleClickToReply) return;
+
+                    const EPHEMERAL = 64;
+                    if (msg.hasFlag(EPHEMERAL)) return;
 
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
