@@ -90,9 +90,6 @@ export const ShapeTool: ToolDefinition = {
                 break;
         }
 
-        canvas.lineCap = "butt";
-        canvas.lineJoin = "miter";
-
         render();
     },
 

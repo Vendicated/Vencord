@@ -109,10 +109,10 @@ export const CropTool: ToolDefinition = {
 
         cropCanvas.strokeRect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
 
-        fillCircle(bounds.left, bounds.top, 15, cropCanvas);
-        fillCircle(bounds.right, bounds.top, 15, cropCanvas);
-        fillCircle(bounds.left, bounds.bottom, 15, cropCanvas);
-        fillCircle(bounds.right, bounds.bottom, 15, cropCanvas);
+        fillCircle(bounds.left, bounds.top, 10, cropCanvas);
+        fillCircle(bounds.right, bounds.top, 10, cropCanvas);
+        fillCircle(bounds.left, bounds.bottom, 10, cropCanvas);
+        fillCircle(bounds.right, bounds.bottom, 10, cropCanvas);
 
         render();
     },

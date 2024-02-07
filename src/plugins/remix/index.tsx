@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -19,9 +19,14 @@ import css from "./styles.css?managed";
 
 // so FileUpload is loaded
 export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
+// so ColorPicker is loaded
+export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}el\("(.+?)"\).{0,50}"UserSettings"/);
 
 const CloudUtils = findByPropsLazy("CloudUpload");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
+
+
+const validMediaTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 const UploadContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     if (children.find(c => c?.props?.id === "vc-remix")) return;
@@ -37,15 +42,23 @@ const UploadContextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
     />);
 };
 
-const ImageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (!props.attachment || children.find(c => c?.props?.id === "vc-remix")) return;
+const MessageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    const url = props.itemHref ?? props.itemSrc;
+    if (!url) return;
+    if (props.attachment && !validMediaTypes.includes(props.attachment.content_type)) return;
 
-    children.push(<Menu.MenuItem
+    const group = findGroupChildrenByChildId("copy-text", children);
+    if (!group) return;
+    if (group.find(c => c?.props?.id === "vc-remix")) return;
+
+    const index = group.findIndex(c => c?.props?.id === "copy-text");
+
+    group.splice(index + 1, 0, <Menu.MenuItem
         id="vc-remix"
         label="Remix"
         action={() => {
             const key = openModal(modalProps =>
-                <RemixModal modalProps={modalProps} close={() => closeModal(key)} url={props.attachment.url} />
+                <RemixModal modalProps={modalProps} close={() => closeModal(key)} url={url} />
             );
         }}
     />);
@@ -103,16 +116,17 @@ export default definePlugin({
 
     async start() {
         addContextMenuPatch("channel-attach", UploadContextMenuPatch);
-        addContextMenuPatch("message", ImageContextMenuPatch);
+        addContextMenuPatch("message", MessageContextMenuPatch);
 
         await requireCreateStickerModal();
+        await requireSettingsMenu();
 
         enableStyle(css);
     },
 
     stop() {
         removeContextMenuPatch("channel-attach", UploadContextMenuPatch);
-        removeContextMenuPatch("message", ImageContextMenuPatch);
+        removeContextMenuPatch("message", MessageContextMenuPatch);
 
         disableStyle(css);
     },

@@ -18,6 +18,7 @@ interface ColorPickerProps {
     showEyeDropper?: boolean;
     onChange(value: number | null): void;
 }
+
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".BACKGROUND_PRIMARY).hex");
 
 const cl = classNameFactory("vc-remix-settings-color-");
