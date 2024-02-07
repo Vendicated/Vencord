@@ -95,8 +95,8 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    ignoreCustom: {
-        description: "Ignore all Competing activities (These are normally special game activities)",
+    ignoreCompeting: {
+        description: "Ignore all competing activities (These are normally special game activities)",
         type: OptionType.BOOLEAN,
         default: false
     }
@@ -118,7 +118,7 @@ function isActivityTypeIgnored(type: number, id?: string) {
         case 1: return settings.store.ignoreStreaming;
         case 2: return settings.store.ignoreListening;
         case 3: return settings.store.ignoreWatching;
-        case 4: return settings.store.ignoreCustom;
+        case 5: return settings.store.ignoreCompeting;
     }
 
     return false;
