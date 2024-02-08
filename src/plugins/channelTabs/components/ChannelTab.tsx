@@ -18,7 +18,7 @@
 
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Avatar, ChannelStore, GuildStore, i18n, Menu, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
@@ -28,9 +28,7 @@ const { moveDraggedTabs } = ChannelTabsUtils;
 
 const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
-const { useChannelEmojiAndColor } = findByPropsLazy("useChannelEmojiAndColor");
 
-const Emoji = findComponentByCodeLazy(".autoplay,allowAnimatedEmoji:");
 const { FriendsIcon } = findByPropsLazy("FriendsIcon");
 
 const cl = (name: string) => `vc-channeltabs-${name}`;
@@ -88,18 +86,6 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
         </div> : null;
 };
 
-function ChannelEmoji({ channel }: { channel: Channel; }) {
-    const { emoji, color } = useChannelEmojiAndColor(channel);
-    if (!emoji?.name) return null;
-
-    return <div className={cl("emoji-container")} style={{ backgroundColor: color }}>
-        {emoji.id
-            ? <img src={emoji.url} className={cl("emoji")} />
-            : <Emoji emojiName={emoji.name} className={cl("emoji")} />
-        }
-    </div>;
-}
-
 function ChannelTabContent(props: ChannelTabsProps & {
     guild?: Guild,
     channel?: Channel;
@@ -109,9 +95,8 @@ function ChannelTabContent(props: ChannelTabsProps & {
     const recipients = channel?.recipients;
     const {
         noPomeloNames,
-        showChannelEmojis,
         showStatusIndicators
-    } = settings.use(["noPomeloNames", "showChannelEmojis", "showStatusIndicators"]);
+    } = settings.use(["noPomeloNames", "showStatusIndicators"]);
 
     const [isTyping, status, isMobile] = useStateFromStores(
         [TypingStore, PresenceStore],
@@ -126,7 +111,6 @@ function ChannelTabContent(props: ChannelTabsProps & {
         if (channel)
             return <>
                 <GuildIcon guild={guild} />
-                {!compact && showChannelEmojis && <ChannelEmoji channel={channel} />}
                 {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
                 <NotificationDot channelIds={[channel.id]} />
                 <TypingIndicator isTyping={isTyping} />

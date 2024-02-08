@@ -120,11 +120,6 @@ export const channelTabsSettings = definePluginSettings({
         description: "Show notification dot for bookmarks",
         type: OptionType.BOOLEAN,
         default: true
-    },
-    showChannelEmojis: {
-        description: "Requires a restart to load the right emoji",
-        type: OptionType.BOOLEAN,
-        default: false
     }
 });
 
