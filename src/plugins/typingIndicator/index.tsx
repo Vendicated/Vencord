@@ -133,7 +133,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /channel:(\i).{0,100}?channelEmoji,.{0,250}?\.children.{0,50}?:null/,
+                match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id)"
             }
         },
