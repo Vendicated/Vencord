@@ -7,10 +7,12 @@
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip } from "webpack/common";
+import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useRef, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -71,43 +73,75 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 
 function ImportCustomRPCComponent() {
     return (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Forms.FormText>Import the application id of the CustomRPC plugin to the allowed list</Forms.FormText>
-            <Button
-                onClick={() => {
-                    let id: string | undefined;
-                    if (!(id = Settings.plugins.CustomRPC?.appID)) {
-                        return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
-                    }
+        <Flex flexDirection="column">
+            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Import the application id of the CustomRPC plugin to the allowed list</Forms.FormText>
+            <div>
+                <Button
+                    onClick={() => {
+                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        if (!id) {
+                            return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
+                        }
 
-                    if (settings.store.allowedIds.includes(id)) {
-                        return showToast("CustomRPC application ID is already allowed.", Toasts.Type.FAILURE);
-                    }
-
-                    settings.store.allowedIds += `${settings.store.allowedIds.length > 0 ? "," : ""}${id}`;
-                }}
-            >
-                Import CustomRPC
-            </Button>
-        </div>
+                        const isAlreadyAdded = allowedIdsPushID?.(id);
+                        if (isAlreadyAdded) {
+                            showToast("CustomRPC application ID is already added.", Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    Import CustomRPC ID
+                </Button>
+            </div>
+        </Flex>
     );
 }
 
+let allowedIdsPushID: ((id: string) => boolean) | null = null;
+
 function AllowedIdsComponent() {
-    const { allowedIds } = settings.use(["allowedIds"]);
+    const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
+    const componentWillUnmount = useRef(false);
+
+    allowedIdsPushID = (id: string) => {
+        const currentIds = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
+
+        if (currentIds.has(id)) {
+            return true;
+        }
+
+        setAllowedIds(Array.from(currentIds.add(id)).join(", "));
+        return false;
+    };
+
+    useEffect(() => {
+        return () => {
+            allowedIdsPushID = null;
+            componentWillUnmount.current = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (!componentWillUnmount.current) return;
+
+            const ids = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
+            settings.store.allowedIds = Array.from(ids).join(", ");
+        };
+    }, [allowedIds]);
 
     function handleChange(newValue: string) {
-        settings.store.allowedIds = newValue;
+        setAllowedIds(newValue);
     }
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)</Forms.FormTitle>
+            <Forms.FormTitle tag="h3">Allowed List</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)</Forms.FormText>
             <TextInput
                 type="text"
-                value={allowedIds ?? ""}
+                value={allowedIds}
                 onChange={handleChange}
-                placeholder="Enter a value"
+                placeholder="235834946571337729, 343383572805058560"
             />
         </Forms.FormSection>
     );
