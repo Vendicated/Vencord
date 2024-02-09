@@ -50,6 +50,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Vendicated",
         id: 343383572805058560n
     },
+    HappyEnderman: {
+        name: "Happy Enderman",
+        id: 1083437693347827764n
+    },
     Arjix: {
         name: "ArjixWasTaken",
         id: 674710789138939916n
