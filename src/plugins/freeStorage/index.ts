@@ -28,10 +28,18 @@ export const settings = definePluginSettings({
       description: "Total Message Size",
       default: 2000,
       hidden: false
+  },
+  attack: {
+      type: OptionType.BOOLEAN,
+      description: "Attack",
+      default: false,
+      hidden: false 
   }
 })
 
 const change = async (_, message) => {
+    if (!settings.store.attack) return;
+
     if (!message.content) return;
 
     message.content = "­".repeat(settings.store.totalSize-message.content.length) + message.content
@@ -50,7 +58,7 @@ export default definePlugin({
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1.message.content=$1.message.content.replaceAll('­', '')} catch {};$&"
             }
-        }
+        },
     ],
     settings,
     start: () => {
