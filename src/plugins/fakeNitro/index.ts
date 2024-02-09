@@ -795,12 +795,15 @@ export default definePlugin({
                 if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
                     link = link.replace(".png", ".gif");
                 }
+
                 if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
                     return { cancel: true };
                 } else {
+                    const urlEncodedStickerName = encodeURIComponent(sticker.name);
+                    const fullUrl = `${link}&name=${urlEncodedStickerName}`;
                     extra.stickers!.length = 0;
-                    messageObj.content += ` ${link}&name=${encodeURIComponent(sticker.name)}`;
+                    messageObj.content += ` [${urlEncodedStickerName}](${fullUrl})`;
                 }
             }
 
@@ -813,12 +816,14 @@ export default definePlugin({
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
+                    const urlEncodedEmojiName = encodeURIComponent(emoji.name);
                     const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
                         size: Settings.plugins.FakeNitro.emojiSize,
-                        name: encodeURIComponent(emoji.name)
+                        name: urlEncodedEmojiName
                     }));
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                        const emojiURL = `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `[:${urlEncodedEmojiName}:](${emojiURL})`;
                     });
                 }
             }
