@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useRef, useState } from "webpack/common";
+import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -98,39 +98,28 @@ function ImportCustomRPCComponent() {
 
 let allowedIdsPushID: ((id: string) => boolean) | null = null;
 
-function AllowedIdsComponent() {
+function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
     const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
-    const componentWillUnmount = useRef(false);
 
     allowedIdsPushID = (id: string) => {
         const currentIds = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
 
-        if (currentIds.has(id)) {
-            return true;
-        }
+        const isAlreadyAdded = currentIds.has(id) || (currentIds.add(id), false);
 
-        setAllowedIds(Array.from(currentIds.add(id)).join(", "));
-        return false;
+        const ids = Array.from(currentIds).join(", ");
+        setAllowedIds(ids);
+        props.setValue(ids);
+
+        return isAlreadyAdded;
     };
 
-    useEffect(() => {
-        return () => {
-            allowedIdsPushID = null;
-            componentWillUnmount.current = true;
-        };
+    useEffect(() => () => {
+        allowedIdsPushID = null;
     }, []);
-
-    useEffect(() => {
-        return () => {
-            if (!componentWillUnmount.current) return;
-
-            const ids = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
-            settings.store.allowedIds = Array.from(ids).join(", ");
-        };
-    }, [allowedIds]);
 
     function handleChange(newValue: string) {
         setAllowedIds(newValue);
+        props.setValue(newValue);
     }
 
     return (
@@ -157,7 +146,11 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "",
         default: "",
-        component: () => <AllowedIdsComponent />
+        onChange(newValue) {
+            const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
+            settings.store.allowedIds = Array.from(ids).join(", ");
+        },
+        component: props => <AllowedIdsComponent setValue={props.setValue} />
     },
     ignorePlaying: {
         type: OptionType.BOOLEAN,
