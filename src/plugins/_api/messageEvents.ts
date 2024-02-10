@@ -25,10 +25,13 @@ export default definePlugin({
     authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
-            find: '"MessageActionCreators"',
+            find: ".Messages.EDIT_TEXTAREA_HELP",
             replacement: {
-                match: /async editMessage\(.+?\)\{/,
-                replace: "$&await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
+                match: /(shouldRefocus:!1.+?value:\i,channel:\i}\)\.then\()(.+?)(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
+                replace: (_, rest1, rest2, args) => "" +
+                    `${rest1}async ${rest2}` +
+                    `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
+                    "return Promise.resolve({shoudClear:true,shouldRefocus:true});"
             }
         },
         {
