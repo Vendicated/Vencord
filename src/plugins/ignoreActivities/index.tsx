@@ -146,7 +146,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "",
         default: "",
-        onChange(newValue) {
+        onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
             settings.store.allowedIds = Array.from(ids).join(", ");
         },
