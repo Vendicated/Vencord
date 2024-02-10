@@ -15,17 +15,8 @@ export default definePlugin({
     name: "StreamerModeOnLive",
     description: "Enables streamer mode when you start live on discord.",
     authors: [Devs.Rawir],
-
-    handleStreamStart: () => updateStreamerMode(true),
-    handleStreamStop: () => updateStreamerMode(false),
-
-    start() {
-        FluxDispatcher.subscribe("STREAM_START", this.handleStreamStart);
-        FluxDispatcher.subscribe("STREAM_STOP", this.handleStreamStop);
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("STREAM_START", this.handleStreamStart);
-        FluxDispatcher.unsubscribe("STREAM_STOP", this.handleStreamStop);
+    flux: {
+        STREAM_START: () => updateStreamerMode(true),
+        STREAM_STOP: () => updateStreamerMode(false)
     }
 });
