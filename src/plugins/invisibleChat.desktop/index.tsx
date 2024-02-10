@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, RestAPI, Tooltip, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 
@@ -166,7 +166,7 @@ export default definePlugin({
             find: ".Messages.MESSAGE_EDITED,",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
-                replace: "try {if($1 && $self.INV_REGEX.test($1.message.content)){$1.content.push($self.indicator());(async () => {await $self.tryMasterPassword($1.message).then(res=> {if (res) return void $self.buildEmbed($1.message, res)})})()}else null } catch {};$&"
+                replace: "try {if($1 && $self.INV_REGEX.test($1.message.content))$1.content.push($self.indicator())} catch {};$&"
             }
         },
         {
@@ -186,6 +186,13 @@ export default definePlugin({
     tryMasterPassword: tryMasterPassword,
     steggo: steggo,
     settings,
+    async processMessage ( msg ) {
+        const message = msg.message;
+        if (message.author.id == UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
+        if (!this.INV_REGEX.test(message.content)) return;
+        const res = await tryMasterPassword(message);
+        if (res) return void this.buildEmbed(message, res);
+    },
     async start() {
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
@@ -212,13 +219,25 @@ export default definePlugin({
             if (!settings.store.autoEncrypt) return;
             if (!message.content) return;
 
-            message.content = (await encrypt(message.content, settings.store.savedPasswords, settings.store.cover));
+            let cover = ""
+            if (message.content.includes(" -c ")) {
+                [message.content, cover] = message.content.split(" -c ")
+            }
+            else if (message.content.includes(" --cover ")) {
+                [message.content, cover] = message.content.split(" --cover ")
+            }
+
+            message.content = (await encrypt(message.content, settings.store.savedPasswords, (cover || settings.store.cover) + "­ ­"));
         });
+        const outerThis = this;
+        this.processMessageFunction = (message) => outerThis.processMessage.apply(outerThis, [message]);
+        FluxDispatcher.subscribe("MESSAGE_CREATE", this.processMessageFunction);
     },
 
     stop() {
         removeButton("invDecrypt");
         removePreSendListener(this.preSend);
+        FluxDispatcher.unsubscribe("MESSAGE_CREATE", this.processMessageFunction);
     },
 
     // Gets the Embed of a Link
@@ -275,33 +294,23 @@ export function isCorrectPassword(result: string): boolean {
     return result.endsWith("\u200b");
 }
 
-const cache = new Set();
-
 export async function tryMasterPassword(message) {
 
-    try {
-        const password = settings.store.savedPasswords;
-        const autoDecrypt = settings.store.autoDecrypt;
+    const password = settings.store.savedPasswords;
+    const autoDecrypt = settings.store.autoDecrypt;
 
-        if (!autoDecrypt) return false;
+    if (!autoDecrypt) return false;
 
-        if (message.embeds.length || !message?.content || !password) return false;
+    if (message.embeds.length || !message?.content || !password) return false;
 
-        if (cache.has(message.id)) return;
-        cache.add(message.id);
+    let { content } = message;
 
-        let { content } = message;
+    // we use an extra variable so we dont have to edit the message content directly
+    if (/^\W/.test(message.content)) content = `d ${message.content}d`;
 
-        // we use an extra variable so we dont have to edit the message content directly
-        if (/^\W/.test(message.content)) content = `d ${message.content}d`;
-
-        const result = decrypt(content, password, false);
-        cache.delete(message.id);
-        return result;
-    } catch (e) {
-        cache.delete(message.id);
-        return false;
-    }
+    const result = decrypt(content, password, false);
+    console.log(message.id)
+    return result;
 }
 
 export async function iteratePasswords(message: Message): Promise<string | false> {
