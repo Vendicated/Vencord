@@ -157,6 +157,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    useHyperLinks: {
+        description: "Whether to use hyperlinks when sending fake emojis and stickers",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -708,7 +713,7 @@ export default definePlugin({
     },
 
     getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.FakeNitro.stickerSize}`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -813,7 +818,7 @@ export default definePlugin({
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}[${sticker.name}](${url})`;
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }
@@ -829,11 +834,11 @@ export default definePlugin({
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
                     const url = new URL(emoji.url);
-                    url.searchParams.set("size", settings.store.emojiSize.toString());
+                    url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}[:${emoji.name}:](${url})${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[:${emoji.name}:](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -856,10 +861,10 @@ export default definePlugin({
                 if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
 
                 const url = new URL(emoji.url);
-                url.searchParams.set("size", settings.store.emojiSize.toString());
+                url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}[:${emoji.name}:](${url})${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[:${emoji.name}:](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },
