@@ -19,38 +19,35 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Forms, Button, ButtonLooks } from "@webpack/common";
-
+import { Forms, Text  } from "@webpack/common";
 
 export default definePlugin({
-    name: "CustomAppIcons",
-    description: "Allows you to add your own app icons!",
+    name: "StagingBuild",
+    description: "Allows you to switch to staging build!",
     authors: [Devs.HappyEnderman],
 
     patches: [],
 
     options: {
-        addButton: {
+        description: {
             type: OptionType.COMPONENT,
             description: "",
             component: () => {
-                if (!Vencord.Plugins.plugins.CustomAppIcons.started) return <Forms.FormText>
-                    Enable CustomAppIcons and restart your client to add your own app icons.
-                </Forms.FormText>;
                 return (
-                    <>
-                        <Button color={ButtonLooks.OUTLINED}>!</Button>
-                    </>
+                    <Forms.FormText>
+                        This will enable experiments, disable tracking requests, allows access to more features
+                    </Forms.FormText>
                 );
             }
         }
     },
 
     start() {
-
+        window.GLOBAL_ENV.RELEASE_CHANNEL = "staging"
     },
 
     stop() {
 
     }
 });
+
