@@ -238,14 +238,10 @@ export default definePlugin({
         {
             find: "renderSystemTag:",
             replacement: [
+                // Pass the tag's colors and type to the next function
                 {
-                    match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
-                    replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
-                },
-                // Pass the tag's colors to the next function
-                {
-                    match: /\.jsx\)\(\i\.default,{/,
-                    replace: "$&...$self.getTagColors({...arguments[0]}),"
+                    match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)\?null:\(0,(\i)\.jsx\)\((\i).default,{/,
+                    replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null?null:(0,$3.jsx)($4.default,{...$self.getTagColors({...arguments[0],tagType:$2,location:'chat'}),"
                 }
             ]
         },
@@ -253,14 +249,10 @@ export default definePlugin({
         {
             find: ".Messages.GUILD_OWNER,",
             replacement: [
+                // Pass the tag's colors and type to the next function
                 {
-                    match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
-                    replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
-                },
-                // Pass the tag's colors to the next function
-                {
-                    match: /\.jsx\)\(\i\.default,{className:\i.botTag,/,
-                    replace: "$&...$self.getTagColors({...arguments[0]}),"
+                    match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot\?\(0,(?<jsxf>\i)\.jsx\)\((?<module>\i)\.default,{/,
+                    replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'?(0,$<jsxf>.jsx)($<module>.default,{...$self.getTagColors({...arguments[0],tagType:$<type>,location:'not-chat'}),"
                 }
             ]
         },
@@ -290,8 +282,8 @@ export default definePlugin({
                     replace: "$&moreTags_channelId,"
                 }, {
                     // Get the tag itself and the tag colors, but this isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
-                    match: /,botType:(\i\((\i)\)),/g,
-                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),...$self.getTagColors({user:$2,channelId:moreTags_channelId}),"
+                    match: /(return\(0,\i.jsx\)\(\i,{primary:\i,secondary:\i,botVerified:\i.isVerifiedBot\(\)),botType:(\i\((\i)\)),/g,
+                    replace: "let moreTags_tagType=$self.getTag({user:$3,channelId:moreTags_channelId,origType:$2,location:'not-chat'});$1,botType:moreTags_tagType,...$self.getTagColors({user:$3,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'}),"
                 }, {
                     // Get the parameters from the function that were passed in previously
                     // because Discord needs to make it hard on us
@@ -384,16 +376,22 @@ export default definePlugin({
     },
 
     getTagColors({
-        user, channelId, channel
+        user, channelId, channel, location, tagType
     }: {
         user: User,
         channel?: Channel,
         channelId?: string;
+        location: "chat" | "not-chat";
+        tagType: number;
     }): {
         bgColor: string,
         fgColor: string;
     } {
-        if (!settings.store.useRoleColors) {
+        console.log(tagType);
+        const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] == tagType);
+        const [tagName, variant] = passedTagName?.split("-") ?? [null, null];
+        console.log(tagName);
+        if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName].showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName].showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
             return { bgColor: "", fgColor: "" };
         }
         if (!channel && channelId) channel = ChannelStore.getChannel(channelId);
