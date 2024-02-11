@@ -27,7 +27,7 @@ export function goofs() {
                             font-size: 2rem;`,
                 innerText: '×'
             });
-            const hitSound = Object.assign(document.createElement('audio'), { src: 'https://cdn.discordapp.com/attachments/545600181744173068/1090841136458899516/hit.wav', autoplay: true, volume: 0.2 });
+            const hitSound = Object.assign(document.createElement('audio'), { src: 'https://cdn.discordapp.com/attachments/545600181744173068/1090841136458899516/hit.wav', autoplay: true, volume: 0.15 });
             hitSound.onended = () => {
                 hit.removeChild(hitSound);
                 document.body.removeChild(hit);

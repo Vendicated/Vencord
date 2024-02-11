@@ -99,14 +99,7 @@ export default definePlugin({
             find: "=4e6",
             replacement: {
                 match: /=4e6/,
-                replace: "=10e6"
-            }
-        },
-        {
-            find: "=8e6",
-            replacement: {
-                match: /=8e6/,
-                replace: "=10e6"
+                replace: "=8e6"
             }
         },
         {
@@ -121,13 +114,6 @@ export default definePlugin({
             replacement: {
                 match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
                 replace: "$&return;"
-            }
-        },
-        {
-            find: "=8e6",
-            replacement: {
-                match: /=8e6/,
-                replace: "=10e6"
             }
         }
     ],
