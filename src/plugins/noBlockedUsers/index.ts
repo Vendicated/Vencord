@@ -30,24 +30,24 @@ const settings = definePluginSettings(
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
-            onChange: (newValue) => {
+            onChange: newValue => {
                 if (!newValue) settings.store.ignoreBlockedMessages = false;
             },
         },
         ignoreBlockedMessages: {
-            description: "Completely ignores incoming gateway messages from blocked users (locally).",
+            description: "Completely ignore incoming gateway messages from blocked users. (locally)",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
         },
         ignoreTyping: {
-            description: "Hides blocked users from the currently typing list in chat.",
+            description: "Hide blocked users from the currently typing list in chat.",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
         },
         hideReferencedAuthor: {
-            description: "Hides blocked authors of the referenced message in replies.",
+            description: "Hide blocked authors of referenced messages in replies.",
             type: OptionType.BOOLEAN,
             default: false,
             restartNeeded: true,
@@ -59,6 +59,7 @@ export default definePlugin({
     name: "NoBlockedUsers",
     description: "Hides blocked users and their messages from everywhere possible",
     authors: [Devs.rushii, Devs.Samu],
+    settings,
     patches: [
         // Based on canary 70001c7d67fae9258eb77f27d7addd4a20b99fad
         {
@@ -79,8 +80,8 @@ export default definePlugin({
             find,
             predicate: () => settings.store.ignoreBlockedMessages,
             replacement: {
-                match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                replace: (_, props) => `if($self.isUserBlocked(${props}.message.id))return;`,
+                match: /(?<=MESSAGE_CREATE:function\((?<props>\i)\){)/,
+                replace: "if($self.isBlocked($<props>.message.id)) return;",
             },
         })),
         {
@@ -89,7 +90,7 @@ export default definePlugin({
             predicate: () => settings.store.hideReferencedAuthor,
             replacement: {
                 match: /function \i\(\i\){/,
-                replace: (match) => `${match}if($self.isUserBlocked(arguments[0].message.author.id))return;`,
+                replace: "$& if($self.isBlocked(arguments[0].message.author.id)) return;",
             },
         },
         {
@@ -97,21 +98,19 @@ export default definePlugin({
             find: "displayName=\"TypingStore\"",
             predicate: () => settings.store.ignoreTyping,
             replacement: {
-                match: /TYPING_START:(\i)/,
-                replace: (_, func) => `TYPING_START:(e)=>{if($self.isUserBlocked(e.userId))return;${func}(e)}`,
+                match: /TYPING_START:(?<func>\i)/,
+                replace: "TYPING_START: (e) => { if($self.isBlocked(e.userId))return; $<func>(e) }",
             },
         },
         {
             // Hide blocked users from chat autocomplete
             find: ".GlobalMentionMode.ALLOW_EVERYONE_OR_HERE,",
             replacement: {
-                match: /(queryResults.+?)(return{results:(\i))/,
-                replace: (_, start, end, results) =>
-                    `${start}${results}.users=${results}.users.filter(res=>!$self.isUserBlocked(res.user.id));console.log(${results});${end}`,
+                match: /(?<start>queryResults.+?)(?<end>return{results:(?<results>\i))/,
+                replace: "$<start> $<results>.users=$<results>.users.filter(res=>!$self.isBlocked(res.user.id)); $<end>",
             },
         },
     ],
-    settings,
-    isUserBlocked: (userId: string) =>
+    isBlocked: (userId: string) =>
         userId && RelationshipStore.isBlocked(userId),
 });
