@@ -52,6 +52,12 @@ const settings = definePluginSettings(
             default: false,
             restartNeeded: true,
         },
+        hideFromMemberList: {
+            description: "Hide blocked users from the members list.",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
     },
 );
 
@@ -107,6 +113,15 @@ export default definePlugin({
             replacement: {
                 match: /(?<start>queryResults.+?)(?<end>return{results:(?<results>\i))/,
                 replace: "$<start> $<results>.users=$<results>.users.filter(res=>!$self.isBlocked(res.user.id)); $<end>",
+            },
+        },
+        {
+            // Hide blocked users from the member list
+            find: "this.props.channel.id&&this.updateSubscription(),this.trackMemberListViewed()",
+            predicate: () => settings.store.hideFromMemberList,
+            replacement: {
+                match: /(?<start>memo\((?<param>\i)=>{)(?<end>let{colorRoleId)/,
+                replace: "$<start> if($self.isBlocked($<param>.user.id)) return; $<end>",
             },
         },
     ],
