@@ -48,6 +48,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
+    },
+    autoTranslateReceived: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically translate received messages",
+        default: false
     }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;

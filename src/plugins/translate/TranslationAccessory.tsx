@@ -23,7 +23,7 @@ import { Languages } from "./languages";
 import { TranslateIcon } from "./TranslateIcon";
 import { cl, TranslationValue } from "./utils";
 
-const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
+export const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
 
 export function handleTranslate(messageId: string, data: TranslationValue) {
     TranslationSetters.get(messageId)!(data);

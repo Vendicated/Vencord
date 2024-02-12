@@ -25,7 +25,8 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu } from "@webpack/common";
+import { ChannelStore, Menu, UserStore } from "@webpack/common";
+import { Util } from "Vencord";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -54,7 +55,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.MrDiamond],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     // not used, just here in case some other plugin wants it or w/e
@@ -96,4 +97,17 @@ export default definePlugin({
         removeButton("vc-translate");
         removeAccessory("vc-translation");
     },
+
+    flux: {
+        MESSAGE_CREATE: async event => {
+            if (!settings.store.autoTranslateReceived) return;
+            if (event.channelId !== Util.getCurrentChannel().id) return;
+            if (event.message.author.id === UserStore.getCurrentUser().id) return;
+
+            console.log(event.message);
+
+            const trans = await translate("received", event.message.content);
+            handleTranslate(event.message.id, trans);
+        }
+    }
 });

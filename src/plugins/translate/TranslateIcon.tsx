@@ -40,7 +40,7 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
 }
 
 export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
-    const { autoTranslate } = settings.use(["autoTranslate"]);
+    const { autoTranslate, autoTranslateReceived } = settings.use(["autoTranslate", "autoTranslateReceived"]);
 
     if (!isMainChat) return null;
 
@@ -81,7 +81,7 @@ export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 "aria-haspopup": "dialog"
             }}
         >
-            <TranslateIcon className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
+            <TranslateIcon className={cl({ "auto-translate": autoTranslate || autoTranslateReceived, "chat-button": true })} />
         </ChatBarButton>
     );
 };

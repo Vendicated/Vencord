@@ -57,17 +57,17 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
     );
 }
 
-function AutoTranslateToggle() {
-    const value = settings.use(["autoTranslate"]).autoTranslate;
+function TranslateToggle({ setting, label }: { setting: "autoTranslate" | "autoTranslateReceived", label: string; }) {
+    const value = settings.use([setting])[setting];
 
     return (
         <Switch
             value={value}
-            onChange={v => settings.store.autoTranslate = v}
-            note={settings.def.autoTranslate.description}
+            onChange={v => settings.store[setting] = v}
+            note={settings.def[setting].description}
             hideBorder
         >
-            Auto Translate
+            {label}
         </Switch>
     );
 }
@@ -94,7 +94,8 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
 
                 <Forms.FormDivider className={Margins.bottom16} />
 
-                <AutoTranslateToggle />
+                <TranslateToggle label="Auto Translate" setting="autoTranslate" />
+                <TranslateToggle label="Auto Translate Received" setting="autoTranslateReceived" />
             </ModalContent>
         </ModalRoot>
     );
