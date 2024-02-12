@@ -63,12 +63,11 @@ export default definePlugin({
     patches: [
         // Based on canary 70001c7d67fae9258eb77f27d7addd4a20b99fad
         {
-            // Hide the blocked message component from chat
-            find: "Messages.BLOCKED_MESSAGES_HIDE",
-            predicate: () => settings.store.hideBlockedMessages,
+            // Hide blocked message groups from non-DM channels
+            find: "ChannelStreamTypes.MESSAGE_GROUP_BLOCKED||",
             replacement: {
-                match: /let\{[^}]*collapsedReason[^}]*}/,
-                replace: "return null;$&",
+                match: /map\(\((?<param>\i).+?ChannelStreamTypes.MESSAGE_GROUP_SPAMMER\)\{/,
+                replace: "$& if(!arguments[0].channel.isDM() && $<param>.type === 'MESSAGE_GROUP_BLOCKED') return;",
             },
         },
         ...[
