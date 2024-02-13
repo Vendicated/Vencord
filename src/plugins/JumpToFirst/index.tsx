@@ -30,8 +30,8 @@ const Patch: NavContextMenuPatchCallback = (children, { channel }: { channel: Ch
 
 function jumpToFirstMessage(props)
 {
-    let guildid = props.guild_id;
-    let channelid = props.id;
-    let url = `/channels/${guildid}/${channelid}/0`;
+    const guildid = props.guild_id;
+    const channelid = props.id;
+    const url = `/channels/${guildid}/${channelid}/0`;
     NavigationRouter.transitionTo(url);
 }
