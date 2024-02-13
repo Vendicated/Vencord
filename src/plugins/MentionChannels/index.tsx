@@ -32,6 +32,6 @@ export default definePlugin({
 const Patch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => () => {
     const group = findGroupChildrenByChildId("channel-copy-link", children);
     group?.push(
-        <Menu.MenuItem id="hyperlinkchannel" label="Send Channel Hyperlink" action={() => insertTextIntoChatInputBox(` <#${channel.id}> `)}></Menu.MenuItem>
+        <Menu.MenuItem id="hyperlinkchannel" label="Mention" action={() => insertTextIntoChatInputBox(` <#${channel.id}> `)}></Menu.MenuItem>
     );
 };
