@@ -1,12 +1,18 @@
-import definePlugin from "@utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { addContextMenuPatch, findGroupChildrenByChildId,NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
-import { addContextMenuPatch, removeContextMenuPatch, NavContextMenuPatchCallback, findGroupChildrenByChildId } from "@api/ContextMenu";
+import definePlugin from "@utils/types";
 import { Menu, NavigationRouter } from "@webpack/common";
 import { Channel } from "discord-types/general";
 export default definePlugin({
     name: "JumpToFirst",
     description: "Adds a context menu option to jump to the first message of a channel",
-    authors: 
+    authors:
     [
         Devs.Samwich
     ],
