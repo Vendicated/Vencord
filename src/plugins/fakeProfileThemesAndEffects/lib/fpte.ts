@@ -72,13 +72,13 @@ export function encodeEffect(id: bigint) {
  * Converts the given no-offset base-4096 string to a base-10 profile effect ID
  * @param str The no-offset base-4096 string to be converted
  * @returns The converted base-10 profile effect ID
- *          Will be -1n if the given string is empty and -2n if greater than the maximum profile effect ID, 1.2 quintillion
+ *          Will be -1n if the given string is empty and -2n if greater than the maximum profile effect ID
  */
 export function decodeEffect(str: string) {
     if (str === "") return -1n;
     let id = 0n;
     for (let i = 0; i < str.length; i++) {
-        if (id > 1_200_000_000_000_000_000n) return -2n;
+        if (id >= 10_000_000_000_000_000_000n) return -2n;
         id += BigInt(str.codePointAt(i)!) * 4096n ** BigInt(str.length - 1 - i);
     }
     return id;
