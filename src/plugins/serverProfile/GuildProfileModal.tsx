@@ -12,7 +12,7 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, moment, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconUtils = findByPropsLazy("getGuildBannerURL");
@@ -50,7 +50,7 @@ const fetched = {
 
 function renderTimestamp(timestamp: number) {
     return (
-        <Timestamp timestamp={moment(timestamp)} />
+        <Timestamp timestamp={new Date(timestamp)} />
     );
 }
 

@@ -20,7 +20,7 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { formatDuration } from "@utils/text";
 import { findByPropsLazy, findComponentByCodeLazy, findComponentLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
@@ -216,12 +216,12 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {lastMessageId &&
                     <Text variant="text-md/normal">
                         Last {channel.isForumChannel() ? "post" : "message"} created:
-                        <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
+                        <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
                     </Text>
                 }
 
                 {lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
+                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
                 }
                 {(rateLimitPerUser ?? 0) > 0 &&
                     <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
