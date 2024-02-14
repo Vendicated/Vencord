@@ -391,7 +391,7 @@ export default definePlugin({
         const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] == tagType);
         const [tagName, variant] = passedTagName?.split("-") ?? [null, null];
         console.log(tagName);
-        if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName].showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName].showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
+        if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName]?.showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName]?.showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
             return { bgColor: "", fgColor: "" };
         }
         if (!channel && channelId) channel = ChannelStore.getChannel(channelId);
@@ -427,8 +427,8 @@ export default definePlugin({
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
-            if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
+            if (location === "chat" && !settings.tagSettings[tag.name]?.showInChat) continue;
+            if (location === "not-chat" && !settings.tagSettings[tag.name]?.showInNotChat) continue;
 
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
