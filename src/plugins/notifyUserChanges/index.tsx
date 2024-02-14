@@ -168,20 +168,18 @@ export default definePlugin({
                 }
 
                 // this is also triggered for multiple guilds and when only the activities change, so we have to check if the status actually changed
-                if (lastStatuses.has(userId) && lastStatuses.get(userId) === status) {
-                    continue;
+                if (lastStatuses.has(userId) && lastStatuses.get(userId) !== status) {
+                    const user = UserStore.getUser(userId);
+                    const name = username ?? user.username;
+
+                    showNotification({
+                        title: shouldBeNative() ? `User ${name} changed status` : "User status change",
+                        body: `is now ${status}`,
+                        noPersist: true,
+                        richBody: getRichBody(user, `${name}'s status is now ${status}`),
+                    });
                 }
                 lastStatuses.set(userId, status);
-
-                const user = UserStore.getUser(userId);
-                const name = username ?? user.username;
-
-                showNotification({
-                    title: shouldBeNative() ? `User ${name} changed status` : "User status change",
-                    body: `is now ${status}`,
-                    noPersist: true,
-                    richBody: getRichBody(user, `${name}'s status is now ${status}`),
-                });
             }
         }
     },
