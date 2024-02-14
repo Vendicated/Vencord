@@ -388,7 +388,7 @@ export default definePlugin({
         fgColor: string;
     } {
         console.log(tagType);
-        const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] == tagType);
+        const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] === tagType);
         const [tagName, variant] = passedTagName?.split("-") ?? [null, null];
         console.log(tagName);
         if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName]?.showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName]?.showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
