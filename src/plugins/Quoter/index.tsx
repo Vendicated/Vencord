@@ -97,7 +97,7 @@ async function createQuoteImage(avatarUrl: string, name: string, quoteOld: strin
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const avatarBlob = await fetchImageAsBlob(avatarUrl);
-    const fadeBlob = await fetchImageAsBlob("https://media.discordapp.net/attachments/1192200349809918082/1204252827522699324/fade.png");
+    const fadeBlob = await fetchImageAsBlob("https://files.catbox.moe/54e96l.png");
 
     const avatar = new Image();
     const fade = new Image();
