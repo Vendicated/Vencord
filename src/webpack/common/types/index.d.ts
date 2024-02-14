@@ -19,6 +19,7 @@
 export * from "./components";
 export * from "./fluxEvents";
 export * from "./menu";
+export * from "./presenceupdate";
 export * from "./stores";
 export * from "./utils";
 export * from "./voicestate";
