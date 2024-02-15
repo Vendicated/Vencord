@@ -22,7 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
 import { TwitchIcon } from "./components/TwitchIcon";
@@ -76,8 +76,11 @@ interface Executable {
 
 const ApplicationStore: {
     getApplication: (id: string) => Application | null;
-    fetchApplication: (id: string) => Promise<Application | null>;
 } = findStoreLazy("ApplicationStore");
+
+const { fetchApplication }: {
+    fetchApplication: (id: string) => Promise<Application | null>;
+} = findByPropsLazy("fetchApplication");
 
 const fetchedApplications = new Map<string, Application | null>();
 
@@ -134,7 +137,7 @@ export default definePlugin({
                         application = fetchedApplications.get(application_id) as Application | null;
                     } else {
                         fetchedApplications.set(application_id, null);
-                        ApplicationStore.fetchApplication(application_id).then(app => {
+                        fetchApplication(application_id).then(app => {
                             fetchedApplications.set(application_id, app);
                         });
                     }
