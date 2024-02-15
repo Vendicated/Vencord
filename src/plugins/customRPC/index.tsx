@@ -386,7 +386,7 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN],
+    authors: [Devs.captain],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
