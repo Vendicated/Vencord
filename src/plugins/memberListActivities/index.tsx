@@ -22,6 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
 import { TwitchIcon } from "./components/TwitchIcon";
@@ -46,6 +47,40 @@ interface Activity {
 
 const cl = classNameFactory("vc-mla-");
 
+interface Application {
+    id: string;
+    name: string;
+    icon: string;
+    description: string;
+    summary: string;
+    type: number;
+    hook: boolean;
+    guild_id: string;
+    executables: Executable[];
+    verify_key: string;
+    publishers: Developer[];
+    developers: Developer[];
+    flags: number;
+}
+
+interface Developer {
+    id: string;
+    name: string;
+}
+
+interface Executable {
+    os: string;
+    name: string;
+    is_launcher: boolean;
+}
+
+const ApplicationStore: {
+    getApplication: (id: string) => Application | null;
+    fetchApplication: (id: string) => Promise<Application | null>;
+} = findStoreLazy("ApplicationStore");
+
+const fetchedApplications = new Map<string, Application | null>();
+
 export default definePlugin({
     name: "MemberListActivities",
     description: "Shows activity icons in the member list",
@@ -65,7 +100,10 @@ export default definePlugin({
 
         const applications = activities.filter(activity => activity.application_id);
         applications.forEach(activity => {
-            const { assets } = activity;
+            const { assets, application_id } = activity;
+            if (!application_id) {
+                return;
+            }
             if (assets) {
 
                 const addImage = (image: string, alt: string) => {
@@ -73,7 +111,7 @@ export default definePlugin({
                         const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
                         icons.push(<img src={discordMediaLink} alt={alt}/>);
                     } else {
-                        const src = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
+                        const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
                         icons.push(<img src={src} alt={alt}/>);
                     }
                 };
@@ -89,6 +127,23 @@ export default definePlugin({
                     }
                 }
 
+            } else {
+                let application = ApplicationStore.getApplication(application_id);
+                if (!application) {
+                    if (fetchedApplications.has(application_id)) {
+                        application = fetchedApplications.get(application_id) as Application | null;
+                    } else {
+                        fetchedApplications.set(application_id, null);
+                        ApplicationStore.fetchApplication(application_id).then(app => {
+                            fetchedApplications.set(application_id, app);
+                        });
+                    }
+                }
+
+                if (application) {
+                    const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
+                    icons.push(<img src={src} alt={application.name}/>);
+                }
             }
         });
 
