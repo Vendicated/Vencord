@@ -29,6 +29,7 @@ import {
     ChannelStore,
     FluxDispatcher,
     GuildStore,
+    IconUtils,
     MessageStore,
     Parser,
     PermissionsBits,
@@ -50,6 +51,7 @@ const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageCo
 const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
+const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -232,7 +234,7 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
         }
 
         const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel || (!linkedChannel.isDM() && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, linkedChannel))) {
+        if (!linkedChannel || (!linkedChannel.isPrivate() && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, linkedChannel))) {
             continue;
         }
 
@@ -279,36 +281,42 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
     return accessories.length ? <>{accessories}</> : null;
 }
 
+function getChannelLabelAndIconUrl(channel: Channel) {
+    if (channel.isDM()) return ["Direct Message", IconUtils.getUserAvatarURL(UserStore.getUser(channel.recipients[0]))];
+    if (channel.isGroupDM()) return ["Group DM", IconUtils.getChannelIconURL(channel)];
+    return ["Server", IconUtils.getGuildIconURL(GuildStore.getGuild(channel.guild_id))];
+}
+
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
-    const guild = !channel.isDM() && GuildStore.getGuild(channel.guild_id);
     const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
 
+    const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
-    return <Embed
-        embed={{
-            rawDescription: "",
-            color: "var(--background-secondary)",
-            author: {
-                name: <Text variant="text-xs/medium" tag="span">
-                    {channel.isDM() && <span>Direct Message - </span>}
-                    {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
-                </Text>,
-                iconProxyURL: guild
-                    ? `https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild.id}/${guild.icon}.png`
-                    : `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${dmReceiver.id}/${dmReceiver.avatar}`
-            }
-        }}
-        renderDescription={() => (
-            <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult)}>
-                <ChannelMessage
-                    id={`message-link-embeds-${message.id}`}
-                    message={message}
-                    channel={channel}
-                    subscribeToComponentDispatch={false}
-                />
-            </div>
-        )}
-    />;
+    return (
+        <Embed
+            embed={{
+                rawDescription: "",
+                color: "var(--background-secondary)",
+                author: {
+                    name: <Text variant="text-xs/medium" tag="span">
+                        <span>{channelLabel} - </span>
+                        {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
+                    </Text>,
+                    iconProxyURL: iconUrl
+                }
+            }}
+            renderDescription={() => (
+                <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult)}>
+                    <ChannelMessage
+                        id={`message-link-embeds-${message.id}`}
+                        message={message}
+                        channel={channel}
+                        subscribeToComponentDispatch={false}
+                    />
+                </div>
+            )}
+        />
+    );
 }
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
@@ -317,15 +325,20 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const images = getImages(message);
     const { parse } = Parser;
 
+    const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
+
     return <AutoModEmbed
         channel={channel}
         childrenAccessories={
-            <Text color="text-muted" variant="text-xs/medium" tag="span">
-                {channel.isDM()
-                    ? parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
-                    : parse(`<#${channel.id}>`)
-                }
-                {channel.isDM() && <span> - Direct Message</span>}
+            <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
+                {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
+                <span>
+                    <span>{channelLabel} - </span>
+                    {channel.isDM()
+                        ? Parser.parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
+                        : Parser.parse(`<#${channel.id}>`)
+                    }
+                </span>
             </Text>
         }
         compact={compact}
