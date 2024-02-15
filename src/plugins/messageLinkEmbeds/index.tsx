@@ -226,7 +226,9 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     let match = null as RegExpMatchArray | null;
     while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, guildID, channelID, messageID] = match;
+        const [_, __, channelID, messageID] = match;
+        let guildID = match[1];
+
         if (embeddedBy.includes(messageID)) {
             continue;
         }
@@ -234,6 +236,11 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
         const linkedChannel = ChannelStore.getChannel(channelID);
         if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
             continue;
+        }
+
+        if (linkedChannel.guild_id && GuildStore.getGuild(linkedChannel.guild_id) && guildID === "@me") {
+            guildID = linkedChannel.guild_id;
+            // done to fix messages that use @me as the guild, which discord supports
         }
 
         const { listMode, idList } = settings.store;
