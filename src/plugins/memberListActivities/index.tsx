@@ -167,8 +167,8 @@ export default definePlugin({
             // Patch activity icons
             find: "default.getHangStatusActivity():null!",
             replacement: {
-                match: /(\i).some\((\i).default\)\?/,
-                replace: "$&$self.patchActivityList($1)||"
+                match: /null!=(\i)&&(\i).some\((\i).default\)\?/,
+                replace: "$self.patchActivityList($1),false?"
             }
         },
     ],
