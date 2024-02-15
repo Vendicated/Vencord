@@ -24,6 +24,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
+import { TwitchIcon } from "./components/TwitchIcon";
 
 interface Activity {
     created_at: number;
@@ -58,6 +59,10 @@ export default definePlugin({
             icons.push(<SpotifyIcon />);
         }
 
+        if (activities.some(activity => activity.name === "Twitch")) {
+            icons.push(<TwitchIcon />);
+        }
+
         const applications = activities.filter(activity => activity.application_id);
         applications.forEach(activity => {
             const { assets } = activity;
@@ -70,6 +75,12 @@ export default definePlugin({
 
                         if (externalLink) {
                             icons.push(<img src={externalDiscordLink} alt={alt}/>);
+                        }
+                    } else if (image.startsWith("mp:attachments/")) {
+                        const attachmentId = image.replace(/mp:attachments\//, "");
+                        const attachmentLink = `https://media.discordapp.net/attachments/${attachmentId}`;
+                        if (attachmentId) {
+                            icons.push(<img src={attachmentLink} alt={alt}/>);
                         }
                     } else {
                         const src = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
