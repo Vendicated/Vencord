@@ -69,19 +69,9 @@ export default definePlugin({
             if (assets) {
 
                 const addImage = (image: string, alt: string) => {
-                    if (image.startsWith("mp:external/")) {
-                        const externalLink = image.replace(/mp:/, "");
-                        const externalDiscordLink = `https://media.discordapp.net/${externalLink}`;
-
-                        if (externalLink) {
-                            icons.push(<img src={externalDiscordLink} alt={alt}/>);
-                        }
-                    } else if (image.startsWith("mp:attachments/")) {
-                        const attachmentId = image.replace(/mp:attachments\//, "");
-                        const attachmentLink = `https://media.discordapp.net/attachments/${attachmentId}`;
-                        if (attachmentId) {
-                            icons.push(<img src={attachmentLink} alt={alt}/>);
-                        }
+                    if (image.startsWith("mp:")) {
+                        const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
+                        icons.push(<img src={discordMediaLink} alt={alt}/>);
                     } else {
                         const src = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
                         icons.push(<img src={src} alt={alt}/>);
