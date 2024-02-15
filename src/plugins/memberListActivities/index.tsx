@@ -18,14 +18,25 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
 import { TwitchIcon } from "./components/TwitchIcon";
+
+const settings = definePluginSettings({
+    iconSize: {
+        type: OptionType.SLIDER,
+        description: "Size of the activity icons",
+        markers: [10, 15, 20],
+        default: 20,
+        stickToMarkers: false,
+    },
+});
 
 interface Activity {
     created_at: number;
@@ -89,6 +100,8 @@ export default definePlugin({
     description: "Shows activity icons in the member list",
     authors: [Devs.D3SOX],
     tags: ["activity"],
+
+    settings,
 
     patchActivityList: (activities: Activity[]) => {
         const icons: JSX.Element[] = [];
@@ -154,7 +167,7 @@ export default definePlugin({
             return <ErrorBoundary noop>
                 <div className={cl("row")}>
                     {icons.map((icon, i) => (
-                        <div key={i} className={cl("icon")}>
+                        <div key={i} className={cl("icon")} style={{ width: `${settings.store.iconSize}px`, height: `${settings.store.iconSize}px` }}>
                             {icon}
                         </div>
                     ))}
