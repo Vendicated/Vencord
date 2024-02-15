@@ -168,7 +168,7 @@ export default definePlugin({
             find: "default.getHangStatusActivity():null!",
             replacement: {
                 match: /(\i).some\((\i).default\)\?/,
-                replace: "$&$self.patchActivityList(l,d,_)?$self.patchActivityList(l,d,_):"
+                replace: "$&$self.patchActivityList($1)||"
             }
         },
     ],
