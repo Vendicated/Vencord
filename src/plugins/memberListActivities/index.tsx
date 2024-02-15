@@ -65,10 +65,11 @@ export default definePlugin({
 
                 const addImage = (image: string, alt: string) => {
                     if (image.startsWith("mp:external/")) {
-                        const externalLink = image.replace(/mp:external\/.{0,43}\//, "").replaceAll("https/", "https://");
-                        console.log("patch activity list external link", image, externalLink);
+                        const externalLink = image.replace(/mp:/, "");
+                        const externalDiscordLink = `https://media.discordapp.net/${externalLink}`;
+
                         if (externalLink) {
-                            icons.push(<img src={externalLink} alt={alt}/>);
+                            icons.push(<img src={externalDiscordLink} alt={alt}/>);
                         }
                     } else {
                         const src = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${image}.png`;
