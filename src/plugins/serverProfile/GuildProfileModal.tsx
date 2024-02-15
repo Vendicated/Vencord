@@ -12,10 +12,9 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
-const IconUtils = findByPropsLazy("getGuildBannerURL");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findExportedComponentLazy("FriendRow");
 
@@ -65,10 +64,7 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     const [currentTab, setCurrentTab] = useState(Tabs.ServerInfo);
 
-    const bannerUrl = guild.banner && IconUtils.getGuildBannerURL({
-        id: guild.id,
-        banner: guild.banner
-    }, true).replace(/\?size=\d+$/, "?size=1024");
+    const bannerUrl = guild.banner && IconUtils.getGuildBannerURL(guild, true)!.replace(/\?size=\d+$/, "?size=1024");
 
     const iconUrl = guild.icon && IconUtils.getGuildIconURL({
         id: guild.id,
@@ -89,7 +85,7 @@ function GuildProfileModal({ guild }: GuildProps) {
             )}
 
             <div className={cl("header")}>
-                {guild.icon
+                {iconUrl
                     ? <img
                         src={iconUrl}
                         alt=""
@@ -150,7 +146,7 @@ function Owner(guildId: string, owner: User) {
                 avatar: guildAvatar,
                 guildId,
                 canAnimate: true
-            }, true)
+            })
             : IconUtils.getUserAvatarURL(owner, true);
 
     return (
