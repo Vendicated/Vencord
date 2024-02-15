@@ -20,11 +20,10 @@ import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const AvatarUtils = findByPropsLazy("getChannelIconURL");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
@@ -71,7 +70,7 @@ export default definePlugin({
                 }}
             >
                 <Avatar
-                    src={AvatarUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
+                    src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                     size="SIZE_40"
                     className={ProfileListClasses.listAvatar}
                 >
