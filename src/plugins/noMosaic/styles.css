@@ -6,8 +6,3 @@
 [class^="nonMediaAttachmentItem_"]:has([class^="messageAttachment_"][style^="max-width"]) {
     width: 100%;
 }
-
-[class^="loadingOverlay_"]>[class^="imagePlaceholder_"] {
-    position: unset;
-    zoom: 20;
-}
