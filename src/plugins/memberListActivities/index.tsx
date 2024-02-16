@@ -36,6 +36,12 @@ const settings = definePluginSettings({
         default: 20,
         stickToMarkers: false,
     },
+    renderGifs: {
+        type: OptionType.BOOLEAN,
+        description: "Allow rendering GIFs",
+        default: true,
+        restartNeeded: false,
+    },
 });
 
 interface Activity {
@@ -125,7 +131,9 @@ export default definePlugin({
                 const addImage = (image: string, alt: string) => {
                     if (image.startsWith("mp:")) {
                         const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
-                        icons.push(<img src={discordMediaLink} alt={alt}/>);
+                        if (settings.store.renderGifs || !discordMediaLink.endsWith(".gif")) {
+                            icons.push(<img src={discordMediaLink} alt={alt}/>);
+                        }
                     } else {
                         const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
                         icons.push(<img src={src} alt={alt}/>);
