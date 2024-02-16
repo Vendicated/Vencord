@@ -11,12 +11,12 @@ import { Button, GuildMemberStore, UserProfileStore, UserStore } from "@webpack/
 
 const SummaryItem = findComponentByCodeLazy("borderType", "showBorder", "hideDivider");
 
-let savedNick = "";
-let savedPronouns = "";
+let savedNick: string | null = null;
+let savedPronouns: string | null = null;
 
 const { setPendingNickname, setPendingPronouns }: {
     setPendingNickname: (a: string | null) => void;
-    setPendingPronouns: (a: string) => void;
+    setPendingPronouns: (a: string | null) => void;
 } = findByPropsLazy("setPendingNickname");
 
 export default definePlugin({
