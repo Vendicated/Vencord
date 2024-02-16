@@ -144,6 +144,11 @@ export default definePlugin({
             description: "Whether to log deleted messages",
             default: true,
         },
+        collapseDeleted: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to collapse deleted messages",
+            default: true
+        },
         logEdits: {
             type: OptionType.BOOLEAN,
             description: "Whether to log edited messages",
@@ -431,7 +436,7 @@ export default definePlugin({
             find: "MessageTypesSets.NON_COLLAPSIBLE.has(",
             replacement: {
                 match: /if\((\i)\.blocked\)return \i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED;/,
-                replace: '$&else if($1.deleted) return"MESSAGE_GROUP_DELETED";',
+                replace: '$&else if($1.deleted && Vencord.Settings.plugins.MessageLogger.collapseDeleted) return"MESSAGE_GROUP_DELETED";',
             },
         },
         {
