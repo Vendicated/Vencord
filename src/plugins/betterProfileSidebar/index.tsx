@@ -60,7 +60,7 @@ export default definePlugin({
                         <Tooltip key={guild.id} text={`${guild.name}${nick ? ` (${nick})` : ""}`}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <img
-                                    className={cl("guildIcon")}
+                                    className={cl("guild-icon")}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
                                     onClick={() => {
