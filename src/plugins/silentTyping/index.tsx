@@ -21,7 +21,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, React } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, React } from "@webpack/common";
 
 const settings = definePluginSettings({
     showIcon: {
@@ -123,7 +123,9 @@ function getDisabledChannelsList(list = settings.store.disabledFor) {
 function isEnabled(channelId: string) {
     if (!settings.store.isEnabled) return false;
     if (settings.store.specificChats) {
-        return !getDisabledChannelsList().includes(channelId);
+        // need to resolve guild id for guild channels
+        const guildId = ChannelStore.getChannel(channelId)?.guild_id;
+        return !getDisabledChannelsList().includes(guildId ?? channelId);
     }
     return true;
 }
