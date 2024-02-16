@@ -32,10 +32,12 @@ export default definePlugin({
     description: "Adds a copy/paste/reset button to the server profiles editor",
 
     patchServerProfiles({ guildId }: { guildId: string }) {
+        const currentUser = UserStore.getCurrentUser();
+        const premiumType = currentUser.premiumType ?? 0;
+
         return <SummaryItem title="Server Profiles Toolbox" hideDivider={false} forcedDivider>
             <div style={{ display: "flex", gap: "5px" }}>
                 <Button onClick={() => {
-                    const currentUser = UserStore.getCurrentUser();
                     const profile = UserProfileStore.getGuildMemberProfile(currentUser.id, guildId);
                     const nick = GuildMemberStore.getNick(guildId, currentUser.id);
                     savedNick = nick ?? "";
@@ -50,9 +52,11 @@ export default definePlugin({
                     // set pending
                     setPendingNickname(savedNick);
                     setPendingPronouns(savedPronouns);
-                    setPendingBio(savedBio);
-                    setPendingThemeColors(savedThemeColors);
-                    setPendingBanner(savedBanner);
+                    if (premiumType === 2) {
+                        setPendingBio(savedBio);
+                        setPendingThemeColors(savedThemeColors);
+                        setPendingBanner(savedBanner);
+                    }
                 }}>
                     Paste profile
                 </Button>
@@ -60,9 +64,11 @@ export default definePlugin({
                     // reset
                     setPendingNickname("");
                     setPendingPronouns("");
-                    setPendingBio(undefined);
-                    setPendingThemeColors(undefined);
-                    setPendingBanner(undefined);
+                    if (premiumType === 2) {
+                        setPendingBio("");
+                        setPendingThemeColors([]);
+                        setPendingBanner("");
+                    }
                 }}>
                     Reset profile
                 </Button>
