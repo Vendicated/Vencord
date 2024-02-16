@@ -79,8 +79,9 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat, channel }) => {
         if (!isEnabled) {
             tooltip = "Re-enable Silent Typing globally";
         } else {
-            tooltip = shouldEnable ? "Disable Silent Typing for current channel (right-click to toggle globally)"
-                : "Enable Silent Typing for current channel (right-click to toggle globally)";
+            const chatType = channel.guild_id ? "guild" : "user";
+            tooltip = shouldEnable ? `Disable Silent Typing for current ${chatType} (right-click to toggle globally)`
+                : `Enable Silent Typing for current ${chatType} (right-click to toggle globally)`;
         }
     }
 
