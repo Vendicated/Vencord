@@ -24,13 +24,13 @@ export default definePlugin({
     authors: [Devs.D3SOX],
     description: "Adds a copy/paste/reset button to the server profiles editor",
 
-    patchServerProfiles(args: { guildId: string }) {
+    patchServerProfiles({ guildId }: { guildId: string }) {
         return <SummaryItem title="Server Profiles Toolbox" hideDivider={false} forcedDivider>
             <div style={{ display: "flex", gap: "5px" }}>
                 <Button onClick={() => {
                     const currentUser = UserStore.getCurrentUser();
-                    const profile = UserProfileStore.getGuildMemberProfile(currentUser.id, args.guildId);
-                    const nick = GuildMemberStore.getNick(args.guildId, currentUser.id);
+                    const profile = UserProfileStore.getGuildMemberProfile(currentUser.id, guildId);
+                    const nick = GuildMemberStore.getNick(guildId, currentUser.id);
                     savedNick = nick ?? "";
                     savedPronouns = profile.pronouns;
                 }}>
