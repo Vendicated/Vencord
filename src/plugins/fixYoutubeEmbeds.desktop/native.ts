@@ -17,7 +17,7 @@ app.on("browser-window-created", (_, win) => {
                 frame.executeJavaScript(`
                 new MutationObserver(() => {
                     if(
-                        document.querySelector('div.ytp-error-content-wrap-subreason a[href^="https://www.youtube.com/watch?v="]')
+                        document.querySelector('div.ytp-error-content-wrap-subreason a[href*="www.youtube.com/watch?v="]')
                     ) location.reload()
                 }).observe(document.body, { childList: true, subtree:true });
                 `);
