@@ -140,17 +140,16 @@ export default definePlugin({
                     }
                 };
 
-                // Prefer small image
-                const smallImage = assets.small_image;
-                if (smallImage) {
-                    addImage(smallImage, assets.small_text ?? "Small Text");
+                // Prefer large image
+                const largeImage = assets.large_image;
+                if (largeImage) {
+                    addImage(largeImage, assets.large_text ?? "Large Text");
                 } else {
-                    const largeImage = assets.large_image;
-                    if (largeImage) {
-                        addImage(largeImage, assets.large_text ?? "Large Text");
+                    const smallImage = assets.small_image;
+                    if (smallImage) {
+                        addImage(smallImage, assets.small_text ?? "Small Text");
                     }
                 }
-
             } else {
                 let application = ApplicationStore.getApplication(application_id);
                 if (!application) {
