@@ -181,7 +181,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
+        <ModalRoot transitionState={transitionState} size={plugin.settingsModalSize ?? ModalSize.MEDIUM} className="vc-text-selectable">
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
