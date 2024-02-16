@@ -52,13 +52,13 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat, channel }) => {
     const { isEnabled, showIcon, specificChats, disabledFor } = settings.use(["isEnabled", "showIcon", "specificChats", "disabledFor"]);
     const id = channel.guild_id ?? channel.id;
 
-    const togglePlugin = () => {
+    const toggleGlobal = () => {
         settings.store.isEnabled = !settings.store.isEnabled;
     };
     const toggle = () => {
         if (specificChats) {
             if (!settings.store.isEnabled) {
-                togglePlugin();
+                toggleGlobal();
             } else {
                 const disabledChannels = getDisabledChannelsList(disabledFor);
                 if (disabledChannels.includes(id)) {
@@ -69,7 +69,7 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat, channel }) => {
                 settings.store.disabledFor = disabledChannels.join(", ");
             }
         } else {
-            togglePlugin();
+            toggleGlobal();
         }
     };
     const shouldEnable = isEnabled && (!specificChats || !getDisabledChannelsList(disabledFor).includes(id));
@@ -90,7 +90,7 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat, channel }) => {
         <ChatBarButton
             tooltip={tooltip}
             onClick={toggle}
-            onContextMenu={togglePlugin}
+            onContextMenu={toggleGlobal}
         >
             <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
                 <path fill="currentColor"
