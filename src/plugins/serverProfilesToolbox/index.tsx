@@ -13,11 +13,18 @@ const SummaryItem = findComponentByCodeLazy("borderType", "showBorder", "hideDiv
 
 let savedNick: string | null = null;
 let savedPronouns: string | null = null;
+let savedBio: string | undefined = undefined;
+let savedThemeColors: number[] | undefined = undefined;
+let savedBanner: string | undefined = undefined;
 
-const { setPendingNickname, setPendingPronouns }: {
+const { setPendingAvatar, setPendingBanner, setPendingBio, setPendingNickname, setPendingPronouns, setPendingThemeColors }: {
+    setPendingAvatar: (a: string | null) => void;
+    setPendingBanner: (a: string | undefined) => void;
+    setPendingBio: (a: string | undefined) => void;
     setPendingNickname: (a: string | null) => void;
     setPendingPronouns: (a: string | null) => void;
-} = findByPropsLazy("setPendingNickname");
+    setPendingThemeColors: (a: number[] | undefined) => void;
+} = findByPropsLazy("setPendingNickname", "setPendingPronouns");
 
 export default definePlugin({
     name: "ServerProfilesToolbox",
@@ -33,6 +40,9 @@ export default definePlugin({
                     const nick = GuildMemberStore.getNick(guildId, currentUser.id);
                     savedNick = nick ?? "";
                     savedPronouns = profile.pronouns;
+                    savedBio = profile.bio;
+                    savedThemeColors = profile.themeColors;
+                    savedBanner = profile.banner;
                 }}>
                     Copy profile
                 </Button>
@@ -40,6 +50,9 @@ export default definePlugin({
                     // set pending
                     setPendingNickname(savedNick);
                     setPendingPronouns(savedPronouns);
+                    setPendingBio(savedBio);
+                    setPendingThemeColors(savedThemeColors);
+                    setPendingBanner(savedBanner);
                 }}>
                     Paste profile
                 </Button>
@@ -47,6 +60,9 @@ export default definePlugin({
                     // reset
                     setPendingNickname("");
                     setPendingPronouns("");
+                    setPendingBio(undefined);
+                    setPendingThemeColors(undefined);
+                    setPendingBanner(undefined);
                 }}>
                     Reset profile
                 </Button>
