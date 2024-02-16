@@ -59,6 +59,30 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         restartNeeded: true,
     },
+    bitrates: {
+        description: "ADVANCED: ONLY USE FOR TESTING PURPOSES!",
+        default: false,
+        type: OptionType.BOOLEAN,
+        restartNeeded: false,
+    },
+    targetBitrate: {
+        description: "Bitrate",
+        default: 600000,
+        type: OptionType.NUMBER,
+        hidden: true
+    },
+    minBitrate: {
+        description: "Bitrate",
+        default: 500000,
+        type: OptionType.NUMBER,
+        hidden: true
+    },
+    maxBitrate: {
+        description: "Bitrate",
+        default: 8000000,
+        type: OptionType.NUMBER,
+        hidden: true
+    },
 });
 
 export default definePlugin({
@@ -115,6 +139,20 @@ export default definePlugin({
                 match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
                 replace: "$&return;"
             }
+        },
+        {
+            find: "{getQuality(",
+            replacement: {
+                match: /(bitrateMin:).+?(,bitrateMax:).+?(,bitrateTarget:).+?,/,
+                replace: "$1$self.getMinBitrate()$2$self.getMaxBitrate()$3$self.getTargetBitrate(),"
+            }
+        },
+        {
+            find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
+            replacement: {
+                match: /(stream-settings-resolution-.+?children:.)/,
+                replace: "$1$self.settings.store.bitrates?$self.BitrateGroup():null,"
+            }
         }
     ],
     CustomRange(changeRes: Function, res: number, fps: number, analytics: string, group: "fps" | "resolution") {
@@ -138,6 +176,41 @@ export default definePlugin({
                 value={normalize((group === "fps" ? fps : res), minValue, maxValue)}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
+    },
+    BitrateGroup() {
+        const bitrates: Array<"target" | "min" | "max"> = ["min", "target", "max"];
+
+        return (<Menu.MenuGroup label="Bitrate (Min/Target/Max)">
+            {bitrates.map(e => this.BitrateSlider(e))}
+        </Menu.MenuGroup>);
+    },
+    BitrateSlider(name: "target" | "min" | "max") {
+        const [bitrate, setBitrate] = useState(this.settings.store[name + "Bitrate"]);
+        const { minBitrate, maxBitrate } = settings.store;
+        let onChange = (number: number) => {
+            const tmp = denormalize(number, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate);
+            setBitrate(tmp);
+            this.settings.store[name + "Bitrate"] = Math.round(tmp);
+        };
+        return (<Menu.MenuControlItem group={`stream-settings-bitrate-${name}`} id={`stream-settings-bitrate-${name}-custom`}>
+            <Menu.MenuSliderControl
+                onChange={onChange}
+                renderValue={() => Math.round(bitrate / 1000) + "kbps"}
+                value={normalize(bitrate, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate)}>
+            </Menu.MenuSliderControl>
+        </Menu.MenuControlItem>);
+    },
+    getMinBitrate() {
+        const { minBitrate } = settings.store;
+        return minBitrate;
+    },
+    getTargetBitrate() {
+        const { targetBitrate } = settings.store;
+        return targetBitrate;
+    },
+    getMaxBitrate() {
+        const { maxBitrate } = settings.store;
+        return maxBitrate;
     },
     start() {
         if (settings.store.goofs)
