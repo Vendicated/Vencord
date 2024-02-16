@@ -23,6 +23,7 @@ import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -32,6 +33,7 @@ import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const FormattedMessage = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -220,6 +222,10 @@ export default definePlugin({
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
+    Messages: proxyLazy(() => ({
+        DELETED_MESSAGE_COUNT: FormattedMessage.getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}"),
+    })),
+
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
     patches: [
         {
@@ -404,7 +410,7 @@ export default definePlugin({
                     replace: "children:arguments[0].message.deleted?[]:$1"
                 }
             ]
-        }
+        },
 
         // {
         //     // MessageStore caching internals
@@ -418,5 +424,30 @@ export default definePlugin({
         //         // }
         //     ]
         // }
+
+        {
+            // Message grouping
+            // Module 51714
+            find: "MessageTypesSets.NON_COLLAPSIBLE.has(",
+            replacement: {
+                match: /if\((\i)\.blocked\)return \i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED;/,
+                replace: '$&else if($1.deleted) return"MESSAGE_GROUP_DELETED";',
+            },
+        },
+        {
+            // Message group rendering
+            // Module 221068
+            find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
+            replacement: [
+                {
+                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\|\|/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"||',
+                },
+                {
+                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\?.*?:/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
+                },
+            ],
+        },
     ]
 });
