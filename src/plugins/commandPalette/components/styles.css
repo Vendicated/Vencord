@@ -1,0 +1,112 @@
+/* cl = vc-command-palette- */
+
+.vc-command-palette-root {
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--background-tertiary)
+}
+
+.vc-command-palette-option {
+    padding: 5px;
+    background-color: var(--background-tertiary);
+    color: var(--white-500);
+    font-family: var(--font-display);
+    text-align: left;
+    padding-left: 0.8rem;
+}
+
+.vc-command-palette-key-hover {
+    padding: 5px;
+    background-color: var(--background-modifier-selected);
+    border-radius: 3px;
+    font-family: var(--font-display);
+    color: var(--interactive-hover);
+    padding-left: 0.8rem;
+}
+
+.vc-command-palette-option-container{
+    display: grid;
+    gap: 2px;
+    margin-left: 0.8rem;
+    margin-right: 0.8rem;
+}
+
+.vc-command-palette-textinfo {
+    font-family: var(--font-display);
+    color: var(--white-500);
+    margin-left: 0.8rem;
+    margin-right: 0.8rem;
+    padding: 0.8rem 0;
+}
+
+.vc-command-palette-simple-text {
+    background-color: var(--input-background);
+    width: 30wh;
+}
+
+.vc-command-palette-registrar {
+    position: absolute;
+    color: var(--interactive-normal);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    right: 1.6rem;
+}
+
+.vc-command-palette-key-recorder-container {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    height: 40px;
+    width: 20rem;
+}
+
+.vc-command-palette-key-recorder {
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    background-color: hsl(var(--black-500-hsl)/10%);
+    color: var(--header-primary);
+    line-height: 22px;
+    font-weight: 600;
+    padding: 10px 0 10px 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border: 1px solid;
+    border-color: hsl(var(--black-500-hsl)/30%);
+    transition: border.15s ease;
+    user-select: none;
+    font-family: var(--font-primary);
+}
+
+.vc-command-palette-recording {
+    animation: shadowPulse_b16790 1s ease-in infinite;
+    box-shadow: 0 0 6px hsl(var(--red-400-hsl)/.3);
+    border-color: hsl(var(--red-400-hsl)/.3);
+    color: var(--status-danger);
+}
+
+.vc-command-palette-key-recorder:hover {
+    border-color: hsl(var(--red-400-hsl)/30%);
+}
+
+.vc-command-palette-recording-button {
+    color: var(--status-danger) !important;
+    background-color: hsl(var(--red-400-hsl)/.1) !important;
+    opacity: 1;
+    transition: opacity.2s ease-in-out,transform.2s ease-in-out;
+}
+
+.vc-command-palette-key-recorder-button {
+    position: absolute;
+    right: 1rem;
+    height: 30px;
+    width: 128px;
+    color: var(--white-500);
+    background-color: var(--button-secondary-background);
+    border-radius: 10px;
+    transition: background-color 0.15s ease;
+}
+
+.vc-command-palette-key-recorder-button:hover {
+    background-color: var(--button-secondary-background-hover)
+}
