@@ -230,7 +230,7 @@ export default definePlugin({
                 if (channelId !== oldChannelId) {
                     const isMe = userId === UserStore.getCurrentUser().id;
                     // move back if the setting is on and you were moved
-                    if (settings.store.autoMoveBack && isMe && channelId) {
+                    if (settings.store.autoMoveBack && isMe && channelId && oldChannelId) {
                         triggerFollow();
                         continue;
                     }
