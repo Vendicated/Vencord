@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.Grzesiek11],
     patches: [
         {
-            find: ".useCanSeeRemixBadge)",
+            find: "=\"SYSTEM_TAG\"",
             replacement: {
                 match: /style:"username"===\i&&null!=\i\?{color:\i}:void 0/,
                 replace: "style:{color:$self.calculateNameColor(BigInt(arguments[0].message.author.id))}"
