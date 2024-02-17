@@ -337,9 +337,20 @@ export default definePlugin({
     enabledByDefault: true,
 
     onKey(e: KeyboardEvent) {
-        const hasCtrl = e.ctrlKey || (e.metaKey && navigator.platform.includes("Mac"));
+        let hasModifierKey;
+        switch (settings.store.mainModifierKey) {
+            case "ctrl":
+                hasModifierKey = e.ctrlKey || (e.metaKey && navigator.platform.includes("Mac"));
+                break;
+            case "shift":
+                hasModifierKey = e.shiftKey;
+                break;
+            case "alt":
+                hasModifierKey = e.altKey;
+                break;
+        }
 
-        if (hasCtrl) switch (e.key) {
+        if (hasModifierKey) switch (e.key) {
             case "t":
             case "T":
                 e.preventDefault();
