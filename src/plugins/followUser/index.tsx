@@ -235,8 +235,8 @@ export default definePlugin({
                         continue;
                     }
 
-                    // if someone leaves a full channel of the followed user, join
-                    if (settings.store.channelFull && !channelId && oldChannelId) {
+                    // if you're not in the channel of the followed user and it is no longer full, join
+                    if (settings.store.channelFull && !channelId && oldChannelId && oldChannelId !== SelectedChannelStore.getVoiceChannelId()) {
                         const channel = ChannelStore.getChannel(oldChannelId);
                         const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
                         const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
