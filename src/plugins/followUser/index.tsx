@@ -57,7 +57,7 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Attempt to move you to the channel when is not full anymore",
         restartNeeded: false,
-        default: false
+        default: true,
     }
 });
 
@@ -97,7 +97,7 @@ function getChannelId(userId: string) {
     return null;
 }
 
-function triggerFollow(userChannelId: string | null = getChannelId(settings.store.followUserId), retry = false) {
+function triggerFollow(userChannelId: string | null = getChannelId(settings.store.followUserId)) {
     if (settings.store.followUserId) {
         const myChanId = SelectedChannelStore.getVoiceChannelId();
         if (userChannelId) {
@@ -107,19 +107,12 @@ function triggerFollow(userChannelId: string | null = getChannelId(settings.stor
                 const voiceStates = VoiceStateStore.getVoiceStatesForChannel(userChannelId);
                 const memberCount = voiceStates ? Object.keys(voiceStates).length : null;
                 if (PermissionStore.can(CONNECT, channel)) {
-                    if (channel.userLimit !== 0 && memberCount && memberCount >= channel.userLimit && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
-                        if (settings.store.channelFull) {
-                            setTimeout(() => {
-                                triggerFollow(userChannelId, true);
-                            }, 5000);
-                        }
-                        if (!retry) {
-                            Toasts.show({
-                                message: "Channel is full",
-                                id: Toasts.genId(),
-                                type: Toasts.Type.FAILURE
-                            });
-                        }
+                    if (channel.userLimit !== 0 && memberCount !== null && memberCount >= channel.userLimit && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
+                        Toasts.show({
+                            message: "Channel is full",
+                            id: Toasts.genId(),
+                            type: Toasts.Type.FAILURE
+                        });
                         return;
                     }
                     ChannelActions.selectVoiceChannel(userChannelId);
@@ -237,9 +230,23 @@ export default definePlugin({
                 if (channelId !== oldChannelId) {
                     const isMe = userId === UserStore.getCurrentUser().id;
                     // move back if the setting is on and you were moved
-                    if (isMe && channelId && settings.store.autoMoveBack) {
+                    if (settings.store.autoMoveBack && isMe && channelId) {
                         triggerFollow();
                         continue;
+                    }
+
+                    // if someone leaves a full channel of the followed user, join
+                    if (settings.store.channelFull && !channelId && oldChannelId) {
+                        const channel = ChannelStore.getChannel(oldChannelId);
+                        const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
+                        const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
+                        if (channel.userLimit !== 0 && memberCount !== null && memberCount < channel.userLimit && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
+                            const users = Object.values(channelVoiceStates).map(x => x.userId);
+                            if (users.includes(settings.store.followUserId)) {
+                                triggerFollow(oldChannelId);
+                                continue;
+                            }
+                        }
                     }
 
                     const isFollowed = settings.store.followUserId === userId;
@@ -284,7 +291,7 @@ export default definePlugin({
         if (Array.isArray(e.toolbar)) {
             return e.toolbar.push(
                 <ErrorBoundary noop={true} key="follow-indicator">
-                    <this.FollowIndicator />
+                    <this.FollowIndicator/>
                 </ErrorBoundary>
             );
         }
@@ -296,5 +303,4 @@ export default definePlugin({
             e.toolbar,
         ];
     },
-
 });
