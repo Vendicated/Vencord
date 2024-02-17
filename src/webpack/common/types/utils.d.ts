@@ -141,22 +141,33 @@ type ASTNode = {
     content: string | ASTNode;
 }[];
 
-export class FormattedMessage<T extends boolean | undefined = undefined> {
+export class FormattedMessage<
+    Params extends string = string,
+    Markdown extends boolean | undefined = undefined,
+    Args = [Record<Params, any>] | (Params extends `${infer _}` ? never : [])
+> {
     /**
      * @throws {SyntaxError} Argument `message` must follow the proper syntax.
      */
-    constructor(message: string, locale?: string, hasMarkdown?: T);
+    constructor(message: string, locale?: string, hasMarkdown?: Markdown);
 
-    format(values: Record<string, any>): T extends true ? (string | React.ReactElement)[] : string;
-    astFormat(values: Record<string, any>): ASTNode;
-    plainFormat(values: Record<string, any>): string;
-    getContext<V extends Record<string, any>>(values: V): [Record<keyof V, number>, Record<number, V[keyof V]>];
+    format(...args: Args): Markdown extends true
+        ? (string | React.ReactElement)[]
+        : string;
+    astFormat(...args: Args): ASTNode;
+    plainFormat(...args: Args): string;
+    getContext<A extends Record<string, any>>(args: A): Markdown extends true
+        ? [
+            Record<Exclude<keyof A, Params>, A[keyof A]> & Record<Params & keyof A, number | A[keyof A]>,
+            keyof A extends never ? {} : Record<number, A[Params & keyof A]>
+        ]
+        : [A, {}];
 
     message: string;
-    hasMarkdown: T;
+    hasMarkdown: Markdown;
     intlMessage: {
+        format(...args: Args): string;
         _locale: string;
-        format(values: Record<string, any>): string;
     };
 }
 
@@ -184,7 +195,7 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, string | FormattedMessage<boolean>>;
+    Messages: Record<i18nMessages, string | FormattedMessage<string, boolean>>;
 }
 
 export interface Clipboard {
