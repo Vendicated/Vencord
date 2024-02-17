@@ -22,7 +22,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findStore } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
@@ -44,7 +44,8 @@ export default definePlugin({
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
+        Devs.happy_enderman
     ],
     settings,
 
@@ -119,5 +120,11 @@ export default definePlugin({
                 Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
             </Forms.FormText>
         </ErrorCard>
-    ), { noop: true })
+    ), { noop: true }),
+    start() {
+        findStore("DeveloperActivityShelfStore").getIsEnabled = () => { return true; };
+    },
+    stop() {
+        findStore("DeveloperActivityShelfStore").getIsEnabled = () => { return false; };
+    }
 });
