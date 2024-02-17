@@ -16,9 +16,10 @@ let savedPronouns: string | null = null;
 let savedBio: string | undefined = undefined;
 let savedThemeColors: number[] | undefined = undefined;
 let savedBanner: string | undefined = undefined;
+let savedAvatar: string | undefined = undefined;
 
 const { setPendingAvatar, setPendingBanner, setPendingBio, setPendingNickname, setPendingPronouns, setPendingThemeColors }: {
-    setPendingAvatar: (a: string | null) => void;
+    setPendingAvatar: (a: string | undefined) => void;
     setPendingBanner: (a: string | undefined) => void;
     setPendingBio: (a: string | undefined) => void;
     setPendingNickname: (a: string | null) => void;
@@ -40,11 +41,13 @@ export default definePlugin({
                 <Button onClick={() => {
                     const profile = UserProfileStore.getGuildMemberProfile(currentUser.id, guildId);
                     const nick = GuildMemberStore.getNick(guildId, currentUser.id);
+                    const selfMember = GuildMemberStore.getMember(guildId, currentUser.id);
                     savedNick = nick ?? "";
                     savedPronouns = profile.pronouns;
                     savedBio = profile.bio;
                     savedThemeColors = profile.themeColors;
                     savedBanner = profile.banner;
+                    savedAvatar = selfMember.avatar;
                 }}>
                     Copy profile
                 </Button>
@@ -56,6 +59,7 @@ export default definePlugin({
                         setPendingBio(savedBio);
                         setPendingThemeColors(savedThemeColors);
                         setPendingBanner(savedBanner);
+                        setPendingAvatar(savedAvatar);
                     }
                 }}>
                     Paste profile
@@ -68,6 +72,7 @@ export default definePlugin({
                         setPendingBio("");
                         setPendingThemeColors([]);
                         setPendingBanner("");
+                        setPendingAvatar("");
                     }
                 }}>
                     Reset profile
