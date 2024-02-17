@@ -240,7 +240,7 @@ export default definePlugin({
                         const channel = ChannelStore.getChannel(oldChannelId);
                         const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
                         const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
-                        if (channel.userLimit !== 0 && memberCount !== null && memberCount < channel.userLimit && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
+                        if (channel.userLimit !== 0 && memberCount !== null && memberCount === (channel.userLimit - 1) && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
                             const users = Object.values(channelVoiceStates).map(x => x.userId);
                             if (users.includes(settings.store.followUserId)) {
                                 triggerFollow(oldChannelId);
