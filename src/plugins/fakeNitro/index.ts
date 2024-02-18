@@ -162,6 +162,11 @@ const settings = definePluginSettings({
         description: "Whether to use hyperlinks when sending fake emojis and stickers",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    invisibleHyperLInks: {
+        description: "Wether it should hide hyperlinks with an empty character",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
@@ -838,8 +843,8 @@ export default definePlugin({
                     url.searchParams.set("name", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        // Empty character is U+2800 "Braille Pattern Blank" --------------- v
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[⠀](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        // Empty character is U+2800 "Braille Pattern Blank" ------------------------------------------ v
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.invisibleHyperLinks ? "⠀" : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -865,8 +870,8 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                // Empty character is U+2800 "Braille Pattern Blank" --------------- v
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[⠀](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                // Empty character is U+2800 "Braille Pattern Blank" ------------------------------------------ v
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.invisibleHyperLinks ? "⠀" : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },
