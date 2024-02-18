@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings,migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
+const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
+const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
 
 const settings = definePluginSettings({
     guild: {
-        description: "Mute Guild",
+        description: "Mute Guild automatically",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -38,13 +40,20 @@ const settings = definePluginSettings({
         description: "Suppress All Role @mentions",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    showAllChannels: {
+        description: "Show all channels automatically",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
+migratePluginSettings("NewGuildSettings", "MuteNewGuild");
 export default definePlugin({
-    name: "MuteNewGuild",
-    description: "Mutes newly joined guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince],
+    name: "NewGuildSettings",
+    description: "Automatically mute new servers and change various other settings upon joining",
+    tags: ["MuteNewGuild", "mute", "server"],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi],
     patches: [
         {
             find: ",acceptInvite(",
@@ -70,7 +79,9 @@ export default definePlugin({
                 muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role
-            }
-        );
+            });
+        if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
+            toggleShowAllChannels(guildId);
+        }
     }
 });
