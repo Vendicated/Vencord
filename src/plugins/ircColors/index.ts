@@ -28,7 +28,7 @@ export default definePlugin({
             find: "=\"SYSTEM_TAG\"",
             replacement: {
                 match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForContext(arguments[0])}"
+                replace: "style:{color:$self.calculateNameColorForContext(arguments[0])},"
             },
         },
     ],
