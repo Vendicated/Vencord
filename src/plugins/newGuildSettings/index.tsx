@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/Settings";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -24,7 +25,6 @@ import { findByPropsLazy } from "@webpack";
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
 const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
-
 
 const settings = definePluginSettings({
     muteGuild: {
@@ -49,10 +49,12 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("NewGuildSettings", "MuteNewGuilds");
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Settings related to joining new guilds",
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Alyxia, Devs.Mopi],
+    tags: ["MuteNewGuilds", "mute", "server"],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi],
     patches: [
         {
             find: ",acceptInvite(",
@@ -81,8 +83,6 @@ export default definePlugin({
             });
         if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
             toggleShowAllChannels(guildId);
-        } else if (settings.store.showAllChannels && !isOptInEnabledForGuild(guildId)) {
-            return;
         }
     }
 });
