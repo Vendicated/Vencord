@@ -838,7 +838,8 @@ export default definePlugin({
                     url.searchParams.set("name", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        // Empty character is U+2800 "Braille Pattern Blank" --------------- v
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[⠀](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -864,7 +865,8 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                // Empty character is U+2800 "Braille Pattern Blank" --------------- v
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[⠀](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },
