@@ -163,10 +163,10 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
-    invisibleHyperLInks: {
-        description: "Wether it should hide hyperlinks with an empty character",
-        type: OptionType.BOOLEAN,
-        default: false
+    hyperLinkText: {
+        description: "What text the hyperlink should use, if empty it uses the emoji name",
+        type: OptionType.STRING,
+        default: ""
     }
 });
 
@@ -843,8 +843,7 @@ export default definePlugin({
                     url.searchParams.set("name", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        // Empty character is U+2800 "Braille Pattern Blank" ------------------------------------------ v
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.invisibleHyperLinks ? "⠀" : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.hyperLinkText ? s.hyperLinkText : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -870,8 +869,7 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                // Empty character is U+2800 "Braille Pattern Blank" ------------------------------------------ v
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.invisibleHyperLinks ? "⠀" : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.hyperLinkText ? s.hyperLinkText : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },
