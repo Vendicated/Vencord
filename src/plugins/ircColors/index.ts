@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "=\"SYSTEM_TAG\"",
             replacement: {
-                match: /style:"username"===\i&&null!=\i\?{color:\i}:void 0/,
+                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
                 replace: "style:{color:$self.calculateNameColor(BigInt(arguments[0].message.author.id))}"
             },
         },
