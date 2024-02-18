@@ -20,13 +20,15 @@ import "./styles.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
+import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -164,6 +166,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         fallbackValue: EMPTY_META,
     });
 
+    const isUnsupportedFormat = blob && (
+        !blob.type.startsWith("audio/ogg")
+        || blob.type.includes("codecs") && !blob.type.includes("opus")
+    );
+
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
@@ -199,6 +206,16 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     waveform={meta.waveform}
                     recording={isRecording}
                 />
+
+                {isUnsupportedFormat && (
+                    <Card className={`vc-plugins-restart-card ${Margins.top16}`}>
+                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+
+                        <Forms.FormText className={Margins.top8}>
+                            To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
+                        </Forms.FormText>
+                    </Card>
+                )}
 
             </ModalContent>
 
