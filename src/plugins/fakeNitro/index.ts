@@ -164,9 +164,9 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use, if empty it uses the emoji name",
+        description: "What text the hyperlink should use.",
         type: OptionType.STRING,
-        default: ""
+        default: "{{NAME}}"
     }
 });
 
@@ -842,8 +842,10 @@ export default definePlugin({
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
+                    const linkText = s.hyperLinkText.replace(/\{\{NAME\}\}/g, emoji.name);
+                    
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.hyperLinkText ? s.hyperLinkText : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -869,7 +871,9 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${s.hyperLinkText ? s.hyperLinkText : emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                const linkText = s.hyperLinkText.replace(/\{\{NAME\}\}/g, emoji.name);
+
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },
