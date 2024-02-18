@@ -26,7 +26,7 @@ const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
 const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
 
 const settings = definePluginSettings({
-    muteGuild: {
+    guild: {
         description: "Mute Guild automatically",
         type: OptionType.BOOLEAN,
         default: true
@@ -51,7 +51,7 @@ const settings = definePluginSettings({
 migratePluginSettings("NewGuildSettings", "MuteNewGuilds");
 export default definePlugin({
     name: "NewGuildSettings",
-    description: "Settings related to joining new guilds",
+    description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["MuteNewGuilds", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi],
     patches: [
@@ -76,7 +76,7 @@ export default definePlugin({
         if (guildId === "@me" || guildId === "null" || guildId == null) return;
         updateGuildNotificationSettings(guildId,
             {
-                muted: settings.store.muteGuild,
+                muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role
             });
