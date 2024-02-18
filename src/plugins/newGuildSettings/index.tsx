@@ -48,7 +48,7 @@ const settings = definePluginSettings({
     }
 });
 
-migratePluginSettings("NewGuildSettings", "MuteNewGuilds");
+migratePluginSettings("NewGuildSettings", "MuteNewGuild");
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
