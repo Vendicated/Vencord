@@ -28,12 +28,15 @@ export default definePlugin({
             find: "=\"SYSTEM_TAG\"",
             replacement: {
                 match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColor(BigInt(arguments[0].message.author.id))}"
+                replace: "style:{color:$self.calculateNameColorForContext(arguments[0])}"
             },
         },
     ],
     // Calculate a CSS color string based on the user ID
-    calculateNameColor(id: bigint) {
+    calculateNameColorForContext(context: any) {
+        return this.calculateNameColorForUser(BigInt(context.message.author.id));
+    },
+    calculateNameColorForUser(id: bigint) {
         // Compute a 64-bit FNV-1a hash of the passed data
         function hash(data: ArrayBuffer) {
             const fnvPrime = 1099511628211n;
