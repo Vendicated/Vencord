@@ -22,11 +22,11 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "NoTrack",
     description: "Disable Discord's tracking ('science'), metrics and Sentry crash reporting",
-    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
     required: true,
     patches: [
         {
-            find: "TRACKING_URL:",
+            find: "AnalyticsActionHandlers.handle",
             replacement: {
                 match: /^.+$/,
                 replace: "()=>{}",
@@ -43,14 +43,22 @@ export default definePlugin({
             find: ".METRICS,",
             replacement: [
                 {
-                    match: /this\._intervalId.+?12e4\)/,
-                    replace: ""
+                    match: /this\._intervalId=/,
+                    replace: "this._intervalId=undefined&&"
                 },
                 {
-                    match: /(?<=increment=function\(\i\){)/,
-                    replace: "return;"
+                    match: /(increment\(\i\){)/,
+                    replace: "$1return;"
                 }
             ]
-        }
+        },
+        {
+            find: ".installedLogHooks)",
+            replacement: {
+                // if getDebugLogging() returns false, the hooks don't get installed.
+                match: "getDebugLogging(){",
+                replace: "getDebugLogging(){return false;"
+            }
+        },
     ]
 });

@@ -17,51 +17,26 @@
 */
 
 import { IpcEvents } from "@utils/IpcEvents";
-import { app, ipcMain } from "electron";
-import { readFile } from "fs/promises";
-import { request } from "https";
-import { basename, normalize } from "path";
+import { ipcMain } from "electron";
 
-// #region OpenInApp
-// These links don't support CORS, so this has to be native
-const validRedirectUrls = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
+import PluginNatives from "~pluginNatives";
 
-function getRedirect(url: string) {
-    return new Promise<string>((resolve, reject) => {
-        const req = request(new URL(url), { method: "HEAD" }, res => {
-            resolve(
-                res.headers.location
-                    ? getRedirect(res.headers.location)
-                    : url
-            );
-        });
-        req.on("error", reject);
-        req.end();
-    });
+const PluginIpcMappings = {} as Record<string, Record<string, string>>;
+export type PluginIpcMappings = typeof PluginIpcMappings;
+
+for (const [plugin, methods] of Object.entries(PluginNatives)) {
+    const entries = Object.entries(methods);
+    if (!entries.length) continue;
+
+    const mappings = PluginIpcMappings[plugin] = {};
+
+    for (const [methodName, method] of entries) {
+        const key = `VencordPluginNative_${plugin}_${methodName}`;
+        ipcMain.handle(key, method);
+        mappings[methodName] = key;
+    }
 }
 
-ipcMain.handle(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, async (_, url: string) => {
-    if (!validRedirectUrls.test(url)) return url;
-
-    return getRedirect(url);
+ipcMain.on(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP, e => {
+    e.returnValue = PluginIpcMappings;
 });
-// #endregion
-
-
-// #region VoiceMessages
-ipcMain.handle(IpcEvents.VOICE_MESSAGES_READ_RECORDING, async (_, filePath: string) => {
-    filePath = normalize(filePath);
-    const filename = basename(filePath);
-    const discordBaseDirWithTrailingSlash = normalize(app.getPath("userData") + "/");
-    console.log(filename, discordBaseDirWithTrailingSlash, filePath);
-    if (filename !== "recording.ogg" || !filePath.startsWith(discordBaseDirWithTrailingSlash)) return null;
-
-    try {
-        const buf = await readFile(filePath);
-        return new Uint8Array(buf.buffer);
-    } catch {
-        return null;
-    }
-});
-
-// #endregion

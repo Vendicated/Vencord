@@ -26,7 +26,7 @@ export default definePlugin({
     patches: [
         // obtain BUILT_IN_COMMANDS instance
         {
-            find: '"giphy","tenor"',
+            find: ',"tenor"',
             replacement: [
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is
@@ -34,7 +34,7 @@ export default definePlugin({
                     // patch simpler
 
                     // textCommands = builtInCommands.filter(...)
-                    match: /(?<=\w=)(\w)(\.filter\(.{0,30}giphy)/,
+                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tenor)/,
                     replace: "Vencord.Api.Commands._init($1)$2",
                 }
             ],
@@ -44,8 +44,8 @@ export default definePlugin({
             find: "Unexpected value for option",
             replacement: {
                 // return [2, cmd.execute(args, ctx)]
-                match: /,(.{1,2})\.execute\((.{1,2}),(.{1,2})\)]/,
-                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})]`
+                match: /,(\i)\.execute\((\i),(\i)\)/,
+                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})`
             }
         },
         // Show plugin name instead of "Built-In"

@@ -19,15 +19,14 @@
 import "./styles.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Flex } from "@components/Flex";
 import { Microphone } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findLazy } from "@webpack";
-import { Button, Forms, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { Button, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -36,7 +35,9 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUpload = findLazy(m => m.prototype?.uploadFileToCloud);
+const CloudUtils = findByPropsLazy("CloudUpload");
+const PendingReplyStore = findStoreLazy("PendingReplyStore");
+const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
@@ -48,7 +49,7 @@ const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderW
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven, Devs.Vap],
+    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
 
     start() {
@@ -71,8 +72,10 @@ const EMPTY_META: AudioMetadata = {
 
 function sendAudio(blob: Blob, meta: AudioMetadata) {
     const channelId = SelectedChannelStore.getChannelId();
+    const reply = PendingReplyStore.getPendingReply(channelId);
+    if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
-    const upload = new CloudUpload({
+    const upload = new CloudUtils.CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isClip: false,
         isThumbnail: false,
@@ -95,7 +98,8 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     uploaded_filename: upload.uploadedFilename,
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
-                }]
+                }],
+                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });
@@ -133,7 +137,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         const channelData = audioBuffer.getChannelData(0);
 
         // average the samples into much lower resolution bins, maximum of 256 total bins
-        const bins = new Uint8Array(window._.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+        const bins = new Uint8Array(lodash.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
         const samplesPerBin = Math.floor(channelData.length / bins.length);
 
         // Get root mean square of each bin
@@ -215,21 +219,18 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 }
 
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (props.channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel)) return;
+    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
 
     children.push(
         <Menu.MenuItem
             id="vc-send-vmsg"
             label={
-                <>
-                    <Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
-                        <Microphone height={24} width={24} />
-                        Send voice message
-                    </Flex>
-                </>
+                <div className={OptionClasses.optionLabel}>
+                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
+                    <div className={OptionClasses.optionName}>Send voice message</div>
+                </div>
             }
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />
     );
 };
-

@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, waitFor } from "@webpack";
+import { filters, findByPropsLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
 import * as t from "./types/components";
@@ -55,7 +55,9 @@ export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", m => m?.t
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
-waitFor("FormItem", m => {
+export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
+
+waitFor(["FormItem", "Button"], m => {
     ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
     Forms = m;
 });

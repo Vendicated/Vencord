@@ -29,11 +29,23 @@ export const enum ReviewType {
     System = 3
 }
 
+export const enum NotificationType {
+    Info = 0,
+    Ban = 1,
+    Unban = 2,
+    Warning = 3
+}
+
+export interface ReviewDBAuth {
+    token?: string;
+    user?: ReviewDBCurrentUser;
+}
+
 export interface Badge {
     name: string;
     description: string;
     icon: string;
-    redirectURL: string;
+    redirectURL?: string;
     type: number;
 }
 
@@ -45,17 +57,29 @@ export interface BanInfo {
     banEndDate: number;
 }
 
+export interface Notification {
+    id: number;
+    title: string;
+    content: string;
+    type: NotificationType;
+}
+
 export interface ReviewDBUser {
     ID: number;
     discordID: string;
     username: string;
-    profilePhoto: string;
-    clientMod: string;
-    warningCount: number;
-    badges: any[];
-    banInfo: BanInfo | null;
-    lastReviewID: number;
     type: UserType;
+    profilePhoto: string;
+    badges: any[];
+}
+
+export interface ReviewDBCurrentUser extends ReviewDBUser {
+    warningCount: number;
+    clientMod: string;
+    banInfo: BanInfo | null;
+    notification: Notification | null;
+    lastReviewID: number;
+    blockedUsers?: string[];
 }
 
 export interface ReviewAuthor {

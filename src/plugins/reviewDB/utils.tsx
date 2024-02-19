@@ -17,65 +17,38 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { findByProps } from "@webpack";
-import { React, Toasts } from "@webpack/common";
+import { Toasts, UserStore } from "@webpack/common";
 
+import { Auth } from "./auth";
 import { Review, UserType } from "./entities";
-import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-rdb-");
 
-export function authorize(callback?: any) {
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
-    openModal((props: any) =>
-        <OAuth2AuthorizeModal
-            {...props}
-            scopes={["identify"]}
-            responseType="code"
-            redirectUri="https://manti.vendicated.dev/api/reviewdb/auth"
-            permissions={0n}
-            clientId="915703782174752809"
-            cancelCompletesFlow={false}
-            callback={async (response: any) => {
-                try {
-                    const url = new URL(response.location);
-                    url.searchParams.append("clientMod", "vencord");
-                    const res = await fetch(url, {
-                        headers: new Headers({ Accept: "application/json" })
-                    });
-                    const { token, success } = await res.json();
-                    if (success) {
-                        settings.store.token = token;
-                        showToast("Successfully logged in!");
-                        callback?.();
-                    } else if (res.status === 1) {
-                        showToast("An Error occurred while logging in.");
-                    }
-                } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorize", e);
-                }
-            }}
-        />
+export function canDeleteReview(profileId: string, review: Review) {
+    const myId = UserStore.getCurrentUser().id;
+    return (
+        myId === profileId
+        || review.sender.discordID === myId
+        || Auth.user?.type === UserType.Admin
     );
 }
 
-export function showToast(text: string) {
+export function canBlockReviewAuthor(profileId: string, review: Review) {
+    const myId = UserStore.getCurrentUser().id;
+    return profileId === myId && review.sender.discordID !== myId;
+}
+
+export function canReportReview(review: Review) {
+    return review.sender.discordID !== UserStore.getCurrentUser().id;
+}
+
+export function showToast(message: string, type = Toasts.Type.MESSAGE) {
     Toasts.show({
-        type: Toasts.Type.MESSAGE,
-        message: text,
         id: Toasts.genId(),
+        message,
+        type,
         options: {
-            position: Toasts.Position.BOTTOM
+            position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
         },
     });
-}
-
-export function canDeleteReview(review: Review, userId: string) {
-    return (
-        review.sender.discordID === userId
-        || settings.store.user?.type === UserType.Admin
-    );
 }

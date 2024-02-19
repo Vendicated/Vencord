@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenu, Menu, React, ReactDOM } from "@webpack/common";
+import { ContextMenuApi, Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -34,13 +34,6 @@ export const settings = definePluginSettings({
     saveZoomValues: {
         type: OptionType.BOOLEAN,
         description: "Whether to save zoom and lens size values",
-        default: true,
-    },
-
-    preventCarouselFromClosingOnClick: {
-        type: OptionType.BOOLEAN,
-        // Thanks chat gpt
-        description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
         default: true,
     },
 
@@ -96,7 +89,16 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 checked={settings.store.square}
                 action={() => {
                     settings.store.square = !settings.store.square;
-                    ContextMenu.close();
+                    ContextMenuApi.closeContextMenu();
+                }}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-nearest-neighbour"
+                label="Nearest Neighbour"
+                checked={settings.store.nearestNeighbour}
+                action={() => {
+                    settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
+                    ContextMenuApi.closeContextMenu();
                 }}
             />
             <Menu.MenuControlItem
@@ -154,10 +156,14 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"renderLinkComponent","maxWidth"',
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
-                replace: `$1id: '${ELEMENT_ID}',$2`
+                // there are 2 image thingies. one for carosuel and one for the single image.
+                // so thats why i added global flag.
+                // also idk if this patch is good, should it be more specific?
+                // https://regex101.com/r/xfvNvV/1
+                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
@@ -165,27 +171,26 @@ export default definePlugin({
             find: "handleImageLoad=",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /placeholderVersion:\i,/,
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
-                    match: /componentDidMount=function\(\){/,
+                    match: /componentDidMount\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
-                    match: /componentWillUnmount=function\(\){/,
+                    match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
         },
-
         {
-            find: ".carouselModal,",
+            find: ".carouselModal",
             replacement: {
-                match: /onClick:(\i),/,
-                replace: "onClick:$self.settings.store.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
             }
         }
     ],
