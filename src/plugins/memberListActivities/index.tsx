@@ -60,6 +60,7 @@ interface Activity {
         small_text?: string;
         small_image?: string;
     };
+    platform?: string;
 }
 
 const cl = classNameFactory("vc-mla-");
@@ -101,6 +102,8 @@ const { fetchApplication }: {
 
 const fetchedApplications = new Map<string, Application | null>();
 
+const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
+
 export default definePlugin({
     name: "MemberListActivities",
     description: "Shows activity icons in the member list",
@@ -120,10 +123,10 @@ export default definePlugin({
             icons.push(<TwitchIcon />);
         }
 
-        const applications = activities.filter(activity => activity.application_id);
+        const applications = activities.filter(activity => activity.application_id || activity.platform);
         applications.forEach(activity => {
-            const { assets, application_id } = activity;
-            if (!application_id) {
+            const { assets, application_id, platform } = activity;
+            if (!application_id && !platform) {
                 return;
             }
             if (assets) {
@@ -150,7 +153,7 @@ export default definePlugin({
                         addImage(smallImage, assets.small_text ?? "Small Text");
                     }
                 }
-            } else {
+            } else if (application_id) {
                 let application = ApplicationStore.getApplication(application_id);
                 if (!application) {
                     if (fetchedApplications.has(application_id)) {
@@ -164,8 +167,12 @@ export default definePlugin({
                 }
 
                 if (application) {
-                    const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
+                    const src = platform === "xbox" && application.icon === null ? xboxUrl : `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
                     icons.push(<img src={src} alt={application.name}/>);
+                }
+            } else {
+                if (platform === "xbox") {
+                    icons.push(<img src={xboxUrl} alt="Xbox" />);
                 }
             }
         });
