@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { humanFriendlyJoin } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, MessageActions, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, MessageStore, RelationshipStore, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 const MessageCreator = findByPropsLazy("createBotMessage");
@@ -71,7 +71,17 @@ function sendVoiceStatusMessage(channelId: string, content: string, userId: stri
     const message: Message = MessageCreator.createBotMessage({ channelId, content, embeds: [] });
     message.flags = getMessageFlags(isDM);
     message.author = UserStore.getUser(userId);
-    MessageActions.receiveMessage(channelId, message);
+    // MessageActions.receiveMessage(channelId, message);
+    MessageStore.getMessages(channelId);
+    // MessageActions.fetchMessages({ channelId });
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_CREATE",
+        channelId,
+        message,
+        optimistic: true,
+        sendMessageOptions: {},
+        isPushNotification: false
+    });
     return message;
 }
 
@@ -119,7 +129,8 @@ export default definePlugin({
                             memberListContent += humanFriendlyJoin(sortedVoiceStates.map(s => `<@${s.user.id}>`));
                         }
                     }
-                    sendVoiceStatusMessage(channelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true);
+                    const dmChannelId = ChannelStore.getDMFromUserId(userId);
+                    if (dmChannelId) sendVoiceStatusMessage(dmChannelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true);
                 }
 
                 if (settings.store.voiceChannel) {
@@ -138,6 +149,20 @@ export default definePlugin({
                 }
 
             });
-        }
-    }
+        },
+    },
+    patches: [
+        // Join messages
+        // case m.MessageTypes.RECIPIENT_ADD: if(null== M)return; return (0, s.astToString)(N.default.Messages.SYSTEM_MESSAGE_RECIPIENT_ADD.astFormat({ username: R, usernameOnClick: m.NOOP, otherUsername: T.default.getName(null, O, M), otherUsernameOnClick: m.NOOP }));
+        // {
+        //     find: "MessageTypes.RECIPIENT_ADD: ",
+        //     replacement: {
+        //         match: /(\w+)if\(null== \i\)return;d/,
+        //         // match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
+        //         replace: "$&,$self.TypingIndicator($1.id)"
+        //     }
+        // },
+    ],
+    // getMessageFlags,
+    // sendVoiceStatusMessage
 });
