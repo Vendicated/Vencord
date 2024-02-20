@@ -24,11 +24,12 @@ import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's voice channel in their profile modal",
@@ -38,7 +39,19 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
-    }
+    },
+    showVoiceActivityIcons: {
+        type: OptionType.BOOLEAN,
+        description: "Show a user's voice activity in dm list and member list",
+        default: true,
+        restartNeeded: true,
+    },
+    showUsersInVoiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show a list of users connected to a channel",
+        default: true,
+        disabled: () => !settings.store.showVoiceActivityIcons
+    },
 });
 
 interface UserProps {
@@ -67,10 +80,12 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     );
 });
 
+
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows whether a User is currently in a voice channel somewhere in their profile",
-    authors: [Devs.LordElias],
+    authors: [Devs.LordElias, Devs.Johannes7k75],
+    tags: ["voice", "activity"],
     settings,
 
     patchModal({ user }: UserProps) {
@@ -93,21 +108,48 @@ export default definePlugin({
         );
     },
 
+    patchUserList: ({ user }: UserProps, dmList: boolean) => {
+        if (!settings.store.showVoiceActivityIcons) return null;
+
+        return (
+            <ErrorBoundary noop>
+                <VoiceActivityIcon user={user} dmChannel={dmList} />
+            </ErrorBoundary>
+
+        );
+    },
+
     patches: [
-        // above message box
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
+                // paste my fancy custom button above the message field
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
         },
-        // below username
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
+                // paste my fancy custom button below the username
                 replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+        {
+            // Patch Member List
+            find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
+            replacement: {
+                match: /avatar:\(\(/,
+                replace: "children:[$self.patchUserList(arguments[0], false)],$&",
+            }
+        },
+        {
+            // Patch Dm List
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
+                replace: "$&$self.patchUserList(arguments[0], true),",
             }
         }
     ],
