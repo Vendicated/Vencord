@@ -121,7 +121,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".lastEditedByContainer,",
+            find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
                 // paste my fancy custom button above the message field
