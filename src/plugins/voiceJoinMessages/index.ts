@@ -175,18 +175,4 @@ export default definePlugin({
             });
         },
     },
-    patches: [
-        // Join messages
-        // case m.MessageTypes.RECIPIENT_ADD: if(null== M)return; return (0, s.astToString)(N.default.Messages.SYSTEM_MESSAGE_RECIPIENT_ADD.astFormat({ username: R, usernameOnClick: m.NOOP, otherUsername: T.default.getName(null, O, M), otherUsernameOnClick: m.NOOP }));
-        // {
-        //     find: "MessageTypes.RECIPIENT_ADD: ",
-        //     replacement: {
-        //         match: /(\w+)if\(null== \i\)return;d/,
-        //         // match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
-        //         replace: "$&,$self.TypingIndicator($1.id)"
-        //     }
-        // },
-    ],
-    // getMessageFlags,
-    // sendVoiceStatusMessage
 });
