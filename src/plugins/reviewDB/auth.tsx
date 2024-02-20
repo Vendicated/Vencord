@@ -59,7 +59,7 @@ export function authorize(callback?: any) {
                     const url = new URL(response.location);
                     url.searchParams.append("clientMod", "vencord");
                     const res = await fetch(url, {
-                        headers: new Headers({ Accept: "application/json" })
+                        headers: { Accept: "application/json" }
                     });
 
                     if (!res.ok) {
