@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { humanFriendlyJoin } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 const MessageCreator = findByPropsLazy("createBotMessage");
@@ -18,7 +18,7 @@ const SortedVoiceStateStore = findByPropsLazy("getVoiceStatesForChannel");
 const settings = definePluginSettings({
     friendDirectMessages: {
         type: OptionType.BOOLEAN,
-        description: "Recieve notifications in your friend's DMs when they join a voice channel",
+        description: "Recieve notifications in your friends' DMs when they join a voice channel",
         default: true
     },
     friendDirectMessagesShowMembers: {
@@ -29,6 +29,16 @@ const settings = definePluginSettings({
     friendDirectMessagesShowMemberCount: {
         type: OptionType.BOOLEAN,
         description: "Show the count of other members in the voice channel when recieving a DM notification of your friend joining a voice channel",
+        default: false
+    },
+    friendDirectMessagesSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Recieve notifications in your friends' DMs even if you are in the same voice channel as them",
+        default: false
+    },
+    friendDirectMessagesSilent: {
+        type: OptionType.BOOLEAN,
+        description: "Join messages in your friends DMs will be silent",
         default: false
     },
     voiceChannel: {
@@ -46,6 +56,11 @@ const settings = definePluginSettings({
         description: "Join/leave/move messages in voice channel chats will be silent",
         default: true
     },
+    voiceChannelChatSilentSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Join/leave/move messages in voice channel chats will be silent if you are in the voice channel",
+        default: false
+    },
     ignoreBlockedUsers: {
         type: OptionType.BOOLEAN,
         description: "Do not send messages about blocked users joining/leaving/moving voice channels",
@@ -61,15 +76,19 @@ interface VoiceState {
     userId: string;
 }
 
-function getMessageFlags(isDM: boolean) {
+function getMessageFlags(isDM: boolean, selfInChannel: boolean) {
     let flags = 1 << 6;
-    if (settings.store.voiceChannelChatSilent && isDM) flags += 1 << 12;
+    if (isDM) {
+        if (settings.store.friendDirectMessagesSilent) flags += 1 << 12;
+    } else {
+        if (selfInChannel ? settings.store.voiceChannelChatSilentSelf : settings.store.voiceChannelChatSilent) flags += 1 << 12;
+    }
     return flags;
 }
 
-function sendVoiceStatusMessage(channelId: string, content: string, userId: string, isDM: boolean): Message {
+function sendVoiceStatusMessage(channelId: string, content: string, userId: string, isDM: boolean, selfInChannel: boolean): Message {
     const message: Message = MessageCreator.createBotMessage({ channelId, content, embeds: [] });
-    message.flags = getMessageFlags(isDM);
+    message.flags = getMessageFlags(isDM, selfInChannel);
     message.author = UserStore.getUser(userId);
     // If we try to send a message into an unloaded channel, the client-sided messages get overwritten when the channel gets loaded
     // This might be messy but It Works:tm:
@@ -117,22 +136,24 @@ export default definePlugin({
 
                 // Friend joined a voice channel
                 if (settings.store.friendDirectMessages && (!oldChannelId && channelId) && userId !== clientUserId && RelationshipStore.isFriend(userId)) {
+                    const selfInChannel = SelectedChannelStore.getVoiceChannelId() === channelId;
                     let memberListContent = "";
                     if (settings.store.friendDirectMessagesShowMembers || settings.store.friendDirectMessagesShowMemberCount) {
                         const sortedVoiceStates: [{ user: { id: string; }; }] = SortedVoiceStateStore.getVoiceStatesForChannel(ChannelStore.getChannel(channelId));
-                        const otherMembers = sortedVoiceStates.filter(s => s.user.id !== userId).length;
-                        if (otherMembers <= 0) {
+                        const otherMembers = sortedVoiceStates.filter(s => s.user.id !== userId);
+                        const otherMembersCount = otherMembers.length;
+                        if (otherMembersCount <= 0) {
                             memberListContent += ", nobody else is in the voice channel";
                         } else if (settings.store.friendDirectMessagesShowMemberCount) {
-                            memberListContent += ` with ${otherMembers} other member${otherMembers === 1 ? "s" : ""}`;
+                            memberListContent += ` with ${otherMembersCount} other member${otherMembersCount === 1 ? "s" : ""}`;
                         }
-                        if (settings.store.friendDirectMessagesShowMembers && otherMembers > 0) {
+                        if (settings.store.friendDirectMessagesShowMembers && otherMembersCount > 0) {
                             memberListContent += settings.store.friendDirectMessagesShowMemberCount ? ", " : " with ";
-                            memberListContent += humanFriendlyJoin(sortedVoiceStates.map(s => `<@${s.user.id}>`));
+                            memberListContent += humanFriendlyJoin(otherMembers.map(s => `<@${s.user.id}>`));
                         }
                     }
                     const dmChannelId = ChannelStore.getDMFromUserId(userId);
-                    if (dmChannelId) sendVoiceStatusMessage(dmChannelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true);
+                    if (dmChannelId && selfInChannel ? settings.store.friendDirectMessagesSelf : true) sendVoiceStatusMessage(dmChannelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true, selfInChannel);
                 }
 
                 if (settings.store.voiceChannel) {
@@ -141,7 +162,8 @@ export default definePlugin({
                     if ((!oldChannelId && channelId) || (oldChannelId && !channelId)) {
                         // empty string is to make type checker shut up
                         const targetChannelId = oldChannelId || channelId || "";
-                        sendVoiceStatusMessage(targetChannelId, `${(channelId ? "Joined" : "Left")} <#${targetChannelId}>`, userId, false);
+                        const selfInChannel = SelectedChannelStore.getVoiceChannelId() === targetChannelId;
+                        sendVoiceStatusMessage(targetChannelId, `${(channelId ? "Joined" : "Left")} <#${targetChannelId}>`, userId, false, selfInChannel);
                     }
                     // Move between channels
                     if (oldChannelId && channelId) {
