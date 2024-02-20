@@ -41,6 +41,11 @@ const settings = definePluginSettings({
         description: "Join messages in your friends DMs will be silent",
         default: false
     },
+    allowedFriends: {
+        type: OptionType.STRING,
+        description: "Comma or space separated list of friends' user IDs you want to recieve join messages from",
+        default: ""
+    },
     voiceChannel: {
         type: OptionType.BOOLEAN,
         description: "Recieve messages in the voice channels directly",
@@ -86,7 +91,8 @@ function getMessageFlags(isDM: boolean, selfInChannel: boolean) {
     return flags;
 }
 
-function sendVoiceStatusMessage(channelId: string, content: string, userId: string, isDM: boolean, selfInChannel: boolean): Message {
+function sendVoiceStatusMessage(channelId: string, content: string, userId: string, isDM: boolean, selfInChannel: boolean): Message | null {
+    if (!channelId) return null;
     const message: Message = MessageCreator.createBotMessage({ channelId, content, embeds: [] });
     message.flags = getMessageFlags(isDM, selfInChannel);
     message.author = UserStore.getUser(userId);
@@ -104,6 +110,13 @@ function sendVoiceStatusMessage(channelId: string, content: string, userId: stri
         });
     });
     return message;
+}
+
+function isFriendAllowlisted(friendId: string) {
+    if (!RelationshipStore.isFriend(friendId)) return false;
+    const list = settings.store.allowedFriends.split(",").join(" ").split(" ").filter(i => i.length > 0);
+    if (list.join(" ").length < 1) return true;
+    return list.includes(friendId);
 }
 
 // Blatantly stolen from VcNarrator plugin
@@ -135,7 +148,7 @@ export default definePlugin({
                 if (oldChannelId === channelId) return;
 
                 // Friend joined a voice channel
-                if (settings.store.friendDirectMessages && (!oldChannelId && channelId) && userId !== clientUserId && RelationshipStore.isFriend(userId)) {
+                if (settings.store.friendDirectMessages && (!oldChannelId && channelId) && userId !== clientUserId && isFriendAllowlisted(userId)) {
                     const selfInChannel = SelectedChannelStore.getVoiceChannelId() === channelId;
                     let memberListContent = "";
                     if (settings.store.friendDirectMessagesShowMembers || settings.store.friendDirectMessagesShowMemberCount) {
@@ -153,7 +166,7 @@ export default definePlugin({
                         }
                     }
                     const dmChannelId = ChannelStore.getDMFromUserId(userId);
-                    if (dmChannelId && selfInChannel ? settings.store.friendDirectMessagesSelf : true) sendVoiceStatusMessage(dmChannelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true, selfInChannel);
+                    if (dmChannelId && (selfInChannel ? settings.store.friendDirectMessagesSelf : true)) sendVoiceStatusMessage(dmChannelId, `Joined voice channel <#${channelId}>${memberListContent}`, userId, true, selfInChannel);
                 }
 
                 if (settings.store.voiceChannel) {
