@@ -1,16 +1,22 @@
 #vc-spotify-player {
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--background-modifier-accent);
+    position: relative;
+    overflow: hidden;
 
-    --vc-spotify-green: #1db954; /* so custom themes can easily change it */
+    --vc-spotify-green: #1db954;
+
+    /* so custom themes can easily change it */
 }
 
-.theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
-}
-
-.theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
+#vc-spotify-background-image {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    height: 120%;
+    width: 120%;
+    filter: blur(30px) brightness(0.75);
+    z-index: -1;
 }
 
 .vc-spotify-button {
@@ -35,8 +41,8 @@
     width: 24px;
 }
 
-[class*="vc-spotify-shuffle"] > svg,
-[class*="vc-spotify-repeat"] > svg {
+[class*="vc-spotify-shuffle"]>svg,
+[class*="vc-spotify-repeat"]>svg {
     width: 22px;
     height: 22px;
 }
@@ -156,17 +162,17 @@
     margin-bottom: 5px;
 }
 
-#vc-spotify-progress-bar > [class^="slider"] {
+#vc-spotify-progress-bar>[class^="slider"] {
     flex-grow: 1;
     width: 100%;
     padding: 0 !important;
 }
 
-#vc-spotify-progress-bar > [class^="slider"] [class^="bar-"] {
+#vc-spotify-progress-bar>[class^="slider"] [class^="bar-"] {
     height: 4px !important;
 }
 
-#vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+#vc-spotify-progress-bar>[class^="slider"] [class^="grabber"] {
     /* these importants are necessary, it applies a width and height through inline styles */
     height: 10px !important;
     width: 10px !important;
