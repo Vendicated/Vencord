@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { humanFriendlyJoin } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, MessageStore, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, RelationshipStore, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 const MessageCreator = findByPropsLazy("createBotMessage");
@@ -71,16 +71,18 @@ function sendVoiceStatusMessage(channelId: string, content: string, userId: stri
     const message: Message = MessageCreator.createBotMessage({ channelId, content, embeds: [] });
     message.flags = getMessageFlags(isDM);
     message.author = UserStore.getUser(userId);
-    // MessageActions.receiveMessage(channelId, message);
-    MessageStore.getMessages(channelId);
-    // MessageActions.fetchMessages({ channelId });
-    FluxDispatcher.dispatch({
-        type: "MESSAGE_CREATE",
-        channelId,
-        message,
-        optimistic: true,
-        sendMessageOptions: {},
-        isPushNotification: false
+    // If we try to send a message into an unloaded channel, the client-sided messages get overwritten when the channel gets loaded
+    // This might be messy but It Works:tm:
+    const messagesLoaded: Promise<any> = MessageStore.hasPresent(channelId) ? new Promise<void>(r => r()) : MessageActions.fetchMessages({ channelId });
+    messagesLoaded.then(() => {
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_CREATE",
+            channelId,
+            message,
+            optimistic: true,
+            sendMessageOptions: {},
+            isPushNotification: false
+        });
     });
     return message;
 }
