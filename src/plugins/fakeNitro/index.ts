@@ -361,7 +361,7 @@ export default definePlugin({
                 replace: (_, props, rest, reactNode) => `let{fakeNitroNode}=${props};${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!fakeNitroNode?.fake)`
             }
         },
-        // Allow using custom app icons
+
         {
             find: "canUseSoundboardEverywhere:function",
             predicate: () => settings.store.enableSoundboardBypass,
@@ -371,21 +371,14 @@ export default definePlugin({
             },
         },
         {
-            find: "unavailableTooltip:\"unavailableTooltip__58709\"",
+            find: "available:e.available",
             predicate: () => settings.store.enableSoundboardGuildLimitBypass,
             replacement: {
-                match: /unavailableTooltip__58709/,
-                replace: ""
+                match: /available:e\.available/,
+                replace: "available:true"
             }
         },
-        {
-            find: "premiumDisabled:\"premiumDisabled__07ada\"",
-            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
-            replacement: {
-                match: /premiumDisabled__07ada/,
-                replace: ""
-            }
-        },
+        // Allow using custom app icons
         {
             find: "canUsePremiumAppIcons:function",
             replacement: {
