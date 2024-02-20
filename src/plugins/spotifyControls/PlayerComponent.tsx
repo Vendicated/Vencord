@@ -349,7 +349,7 @@ function Info({ track }: { track: Track; }) {
     );
 }
 
-export function Player() {
+export function Player({ useBg }: { useBg: Boolean; }) {
     const track = useStateFromStores(
         [SpotifyStore],
         () => SpotifyStore.track,
@@ -388,7 +388,7 @@ export function Player() {
             </div>
         )}>
             <div id={cl("player")}>
-                <Background track={track} />
+                {useBg && <Background track={track} />}
                 <Info track={track} />
                 <SeekBar />
                 <Controls />

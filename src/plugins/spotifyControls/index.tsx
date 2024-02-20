@@ -31,7 +31,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -43,6 +43,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Open Spotify URIs instead of Spotify URLs. Will only work if you have Spotify installed and might not work on all platforms",
             default: false
+        },
+        useCoverAsBackground: {
+            type: OptionType.BOOLEAN,
+            description: "Use the album cover as a background",
+            default: true
         }
     },
     patches: [
@@ -79,5 +84,5 @@ export default definePlugin({
         }
     ],
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
-    renderPlayer: () => <Player />
+    renderPlayer: () => <Player useBg={Settings.plugins.SpotifyControls.useCoverAsBackground} />
 });
