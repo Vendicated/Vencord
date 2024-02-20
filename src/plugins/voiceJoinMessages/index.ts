@@ -167,8 +167,8 @@ export default definePlugin({
                     }
                     // Move between channels
                     if (oldChannelId && channelId) {
-                        sendVoiceStatusMessage(oldChannelId, `Moved to <#${channelId}>`, userId, false);
-                        sendVoiceStatusMessage(channelId, `Moved from <#${oldChannelId}>`, userId, false);
+                        sendVoiceStatusMessage(oldChannelId, `Moved to <#${channelId}>`, userId, false, SelectedChannelStore.getVoiceChannelId() === oldChannelId);
+                        sendVoiceStatusMessage(channelId, `Moved from <#${oldChannelId}>`, userId, false, SelectedChannelStore.getVoiceChannelId() === channelId);
                     }
                 }
 
