@@ -25,12 +25,17 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
+import { Message as _Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+import { showHistory } from "./HistoryModal";
+
+export type Message = _Message & { editHistory: { timestamp: any, content: string }[] };
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 const FormattedMessage = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
@@ -227,6 +232,19 @@ export default definePlugin({
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
+    EditMarker({ message, className, children, ...props }: any) {
+        return (
+            <span
+                {...props}
+                className={classes("messagelogger-edit-marker", className)}
+                onClick={() => showHistory(message)}
+                aria-role="button"
+            >
+                {children}
+            </span>
+        );
+    },
+
     Messages: proxyLazy(() => ({
         DELETED_MESSAGE_COUNT: FormattedMessage.getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}"),
     })),
@@ -384,6 +402,11 @@ export default definePlugin({
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
                     replace: "$1 (arguments[0].message.editHistory?.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
+                },
+                {
+                    // Make edit marker clickable
+                    match: /"span",\{/,
+                    replace: "$self.EditMarker,{message:arguments[0].message,"
                 }
             ]
         },

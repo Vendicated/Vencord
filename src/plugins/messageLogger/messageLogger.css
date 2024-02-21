@@ -35,3 +35,63 @@
 .theme-light .messagelogger-edited {
     opacity: 0.5;
 }
+
+.messagelogger-edit-marker {
+    cursor: pointer;
+}
+
+.messagelogger-modal-head {
+    display: grid;
+    grid-template:
+         "t x" auto
+         "r r" 1fr
+         / 1fr auto;
+}
+
+.messagelogger-modal-head:nth-child(1) { grid-area: "t"; }
+.messagelogger-modal-head:nth-child(2) { grid-area: "x"; }
+.messagelogger-modal-head:nth-child(3) { grid-area: "r"; }
+
+/* For correct sizing, the revisions are all stacked in a 1x1 grid, with all but one being invisible */
+.messagelogger-modal-contents {
+    padding-top: 1em;
+    height: 25em;
+    max-height: 90%;
+    display: grid;
+    grid-template: "a" 1fr / 1fr;
+}
+
+.messagelogger-modal-content {
+    grid-area: a;
+}
+
+.messagelogger-modal-content:not(.messagelogger-modal-content-active) {
+    visibility: hidden;
+}
+
+.messagelogger-modal-revisions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+
+.messagelogger-modal-revision {
+    cursor: pointer;
+    color: var(--interactive-normal);
+    background: none;
+}
+
+.messagelogger-modal-timestamp {
+    cursor: unset;
+}
+
+.messagelogger-modal-revision:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover)
+}
+
+.messagelogger-modal-revision-active {
+    color: var(--interactive-active);
+    background-color: var(--background-modifier-active)
+}
