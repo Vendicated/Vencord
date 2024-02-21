@@ -75,6 +75,12 @@
     gap: 0.5em;
 }
 
+.messagelogger-modal-revision-lost {
+    cursor: unset;
+    color: var(--icon-muted); /* interactive-muted is hard to see on dark background. This one looks good on both dark and light theme. */
+    background: none;
+}
+
 .messagelogger-modal-revision {
     cursor: pointer;
     color: var(--interactive-normal);
