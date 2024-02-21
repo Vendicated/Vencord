@@ -178,9 +178,15 @@ export default definePlugin({
         });
 
         if (icons.length) {
+            const compareJSXElementsSource = (a: JSX.Element, b: JSX.Element) => {
+                return a.props?.src === b.props?.src;
+            };
+            const uniqueIcons = icons.filter((element, index, array) => {
+                return array.findIndex(el => compareJSXElementsSource(el, element)) === index;
+            });
             return <ErrorBoundary noop>
                 <div className={cl("row")}>
-                    {icons.map((icon, i) => (
+                    {uniqueIcons.map((icon, i) => (
                         <div key={i} className={cl("icon")} style={{ width: `${settings.store.iconSize}px`, height: `${settings.store.iconSize}px` }}>
                             {icon}
                         </div>
