@@ -29,8 +29,7 @@ export function showHistory(message: any) {
 
 export function HistoryModal({ modalProps, close, message }: { modalProps: ModalProps; close(): void; message: any }) {
     const [selected, selectItem] = useState(message.editHistory.length);
-    // TODO the first timestamp is not necessarily correct, I want some way to store the oldest known edited-timestamp
-    const timestamps = [message.timestamp, ...message.editHistory.map(a => a.timestamp)];
+    const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(a => a.timestamp)];
     const contents = [...message.editHistory.map(a => a.content), message.content];
 
     return <ModalRoot {...modalProps} size={ModalSize.LARGE}>
@@ -38,6 +37,16 @@ export function HistoryModal({ modalProps, close, message }: { modalProps: Modal
             <Text variant="heading-lg/semibold">Message edit history</Text>
             <ModalCloseButton onClick={close} />
             <div className={cl("revisions")}>
+                { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() ? (
+                    <button className={cl("revision-lost")} disabled>
+                        <Timestamp
+                            className={cl("timestamp")}
+                            timestamp={message.timestamp}
+                            isEdited={true}
+                            isInline={false}
+                        />
+                    </button>
+                ) : null }
                 {...timestamps.map((timestamp, index) =>
                     <button
                         className={cl("revision", { "revision-active": selected === index })}

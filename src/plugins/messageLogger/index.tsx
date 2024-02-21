@@ -307,7 +307,8 @@ export default definePlugin({
                     match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
                     replace: "this.customRenderedContent = $1.customRenderedContent," +
                         "this.deleted = $1.deleted || false," +
-                        "this.editHistory = $1.editHistory || [],"
+                        "this.editHistory = $1.editHistory || []," +
+                        "this.firstEditTimestamp = $1.firstEditTimestamp || this.timestamp,"
                 }
             ]
         },
@@ -329,7 +330,8 @@ export default definePlugin({
                         "interactionData:$1.interactionData," +
                         "deleted:$1.deleted," +
                         "editHistory:$1.editHistory," +
-                        "attachments:$1.attachments"
+                        "attachments:$1.attachments," +
+                        "firstEditTimestamp:$1.firstEditTimestamp"
                 },
 
                 // {
@@ -353,7 +355,8 @@ export default definePlugin({
                         "   return $2;" +
                         "})())," +
                         "deleted: arguments[1]?.deleted," +
-                        "editHistory: arguments[1]?.editHistory"
+                        "editHistory: arguments[1]?.editHistory," +
+                        "firstEditTimestamp: new Date(arguments[1]?.firstEditTimestamp ?? $2.edited_timestamp ?? $2.timestamp)"
                 },
                 {
                     // Preserve deleted attribute on attachments
