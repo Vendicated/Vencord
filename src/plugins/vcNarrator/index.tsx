@@ -167,6 +167,7 @@ export default definePlugin({
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
                 const isMe = userId === myId;
+                if (isMe && Settings.plugins.VcNarrator.ignoreSelf) return;
                 if (!isMe) {
                     if (!myChanId) continue;
                     if (channelId !== myChanId && oldChannelId !== myChanId) continue;
@@ -188,6 +189,7 @@ export default definePlugin({
         },
 
         AUDIO_TOGGLE_SELF_MUTE() {
+            if (Settings.plugins.VcNarrator.ignoreSelf) return;
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
             const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
             if (!s) return;
@@ -197,6 +199,7 @@ export default definePlugin({
         },
 
         AUDIO_TOGGLE_SELF_DEAF() {
+            if (Settings.plugins.VcNarrator.ignoreSelf) return;
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
             const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
             if (!s) return;
@@ -242,6 +245,11 @@ export default definePlugin({
                 default: 1,
                 markers: [0.1, 0.5, 1, 2, 5, 10],
                 stickToMarkers: false
+            },
+            ignoreSelf: {
+                type: OptionType.BOOLEAN,
+                description: "Do not say your own actions",
+                default: false
             },
             sayOwnName: {
                 description: "Say own name",
