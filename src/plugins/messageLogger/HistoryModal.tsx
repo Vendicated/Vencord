@@ -10,14 +10,12 @@ import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, Mo
 import { findByPropsLazy } from "@webpack";
 import { Parser, Text, Timestamp, useState } from "@webpack/common";
 
-import type { Message } from ".";
-
 const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
 
 const cl = classNameFactory("messagelogger-modal-");
 
-export function showHistory(message: Message) {
+export function showHistory(message: any) {
     const key = openModal(props =>
         <ErrorBoundary>
             <HistoryModal
@@ -29,7 +27,7 @@ export function showHistory(message: Message) {
     );
 }
 
-export function HistoryModal({ modalProps, close, message }: { modalProps: ModalProps; close(): void; message: Message }) {
+export function HistoryModal({ modalProps, close, message }: { modalProps: ModalProps; close(): void; message: any }) {
     const [selected, selectItem] = useState(message.editHistory.length);
     // TODO the first timestamp is not necessarily correct, I want some way to store the oldest known edited-timestamp
     const timestamps = [message.timestamp, ...message.editHistory.map(a => a.timestamp)];

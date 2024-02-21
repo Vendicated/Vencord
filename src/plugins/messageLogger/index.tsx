@@ -29,13 +29,10 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
-import { Message as _Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { showHistory } from "./HistoryModal";
-
-export type Message = _Message & { editHistory: { timestamp: any, content: string }[] };
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 const FormattedMessage = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
