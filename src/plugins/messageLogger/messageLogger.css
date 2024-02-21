@@ -43,9 +43,9 @@
 .messagelogger-modal-head {
     display: grid;
     grid-template:
-         "t x" auto
-         "r r" 1fr
-         / 1fr auto;
+        "t x" auto
+        "r r" 1fr
+        / 1fr auto;
 }
 
 .messagelogger-modal-head:nth-child(1) { grid-area: "t"; }
@@ -71,8 +71,7 @@
 
 .messagelogger-modal-revisions {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     gap: 0.5em;
 }
 
