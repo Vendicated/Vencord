@@ -110,7 +110,7 @@ export default definePlugin({
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
-        return (
+        return Settings.plugins.MessageLogger.inlineEdits ? (
             <ErrorBoundary noop>
                 <div className="messagelogger-edited">
                     {Parser.parse(edit.content)}
@@ -123,7 +123,7 @@ export default definePlugin({
                     </Timestamp>
                 </div>
             </ErrorBoundary>
-        );
+        ) : null;
     },
 
     makeEdit(newMessage: any, oldMessage: any): any {
@@ -158,6 +158,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Whether to log edited messages",
             default: true,
+        },
+        inlineEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to display edit history as part of message content",
+            default: false
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
