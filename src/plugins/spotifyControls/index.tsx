@@ -48,6 +48,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Use the album cover as a background",
             default: true
+        },
+        rotateBackground: {
+            type: OptionType.BOOLEAN,
+            description: "Slowly rotates the background if activated ",
+            default: true
         }
     },
     patches: [
@@ -84,5 +89,5 @@ export default definePlugin({
         }
     ],
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
-    renderPlayer: () => <Player useBg={Settings.plugins.SpotifyControls.useCoverAsBackground} />
+    renderPlayer: () => <Player useBg={Settings.plugins.SpotifyControls.useCoverAsBackground} rotateBg={Settings.plugins.SpotifyControls.rotateBackground} />
 });
