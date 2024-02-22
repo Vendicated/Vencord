@@ -20,7 +20,8 @@
 }
 
 .vc-spotify-rotate {
-    animation: vc-spotify-rotate-anim 15s infinite;
+    transform-origin: center;
+    animation: vc-spotify-rotate-anim 15s linear infinite;
 }
 
 .vc-spotify-button {
