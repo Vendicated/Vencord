@@ -167,8 +167,12 @@ export default definePlugin({
                 }
 
                 if (application) {
-                    const src = platform === "xbox" && application.icon === null ? xboxUrl : `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
-                    icons.push(<img src={src} alt={application.name}/>);
+                    if (application.icon) {
+                        const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
+                        icons.push(<img src={src} alt={application.name} />);
+                    } else if (platform === "xbox") {
+                        icons.push(<img src={xboxUrl} alt="Xbox" />);
+                    }
                 }
             } else {
                 if (platform === "xbox") {
