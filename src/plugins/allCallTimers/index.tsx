@@ -18,7 +18,13 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Always show the timer without needing to hover (not as pretty)!",
         restartNeeded: false,
-        default: false
+        default: true
+    },
+    showRoleColor: {
+        type: OptionType.BOOLEAN,
+        description: "Show the user's role color (if this plugin in enabled)",
+        restartNeeded: false,
+        default: true
     },
     trackSelf: {
         type: OptionType.BOOLEAN,
@@ -34,7 +40,7 @@ export const settings = definePluginSettings({
     },
     format: {
         type: OptionType.SELECT,
-        description: "The timer format",
+        description: "Compact or human readable format:",
         options: [
             {
                 label: "30:23:00:42",
@@ -81,7 +87,16 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(render\(\)\{.+\}\),children:)\[(.+renderName\(\),)/,
-                    replace: "$&$self.showInjection(this),"
+                    replace: "$&,$self.showClockInjection(this),"
+                }
+            ]
+        },
+        {
+            find: "renderPrioritySpeaker",
+            replacement: [
+                {
+                    match: /(renderName\(\)\{.+:\"\")/,
+                    replace: "$&,$self.showTextInjection(this),"
                 }
             ]
         }
@@ -186,6 +201,20 @@ export default definePlugin({
         if (settings.store.watchLargeGuilds) {
             this.subscribeToAllGuilds();
         }
+    },
+
+    showClockInjection(property: { props: { user: { id: string; }; }; }) {
+        if (settings.store.showWithoutHover) {
+            return "";
+        }
+        return this.showInjection(property);
+    },
+
+    showTextInjection(property: { props: { user: { id: string; }; }; }) {
+        if (!settings.store.showWithoutHover) {
+            return "";
+        }
+        return this.showInjection(property);
     },
 
     showInjection(property: { props: { user: { id: string; }; }; }) {
