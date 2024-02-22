@@ -54,4 +54,6 @@ export const settings = definePluginSettings({
         description: "Instantly become fluent in all languages. You can also ctrl/scroll click the translate button to toggle this",
         default: false
     }
-});
+}).withPrivateSettings<{
+    showAutoTranslateAlert: boolean;
+}>();

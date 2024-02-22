@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ChatBarButton } from "@api/ChatButtons";
+import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Alerts, Forms } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
@@ -37,12 +39,11 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
     );
 }
 
-export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { analyticsName: string; }; }; }) {
+export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
     const { autoFluent } = settings.use(["autoFluent"]);
 
-    if (slateProps.type.analyticsName !== "normal")
-        return null;
+    if (!isMainChat) return null;
 
     const toggle = () => settings.store.autoTranslate = !autoTranslate;
     const toggle2 = () => settings.store.autoFluent = !autoFluent;
@@ -80,4 +81,4 @@ export function TranslateChatBarIcon({ slateProps }: { slateProps: { type: { ana
             )}
         </Tooltip>
     );
-}
+};

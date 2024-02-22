@@ -67,12 +67,8 @@ function Indicator() {
 
 }
 
-function ChatBarIcon(chatBoxProps: {
-    type: {
-        analyticsName: string;
-    };
-}) {
-    if (chatBoxProps.type.analyticsName !== "normal") return null;
+const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+    if (!isMainChat) return null;
 
     const { autoEncrypt } = settings.use(["autoEncrypt"]);
     const { autoDecrypt } = settings.use(["autoDecrypt"]);
@@ -130,7 +126,7 @@ function ChatBarIcon(chatBoxProps: {
             }
         </Tooltip >
     );
-}
+};
 
 export const settings = definePluginSettings({
     savedPasswords: {
@@ -167,13 +163,6 @@ export default definePlugin({
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {if($1 && $self.INV_REGEX.test($1.message.content))$1.content.push($self.indicator())} catch {};$&"
-            }
-        },
-        {
-            find: "ChannelTextAreaButtons",
-            replacement: {
-                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
             }
         },
     ],
@@ -276,7 +265,6 @@ export default definePlugin({
         });
     },
 
-    chatBarIcon: ErrorBoundary.wrap(ChatBarIcon, { noop: true }),
     popOverIcon: () => <PopOverIcon />,
     indicator: ErrorBoundary.wrap(Indicator, { noop: true })
 });

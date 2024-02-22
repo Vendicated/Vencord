@@ -18,11 +18,11 @@
 
 import "./styles.css";
 
+import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu, FluxDispatcher, UserStore } from "@webpack/common";
@@ -51,9 +51,10 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
     ));
 };
 
+
 const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,./<>?;'’:\"[]{}\\|`~!@#$%^&*()_+-=\n ";
 
-const autoTranslate = async ( msg ) => {
+const autoTranslate = async (msg) => {
     const message = msg.message;
 
     if (!settings.store.autoFluent) return;
@@ -64,7 +65,7 @@ const autoTranslate = async ( msg ) => {
 
     if (new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/).test(message.content)) return;
 
-    message.content = message.content.replaceAll("­", "")
+    message.content = message.content.replaceAll("­", "");
 
     if (message.content.split("").every(c => alphabets.includes(c))) return;
 
@@ -73,33 +74,24 @@ const autoTranslate = async ( msg ) => {
     if (trans.src == "en") return;
 
     handleTranslate(message.id, trans);
-}
+};
 
 
 export default definePlugin({
-    name: "EnhancedTranslate",
-    description: "Translate messages with Google Translate\nEnhanced by TechFun",
+    name: "Translate",
+    description: "Translate messages with Google Translate",
     authors: [Devs.Ven, Devs.TechFun],
-    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     // not used, just here in case some other plugin wants it or w/e
     translate,
-
-    patches: [
-        {
-            find: "ChannelTextAreaButtons",
-            replacement: {
-                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
-            }
-        },
-    ],
 
     start() {
         FluxDispatcher.subscribe("MESSAGE_CREATE", autoTranslate);
         addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
 
         addContextMenuPatch("message", messageCtxPatch);
+        addChatBarButton("vc-translate", TranslateChatBarIcon);
 
         addButton("vc-translate", message => {
             if (!message.content) return null;
@@ -128,13 +120,8 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", autoTranslate);
         removePreSendListener(this.preSend);
         removeContextMenuPatch("message", messageCtxPatch);
+        removeChatBarButton("vc-translate");
         removeButton("vc-translate");
         removeAccessory("vc-translation");
     },
-
-    chatBarIcon: (slateProps: any) => (
-        <ErrorBoundary noop>
-            <TranslateChatBarIcon slateProps={slateProps} />
-        </ErrorBoundary>
-    )
 });
