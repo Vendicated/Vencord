@@ -25,7 +25,7 @@ import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu, FluxDispatcher, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, Menu, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -54,14 +54,14 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
 
 const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,./<>?;'’:\"[]{}\\|`~!@#$%^&*()_+-=\n ";
 
-const autoTranslate = async (msg) => {
-    const message = msg.message;
+const autoTranslate = async msg => {
+    const { message } = msg;
 
     if (!settings.store.autoFluent) return;
 
     if (!message.content) return;
 
-    if (message.author.id == UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
+    if (message.author.id === UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
 
     if (new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/).test(message.content)) return;
 
@@ -71,7 +71,7 @@ const autoTranslate = async (msg) => {
 
     const trans = await translate("received", message.content);
 
-    if (trans.src == "en") return;
+    if (trans.src === "en") return;
 
     handleTranslate(message.id, trans);
 };

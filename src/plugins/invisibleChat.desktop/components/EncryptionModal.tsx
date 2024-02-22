@@ -16,24 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { insertTextIntoChatInputBox } from "@utils/discord";
 import {
+    ModalCloseButton,
     ModalContent,
     ModalHeader,
     ModalProps,
     ModalRoot,
-    openModal,
-    ModalCloseButton
-} from "@utils/modal";
-import { Button, Forms, React, Switch, TextInput, TextArea } from "@webpack/common";
+    openModal } from "@utils/modal";
+import { Forms, React, Switch, TextArea,TextInput } from "@webpack/common";
 
-import { encrypt, settings } from "../index";
+import { settings } from "../index";
 
 function EncModal(props: ModalProps) {
 
-    const cover = settings.use(["cover"]).cover;
-    const autoEncrypt = settings.use(["autoEncrypt"]).autoEncrypt;
-    const autoDecrypt = settings.use(["autoDecrypt"]).autoDecrypt;
+    const { cover } = settings.use(["cover"]);
+    const { autoEncrypt } = settings.use(["autoEncrypt"]);
+    const { autoDecrypt } = settings.use(["autoDecrypt"]);
 
     return (
         <ModalRoot {...props}>

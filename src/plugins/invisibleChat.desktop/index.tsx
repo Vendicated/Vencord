@@ -1,23 +1,12 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./style.css";
 
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +15,6 @@ import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ButtonLooks, ButtonWrapperClasses, ChannelStore, FluxDispatcher, RestAPI, Tooltip, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -67,7 +55,7 @@ function Indicator() {
 
 }
 
-const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+const ChatBarIcon = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     const { autoEncrypt } = settings.use(["autoEncrypt"]);
@@ -104,7 +92,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                             buildEncModal();
                         }}
                         onContextMenu={() => toggle()}
-                        onAuxClick={e => { if (e.button == 1) toggle2() } }
+                        onAuxClick={e => { if (e.button === 1) toggle2(); }}
                         style={{ padding: "0 2px", scale: "0.9" }}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>
@@ -115,7 +103,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                                 height="32"
                                 viewBox={"0 0 64 64"}
                                 style={{ scale: "1.1" }}
-                                className={ `${autoEncrypt ? "vc-auto-encrypt" : ""} ${autoDecrypt ? "vc-auto-decrypt" : ""}` }
+                                className={`${autoEncrypt ? "vc-auto-encrypt" : ""} ${autoDecrypt ? "vc-auto-decrypt" : ""}`}
                             >
                                 <path fill="currentColor" d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
                             </svg>
@@ -175,9 +163,9 @@ export default definePlugin({
     tryMasterPassword: tryMasterPassword,
     steggo: steggo,
     settings,
-    async processMessage ( msg ) {
-        const message = msg.message;
-        if (message.author.id == UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
+    async processMessage(msg) {
+        const { message } = msg;
+        if (message.author.id === UserStore.getCurrentUser().id && msg?.sendMessageOptions) return;
         if (!this.INV_REGEX.test(message.content)) return;
         const res = await tryMasterPassword(message);
         if (res) return void this.buildEmbed(message, res);
@@ -208,18 +196,18 @@ export default definePlugin({
             if (!settings.store.autoEncrypt) return;
             if (!message.content) return;
 
-            let cover = ""
+            let cover = "";
             if (message.content.includes(" -c ")) {
-                [message.content, cover] = message.content.split(" -c ")
+                [message.content, cover] = message.content.split(" -c ");
             }
             else if (message.content.includes(" --cover ")) {
-                [message.content, cover] = message.content.split(" --cover ")
+                [message.content, cover] = message.content.split(" --cover ");
             }
 
             message.content = (await encrypt(message.content, settings.store.savedPasswords, (cover || settings.store.cover) + "­ ­"));
         });
         const outerThis = this;
-        this.processMessageFunction = (message) => outerThis.processMessage.apply(outerThis, [message]);
+        this.processMessageFunction = message => outerThis.processMessage.apply(outerThis, [message]);
         FluxDispatcher.subscribe("MESSAGE_CREATE", this.processMessageFunction);
     },
 
@@ -285,7 +273,7 @@ export function isCorrectPassword(result: string): boolean {
 export async function tryMasterPassword(message) {
 
     const password = settings.store.savedPasswords;
-    const autoDecrypt = settings.store.autoDecrypt;
+    const { autoDecrypt } = settings.store;
 
     if (!autoDecrypt) return false;
 
@@ -297,7 +285,7 @@ export async function tryMasterPassword(message) {
     if (/^\W/.test(message.content)) content = `d ${message.content}d`;
 
     const result = decrypt(content, password, false);
-    console.log(message.id)
+    console.log(message.id);
     return result;
 }
 

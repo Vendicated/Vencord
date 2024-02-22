@@ -1,27 +1,14 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { ApplicationCommandInputType } from "@api/Commands/types";
 import { Devs } from "@utils/constants";
-import { FluxDispatcher } from "@webpack/common";
-import { UserStore } from "@webpack/common";
 import definePlugin from "@utils/types";
+import { FluxDispatcher, UserStore } from "@webpack/common";
 
 export default definePlugin({
     name: "Impersonate",
@@ -61,9 +48,9 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
-                    let channel = args.find(x => x.name == "channel") ?? { value: ctx.channel.id };
-                    let delay = args.find(x => x.name == "delay");
-                    let user = UserStore.getUser(args[0].value);
+                    const channel = args.find(x => x.name === "channel") ?? { value: ctx.channel.id };
+                    const delay = args.find(x => x.name === "delay");
+                    const user = UserStore.getUser(args[0].value);
 
                     if (delay) {
                         FluxDispatcher.dispatch({
@@ -89,7 +76,9 @@ export default definePlugin({
                                     flags: user.flags,
                                     banner: user.banner,
                                     accent_color: null,
+                                    // @ts-ignore FIXME: bad thing to do, fix ur types DAVYD!
                                     global_name: user.globalName,
+                                    // @ts-ignore FIXME: bad thing to do, fix ur types DAVYD!
                                     avatar_decoration_data: (user.avatarDecorationData) ? { asset: user.avatarDecorationData.asset, sku_id: user.avatarDecorationData.skuId } : null,
                                     banner_color: null
                                 },
