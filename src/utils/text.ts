@@ -118,8 +118,8 @@ export function formatDurationMs(ms: number, human: boolean = false, seconds: bo
 
     let res = "";
     if (d) res += `${d}${unit("d")}${delim}`;
-    if (h || res) res += `${format(h)}${unit("h")}${delim}`;
-    if (m || res || !human) res += `${format(m)}${unit("m")}`;
+    if (h || res || !seconds) res += `${format(h)}${unit("h")}${delim}`;
+    if (m || res || !human || !seconds) res += `${format(m)}${unit("m")}`;
     if (seconds && (m || res || !human)) res += `${delim}`;
     if (seconds) res += `${format(s)}${unit("s")}`;
 
