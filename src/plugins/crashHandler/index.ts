@@ -25,7 +25,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
-import type { ReactElement } from "react";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 const { ModalStack, DraftManager, DraftType, closeExpressionPicker } = proxyLazyWebpack(() => {
@@ -57,13 +56,13 @@ const settings = definePluginSettings({
     }
 });
 
-let crashCount: number = 0;
-let lastCrashTimestamp: number = 0;
-let shouldAttemptNextHandle = false;
+let hasCrashedOnce = false;
+let isRecovering = false;
+let shouldAttemptRecover = true;
 
 export default definePlugin({
     name: "CrashHandler",
-    description: "Utility plugin for handling and possibly recovering from Crashes without a restart",
+    description: "Utility plugin for handling and possibly recovering from crashes without a restart",
     authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
@@ -73,61 +72,67 @@ export default definePlugin({
         {
             find: ".Messages.ERRORS_UNEXPECTED_CRASH",
             replacement: {
-                match: /(?=this\.setState\()/,
-                replace: "$self.handleCrash(this)||"
+                match: /this\.setState\((.+?)\)/,
+                replace: "$self.handleCrash(this,$1);"
             }
         }
     ],
 
-    handleCrash(_this: ReactElement & { forceUpdate: () => void; }) {
-        if (Date.now() - lastCrashTimestamp <= 1_000 && !shouldAttemptNextHandle) return true;
+    handleCrash(_this: any, errorState: any) {
+        _this.setState(errorState);
 
-        shouldAttemptNextHandle = false;
+        // Already recovering, prevent error which happens more than once too fast to trigger another recover
+        if (isRecovering) return;
+        isRecovering = true;
 
-        if (++crashCount > 5) {
+        // 1 ms timeout to avoid react breaking when re-rendering
+        setTimeout(() => {
             try {
-                showNotification({
-                    color: "#eed202",
-                    title: "Discord has crashed!",
-                    body: "Awn :( Discord has crashed more than five times, not attempting to recover.",
-                    noPersist: true,
-                });
+                // Prevent a crash loop with an error that could not be handled
+                if (!shouldAttemptRecover) {
+                    try {
+                        showNotification({
+                            color: "#eed202",
+                            title: "Discord has crashed!",
+                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover.",
+                            noPersist: true
+                        });
+                    } catch { }
+
+                    return;
+                }
+
+                shouldAttemptRecover = false;
+                // This is enough to avoid a crash loop
+                setTimeout(() => shouldAttemptRecover = true, 500);
             } catch { }
 
-            lastCrashTimestamp = Date.now();
-            return false;
-        }
+            try {
+                if (!hasCrashedOnce) {
+                    hasCrashedOnce = true;
+                    maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
+                }
+            } catch { }
 
-        setTimeout(() => crashCount--, 60_000);
-
-        try {
-            if (crashCount === 1) maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
-
-            if (settings.store.attemptToPreventCrashes) {
-                this.handlePreventCrash(_this);
-                return true;
+            try {
+                if (settings.store.attemptToPreventCrashes) {
+                    this.handlePreventCrash(_this);
+                }
+            } catch (err) {
+                CrashHandlerLogger.error("Failed to handle crash", err);
             }
-
-            return false;
-        } catch (err) {
-            CrashHandlerLogger.error("Failed to handle crash", err);
-            return false;
-        } finally {
-            lastCrashTimestamp = Date.now();
-        }
+        }, 1);
     },
 
-    handlePreventCrash(_this: ReactElement & { forceUpdate: () => void; }) {
-        if (Date.now() - lastCrashTimestamp >= 1_000) {
-            try {
-                showNotification({
-                    color: "#eed202",
-                    title: "Discord has crashed!",
-                    body: "Attempting to recover...",
-                    noPersist: true,
-                });
-            } catch { }
-        }
+    handlePreventCrash(_this: any) {
+        try {
+            showNotification({
+                color: "#eed202",
+                title: "Discord has crashed!",
+                body: "Attempting to recover...",
+                noPersist: true
+            });
+        } catch { }
 
         try {
             const channelId = SelectedChannelStore.getChannelId();
@@ -176,9 +181,12 @@ export default definePlugin({
             }
         }
 
+
+        // Set isRecovering to false before setting the state to allow us to handle the next crash error correcty, in case it happens
+        setImmediate(() => isRecovering = false);
+
         try {
-            shouldAttemptNextHandle = true;
-            _this.forceUpdate();
+            _this.setState({ error: null, info: null });
         } catch (err) {
             CrashHandlerLogger.debug("Failed to update crash handler component.", err);
         }
