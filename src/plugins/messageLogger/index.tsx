@@ -137,6 +137,18 @@ export default definePlugin({
             ],
             onChange: () => addDeleteStyle()
         },
+        logDeletes: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log deleted messages",
+            default: true,
+            restartNeeded: true
+        },
+        logEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log edited messages",
+            default: true,
+            restartNeeded: true
+        },
         ignoreBots: {
             type: OptionType.BOOLEAN,
             description: "Whether to ignore messages by bots",
@@ -219,6 +231,7 @@ export default definePlugin({
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
                     match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    predicate: () => Settings.plugins.MessageLogger.logDeletes,
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -229,6 +242,7 @@ export default definePlugin({
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
                     match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    predicate: () => Settings.plugins.MessageLogger.logDeletes,
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -239,6 +253,7 @@ export default definePlugin({
                 {
                     // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    predicate: () => Settings.plugins.MessageLogger.logEdits,
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
@@ -251,6 +266,7 @@ export default definePlugin({
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
                     match: /(?<=getLastEditableMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
+                    predicate: () => Settings.plugins.MessageLogger.logEdits,
                     replace: "!$1.deleted &&"
                 }
             ]
