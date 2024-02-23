@@ -1,0 +1,27 @@
+.export-contacts-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-width: 40px;
+    -webkit-app-region: no-drag;
+    border-radius: 4px;
+    margin: 0 8px;
+    padding: 2px 8px;
+    position: relative;
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex-shrink: 0;
+    outline: 0;
+    background-color: #5865f2;
+    color: var(--status-positive-text);
+}
+
+.export-contacts-button:hover {
+    background-color: #454fbf;
+}
