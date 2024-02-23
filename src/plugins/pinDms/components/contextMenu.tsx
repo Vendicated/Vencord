@@ -16,7 +16,7 @@ function PinMenuItem(channelId: string) {
 
     return (
         <Menu.MenuItem
-            id="better-pin-dm"
+            id="pin-dm"
             label="Pin DMs"
         >
 

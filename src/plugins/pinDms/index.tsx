@@ -37,7 +37,7 @@ waitFor(["dispatch", "subscribe"], m => {
 
         const id = UserStore.getCurrentUser()?.id;
         await initCategories(id);
-        await migrateData();
+        await migrateData(id);
         forceUpdate();
         // dont want to unsubscribe because if they switch accounts we want to reinit
     });
