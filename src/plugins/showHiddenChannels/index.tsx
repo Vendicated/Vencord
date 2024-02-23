@@ -29,7 +29,7 @@ import type { Channel, Role } from "discord-types/general";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
-const ChannelListClasses = findByPropsLazy("channelEmoji", "unread", "icon");
+const ChannelListClasses = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
 
 const enum ShowMode {
     LockIcon,
@@ -162,7 +162,7 @@ export default definePlugin({
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
-                    match: /\i\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.HiddenChannelIcon():null`
                 },
                 // Make voice channels also appear as muted if they are muted

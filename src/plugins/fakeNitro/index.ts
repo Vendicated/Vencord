@@ -108,6 +108,7 @@ const enum FakeNoticeType {
 const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
+const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -156,6 +157,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    useHyperLinks: {
+        description: "Whether to use hyperlinks when sending fake emojis and stickers",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -447,13 +453,23 @@ export default definePlugin({
 
     trimContent(content: Array<any>) {
         const firstContent = content[0];
-        if (typeof firstContent === "string") content[0] = firstContent.trimStart();
-        if (content[0] === "") content.shift();
+        if (typeof firstContent === "string") {
+            content[0] = firstContent.trimStart();
+            content[0] || content.shift();
+        } else if (firstContent?.type === "span") {
+            firstContent.props.children = firstContent.props.children.trimStart();
+            firstContent.props.children || content.shift();
+        }
 
         const lastIndex = content.length - 1;
         const lastContent = content[lastIndex];
-        if (typeof lastContent === "string") content[lastIndex] = lastContent.trimEnd();
-        if (content[lastIndex] === "") content.pop();
+        if (typeof lastContent === "string") {
+            content[lastIndex] = lastContent.trimEnd();
+            content[lastIndex] || content.pop();
+        } else if (lastContent?.type === "span") {
+            lastContent.props.children = lastContent.props.children.trimEnd();
+            lastContent.props.children || content.pop();
+        }
     },
 
     clearEmptyArrayItems(array: Array<any>) {
@@ -465,7 +481,7 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        // If content has more than one child or it's a single ReactElement like a header or list
+        // If content has more than one child or it's a single ReactElement like a header, list or span
         if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
         let nextIndex = content.length;
@@ -574,7 +590,7 @@ export default definePlugin({
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
-            if (!settings.store.transformCompoundSentence && !item.startsWith("http")) continue;
+            if (!settings.store.transformCompoundSentence && !item.startsWith("http") && !hyperLinkRegex.test(item)) continue;
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
@@ -619,8 +635,7 @@ export default definePlugin({
             case "image": {
                 if (
                     !settings.store.transformCompoundSentence
-                    && !contentItems.includes(embed.url!)
-                    && !contentItems.includes(embed.image?.proxyURL!)
+                    && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
                 ) return false;
 
                 if (settings.store.transformEmojis) {
@@ -698,7 +713,7 @@ export default definePlugin({
     },
 
     getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.FakeNitro.stickerSize}`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -795,12 +810,16 @@ export default definePlugin({
                 if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
                     link = link.replace(".png", ".gif");
                 }
+
                 if (sticker.format_type === StickerType.APNG) {
                     this.sendAnimatedSticker(link, sticker.id, channelId);
                     return { cancel: true };
                 } else {
+                    const url = new URL(link);
+                    url.searchParams.set("name", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
                     extra.stickers!.length = 0;
-                    messageObj.content += ` ${link}&name=${encodeURIComponent(sticker.name)}`;
                 }
             }
 
@@ -813,12 +832,13 @@ export default definePlugin({
                     if (emoji.guildId === guildId && !emoji.animated) continue;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                    const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                        size: Settings.plugins.FakeNitro.emojiSize,
-                        name: encodeURIComponent(emoji.name)
-                    }));
+
+                    const url = new URL(emoji.url);
+                    url.searchParams.set("size", s.emojiSize.toString());
+                    url.searchParams.set("name", emoji.name);
+
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -840,11 +860,11 @@ export default definePlugin({
                 if (emoji.available !== false && canUseEmotes) return emojiStr;
                 if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
 
-                const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                    size: Settings.plugins.FakeNitro.emojiSize,
-                    name: encodeURIComponent(emoji.name)
-                }));
-                return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                const url = new URL(emoji.url);
+                url.searchParams.set("size", s.emojiSize.toString());
+                url.searchParams.set("name", emoji.name);
+
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
         });
     },

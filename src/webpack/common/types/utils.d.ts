@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Guild, GuildMember } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import type { FluxEvents } from "./fluxEvents";
@@ -181,4 +182,48 @@ export interface NavigationRouter {
     replaceWith(...args: unknown[]): void;
     getLastRouteChangeSource(): any;
     getLastRouteChangeSourceLocationStack(): any;
+}
+
+export interface IconUtils {
+    getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
+    getDefaultAvatarURL(id: string, discriminator?: string): string;
+    getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+    getAvatarDecorationURL(dara: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+
+    getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
+    getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
+    getGuildMemberBannerURL(data: { id: string, guildId: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+
+    getGuildIconURL(data: { id: string, icon?: string, size?: number, canAnimate?: boolean; }): string | undefined;
+    getGuildBannerURL(guild: Guild, canAnimate?: boolean): string | null;
+
+    getChannelIconURL(data: { id: string; icon?: string; applicationId?: string; size?: number; }): string | undefined;
+    getEmojiURL(data: { id: string, animated: boolean, size: number, forcePNG?: boolean; }): string;
+
+    hasAnimatedGuildIcon(guild: Guild): boolean;
+    isAnimatedIconHash(hash: string): boolean;
+
+    getGuildSplashURL: any;
+    getGuildDiscoverySplashURL: any;
+    getGuildHomeHeaderURL: any;
+    getResourceChannelIconURL: any;
+    getNewMemberActionIconURL: any;
+    getGuildTemplateIconURL: any;
+    getApplicationIconURL: any;
+    getGameAssetURL: any;
+    getVideoFilterAssetURL: any;
+
+    getGuildMemberAvatarSource: any;
+    getUserAvatarSource: any;
+    getGuildSplashSource: any;
+    getGuildDiscoverySplashSource: any;
+    makeSource: any;
+    getGameAssetSource: any;
+    getGuildIconSource: any;
+    getGuildTemplateIconSource: any;
+    getGuildBannerSource: any;
+    getGuildHomeHeaderSource: any;
+    getChannelIconSource: any;
+    getApplicationIconSource: any;
+    getAnimatableSourceWithFallback: any;
 }
