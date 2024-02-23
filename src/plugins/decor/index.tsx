@@ -72,7 +72,7 @@ export default definePlugin({
             replacement: [
                 // Add Decor avatar decoration hook to avatar decoration hook
                 {
-                    match: /(?<=TryItOut:\i}\),)(?<=user:(\i).+?)/,
+                    match: /(?<=TryItOut:\i,guildId:\i}\),)(?<=user:(\i).+?)/,
                     replace: "vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1),"
                 },
                 // Use added hook
