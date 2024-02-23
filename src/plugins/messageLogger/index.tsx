@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, SnowflakeUtils, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -92,7 +92,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.meadowsys],
 
     start() {
         addDeleteStyle();
@@ -163,6 +163,11 @@ export default definePlugin({
             description: "Comma-separated list of guild IDs to ignore",
             default: ""
         },
+        ignoreQuickDelete: {
+            type: OptionType.NUMBER,
+            description: "Ignore deleted messages if they were deleted quicker than this many milliseconds",
+            default: 0
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -199,15 +204,18 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, ignoreQuickDelete } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
+        const timeNow = Date.now();
+        const timeMessage = SnowflakeUtils.extractTimestamp(message.id);
 
         return ignoreBots && message.author?.bot ||
             ignoreSelf && message.author?.id === myId ||
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            timeNow - timeMessage <= ignoreQuickDelete;
     },
 
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
