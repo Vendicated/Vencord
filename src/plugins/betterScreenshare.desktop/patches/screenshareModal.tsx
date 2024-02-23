@@ -63,7 +63,7 @@ export function replacedScreenshareModalSettingsContentType(oldType: (...args: a
     const oldTypeResult = Reflect.apply(oldType, thisContext, functionArguments);
 
     if (hideDefaultSettings)
-        oldTypeResult.props.children = oldTypeResult.props.children.filter(c => !c?.props.selectedFPS);
+        oldTypeResult.props.children = oldTypeResult.props.children.filter(c => !c?.props?.selectedFPS);
     oldTypeResult.props.children.push(<ReplacedStreamSettings />);
 
     return oldTypeResult;
