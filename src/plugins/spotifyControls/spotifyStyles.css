@@ -1,27 +1,18 @@
 #vc-spotify-player {
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--background-modifier-accent);
-    position: relative;
-    overflow: hidden;
 
     --vc-spotify-green: #1db954;
 
     /* so custom themes can easily change it */
 }
 
-#vc-spotify-background-image {
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    height: 120%;
-    width: 120%;
-    filter: blur(30px) brightness(0.75);
-    z-index: -1;
+.theme-light #vc-spotify-player {
+    background: var(--bg-overlay-3, var(--background-secondary-alt));
 }
 
-.vc-spotify-rotate {
-    transform-origin: center;
-    animation: vc-spotify-rotate-anim 15s linear infinite;
+.theme-dark #vc-spotify-player {
+    background: var(--bg-overlay-1, var(--background-secondary-alt));
 }
 
 .vc-spotify-button {
@@ -207,14 +198,4 @@
 .vc-spotify-fallback {
     padding: 0.5em;
     color: var(--text-normal);
-}
-
-@keyframes vc-spotify-rotate-anim {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
 }
