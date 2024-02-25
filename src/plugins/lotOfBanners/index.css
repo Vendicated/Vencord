@@ -1,0 +1,42 @@
+:is([class*="userProfile"], [class*="userPopout"]) [class*="bannerPremium"] {
+    background: center / cover no-repeat;
+}
+
+[class*="NonPremium"]:has([class*="bannerPremium"])
+    [class*="avatarPositionNormal"],
+[class*="PremiumWithoutBanner"]:has([class*="bannerPremium"])
+    [class*="avatarPositionPremiumNoBanner"] {
+    top: 76px;
+}
+
+[style*="background-image"] [class*="background-"] {
+    background-color: transparent !important;
+}
+
+[style^="--lob-bg"]:not([style^='--lob-bg:url("");'])::before {
+    opacity: 0.8;
+    -webkit-mask-image: linear-gradient(to right, transparent 20%, #fff);
+    mask-image: linear-gradient(to right, transparent 20%, #fff);
+    width: 100%;
+    height: 96%;
+    content: "";
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    border-radius: 4px;
+    background-image: var(--lob-bg);
+}
+
+[class^="memberInner-"] {
+    z-index: 1;
+    position: relative;
+}
+
+[style^="--lob-bg"]:has(::before):hover > [class*="layout"] {
+    background-color: none;
+}
+
+[style^="--lob-bg"]:not([style^='--lob-bg:url("");']):hover
+    > [class*="layout"] {
+    background-color: #0000007e !important;
+}
