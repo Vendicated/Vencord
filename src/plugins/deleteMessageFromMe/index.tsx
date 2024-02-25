@@ -5,6 +5,7 @@
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher, Menu } from "@webpack/common";
@@ -32,6 +33,8 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { messag
         />
     );
 };
+
+export const cl = classNameFactory("vc-delete-from-me-");
 
 export default definePlugin({
     name: "DeleteMessageFromMe",

@@ -6,7 +6,7 @@
 
 import { classes } from "@utils/misc";
 
-import { cl } from "./utils";
+import { cl } from "./index";
 
 export function TrashIcon({ height = 24, width = 24, className }: { height?: number; width?: number; className?: string; }) {
     return (
