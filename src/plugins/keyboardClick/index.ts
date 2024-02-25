@@ -50,7 +50,7 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "KeyboardClick",
-    description: "Modified BD plugin for some nice clicking sounds when typing.",
+    description: "Adds nice clicking sounds when typing.",
     authors: [
         {
             id: 346059939502096396n,
