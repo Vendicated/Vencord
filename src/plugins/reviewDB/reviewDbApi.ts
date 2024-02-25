@@ -16,18 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { showToast, Toasts } from "@webpack/common";
+import { Toasts } from "@webpack/common";
 
 import { Auth, authorize, getToken, updateAuth } from "./auth";
 import { Review, ReviewDBCurrentUser, ReviewDBUser, ReviewType } from "./entities";
 import { settings } from "./settings";
+import { showToast } from "./utils";
 
 const API_URL = "https://manti.vendicated.dev/api/reviewdb";
 
 export const REVIEWS_PER_PAGE = 50;
 
 export interface Response {
-    success: boolean,
     message: string;
     reviews: Review[];
     updated: boolean;
@@ -36,6 +36,16 @@ export interface Response {
 }
 
 const WarningFlag = 0b00000010;
+
+async function rdbRequest(path: string, options: RequestInit = {}) {
+    return fetch(API_URL + path, {
+        ...options,
+        headers: {
+            ...options.headers,
+            Authorization: await getToken() || "",
+        }
+    });
+}
 
 export async function getReviews(id: string, offset = 0): Promise<Response> {
     let flags = 0;
@@ -47,10 +57,9 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
     });
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
-    const res = (req.status === 200)
+    const res = (req.ok)
         ? await req.json() as Response
         : {
-            success: false,
             message: req.status === 429 ? "You are sending requests too fast. Wait a few seconds and try again." : "An Error occured while fetching reviews. Please try again later.",
             reviews: [],
             updated: false,
@@ -58,7 +67,7 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
             reviewCount: 0
         };
 
-    if (!res.success) {
+    if (!req.ok) {
         showToast(res.message, Toasts.Type.FAILURE);
         return {
             ...res,
@@ -85,52 +94,53 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
 }
 
 export async function addReview(review: any): Promise<Response | null> {
-    review.token = await getToken();
 
-    if (!review.token) {
+    const token = await getToken();
+    if (!token) {
         showToast("Please authorize to add a review.");
         authorize();
         return null;
     }
 
-    return fetch(API_URL + `/users/${review.userid}/reviews`, {
+    return await rdbRequest(`/users/${review.userid}/reviews`, {
         method: "PUT",
         body: JSON.stringify(review),
         headers: {
             "Content-Type": "application/json",
         }
-    })
-        .then(r => r.json())
-        .then(res => {
-            showToast(res.message);
-            return res ?? null;
-        });
+    }).then(async r => {
+        const data = await r.json() as Response;
+        showToast(data.message);
+        return r.ok ? data : null;
+    });
 }
 
-export async function deleteReview(id: number): Promise<Response> {
-    return fetch(API_URL + `/users/${id}/reviews`, {
+export async function deleteReview(id: number): Promise<Response | null> {
+    return await rdbRequest(`/users/${id}/reviews`, {
         method: "DELETE",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-        }),
+        },
         body: JSON.stringify({
-            token: await getToken(),
             reviewid: id
         })
-    }).then(r => r.json());
+    }).then(async r => {
+        const data = await r.json() as Response;
+        showToast(data.message);
+        return r.ok ? data : null;
+    });
 }
 
 export async function reportReview(id: number) {
-    const res = await fetch(API_URL + "/reports", {
+    const res = await rdbRequest("/reports", {
         method: "PUT",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-        }),
+        },
         body: JSON.stringify({
             reviewid: id,
-            token: await getToken()
         })
     }).then(r => r.json()) as Response;
 
@@ -138,13 +148,12 @@ export async function reportReview(id: number) {
 }
 
 async function patchBlock(action: "block" | "unblock", userId: string) {
-    const res = await fetch(API_URL + "/blocks", {
+    const res = await rdbRequest("/blocks", {
         method: "PATCH",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            Authorization: await getToken() || ""
-        }),
+        },
         body: JSON.stringify({
             action: action,
             discordId: userId
@@ -169,12 +178,11 @@ export const blockUser = (userId: string) => patchBlock("block", userId);
 export const unblockUser = (userId: string) => patchBlock("unblock", userId);
 
 export async function fetchBlocks(): Promise<ReviewDBUser[]> {
-    const res = await fetch(API_URL + "/blocks", {
+    const res = await rdbRequest("/blocks", {
         method: "GET",
-        headers: new Headers({
+        headers: {
             Accept: "application/json",
-            Authorization: await getToken() || ""
-        })
+        }
     });
 
     if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
@@ -182,17 +190,13 @@ export async function fetchBlocks(): Promise<ReviewDBUser[]> {
 }
 
 export function getCurrentUserInfo(token: string): Promise<ReviewDBCurrentUser> {
-    return fetch(API_URL + "/users", {
-        body: JSON.stringify({ token }),
+    return rdbRequest("/users", {
         method: "POST",
     }).then(r => r.json());
 }
 
 export async function readNotification(id: number) {
-    return fetch(API_URL + `/notifications?id=${id}`, {
-        method: "PATCH",
-        headers: {
-            "Authorization": await getToken() || "",
-        },
+    return rdbRequest(`/notifications?id=${id}`, {
+        method: "PATCH"
     });
 }
