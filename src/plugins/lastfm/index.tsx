@@ -282,7 +282,8 @@ export default definePlugin({
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
                 ...(settings.store.showLastFmLogo && {
-                    small_image: await getApplicationAsset("lastfm-small"), small_text: "Last.fm"
+                    small_image: await getApplicationAsset("lastfm-small"),
+                    small_text: "Last.fm"
                 }),
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
