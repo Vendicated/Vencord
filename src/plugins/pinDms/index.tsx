@@ -17,7 +17,7 @@ import { Channel } from "discord-types/general";
 import { addContextMenus, removeContextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, categoryLen, collapseCategory, getAllUncolapsedChannels, getSections, initCategories, isPinned, migrateData, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, initCategories, isPinned, migrateData, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -48,6 +48,13 @@ export const settings = definePluginSettings({
     sortDmsByNewestMessage: {
         type: OptionType.BOOLEAN,
         description: "Sort DMs by newest message",
+        default: false,
+        onChange: () => forceUpdate()
+    },
+
+    dmSectioncollapsed: {
+        type: OptionType.BOOLEAN,
+        description: "Collapse DM sections",
         default: false,
         onChange: () => forceUpdate()
     }
@@ -82,11 +89,15 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /this\.renderDM=\(.+?(\i\.default),{channel.+?this.renderRow=(\i)=>{/,
-                    replace: "$&if($self.isCategoryIndex($2.section))return $self.renderChannel($2.section,$2.row,$1);"
+                    replace: "$&if($self.isChannelIndex($2.section, $2.row))return $self.renderChannel($2.section,$2.row,$1);"
                 },
                 {
                     match: /this\.renderSection=(\i)=>{/,
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
+                },
+                {
+                    match: /(?<=span",{)className:\i\.headerText,/,
+                    replace: "onClick: (e) => $self.collapseDMList(e),$&"
                 },
 
                 // Fix Row Height
@@ -107,7 +118,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncolapsedChannels()]"
+                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
                 },
 
             ]
@@ -131,7 +142,7 @@ export default definePlugin({
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
-                replace: "$self.getAllUncolapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
 
@@ -140,7 +151,7 @@ export default definePlugin({
             find: ".getFlattenedGuildIds()],",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
-                replace: "$self.getAllUncolapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
     ],
@@ -154,7 +165,7 @@ export default definePlugin({
     isPinned,
     categoryLen,
     getSections,
-    getAllUncolapsedChannels,
+    getAllUncollapsedChannels,
 
     start() {
         addContextMenus();
@@ -201,27 +212,44 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
+        if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
+            return true;
         return this.isCategoryIndex(sectionIndex) && categories[sectionIndex - 1]?.channels[channelIndex];
     },
 
+    isDMSectioncollapsed() {
+        return settings.store.dmSectioncollapsed;
+    },
+
+    collapseDMList() {
+        // console.log("HI");
+        settings.store.dmSectioncollapsed = !settings.store.dmSectioncollapsed;
+        forceUpdate();
+    },
+
     isChannelHidden(categoryIndex: number, channelIndex: number) {
+        if (categoryIndex === 0) return false;
+
+        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
+            return true;
+
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.colapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
+        return category.collapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))
             return (
                 (rowHeight + padding) * 2 // header
-                + rowHeight * this.getAllUncolapsedChannels().length // pins
+                + rowHeight * this.getAllUncollapsedChannels().length // pins
                 + originalOffset // original pin offset minus pins
             );
 
-        return rowHeight * (this.getAllUncolapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
+        return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
     },
 
     renderCategory({ section }: { section: number; }) {
@@ -231,10 +259,10 @@ export default definePlugin({
 
         return (
             <h2
-                className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.colapsed ? "vc-pindms-colapsed" : "")}
+                className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
                 style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
                 onClick={async () => {
-                    await collapseCategory(category.id, !category.colapsed);
+                    await collapseCategory(category.id, !category.collapsed);
                     forceUpdate();
                 }}
                 onContextMenu={e => {
@@ -289,7 +317,7 @@ export default definePlugin({
                 <span className={headerClasses.headerText}>
                     {category?.name ?? "uh oh"}
                 </span>
-                <svg className="vc-pindms-colapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
                 </svg>
             </h2>
@@ -300,14 +328,12 @@ export default definePlugin({
         const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
         if (!channel || !category) return null;
-        const selected = this.instance.props.selectedChannelId === channel.id;
-
-        if (!selected && category.colapsed) return null;
+        if (this.isChannelHidden(sectionIndex, index)) return null;
 
         return (
             <ChannelComponent
                 channel={channel}
-                selected={selected}
+                selected={this.instance.props.selectedChannelId === channel.id}
             >
                 {channel.id}
             </ChannelComponent>

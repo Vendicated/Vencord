@@ -25,13 +25,17 @@
     display: none;
 }
 
-.vc-pindms-colapse-icon {
+.vc-pindms-collapse-icon {
     width: 16px;
     height: 16px;
     color: var(--interactive-normal);
     transform: rotate(90deg)
 }
 
-.vc-pindms-colapsed .vc-pindms-colapse-icon {
+.vc-pindms-collapsed .vc-pindms-collapse-icon {
     transform: rotate(0deg);
+}
+
+[class^="privateChannelsHeaderContainer"] > [class^="headerText"] {
+    cursor: pointer;
 }
