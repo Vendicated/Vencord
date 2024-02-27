@@ -161,6 +161,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    hyperLinkText: {
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
+        type: OptionType.STRING,
+        default: "{{NAME}}"
+    }
 }).withPrivateSettings<{
     disableEmbedPermissionCheck: boolean;
 }>();
@@ -880,8 +885,10 @@ export default definePlugin({
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
+
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -917,7 +924,9 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
+
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
