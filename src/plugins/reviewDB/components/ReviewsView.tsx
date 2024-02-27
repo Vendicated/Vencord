@@ -138,6 +138,9 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
         getRecipientId: () => "0",
         hasFlag: () => false,
         getEveryoneRoleId: () => "0",
+        // this is so awful tbh but idk any other good ways to do it
+        // maybe I can get current channel and override some stuff but idk if that'll work
+        // I am too lazy to implement and test that, this works for now
     };
 
     return (
