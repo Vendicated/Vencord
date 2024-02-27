@@ -162,7 +162,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use.",
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
     }
@@ -885,7 +885,7 @@ export default definePlugin({
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
-                    const linkText = s.hyperLinkText.replace(/\{\{NAME\}\}/g, emoji.name);
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
                         return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
@@ -924,7 +924,7 @@ export default definePlugin({
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
-                const linkText = s.hyperLinkText.replace(/\{\{NAME\}\}/g, emoji.name);
+                const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
                 return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
