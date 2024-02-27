@@ -161,12 +161,9 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
-    disableEmbedPermissionCheck: {
-        description: "Disables the notice for sending FakeNitro items without embed permissions",
-        type: OptionType.BOOLEAN,
-        default: false
-    }
-});
+}).withPrivateSettings<{
+    disableEmbedPermissionCheck: boolean;
+}>();
 
 export default definePlugin({
     name: "FakeNitro",
@@ -793,7 +790,7 @@ export default definePlugin({
                     body: <div>
                         <Forms.FormText>
                             You are trying to send/edit a message that contains a FakeNitro emoji or sticker
-                            , however you do not have permissions to embed links on the current channel.
+                            , however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
                         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
@@ -802,8 +799,13 @@ export default definePlugin({
                     </div>,
                     confirmText: "Send Anyway",
                     cancelText: "Cancel",
+                    secondaryConfirmText: "Do not show again",
                     onConfirm: () => resolve(true),
-                    onCloseCallback: () => setImmediate(() => resolve(false))
+                    onCloseCallback: () => setImmediate(() => resolve(false)),
+                    onConfirmSecondary() {
+                        settings.store.disableEmbedPermissionCheck = true;
+                        resolve(true);
+                    }
                 });
             });
         }
@@ -845,7 +847,7 @@ export default definePlugin({
                             body: <div>
                                 <Forms.FormText>
                                     You cannot send this message because it contains an animated FakeNitro sticker,
-                                    and you do not have permissions to attach files on the current channel. Please remove the sticker to proceed.
+                                    and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
                                 </Forms.FormText>
                             </div>
                         });
