@@ -69,14 +69,14 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
 function makeRenderMoreUsers(users: User[]) {
     return function renderMoreUsers(_label: string, _count: number) {
         return (
-            <Tooltip text={users.slice(5).map(u => u.username).join(", ")} >
+            <Tooltip text={users.slice(4).map(u => u.username).join(", ")} >
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
                         className={AvatarStyles.moreUsers}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                     >
-                        +{users.length - 5}
+                        +{users.length - 4}
                     </div>
                 )}
             </Tooltip >
