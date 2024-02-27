@@ -889,7 +889,7 @@ export default definePlugin({
                 }
             }
 
-            if (hasBypass && !s.disableEmbedPermissionCheck && !PermissionStore.can(PermissionsBits.EMBED_LINKS, channelId)) {
+            if (hasBypass && !s.disableEmbedPermissionCheck && !PermissionStore.can(PermissionsBits.EMBED_LINKS, ChannelStore.getChannel(channelId))) {
                 if (!await cannotEmbedNotice()) {
                     return { cancel: true };
                 }
