@@ -170,6 +170,11 @@ const settings = definePluginSettings({
             }
         ],
     },
+    showLastFmLogo: {
+        description: "show the Last.fm logo by the album cover",
+        type: OptionType.BOOLEAN,
+        default: true,
+    }
 });
 
 export default definePlugin({
@@ -276,8 +281,10 @@ export default definePlugin({
             {
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
-                small_image: await getApplicationAsset("lastfm-small"),
-                small_text: "Last.fm",
+                ...(settings.store.showLastFmLogo && {
+                    small_image: await getApplicationAsset("lastfm-small"),
+                    small_text: "Last.fm"
+                }),
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
                 large_text: trackData.album || undefined,
