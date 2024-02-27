@@ -137,6 +137,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
         roles: { "0": { permissions: 0n } },
         getRecipientId: () => "0",
         hasFlag: () => false,
+        getEveryoneRoleId: () => "0",
     };
 
     return (
