@@ -165,6 +165,19 @@ const settings = definePluginSettings({
     disableEmbedPermissionCheck: boolean;
 }>();
 
+function hasPermission(channelId: string, permission: bigint) {
+    const channel = ChannelStore.getChannel(channelId);
+
+    if (!channel || channel.isPrivate()) return true;
+
+    return PermissionStore.can(permission, channel);
+}
+
+const hasExternalEmojiPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.USE_EXTERNAL_EMOJIS);
+const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.USE_EXTERNAL_STICKERS);
+const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
+const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
+
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
@@ -696,22 +709,6 @@ export default definePlugin({
         }
     },
 
-    hasPermissionToUseExternalEmojis(channelId: string): boolean {
-        const channel = ChannelStore.getChannel(channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
-
-        return PermissionStore.can(PermissionsBits.USE_EXTERNAL_EMOJIS, channel);
-    },
-
-    hasPermissionToUseExternalStickers(channelId: string) {
-        const channel = ChannelStore.getChannel(channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
-
-        return PermissionStore.can(PermissionsBits.USE_EXTERNAL_STICKERS, channel);
-    },
-
     getStickerLink(stickerId: string) {
         return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
     },
@@ -827,7 +824,7 @@ export default definePlugin({
                 if ("pack_id" in sticker)
                     break stickerBypass;
 
-                const canUseStickers = this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId);
+                const canUseStickers = this.canUseStickers && hasExternalStickerPerms(channelId);
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
@@ -841,7 +838,7 @@ export default definePlugin({
                 }
 
                 if (sticker.format_type === StickerType.APNG) {
-                    if (!PermissionStore.can(PermissionsBits.ATTACH_FILES, channelId)) {
+                    if (!hasAttachmentPerms(channelId)) {
                         Alerts.show({
                             title: "Hold on!",
                             body: <div>
@@ -868,7 +865,7 @@ export default definePlugin({
             }
 
             if (s.enableEmojiBypass) {
-                const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
+                const canUseEmotes = this.canUseEmotes && hasExternalEmojiPerms(channelId);
 
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (!emoji.require_colons) continue;
@@ -889,7 +886,7 @@ export default definePlugin({
                 }
             }
 
-            if (hasBypass && !s.disableEmbedPermissionCheck && !PermissionStore.can(PermissionsBits.EMBED_LINKS, ChannelStore.getChannel(channelId))) {
+            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
                 if (!await cannotEmbedNotice()) {
                     return { cancel: true };
                 }
@@ -905,7 +902,7 @@ export default definePlugin({
 
             let hasBypass = false;
 
-            const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
+            const canUseEmotes = this.canUseEmotes && hasExternalEmojiPerms(channelId);
 
             messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
@@ -923,7 +920,7 @@ export default definePlugin({
                 return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${emoji.name}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
 
-            if (hasBypass && !s.disableEmbedPermissionCheck && !PermissionStore.can(PermissionsBits.EMBED_LINKS, channelId)) {
+            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
                 if (!await cannotEmbedNotice()) {
                     return { cancel: true };
                 }
