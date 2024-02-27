@@ -118,10 +118,10 @@ export async function addReview(review: any): Promise<Response | null> {
 export async function deleteReview(id: number): Promise<Response | null> {
     return await rdbRequest(`/users/${id}/reviews`, {
         method: "DELETE",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-        }),
+        },
         body: JSON.stringify({
             reviewid: id
         })
@@ -135,10 +135,10 @@ export async function deleteReview(id: number): Promise<Response | null> {
 export async function reportReview(id: number) {
     const res = await rdbRequest("/reports", {
         method: "PUT",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-        }),
+        },
         body: JSON.stringify({
             reviewid: id,
         })
@@ -150,10 +150,10 @@ export async function reportReview(id: number) {
 async function patchBlock(action: "block" | "unblock", userId: string) {
     const res = await rdbRequest("/blocks", {
         method: "PATCH",
-        headers: new Headers({
+        headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-        }),
+        },
         body: JSON.stringify({
             action: action,
             discordId: userId
@@ -180,9 +180,9 @@ export const unblockUser = (userId: string) => patchBlock("unblock", userId);
 export async function fetchBlocks(): Promise<ReviewDBUser[]> {
     const res = await rdbRequest("/blocks", {
         method: "GET",
-        headers: new Headers({
+        headers: {
             Accept: "application/json",
-        })
+        }
     });
 
     if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
