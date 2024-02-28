@@ -14,7 +14,7 @@ import { UserStore } from "@webpack/common";
 const settings = definePluginSettings({
     primaryLabel: {
         type: OptionType.SELECT,
-        description: "What should be the primary display? (the text with the role color_)",
+        description: "What should be the primary display? (the text with the role color)",
         options: [
             { label: "Username", value: "user", default: true },
             { label: "Nickname", value: "nick" },
