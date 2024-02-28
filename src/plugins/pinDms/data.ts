@@ -6,11 +6,9 @@
 
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
-import { findStoreLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
 import { DEFAULT_COLOR } from "./constants";
-import { settings } from "./index";
 
 export interface Category {
     id: string;
@@ -27,7 +25,6 @@ export const KEYS = {
     OLD_CATEGORY_KEY: "BetterPinDMsCategories-"
 };
 
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let categories: Category[] = [];
 
@@ -37,19 +34,7 @@ export async function saveCats(cats: Category[]) {
 }
 
 export async function initCategories(userId: string) {
-    const cats = await DataStore.get<Category[]>(KEYS.CATEGORY_BASE_KEY + userId) ?? [];
-
-    // so we dont have to keep checking if the user has the setting enabled
-    categories = cats.map(m => ({
-        ...m,
-        get channels() {
-            return settings.store.sortDmsByNewestMessage ? PrivateChannelSortStore.getPrivateChannelIds().filter(c => m.channels.includes(c)) : m.channels;
-        },
-
-        set channels(value) {
-            m.channels = value;
-        }
-    }));
+    categories = await DataStore.get<Category[]>(KEYS.CATEGORY_BASE_KEY + userId) ?? [];
 }
 
 export function getCategory(id: string) {
