@@ -50,7 +50,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "",
+    name: "ShowMeYourName",
     description: "Allows you to configure what is shown as a users username",
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.Samwich],
     patches: [
