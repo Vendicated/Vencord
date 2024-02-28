@@ -59,6 +59,7 @@ export interface Alerts {
         onCancel?(): void;
         onConfirm?(): void;
         onConfirmSecondary?(): void;
+        onCloseCallback?(): void;
     }): void;
     /** This is a noop, it does nothing. */
     close(): void;

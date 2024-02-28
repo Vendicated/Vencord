@@ -74,7 +74,7 @@ export interface MessageExtra {
 }
 
 export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void>;
+export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
@@ -84,7 +84,7 @@ export async function _handlePreSend(channelId: string, messageObj: MessageObjec
     for (const listener of sendListeners) {
         try {
             const result = await listener(channelId, messageObj, extra);
-            if (result && result.cancel === true) {
+            if (result?.cancel) {
                 return true;
             }
         } catch (e) {
@@ -97,11 +97,15 @@ export async function _handlePreSend(channelId: string, messageObj: MessageObjec
 export async function _handlePreEdit(channelId: string, messageId: string, messageObj: MessageObject) {
     for (const listener of editListeners) {
         try {
-            await listener(channelId, messageId, messageObj);
+            const result = await listener(channelId, messageId, messageObj);
+            if (result?.cancel) {
+                return true;
+            }
         } catch (e) {
             MessageEventsLogger.error("MessageEditHandler: Listener encountered an unknown error\n", e);
         }
     }
+    return false;
 }
 
 /**
