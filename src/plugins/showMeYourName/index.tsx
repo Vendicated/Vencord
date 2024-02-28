@@ -66,7 +66,7 @@ export default definePlugin({
 
     renderUsername: data => {
         try {
-            const messageuser = UserStore.getUser(data.message.author.id);
+            const messageuser = UserStore.getUser(data.message.author.id) as any;
             let primaryLabel;
 
             const extraData: string[] = [];
@@ -75,8 +75,6 @@ export default definePlugin({
             {
                 extraData.push(messageuser.username);
             }
-            // no globalname property for some reason
-            // @ts-ignore
             if(settings.store.nickname && settings.store.primaryLabel !== "nick" && data.author.nick !== messageuser.globalName)
             {
                 extraData.push(data.author.nick);
@@ -89,7 +87,6 @@ export default definePlugin({
 
             if(settings.store.DisplayName && settings.store.primaryLabel !== "display")
             {
-                // @ts-ignore
                 extraData.push(messageuser.globalName);
             }
             // set the primary label to whatever the user set
