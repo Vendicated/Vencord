@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 rini
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -64,56 +64,56 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: (data) => {
+    renderUsername: data => {
         try {
-            let messageuser = UserStore.getUser(data.message.author.id);
+            const messageuser = UserStore.getUser(data.message.author.id);
             let primaryLabel;
-            
-            let extraData: string[] = [];
-            
-            if(settings.store.username && settings.store.primaryLabel != "user")
+
+            const extraData: string[] = [];
+
+            if(settings.store.username && settings.store.primaryLabel !== "user")
             {
                 extraData.push(messageuser.username);
             }
-            //no globalname property for some reason
+            // no globalname property for some reason
             // @ts-ignore
-            if(settings.store.nickname && settings.store.primaryLabel != "nick" && data.author.nick != messageuser.globalName)
+            if(settings.store.nickname && settings.store.primaryLabel !== "nick" && data.author.nick !== messageuser.globalName)
             {
                 extraData.push(data.author.nick);
             }
 
-            if(settings.store.id && settings.store.primaryLabel != "id")
+            if(settings.store.id && settings.store.primaryLabel !== "id")
             {
                 extraData.push(messageuser.id);
             }
 
-            if(settings.store.DisplayName && settings.store.primaryLabel != "display")
+            if(settings.store.DisplayName && settings.store.primaryLabel !== "display")
             {
                 // @ts-ignore
                 extraData.push(messageuser.globalName);
             }
-            //set the primary label to whatever the user set
+            // set the primary label to whatever the user set
             switch(settings.store.primaryLabel)
             {
                 case "user":
                     primaryLabel = messageuser.username;
-                break;
+                    break;
                 case "nick":
                     primaryLabel = data.author.nick;
-                break; 
+                    break;
                 case "id":
                     primaryLabel = messageuser.id;
-                break;
+                    break;
                 case "display":
                     // @ts-ignore
                     primaryLabel = messageuser.globalName;
-                break;
+                    break;
             }
-            //return the text with all the values
+            // return the text with all the values
             return <>{primaryLabel}<span className="vc-smyn-suffix">{extraData.length ? ` (${extraData.join(", ")})` : ""}</span></>;
 
         } catch {
-            return "oops"
+            return "oops";
         }
     },
 });
