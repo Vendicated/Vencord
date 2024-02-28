@@ -369,8 +369,8 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.*?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
-                replace: (_, props, rest, reactNode) => `let{fakeNitroNode}=${props};${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!fakeNitroNode?.fake)`
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
+                replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
         // Allow using custom app icons
@@ -474,7 +474,7 @@ export default definePlugin({
         if (typeof firstContent === "string") {
             content[0] = firstContent.trimStart();
             content[0] || content.shift();
-        } else if (firstContent?.type === "span") {
+        } else if (typeof firstContent?.props.children === "string") {
             firstContent.props.children = firstContent.props.children.trimStart();
             firstContent.props.children || content.shift();
         }
@@ -484,7 +484,7 @@ export default definePlugin({
         if (typeof lastContent === "string") {
             content[lastIndex] = lastContent.trimEnd();
             content[lastIndex] || content.pop();
-        } else if (lastContent?.type === "span") {
+        } else if (typeof firstContent?.props.children === "string") {
             lastContent.props.children = lastContent.props.children.trimEnd();
             lastContent.props.children || content.pop();
         }
