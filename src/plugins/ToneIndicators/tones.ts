@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 
-import { logger,TONES_KEY_STRING } from "./index";
+import { TONES_KEY_STRING } from "./index";
 
 export const Tones = {
     j: "Joking",
@@ -80,5 +80,4 @@ export async function setTones(): Promise<void> {
     }
 
     customTones = newTones;
-    logger.info(`Added Tones: ${JSON.stringify(customTones)} `);
 }

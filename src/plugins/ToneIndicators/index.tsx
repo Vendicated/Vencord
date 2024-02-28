@@ -10,7 +10,6 @@ import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
@@ -230,7 +229,6 @@ interface IndicatorRule {
 
 type Rules = { [key: string]: IndicatorRule; };
 
-export const logger = new Logger("ToneIndicator", "#ee82ff");
 
 function getToneDescription(indicator: string) {
     const combinedTones = { ...Tones, ...customTones };
@@ -242,7 +240,6 @@ const customRules: Rules = {
         order: 25,
         match: e => /\/([^\s]{0,12})/.exec(e),
         parse: (match, nestedParse, context) => {
-            logger.log(`Parsing custom rule ${"toneIndicator"} for the following input:\n\n${match.input}\n`, { match, context, nestedParse });
             const combinedTones = { ...Tones, ...customTones };
             if (Object.keys(combinedTones).some(indicator => indicator === match[1])) {
                 return {
@@ -259,7 +256,6 @@ const customRules: Rules = {
         },
         react: function (props: any) {
             const { content, indicator } = props;
-            logger.log("Requested React component\n", { props });
             return (
                 <Tooltip text={getToneDescription(indicator)}>
                     {({ onMouseEnter, onMouseLeave }) => (
@@ -325,7 +321,6 @@ export default definePlugin({
         return Object.fromEntries(Object.keys(customRules).map(k => [k, { type: "skip" }]));
     },
     patchRules: (rules: Rules) => {
-        logger.log("Patching rules", rules);
         for (const rule in customRules) {
             rules[rule] = customRules[rule];
         }
