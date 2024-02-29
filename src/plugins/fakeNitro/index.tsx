@@ -474,7 +474,7 @@ export default definePlugin({
         if (typeof firstContent === "string") {
             content[0] = firstContent.trimStart();
             content[0] || content.shift();
-        } else if (typeof firstContent?.props.children === "string") {
+        } else if (typeof firstContent?.props?.children === "string") {
             firstContent.props.children = firstContent.props.children.trimStart();
             firstContent.props.children || content.shift();
         }
@@ -484,7 +484,7 @@ export default definePlugin({
         if (typeof lastContent === "string") {
             content[lastIndex] = lastContent.trimEnd();
             content[lastIndex] || content.pop();
-        } else if (typeof firstContent?.props.children === "string") {
+        } else if (typeof lastContent?.props?.children === "string") {
             lastContent.props.children = lastContent.props.children.trimEnd();
             lastContent.props.children || content.pop();
         }
