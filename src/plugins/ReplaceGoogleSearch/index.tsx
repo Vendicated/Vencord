@@ -18,7 +18,7 @@ const Engines = {
     Yandex: "https://yandex.com/search/?text=",
     AOL: "https://search.aol.com/aol/search?q=",
     BaiDu: "https://www.baidu.com/s?wd=",
-    Wikipidia: "https://wikipedia.org/w/index.php?search="
+    Wikipedia: "https://wikipedia.org/w/index.php?search="
 } as const;
 
 function search(src: string, engine: string) {
