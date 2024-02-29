@@ -72,20 +72,6 @@ function makeSearchItem(src: string) {
                     />
                 );
             })}
-            <Menu.MenuItem
-                key="search-content-all"
-                id="search-content-all"
-                label={
-                    <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                        <OpenExternalIcon height={16} width={16} />
-                        All
-                    </Flex>
-                }
-                action={() => Object.values(Engines).forEach(e => {
-                    if (!src) return;
-                    search(src, e);
-                })}
-            />
         </Menu.MenuItem>
     );
 }
