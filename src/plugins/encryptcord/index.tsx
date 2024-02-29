@@ -41,7 +41,7 @@ interface IMessageCreate {
 
 // Generate RSA key pair
 function generateKeyPair(): { privateKey: string; publicKey: string; } {
-    const keys = forge.pki.rsa.generateKeyPair({ bits: 1024 });
+    const keys = forge.pki.rsa.generateKeyPair({ bits: 2048 });
     const privateKey = forge.pki.privateKeyToPem(keys.privateKey);
     const publicKey = forge.pki.publicKeyToPem(keys.publicKey);
 
@@ -52,7 +52,7 @@ function generateKeyPair(): { privateKey: string; publicKey: string; } {
 function encrypt(message: string, publicKey): string[] {
     try {
         const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
-        const chunkSize = 62;
+        const chunkSize = 190;
 
         const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
         message = message.replace(emojiRegex, '');
