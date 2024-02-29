@@ -54,6 +54,9 @@ function encrypt(message: string, publicKey): string[] {
         const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
         const chunkSize = 62;
 
+        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+        message = message.replace(emojiRegex, '');
+
         const encryptedChunks: string[] = [];
 
         for (let i = 0; i < message.length; i += chunkSize) {
@@ -175,16 +178,17 @@ export default definePlugin({
             find: "executeMessageComponentInteraction:",
             replacement: {
                 match: /await\s+l\.default\.post\({\s*url:\s*A\.Endpoints\.INTERACTIONS,\s*body:\s*C,\s*timeout:\s*3e3\s*},\s*t\s*=>\s*{\s*h\(T,\s*p,\s*f,\s*t\)\s*}\s*\)/,
-                replace: 'await $self.joinGroup(C);$&'
+                replace: 'if(await $self.joinGroup(C))return;$&'
             }
         }
     ],
     async joinGroup(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
-        if (!sender || sender.bot == true) return;
+        if (!sender || sender.bot == true) return false;
         if (interaction.data.component_type == 2 && interaction.data.custom_id == "acceptGroup") {
             await sendTempMessage(interaction.application_id, `${await DataStore.get("encryptcordPublicKey")}`, "join");
         }
+        return true;
     },
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
