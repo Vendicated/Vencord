@@ -83,7 +83,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 };
 
 export default definePlugin({
-    name: "ReplaceGoogleSearch",
+    name: "MoreSeachEngines",
     authors: [Devs.Moxxie,Devs.Ethan],
     description: "Allows you to search messages in diffrent search engines!",
 
