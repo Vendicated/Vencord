@@ -6,6 +6,7 @@ import { sleep } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
 import { useEffect, useState } from "@webpack/common";
+import { Devs } from "@utils/constants";
 import {
     RestAPI,
     SnowflakeUtils,
@@ -167,12 +168,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
 export default definePlugin({
     name: "Encryptcord",
     description: "End-to-end encryption in Discord!",
-    authors: [
-        {
-            id: 761777382041714690n,
-            name: "Inbestigator",
-        },
-    ],
+    authors: [Devs.Inbestigator],
     dependencies: ["CommandsAPI"],
     patches: [
         {
