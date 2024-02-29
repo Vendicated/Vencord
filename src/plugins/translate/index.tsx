@@ -20,13 +20,14 @@ import "./styles.css";
 
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, Menu, UserStore } from "@webpack/common";
-import { Util } from "Vencord";
+import { ChannelStore, Menu, MessageStore, UserStore } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -100,14 +101,38 @@ export default definePlugin({
 
     flux: {
         MESSAGE_CREATE: async event => {
-            if (!settings.store.autoTranslateReceived) return;
-            if (event.channelId !== Util.getCurrentChannel().id) return;
-            if (event.message.author.id === UserStore.getCurrentUser().id) return;
+            try {
+                const currentChannel = Vencord.Util.getCurrentChannel().id;
 
-            console.log(event.message);
+                const autoTranslate = (await DataStore.get("autoTranslateReceived"))[currentChannel];
+                if (!autoTranslate) return;
 
-            const trans = await translate("received", event.message.content);
-            handleTranslate(event.message.id, trans);
+                if (event.channelId !== currentChannel) return;
+                if (event.message.author.id === UserStore.getCurrentUser().id) return;
+
+                const trans = await translate("received", event.message.content);
+                handleTranslate(event.message.id, trans);
+            } catch (e) { }
+        },
+        CHANNEL_SELECT: async () => {
+            try {
+                const currentChannel = Vencord.Util.getCurrentChannel().id;
+
+                const autoTranslate = (await DataStore.get("autoTranslateReceived"))[currentChannel];
+                if (!autoTranslate) return;
+
+                const { amountToAutoTranslate } = settings.store;
+
+                const messages: Message[] = await MessageStore.getMessages(currentChannel)._array.reverse();
+
+                for (let i = 0; i < amountToAutoTranslate; i++) {
+                    const message = messages[i];
+                    if (!message) return;
+
+                    const trans = await translate("received", message.content);
+                    handleTranslate(message.id, trans);
+                }
+            } catch (e) { }
         }
     }
 });

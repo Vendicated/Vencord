@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSlider } from "@utils/types";
 import { Forms, React, Slider } from "@webpack/common";
 
@@ -50,7 +51,7 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>{option.description}</Forms.FormTitle>
+            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Slider
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 markers={option.markers}
@@ -62,6 +63,7 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
                 stickToMarkers={option.stickToMarkers ?? true}
                 {...option.componentProps}
             />
+            <Forms.FormText style={{ color: "var(--text-muted)" }}>{option.description}</Forms.FormText>
         </Forms.FormSection>
     );
 }
