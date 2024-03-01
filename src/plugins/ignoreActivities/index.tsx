@@ -5,12 +5,14 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { Margins } from "@utils/margins";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { StatusSettingsStores, Tooltip } from "webpack/common";
+import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -69,7 +71,113 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     StatusSettingsStores.ShowCurrentGame.updateSetting(old => old);
 }
 
-const settings = definePluginSettings({}).withPrivateSettings<{
+function ImportCustomRPCComponent() {
+    return (
+        <Flex flexDirection="column">
+            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Import the application id of the CustomRPC plugin to the allowed list</Forms.FormText>
+            <div>
+                <Button
+                    onClick={() => {
+                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        if (!id) {
+                            return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
+                        }
+
+                        const isAlreadyAdded = allowedIdsPushID?.(id);
+                        if (isAlreadyAdded) {
+                            showToast("CustomRPC application ID is already added.", Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    Import CustomRPC ID
+                </Button>
+            </div>
+        </Flex>
+    );
+}
+
+let allowedIdsPushID: ((id: string) => boolean) | null = null;
+
+function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
+    const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
+
+    allowedIdsPushID = (id: string) => {
+        const currentIds = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
+
+        const isAlreadyAdded = currentIds.has(id) || (currentIds.add(id), false);
+
+        const ids = Array.from(currentIds).join(", ");
+        setAllowedIds(ids);
+        props.setValue(ids);
+
+        return isAlreadyAdded;
+    };
+
+    useEffect(() => () => {
+        allowedIdsPushID = null;
+    }, []);
+
+    function handleChange(newValue: string) {
+        setAllowedIds(newValue);
+        props.setValue(newValue);
+    }
+
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">Allowed List</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CustomRPC)</Forms.FormText>
+            <TextInput
+                type="text"
+                value={allowedIds}
+                onChange={handleChange}
+                placeholder="235834946571337729, 343383572805058560"
+            />
+        </Forms.FormSection>
+    );
+}
+
+const settings = definePluginSettings({
+    importCustomRPC: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component: () => <ImportCustomRPCComponent />
+    },
+    allowedIds: {
+        type: OptionType.COMPONENT,
+        description: "",
+        default: "",
+        onChange(newValue: string) {
+            const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
+            settings.store.allowedIds = Array.from(ids).join(", ");
+        },
+        component: props => <AllowedIdsComponent setValue={props.setValue} />
+    },
+    ignorePlaying: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore all playing activities (These are usually game and RPC activities)",
+        default: false
+    },
+    ignoreStreaming: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore all streaming activities",
+        default: false
+    },
+    ignoreListening: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore all listening activities (These are usually spotify activities)",
+        default: false
+    },
+    ignoreWatching: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore all watching activities",
+        default: false
+    },
+    ignoreCompeting: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore all competing activities (These are normally special game activities)",
+        default: false
+    }
+}).withPrivateSettings<{
     ignoredActivities: IgnoredActivity[];
 }>();
 
@@ -77,10 +185,26 @@ function getIgnoredActivities() {
     return settings.store.ignoredActivities ??= [];
 }
 
+function isActivityTypeIgnored(type: number, id?: string) {
+    if (id && settings.store.allowedIds.includes(id)) {
+        return false;
+    }
+
+    switch (type) {
+        case 0: return settings.store.ignorePlaying;
+        case 1: return settings.store.ignoreStreaming;
+        case 2: return settings.store.ignoreListening;
+        case 3: return settings.store.ignoreWatching;
+        case 5: return settings.store.ignoreCompeting;
+    }
+
+    return false;
+}
+
 export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
-    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are ignored from the Registered Games and Activities tabs.",
+    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
 
     settings,
 
@@ -141,13 +265,17 @@ export default definePlugin({
     },
 
     isActivityNotIgnored(props: { type: number; application_id?: string; name?: string; }) {
-        if (props.type === 0 || props.type === 3) {
-            if (props.application_id != null) return !getIgnoredActivities().some(activity => activity.id === props.application_id);
-            else {
-                const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
-                if (exePath) return !getIgnoredActivities().some(activity => activity.id === exePath);
+        if (isActivityTypeIgnored(props.type, props.application_id)) return false;
+
+        if (props.application_id != null) {
+            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || settings.store.allowedIds.includes(props.application_id);
+        } else {
+            const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
+            if (exePath) {
+                return !getIgnoredActivities().some(activity => activity.id === exePath);
             }
         }
+
         return true;
     },
 
