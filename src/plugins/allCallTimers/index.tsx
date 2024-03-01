@@ -16,7 +16,7 @@ import { Timer } from "./Timer";
 export const settings = definePluginSettings({
     showWithoutHover: {
         type: OptionType.BOOLEAN,
-        description: "Always show the timer without needing to hover (not as pretty)!",
+        description: "Always show the timer without needing to hover",
         restartNeeded: false,
         default: true
     },
