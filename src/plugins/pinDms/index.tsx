@@ -74,7 +74,7 @@ export default definePlugin({
             replacement: [
                 // Init
                 {
-                    match: /componentDidMount\(\){/,
+                    match: /totalRowCount.{1,100}componentDidMount\(\){/,
                     replace: "$&$self._instance = this;"
                 },
                 {
@@ -99,13 +99,13 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=span",{)className:\i\.headerText,/,
-                    replace: "onClick: (e) => $self.collapseDMList(e),$&"
+                    replace: "...$self.makeSpanProps(),$&"
                 },
 
                 // Fix Row Height
                 {
-                    match: /(this\.getRowHeight=.{1,100}return 1===)(\i)/,
-                    replace: "$1($2-$self.categoryLen())"
+                    match: /(?<=this\.getRowHeight=.{1,100}return 1===)\i/,
+                    replace: "($&-$self.categoryLen())"
                 },
                 {
                     match: /this.getRowHeight=\((\i),(\i)\)=>{/,
@@ -132,8 +132,8 @@ export default definePlugin({
         {
             find: ".FRIENDS},\"friends\"",
             replacement: {
-                match: /(\i=\i=>{)(.{1,850})showDMHeader:/,
-                replace: "$1let forceUpdate = Vencord.Util.useForceUpdater();$2_forceUpdate:forceUpdate,showDMHeader:"
+                match: /(?<=\i=\i=>{).{1,100}premiumTabSelected.{1,800}showDMHeader:.+?,/,
+                replace: "let forceUpdate = Vencord.Util.useForceUpdater();$&_forceUpdate:forceUpdate,"
             }
         },
 
@@ -181,7 +181,7 @@ export default definePlugin({
     makeProps(instance, { sections }: { sections: number[]; }) {
         this.sections = sections;
 
-        this.sections.splice(1, 0, ...this.usePinCount(instance.props.privateChannelIds || []));
+        this.sections.splice(1, 0, ...this.getPinCount(instance.props.privateChannelIds || []));
 
         if (this.instance?.props?.privateChannelIds?.length === 0) {
             this.sections[this.sections.length - 1] = 0;
@@ -190,6 +190,14 @@ export default definePlugin({
         return {
             sections: this.sections,
             chunkSize: this.getChunkSize(),
+        };
+    },
+
+    makeSpanProps() {
+        return {
+            onClick: () => this.collapseDMList(),
+            role: "button",
+            style: { cursor: "pointer" }
         };
     },
 
@@ -205,7 +213,7 @@ export default definePlugin({
         return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
-    usePinCount(channelIds: string[]) {
+    getPinCount(channelIds: string[]) {
         return channelIds.length ? this.getSections() : [];
     },
 
