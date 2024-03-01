@@ -162,7 +162,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
     }
@@ -864,7 +864,9 @@ export default definePlugin({
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }
