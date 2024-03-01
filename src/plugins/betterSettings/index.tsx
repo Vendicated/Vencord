@@ -18,6 +18,17 @@ const cl = classNameFactory("");
 const Classes = findByPropsLazy("animating", "baseLayer", "bg", "layer", "layers");
 
 const settings = definePluginSettings({
+    disableFade: {
+        description: "Disable the crossfade animation",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true,
+    },
+    organizeMenu: {
+        description: "Organizes the settings cog context menu",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
     eagerLoad: {
         description: "Eagerly load menu contents",
         type: OptionType.BOOLEAN,
@@ -39,6 +50,7 @@ export default definePlugin({
                 { // Fade in on layer
                     match: /(?<=(\w+)\.contextType=\w+\.AccessibilityPreferencesContext;)/,
                     replace: "$1=$self.Layer;",
+                    predicate: () => settings.store.disableFade,
                 },
                 { // Lazy-load contents
                     match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"\w+"/g,
@@ -52,7 +64,8 @@ export default definePlugin({
             replacement: {
                 match: /(?<=Fragment,\{children:)\w+\(\((\w+),\w+\)=>(\(0,\w+\.jsxs\))\(\w+\.animated\.div,\{style:\1,/,
                 replace: "($2(\"div\",{"
-            }
+            },
+            predicate: () => settings.store.disableFade,
         },
         { // load menu stuff on hover, not on click
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
@@ -97,6 +110,8 @@ export default definePlugin({
     },
 
     wrapMenu(list: SettingsEntry[]) {
+        if(!settings.store.organizeMenu) return list;
+
         const items = [{ label: null as string|null, items: [] as SettingsEntry[] }];
         for(const item of list) {
             if(item.section === "HEADER") {
