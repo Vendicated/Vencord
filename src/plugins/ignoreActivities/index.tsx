@@ -125,7 +125,7 @@ function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h3">Allowed List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CUSTOM RPC)</Forms.FormText>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CustomRPC)</Forms.FormText>
             <TextInput
                 type="text"
                 value={allowedIds}
