@@ -61,7 +61,7 @@ export default definePlugin({
         {
             find: "customStatusSection,",
             replacement: {
-                match: /\(0,\i\.jsx\)\((\i\.\i),{activity:\i,user:\i,guild:\i,channelId:\i,onClose:\i}\)/,
+                match: /\(0,\i\.jsx\)\((\i\.\i),{activity:\i,user:\i,guild:\i,channelId:\i,onClose:\i,/,
                 replace: (m, component) => m.replace(component, "$self.ShowAllActivitiesComponent")
             },
             predicate: () => settings.store.showAllActivities
