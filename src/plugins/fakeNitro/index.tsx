@@ -791,8 +791,8 @@ export default definePlugin({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker
-                            , however you do not have permissions to embed links in the current channel.
+                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                            however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
                         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
