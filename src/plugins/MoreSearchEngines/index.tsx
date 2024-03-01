@@ -63,16 +63,14 @@ function makeSearchItem(src: string) {
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    const group = findGroupChildrenByChildId("copy-link", children);
     const message = props.message.content;
-
-    if (message) {
-        group?.push(makeSearchItem(message));
-    }
+    if (!message) return;
+    const group = findGroupChildrenByChildId("copy-link", children);
+    group?.push(makeSearchItem(message));
 };
 
 export default definePlugin({
-    name: "MoreSeachEngines",
+    name: "MoreSearchEngines",
     authors: [Devs.Moxxie, Devs.Ethan],
     description: "Allows you to search messages in diffrent search engines!",
 
