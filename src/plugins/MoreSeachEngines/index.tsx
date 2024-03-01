@@ -22,19 +22,6 @@ const Engines = {
 } as const;
 
 function search(src: string, engine: string) {
-    if (!src) {
-        Toasts.show({
-            message: "This message has no content. Did not search.",
-            type: Toasts.Type.FAILURE,
-            id: Toasts.genId(),
-            options: {
-                duration: 3000
-            }
-        });
-
-        return;
-    }
-
     open(engine + encodeURIComponent(src), "_blank");
 }
 
@@ -79,21 +66,21 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const group = findGroupChildrenByChildId("copy-link", children);
     const message = props.message.content;
 
-    group?.push(makeSearchItem(message));
+    if (message) {
+        group?.push(makeSearchItem(message));
+    }
 };
 
 export default definePlugin({
     name: "MoreSeachEngines",
-    authors: [Devs.Moxxie,Devs.Ethan],
+    authors: [Devs.Moxxie, Devs.Ethan],
     description: "Allows you to search messages in diffrent search engines!",
 
     start() {
         addContextMenuPatch("message", messageContextMenuPatch);
-        addContextMenuPatch("channel-context", messageContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("message", messageContextMenuPatch);
-        removeContextMenuPatch("channel-context", messageContextMenuPatch);
     }
 });
