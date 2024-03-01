@@ -114,17 +114,11 @@ function makeSearchItem(src: string) {
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    let message = props.message.content;
     const selection = document.getSelection()?.toString();
+    if (!selection) return;
 
-    if (!message) return;
     const group = findGroupChildrenByChildId("search-google", children);
-
-    if (selection) {
-        message = selection;
-    }
-
-    group?.push(makeSearchItem(message));
+    group?.push(makeSearchItem(selection));
 };
 
 export default definePlugin({
