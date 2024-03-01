@@ -9,7 +9,7 @@ import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ComponentDispatch, FocusLock, i18n, Menu, SettingsRouter, useEffect, useRef } from "@webpack/common";
+import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
 type SettingsEntry = { section: string, label: string };
@@ -135,12 +135,6 @@ export default definePlugin({
                     .filter(a => a.items.length > 0)
                     .map(({ label, items }) => {
                         const children = items.map(render);
-                        children.forEach(c => {
-                            const id = c?.props?.id;
-                            if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
-                                c.props.action = () => SettingsRouter.open(id);
-                            }
-                        });
                         if(label) {
                             return <Menu.MenuItem
                                 id={label.replace(/\W/, "_")}
