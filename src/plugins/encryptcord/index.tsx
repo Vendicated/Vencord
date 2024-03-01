@@ -5,7 +5,7 @@ import * as DataStore from "@api/DataStore";
 import { sleep } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { useEffect, useState } from "@webpack/common";
+import { useEffect, useState, FluxDispatcher } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import {
     RestAPI,
@@ -23,7 +23,6 @@ import {
 import { Message } from "discord-types/general";
 const MessageCreator = findByPropsLazy("createBotMessage");
 const CloudUtils = findByPropsLazy("CloudUpload");
-import axios from 'axios';
 import { getCurrentChannel } from "@utils/discord";
 import forge from 'node-forge';
 
@@ -130,17 +129,18 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
             onClick={async () => {
                 const groupChannel = await DataStore.get('encryptcordChannelId');
                 if (await DataStore.get('encryptcordGroup') == false) {
-                    sendBotMessage(getCurrentChannel().id, { content: `You must be in an E2EE group to send an encrypted message!` });
-                    return;
-                }
-                if (getCurrentChannel().id !== groupChannel) {
-                    sendBotMessage(getCurrentChannel().id, { content: `You must be in the E2EE group channel to send an encrypted message!` });
+                    await startGroup("", { channel: { id: getCurrentChannel().id } });
+                } else if (getCurrentChannel().id !== groupChannel) {
+                    sendBotMessage(getCurrentChannel().id, { content: `You must be in <#${groupChannel}> to send an encrypted message!`, author: { username: "false" } });
                     return;
                 }
                 setEnabled(!enabled);
             }}
             buttonProps={{
-                "aria-haspopup": "dialog",
+                style: {
+                    transition: 'transform 0.3s ease-in-out',
+                    transform: `rotate(${enabled ? 0 : 15}deg)`,
+                }
             }}
         >
             <svg
@@ -178,17 +178,21 @@ export default definePlugin({
             find: "executeMessageComponentInteraction:",
             replacement: {
                 match: /await\s+l\.default\.post\({\s*url:\s*A\.Endpoints\.INTERACTIONS,\s*body:\s*C,\s*timeout:\s*3e3\s*},\s*t\s*=>\s*{\s*h\(T,\s*p,\s*f,\s*t\)\s*}\s*\)/,
-                replace: 'if(await $self.joinGroup(C))return;$&'
+                replace: 'await $self.joinGroup(C);$&'
             }
         }
     ],
     async joinGroup(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
-        if (!sender || sender.bot == true) return false;
-        if (interaction.data.component_type == 2 && interaction.data.custom_id == "acceptGroup") {
-            await sendTempMessage(interaction.application_id, `${await DataStore.get("encryptcordPublicKey")}`, "join");
-        }
-        return true;
+        if (!sender || sender.bot == true) return;
+        if (interaction.data.component_type != 2 || interaction.data.custom_id != "acceptGroup") return;
+        await sendTempMessage(interaction.application_id, `${await DataStore.get("encryptcordPublicKey")}`, "join");
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_DELETE",
+            channelId: interaction.channel_id,
+            id: interaction.message_id,
+            mlDeleted: true
+        });
     },
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
@@ -215,7 +219,8 @@ export default definePlugin({
                             });
                             break;
                         case "groupdata":
-                            const groupdata = (await axios.get(message.attachments[0].url)).data;
+                            const response = await fetch(message.attachments[0].url);
+                            const groupdata = await response.json();
                             await handleGroupData(groupdata);
                             break;
                         default:
@@ -226,7 +231,9 @@ export default definePlugin({
                 if (message.content.toLowerCase() !== "join") return;
                 const sender = await UserUtils.getUser(message.author.id).catch(() => null);
                 if (!sender) return;
-                const userKey = (await axios.get(message.attachments[0].url)).data;
+                const response = await fetch(message.attachments[0].url);
+                console.log(response);
+                const userKey = await response.text();
                 await handleJoin(sender.id, userKey, encryptcordGroupMembers);
                 return;
             }
@@ -245,11 +252,13 @@ export default definePlugin({
                     handleLeaving(sender.id, encryptcordGroupMembers, groupChannel);
                     break;
                 case "message":
-                    const messagedata = (await axios.get(message.attachments[0].url)).data;
+                    const msgResponse = await fetch(message.attachments[0].url);
+                    const messagedata = await msgResponse.json();
                     await handleMessage(messagedata, sender.id, groupChannel);
                     break;
                 case "groupdata":
-                    const groupdata = (await axios.get(message.attachments[0].url)).data;
+                    const response = await fetch(message.attachments[0].url);
+                    const groupdata = await response.json();
                     await handleGroupData(groupdata);
                     break;
                 default:
@@ -304,7 +313,6 @@ export default definePlugin({
             },
         },
     ],
-    startAt: StartAt.DOMContentLoaded,
     async start() {
         addChatBarButton("Encryptcord", ChatBarIcon);
         const pair = generateKeyPair();
