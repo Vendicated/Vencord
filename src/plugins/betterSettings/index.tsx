@@ -123,15 +123,14 @@ export default definePlugin({
             }
         }
         return {
-            items,
             filter(predicate: (item: SettingsEntry) => boolean) {
-                for(const category of this.items) {
+                for(const category of items) {
                     category.items = category.items.filter(predicate);
                 }
                 return this;
             },
             map(render: (item: SettingsEntry) => ReactElement) {
-                return this.items
+                return items
                     .filter(a => a.items.length > 0)
                     .map(({ label, items }) => {
                         const children = items.map(render);
