@@ -368,6 +368,8 @@ export default definePlugin({
             if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
             if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
 
+            if (tag.name !== "OWNER" && GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id) continue;
+
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message!, user, channel))
