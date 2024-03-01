@@ -49,7 +49,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
+                                    src={new URL("/favicon.ico", Engines[engine]).toString()}
                                 />
                                 {engine}
                             </Flex>
