@@ -1,79 +1,66 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import "./style.css";
+import { getCurrentChannel } from "@utils/discord";
+import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
 
-import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { FluxStore } from "@webpack/types";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat } from ".";
+import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 
-import { MemberCount } from "./MemberCount";
+export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
+    const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
 
-export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
-export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
-};
+    const guildId = isTooltip ? tooltipGuildId! : currentChannel.guild_id;
 
-const settings = definePluginSettings({
-    views: {
-        type: OptionType.SELECT,
-        description: "Where the member count should be displayed.",
-        options: [
-            { label: "Member List", value: 1, default: true },
-            { label: "Guild Tooltip", value: 2 },
-            { label: "Both", value: 3 }
-        ],
-        restartNeeded: true
+    const totalCount = useStateFromStores(
+        [GuildMemberCountStore],
+        () => GuildMemberCountStore.getMemberCount(guildId)
+    );
+
+    let onlineCount = useStateFromStores(
+        [OnlineMemberCountStore],
+        () => OnlineMemberCountStore.getCount(guildId)
+    );
+
+    const { groups } = useStateFromStores(
+        [ChannelMemberStore],
+        () => ChannelMemberStore.getProps(guildId, currentChannel.id)
+    );
+
+    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
+        onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
     }
-});
 
-const sharedIntlNumberFormat = new Intl.NumberFormat();
-export const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
-export const cl = classNameFactory("vc-membercount-");
+    useEffect(() => {
+        OnlineMemberCountStore.ensureCount(guildId);
+    }, [guildId]);
 
-export default definePlugin({
-    name: "MemberCount",
-    description: "Shows the amount of online & total members in the server member list and tooltip",
-    authors: [Devs.Ven, Devs.Commandtechno],
-    settings,
+    if (totalCount == null)
+        return null;
 
-    patches: [
-        {
-            find: "{isSidebarVisible:",
-            replacement: {
-                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            },
-            predicate: () => settings.store.views === 3 || settings.store.views === 1
-        },
-        {
-            find: ".invitesDisabledTooltip",
-            replacement: {
-                match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
-                replace: ",$self.renderTooltip(arguments[0].guild)]"
-            },
-            predicate: () => settings.store.views === 3 || settings.store.views === 2
-        }
-    ],
-    render: ErrorBoundary.wrap(MemberCount, { noop: true }),
-    renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
-});
+    const formattedOnlineCount = onlineCount != null ? numberFormat(onlineCount) : "?";
+
+    return (
+        <div className={cl("widget", { tooltip: isTooltip, "member-list": !isTooltip })}>
+            <Tooltip text={`${formattedOnlineCount} online in this channel`} position="bottom">
+                {props => (
+                    <div {...props}>
+                        <span className={cl("online-dot")} />
+                        <span className={cl("online")}>{formattedOnlineCount}</span>
+                    </div>
+                )}
+            </Tooltip>
+            <Tooltip text={`${numberFormat(totalCount)} total server members`} position="bottom">
+                {props => (
+                    <div {...props}>
+                        <span className={cl("total-dot")} />
+                        <span className={cl("total")}>{numberFormat(totalCount)}</span>
+                    </div>
+                )}
+            </Tooltip>
+        </div>
+    );
+}
