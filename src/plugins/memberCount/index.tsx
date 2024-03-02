@@ -34,10 +34,14 @@ export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxSto
 };
 
 const settings = definePluginSettings({
-    tooltip: {
-        type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the guild tooltip.",
-        default: false,
+    views: {
+        type: OptionType.SELECT,
+        description: "Where the member count should be displayed.",
+        options: [
+            { label: "Member List", value: 1, default: true },
+            { label: "Guild Tooltip", value: 2 },
+            { label: "Both", value: 3 }
+        ],
         restartNeeded: true
     }
 });
@@ -50,6 +54,7 @@ export default definePlugin({
     name: "MemberCount",
     description: "Shows the amount of online & total members in the server member list and tooltip",
     authors: [Devs.Ven, Devs.Commandtechno],
+    settings,
 
     patches: [
         {
@@ -57,7 +62,8 @@ export default definePlugin({
             replacement: {
                 match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            }
+            },
+            predicate: () => settings.store.views === 3 || settings.store.views === 1
         },
         {
             find: ".invitesDisabledTooltip",
@@ -65,10 +71,9 @@ export default definePlugin({
                 match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
                 replace: ",$self.renderTooltip(arguments[0].guild)]"
             },
-            predicate: () => settings.store.tooltip
+            predicate: () => settings.store.views === 3 || settings.store.views === 2
         }
     ],
-    settings,
     render: ErrorBoundary.wrap(MemberCount, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
