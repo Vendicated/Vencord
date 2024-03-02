@@ -18,11 +18,10 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { FluxStore } from "@webpack/types";
 
@@ -33,19 +32,6 @@ export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxSto
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
-const settings = definePluginSettings({
-    views: {
-        type: OptionType.SELECT,
-        description: "Where the member count should be displayed.",
-        options: [
-            { label: "Member List", value: 1, default: true },
-            { label: "Guild Tooltip", value: 2 },
-            { label: "Both", value: 3 }
-        ],
-        restartNeeded: true
-    }
-});
-
 const sharedIntlNumberFormat = new Intl.NumberFormat();
 export const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
 export const cl = classNameFactory("vc-membercount-");
@@ -54,7 +40,6 @@ export default definePlugin({
     name: "MemberCount",
     description: "Shows the amount of online & total members in the server member list and tooltip",
     authors: [Devs.Ven, Devs.Commandtechno],
-    settings,
 
     patches: [
         {
@@ -62,18 +47,17 @@ export default definePlugin({
             replacement: {
                 match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            },
-            predicate: () => settings.store.views === 3 || settings.store.views === 1
+            }
         },
         {
             find: ".invitesDisabledTooltip",
             replacement: {
                 match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
                 replace: ",$self.renderTooltip(arguments[0].guild)]"
-            },
-            predicate: () => settings.store.views === 3 || settings.store.views === 2
+            }
         }
     ],
+
     render: ErrorBoundary.wrap(MemberCount, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
