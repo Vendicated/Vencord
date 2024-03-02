@@ -1,13 +1,12 @@
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
 import { removeButton } from "@api/MessagePopover";
-import { addDecoration } from "@api/MessageDecorations";
 import definePlugin from "@utils/types";
 import * as DataStore from "@api/DataStore";
 import { sleep } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
 import { useEffect, useState, FluxDispatcher } from "@webpack/common";
-import { generateKeys, encryptData, decryptData } from "./rsa-utils";
+import { generateKeys, encryptData, decryptData, formatPemKey } from "./rsa-utils";
 import { Devs } from "@utils/constants";
 import {
     RestAPI,
@@ -276,6 +275,12 @@ export default definePlugin({
                     ],
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                 },
+                {
+                    name: "data",
+                    description: "View your keys and current group members",
+                    options: [],
+                    type: ApplicationCommandOptionType.SUB_COMMAND,
+                },
             ],
             inputType: ApplicationCommandInputType.BOT,
             execute: (opts, ctx) => {
@@ -288,6 +293,9 @@ export default definePlugin({
                         break;
                     case "leave":
                         leave(opts[0].options, ctx);
+                        break;
+                    case "data":
+                        data(opts[0].options, ctx);
                         break;
                 }
             },
@@ -519,3 +527,17 @@ async function leave(opts, ctx) {
     await MessageActions.receiveMessage(channelId, await createMessage("", user.id, channelId, 2));
     setEnabled(false);
 }
+
+// View user data
+async function data(opts, ctx) {
+    const channelId = ctx.channel.id;
+    const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
+    const encryptcordPublicKey = await DataStore.get('encryptcordPublicKey');
+    const encryptcordPrivateKey = await DataStore.get('encryptcordPrivateKey');
+    const exportedPrivateKey = await crypto.subtle.exportKey("pkcs8", encryptcordPrivateKey);
+    const groupMembers = Object.keys(encryptcordGroupMembers);
+    sendBotMessage(channelId, {
+        content: `## Public key:\n\`\`\`${encryptcordPublicKey}\`\`\`\n## Private key:\n||\`\`\`${formatPemKey(exportedPrivateKey, "private")}\`\`\`||\n## Group members:\n\`\`\`json\n${JSON.stringify(groupMembers)}\`\`\``
+    });
+}
+

@@ -11,7 +11,7 @@ export const generateKeys = async () => {
     );
 
     const exportedPublicKey = await crypto.subtle.exportKey("spki", keyPair.publicKey);
-    const publicKey = formatPemKey(exportedPublicKey);
+    const publicKey = formatPemKey(exportedPublicKey, "public");
 
     return { privateKey: keyPair.privateKey, publicKey };
 };
@@ -78,9 +78,9 @@ const base64ToArrayBuffer = (base64String) => {
     return buffer;
 };
 
-const formatPemKey = (keyData) => {
+export const formatPemKey = (keyData, type) => {
     const base64Key = arrayBufferToBase64(keyData);
-    return `-----BEGIN PUBLIC KEY-----\n` + base64Key + `\n----- END PUBLIC KEY----- `;
+    return `-----BEGIN ${type.toUpperCase()} KEY-----\n` + base64Key + `\n----- END ${type.toUpperCase()} KEY----- `;
 };
 
 const importPemPublicKey = async (pemKey) => {
