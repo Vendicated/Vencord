@@ -26,7 +26,6 @@ import { Message } from "discord-types/general";
 const MessageCreator = findByPropsLazy("createBotMessage");
 const CloudUtils = findByPropsLazy("CloudUpload");
 import { getCurrentChannel } from "@utils/discord";
-import forge from 'node-forge';
 
 let enabled;
 let setEnabled;
@@ -83,7 +82,17 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 if (await DataStore.get('encryptcordGroup') == false) {
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
                 } else if (getCurrentChannel().id !== groupChannel) {
-                    sendBotMessage(getCurrentChannel().id, { content: `You must be in <#${groupChannel}> to send an encrypted message!`, author: { username: "false" } });
+                    sendBotMessage(getCurrentChannel().id, {
+                        content: `You are already in an encrypted group in <#${groupChannel}>.\n> Would you like to create a new one?`, components: [{
+                            type: 1,
+                            components: [{
+                                type: 2,
+                                style: 3,
+                                label: 'Yes',
+                                custom_id: 'createGroup'
+                            }]
+                        }]
+                    });
                     return;
                 }
                 setEnabled(!enabled);
@@ -136,7 +145,7 @@ export default definePlugin({
     ],
     async joinGroup(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
-        if (!sender || sender.bot == true) return;
+        if (!sender || (sender.bot == true && sender.id != "1")) return;
         if (interaction.data.component_type != 2) return;
         switch (interaction.data.custom_id) {
             case "acceptGroup":
@@ -157,6 +166,10 @@ export default definePlugin({
                     id: interaction.message_id,
                     mlDeleted: true
                 });
+                break;
+            case "createGroup":
+                await leave("", { channel: { id: interaction.channel_id } });
+                await startGroup("", { channel: { id: interaction.channel_id } });
                 break;
             default:
                 return;
