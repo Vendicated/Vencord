@@ -1,11 +1,13 @@
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
 import { removeButton } from "@api/MessagePopover";
-import definePlugin, { StartAt } from "@utils/types";
+import { addDecoration } from "@api/MessageDecorations";
+import definePlugin from "@utils/types";
 import * as DataStore from "@api/DataStore";
 import { sleep } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
 import { useEffect, useState, FluxDispatcher } from "@webpack/common";
+import { generateKeys, encryptData, decryptData } from "./rsa-utils";
 import { Devs } from "@utils/constants";
 import {
     RestAPI,
@@ -38,56 +40,6 @@ interface IMessageCreate {
     message: Message;
 }
 
-// Generate RSA key pair
-function generateKeyPair(): { privateKey: string; publicKey: string; } {
-    const keys = forge.pki.rsa.generateKeyPair({ bits: 2048 });
-    const privateKey = forge.pki.privateKeyToPem(keys.privateKey);
-    const publicKey = forge.pki.publicKeyToPem(keys.publicKey);
-
-    return { privateKey, publicKey };
-}
-
-// Encrypt message with public key
-function encrypt(message: string, publicKey): string[] {
-    try {
-        const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
-        const chunkSize = 190;
-
-        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
-        message = message.replace(emojiRegex, '');
-
-        const encryptedChunks: string[] = [];
-
-        for (let i = 0; i < message.length; i += chunkSize) {
-            const chunk = message.substring(i, i + chunkSize);
-            const encryptedChunk = publicKeyObj.encrypt(chunk, 'RSA-OAEP', {
-                md: forge.md.sha256.create(),
-            });
-            encryptedChunks.push(forge.util.encode64(encryptedChunk));
-        }
-
-        return encryptedChunks;
-    } catch (error) {
-        return [];
-    }
-}
-
-// Decrypt message with private key
-function decrypt(encryptedMessages: string[], privateKey): string {
-    const privateKeyObj = forge.pki.privateKeyFromPem(privateKey);
-    let decryptedMessages: string[] = [];
-
-    encryptedMessages.forEach((encryptedMessage) => {
-        const encrypted = forge.util.decode64(encryptedMessage);
-        const decrypted = privateKeyObj.decrypt(encrypted, 'RSA-OAEP', {
-            md: forge.md.sha256.create(),
-        });
-        decryptedMessages.push(decrypted);
-    });
-
-    return decryptedMessages.join('');
-}
-
 // Chat Bar Icon Component
 const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     [enabled, setEnabled] = useState(false);
@@ -107,7 +59,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 const dmPromises = Object.keys(encryptcordGroupMembers).map(async (memberId) => {
                     const groupMember = await UserUtils.getUser(memberId).catch(() => null);
                     if (!groupMember) return;
-                    const encryptedMessage = encrypt(trimmedMessage, encryptcordGroupMembers[memberId]);
+                    const encryptedMessage = await encryptData(encryptcordGroupMembers[memberId], trimmedMessage);
                     const encryptedMessageString = JSON.stringify(encryptedMessage);
                     await sendTempMessage(groupMember.id, encryptedMessageString, `message`);
                 });
@@ -185,14 +137,29 @@ export default definePlugin({
     async joinGroup(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
         if (!sender || sender.bot == true) return;
-        if (interaction.data.component_type != 2 || interaction.data.custom_id != "acceptGroup") return;
-        await sendTempMessage(interaction.application_id, `${await DataStore.get("encryptcordPublicKey")}`, "join");
-        FluxDispatcher.dispatch({
-            type: "MESSAGE_DELETE",
-            channelId: interaction.channel_id,
-            id: interaction.message_id,
-            mlDeleted: true
-        });
+        if (interaction.data.component_type != 2) return;
+        switch (interaction.data.custom_id) {
+            case "acceptGroup":
+                await sendTempMessage(interaction.application_id, `${await DataStore.get("encryptcordPublicKey")}`, "join");
+                FluxDispatcher.dispatch({
+                    type: "MESSAGE_DELETE",
+                    channelId: interaction.channel_id,
+                    id: interaction.message_id,
+                    mlDeleted: true
+                });
+                break;
+            case "removeFromGroup":
+                await handleLeaving(sender.id, await DataStore.get("encryptcordGroupMembers") ?? {}, interaction.channel_id);
+                FluxDispatcher.dispatch({
+                    type: "MESSAGE_DELETE",
+                    channelId: interaction.channel_id,
+                    id: interaction.message_id,
+                    mlDeleted: true
+                });
+                break;
+            default:
+                return;
+        }
     },
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
@@ -232,7 +199,6 @@ export default definePlugin({
                 const sender = await UserUtils.getUser(message.author.id).catch(() => null);
                 if (!sender) return;
                 const response = await fetch(message.attachments[0].url);
-                console.log(response);
                 const userKey = await response.text();
                 await handleJoin(sender.id, userKey, encryptcordGroupMembers);
                 return;
@@ -315,7 +281,7 @@ export default definePlugin({
     ],
     async start() {
         addChatBarButton("Encryptcord", ChatBarIcon);
-        const pair = generateKeyPair();
+        const pair = await generateKeys();
         await DataStore.set('encryptcordPublicKey', pair.publicKey);
         await DataStore.set('encryptcordPrivateKey', pair.privateKey);
         if (await DataStore.get("encryptcordGroup") == true) {
@@ -402,7 +368,7 @@ async function handleLeaving(senderId: string, encryptcordGroupMembers: object, 
 
 // Handle receiving message
 async function handleMessage(message, senderId: string, groupChannel: string) {
-    const decryptedMessage = decrypt(message, await DataStore.get("encryptcordPrivateKey"));
+    const decryptedMessage = await decryptData(await DataStore.get("encryptcordPrivateKey"), message);
     await MessageActions.receiveMessage(groupChannel, await createMessage(decryptedMessage, senderId, groupChannel, 0));
 }
 
@@ -442,7 +408,24 @@ async function handleJoin(senderId: string, senderKey: string, encryptcordGroupM
     });
 
     await Promise.all(dmPromises);
-    await MessageActions.receiveMessage(groupChannel, await createMessage("", senderId, groupChannel, 7));
+    await MessageActions.receiveMessage(groupChannel, {
+        ...await createMessage("", senderId, groupChannel, 7), components: [{
+            type: 1,
+            components: [{
+                type: 2,
+                style: 4,
+                label: 'I don\'t want to talk to you!',
+                custom_id: 'removeFromGroup'
+            },
+            {
+                type: 2,
+                style: 2,
+                label: '(Other users can still send/receive messages to/from them)',
+                disabled: true,
+                custom_id: 'encryptcord'
+            }]
+        }]
+    });
 }
 
 // Create message for group
