@@ -74,8 +74,8 @@ export default definePlugin({
             replacement: [
                 // Init
                 {
-                    match: /totalRowCount.{1,100}componentDidMount\(\){/,
-                    replace: "$&$self._instance = this;"
+                    match: /(?<=componentDidMount\(\){).{1,100}scrollToChannel/,
+                    replace: "$self._instance = this;$&"
                 },
                 {
                     // Filter out pinned channels from the private channel list
