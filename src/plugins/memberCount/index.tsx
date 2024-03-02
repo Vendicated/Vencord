@@ -33,14 +33,20 @@ export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxSto
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
+enum viewTypes {
+    MemberList,
+    Tooltip,
+    Both
+}
+
 const settings = definePluginSettings({
     views: {
         type: OptionType.SELECT,
         description: "Where the member count should be displayed.",
         options: [
-            { label: "Member List", value: 1, default: true },
-            { label: "Guild Tooltip", value: 2 },
-            { label: "Both", value: 3 }
+            { label: "Member List", value: viewTypes.MemberList, default: true },
+            { label: "Guild Tooltip", value: viewTypes.Tooltip },
+            { label: "Both", value: viewTypes.Both }
         ],
         restartNeeded: true
     }
@@ -63,7 +69,7 @@ export default definePlugin({
                 match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
             },
-            predicate: () => settings.store.views === 3 || settings.store.views === 1
+            predicate: () => settings.store.views === viewTypes.MemberList || settings.store.views === viewTypes.Both
         },
         {
             find: ".invitesDisabledTooltip",
@@ -71,7 +77,7 @@ export default definePlugin({
                 match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
                 replace: ",$self.renderTooltip(arguments[0].guild)]"
             },
-            predicate: () => settings.store.views === 3 || settings.store.views === 2
+            predicate: () => settings.store.views === viewTypes.Tooltip || settings.store.views === viewTypes.Both
         }
     ],
     render: ErrorBoundary.wrap(MemberCount, { noop: true }),
