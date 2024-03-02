@@ -148,8 +148,9 @@ export default definePlugin({
                     mlDeleted: true
                 });
                 break;
-            case "removeFromGroup":
+            case "removeFromSelf":
                 await handleLeaving(sender.id, await DataStore.get("encryptcordGroupMembers") ?? {}, interaction.channel_id);
+                await sendTempMessage(sender.id, "", "leaving");
                 FluxDispatcher.dispatch({
                     type: "MESSAGE_DELETE",
                     channelId: interaction.channel_id,
@@ -415,7 +416,7 @@ async function handleJoin(senderId: string, senderKey: string, encryptcordGroupM
                 type: 2,
                 style: 4,
                 label: 'I don\'t want to talk to you!',
-                custom_id: 'removeFromGroup'
+                custom_id: 'removeFromSelf'
             },
             {
                 type: 2,
@@ -445,7 +446,7 @@ async function startGroup(opts, ctx) {
     });
     await DataStore.set('encryptcordGroupJoinList', []);
     await DataStore.set('encryptcordGroup', true);
-    sendBotMessage(channelId, { content: "Group created!" });
+    sendBotMessage(channelId, { content: "Group created!\n> You can do `/encryptcord invite` to invite other users to this group." });
     await MessageActions.receiveMessage(channelId, await createMessage("", UserStore.getCurrentUser().id, channelId, 7));
     setEnabled(true);
 }
