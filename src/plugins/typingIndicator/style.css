@@ -1,0 +1,18 @@
+.vc-typing-indicator {
+    display: flex;
+    align-items: center;
+    height: 20px;
+}
+
+.vc-typing-indicator-avatars {
+    margin-left: 6px;
+}
+
+.vc-typing-indicator-dots {
+    margin-left: 6px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    z-index: 0;
+    cursor: pointer;
+}
