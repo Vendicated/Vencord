@@ -18,19 +18,31 @@
 
 import "./style.css";
 
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
+
 export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
+
+const settings = definePluginSettings({
+    tooltip: {
+        type: OptionType.BOOLEAN,
+        description: "If the member count should be displayed on the guild tooltip.",
+        default: false,
+        restartNeeded: true
+    }
+});
+
 
 const sharedIntlNumberFormat = new Intl.NumberFormat();
 export const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
@@ -48,16 +60,18 @@ export default definePlugin({
                 match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
             }
+
         },
         {
             find: ".invitesDisabledTooltip",
             replacement: {
                 match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
                 replace: ",$self.renderTooltip(arguments[0].guild)]"
-            }
+            },
+            predicate: () => settings.store.tooltip
         }
     ],
-
+    settings,
     render: ErrorBoundary.wrap(MemberCount, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
