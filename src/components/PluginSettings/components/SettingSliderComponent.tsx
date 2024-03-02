@@ -63,7 +63,7 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
                 stickToMarkers={option.stickToMarkers ?? true}
                 {...option.componentProps}
             />
-            <Forms.FormText style={{ color: "var(--text-muted)" }}>{option.description}</Forms.FormText>
+            <Forms.FormText className="vc-plugins-setting-footer">{option.description}</Forms.FormText>
         </Forms.FormSection>
     );
 }
