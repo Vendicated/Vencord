@@ -49,7 +49,8 @@ export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
 }
 
 export async function downloadSettingsBackup() {
-    const filename = "vencord-settings-backup.json";
+    // The date is formatted as yyyy-mm-dd.
+    const filename = `vencord-settings-backup-${(new Date).toLocaleDateString('ky')}.json`;
     const backup = await exportSettings();
     const data = new TextEncoder().encode(backup);
 
