@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Menu, Switch, Text, UploadHandler,useEffect, useState } from "@webpack/common";
+import { Button, Menu, Switch, Text, UploadHandler, useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 let recentmessage: Message;
@@ -48,15 +48,14 @@ const messagePatch: NavContextMenuPatchCallback = (children, { message }) => () 
     );
 };
 
-
 export function QuoteIcon({
     height = 24,
     width = 24,
     className
 }: {
-  height?: number;
-  width?: number;
-  className?: string;
+    height?: number;
+    width?: number;
+    className?: string;
 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -73,10 +72,8 @@ function sizeUpgrade(url) {
     return u.toString();
 }
 
-
 let preparingSentence: string[] = [];
 const lines: string[] = [];
-
 
 async function createQuoteImage(avatarUrl: string, name: string, quoteOld: string, grayScale: boolean): Promise<Blob> {
     const quote = removeCustomEmojis(quoteOld);
@@ -144,7 +141,6 @@ async function createQuoteImage(avatarUrl: string, name: string, quoteOld: strin
     return new Promise<Blob>(resolve => {
         canvas.toBlob(blob => {
             if (blob) {
-
                 resolve(blob);
             } else {
                 throw new Error("Failed to create Blob");
@@ -196,37 +192,33 @@ async function createQuoteImage(avatarUrl: string, name: string, quoteOld: strin
 
 }
 
-function QuoteModal(props: ModalProps)
-{
+function QuoteModal(props: ModalProps) {
     const [gray, setGray] = useState(true);
     useEffect(() => {
         grayscale = gray;
         GeneratePreview();
-
     }, [gray]);
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false}>
                 <Text color="header-primary" variant="heading-lg/semibold" tag="h1" style={{ flexGrow: 1 }}>
-                  Catch Them In 4K.
+                    Catch Them In 4K.
                 </Text>
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
             <ModalContent scrollbarType="none">
-                <img src={""} id={"quoterPreview"}style={{ borderRadius: "20px", width: "100%" }}></img>
+                <img src={""} id={"quoterPreview"} style={{ borderRadius: "20px", width: "100%" }}></img>
                 <br></br><br></br>
                 <Switch value={gray} onChange={setGray}>Grayscale</Switch>
                 <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => Export()} style={{ display: "inline-block", marginRight: "5px" }}>Export</Button>
                 <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => SendInChat(props.onClose)} style={{ display: "inline-block" }}>Send</Button>
-
             </ModalContent>
             <br></br>
         </ModalRoot>
     );
 }
 
-async function SendInChat(onClose) 
-{
+async function SendInChat(onClose) {
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
     const preview = generateFileNamePreview(recentmessage.content);
     const imageName = `${preview} - ${recentmessage.author.username}`;
@@ -235,8 +227,7 @@ async function SendInChat(onClose)
     onClose();
 }
 
-async function Export()
-{
+async function Export() {
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
     const link = document.createElement("a");
     link.href = URL.createObjectURL(image);
@@ -248,22 +239,17 @@ async function Export()
     link.remove();
 }
 
-async function GeneratePreview()
-{
+async function GeneratePreview() {
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
     document.getElementById("quoterPreview")?.setAttribute("src", URL.createObjectURL(image));
 }
 
-function generateFileNamePreview(message)
-{
+function generateFileNamePreview(message) {
     const words = message.split(" ");
     let preview;
-    if(words.length >= 6)
-    {
+    if (words.length >= 6) {
         preview = words.slice(0, 6).join(" ");
-    }
-    else
-    {
+    } else {
         preview = words.slice(0, words.length).join(" ");
     }
     return preview;
