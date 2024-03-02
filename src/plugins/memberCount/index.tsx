@@ -58,7 +58,6 @@ export default definePlugin({
                 match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
             }
-
         },
         {
             find: ".invitesDisabledTooltip",
