@@ -61,13 +61,19 @@ export default definePlugin({
         },
         { // For some reason standardSidebarView also has a small fade-in
             find: "DefaultCustomContentScroller:function()",
-            replacement: {
-                match: /(?<=Fragment,\{children:)\i\(\((\i),\i\)=>(\(0,\i\.jsxs\))\(\i\.animated\.div,\{style:\1,/,
-                replace: "($2(\"div\",{"
-            },
+            replacement: [
+                {
+                    match: /\(0,\i\.useTransition\)\((\i)/,
+                    replace: "(_cb=>_cb(void 0,$1))||$&"
+                },
+                {
+                    match: /\i\.animated\.div/,
+                    replace: "\"div\""
+                },
+            ],
             predicate: () => settings.store.disableFade,
         },
-        { // load menu stuff on hover, not on click
+        { // Load menu stuff on hover, not on click
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
                 match: /(?<=handleOpenSettingsContextMenu.{0,250}?\i\.el\(("\d+")\)\.then.*?Messages\.USER_SETTINGS,)(?=onClick:)/,
@@ -75,7 +81,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad,
         },
-        {
+        { // Settings cog context menu
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
                 match: /\(0,\i.default\)\(\)(?=\.filter)/,
