@@ -48,12 +48,12 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 { // Fade in on layer
-                    match: /(?<=(\w+)\.contextType=\w+\.AccessibilityPreferencesContext;)/,
+                    match: /(?<=(\i)\.contextType=\i\.AccessibilityPreferencesContext;)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade,
                 },
                 { // Lazy-load contents
-                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"\w+"/g,
+                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
                     replace: "$&,_:$1",
                     predicate: () => settings.store.eagerLoad,
                 },
@@ -62,7 +62,7 @@ export default definePlugin({
         { // For some reason standardSidebarView also has a small fade-in
             find: "DefaultCustomContentScroller:function()",
             replacement: {
-                match: /(?<=Fragment,\{children:)\w+\(\((\w+),\w+\)=>(\(0,\w+\.jsxs\))\(\w+\.animated\.div,\{style:\1,/,
+                match: /(?<=Fragment,\{children:)\i\(\((\i),\i\)=>(\(0,\i\.jsxs\))\(\i\.animated\.div,\{style:\1,/,
                 replace: "($2(\"div\",{"
             },
             predicate: () => settings.store.disableFade,
