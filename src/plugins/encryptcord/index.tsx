@@ -78,13 +78,13 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
             tooltip={enabled ? "Send Unencrypted Messages" : "Send Encrypted Messages"}
             onClick={async () => {
                 if (await DataStore.get('encryptcordGroup') == false || (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
-                    await sendTempMessage(getCurrentChannel().id, `${await DataStore.get("encryptcordPublicKey")}`, "join", false);
-                    sendBotMessage(getCurrentChannel().id, { content: "*Checking for any groups in this channel...*" });
+                    await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
+                    sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>` });
                     await sleep(5000);
                     if (await DataStore.get('encryptcordGroup') == true && (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
                         sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
                         await leave("", { channel: { id: await DataStore.get('encryptcordChannelId') } });
-                    } else {
+                    } else if (await DataStore.get('encryptcordGroup') == true) {
                         return;
                     };
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
@@ -168,7 +168,7 @@ export default definePlugin({
             if (!message.content) return;
             const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
             if (!Object.keys(encryptcordGroupMembers).some(key => key == message.author.id)) {
-                switch (message.content.toLowerCase()) {
+                switch (message.content.toLowerCase().split("```")[0]) {
                     case "groupdata":
                         const response = await fetch(message.attachments[0].url);
                         const groupdata = await response.json();
@@ -179,8 +179,7 @@ export default definePlugin({
                         if (!await DataStore.get("encryptcordGroup")) return;
                         const sender = await UserUtils.getUser(message.author.id).catch(() => null);
                         if (!sender) return;
-                        const joinresponse = await fetch(message.attachments[0].url);
-                        const userKey = await joinresponse.text();
+                        const userKey = message.content.split("```")[1];
                         await handleJoin(sender.id, userKey, encryptcordGroupMembers);
                         break;
                     default:

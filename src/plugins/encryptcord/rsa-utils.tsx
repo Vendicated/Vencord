@@ -80,7 +80,7 @@ const base64ToArrayBuffer = (base64String) => {
 
 export const formatPemKey = (keyData, type) => {
     const base64Key = arrayBufferToBase64(keyData);
-    return `-----BEGIN ${type.toUpperCase()} KEY-----\n` + base64Key + `\n----- END ${type.toUpperCase()} KEY----- `;
+    return `-----BEGIN ${type.toUpperCase()} KEY-----\n` + base64Key + `\n-----END ${type.toUpperCase()} KEY----- `;
 };
 
 const importPemPublicKey = async (pemKey) => {
@@ -89,7 +89,7 @@ const importPemPublicKey = async (pemKey) => {
 
         const keyBody = trimmedPemKey
             .replace("-----BEGIN PUBLIC KEY-----", "")
-            .replace("----- END PUBLIC KEY-----", "");
+            .replace("-----END PUBLIC KEY-----", "");
 
         const binaryDer = atob(keyBody);
 
