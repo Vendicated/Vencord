@@ -107,7 +107,7 @@ export default definePlugin({
             },
         },
         {
-            find: 'case"GUILD_MEMBERS_CHUNK"',
+            find: ".not_found",
             replacement: {
                 match: /notFound:(\i)\.not_found/,
                 replace: "$&,nonce:$1.nonce"
