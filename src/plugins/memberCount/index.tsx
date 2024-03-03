@@ -36,13 +36,13 @@ export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxSto
 const settings = definePluginSettings({
     toolTip: {
         type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the server tooltip.",
+        description: "If the member count should be displayed on the server tooltip",
         default: true,
         restartNeeded: true
     },
     memberList: {
         type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the member list.",
+        description: "If the member count should be displayed on the member list",
         default: true,
         restartNeeded: true
     }
