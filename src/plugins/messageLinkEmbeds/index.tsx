@@ -22,6 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
+import { useIntersection } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
@@ -74,6 +75,11 @@ const settings = definePluginSettings({
     messageBackgroundColor: {
         description: "Background color for messages in rich embeds",
         type: OptionType.BOOLEAN
+    },
+    loadVisibleOnly: {
+        description: "Only load message links that are visible",
+        type: OptionType.BOOLEAN,
+        default: false
     },
     automodEmbeds: {
         description: "Use automod embeds instead of rich embeds (smaller but less info)",
@@ -220,7 +226,35 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 }
 
 
-function MessageEmbedAccessory({ message }: { message: Message; }) {
+/**
+ * Constructs a <MessageEmbedAccessory>, using a `useIntersection` hook if
+ * necessary.
+ */
+function MessageEmbedAccessoryMaybeWithIntersection({ message }: { message: Message; }) {
+    const { loadVisibleOnly } = settings.use(["loadVisibleOnly"]);
+    if (loadVisibleOnly) {
+        return <MessageEmbedAccessoryWithIntersection
+            message={message}
+        />;
+    } else {
+        return <MessageEmbedAccessory
+            message={message}
+            shouldFetch={true}
+        />;
+    }
+}
+
+function MessageEmbedAccessoryWithIntersection({ message }: { message: Message; }) {
+    const [ref, isIntersecting] = useIntersection(true);
+    return <span ref={ref}>
+        <MessageEmbedAccessory
+            message={message}
+            shouldFetch={isIntersecting}
+        />
+    </span>;
+}
+
+function MessageEmbedAccessory({ message, shouldFetch }: { message: Message; shouldFetch: boolean; }) {
     // @ts-ignore
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
@@ -251,6 +285,9 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             if (linkedMessage) {
                 messageCache.set(messageID, { message: linkedMessage, fetched: true });
             } else {
+                if (!shouldFetch) {
+                    continue;
+                }
                 const msg = { ...message } as any;
                 delete msg.embeds;
                 delete msg.interaction;
@@ -382,7 +419,7 @@ export default definePlugin({
 
             return (
                 <ErrorBoundary>
-                    <MessageEmbedAccessory
+                    <MessageEmbedAccessoryMaybeWithIntersection
                         message={props.message}
                     />
                 </ErrorBoundary>
