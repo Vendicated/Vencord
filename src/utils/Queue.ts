@@ -29,9 +29,9 @@ export class Queue {
      */
     constructor(public readonly maxSize = Infinity) { }
 
-    private queue = [] as Array<() => Promisable<unknown>>;
+    private queue: Array<() => Promisable<unknown>> = [];
 
-    private promise?: Promise<any>;
+    private promise?: Promise<unknown>;
 
     private next() {
         const func = this.queue.shift();
@@ -53,7 +53,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the first task in queue will be removed.
      * @param func Task
      */
-    push<T>(func: () => Promisable<T>) {
+    push(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.shift();
 
@@ -66,7 +66,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the last task in queue will be removed.
      * @param func Task
      */
-    unshift<T>(func: () => Promisable<T>) {
+    unshift(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.pop();
 
