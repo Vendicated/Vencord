@@ -33,7 +33,7 @@ export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxSto
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
-enum viewTypes {
+const enum ViewTypes {
     MemberList,
     Tooltip,
     Both
