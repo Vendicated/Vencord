@@ -34,7 +34,7 @@ export class Queue {
     private promise?: Promise<any>;
 
     private next() {
-        const func = this.queue.shift();
+        const func = this.queue.pop();
         if (func)
             this.promise = Promise.resolve()
                 .then(func)
@@ -55,9 +55,9 @@ export class Queue {
      */
     push<T>(func: () => Promisable<T>) {
         if (this.size >= this.maxSize)
-            this.queue.shift();
+            this.queue.pop();
 
-        this.queue.push(func);
+        this.queue.unshift(func);
         this.run();
     }
 
@@ -68,9 +68,9 @@ export class Queue {
      */
     unshift<T>(func: () => Promisable<T>) {
         if (this.size >= this.maxSize)
-            this.queue.pop();
+            this.queue.shift();
 
-        this.queue.unshift(func);
+        this.queue.push(func);
         this.run();
     }
 
