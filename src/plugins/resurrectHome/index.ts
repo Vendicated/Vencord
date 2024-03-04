@@ -21,19 +21,18 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ResurrectHome",
-    description: "Reenables the Server Home tab when there isn't a Server Guide.",
+    description: "Re-enables the Server Home tab when there isn't a Server Guide.",
     authors: [Devs.Dolfies],
     patches: [
         // Force home deprecation override
         {
             find: "GuildFeatures.GUILD_HOME_DEPRECATION_OVERRIDE",
             all: true,
-            noWarn: true,
             replacement: [
                 {
                     match: /\i\.hasFeature\(\i\.GuildFeatures\.GUILD_HOME_DEPRECATION_OVERRIDE\)/g,
-                    replace: "true",
-                },
+                    replace: "true"
+                }
             ],
         },
         // Disable feedback prompts
@@ -41,10 +40,10 @@ export default definePlugin({
             find: "GuildHomeFeedbackExperiment.definition.id",
             replacement: [
                 {
-                    match: /return{showFeedback:\i,setOnDismissedFeedback:(\i)}/g,
-                    replace: "return{showFeedback:false,setOnDismissedFeedback:$1}",
-                },
-            ],
+                    match: /return{showFeedback:\i,setOnDismissedFeedback:(\i)}/,
+                    replace: "return{showFeedback:false,setOnDismissedFeedback:$1}"
+                }
+            ]
         },
         // Enable guild feed render mode selector
         {
@@ -52,9 +51,17 @@ export default definePlugin({
             replacement: [
                 {
                     match: /showSelector:!1/,
-                    replace: "showSelector:true",
-                },
-            ],
+                    replace: "showSelector:true"
+                }
+            ]
         },
+        // Fix focusMessage clearing previously cached messages and causing a loop when fetching messages around home messages
+        {
+            find: '"MessageActionCreators"',
+            replacement: {
+                match: /(?<=focusMessage\(\i\){.+?)(?=focus:{messageId:(\i)})/,
+                replace: "before:$1,"
+            }
+        }
     ]
 });
