@@ -81,7 +81,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 if (await DataStore.get('encryptcordGroup') == false || (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
                     setButtonDisabled(true);
                     await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
-                    sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> You can do \`/encryptcord leave\` to leave the current group` });
+                    sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> [Tip] You can do \`/encryptcord leave\` to leave a group` });
                     await sleep(5000);
                     if (await DataStore.get('encryptcordGroup') == true && (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
                         sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
