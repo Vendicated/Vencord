@@ -5,7 +5,7 @@ import * as DataStore from "@api/DataStore";
 import { sleep } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { useEffect, useState, FluxDispatcher } from "@webpack/common";
+import { useEffect, useState, FluxDispatcher, PrivateChannelsStore } from "@webpack/common";
 import { generateKeys, encryptData, decryptData, formatPemKey } from "./rsa-utils";
 import { Devs } from "@utils/constants";
 import {
@@ -24,7 +24,7 @@ import {
 import { Message } from "discord-types/general";
 const MessageCreator = findByPropsLazy("createBotMessage");
 const CloudUtils = findByPropsLazy("CloudUpload");
-import { getCurrentChannel } from "@utils/discord";
+import { getCurrentChannel, openPrivateChannel } from "@utils/discord";
 
 let enabled;
 let setEnabled;
@@ -87,6 +87,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                         sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
                         await leave("", { channel: { id: await DataStore.get('encryptcordChannelId') } });
                     } else if (await DataStore.get('encryptcordGroup') == true) {
+                        setButtonDisabled(false);
                         return;
                     };
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
@@ -191,12 +192,7 @@ export default definePlugin({
                 }
                 return;
             }
-            const dmChannelId = await RestAPI.post({
-                url: `/users/@me/channels`,
-                body: {
-                    recipient_id: message.author.id,
-                },
-            }).then((response) => response.body.id);
+            const dmChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
             if (channelId !== dmChannelId) return;
             const sender = await UserUtils.getUser(message.author.id).catch(() => null);
             if (!sender) return;
@@ -277,14 +273,7 @@ export default definePlugin({
 // Send Temporary Message
 async function sendTempMessage(recipientId: string, attachment: string, content: string, dm: boolean = true) {
     if (recipientId == UserStore.getCurrentUser().id) return;
-
-    const dmChannelId = dm ? await RestAPI.post({
-        url: `/users/@me/channels`,
-        body: {
-            recipient_id: recipientId,
-        },
-    }).then((response) => response.body.id) : recipientId;
-
+    const dmChannelId = dm ? await PrivateChannelsStore.getOrEnsurePrivateChannel(recipientId) : recipientId;
     if (attachment && attachment != "") {
         const upload = await new CloudUtils.CloudUpload({
             file: new File([new Blob([attachment])], "file.text", { type: "text/plain; charset=utf-8" }),
