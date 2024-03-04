@@ -41,6 +41,7 @@ interface IMessageCreate {
 // Chat Bar Icon Component
 const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     [enabled, setEnabled] = useState(false);
+    let [buttonDisabled, setButtonDisabled] = useState(false);
 
     useEffect(() => {
         const listener: SendListener = async (_, message) => {
@@ -78,6 +79,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
             tooltip={enabled ? "Send Unencrypted Messages" : "Send Encrypted Messages"}
             onClick={async () => {
                 if (await DataStore.get('encryptcordGroup') == false || (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
+                    setButtonDisabled(true);
                     await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
                     sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>` });
                     await sleep(5000);
@@ -90,12 +92,14 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
                 }
                 setEnabled(!enabled);
+                setButtonDisabled(false);
             }}
             buttonProps={{
                 style: {
                     transition: 'transform 0.3s ease-in-out',
                     transform: `rotate(${enabled ? 0 : 15}deg)`,
-                }
+                },
+                disabled: buttonDisabled
             }}
         >
             <svg
