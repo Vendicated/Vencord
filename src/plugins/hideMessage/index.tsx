@@ -131,7 +131,7 @@ export const settings = definePluginSettings({
     },
 });
 
-const plugin = definePlugin({
+export default definePlugin({
     name: "HideMessage",
     description: "Adds a context menu option to hide messages",
     authors: [Devs.Hanzy],
@@ -164,5 +164,3 @@ const plugin = definePlugin({
         hiddenMessages.clear();
     },
 });
-
-export default plugin;
