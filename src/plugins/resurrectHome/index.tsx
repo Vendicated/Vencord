@@ -79,15 +79,15 @@ export default definePlugin({
             ]
         },
         // Enable guild feed render mode selector
-        {
-            find: "2022-01_home_feed_toggle",
-            replacement: [
-                {
-                    match: /showSelector:!1/,
-                    replace: "showSelector:true"
-                }
-            ]
-        },
+        // {
+        //     find: "2022-01_home_feed_toggle",
+        //     replacement: [
+        //         {
+        //             match: /showSelector:!1/,
+        //             replace: "showSelector:true"
+        //         }
+        //     ]
+        // },
         // Fix focusMessage clearing previously cached messages and causing a loop when fetching messages around home messages
         {
             find: '"MessageActionCreators"',
