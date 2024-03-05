@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ResurrectHome",
     description: "Re-enables the Server Home tab when there isn't a Server Guide.",
-    authors: [Devs.Dolfies],
+    authors: [Devs.Dolfies, Devs.Nuckyz],
     patches: [
         // Force home deprecation override
         {
