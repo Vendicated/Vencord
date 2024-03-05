@@ -16,13 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { ContextMenuApi, Menu } from "@webpack/common";
+
+const settings = definePluginSettings({
+    forceServerHome: {
+        type: OptionType.BOOLEAN,
+        description: "Force the Server Guide to be the Server Home tab when it is enabled.",
+        default: false
+    }
+});
+
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+    if (!props?.guild) return;
+
+    const group = findGroupChildrenByChildId("hide-muted-channels", children);
+
+    group?.unshift(
+        <Menu.MenuCheckboxItem
+            key="force-server-home"
+            id="force-server-home"
+            label="Force Server Home"
+            checked={settings.store.forceServerHome}
+            action={() => {
+                settings.store.forceServerHome = !settings.store.forceServerHome;
+                ContextMenuApi.closeContextMenu();
+            }}
+        />
+
+    );
+};
 
 export default definePlugin({
     name: "ResurrectHome",
-    description: "Re-enables the Server Home tab when there isn't a Server Guide.",
-    authors: [Devs.Dolfies],
+    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide.",
+    authors: [Devs.Dolfies, Devs.Nuckyz],
+    settings,
+
     patches: [
         // Force home deprecation override
         {
@@ -62,6 +95,28 @@ export default definePlugin({
                 match: /(?<=focusMessage\(\i\){.+?)(?=focus:{messageId:(\i)})/,
                 replace: "before:$1,"
             }
+        },
+        // Force Server Home instead of Server Guide
+        {
+            find: "61eef9_2",
+            replacement: {
+                match: /(?<=getMutableGuildChannelsForGuild\(\i\)\);)(?=if\(null==\i\|\|)/,
+                replace: "if($self.useForceServerHome())return false;"
+            }
         }
-    ]
+    ],
+
+    start() {
+        addContextMenuPatch("guild-context", contextMenuPatch);
+    },
+
+    stop() {
+        removeContextMenuPatch("guild-context", contextMenuPatch);
+    },
+
+    useForceServerHome() {
+        const { forceServerHome } = settings.use(["forceServerHome"]);
+
+        return forceServerHome;
+    }
 });
