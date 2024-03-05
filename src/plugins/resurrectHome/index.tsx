@@ -52,7 +52,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => () =>
 
 export default definePlugin({
     name: "ResurrectHome",
-    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide.",
+    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking the Server Guide.",
     authors: [Devs.Dolfies, Devs.Nuckyz],
     settings,
 
