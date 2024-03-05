@@ -30,7 +30,8 @@ const settings = definePluginSettings({
     }
 });
 
-const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    settings.use(["forceServerHome"]);
     if (!props?.guild) return;
 
     const group = findGroupChildrenByChildId("hide-muted-channels", children);
@@ -41,12 +42,8 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => () =>
             id="force-server-home"
             label="Force Server Home"
             checked={settings.store.forceServerHome}
-            action={() => {
-                settings.store.forceServerHome = !settings.store.forceServerHome;
-                ContextMenuApi.closeContextMenu();
-            }}
+            action={() => settings.store.forceServerHome = !settings.store.forceServerHome }
         />
-
     );
 };
 

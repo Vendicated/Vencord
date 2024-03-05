@@ -29,8 +29,8 @@ export default definePlugin({
         {
             find: "♫ (つ｡◕‿‿◕｡)つ ♪",
             replacement: {
-                match: /let{navId:/,
-                replace: "Vencord.Api.ContextMenu._patchContextMenu(arguments[0]);$&"
+                match: /(?<=function \i\((\i)\){.*?)(?=let{navId:)/,
+                replace: "$1=Vencord.Api.ContextMenu._usePatchContextMenu($1);"
             }
         },
         {
@@ -38,7 +38,7 @@ export default definePlugin({
             all: true,
             replacement: {
                 match: /Menu,{(?<=\.jsxs?\)\(\i\.Menu,{)/g,
-                replace: "$&contextMenuApiArguments:typeof arguments!=='undefined'?arguments:[],"
+                replace: "$&contextMenuApiArguments:typeof arguments!=='undefined'?[...arguments]:[],"
             }
         }
     ]

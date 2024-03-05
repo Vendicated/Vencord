@@ -17,6 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
+import { lodash } from "@webpack/common";
 import type { ReactElement } from "react";
 
 type ContextMenuPatchCallbackReturn = (() => void) | void;
@@ -126,9 +127,11 @@ interface ContextMenuProps {
     onClose: (callback: (...args: Array<any>) => any) => void;
 }
 
+// TODO this should be phased out eventually
 const patchedMenus = new WeakSet();
 
-export function _patchContextMenu(props: ContextMenuProps) {
+export function _usePatchContextMenu(props: ContextMenuProps) {
+    props = lodash.cloneDeep(props);
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
@@ -155,4 +158,6 @@ export function _patchContextMenu(props: ContextMenuProps) {
     }
 
     patchedMenus.add(props);
+
+    return props;
 }
