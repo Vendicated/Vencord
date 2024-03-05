@@ -18,13 +18,13 @@
 
 import { LazyComponent, useAwaiter, useForceUpdater } from "@utils/react";
 import { find, findByPropsLazy } from "@webpack";
-import { Forms, React, RelationshipStore, showToast, useRef, UserStore } from "@webpack/common";
+import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
 import { Review } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
-import { cl } from "../utils";
+import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 
@@ -32,6 +32,7 @@ const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
 const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
 
 const InputComponent = LazyComponent(() => find(m => m.default?.type?.render?.toString().includes("default.CHANNEL_TEXT_AREA")).default);
+const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
 
 interface UserProps {
     discordId: string;
@@ -125,19 +126,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
     const inputType = ChatInputTypes.FORM;
     inputType.disableAutoFocus = true;
 
-    const channel = {
-        flags_: 256,
-        guild_id_: null,
-        id: "0",
-        getGuildId: () => null,
-        isPrivate: () => true,
-        isActiveThread: () => false,
-        isArchivedLockedThread: () => false,
-        isDM: () => true,
-        roles: { "0": { permissions: 0n } },
-        getRecipientId: () => "0",
-        hasFlag: () => false,
-    };
+    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
 
     return (
         <>
@@ -168,7 +157,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                                 comment: res.value,
                             });
 
-                            if (response?.success) {
+                            if (response) {
                                 refetch();
 
                                 const slateEditor = editorRef.current.ref.current.getSlateEditor();
@@ -180,8 +169,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                                         focus: Editor.end(slateEditor, []),
                                     }
                                 });
-                            } else if (response?.message) {
-                                showToast(response.message);
                             }
 
                             // even tho we need to return this, it doesnt do anything
