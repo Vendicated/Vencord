@@ -105,7 +105,7 @@ const settings = definePluginSettings({
     },
     users: {
         type: OptionType.STRING,
-        description: "Users to let bypass (notified for all messages)",
+        description: "Users to let bypass (notified for all messages sent in DMs)",
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
@@ -115,7 +115,7 @@ const settings = definePluginSettings({
     },
     allowOutsideOfDm: {
         type: OptionType.BOOLEAN,
-        description: "Allow selected users to send notifications outside of DM (acts like a channel/guild bypass, but it's for all messages sent by the selected users)",
+        description: "Allow selected users to bypass DND outside of DM too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)",
     }
 });
 
