@@ -1,10 +1,17 @@
-import { NavContextMenuPatchCallback, addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { addContextMenuPatch, type NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { DataStore, Notifications } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
-import { Channel, Guild, Message, User } from "discord-types/general";
+import { type Channel, type Guild, type Message, type User } from "discord-types/general";
+
 interface ContextProps {
     channel: Channel;
     user: User;
@@ -21,64 +28,80 @@ interface IMessageCreate {
 }
 
 const GuildContext: NavContextMenuPatchCallback = (children, { guild }: ContextProps) => () => {
-    if (!guild) return;
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-guild-bypass"
-                label={`${bypasses["guilds"].includes(guild.id) ? "Remove" : "Add"} DND Bypass`}
-                action={async () => {
-                    if (bypasses["guilds"].includes(guild.id)) bypasses["guilds"] = await bypasses["guilds"].filter(id => id !== guild.id);
-                    else bypasses["guilds"].push(guild.id);
-                    await DataStore.set("bypassdnd", bypasses);
-                    settings.store.guilds = (bypasses["guilds"].join(', '));
+                label={`${bypasses.guilds.includes(guild.id) ? "Remove" : "Add"} DND Bypass`}
+                action={() => {
+                    if (bypasses.guilds.includes(guild.id)) bypasses.guilds = bypasses.guilds.filter(id => id !== guild.id);
+                    else bypasses.guilds.push(guild.id);
+                    DataStore.set("bypassdnd", bypasses)
+                        .then(() => {
+                            settings.store.guilds = bypasses.guilds.join(", ");
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
                 }}
+
             />
         </Menu.MenuGroup>
     ));
 };
 
 const ChannelContext: NavContextMenuPatchCallback = (children, { channel }: ContextProps) => () => {
-    if (!channel) return;
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-channel-bypass"
-                label={`${bypasses["channels"].includes(channel.id) ? "Remove" : "Add"} DND Bypass`}
-                action={async () => {
-                    if (bypasses["channels"].includes(channel.id)) bypasses["channels"] = await bypasses["channels"].filter(id => id !== channel.id);
-                    else bypasses["channels"].push(channel.id);
-                    await DataStore.set("bypassdnd", bypasses);
-                    settings.store.channels = (bypasses["channels"].join(', '));
+                label={`${bypasses.channels.includes(channel.id) ? "Remove" : "Add"} DND Bypass`}
+                action={() => {
+                    if (bypasses.channels.includes(channel.id)) bypasses.channels = bypasses.channels.filter(id => id !== channel.id);
+                    else bypasses.channels.push(channel.id);
+
+                    DataStore.set("bypassdnd", bypasses)
+                        .then(() => {
+                            settings.store.channels = bypasses.channels.join(", ");
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
                 }}
+
             />
         </Menu.MenuGroup>
     ));
 };
 
 const UserContext: NavContextMenuPatchCallback = (children, { user }: ContextProps) => () => {
-    if (!user) return;
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-user-bypass"
-                label={`${bypasses["users"].includes(user.id) ? "Remove" : "Add"} DND Bypass`}
-                action={async () => {
-                    if (bypasses["users"].includes(user.id)) bypasses["users"] = await bypasses["users"].filter(id => id !== user.id);
-                    else bypasses["users"].push(user.id);
-                    await DataStore.set("bypassdnd", bypasses);
-                    settings.store.users = (bypasses["users"].join(', '));
+                label={`${bypasses.users.includes(user.id) ? "Remove" : "Add"} DND Bypass`}
+                action={() => {
+                    if (bypasses.users.includes(user.id)) bypasses.users = bypasses.users.filter(id => id !== user.id);
+                    else bypasses.users.push(user.id);
+
+                    DataStore.set("bypassdnd", bypasses)
+                        .then(() => {
+                            settings.store.users = bypasses.users.join(", ");
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
                 }}
             />
         </Menu.MenuGroup>
     ));
 };
 
-type Bypasses = {
+interface Bypasses {
     guilds: string[];
     channels: string[];
     users: string[];
-};
+}
 
 let bypasses: Bypasses;
 
@@ -89,9 +112,9 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses["guilds"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
+            bypasses.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
             await DataStore.set("bypassdnd", bypasses);
-        },
+        }
     },
     channels: {
         type: OptionType.STRING,
@@ -99,9 +122,9 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses["channels"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
+            bypasses.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
             await DataStore.set("bypassdnd", bypasses);
-        },
+        }
     },
     users: {
         type: OptionType.STRING,
@@ -109,29 +132,29 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses["users"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
+            bypasses.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
             await DataStore.set("bypassdnd", bypasses);
-        },
+        }
     },
     allowOutsideOfDms: {
         type: OptionType.BOOLEAN,
-        description: "Allow selected users to bypass DND outside of DMs too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)",
+        description: "Allow selected users to bypass DND outside of DMs too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)"
     }
 });
 
-async function showUserNotification(message: Message) {
+async function showUserNotification(message: Message): Promise<void> {
     await Notifications.showNotification({
         title: `${message.author.globalName ?? message.author.username} sent a message in a DM`,
         body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false)
     });
 }
 
-async function showChannelNotification(message: Message) {
+async function showChannelNotification(message: Message): Promise<void> {
     await Notifications.showNotification({
-        title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(message.channel_id).name}`,
+        title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}`,
         body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false)
     });
 }
 
@@ -144,10 +167,10 @@ export default definePlugin({
             try {
                 if (optimistic || type !== "MESSAGE_CREATE") return;
                 if (message.state === "SENDING") return;
-                if (!message.content) return;
+                if (message.content === "") return;
                 const currentUser = UserStore.getCurrentUser();
                 if (message.author.id === currentUser.id) return;
-                if (await PresenceStore.getStatus(currentUser.id) != 'dnd') return;
+                if (await PresenceStore.getStatus(currentUser.id) !== "dnd") return;
                 if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
                     await showChannelNotification(message);
                     return;
@@ -155,7 +178,7 @@ export default definePlugin({
                 if (bypasses.users.includes(message.author.id)) {
                     if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
                         await showUserNotification(message);
-                    } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && settings.store.allowOutsideOfDms) {
+                    } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && (settings.store.allowOutsideOfDms === true)) {
                         await showChannelNotification(message);
                     }
                 }
@@ -169,7 +192,7 @@ export default definePlugin({
         addContextMenuPatch("guild-context", GuildContext);
         addContextMenuPatch("channel-context", ChannelContext);
         addContextMenuPatch("user-context", UserContext);
-        bypasses = await DataStore.get("bypassdnd") ?? { guilds: [], channels: [], users: [] };
+        bypasses = (await DataStore.get("bypassdnd")) ?? { guilds: [], channels: [], users: [] };
         await DataStore.set("bypassdnd", bypasses);
     },
     stop() {
