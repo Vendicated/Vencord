@@ -117,11 +117,11 @@ export default definePlugin({
         async MESSAGE_CREATE({ optimistic, type, message, guildId, channelId }: IMessageCreate) {
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
-            if (message.author.id === UserStore.getCurrentUser().id) return;
             if (!message.content) return;
-            if (await PresenceStore.getStatus(UserStore.getCurrentUser().id) != 'dnd') return;
-
-            if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${UserStore.getCurrentUser().id}>`) || message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id))) {
+            const currentUser = UserStore.getCurrentUser();
+            if (message.author.id === currentUser.id) return;
+            if (await PresenceStore.getStatus(currentUser.id) != 'dnd') return;
+            if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
                 await Notifications.showNotification({
                     title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(channelId).name}`,
                     body: message.content,
