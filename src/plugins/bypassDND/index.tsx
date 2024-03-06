@@ -112,6 +112,10 @@ const settings = definePluginSettings({
             bypasses["users"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
             await DataStore.set("bypassdnd", bypasses);
         },
+    },
+    allowOutsideOfDM: {
+        type: OptionType.BOOLEAN,
+        description: "Allow selected users to send notifications outside of DM (acts like a channel/guild bypass, but it's for all messages sent by the selected users)",
     }
 });
 
@@ -150,7 +154,7 @@ export default definePlugin({
             if (bypasses.users.includes(message.author.id)) {
                 if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
                     await showUserNotification(message);
-                } else if (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) {
+                } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && settings.store.allowOutsideOfDM) {
                     await showChannelNotification(message);
                 }
             }
