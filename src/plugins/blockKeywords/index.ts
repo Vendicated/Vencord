@@ -44,15 +44,17 @@ export default definePlugin({
 
     start() {
         let blockedWordsList: Array<string> = Settings.plugins.BlockKeywords.blockedWords.split(",");
+        const caseSensitiveFlag = Settings.plugins.BlockKeywords.caseSensitive ? "" : "i";
+
         if (Settings.plugins.BlockKeywords.useRegex) {
             blockedKeywords = blockedWordsList.map((word) => {
-                return new RegExp(word, Settings.plugins.BlockKeywords.caseSensitive ? "" : "i");
+                return new RegExp(word, caseSensitiveFlag);
             });
         }
         else {
             blockedKeywords = blockedWordsList.map((word) => {
                 // escape regex chars in word https://stackoverflow.com/a/6969486
-                return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, Settings.plugins.BlockKeywords.caseSensitive ? "" : "i");
+                return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, caseSensitiveFlag);
             });
         }
         console.log(blockedKeywords);
@@ -72,7 +74,6 @@ export default definePlugin({
         // embed content loop (e.g. twitter embeds)
         for (let embedIndex = 0; embedIndex < message.embeds.length; embedIndex++) {
             const embed = message.embeds[embedIndex];
-            if (embed["rawDescription"] == null || embed["rawTitle"] == null) { continue; }
             for (let wordIndex = 0; wordIndex < blockedKeywords.length; wordIndex++) {
                 // doing this because undefined strings get converted to the string "undefined" in regex tests
                 const descriptionHasKeywords = embed["rawDescription"] != null && blockedKeywords[wordIndex].test(embed["rawDescription"]);
