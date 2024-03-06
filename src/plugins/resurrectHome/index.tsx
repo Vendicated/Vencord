@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenuApi, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 const settings = definePluginSettings({
     forceServerHome: {
@@ -29,23 +29,6 @@ const settings = definePluginSettings({
         default: false
     }
 });
-
-const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    settings.use(["forceServerHome"]);
-    if (!props?.guild) return;
-
-    const group = findGroupChildrenByChildId("hide-muted-channels", children);
-
-    group?.unshift(
-        <Menu.MenuCheckboxItem
-            key="force-server-home"
-            id="force-server-home"
-            label="Force Server Home"
-            checked={settings.store.forceServerHome}
-            action={() => settings.store.forceServerHome = !settings.store.forceServerHome }
-        />
-    );
-};
 
 export default definePlugin({
     name: "ResurrectHome",
@@ -106,12 +89,23 @@ export default definePlugin({
         }
     ],
 
-    start() {
-        addContextMenuPatch("guild-context", contextMenuPatch);
-    },
+    contextMenus: {
+        "guild-context"(children, props) {
+            settings.use(["forceServerHome"]);
+            if (!props?.guild) return;
 
-    stop() {
-        removeContextMenuPatch("guild-context", contextMenuPatch);
+            const group = findGroupChildrenByChildId("hide-muted-channels", children);
+
+            group?.unshift(
+                <Menu.MenuCheckboxItem
+                    key="force-server-home"
+                    id="force-server-home"
+                    label="Force Server Home"
+                    checked={settings.store.forceServerHome}
+                    action={() => settings.store.forceServerHome = !settings.store.forceServerHome }
+                />
+            );
+        }
     },
 
     useForceServerHome() {
