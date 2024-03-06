@@ -119,9 +119,7 @@ export interface PluginDef {
     /**
      * Allows you to manipulate context menus
      */
-    contextMenus?: {
-        [navId: string]: NavContextMenuPatchCallback;
-    };
+    contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
      * The key will be used as text for the button

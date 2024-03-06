@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -36,11 +37,11 @@ export default definePlugin({
         // sections to manually use SettingsRouter (which only works on desktop
         // but the context menu is usually not available on mobile anyway)
         "user-settings-cog"(children) {
-            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
+            const section = findGroupChildrenByChildId("VencordSettings", children);
             section?.forEach(c => {
                 const id = c?.props?.id;
                 if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
-                    c.props.action = () => SettingsRouter.open(id);
+                    c!.props.action = () => SettingsRouter.open(id);
                 }
             });
         }

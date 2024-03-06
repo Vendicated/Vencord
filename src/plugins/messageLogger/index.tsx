@@ -93,8 +93,9 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
+
     contextMenus: {
-        "message": patchMessageContextMenu,
+        "message": patchMessageContextMenu
     },
 
     start() {

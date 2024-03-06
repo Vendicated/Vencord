@@ -23,7 +23,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenuApi, Menu, React, ReactDOM } from "@webpack/common";
+import { Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -81,24 +81,24 @@ export const settings = definePluginSettings({
 
 
 const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+    const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
+
     children.push(
         <Menu.MenuGroup id="image-zoom">
             <Menu.MenuCheckboxItem
                 id="vc-square"
                 label="Square Lens"
-                checked={settings.store.square}
+                checked={square}
                 action={() => {
-                    settings.store.square = !settings.store.square;
-                    ContextMenuApi.closeContextMenu();
+                    settings.store.square = !square;
                 }}
             />
             <Menu.MenuCheckboxItem
                 id="vc-nearest-neighbour"
                 label="Nearest Neighbour"
-                checked={settings.store.nearestNeighbour}
+                checked={nearestNeighbour}
                 action={() => {
-                    settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
-                    ContextMenuApi.closeContextMenu();
+                    settings.store.nearestNeighbour = !nearestNeighbour;
                 }}
             />
             <Menu.MenuControlItem

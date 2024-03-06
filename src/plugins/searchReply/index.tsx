@@ -70,6 +70,6 @@ export default definePlugin({
     description: "Adds a reply button to search results",
     authors: [Devs.Aria],
     contextMenus: {
-        "message": messageContextMenuPatch,
+        "message": messageContextMenuPatch
     }
 });

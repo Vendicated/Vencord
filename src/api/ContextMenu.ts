@@ -23,14 +23,12 @@ import type { ReactElement } from "react";
 /**
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
- * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
 export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => void;
 /**
  * @param navId The navId of the context menu being patched
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
- * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
 export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => void;
 
@@ -93,14 +91,19 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
  * @param id The id of the child. If an array is specified, all ids will be tried
  * @param children The context menu children
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>, _itemsArray?: Array<ReactElement | null>): Array<ReactElement | null> | null {
+export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>): Array<ReactElement | null> | null {
     for (const child of children) {
         if (child == null) continue;
+
+        if (Array.isArray(child)) {
+            const found = findGroupChildrenByChildId(id, child);
+            if (found !== null) return found;
+        }
 
         if (
             (Array.isArray(id) && id.some(id => child.props?.id === id))
             || child.props?.id === id
-        ) return _itemsArray ?? null;
+        ) return children;
 
         let nextChildren = child.props?.children;
         if (nextChildren) {
@@ -109,7 +112,7 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
                 child.props.children = nextChildren;
             }
 
-            const found = findGroupChildrenByChildId(id, nextChildren, nextChildren);
+            const found = findGroupChildrenByChildId(id, nextChildren);
             if (found !== null) return found;
         }
     }
@@ -131,6 +134,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
         ...props,
         children: cloneMenuChildren(props.children),
     };
+
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
@@ -157,13 +161,18 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     return props;
 }
 
-function cloneMenuChildren(obj) {
+function cloneMenuChildren(obj: ReactElement | Array<ReactElement | null> | null) {
     if (Array.isArray(obj)) {
-        obj = obj.map(cloneMenuChildren);
-    } else if (React.isValidElement(obj)) {
-        obj = React.cloneElement(obj);
-        if (obj.props.children && obj.type !== Menu.MenuControlItem)
-            obj.props.children = cloneMenuChildren(obj.props.children);
+        return obj.map(cloneMenuChildren);
     }
+
+    if (React.isValidElement(obj)) {
+        obj = React.cloneElement(obj);
+
+        if (obj?.props?.children && obj?.type !== Menu.MenuControlItem) {
+            obj.props.children = cloneMenuChildren(obj.props.children);
+        }
+    }
+
     return obj;
 }

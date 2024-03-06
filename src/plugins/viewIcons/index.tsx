@@ -153,12 +153,12 @@ export default definePlugin({
 
     settings,
 
+    openImage,
+
     contextMenus: {
         "user-context": UserContext,
-        "guild-context": GuildContext,
+        "guild-context": GuildContext
     },
-
-    openImage,
 
     patches: [
         // Make pfps clickable

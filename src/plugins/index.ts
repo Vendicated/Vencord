@@ -156,9 +156,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
 
     if (contextMenus) {
-        for (const [k, v] of Object.entries(contextMenus)) {
-            console.log(k, v);
-            addContextMenuPatch(k, v);
+        for (const navId in contextMenus) {
+            addContextMenuPatch(navId, contextMenus[navId]);
         }
     }
 
@@ -201,8 +200,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
 
     if (contextMenus) {
-        for (const [k, v] of Object.entries(contextMenus)) {
-            removeContextMenuPatch(k, v);
+        for (const navId in contextMenus) {
+            removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
 

@@ -30,6 +30,12 @@ const settings = definePluginSettings({
     }
 });
 
+function useForceServerHome() {
+    const { forceServerHome } = settings.use(["forceServerHome"]);
+
+    return forceServerHome;
+}
+
 export default definePlugin({
     name: "ResurrectHome",
     description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking the Server Guide.",
@@ -89,9 +95,12 @@ export default definePlugin({
         }
     ],
 
+    useForceServerHome,
+
     contextMenus: {
         "guild-context"(children, props) {
-            settings.use(["forceServerHome"]);
+            const forceServerHome = useForceServerHome();
+
             if (!props?.guild) return;
 
             const group = findGroupChildrenByChildId("hide-muted-channels", children);
@@ -101,16 +110,10 @@ export default definePlugin({
                     key="force-server-home"
                     id="force-server-home"
                     label="Force Server Home"
-                    checked={settings.store.forceServerHome}
-                    action={() => settings.store.forceServerHome = !settings.store.forceServerHome }
+                    checked={forceServerHome}
+                    action={() => settings.store.forceServerHome = !forceServerHome}
                 />
             );
         }
-    },
-
-    useForceServerHome() {
-        const { forceServerHome } = settings.use(["forceServerHome"]);
-
-        return forceServerHome;
     }
 });
