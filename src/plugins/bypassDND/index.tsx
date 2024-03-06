@@ -115,6 +115,22 @@ const settings = definePluginSettings({
     }
 });
 
+async function showUserNotification(message: Message) {
+    await Notifications.showNotification({
+        title: `${message.author.globalName ?? message.author.username} sent a message in a DM`,
+        body: message.content,
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+    });
+}
+
+async function showChannelNotification(message: Message) {
+    await Notifications.showNotification({
+        title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(message.channel_id).name}`,
+        body: message.content,
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+    });
+}
+
 export default definePlugin({
     name: "BypassDND",
     description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
@@ -128,19 +144,15 @@ export default definePlugin({
             if (message.author.id === currentUser.id) return;
             if (await PresenceStore.getStatus(currentUser.id) != 'dnd') return;
             if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
-                await Notifications.showNotification({
-                    title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(channelId).name}`,
-                    body: message.content,
-                    icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-                });
+                await showChannelNotification(message);
                 return;
             }
-            if (bypasses.users.includes(message.author.id) && channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
-                await Notifications.showNotification({
-                    title: `${message.author.globalName ?? message.author.username} sent a message in a DM`,
-                    body: message.content,
-                    icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-                });
+            if (bypasses.users.includes(message.author.id)) {
+                if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
+                    await showUserNotification(message);
+                } else if (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) {
+                    await showChannelNotification(message);
+                }
             }
         }
     },
