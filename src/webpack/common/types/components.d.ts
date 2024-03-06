@@ -454,3 +454,9 @@ export type Avatar = ComponentType<PropsWithChildren<{
     "aria-hidden"?: boolean;
     "aria-label"?: string;
 }>>;
+
+export type Dots = ComponentType<PropsWithChildren<{
+    dotRadius: number;
+    themed?: boolean;
+    className?: string;
+}>>;

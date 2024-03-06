@@ -17,10 +17,10 @@
 */
 
 import { Margins } from "@utils/margins";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
-import { ackChannel, Bookmark, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, UseBookmark } from "../util";
+import { ackChannel, Bookmark, BookmarkFolder, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, isBookmarkFolder, UseBookmark } from "../util";
 
 const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab, reopenClosedTab } = ChannelTabsUtils;
 
@@ -35,7 +35,6 @@ export function BasicContextMenu() {
         <Menu.MenuGroup>
             <Menu.MenuCheckboxItem
                 checked={showBookmarkBar}
-                key="show-bookmark-bar"
                 id="show-bookmark-bar"
                 label="Bookmark Bar"
                 action={() => {
@@ -46,9 +45,14 @@ export function BasicContextMenu() {
     </Menu.Menu>;
 }
 
-export function EditModal({ modalProps, modalKey, bookmark, onSave }) {
+export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
+    modalProps: ModalProps,
+    modalKey: string,
+    bookmark: Bookmark | BookmarkFolder,
+    onSave: (name: string, color: string) => void;
+}) {
     const [name, setName] = useState(bookmark.name);
-    const [color, setColor] = useState(bookmark.iconColor);
+    const [color, setColor] = useState(isBookmarkFolder(bookmark) ? bookmark.iconColor : undefined);
     const placeholder = bookmarkPlaceholderName(bookmark);
 
     return <ModalRoot {...modalProps}>
@@ -62,7 +66,7 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }) {
                 placeholder={placeholder}
                 onChange={v => setName(v)}
             />
-            {"bookmarks" in bookmark && <>
+            {isBookmarkFolder(bookmark) && <>
                 <Forms.FormTitle className={Margins.top16}>Folder Color</Forms.FormTitle>
                 <Select
                     options={
@@ -80,7 +84,7 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }) {
         </ModalContent>
         <ModalFooter>
             <Button
-                onClick={() => onSave(name || placeholder, color)}
+                onClick={() => onSave(name || placeholder, color!)}
             >Save</Button>
             <Button
                 color={Button.Colors.TRANSPARENT}
@@ -106,11 +110,12 @@ function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
         <ModalContent>
             <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
             <Select
-                options={[...Object.entries(bookmarks).map(([index, bookmark]) => ({
-                    label: bookmark.name,
-                    value: parseInt(index, 10),
-                    _isFolder: "bookmarks" in bookmark
-                })).filter(v => v._isFolder).map(({ label, value }) => ({ label, value })),
+                options={[...Object.entries(bookmarks)
+                    .filter(([, bookmark]) => isBookmarkFolder(bookmark))
+                    .map(([index, bookmark]) => ({
+                        label: bookmark.name,
+                        value: parseInt(index, 10)
+                    })),
                 {
                     label: "Create one",
                     value: -1,
@@ -149,14 +154,14 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
                 color={Button.Colors.RED}
                 onClick={onConfirm}
             >
-                Yes
+                Delete
             </Button>
             <Button
                 color={Button.Colors.TRANSPARENT}
                 look={Button.Looks.LINK}
                 onClick={() => closeModal(modalKey)}
             >
-                No
+                Cancel
             </Button>
         </ModalFooter>
     </ModalRoot>;
@@ -165,7 +170,7 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
 export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
     const { showBookmarkBar, bookmarkNotificationDot } = settings.use(["showBookmarkBar", "bookmarkNotificationDot"]);
     const bookmark = bookmarks[index];
-    const isFolder = "bookmarks" in bookmark;
+    const isFolder = isBookmarkFolder(bookmark);
 
     return <Menu.Menu
         navId="channeltabs-bookmark-context"
@@ -174,7 +179,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
     >
         {bookmarkNotificationDot && !isFolder && <Menu.MenuGroup>
             <Menu.MenuItem
-                key="mark-as-read"
                 id="mark-as-read"
                 label={i18n.Messages.MARK_AS_READ}
                 disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
@@ -183,7 +187,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
         </Menu.MenuGroup>}
         <Menu.MenuGroup>
             <Menu.MenuItem
-                key="edit-bookmark"
                 id="edit-bookmark"
                 label="Edit Bookmark"
                 action={() => {
@@ -203,7 +206,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 }}
             />
             <Menu.MenuItem
-                key="delete-bookmark"
                 id="delete-bookmark"
                 label="Delete Bookmark"
                 action={() => {
@@ -222,7 +224,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                 }}
             />
             <Menu.MenuItem
-                key="add-to-folder"
                 id="add-to-folder"
                 label="Add Bookmark to Folder"
                 disabled={isFolder}
@@ -250,7 +251,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
         <Menu.MenuGroup>
             <Menu.MenuCheckboxItem
                 checked={showBookmarkBar}
-                key="show-bookmark-bar"
                 id="show-bookmark-bar"
                 label="Bookmark Bar"
                 action={() => {
@@ -275,7 +275,6 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
         <Menu.MenuGroup>
             {channel &&
                 <Menu.MenuItem
-                    key="mark-as-read"
                     id="mark-as-read"
                     label={i18n.Messages.MARK_AS_READ}
                     disabled={!ReadStateStore.hasUnread(channel.id)}
@@ -284,7 +283,6 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
             }
             <Menu.MenuCheckboxItem
                 checked={compact}
-                key="toggle-compact-tab"
                 id="toggle-compact-tab"
                 label="Compact"
                 action={() => {
@@ -295,26 +293,22 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
         </Menu.MenuGroup>
         {openTabs.length !== 1 && <Menu.MenuGroup>
             <Menu.MenuItem
-                key="close-tab"
                 id="close-tab"
                 label="Close Tab"
                 action={() => closeTab(tab.id)}
             />
             <Menu.MenuItem
-                key="close-other-tabs"
                 id="close-other-tabs"
                 label="Close Other Tabs"
                 action={() => closeOtherTabs(tab.id)}
             />
             <Menu.MenuItem
-                key="close-right-tabs"
                 id="close-right-tabs"
                 label="Close Tabs to the Right"
                 disabled={openTabs.indexOf(tab) === openTabs.length - 1}
                 action={() => closeTabsToTheRight(tab.id)}
             />
             <Menu.MenuItem
-                key="reopen-closed-tab"
                 id="reopen-closed-tab"
                 label="Reopen Closed Tab"
                 disabled={!(closedTabs.length)}
@@ -324,7 +318,6 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
         <Menu.MenuGroup>
             <Menu.MenuCheckboxItem
                 checked={showBookmarkBar}
-                key="show-bookmark-bar"
                 id="show-bookmark-bar"
                 label="Bookmark Bar"
                 action={() => {

@@ -132,6 +132,10 @@ function replaceArray<T>(array: T[], ...values: T[]) {
     array.push(...values);
 }
 
+export function isBookmarkFolder(bookmark: Bookmark | BookmarkFolder): bookmark is BookmarkFolder {
+    return "bookmarks" in bookmark;
+}
+
 let highestIdIndex = 0;
 const genId = () => highestIdIndex++;
 
@@ -146,9 +150,8 @@ let update = (save = true) => {
 };
 
 function bookmarkPlaceholderName(bookmark: Omit<Bookmark | BookmarkFolder, "name">) {
-    if ("bookmarks" in bookmark) return "Folder";
-    // @ts-ignore
-    const channel = ChannelStore.getChannel(bookmark.channelId);
+    if (isBookmarkFolder(bookmark as Bookmark | BookmarkFolder)) return "Folder";
+    const channel = ChannelStore.getChannel((bookmark as Bookmark).channelId);
 
     if (!channel) return "Bookmark";
     if (channel.name) return `#${channel.name}`;
@@ -374,7 +377,7 @@ function useBookmarks(userId: string): UseBookmark {
         addBookmark: (bookmark, folderIndex) => {
             if (!bookmarks) return;
 
-            if (typeof folderIndex === "number" && !("bookmarks" in bookmarks[userId][folderIndex]))
+            if (typeof folderIndex === "number" && !(isBookmarkFolder(bookmarks[userId][folderIndex])))
                 return logger.error("Attempted to add bookmark to non-folder " + folderIndex, bookmarks);
 
             const name = bookmark.name ?? bookmarkPlaceholderName(bookmark);

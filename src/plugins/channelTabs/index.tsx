@@ -28,23 +28,20 @@ import { Channel, Message } from "discord-types/general";
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
 import { BasicChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "./util";
 
-const contextMenuPatch: NavContextMenuPatchCallback = (children, props) =>
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props: { channel: Channel, messageId?: string; }) =>
     () => {
-        if (!props) return;
-        const { channel, messageId }: { channel: Channel, messageId?: string; } = props;
+        const { channel, messageId } = props;
         const group = findGroupChildrenByChildId("channel-copy-link", children);
-        if (group)
-            group.push(
-                <Menu.MenuItem
-                    label="Open in New Tab"
-                    id="open-link-in-tab"
-                    key="open-link-in-tab"
-                    action={() => ChannelTabsUtils.createTab({
-                        guildId: channel.guild_id,
-                        channelId: channel.id
-                    }, true, messageId)}
-                />
-            );
+        group?.push(
+            <Menu.MenuItem
+                label="Open in New Tab"
+                id="open-link-in-tab"
+                action={() => ChannelTabsUtils.createTab({
+                    guildId: channel.guild_id,
+                    channelId: channel.id
+                }, true, messageId)}
+            />
+        );
     };
 
 export default definePlugin({

@@ -19,7 +19,7 @@
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, GuildStore, i18n, Menu, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, Dots, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, CircleQuestionIcon } from "../util";
@@ -55,10 +55,7 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
 
 function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
     return isTyping
-        ? <div className={cl("typing-indicator")}>
-            {/* @ts-ignore */}
-            <Menu.Dots dotRadius={3} themed={true} />
-        </div>
+        ? <Dots dotRadius={3} themed={true} className={cl("typing-indicator")} />
         : null;
 }
 
