@@ -585,13 +585,15 @@ export default definePlugin({
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
-            this.trimContent(children);
 
             return children;
         };
 
         try {
-            return modifyChildren(lodash.cloneDeep(content));
+            const newContent = modifyChildren(lodash.cloneDeep(content));
+            this.trimContent(newContent);
+
+            return newContent;
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;
