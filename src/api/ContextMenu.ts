@@ -17,7 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
-import { lodash } from "@webpack/common";
+import { Menu, React } from "@webpack/common";
 import type { ReactElement } from "react";
 
 type ContextMenuPatchCallbackReturn = (() => void) | void;
@@ -131,7 +131,10 @@ interface ContextMenuProps {
 const patchedMenus = new WeakSet();
 
 export function _usePatchContextMenu(props: ContextMenuProps) {
-    props = lodash.cloneDeep(props);
+    props = {
+        ...props,
+        children: cloneMenuChildren(props.children),
+    };
     props.contextMenuApiArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
@@ -160,4 +163,15 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     patchedMenus.add(props);
 
     return props;
+}
+
+function cloneMenuChildren(obj) {
+    if (Array.isArray(obj)) {
+        obj = obj.map(cloneMenuChildren);
+    } else if (React.isValidElement(obj)) {
+        obj = React.cloneElement(obj);
+        if (obj.props.children && obj.type !== Menu.MenuControlItem)
+            obj.props.children = cloneMenuChildren(obj.props.children);
+    }
+    return obj;
 }
