@@ -141,22 +141,26 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, guildId, channelId }: IMessageCreate) {
-            if (optimistic || type !== "MESSAGE_CREATE") return;
-            if (message.state === "SENDING") return;
-            if (!message.content) return;
-            const currentUser = UserStore.getCurrentUser();
-            if (message.author.id === currentUser.id) return;
-            if (await PresenceStore.getStatus(currentUser.id) != 'dnd') return;
-            if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
-                await showChannelNotification(message);
-                return;
-            }
-            if (bypasses.users.includes(message.author.id)) {
-                if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
-                    await showUserNotification(message);
-                } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && settings.store.allowOutsideOfDms) {
+            try {
+                if (optimistic || type !== "MESSAGE_CREATE") return;
+                if (message.state === "SENDING") return;
+                if (!message.content) return;
+                const currentUser = UserStore.getCurrentUser();
+                if (message.author.id === currentUser.id) return;
+                if (await PresenceStore.getStatus(currentUser.id) != 'dnd') return;
+                if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
                     await showChannelNotification(message);
+                    return;
                 }
+                if (bypasses.users.includes(message.author.id)) {
+                    if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
+                        await showUserNotification(message);
+                    } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && settings.store.allowOutsideOfDms) {
+                        await showChannelNotification(message);
+                    }
+                }
+            } catch (error) {
+                console.error(error);
             }
         }
     },
