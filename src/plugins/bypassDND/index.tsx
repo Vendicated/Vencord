@@ -80,11 +80,7 @@ type Bypasses = {
     users: string[];
 };
 
-let bypasses: Bypasses = {
-    guilds: [],
-    channels: [],
-    users: [],
-};
+let bypasses: Bypasses;
 
 const settings = definePluginSettings({
     guilds: {
