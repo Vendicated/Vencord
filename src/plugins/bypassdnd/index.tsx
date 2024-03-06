@@ -3,7 +3,7 @@ import { definePluginSettings } from "@api/Settings";
 import { DataStore, Notifications } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Menu, PrivateChannelsStore, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 interface ContextProps {
     channel: Channel;
@@ -119,19 +119,19 @@ export default definePlugin({
             if (message.state === "SENDING") return;
             if (message.author.id === UserStore.getCurrentUser().id) return;
             if (!message.content) return;
+            if (await PresenceStore.getStatus(UserStore.getCurrentUser().id) != 'dnd') return;
 
-            const { guilds, channels, users } = bypasses;
-            if ((guilds.includes(guildId) || channels.includes(channelId)) && (message.content.includes(`<@${UserStore.getCurrentUser().id}>`) || message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id))) {
+            if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${UserStore.getCurrentUser().id}>`) || message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id))) {
                 await Notifications.showNotification({
-                    title: `${message.author.username} sent a message in ${ChannelStore.getChannel(channelId).name}`,
+                    title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(channelId).name}`,
                     body: message.content,
                     icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
                 });
                 return;
             }
-            if (users.includes(message.author.id) && channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
+            if (bypasses.users.includes(message.author.id) && channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
                 await Notifications.showNotification({
-                    title: `${message.author.username} sent a message in a DM`,
+                    title: `${message.author.globalName ?? message.author.username} sent a message in a DM`,
                     body: message.content,
                     icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
                 });
