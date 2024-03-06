@@ -52,8 +52,7 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
 
 // wreq.O is the webpack onChunksLoaded function
 // Discord uses it to await for all the chunks to be loaded before initializing the app
-// We monkey patch it to get immediate access to the webpack require before the app runs,
-// and to monkey patch the initialize app callback to run our listeners before doing it
+// We monkey patch it to also monkey patch the initialize app callback to grab the webpack and run our listeners before doing it
 Object.defineProperty(Function.prototype, "O", {
     set(onChunksLoaded: any) {
         const wreq = this;
