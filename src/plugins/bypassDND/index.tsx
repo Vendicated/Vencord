@@ -74,7 +74,17 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: ContextPro
     ));
 };
 
-let bypasses;
+type Bypasses = {
+    guilds: string[];
+    channels: string[];
+    users: string[];
+};
+
+let bypasses: Bypasses = {
+    guilds: [],
+    channels: [],
+    users: [],
+};
 
 const settings = definePluginSettings({
     guilds: {
@@ -83,7 +93,7 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses["guild"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
+            bypasses["guilds"] = value.replace(/\s/g, '').split(',').filter(id => id.trim() !== '');
             await DataStore.set("bypassdnd", bypasses);
         },
     },
