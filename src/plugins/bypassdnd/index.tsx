@@ -1,7 +1,6 @@
 import { NavContextMenuPatchCallback, addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
-import { DataStore } from "@api/index";
+import { DataStore, Notifications } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, PrivateChannelsStore, UserStore } from "@webpack/common";
@@ -123,18 +122,18 @@ export default definePlugin({
 
             const { guilds, channels, users } = bypasses;
             if ((guilds.includes(guildId) || channels.includes(channelId)) && (message.content.includes(`<@${UserStore.getCurrentUser().id}>`) || message.mentions.some(mention => mention.id === UserStore.getCurrentUser().id))) {
-                await showNotification({
+                await Notifications.showNotification({
                     title: `${message.author.username} sent a message in ${ChannelStore.getChannel(channelId).name}`,
                     body: message.content,
-                    onClick: () => window.location.href = `https://discord.com/channels/${guildId}/${channelId}/${message.id}`
+                    icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
                 });
                 return;
             }
             if (users.includes(message.author.id) && channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
-                await showNotification({
+                await Notifications.showNotification({
                     title: `${message.author.username} sent a message in a DM`,
                     body: message.content,
-                    onClick: () => window.location.href = `https://discord.com/channels/@me/${channelId}/${message.id}`
+                    icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
                 });
             }
         }
