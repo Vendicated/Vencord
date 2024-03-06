@@ -111,7 +111,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "BypassDND",
-    description: "Still get notifications from specific sources.",
+    description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, guildId, channelId }: IMessageCreate) {
