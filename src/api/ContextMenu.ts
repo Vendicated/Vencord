@@ -20,20 +20,19 @@ import { Logger } from "@utils/Logger";
 import { Menu, React } from "@webpack/common";
 import type { ReactElement } from "react";
 
-type ContextMenuPatchCallbackReturn = (() => void) | void;
 /**
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
-export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
+export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => void;
 /**
  * @param navId The navId of the context menu being patched
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  * @returns A callback which is only ran once used to modify the context menu elements (Use to avoid duplicates)
  */
-export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => ContextMenuPatchCallbackReturn;
+export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => void;
 
 const ContextMenuLogger = new Logger("ContextMenu");
 
@@ -127,9 +126,6 @@ interface ContextMenuProps {
     onClose: (callback: (...args: Array<any>) => any) => void;
 }
 
-// TODO this should be phased out eventually
-const patchedMenus = new WeakSet();
-
 export function _usePatchContextMenu(props: ContextMenuProps) {
     props = {
         ...props,
@@ -143,8 +139,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
             try {
-                const callback = patch(props.children, ...props.contextMenuApiArguments);
-                if (!patchedMenus.has(props)) callback?.();
+                patch(props.children, ...props.contextMenuApiArguments);
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
             }
@@ -153,14 +148,11 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
 
     for (const patch of globalPatches) {
         try {
-            const callback = patch(props.navId, props.children, ...props.contextMenuApiArguments);
-            if (!patchedMenus.has(props)) callback?.();
+            patch(props.navId, props.children, ...props.contextMenuApiArguments);
         } catch (err) {
             ContextMenuLogger.error("Global patch errored,", err);
         }
     }
-
-    patchedMenus.add(props);
 
     return props;
 }
