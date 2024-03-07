@@ -30,7 +30,7 @@ import type { ReactNode } from "react";
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
 function VencordPopout(onClose: () => void) {
-    const { useQuickCss } = useSettings();
+    const { useQuickCss } = useSettings(["useQuickCss"]);
 
     const pluginEntries = [] as ReactNode[];
 
