@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -48,18 +48,30 @@ export type VoiceRecorder = ComponentType<{
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
+const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
+
+    children.push(
+        <Menu.MenuItem
+            id="vc-send-vmsg"
+            label={
+                <div className={OptionClasses.optionLabel}>
+                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
+                    <div className={OptionClasses.optionName}>Send voice message</div>
+                </div>
+            }
+            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
+        />
+    );
+};
+
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
-
-    start() {
-        addContextMenuPatch("channel-attach", ctxMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("channel-attach", ctxMenuPatch);
+    contextMenus: {
+        "channel-attach": ctxMenuPatch
     }
 });
 
@@ -234,20 +246,3 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         </ModalRoot>
     );
 }
-
-const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
-
-    children.push(
-        <Menu.MenuItem
-            id="vc-send-vmsg"
-            label={
-                <div className={OptionClasses.optionLabel}>
-                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
-                    <div className={OptionClasses.optionName}>Send voice message</div>
-                </div>
-            }
-            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
-        />
-    );
-};
