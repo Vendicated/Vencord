@@ -816,7 +816,6 @@ export default definePlugin({
                     return { cancel: true };
                 } else {
                     const url = new URL(link);
-                    url.searchParams.set("name", sticker.name);
 
                     messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
                     extra.stickers!.length = 0;
