@@ -89,7 +89,7 @@ export default definePlugin({
 
     blockMessagesWithKeywords(messageList: any) {
         return messageList.reset(messageList.map(
-            message => message.set('blocked', this.containsBlockedKeywords(message))
+            message => message.set("blocked", message["blocked"] || this.containsBlockedKeywords(message))
         ));
     }
 });
