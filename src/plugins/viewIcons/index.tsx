@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -80,7 +80,7 @@ function openImage(url: string) {
     });
 }
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
+const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
     if (!user) return;
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
@@ -109,7 +109,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     ));
 };
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => () => {
+const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => {
     if (!guild) return;
 
     const { id, icon, banner } = guild;
@@ -155,14 +155,9 @@ export default definePlugin({
 
     openImage,
 
-    start() {
-        addContextMenuPatch("user-context", UserContext);
-        addContextMenuPatch("guild-context", GuildContext);
-    },
-
-    stop() {
-        removeContextMenuPatch("user-context", UserContext);
-        removeContextMenuPatch("guild-context", GuildContext);
+    contextMenus: {
+        "user-context": UserContext,
+        "guild-context": GuildContext
     },
 
     patches: [
