@@ -19,19 +19,13 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = LazyComponent(() => {
-    // This doesn't really need to explicitly find Dots' own module, but it's fine
-    const res = find(m => m.Dots && !m.Menu);
-
-    return res?.Dots;
-});
+const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
@@ -53,12 +47,16 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-
+    const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
+    }
+
+    if (!settings.store.includeCurrentChannel) {
+        if (currentChannelId === channelId) return null;
     }
 
     const myId = UserStore.getCurrentUser()?.id;
@@ -107,6 +105,11 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
 }
 
 const settings = definePluginSettings({
+    includeCurrentChannel: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for the currently selected channel",
+        default: true
+    },
     includeMutedChannels: {
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
@@ -130,7 +133,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /channel:(\i).{0,100}?channelEmoji,.{0,250}?\.children.{0,50}?:null/,
+                match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id)"
             }
         },

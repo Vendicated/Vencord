@@ -58,6 +58,9 @@ if (window[WEBPACK_CHUNK]) {
     // normally, this is populated via webpackGlobal.push, which we patch below.
     // However, Discord has their .m prepopulated.
     // Thus, we use this hack to immediately access their wreq.m and patch all already existing factories
+    //
+    // Update: Discord now has TWO webpack instances. Their normal one and sentry
+    // Sentry does not push chunks to the global at all, so this same patch now also handles their sentry modules
     Object.defineProperty(Function.prototype, "m", {
         set(v: any) {
             // When using react devtools or other extensions, we may also catch their webpack here.
@@ -65,8 +68,6 @@ if (window[WEBPACK_CHUNK]) {
             if (new Error().stack?.includes("discord.com")) {
                 logger.info("Found webpack module factory");
                 patchFactories(v);
-
-                delete (Function.prototype as any).m;
             }
 
             Object.defineProperty(this, "m", {
@@ -142,7 +143,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (exports === window) {
+            if (exports === window && require.c) {
                 Object.defineProperty(require.c, id, {
                     value: require.c[id],
                     enumerable: false,
@@ -152,11 +153,9 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 return;
             }
 
-            const numberId = Number(id);
-
             for (const callback of listeners) {
                 try {
-                    callback(exports, numberId);
+                    callback(exports, id);
                 } catch (err) {
                     logger.error("Error in webpack listener", err);
                 }
@@ -166,10 +165,10 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 try {
                     if (filter(exports)) {
                         subscriptions.delete(filter);
-                        callback(exports, numberId);
+                        callback(exports, id);
                     } else if (exports.default && filter(exports.default)) {
                         subscriptions.delete(filter);
-                        callback(exports.default, numberId);
+                        callback(exports.default, id);
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for webpack chunk", err);
@@ -212,7 +211,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                             }
 
                             if (patch.group) {
-                                logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
                                 code = previousCode;
                                 mod = previousMod;
                                 patchedBy.delete(patch.plugin);
@@ -260,7 +259,7 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
 
                         patchedBy.delete(patch.plugin);
                         if (patch.group) {
-                            logger.warn(`Undoing patch ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                            logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
                             code = previousCode;
                             mod = previousMod;
                             break;

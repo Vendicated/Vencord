@@ -29,7 +29,7 @@ import type { Channel, Role } from "discord-types/general";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
-const ChannelListClasses = findByPropsLazy("channelEmoji", "unread", "icon");
+const ChannelListClasses = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
 
 const enum ShowMode {
     LockIcon,
@@ -77,7 +77,7 @@ export default definePlugin({
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
-                    match: /(?=!\(0,\i\.getHasImportantUnread\)\(this\.record\))/,
+                    match: /(?<=&&)(?=!\i\.\i\.hasUnread\(this\.record\.id\))/,
                     replace: "$self.isHiddenChannel(this.record)||"
                 },
                 // Make channels we dont have access to be the same level as normal ones
@@ -162,7 +162,7 @@ export default definePlugin({
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
-                    match: /\i\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.HiddenChannelIcon():null`
                 },
                 // Make voice channels also appear as muted if they are muted
@@ -334,12 +334,12 @@ export default definePlugin({
             replacement: [
                 {
                     // Remove the divider and the open chat button for the HiddenChannelLockScreen
-                    match: /"more-options-popout"\)\),(?<=let{channel:(\i).+?inCall:(\i).+?)/,
+                    match: /"more-options-popout"\)\),(?<=channel:(\i).+?inCall:(\i).+?)/,
                     replace: (m, channel, inCall) => `${m}${inCall}||!$self.isHiddenChannel(${channel},true)&&`
                 },
                 {
                     // Remove invite users button for the HiddenChannelLockScreen
-                    match: /"popup".{0,100}?if\((?<=let{channel:(\i).+?inCall:(\i).+?)/,
+                    match: /"popup".{0,100}?if\((?<=channel:(\i).+?inCall:(\i).+?)/,
                     replace: (m, channel, inCall) => `${m}(${inCall}||!$self.isHiddenChannel(${channel},true))&&`
                 },
             ]

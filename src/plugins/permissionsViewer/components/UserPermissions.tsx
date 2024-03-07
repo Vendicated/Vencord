@@ -18,9 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
-import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { filters, findBulk } from "@webpack";
+import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -36,15 +35,13 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const Classes = proxyLazy(() => {
-    const modules = findBulk(
+const Classes = proxyLazyWebpack(() =>
+    Object.assign({}, ...findBulk(
         filters.byProps("roles", "rolePill", "rolePillBorder"),
         filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
         filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-    );
-
-    return Object.assign({}, ...modules);
-}) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
+    ))
+) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
 
 function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);
@@ -107,6 +104,7 @@ function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: G
                     guildMember.nick || UserStore.getUser(guildMember.userId).username
                 )
             }
+            onDropDownClick={state => settings.store.defaultPermissionsDropdownState = !state}
             defaultState={settings.store.defaultPermissionsDropdownState}
             buttons={[
                 (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
