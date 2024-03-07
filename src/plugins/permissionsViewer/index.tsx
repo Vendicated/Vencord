@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -125,10 +125,10 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 }
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
-    return (children, props) => () => {
+    return (children, props) => {
         if (!props) return;
         if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
-            return children;
+            return;
 
         const group = findGroupChildrenByChildId(childId, children);
 
@@ -173,19 +173,10 @@ export default definePlugin({
 
     UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
 
-    userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
-    channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
-    guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
-
-    start() {
-        addContextMenuPatch("user-context", this.userContextMenuPatch);
-        addContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        addContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("user-context", this.userContextMenuPatch);
-        removeContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        removeContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
-    },
+    contextMenus: {
+        "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),
+        "channel-context": makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
+        "guild-context": makeContextMenuPatch("privacy", MenuItemParentType.Guild),
+        "guild-header-popout": makeContextMenuPatch("privacy", MenuItemParentType.Guild)
+    }
 });
