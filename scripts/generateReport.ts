@@ -406,11 +406,10 @@ async function runtime(token: string) {
             }
         );
 
-        Vencord.Webpack.beforeInitListeners.add(async () => {
+        Vencord.Webpack.beforeInitListeners.add(async webpackRequire => {
             console.log("[PUP_DEBUG]", "Loading all chunks...");
 
-            ({ wreq } = Vencord.Webpack);
-
+            wreq = webpackRequire;
             const sym = Symbol("Vencord.chunkGroupsExtract");
 
             Object.defineProperty(Object.prototype, sym, {
@@ -434,9 +433,9 @@ async function runtime(token: string) {
             // setImmediate to only search the initial factories after Discord initialized the app
             // our beforeInitListeners are called before Discord initializes the app
             setTimeout(() => {
-                for (const factoryId in Vencord.Webpack.wreq.m) {
+                for (const factoryId in wreq.m) {
                     let isResolved = false;
-                    searchAndLoadLazyChunks(Vencord.Webpack.wreq.m[factoryId].toString()).then(() => isResolved = true);
+                    searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
 
                     chunksSearchPromises.push(() => isResolved);
                 }

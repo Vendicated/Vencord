@@ -18,7 +18,7 @@
 
 import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
+import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
@@ -26,13 +26,19 @@ import { patches } from "../plugins";
 import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
-const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 let webpackChunk: any[];
+
+// The property descriptors in in the monkey patches are used to ensure that if anything else (maybe another mod) hooks the same stuff as we do, we don't overwrite their hooks.
+// Of course the other mods should also do this, but we can't control that, so lets at least make sure in our end we do it.
+const webpackChunkPropertyDescriptor = Object.getOwnPropertyDescriptor(window, WEBPACK_CHUNK);
 
 // Patch the window webpack chunk setter to monkey patch the push method before any chunks are pushed
 // This way we can patch the factory of everything being pushed to the modules array
 Object.defineProperty(window, WEBPACK_CHUNK, {
+    ...webpackChunkPropertyDescriptor,
+    configurable: true,
+
     get: () => webpackChunk,
     set: v => {
         if (v?.push) {
@@ -40,31 +46,47 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
                 logger.info(`Patching ${WEBPACK_CHUNK}.push`);
                 patchPush(v);
 
-                // @ts-ignore
-                delete window[WEBPACK_CHUNK];
-                window[WEBPACK_CHUNK] = v;
+                if (webpackChunkPropertyDescriptor) {
+                    Object.defineProperty(window, WEBPACK_CHUNK, webpackChunkPropertyDescriptor);
+                } else {
+                    // @ts-ignore
+                    delete window[WEBPACK_CHUNK];
+                    window[WEBPACK_CHUNK] = v;
+                }
             }
         }
+
         webpackChunk = v;
-    },
-    configurable: true
+        webpackChunkPropertyDescriptor?.set?.call(window, v);
+    }
 });
+
+const oPropertyDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, "O");
 
 // wreq.O is the webpack onChunksLoaded function
 // Discord uses it to await for all the chunks to be loaded before initializing the app
-// We monkey patch it to also monkey patch the initialize app callback to grab the webpack and run our listeners before doing it
+// We monkey patch it to also monkey patch the initialize app callback to get immediate access to the webpack require and run our listeners before doing it
 Object.defineProperty(Function.prototype, "O", {
+    ...oPropertyDescriptor,
+    configurable: true,
+
     set(onChunksLoaded: any) {
-        const wreq = this;
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
-        if (new Error().stack?.includes("discord.com") && wreq.p === "/assets/") {
+        if (new Error().stack?.includes("discord.com") && this.p === "/assets/") {
             logger.info("Found Webpack onChunksLoaded");
-            delete (Function.prototype as any).O;
 
-            const originalOnChunksLoaded = onChunksLoaded.bind(wreq);
+            if (oPropertyDescriptor) {
+                Object.defineProperty(Function.prototype, "O", oPropertyDescriptor);
+            } else {
+                delete (Function.prototype as any).O;
+            }
+
+            const wreq = this;
+
+            const originalOnChunksLoaded = onChunksLoaded.bind(this);
             onChunksLoaded = function (result: any, chunkIds: string[], callback: () => any, priority: number) {
-                if (callback != null && initCallbackRegex.test(callback.toString())) {
+                if (callback != null) {
                     Object.defineProperty(wreq, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
@@ -75,8 +97,9 @@ Object.defineProperty(Function.prototype, "O", {
                         _initWebpack(wreq);
 
                         for (const beforeInitListener of beforeInitListeners) {
-                            beforeInitListener();
+                            beforeInitListener(wreq);
                         }
+
                         originalCallback();
                     };
                 }
@@ -90,9 +113,12 @@ Object.defineProperty(Function.prototype, "O", {
             value: onChunksLoaded,
             configurable: true
         });
-    },
-    configurable: true
+
+        oPropertyDescriptor?.set?.call(this, onChunksLoaded);
+    }
 });
+
+const mPropertyDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, "m");
 
 // wreq.m is the webpack module factory.
 // normally, this is populated via webpackGlobal.push, which we patch below.
@@ -102,6 +128,9 @@ Object.defineProperty(Function.prototype, "O", {
 // Update: Discord now has TWO webpack instances. Their normal one and sentry
 // Sentry does not push chunks to the global at all, so this same patch now also handles their sentry modules
 Object.defineProperty(Function.prototype, "m", {
+    ...mPropertyDescriptor,
+    configurable: true,
+
     set(v: any) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
@@ -114,8 +143,9 @@ Object.defineProperty(Function.prototype, "m", {
             value: v,
             configurable: true
         });
-    },
-    configurable: true
+
+        mPropertyDescriptor?.set?.call(this, v);
+    }
 });
 
 function patchPush(webpackGlobal: any) {

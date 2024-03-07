@@ -72,7 +72,7 @@ export type CallbackFn = (mod: any, id: string) => void;
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
-export const beforeInitListeners = new Set<() => void>();
+export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
 
 export function _initWebpack(webpackRequire: WebpackInstance) {
     wreq = webpackRequire;
@@ -403,8 +403,8 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
 
 /**
  * Extract and load chunks using their entry point
- * @param code An array of all the code the module factory containing the chunk loading must include
- * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the chunk loading found in the module factory
+ * @param code An array of all the code the module factory containing the lazy chunk loading must include
+ * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A promise that resolves when the chunks were loaded
  */
 export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.el\("(.+?)"\)\.then\(\i\.bind\(\i,"(.+?)"\)\)/) {
@@ -448,8 +448,8 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.
  * This is just a wrapper around {@link extractAndLoadChunks} to make our reporter test for your webpack finds.
  *
  * Extract and load chunks using their entry point
- * @param code An array of all the code the module factory containing the chunk loading must include
- * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the chunk loading found in the module factory
+ * @param code An array of all the code the module factory containing the lazy chunk loading must include
+ * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves when the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /\.el\("(.+?)"\)\.then\(\i\.bind\(\i,"(.+?)"\)\)/) {
