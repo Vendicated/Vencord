@@ -29,7 +29,7 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 
 let webpackChunk: any[];
 
-// The property descriptors in in the monkey patches are used to ensure that if anything else (maybe another mod) hooks the same stuff as we do, we don't overwrite their hooks.
+// The property descriptors in the monkey patches are used to ensure that if anything else (maybe another mod) hooks the same stuff as we do, we don't overwrite their hooks.
 // Of course the other mods should also do this, but we can't control that, so lets at least make sure in our end we do it.
 const webpackChunkPropertyDescriptor = Object.getOwnPropertyDescriptor(window, WEBPACK_CHUNK);
 
