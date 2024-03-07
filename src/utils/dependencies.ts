@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type StylusRenderer = require("stylus/lib/renderer");
+import type LessStatic from "less";
+
 import { makeLazy } from "./lazy";
 import { EXTENSION_BASE_URL } from "./web-metadata";
 
@@ -84,3 +87,18 @@ export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wa
 
 // @ts-expect-error
 export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+
+export const getStylus = /* #__PURE__*/ makeLazy(async () => {
+    const stylusScript = await fetch("https://unpkg.com/stylus-lang-bundle@0.58.1/dist/stylus-renderer.min.js").then(r => r.text());
+    // the stylus bundle doesn't have a header that checks for export conditions so we can just patch the script to
+    // return the renderer itself
+    const patchedScript = stylusScript.replace("var StylusRenderer=", "return ");
+    return Function(patchedScript)() as typeof StylusRenderer;
+});
+
+export const getLess = /* #__PURE__*/ makeLazy(async () => {
+    const lessScript = await fetch("https://unpkg.com/less@4.2.0/dist/less.min.js").then(r => r.text());
+    const module = { exports: {} };
+    Function("module", "exports", lessScript)(module, module.exports);
+    return module.exports as LessStatic;
+});

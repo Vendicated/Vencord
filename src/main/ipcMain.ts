@@ -29,7 +29,6 @@ import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/monacoWin.html;base64";
 
-import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
@@ -47,21 +46,11 @@ function readCss() {
     return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
 }
 
-async function listThemes(): Promise<UserThemeHeader[]> {
-    const files = await readdir(THEMES_DIR).catch(() => []);
-
-    const themeInfo: UserThemeHeader[] = [];
-
-    for (const fileName of files) {
-        if (!fileName.endsWith(".css")) continue;
-
-        const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
-        if (data == null) continue;
-
-        themeInfo.push(getThemeInfo(data, fileName));
-    }
-
-    return themeInfo;
+function listThemes(): Promise<{ fileName: string; content: string; }[]> {
+    return readdir(THEMES_DIR)
+        .then(files =>
+            Promise.all(files.map(async fileName => ({ fileName, content: await getThemeData(fileName) }))))
+        .catch(() => []);
 }
 
 function getThemeData(fileName: string) {

@@ -101,7 +101,7 @@ export default definePlugin({
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: require("@components/VencordSettings/ThemesTab").default,
+                element: require("@components/ThemeSettings/ThemesTab").default,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {

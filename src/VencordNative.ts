@@ -8,7 +8,6 @@ import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
 import { PluginIpcMappings } from "main/ipcPlugins";
-import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
@@ -33,7 +32,7 @@ export default {
         uploadTheme: (fileName: string, fileData: string) => invoke<void>(IpcEvents.UPLOAD_THEME, fileName, fileData),
         deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
         getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
-        getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
+        getThemesList: () => invoke<Array<{ fileName: string; content: string; }>>(IpcEvents.GET_THEMES_LIST),
         getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
         getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
     },

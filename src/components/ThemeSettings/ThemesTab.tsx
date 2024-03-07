@@ -16,25 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/Settings";
+import "./themesStyles.css";
+
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
+import { CogWheel, DeleteIcon, PluginIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import PluginModal from "@components/PluginSettings/PluginModal";
+import { AddonCard } from "@components/VencordSettings/AddonCard";
+import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
+import type { ThemeHeader } from "@utils/themes";
+import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
+import { usercssParse } from "@utils/themes/usercss";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import { UserThemeHeader } from "main/themes";
+import { Button, Card, Forms, React, showToast, TabBar, TextArea, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
+import type { UserstyleHeader } from "usercss-meta";
 
-import { AddonCard } from "./AddonCard";
-import { SettingsTab, wrapTab } from "./shared";
+import { isPluginEnabled } from "../../plugins";
+import { UserCSSSettingsModal } from "./UserCSSModal";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -48,6 +55,7 @@ const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue &
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
+
 
 function Validator({ link }: { link: string; }) {
     const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
@@ -97,14 +105,75 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
     );
 }
 
-interface ThemeCardProps {
+interface OtherThemeCardProps {
     theme: UserThemeHeader;
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
 }
 
-function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
+interface UserCSSCardProps {
+    theme: UserstyleHeader;
+    enabled: boolean;
+    onChange: (enabled: boolean) => void;
+    onDelete: () => void;
+    onSettingsReset: () => void;
+}
+
+function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
+    const missingPlugins = useMemo(() =>
+        theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
+
+    return (
+        <AddonCard
+            name={theme.name ?? "Unknown"}
+            description={theme.description}
+            author={theme.author ?? "Unknown"}
+            enabled={enabled}
+            setEnabled={onChange}
+            disabled={missingPlugins && missingPlugins.length > 0}
+            infoButton={
+                <>
+                    {missingPlugins && missingPlugins.length > 0 && (
+                        <Tooltip text={"The following plugins are required, but aren't enabled: " + missingPlugins.join(", ")}>
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <div
+                                    style={{ color: "var(--status-danger" }}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                >
+                                    <PluginIcon />
+                                </div>
+                            )}
+                        </Tooltip>
+                    )}
+                    {theme.vars && (
+                        <div style={{ cursor: "pointer" }} onClick={
+                            () => openModal(modalProps =>
+                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} onSettingsReset={onSettingsReset} />)
+                        }>
+                            <CogWheel />
+                        </div>
+                    )}
+                    {IS_WEB && (
+                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
+                            <DeleteIcon />
+                        </div>
+                    )}
+                </>
+            }
+            footer={
+                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
+                    {!!theme.homepageURL && <Link href={theme.homepageURL}>Homepage</Link>}
+                    {!!(theme.homepageURL && theme.supportURL) && " • "}
+                    {!!theme.supportURL && <Link href={theme.supportURL}>Support</Link>}
+                </Flex>
+            }
+        />
+    );
+}
+
+function OtherThemeCard({ theme, enabled, onChange, onDelete }: OtherThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -151,7 +220,7 @@ function ThemesTab() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
-    const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
+    const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
@@ -160,7 +229,55 @@ function ThemesTab() {
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
-        setUserThemes(themes);
+
+        const themeInfo: ThemeHeader[] = [];
+
+        for (const { fileName, content } of themes) {
+            if (!fileName.endsWith(".css")) continue;
+
+            if ((!IS_WEB || "armcord" in window) && fileName.endsWith(".user.css")) {
+                // handle it as usercss
+                const header = await usercssParse(content, fileName);
+
+                themeInfo.push({
+                    type: "usercss",
+                    header
+                });
+
+                Settings.userCssVars[header.id] ??= {};
+
+                for (const [name, varInfo] of Object.entries(header.vars ?? {})) {
+                    let normalizedValue = "";
+
+                    switch (varInfo.type) {
+                        case "text":
+                        case "color":
+                        case "checkbox":
+                            normalizedValue = varInfo.default;
+                            break;
+                        case "select":
+                            normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
+                            break;
+                        case "range":
+                            normalizedValue = `${varInfo.default}${varInfo.units}`;
+                            break;
+                        case "number":
+                            normalizedValue = String(varInfo.default);
+                            break;
+                    }
+
+                    Settings.userCssVars[header.id][name] ??= normalizedValue;
+                }
+            } else {
+                // presumably BD but could also be plain css
+                themeInfo.push({
+                    type: "other",
+                    header: getThemeInfo(stripBOM(content), fileName)
+                });
+            }
+        }
+
+        setUserThemes(themeInfo);
     }
 
     // When a local theme is enabled/disabled, update the settings
@@ -269,19 +386,33 @@ function ThemesTab() {
                     </Card>
 
                     <div className={cl("grid")}>
-                        {userThemes?.map(theme => (
-                            <ThemeCard
-                                key={theme.fileName}
-                                enabled={settings.enabledThemes.includes(theme.fileName)}
-                                onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
-                                onDelete={async () => {
-                                    onLocalThemeChange(theme.fileName, false);
-                                    await VencordNative.themes.deleteTheme(theme.fileName);
-                                    refreshLocalThemes();
-                                }}
-                                theme={theme}
-                            />
-                        ))}
+                        {userThemes?.map(({ type, header: theme }: ThemeHeader) => (
+                            type === "other" ? (
+                                <OtherThemeCard
+                                    key={theme.fileName}
+                                    enabled={settings.enabledThemes.includes(theme.fileName)}
+                                    onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
+                                    onDelete={async () => {
+                                        onLocalThemeChange(theme.fileName, false);
+                                        await VencordNative.themes.deleteTheme(theme.fileName);
+                                        refreshLocalThemes();
+                                    }}
+                                    theme={theme as UserThemeHeader}
+                                />
+                            ) : (
+                                <UserCSSThemeCard
+                                    key={theme.fileName}
+                                    enabled={settings.enabledThemes.includes(theme.fileName)}
+                                    onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
+                                    onDelete={async () => {
+                                        onLocalThemeChange(theme.fileName, false);
+                                        await VencordNative.themes.deleteTheme(theme.fileName);
+                                        refreshLocalThemes();
+                                    }}
+                                    onSettingsReset={refreshLocalThemes}
+                                    theme={theme as UserstyleHeader}
+                                />
+                            )))}
                     </div>
                 </Forms.FormSection>
             </>

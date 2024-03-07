@@ -256,6 +256,24 @@ export function DeleteIcon(props: IconProps) {
     );
 }
 
+/**
+ * A plugin icon, created by CorellanStoma. https://github.com/CreArts-Community/Settings-Icons
+ */
+export function PluginIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-plugin-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"
+            />
+        </Icon>
+    );
+}
+
 export function PlusIcon(props: IconProps) {
     return (
         <Icon
@@ -287,6 +305,43 @@ export function NoEntrySignIcon(props: IconProps) {
                 fill="currentColor"
                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"
             />
+        </Icon>
+    );
+}
+
+export function PasteIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-paste-icon")}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        </Icon>
+    );
+}
+
+export function ResetIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
         </Icon>
     );
 }

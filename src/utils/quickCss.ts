@@ -17,7 +17,12 @@
 */
 
 import { addSettingsListener, Settings } from "@api/Settings";
+import { Toasts } from "@webpack/common";
 
+import { Logger } from "./Logger";
+import { compileUsercss } from "./themes/usercss/compiler";
+
+const logger = new Logger("QuickCSS");
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -62,15 +67,69 @@ async function initThemes() {
     const links: string[] = [...themeLinks];
 
     if (IS_WEB) {
-        for (const theme of enabledThemes) {
-            const themeData = await VencordNative.themes.getThemeData(theme);
-            if (!themeData) continue;
+        // make copy so we can remove themes that are missing
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
+            try {
+                var themeData = await VencordNative.themes.getThemeData(theme);
+            } catch (e) {
+                logger.warn("Failed to get theme data for", theme, "(has it gone missing?)", e);
+            }
+
+            if (!themeData) {
+                // disable the theme since it has problems
+                Settings.enabledThemes = enabledThemes.splice(enabledThemes.indexOf(theme), 1);
+                continue;
+            }
+
             const blob = new Blob([themeData], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
+            if (theme.endsWith(".user.css")) continue;
+
+            try {
+                // whilst this is unnecessary here, we're doing it to make sure the theme is valid
+                await VencordNative.themes.getThemeData(theme);
+            } catch (e) {
+                logger.warn("Failed to get theme data for", theme, "(has it gone missing?)", e);
+                Settings.enabledThemes = enabledThemes.splice(enabledThemes.indexOf(theme), 1);
+                continue;
+            }
+
+            links.push(`vencord:///themes/${theme}?v=${Date.now()}`);
+        }
+    }
+
+    if (!IS_WEB || "armcord" in window) {
+        for (let i = enabledThemes.length - 1; i >= 0; i--) {
+            const theme = enabledThemes[i];
+
+            if (!theme.endsWith(".user.css")) continue;
+
+            // UserCSS goes through a compile step first
+            const css = await compileUsercss(theme);
+            if (!css) {
+                // let's not leave the user in the dark about this and point them to where they can find the error
+                Toasts.show({
+                    message: `Failed to compile ${theme}, check the console for more info.`,
+                    type: Toasts.Type.FAILURE,
+                    id: Toasts.genId(),
+                    options: {
+                        position: Toasts.Position.BOTTOM
+                    }
+                });
+                Settings.enabledThemes = enabledThemes.splice(enabledThemes.indexOf(theme), 1);
+                continue;
+            }
+
+            const blob = new Blob([css], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
@@ -85,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     addSettingsListener("themeLinks", initThemes);
     addSettingsListener("enabledThemes", initThemes);
+    addSettingsListener("userCssVars", initThemes, false);
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);

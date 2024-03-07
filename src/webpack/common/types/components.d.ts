@@ -190,7 +190,7 @@ export type TextArea = ComponentType<PropsWithRef<Omit<HTMLProps<HTMLTextAreaEle
     onChange(v: string): void;
 }>>;
 
-interface SelectOption {
+export interface SelectOption {
     disabled?: boolean;
     value: any;
     label: string;
