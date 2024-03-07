@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
@@ -117,8 +117,8 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: "Guild" | "User" | "Channel") {
-    const callback: NavContextMenuPatchCallback = (children, props) => () => {
+function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenuPatchCallback {
+    return (children, props) => {
         const value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === i18n.Messages.CHANNEL_ACTIONS_MENU_LABEL) return; // random shit like notification settings
@@ -141,9 +141,7 @@ function MakeContextCallback(name: "Guild" | "User" | "Channel") {
             />
         );
     };
-    return callback;
 }
-
 
 export default definePlugin({
     name: "ViewRaw",
@@ -151,6 +149,11 @@ export default definePlugin({
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     dependencies: ["MessagePopoverAPI"],
     settings,
+    contextMenus: {
+        "guild-context": MakeContextCallback("Guild"),
+        "channel-context": MakeContextCallback("Channel"),
+        "user-context": MakeContextCallback("User")
+    },
 
     start() {
         addButton("ViewRaw", msg => {
@@ -187,16 +190,9 @@ export default definePlugin({
                 onContextMenu: handleContextMenu
             };
         });
-
-        addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        addContextMenuPatch("user-context", MakeContextCallback("User"));
     },
 
     stop() {
-        removeButton("CopyRawMessage");
-        removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        removeContextMenuPatch("user-context", MakeContextCallback("User"));
+        removeButton("ViewRaw");
     }
 });

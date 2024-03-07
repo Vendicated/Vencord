@@ -12,7 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, lodash as _, useStateFromStores } from "@webpack/common";
+import { Button, Forms, useStateFromStores } from "@webpack/common";
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
@@ -200,8 +200,8 @@ function captureOne(str, regex) {
     return (result === null) ? null : result[1];
 }
 
-function mapReject(arr, mapFunc, rejectFunc = _.isNull) {
-    return _.reject(arr.map(mapFunc), rejectFunc);
+function mapReject(arr, mapFunc) {
+    return arr.map(mapFunc).filter(Boolean);
 }
 
 function updateColorVars(color: string) {
