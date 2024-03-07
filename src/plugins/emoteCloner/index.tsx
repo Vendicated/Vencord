@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -312,7 +312,7 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
     if (!favoriteableId) return;
@@ -341,7 +341,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type } = props?.target?.dataset ?? {};
     if (!id) return;
 
@@ -363,14 +363,8 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-        addContextMenuPatch("expression-picker", expressionPickerPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-        removeContextMenuPatch("expression-picker", expressionPickerPatch);
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "expression-picker": expressionPickerPatch
     }
 });

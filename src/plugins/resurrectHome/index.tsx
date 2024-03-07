@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenuApi, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 const settings = definePluginSettings({
     forceServerHome: {
@@ -30,25 +30,11 @@ const settings = definePluginSettings({
     }
 });
 
-const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (!props?.guild) return;
+function useForceServerHome() {
+    const { forceServerHome } = settings.use(["forceServerHome"]);
 
-    const group = findGroupChildrenByChildId("hide-muted-channels", children);
-
-    group?.unshift(
-        <Menu.MenuCheckboxItem
-            key="force-server-home"
-            id="force-server-home"
-            label="Force Server Home"
-            checked={settings.store.forceServerHome}
-            action={() => {
-                settings.store.forceServerHome = !settings.store.forceServerHome;
-                ContextMenuApi.closeContextMenu();
-            }}
-        />
-
-    );
-};
+    return forceServerHome;
+}
 
 export default definePlugin({
     name: "ResurrectHome",
@@ -109,17 +95,25 @@ export default definePlugin({
         }
     ],
 
-    start() {
-        addContextMenuPatch("guild-context", contextMenuPatch);
-    },
+    useForceServerHome,
 
-    stop() {
-        removeContextMenuPatch("guild-context", contextMenuPatch);
-    },
+    contextMenus: {
+        "guild-context"(children, props) {
+            const forceServerHome = useForceServerHome();
 
-    useForceServerHome() {
-        const { forceServerHome } = settings.use(["forceServerHome"]);
+            if (!props?.guild) return;
 
-        return forceServerHome;
+            const group = findGroupChildrenByChildId("hide-muted-channels", children);
+
+            group?.unshift(
+                <Menu.MenuCheckboxItem
+                    key="force-server-home"
+                    id="force-server-home"
+                    label="Force Server Home"
+                    checked={forceServerHome}
+                    action={() => settings.store.forceServerHome = !forceServerHome}
+                />
+            );
+        }
     }
 });
