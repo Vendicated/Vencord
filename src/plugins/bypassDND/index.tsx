@@ -9,7 +9,7 @@ import { DataStore, Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Menu, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
 import { type Channel, type Guild, type Message, type User } from "discord-types/general";
 
 interface ContextProps {
@@ -142,19 +142,14 @@ const settings = definePluginSettings({
     }
 });
 
-async function showUserNotification(message: Message): Promise<void> {
+async function showNotification(message: Message, guildId?: string): Promise<void> {
     await Notifications.showNotification({
-        title: `${message.author.globalName ?? message.author.username} sent a message in a DM`,
+        title: `${message.author.globalName ?? message.author.username} ${guildId ? `sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}` : "sent a message in a DM"}`,
         body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false)
-    });
-}
-
-async function showChannelNotification(message: Message): Promise<void> {
-    await Notifications.showNotification({
-        title: `${message.author.globalName ?? message.author.username} sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}`,
-        body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false)
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+        onClick: function () {
+            NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
+        }
     });
 }
 
@@ -172,14 +167,14 @@ export default definePlugin({
                 if (message.author.id === currentUser.id) return;
                 if (await PresenceStore.getStatus(currentUser.id) !== "dnd") return;
                 if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
-                    await showChannelNotification(message);
+                    await showNotification(message, guildId);
                     return;
                 }
                 if (bypasses.users.includes(message.author.id)) {
                     if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
-                        await showUserNotification(message);
+                        await showNotification(message);
                     } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && (settings.store.allowOutsideOfDms === true)) {
-                        await showChannelNotification(message);
+                        await showNotification(message, guildId);
                     }
                 }
             } catch (error) {
