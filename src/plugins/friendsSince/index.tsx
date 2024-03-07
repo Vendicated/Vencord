@@ -24,7 +24,7 @@ interface UserPopoutData {
 
 export default definePlugin({
     name: "FriendsSince",
-    description: "Show when you became ",
+    description: "Show when you became friends with someone in the user popout",
     authors: [Devs.Elvyra],
     patches: [
         {
