@@ -175,7 +175,7 @@ const settings = definePluginSettings({
     },
     startTime: {
         type: OptionType.NUMBER,
-        description: "Start timestamp (only for custom timestamp mode)",
+        description: "Start timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -185,7 +185,7 @@ const settings = definePluginSettings({
     },
     endTime: {
         type: OptionType.NUMBER,
-        description: "End timestamp (only for custom timestamp mode)",
+        description: "End timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
