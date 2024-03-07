@@ -167,12 +167,17 @@ function patchPush(webpackGlobal: any) {
     // Thus, override bind to use the original push
     handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
 
+    const webpackPushPropertyDescriptor = Object.getOwnPropertyDescriptor(webpackGlobal, "push");
+
     Object.defineProperty(webpackGlobal, "push", {
+        ...webpackPushPropertyDescriptor,
+        configurable: true,
+
         get: () => handlePush,
         set(v) {
             handlePush.$$vencordOriginal = v;
-        },
-        configurable: true
+            webpackPushPropertyDescriptor?.set?.call(webpackGlobal, v);
+        }
     });
 }
 
