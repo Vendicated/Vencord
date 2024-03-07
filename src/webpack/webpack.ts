@@ -475,8 +475,10 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    const [existing, id] = find(filter!, { isIndirect: true, isWaitFor: true });
-    if (existing) return void callback(existing, id);
+    if (cache != null) {
+        const [existing, id] = find(filter, { isIndirect: true, isWaitFor: true });
+        if (existing) return void callback(existing, id);
+    }
 
     subscriptions.set(filter, callback);
 }
