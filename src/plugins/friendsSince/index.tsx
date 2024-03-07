@@ -44,7 +44,7 @@ export default definePlugin({
         return <React.Fragment>
             <div style={{ height: ".65em" }}/>
             <Heading variant="eyebrow" className={headingClassName}>
-                {"Friends Since"}
+                Friends Since
             </Heading>
             <div className={memberSinceContainer}>
                 <Text variant="text-sm/normal" className={textClassName}>
