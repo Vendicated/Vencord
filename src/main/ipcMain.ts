@@ -126,21 +126,21 @@ ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
 
 
 export function initIpc(mainWindow: BrowserWindow) {
-    let quickCssWatcher: FSWatcher;
+    let quickCssWatcher: FSWatcher | undefined;
 
     open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
         quickCssWatcher = watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
-    });
+    }).catch(() => { });
 
     const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
         mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
     }));
 
     mainWindow.once("closed", () => {
-        quickCssWatcher.close();
+        quickCssWatcher?.close();
         themesWatcher.close();
     });
 }
