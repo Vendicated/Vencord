@@ -27,14 +27,26 @@ interface IMessageCreate {
     message: Message;
 }
 
+function icon(enabled?: boolean) {
+    return <svg
+        width="18"
+        height="18"
+    >
+        <circle cx="9" cy="9" r="8" fill={!enabled ? "var(--status-danger)" : "currentColor"} />
+        <circle cx="9" cy="9" r="3.75" fill={!enabled ? "white" : "black"} />
+    </svg>;
+}
+
 const GuildContext: NavContextMenuPatchCallback = (children, { guild }: ContextProps) => () => {
+    const enabled = bypasses.guilds.includes(guild.id);
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-guild-bypass"
-                label={`${bypasses.guilds.includes(guild.id) ? "Remove" : "Add"} DND Bypass`}
+                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
+                icon={() => icon(enabled)}
                 action={() => {
-                    if (bypasses.guilds.includes(guild.id)) bypasses.guilds = bypasses.guilds.filter(id => id !== guild.id);
+                    if (enabled) bypasses.guilds = bypasses.guilds.filter(id => id !== guild.id);
                     else bypasses.guilds.push(guild.id);
                     DataStore.set("bypassdnd", bypasses)
                         .then(() => {
@@ -51,13 +63,15 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: ContextP
 };
 
 const ChannelContext: NavContextMenuPatchCallback = (children, { channel }: ContextProps) => () => {
+    const enabled = bypasses.channels.includes(channel.id);
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-channel-bypass"
-                label={`${bypasses.channels.includes(channel.id) ? "Remove" : "Add"} DND Bypass`}
+                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
+                icon={() => icon(enabled)}
                 action={() => {
-                    if (bypasses.channels.includes(channel.id)) bypasses.channels = bypasses.channels.filter(id => id !== channel.id);
+                    if (enabled) bypasses.channels = bypasses.channels.filter(id => id !== channel.id);
                     else bypasses.channels.push(channel.id);
 
                     DataStore.set("bypassdnd", bypasses)
@@ -75,13 +89,15 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }: Cont
 };
 
 const UserContext: NavContextMenuPatchCallback = (children, { user }: ContextProps) => () => {
+    const enabled = bypasses.users.includes(user.id);
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="dnd-user-bypass"
-                label={`${bypasses.users.includes(user.id) ? "Remove" : "Add"} DND Bypass`}
+                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
+                icon={() => icon(enabled)}
                 action={() => {
-                    if (bypasses.users.includes(user.id)) bypasses.users = bypasses.users.filter(id => id !== user.id);
+                    if (enabled) bypasses.users = bypasses.users.filter(id => id !== user.id);
                     else bypasses.users.push(user.id);
 
                     DataStore.set("bypassdnd", bypasses)
