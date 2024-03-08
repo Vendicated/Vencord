@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "DisableDMCallIdle",
-    description: "Disables automatically getting kicked from a DM voice call after 3 minutes.",
-    authors: [Devs.Nuckyz],
+    name: "FixCodeblockGap",
+    description: "Removes the gap between codeblocks and text below it",
+    authors: [Devs.Grzesiek11],
     patches: [
         {
-            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
+            find: ".default.Messages.DELETED_ROLE_PLACEHOLDER",
             replacement: {
-                match: /(?<=function \i\(\){)(?=.{1,120}\.Messages\.BOT_CALL_IDLE_DISCONNECT)/,
-                replace: "return;"
-            }
-        }
-    ]
+                match: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}`,
+                replace: "$&\\n?",
+            },
+        },
+    ],
 });

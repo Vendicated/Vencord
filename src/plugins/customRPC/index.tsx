@@ -175,7 +175,7 @@ const settings = definePluginSettings({
     },
     startTime: {
         type: OptionType.NUMBER,
-        description: "Start timestamp (only for custom timestamp mode)",
+        description: "Start timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -185,7 +185,7 @@ const settings = definePluginSettings({
     },
     endTime: {
         type: OptionType.NUMBER,
-        description: "End timestamp (only for custom timestamp mode)",
+        description: "End timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -313,12 +313,12 @@ async function createActivity(): Promise<Activity | undefined> {
     switch (settings.store.timestampMode) {
         case TimestampMode.NOW:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000)
+                start: Date.now()
             };
             break;
         case TimestampMode.TIME:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
+                start: Date.now() - (new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()) * 1000
             };
             break;
         case TimestampMode.CUSTOM:

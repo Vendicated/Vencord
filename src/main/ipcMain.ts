@@ -23,7 +23,7 @@ import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
-import { mkdirSync, readFileSync, watch } from "fs";
+import { FSWatcher, mkdirSync, readFileSync, watch } from "fs";
 import { open, readdir, readFile, writeFile } from "fs/promises";
 import { join, normalize } from "path";
 
@@ -126,21 +126,35 @@ ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
 
 
 export function initIpc(mainWindow: BrowserWindow) {
+    let quickCssWatcher: FSWatcher | undefined;
+
     open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
-        watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
+        quickCssWatcher = watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
-    });
+    }).catch(() => { });
 
-    watch(THEMES_DIR, { persistent: false }, debounce(() => {
+    const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
         mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
     }));
+
+    mainWindow.once("closed", () => {
+        quickCssWatcher?.close();
+        themesWatcher.close();
+    });
 }
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
+    const title = "Vencord QuickCSS Editor";
+    const existingWindow = BrowserWindow.getAllWindows().find(w => w.title === title);
+    if (existingWindow && !existingWindow.isDestroyed()) {
+        existingWindow.focus();
+        return;
+    }
+
     const win = new BrowserWindow({
-        title: "Vencord QuickCSS Editor",
+        title,
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {

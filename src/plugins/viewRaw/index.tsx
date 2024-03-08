@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
@@ -27,7 +27,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, Menu, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, i18n, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -117,29 +117,31 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: string) {
-    const callback: NavContextMenuPatchCallback = (children, props) => () => {
-        if ((name === "Guild" && !props.guild) || (name === "User" && !props.user)) return;
+function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenuPatchCallback {
+    return (children, props) => {
+        const value = props[name.toLowerCase()];
+        if (!value) return;
+        if (props.label === i18n.Messages.CHANNEL_ACTIONS_MENU_LABEL) return; // random shit like notification settings
+
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
             const p = lastChild.props;
             if (!Array.isArray(p.children))
                 p.children = [p.children];
-            ({ children } = p);
+
+            children = p.children;
         }
 
         children.splice(-1, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(props[name.toLowerCase()], null, 4), name)}
+                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
                 icon={CopyIcon}
             />
         );
     };
-    return callback;
 }
-
 
 export default definePlugin({
     name: "ViewRaw",
@@ -147,6 +149,11 @@ export default definePlugin({
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     dependencies: ["MessagePopoverAPI"],
     settings,
+    contextMenus: {
+        "guild-context": MakeContextCallback("Guild"),
+        "channel-context": MakeContextCallback("Channel"),
+        "user-context": MakeContextCallback("User")
+    },
 
     start() {
         addButton("ViewRaw", msg => {
@@ -183,16 +190,9 @@ export default definePlugin({
                 onContextMenu: handleContextMenu
             };
         });
-
-        addContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        addContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        addContextMenuPatch("user-context", MakeContextCallback("User"));
     },
 
     stop() {
-        removeButton("CopyRawMessage");
-        removeContextMenuPatch("guild-context", MakeContextCallback("Guild"));
-        removeContextMenuPatch("channel-context", MakeContextCallback("Channel"));
-        removeContextMenuPatch("user-context", MakeContextCallback("User"));
+        removeButton("ViewRaw");
     }
 });

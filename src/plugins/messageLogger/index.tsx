@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -45,7 +45,7 @@ function addDeleteStyle() {
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
 
@@ -94,13 +94,12 @@ export default definePlugin({
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
-    start() {
-        addDeleteStyle();
-        addContextMenuPatch("message", patchMessageContextMenu);
+    contextMenus: {
+        "message": patchMessageContextMenu
     },
 
-    stop() {
-        removeContextMenuPatch("message", patchMessageContextMenu);
+    start() {
+        addDeleteStyle();
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
@@ -122,7 +121,7 @@ export default definePlugin({
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: moment?.call(newMessage.edited_timestamp),
+            timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
         };
     },
