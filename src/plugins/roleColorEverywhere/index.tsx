@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
@@ -112,7 +113,7 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
         const guild = GuildStore.getGuild(guildId);
         const role = guild?.roles[id];
 
@@ -125,7 +126,7 @@ export default definePlugin({
                 {title ?? label} &mdash; {count}
             </span>
         );
-    },
+    }, { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {
