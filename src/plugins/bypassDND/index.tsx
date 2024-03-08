@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, type NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore, Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -37,82 +37,35 @@ function icon(enabled?: boolean) {
     </svg>;
 }
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild }: ContextProps) => () => {
-    const enabled = bypasses.guilds.includes(guild.id);
-    children.splice(-1, 0, (
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="dnd-guild-bypass"
-                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
-                icon={() => icon(enabled)}
-                action={() => {
-                    if (enabled) bypasses.guilds = bypasses.guilds.filter(id => id !== guild.id);
-                    else bypasses.guilds.push(guild.id);
-                    DataStore.set("bypassdnd", bypasses)
-                        .then(() => {
-                            settings.store.guilds = bypasses.guilds.join(", ");
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                }}
+function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatchCallback {
+    return (children, props) => {
+        const type = props[name];
+        if (!type) return;
+        const enabled = bypasses[`${name}s`].includes(type.id);
+        if (name === "user" && type.id === UserStore.getCurrentUser().id) return;
+        children.splice(-1, 0, (
+            <Menu.MenuGroup>
+                <Menu.MenuItem
+                    id={`dnd-${name}-bypass`}
+                    label={`${enabled ? "Remove" : "Add"} DND Bypass`}
+                    icon={() => icon(enabled)}
+                    action={() => {
+                        if (enabled) bypasses[`${name}s`] = bypasses[`${name}s`].filter(id => id !== type.id);
+                        else bypasses[`${name}s`].push(type.id);
 
-            />
-        </Menu.MenuGroup>
-    ));
-};
-
-const ChannelContext: NavContextMenuPatchCallback = (children, { channel }: ContextProps) => () => {
-    const enabled = bypasses.channels.includes(channel.id);
-    children.splice(-1, 0, (
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="dnd-channel-bypass"
-                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
-                icon={() => icon(enabled)}
-                action={() => {
-                    if (enabled) bypasses.channels = bypasses.channels.filter(id => id !== channel.id);
-                    else bypasses.channels.push(channel.id);
-
-                    DataStore.set("bypassdnd", bypasses)
-                        .then(() => {
-                            settings.store.channels = bypasses.channels.join(", ");
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                }}
-
-            />
-        </Menu.MenuGroup>
-    ));
-};
-
-const UserContext: NavContextMenuPatchCallback = (children, { user }: ContextProps) => () => {
-    const enabled = bypasses.users.includes(user.id);
-    if (user.id === UserStore.getCurrentUser().id) return;
-    children.splice(-1, 0, (
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="dnd-user-bypass"
-                label={`${enabled ? "Remove" : "Add"} DND Bypass`}
-                icon={() => icon(enabled)}
-                action={() => {
-                    if (enabled) bypasses.users = bypasses.users.filter(id => id !== user.id);
-                    else bypasses.users.push(user.id);
-
-                    DataStore.set("bypassdnd", bypasses)
-                        .then(() => {
-                            settings.store.users = bypasses.users.join(", ");
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                }}
-            />
-        </Menu.MenuGroup>
-    ));
-};
+                        DataStore.set("bypassdnd", bypasses)
+                            .then(() => {
+                                settings.store[`${name}s`] = bypasses[`${name}s`].join(", ");
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
+                    }}
+                />
+            </Menu.MenuGroup>
+        ));
+    };
+}
 
 interface Bypasses {
     guilds: string[];
@@ -201,16 +154,13 @@ export default definePlugin({
         }
     },
     settings,
+    contextMenus: {
+        "guild-context": ContextCallback("guild"),
+        "channel-context": ContextCallback("channel"),
+        "user-context": ContextCallback("user"),
+    },
     async start() {
-        addContextMenuPatch("guild-context", GuildContext);
-        addContextMenuPatch("channel-context", ChannelContext);
-        addContextMenuPatch("user-context", UserContext);
         bypasses = (await DataStore.get("bypassdnd")) ?? { guilds: [], channels: [], users: [] };
         await DataStore.set("bypassdnd", bypasses);
-    },
-    stop() {
-        removeContextMenuPatch("guild-context", GuildContext);
-        removeContextMenuPatch("channel-context", ChannelContext);
-        removeContextMenuPatch("user-context", UserContext);
     }
 });
