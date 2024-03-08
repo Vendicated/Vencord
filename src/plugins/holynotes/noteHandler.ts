@@ -46,8 +46,9 @@ export default new (class NoteHandler {
     }
 
     public async getAllNotes(): Promise<HolyNotes.Note[]> {
-        // Needs fucking fixing for fuck sakes VEN GIVE ME IMAGE PERMS
-        return { ...await DataStore.values(HolyNoteStore) } ;
+        const data = await DataStore.values(HolyNoteStore);
+        const mainData = data[0];
+        return mainData;
     }
 
     public addNote = async (message: Message, notebook: string) => {
