@@ -60,6 +60,7 @@ export const filters = {
         return m => {
             if (filter(m)) return true;
             if (!m.$$typeof) return false;
+            if (m.type && m.type.render) return filter(m.type.render); // memo + forwardRef
             if (m.type) return filter(m.type); // memos
             if (m.render) return filter(m.render); // forwardRefs
             return false;
