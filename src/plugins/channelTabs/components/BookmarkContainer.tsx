@@ -20,13 +20,12 @@ import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
+import { ackChannel, Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
 
-import { ackChannel, BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, channelTabsSettings as settings, ChannelTabsUtils, CircleQuestionIcon, isBookmarkFolder } from "../util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, CircleQuestionIcon, isBookmarkFolder, settings, switchChannel, useBookmarks } from "../util";
 import { NotificationDot } from "./ChannelTab";
 import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
-const { switchChannel, useBookmarks } = ChannelTabsUtils;
 const cl = classNameFactory("vc-channeltabs-");
 
 const { StarIcon } = findByPropsLazy("StarIcon");

@@ -21,15 +21,10 @@ import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, closeTab, createTab, handleChannelSwitch, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
-
-const {
-    closeTab, createTab, handleChannelSwitch, isTabSelected,
-    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
-} = ChannelTabsUtils;
 
 type TabSet = Record<string, ChannelTabsProps[]>;
 
@@ -39,7 +34,6 @@ const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
 const cl = classNameFactory("vc-channeltabs-");
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
-    const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState("");
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
@@ -65,7 +59,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         setUpdaterFunction(update);
         const onLogin = () => {
             const { id } = UserStore.getCurrentUser();
-            if (id === userId && openTabs.length) return;
+            if (id === userId && openedTabs.length) return;
             setUserId(id);
 
             openStartupTabs({ ...props, userId: id }, setUserId);
@@ -91,7 +85,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
     >
         <div className={cl("tab-container")}>
-            {openTabs.map((tab, i) => <div
+            {openedTabs.map((tab, i) => <div
                 className={cl("tab", { "tab-compact": tab.compact, "tab-selected": isTabSelected(tab.id) })}
                 key={i}
                 onAuxClick={e => {
@@ -107,7 +101,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                     <ChannelTab {...tab} index={i} />
                 </button>
 
-                {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                {openedTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
                     className={cl("button", "close-button", { "close-button-compact": tab.compact, "hoverable": !tab.compact })}
                     onClick={() => closeTab(tab.id)}
                 >
@@ -150,8 +144,8 @@ export function ChannelTabsPreview(p) {
         <Flex flexDirection="row-reverse">
             <Button
                 onClick={() => {
-                    setCurrentTabs([...ChannelTabsUtils.openTabs]);
-                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openTabs] });
+                    setCurrentTabs([...openedTabs]);
+                    setValue({ ...tabSet, [id]: [...openedTabs] });
                 }}
             >Set to currently open tabs</Button>
         </Flex>

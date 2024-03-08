@@ -18,11 +18,10 @@
 
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
+import { ackChannel, Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
-import { ackChannel, Bookmark, BookmarkFolder, bookmarkFolderColors, Bookmarks, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, isBookmarkFolder, UseBookmark } from "../util";
-
-const { bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, toggleCompactTab, reopenClosedTab } = ChannelTabsUtils;
+import { bookmarkFolderColors, bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, hasClosedTabs, isBookmarkFolder, openedTabs, reopenClosedTab, settings, toggleCompactTab } from "../util";
+import { Bookmark, BookmarkFolder, Bookmarks, ChannelTabsProps, UseBookmarkMethods } from "../util/types";
 
 export function BasicContextMenu() {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
@@ -167,7 +166,7 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
     </ModalRoot>;
 }
 
-export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmark[1]; }) {
+export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmarkMethods; }) {
     const { showBookmarkBar, bookmarkNotificationDot } = settings.use(["showBookmarkBar", "bookmarkNotificationDot"]);
     const bookmark = bookmarks[index];
     const isFolder = isBookmarkFolder(bookmark);
@@ -263,7 +262,6 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
 
 export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const channel = ChannelStore.getChannel(tab.channelId);
-    const { openTabs, closedTabs } = ChannelTabsUtils;
     const [compact, setCompact] = useState(tab.compact);
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
@@ -291,7 +289,7 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                 }}
             />
         </Menu.MenuGroup>
-        {openTabs.length !== 1 && <Menu.MenuGroup>
+        {openedTabs.length !== 1 && <Menu.MenuGroup>
             <Menu.MenuItem
                 id="close-tab"
                 label="Close Tab"
@@ -305,13 +303,13 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
             <Menu.MenuItem
                 id="close-right-tabs"
                 label="Close Tabs to the Right"
-                disabled={openTabs.indexOf(tab) === openTabs.length - 1}
+                disabled={openedTabs.indexOf(tab) === openedTabs.length - 1}
                 action={() => closeTabsToTheRight(tab.id)}
             />
             <Menu.MenuItem
                 id="reopen-closed-tab"
                 label="Reopen Closed Tab"
-                disabled={!(closedTabs.length)}
+                disabled={!hasClosedTabs()}
                 action={() => reopenClosedTab()}
             />
         </Menu.MenuGroup>}

@@ -22,9 +22,7 @@ import { findByPropsLazy } from "@webpack";
 import { Avatar, ChannelStore, Dots, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils, CircleQuestionIcon } from "../util";
-
-const { moveDraggedTabs } = ChannelTabsUtils;
+import { ChannelTabsProps, CircleQuestionIcon, moveDraggedTabs, settings } from "../util";
 
 const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
