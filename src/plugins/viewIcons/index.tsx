@@ -16,17 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { GuildMemberStore, Menu } from "@webpack/common";
+import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
 
-const BannerStore = findByPropsLazy("getGuildBannerURL");
 
 interface UserContextProps {
     channel: Channel;
@@ -82,7 +80,7 @@ function openImage(url: string) {
     });
 }
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => () => {
+const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
     if (!user) return;
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
@@ -91,19 +89,19 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
             <Menu.MenuItem
                 id="view-avatar"
                 label="View Avatar"
-                action={() => openImage(BannerStore.getUserAvatarURL(user, true))}
+                action={() => openImage(IconUtils.getUserAvatarURL(user, true))}
                 icon={ImageIcon}
             />
             {memberAvatar && (
                 <Menu.MenuItem
                     id="view-server-avatar"
                     label="View Server Avatar"
-                    action={() => openImage(BannerStore.getGuildMemberAvatarURLSimple({
+                    action={() => openImage(IconUtils.getGuildMemberAvatarURLSimple({
                         userId: user.id,
                         avatar: memberAvatar,
-                        guildId,
+                        guildId: guildId!,
                         canAnimate: true
-                    }, true))}
+                    }))}
                     icon={ImageIcon}
                 />
             )}
@@ -111,7 +109,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     ));
 };
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => () => {
+const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => {
     if (!guild) return;
 
     const { id, icon, banner } = guild;
@@ -124,11 +122,11 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                     id="view-icon"
                     label="View Icon"
                     action={() =>
-                        openImage(BannerStore.getGuildIconURL({
+                        openImage(IconUtils.getGuildIconURL({
                             id,
                             icon,
                             canAnimate: true
-                        }))
+                        })!)
                     }
                     icon={ImageIcon}
                 />
@@ -138,10 +136,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                     id="view-banner"
                     label="View Banner"
                     action={() =>
-                        openImage(BannerStore.getGuildBannerURL({
-                            id,
-                            banner,
-                        }, true))
+                        openImage(IconUtils.getGuildBannerURL(guild, true)!)
                     }
                     icon={ImageIcon}
                 />
@@ -160,14 +155,9 @@ export default definePlugin({
 
     openImage,
 
-    start() {
-        addContextMenuPatch("user-context", UserContext);
-        addContextMenuPatch("guild-context", GuildContext);
-    },
-
-    stop() {
-        removeContextMenuPatch("user-context", UserContext);
-        removeContextMenuPatch("guild-context", GuildContext);
+    contextMenus: {
+        "user-context": UserContext,
+        "guild-context": GuildContext
     },
 
     patches: [
