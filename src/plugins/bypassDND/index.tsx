@@ -9,7 +9,7 @@ import { DataStore, Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Menu, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
 import { type Channel, type Guild, type Message, type User } from "discord-types/general";
 
 interface ContextProps {
@@ -90,6 +90,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }: Cont
 
 const UserContext: NavContextMenuPatchCallback = (children, { user }: ContextProps) => () => {
     const enabled = bypasses.users.includes(user.id);
+    if (user.id === UserStore.getCurrentUser().id) return;
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
@@ -182,14 +183,15 @@ export default definePlugin({
                 const currentUser = UserStore.getCurrentUser();
                 if (message.author.id === currentUser.id) return;
                 if (await PresenceStore.getStatus(currentUser.id) !== "dnd") return;
-                if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && (message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id))) {
+                const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
+                if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && mentioned) {
                     await showNotification(message, guildId);
                     return;
                 }
                 if (bypasses.users.includes(message.author.id)) {
                     if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
                         await showNotification(message);
-                    } else if ((message.content.includes(`<@${currentUser.id}>`) || message.mentions.some(mention => mention.id === currentUser.id)) && (settings.store.allowOutsideOfDms === true)) {
+                    } else if (mentioned && (settings.store.allowOutsideOfDms === true)) {
                         await showNotification(message, guildId);
                     }
                 }
