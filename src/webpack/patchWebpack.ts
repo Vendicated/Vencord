@@ -18,7 +18,7 @@
 
 import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { canonicalizeReplacement } from "@utils/patches";
+import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
@@ -26,6 +26,7 @@ import { patches } from "../plugins";
 import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
+const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 let webpackChunk: any[];
 
@@ -86,7 +87,7 @@ Object.defineProperty(Function.prototype, "O", {
 
             const originalOnChunksLoaded = onChunksLoaded.bind(this);
             onChunksLoaded = function (result: any, chunkIds: string[], callback: () => any, priority: number) {
-                if (callback != null) {
+                if (callback != null && initCallbackRegex.test(callback.toString())) {
                     Object.defineProperty(wreq, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
@@ -102,6 +103,8 @@ Object.defineProperty(Function.prototype, "O", {
 
                         originalCallback();
                     };
+
+                    callback.toString = originalCallback.toString.bind(originalCallback);
                 }
 
                 originalOnChunksLoaded(result, chunkIds, callback, priority);
@@ -166,6 +169,7 @@ function patchPush(webpackGlobal: any) {
     // being applied multiple times.
     // Thus, override bind to use the original push
     handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
+    handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
 
     const webpackPushPropertyDescriptor = Object.getOwnPropertyDescriptor(webpackGlobal, "push");
 
