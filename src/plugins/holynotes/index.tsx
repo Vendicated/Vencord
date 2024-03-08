@@ -16,11 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
+import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import Message from "discord-types/general";
 
 import { Popover as NoteButtonPopover } from "./components/icons/NoteButton";
+import { NoteModal } from "./components/modals/Notebook";
+import noteHandler from "./noteHandler";
+import { HolyNoteStore } from "./utils";
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { message }: { message: Message; }) => {
+
+    console.log(await noteHandler.getAllNotes());
+};
+
 
 export default definePlugin({
     name: "HolyNotes",
@@ -31,20 +45,20 @@ export default definePlugin({
 
     toolboxActions: {
         async "Open Notes"() {
-
+            openModal(props => <NoteModal {...props} />);
         }
     },
+    contextMenus: {
+        "message": messageContextMenuPatch
+    },
+    store: HolyNoteStore,
 
     async start() {
-        addButton("HolyNotes", message => {
-            console.log("HolyNotes", message);
-
+        addButton("HolyNotes", (message) => {
             return {
                 label: "Save Note",
                 icon: NoteButtonPopover,
-                onClick: () => {
-                    console.log("Clicked on Save Note");
-                }
+                onClick: () => noteHandler.addNote(message, "Main")
             };
         });
     },
@@ -53,3 +67,4 @@ export default definePlugin({
         removeButton("HolyNotes");
     }
 });
+
