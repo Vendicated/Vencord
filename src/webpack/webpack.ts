@@ -428,8 +428,8 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.
         return;
     }
 
-    const [, chunkGroupId, entryPointid] = match;
-    if (!chunkGroupId || Number.isNaN(entryPointid)) {
+    const [, chunkGroupId, entryPointId] = match;
+    if (!chunkGroupId || Number.isNaN(entryPointId)) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk group id, or the entry point id returned as the second group wasn't a number");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
@@ -441,7 +441,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.
     }
 
     await (wreq as any).el(chunkGroupId);
-    wreq(entryPointid);
+    wreq(entryPointId);
 }
 
 /**
