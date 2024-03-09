@@ -28,6 +28,21 @@ function icon(enabled?: boolean) {
     </svg>;
 }
 
+function processIds(value) {
+    return value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
+}
+
+async function showNotification(message: Message, guildId?: string): Promise<void> {
+    await Notifications.showNotification({
+        title: `${message.author.globalName ?? message.author.username} ${guildId ? `sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}` : "sent a message in a DM"}`,
+        body: message.content,
+        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+        onClick: function () {
+            NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
+        }
+    });
+}
+
 function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatchCallback {
     return (children, props) => {
         const type = props[name];
@@ -58,38 +73,27 @@ const settings = definePluginSettings({
         description: "Guilds to let bypass (notified when pinged anywhere in guild)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: value => settings.store.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
+        onChange: value => settings.store.guilds = processIds(value)
     },
     channels: {
         type: OptionType.STRING,
         description: "Channels to let bypass (notified when pinged in that channel)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: value => settings.store.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
+        onChange: value => settings.store.channels = processIds(value)
     },
     users: {
         type: OptionType.STRING,
         description: "Users to let bypass (notified for all messages sent in DMs)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: value => settings.store.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
+        onChange: value => settings.store.users = processIds(value)
     },
     allowOutsideOfDms: {
         type: OptionType.BOOLEAN,
         description: "Allow selected users to bypass DND outside of DMs too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)"
     }
 });
-
-async function showNotification(message: Message, guildId?: string): Promise<void> {
-    await Notifications.showNotification({
-        title: `${message.author.globalName ?? message.author.username} ${guildId ? `sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}` : "sent a message in a DM"}`,
-        body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-        onClick: function () {
-            NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
-        }
-    });
-}
 
 export default definePlugin({
     name: "BypassDND",
