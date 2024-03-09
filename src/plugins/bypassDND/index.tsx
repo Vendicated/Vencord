@@ -5,7 +5,7 @@
  */
 
 import { type NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { DataStore, Notifications } from "@api/index";
+import { Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -13,7 +13,6 @@ import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, Priv
 import { type Message } from "discord-types/general";
 
 interface IMessageCreate {
-    optimistic: boolean;
     channelId: string;
     guildId: string;
     message: Message;
@@ -33,7 +32,7 @@ function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatc
     return (children, props) => {
         const type = props[name];
         if (!type) return;
-        const enabled = bypasses[`${name}s`].includes(type.id);
+        const enabled = settings.store[`${name}s`].split(", ").includes(type.id);
         if (name === "user" && type.id === UserStore.getCurrentUser().id) return;
         children.splice(-1, 0, (
             <Menu.MenuGroup>
@@ -42,30 +41,16 @@ function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatc
                     label={`${enabled ? "Remove" : "Add"} DND Bypass`}
                     icon={() => icon(enabled)}
                     action={() => {
-                        if (enabled) bypasses[`${name}s`] = bypasses[`${name}s`].filter(id => id !== type.id);
-                        else bypasses[`${name}s`].push(type.id);
-
-                        DataStore.set("bypassdnd", bypasses)
-                            .then(() => {
-                                settings.store[`${name}s`] = bypasses[`${name}s`].join(", ");
-                            })
-                            .catch(error => {
-                                console.error(error);
-                            });
+                        let bypasses: string[] = settings.store[`${name}s`].split(", ");
+                        if (enabled) bypasses = bypasses.filter(id => id !== type.id);
+                        else bypasses.push(type.id);
+                        settings.store[`${name}s`] = bypasses.join(", ");
                     }}
                 />
             </Menu.MenuGroup>
         ));
     };
 }
-
-interface Bypasses {
-    guilds: string[];
-    channels: string[];
-    users: string[];
-}
-
-let bypasses: Bypasses;
 
 const settings = definePluginSettings({
     guilds: {
@@ -74,8 +59,7 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
-            await DataStore.set("bypassdnd", bypasses);
+            settings.store.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
         }
     },
     channels: {
@@ -84,8 +68,7 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
-            await DataStore.set("bypassdnd", bypasses);
+            settings.store.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
         }
     },
     users: {
@@ -94,8 +77,7 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "Separate with commas",
         onChange: async function (value) {
-            bypasses.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "");
-            await DataStore.set("bypassdnd", bypasses);
+            settings.store.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
         }
     },
     allowOutsideOfDms: {
@@ -120,17 +102,17 @@ export default definePlugin({
     description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
-        async MESSAGE_CREATE({ optimistic, message, guildId, channelId }: IMessageCreate) {
+        async MESSAGE_CREATE({ message, guildId, channelId }: IMessageCreate) {
             try {
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
-                if (optimistic || message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || userStatus !== "dnd") {
+                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || userStatus !== "dnd") {
                     return;
                 }
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
-                if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && mentioned) {
+                if ((settings.store.guilds.split(", ").includes(guildId) || settings.store.channels.split(", ").includes(channelId)) && mentioned) {
                     await showNotification(message, guildId);
-                } else if (bypasses.users.includes(message.author.id)) {
+                } else if (settings.store.users.split(", ").includes(message.author.id)) {
                     const userChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
                     if (channelId === userChannelId || (mentioned && settings.store.allowOutsideOfDms === true)) {
                         await showNotification(message, guildId);
@@ -146,9 +128,5 @@ export default definePlugin({
         "guild-context": ContextCallback("guild"),
         "channel-context": ContextCallback("channel"),
         "user-context": ContextCallback("user"),
-    },
-    async start() {
-        bypasses = (await DataStore.get("bypassdnd")) ?? { guilds: [], channels: [], users: [] };
-        await DataStore.set("bypassdnd", bypasses);
     }
 });
