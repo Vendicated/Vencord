@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ReplyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -27,7 +27,7 @@ import { Message } from "discord-types/general";
 
 const messageUtils = findByPropsLazy("replyToMessage");
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     // make sure the message is in the selected channel
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
     const channel = ChannelStore.getChannel(message?.channel_id);
@@ -38,7 +38,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     const dmGroup = findGroupChildrenByChildId("pin", children);
     if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
         const pinIndex = dmGroup.findIndex(c => c?.props.id === "pin");
-        return dmGroup.splice(pinIndex + 1, 0, (
+        dmGroup.splice(pinIndex + 1, 0, (
             <Menu.MenuItem
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
@@ -46,12 +46,13 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
             />
         ));
+        return;
     }
 
     // servers
     const serverGroup = findGroupChildrenByChildId("mark-unread", children);
     if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
-        return serverGroup.unshift((
+        serverGroup.unshift((
             <Menu.MenuItem
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
@@ -59,6 +60,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
             />
         ));
+        return;
     }
 };
 
@@ -67,12 +69,7 @@ export default definePlugin({
     name: "SearchReply",
     description: "Adds a reply button to search results",
     authors: [Devs.Aria],
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
+    contextMenus: {
+        "message": messageContextMenuPatch
     }
 });
