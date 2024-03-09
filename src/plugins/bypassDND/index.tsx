@@ -10,13 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
-import { type Channel, type Guild, type Message, type User } from "discord-types/general";
-
-interface ContextProps {
-    channel: Channel;
-    user: User;
-    guild: Guild;
-}
+import { type Message } from "discord-types/general";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -139,9 +133,7 @@ export default definePlugin({
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
                 if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && mentioned) {
                     await showNotification(message, guildId);
-                    return;
-                }
-                if (bypasses.users.includes(message.author.id)) {
+                } else if (bypasses.users.includes(message.author.id)) {
                     if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
                         await showNotification(message);
                     } else if (mentioned && (settings.store.allowOutsideOfDms === true)) {
