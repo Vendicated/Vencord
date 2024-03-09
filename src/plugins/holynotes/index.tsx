@@ -32,7 +32,7 @@ import { HolyNoteStore } from "./utils";
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { message }: { message: Message; }) => {
 
-    console.log(await noteHandler.getAllNotes());
+    //console.log(await noteHandler.getAllNotes());
 };
 
 

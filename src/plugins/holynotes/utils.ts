@@ -5,7 +5,6 @@
  */
 
 import { createStore } from "@api/DataStore";
-import { Settings } from "@api/Settings";
 
 
 export const HolyNoteStore = createStore("HolyNotesData", "HolyNotesStore");

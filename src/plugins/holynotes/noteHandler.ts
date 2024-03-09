@@ -38,25 +38,26 @@ export default new (class NoteHandler {
 
 
     public async getNotes(notebook?: string): Promise<Record<string, HolyNotes.Note>> {
-        if (await DataStore.keys(HolyNoteStore).then(keys => keys.includes(notebook))) {
-            return await DataStore.get(notebook, HolyNoteStore) ?? {};
+        if (await DataStore.keys().then(keys => keys.includes(notebook))) {
+            return await DataStore.get(notebook) ?? {};
         } else {
             return this.newNoteBook(notebook).then(() => this.getNotes(notebook));
         }
     }
 
     public async getAllNotes(): Promise<HolyNotes.Note[]> {
-        const data = await DataStore.values(HolyNoteStore);
-        const mainData = data[0];
-        return mainData;
+        return await DataStore.entries();
+    }
+
+    public async getNotebooks(): Promise<string[]> {
+        return await DataStore.keys();
     }
 
     public addNote = async (message: Message, notebook: string) => {
-        const notes = this.getNotes(notebook);
+        const notes = await this.getNotes(notebook);
         const channel = ChannelStore.getChannel(message.channel_id);
-        const newNotes = Object.assign({ [notebook]: { [message.id]: this._formatNote(channel, message) } }, notes);
-
-        await DataStore.set(notebook, newNotes, HolyNoteStore);
+        const newNotes = Object.assign({ [message.id]: this._formatNote(channel, message) }, notes);
+        await DataStore.set(notebook, newNotes);
 
         Toasts.show({
             id: Toasts.genId(),
@@ -68,7 +69,7 @@ export default new (class NoteHandler {
     public deleteNote = async (noteId: string, notebook: string) => {
         const notes = this.getNotes(notebook);
 
-        await DataStore.set(notebook, lodash.omit(notes, noteId), HolyNoteStore);
+        await DataStore.set(notebook, lodash.omit(notes, noteId));
 
         Toasts.show({
             id: Toasts.genId(),
@@ -83,8 +84,8 @@ export default new (class NoteHandler {
 
         newNoteBook[note.id] = note;
 
-        await DataStore.set(from, lodash.omit(origNotebook, note.id), HolyNoteStore);
-        await DataStore.set(to, newNoteBook, HolyNoteStore);
+        await DataStore.set(from, lodash.omit(origNotebook, note.id));
+        await DataStore.set(to, newNoteBook);
 
         Toasts.show({
             id: Toasts.genId(),
@@ -102,8 +103,8 @@ export default new (class NoteHandler {
             });
             return;
         }
-        await DataStore.set(notebookName, {}, HolyNoteStore);
-        Toasts.show({
+        await DataStore.set(notebookName, {});
+        return Toasts.show({
             id: Toasts.genId(),
             message: `Successfully created ${notebookName}.`,
             type: Toasts.Type.SUCCESS,
