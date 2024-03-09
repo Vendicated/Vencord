@@ -8,19 +8,13 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React, RelationshipStore } from "@webpack/common";
-import { Guild, GuildMember } from "discord-types/general";
 
 const { Heading, Text } = findByPropsLazy("Heading");
-const { memberSinceContainer } = findByPropsLazy("memberSinceContainer");
+const container = findByPropsLazy("memberSinceContainer");
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
-
-interface UserPopoutData {
-    userId: string,
-    headingClassName: string,
-    textClassName: string,
-    guild?: Guild,
-    guildMember?: GuildMember,
-}
+const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");
+const locale = findByPropsLazy("getLocale");
+const lastSection = findByPropsLazy("lastSection");
 
 export default definePlugin({
     name: "FriendsSince",
@@ -28,31 +22,32 @@ export default definePlugin({
     authors: [Devs.Elvyra],
     patches: [
         {
-            find: ".USER_PROFILE_MEMBER_SINCE",
-            replacement: [{
-                match: /let.{50,100}=(\i),(\i).{500,1000}\)}\)]}\)]}\)/,
-                replace: "$&,$self.friendsSince($1,$2)"
-            }]
-        }
+            find: "AnalyticsSections.USER_PROFILE}",
+            replacement: {
+                match: /\i.default,{userId:(\i.id).{0,30}}\)/,
+                replace: "$&,$self.friendsSince($1)"
+            }
+        },
     ],
 
-    friendsSince (data: UserPopoutData, locale: string) {
-        const { userId, headingClassName, textClassName } = data;
+    friendsSince (userId: string) {
         const friendsSince = RelationshipStore.getSince(userId);
         if (!friendsSince) return;
 
-        return <React.Fragment>
-            <div style={{ height: ".65em" }}/>
-            <Heading variant="eyebrow" className={headingClassName}>
-                Friends Since
-            </Heading>
-            <div className={memberSinceContainer}>
-                <Text variant="text-sm/normal" className={textClassName}>
-                    {getCreatedAtDate(friendsSince, locale)}
-                </Text>
-            </div>
-        </React.Fragment>;
+        const { body: textClassName, title: headingClassName } = clydeMoreInfo;
 
+        return <div className={lastSection.section}>
+            <React.Fragment>
+                <Heading variant="eyebrow" className={headingClassName}>
+                Friends Since
+                </Heading>
+                <div className={container.memberSinceContainer}>
+                    <Text variant="text-sm/normal" className={textClassName}>
+                        {getCreatedAtDate(friendsSince, locale.getLocale())}
+                    </Text>
+                </div>
+            </React.Fragment>
+        </div>;
     }
 });
 
