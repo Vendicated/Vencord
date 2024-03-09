@@ -17,13 +17,14 @@
 */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, Text, Toasts, UserStore, useState } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -386,15 +387,39 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
+        const gameActivitySetting = StatusSettingsStores.ShowCurrentGame.useSetting();
+        const [showErrorCard, setShowErrorCard] = useState(!gameActivitySetting);
         return (
             <>
+                <ErrorCard style={{ margin: "20px 0px", padding: "25px 30px", display: !showErrorCard ? "none" : "block" }}>
+                    <Text style={{ fontWeight: "bold", marginBottom: "3px" }}>Notice</Text>
+                    <Text>Game activity isn't enabled, people won't be able to see your custom presence!</Text>
+                    <Button
+                        color={Button.Colors.TRANSPARENT}
+                        style={{ marginTop: "10px" }} onClick={() => {
+                            StatusSettingsStores.ShowCurrentGame.updateSetting(true);
+                            setShowErrorCard(false);
+                            const message = "Game activity enabled";
+                            const type = Toasts.Type.SUCCESS;
+                            Toasts.show({
+                                id: Toasts.genId(),
+                                message,
+                                type,
+                                options: {
+                                    position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
+                                },
+                            });
+                        }}>
+                        Enable
+                    </Button>
+                </ErrorCard>
                 <Forms.FormText>
                     Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
