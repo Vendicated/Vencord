@@ -22,27 +22,32 @@ export default definePlugin({
     authors: [Devs.Elvyra],
     patches: [
         {
-            find: "AnalyticsSections.USER_PROFILE}",
+            find: ".AnalyticsSections.USER_PROFILE}",
             replacement: {
                 match: /\i.default,{userId:(\i.id).{0,30}}\)/,
                 replace: "$&,$self.friendsSince($1)"
             }
         },
+        {
+            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            replacement: {
+                match: /\i.default,{userId:(\i)}\)/,
+                replace: "$&,$self.friendsSince($1)"
+            }
+        }
     ],
 
     friendsSince (userId: string) {
         const friendsSince = RelationshipStore.getSince(userId);
         if (!friendsSince) return;
 
-        const { body: textClassName, title: headingClassName } = clydeMoreInfo;
-
         return <div className={lastSection.section}>
             <React.Fragment>
-                <Heading variant="eyebrow" className={headingClassName}>
+                <Heading variant="eyebrow" className={clydeMoreInfo.title}>
                 Friends Since
                 </Heading>
                 <div className={container.memberSinceContainer}>
-                    <Text variant="text-sm/normal" className={textClassName}>
+                    <Text variant="text-sm/normal" className={clydeMoreInfo.body}>
                         {getCreatedAtDate(friendsSince, locale.getLocale())}
                     </Text>
                 </div>
