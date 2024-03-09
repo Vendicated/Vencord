@@ -4,17 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCodeLazy, findByProps, findByPropsLazy } from "@webpack";
+import { classes } from "@utils/misc";
+import { findByCode, findByProps } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
 import { HolyNotes } from "plugins/holynotes/types";
 
-const { message, groupStart, cozyMessage } = findByPropsLazy("cozyMessage");
-const User = findByCodeLazy("isClyde(){");
-const Message = findByCodeLazy("isEdited(){");
-const Channel = findByCodeLazy("ChannelRecordBase");
 
-export default ({
+export const RenderMessage = ({
     note,
     notebook,
     updateParent,
@@ -28,6 +25,10 @@ export default ({
     closeModal?: () => void;
 }) => {
     const ChannelMessage = findByProps("ThreadStarterChatMessage").default;
+    const { message, groupStart, cozyMessage } = findByProps("cozyMessage");
+    const User = findByCode("isClyde(){");
+    const Message = findByCode("isEdited(){");
+    const Channel = findByProps("ChannelRecordBase").ChannelRecordBase;
 
     const [isHoldingDelete, setHoldingDelete] = React.useState(false);
 
@@ -44,11 +45,9 @@ export default ({
         };
     }, []);
 
-    console.log(note, notebook, updateParent, fromDeleteModal, closeModal);
-
-    const render = (
+    return (
         <div
-            className="holy-note"
+            className="vc-holy-note"
             style={{
                 marginBottom: "8px",
                 marginTop: "8px",
@@ -76,8 +75,8 @@ export default ({
                     ));
             }}
         >
-            {/* <ChannelMessage
-                className={`holy-render ${message} ${groupStart} ${cozyMessage}`}
+            <ChannelMessage
+                className={classes("vc-holy-render", message, groupStart, cozyMessage)}
                 key={note.id}
                 groupId={note.id}
                 id={note.id}
@@ -106,13 +105,10 @@ export default ({
                         ),
                     )
                 }
-            /> */}
+            />
 
         </div>
     );
-
-    console.log(render);
-    return render;
 };
 
 const NoteContextMenu = (props) => {

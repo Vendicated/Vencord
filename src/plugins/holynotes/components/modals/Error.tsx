@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByProps } from "@webpack";
 
-const classes = findByCodeLazy("emptyResultsWrap");
 
 export default ({ error }: { error?: Error; } = {}) => {
+    const classes = findByProps("emptyResultsWrap");
+
     if (error) {
         // Error
         console.log(error);

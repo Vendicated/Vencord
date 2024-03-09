@@ -5,11 +5,12 @@
  */
 
 import { DataStore } from "@api/index";
-import { ChannelStore, Toasts, lodash } from "@webpack/common";
+import { ChannelStore, Toasts, UserStore, lodash, showToast } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { Discord, HolyNotes } from "./types";
 import { HolyNoteStore } from "./utils";
+import { findByCode } from "@webpack";
 
 
 export default new (class NoteHandler {
@@ -118,5 +119,31 @@ export default new (class NoteHandler {
             message: `Successfully deleted ${notebookName}.`,
             type: Toasts.Type.SUCCESS,
         });
+    };
+
+    public refreshAvatars = async () => {
+        const notebooks = await this.getAllNotes();
+
+        const User = findByCode("tag", "isClyde");
+
+        for (const notebook in notebooks)
+            for (const noteId in notebooks[notebook]) {
+                const note = notebooks[notebook][noteId];
+                const user = UserStore.getUser(note.author.id) ?? new User({ ...note.author });
+
+                Object.assign(notebooks[notebook][noteId].author, {
+                    avatar: user.avatar,
+                    discriminator: user.discriminator,
+                    username: user.username,
+                });
+            }
+
+        for (const notebook in notebooks) await DataStore.set(notebook, notebooks[notebook]);
+        Toasts.show({
+            id: Toasts.genId(),
+            message: "Successfully refreshed avatars.",
+            type: Toasts.Type.SUCCESS,
+        });
+
     };
 });
