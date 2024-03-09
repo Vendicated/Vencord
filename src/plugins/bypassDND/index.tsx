@@ -44,7 +44,7 @@ function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatc
                         let bypasses: string[] = settings.store[`${name}s`].split(", ");
                         if (enabled) bypasses = bypasses.filter(id => id !== type.id);
                         else bypasses.push(type.id);
-                        settings.store[`${name}s`] = bypasses.join(", ");
+                        settings.store[`${name}s`] = bypasses.filter(id => id.trim() !== "").join(", ");
                     }}
                 />
             </Menu.MenuGroup>
