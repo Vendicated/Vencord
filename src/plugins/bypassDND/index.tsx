@@ -13,9 +13,7 @@ import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, Priv
 import { type Message } from "discord-types/general";
 
 interface IMessageCreate {
-    type: "MESSAGE_CREATE";
     optimistic: boolean;
-    isPushNotification: boolean;
     channelId: string;
     guildId: string;
     message: Message;
@@ -122,21 +120,19 @@ export default definePlugin({
     description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
-        async MESSAGE_CREATE({ optimistic, type, message, guildId, channelId }: IMessageCreate) {
+        async MESSAGE_CREATE({ optimistic, message, guildId, channelId }: IMessageCreate) {
             try {
-                if (optimistic || type !== "MESSAGE_CREATE") return;
-                if (message.state === "SENDING") return;
-                if (message.content === "") return;
                 const currentUser = UserStore.getCurrentUser();
-                if (message.author.id === currentUser.id) return;
-                if (await PresenceStore.getStatus(currentUser.id) !== "dnd") return;
+                const userStatus = await PresenceStore.getStatus(currentUser.id);
+                if (optimistic || message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || userStatus !== "dnd") {
+                    return;
+                }
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
                 if ((bypasses.guilds.includes(guildId) || bypasses.channels.includes(channelId)) && mentioned) {
                     await showNotification(message, guildId);
                 } else if (bypasses.users.includes(message.author.id)) {
-                    if (channelId === await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id)) {
-                        await showNotification(message);
-                    } else if (mentioned && (settings.store.allowOutsideOfDms === true)) {
+                    const userChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
+                    if (channelId === userChannelId || (mentioned && settings.store.allowOutsideOfDms === true)) {
                         await showNotification(message, guildId);
                     }
                 }
