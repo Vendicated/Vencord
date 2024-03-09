@@ -112,6 +112,7 @@ export default ({
     );
 
     console.log(render);
+    return render;
 };
 
 const NoteContextMenu = (props) => {
