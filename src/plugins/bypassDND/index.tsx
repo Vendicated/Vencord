@@ -58,27 +58,21 @@ const settings = definePluginSettings({
         description: "Guilds to let bypass (notified when pinged anywhere in guild)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: async function (value) {
-            settings.store.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
-        }
+        onChange: value => settings.store.guilds = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
     },
     channels: {
         type: OptionType.STRING,
         description: "Channels to let bypass (notified when pinged in that channel)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: async function (value) {
-            settings.store.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
-        }
+        onChange: value => settings.store.channels = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
     },
     users: {
         type: OptionType.STRING,
         description: "Users to let bypass (notified for all messages sent in DMs)",
         default: "",
         placeholder: "Separate with commas",
-        onChange: async function (value) {
-            settings.store.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
-        }
+        onChange: value => settings.store.users = value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ")
     },
     allowOutsideOfDms: {
         type: OptionType.BOOLEAN,
