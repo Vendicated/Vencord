@@ -24,14 +24,14 @@ export default definePlugin({
         {
             find: ".AnalyticsSections.USER_PROFILE}",
             replacement: {
-                match: /\i.default,{userId:(\i.id).{0,30}}\)/,
+                match: /\i.default,\{userId:(\i.id).{0,30}}\)/,
                 replace: "$&,$self.friendsSince($1)"
             }
         },
         {
             find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,{userId:(\i)}\)/,
+                match: /\i.default,\{userId:(\i)}\)/,
                 replace: "$&,$self.friendsSince($1)"
             }
         }
