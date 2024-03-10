@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCodeLazy, findByProps } from "@webpack";
+import { findByProps } from "@webpack";
 
 
 export default ({ error }: { error?: Error; } = {}) => {

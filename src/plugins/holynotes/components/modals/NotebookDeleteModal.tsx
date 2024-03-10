@@ -5,14 +5,14 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps,ModalRoot, ModalSize } from "@utils/modal";
 import { Button, React, Text } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
 
 import Error from "./Error";
 import { RenderMessage } from "./RenderMessage";
 
-export default ({ onClose, notebook, ...props }: { onClose: () => void; notebook: string; }) => {
+export default ({ onClose, notebook, ...props }: ModalProps & { onClose: () => void; notebook: string; }) => {
     const [notes, setNotes] = React.useState({});
 
     React.useEffect(() => {

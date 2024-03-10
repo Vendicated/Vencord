@@ -19,20 +19,31 @@
 import "./style.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import Message from "discord-types/general";
+import { Menu } from "@webpack/common";
 
 import { Popover as NoteButtonPopover } from "./components/icons/NoteButton";
 import { NoteModal } from "./components/modals/Notebook";
-import noteHandler from "./noteHandler";
-import { HolyNoteStore } from "./utils";
+import noteHandler, { noteHandlerCache } from "./noteHandler";
+import { DataStoreToCache } from "./utils";
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { message }: { message: Message; }) => {
-
-    //console.log(await noteHandler.getAllNotes());
+    children.push(
+        <Menu.MenuItem label="Add Messagge To" id="add-message-to-note">
+            {Object.keys(noteHandler.getAllNotes()).map((notebook: string, index: number) => (
+                <Menu.MenuItem
+                    key={index}
+                    label={notebook}
+                    id={notebook}
+                    action={() => noteHandler.addNote(message, notebook)}
+                />
+            ))}
+        </Menu.MenuItem>
+    );
 };
 
 
@@ -51,10 +62,12 @@ export default definePlugin({
     contextMenus: {
         "message": messageContextMenuPatch
     },
-    store: HolyNoteStore,
 
     async start() {
-        addButton("HolyNotes", (message) => {
+        if (await DataStore.keys().then(keys => !keys.includes("Main"))) return noteHandler.newNoteBook("Main");
+        if (!noteHandlerCache.has("Main")) await DataStoreToCache();
+
+        addButton("HolyNotes", message => {
             return {
                 label: "Save Note",
                 icon: NoteButtonPopover,

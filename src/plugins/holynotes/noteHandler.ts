@@ -5,13 +5,14 @@
  */
 
 import { DataStore } from "@api/index";
-import { ChannelStore, Toasts, UserStore, lodash, showToast } from "@webpack/common";
+import { findByCode } from "@webpack";
+import { ChannelStore, lodash, Toasts, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { Discord, HolyNotes } from "./types";
-import { HolyNoteStore } from "./utils";
-import { findByCode } from "@webpack";
+import { saveCacheToDataStore } from "./utils";
 
+export const noteHandlerCache = new Map();
 
 export default new (class NoteHandler {
     private _formatNote(channel: Channel, message: Message): HolyNotes.Note {
@@ -38,27 +39,26 @@ export default new (class NoteHandler {
     }
 
 
-    public async getNotes(notebook?: string): Promise<Record<string, HolyNotes.Note>> {
-        if (await DataStore.keys().then(keys => keys.includes(notebook))) {
-            return await DataStore.get(notebook) ?? {};
-        } else {
-            return this.newNoteBook(notebook).then(() => this.getNotes(notebook));
+    public getNotes(notebook?: string): Record<string, HolyNotes.Note> {
+        return noteHandlerCache.get(notebook);
+    }
+
+    public getAllNotes(): HolyNotes.Note[] {
+        const data = noteHandlerCache.entries();
+        const notes = {};
+        for (const [key, value] of data) {
+            notes[key] = value;
         }
-    }
-
-    public async getAllNotes(): Promise<HolyNotes.Note[]> {
-        return await DataStore.entries();
-    }
-
-    public async getNotebooks(): Promise<string[]> {
-        return await DataStore.keys();
+        return notes;
     }
 
     public addNote = async (message: Message, notebook: string) => {
-        const notes = await this.getNotes(notebook);
+        const notes = this.getNotes(notebook);
         const channel = ChannelStore.getChannel(message.channel_id);
         const newNotes = Object.assign({ [message.id]: this._formatNote(channel, message) }, notes);
-        await DataStore.set(notebook, newNotes);
+
+        noteHandlerCache.set(notebook, newNotes);
+        saveCacheToDataStore(notebook, newNotes);
 
         Toasts.show({
             id: Toasts.genId(),
@@ -70,7 +70,8 @@ export default new (class NoteHandler {
     public deleteNote = async (noteId: string, notebook: string) => {
         const notes = this.getNotes(notebook);
 
-        await DataStore.set(notebook, lodash.omit(notes, noteId));
+        noteHandlerCache.set(notebook, lodash.omit(notes, noteId));
+        saveCacheToDataStore(notebook, lodash.omit(notes, noteId));
 
         Toasts.show({
             id: Toasts.genId(),
@@ -85,8 +86,12 @@ export default new (class NoteHandler {
 
         newNoteBook[note.id] = note;
 
-        await DataStore.set(from, lodash.omit(origNotebook, note.id));
-        await DataStore.set(to, newNoteBook);
+        noteHandlerCache.set(from, lodash.omit(origNotebook, note.id));
+        noteHandlerCache.set(to, newNoteBook);
+
+        saveCacheToDataStore(from, lodash.omit(origNotebook, note.id));
+        saveCacheToDataStore(to, newNoteBook);
+
 
         Toasts.show({
             id: Toasts.genId(),
@@ -96,7 +101,16 @@ export default new (class NoteHandler {
     };
 
     public newNoteBook = async (notebookName: string) => {
-        if (await DataStore.keys().then(keys => keys.includes(notebookName))) {
+        let notebookExists = false;
+
+        for (const key of noteHandlerCache.keys()) {
+            if (key === notebookName) {
+                notebookExists = true;
+                break;
+            }
+        }
+
+        if (notebookExists) {
             Toasts.show({
                 id: Toasts.genId(),
                 message: `Notebook ${notebookName} already exists.`,
@@ -104,7 +118,10 @@ export default new (class NoteHandler {
             });
             return;
         }
-        await DataStore.set(notebookName, {});
+
+        noteHandlerCache.set(notebookName, {});
+        saveCacheToDataStore(notebookName, {} as HolyNotes.Note[]);
+
         return Toasts.show({
             id: Toasts.genId(),
             message: `Successfully created ${notebookName}.`,
@@ -113,7 +130,9 @@ export default new (class NoteHandler {
     };
 
     public deleteNotebook = async (notebookName: string) => {
-        await DataStore.del(notebookName);
+        noteHandlerCache.delete(notebookName);
+        saveCacheToDataStore(notebookName);
+
         Toasts.show({
             id: Toasts.genId(),
             message: `Successfully deleted ${notebookName}.`,
@@ -122,9 +141,11 @@ export default new (class NoteHandler {
     };
 
     public refreshAvatars = async () => {
-        const notebooks = await this.getAllNotes();
+        const notebooks = this.getAllNotes();
 
         const User = findByCode("tag", "isClyde");
+
+
 
         for (const notebook in notebooks)
             for (const noteId in notebooks[notebook]) {
@@ -138,7 +159,11 @@ export default new (class NoteHandler {
                 });
             }
 
-        for (const notebook in notebooks) await DataStore.set(notebook, notebooks[notebook]);
+        for (const notebook in notebooks) {
+            noteHandlerCache.set(notebook, notebooks[notebook]);
+            saveCacheToDataStore(notebook, notebooks[notebook]);
+        }
+
         Toasts.show({
             id: Toasts.genId(),
             message: "Successfully refreshed avatars.",

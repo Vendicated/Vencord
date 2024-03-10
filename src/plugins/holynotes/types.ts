@@ -45,5 +45,3 @@ export declare namespace HolyNotes {
       stickerItems: Discord.Sticker[];
     }
   }
-
-  

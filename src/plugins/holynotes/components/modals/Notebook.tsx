@@ -6,7 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { ContextMenuApi, Flex, Menu, React, TabBar, Text, TextInput } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
@@ -14,9 +14,9 @@ import { HolyNotes } from "plugins/holynotes/types";
 
 import HelpIcon from "../icons/HelpIcon";
 import Errors from "./Error";
+import HelpModal from "./HelpModal";
 import ManageNotebookButton from "./ManageNotebookButton";
 import { RenderMessage } from "./RenderMessage";
-import HelpModal from "./HelpModal";
 
 const renderNotebook = ({
     notes, notebook, updateParent, sortDirection, sortType, searchInput, closeModal
@@ -29,7 +29,7 @@ const renderNotebook = ({
     searchInput: string;
     closeModal: () => void;
 }) => {
-    const messageArray = Object.values(notes).map((note) => (
+    const messageArray = Object.values(notes).map(note => (
         <RenderMessage
             note={note}
             notebook={notebook}
@@ -47,46 +47,27 @@ const renderNotebook = ({
 
     if (sortDirection) messageArray.reverse();
 
-    const filteredMessages = messageArray.filter((message) =>
+    const filteredMessages = messageArray.filter(message =>
         message.props.note.content.toLowerCase().includes(searchInput.toLowerCase()),
     );
 
-    return filteredMessages;
+    return filteredMessages.length > 0 ? filteredMessages : <Errors />;
 };
 
 
 
-export const NoteModal = (props) => {
+export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
     const [sortType, setSortType] = React.useState(true);
     const [searchInput, setSearch] = React.useState("");
     const [sortDirection, setSortDirection] = React.useState(true);
     const [currentNotebook, setCurrentNotebook] = React.useState("Main");
-    const [notes, setNotes] = React.useState({});
-    const [notebooks, setNotebooks] = React.useState([]);
 
     const { quickSelect, quickSelectLabel, quickSelectQuick, quickSelectValue, quickSelectArrow } = findByProps("quickSelect");
 
     const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
 
-    React.useEffect(() => {
-        const update = async () => {
-            const notes = await noteHandler.getNotes(currentNotebook);
-            setNotes(notes);
-        };
-        update();
-    }, [currentNotebook]);
 
-    React.useEffect(() => {
-        async function fetchNotebooks() {
-            console.log(await noteHandler.getNotebooks());
-            const notebooks = await noteHandler.getNotebooks();
-            setNotebooks(notebooks);
-        }
-
-        fetchNotebooks();
-    }, []);
-
-
+    const notes = noteHandler.getNotes(currentNotebook);
     if (!notes) return <></>;
 
     return (
@@ -120,7 +101,7 @@ export const NoteModal = (props) => {
                                 className={classes("vc-notebook-tabbar-bar", "vc-notebook-tabbar")}
                                 selectedItem={currentNotebook}
                                 onItemSelect={setCurrentNotebook}>
-                                {notebooks.map(notebook => (
+                                {Object.keys(noteHandler.getAllNotes()).map(notebook => (
                                     <TabBar.Item key={notebook} id={notebook} className={classes("vc-notebook-tabbar-bar-item", "vc-notebook-tabbar-item")}>
                                         {notebook}
                                     </TabBar.Item>

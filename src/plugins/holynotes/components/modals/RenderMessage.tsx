@@ -5,6 +5,7 @@
  */
 
 import { classes } from "@utils/misc";
+import { ModalProps } from "@utils/modal";
 import { findByCode, findByProps } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
@@ -111,7 +112,13 @@ export const RenderMessage = ({
     );
 };
 
-const NoteContextMenu = (props) => {
+const NoteContextMenu = (
+    props: ModalProps & {
+        updateParent?: () => void;
+        notebook: string;
+        note: HolyNotes.Note;
+        closeModal?: () => void;
+    }) => {
     const { note, notebook, updateParent, closeModal } = props;
 
     return (
@@ -130,7 +137,16 @@ const NoteContextMenu = (props) => {
                             closeModal?.();
                         }}
                     />
-                </Menu.Menu>);
+                    <Menu.MenuItem
+                        label="Delete Note"
+                        id="delete"
+                        action={() => {
+                            noteHandler.deleteNote(note.id, notebook);
+                            updateParent?.();
+                        }}
+                    />
+                </Menu.Menu>
+            );
         }}></div>
     );
 };
