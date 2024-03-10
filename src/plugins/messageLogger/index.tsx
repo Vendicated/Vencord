@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -45,7 +45,7 @@ function addDeleteStyle() {
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
 
@@ -94,13 +94,12 @@ export default definePlugin({
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
-    start() {
-        addDeleteStyle();
-        addContextMenuPatch("message", patchMessageContextMenu);
+    contextMenus: {
+        "message": patchMessageContextMenu
     },
 
-    stop() {
-        removeContextMenuPatch("message", patchMessageContextMenu);
+    start() {
+        addDeleteStyle();
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
