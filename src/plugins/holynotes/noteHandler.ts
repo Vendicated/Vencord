@@ -10,7 +10,7 @@ import { ChannelStore, lodash, Toasts, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { Discord, HolyNotes } from "./types";
-import { saveCacheToDataStore } from "./utils";
+import { deleteCacheFromDataStore, saveCacheToDataStore } from "./utils";
 
 export const noteHandlerCache = new Map();
 
@@ -131,7 +131,7 @@ export default new (class NoteHandler {
 
     public deleteNotebook = async (notebookName: string) => {
         noteHandlerCache.delete(notebookName);
-        saveCacheToDataStore(notebookName);
+        deleteCacheFromDataStore(notebookName);
 
         Toasts.show({
             id: Toasts.genId(),
