@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { ContextMenuApi, Flex, Menu, React, TabBar, Text, TextInput } from "@webpack/common";
+import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, TabBar, Text, TextInput } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
 import { HolyNotes } from "plugins/holynotes/types";
 
@@ -72,7 +72,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
 
     return (
         <ErrorBoundary>
-            <ModalRoot {...props} className={classes("vc-notebook")} size={ModalSize.LARGE} style={{ borderRadius: "8px" }}>
+            <ModalRoot {...props} className={classes("vc-notebook")} size={ModalSize.LARGE}>
                 <Flex className={classes("vc-notebook-flex")} direction={Flex.Direction.VERTICAL} style={{ width: "100%" }}>
                     <div className={classes("vc-notebook-top-section")}>
                         <ModalHeader className={classes("vc-notebook-header-main")}>
@@ -131,7 +131,11 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                             className={quickSelect}
                             onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                                 ContextMenuApi.openContextMenu(event, () => (
-                                    <>
+                                    <Menu.Menu
+                                        navId="sort-menu"
+                                        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                                        aria-label="Sort Menu"
+                                    >
                                         <Menu.MenuItem
                                             label="Ascending / Date Added"
                                             id="ada"
@@ -157,7 +161,8 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                                                 setSortDirection(false);
                                                 setSortType(false);
                                             }} />
-                                    </>
+                                    </Menu.Menu>
+
                                 ));
                             }}
                         >
