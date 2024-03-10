@@ -13,7 +13,10 @@ import { HolyNotes } from "./types";
 
 export async function saveCacheToDataStore(key: string, value?: HolyNotes.Note[]) {
     await DataStore.set(key, value);
+}
 
+export async function deleteCacheFromDataStore(key: string) {
+    await DataStore.del(key);
 }
 
 export async function getFormatedEntries() {
