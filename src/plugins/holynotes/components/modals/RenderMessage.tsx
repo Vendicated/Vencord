@@ -7,7 +7,7 @@
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
 import { findByCode, findByProps } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
+import { Clipboard, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
 import { HolyNotes } from "plugins/holynotes/types";
 
@@ -64,7 +64,7 @@ export const RenderMessage = ({
             onContextMenu={(event: any) => {
                 if (!fromDeleteModal)
                     // @ts-ignore
-                    return open(event, (props: any) => (
+                    return ContextMenuApi.openContextMenu(event, (props: any) => (
                         // @ts-ignore
                         <NoteContextMenu
                             {...Object.assign({}, props, { onClose: close })}
@@ -94,11 +94,11 @@ export const RenderMessage = ({
                             {
                                 author: new User({ ...note.author }),
                                 timestamp: new Date(note.timestamp),
+                                // @ts-ignore
                                 embeds: note.embeds.map((embed: { timestamp: string | number | Date; }) =>
                                     embed.timestamp
                                         ? Object.assign(embed, {
-                                            // @ts-ignore
-                                            timestamp: new Moment(new Date(embed.timestamp)),
+                                            timestamp: new Date(embed.timestamp),
                                         })
                                         : embed,
                                 ),
@@ -122,31 +122,66 @@ const NoteContextMenu = (
     const { note, notebook, updateParent, closeModal } = props;
 
     return (
-        <div onContextMenu={e => {
-            ContextMenuApi.openContextMenu(e, () =>
-                <Menu.Menu
-                    navId="holynotes"
-                    onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                    aria-label="Holy Notes"
+        <Menu.Menu
+            navId="holynotes"
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label="Holy Notes"
+        >
+            <Menu.MenuItem
+                label="Jump To Message"
+                id="jump"
+                action={() => {
+                    NavigationRouter.transitionTo(`/channels/${note.guild_id ?? "@me"}/${note.channel_id}/${note.id}`);
+                    closeModal?.();
+                }}
+            />
+            <Menu.MenuItem
+                label="Copy Text"
+                id="copy-text"
+                action={() => Clipboard.copy(note.content)}
+            />
+            {note?.attachments.length ? (
+                <Menu.MenuItem
+                    label="Copy Attachment URL"
+                    id="copy-url"
+                    action={() => Clipboard.copy(note.attachments[0].url)}
+                />) : null}
+            <Menu.MenuItem
+                color="danger"
+                label="Delete Note"
+                id="delete"
+                action={() => {
+                    noteHandler.deleteNote(note.id, notebook);
+                    updateParent?.();
+                }}
+            />
+            {Object.keys(noteHandler.getAllNotes()).length !== 1 ? (
+                <Menu.MenuItem
+                    label="Move Note"
+                    id="move-note"
                 >
-                    <Menu.MenuItem
-                        label="Jump To Message"
-                        id="jump"
-                        action={() => {
-                            NavigationRouter.transitionTo(`/channels/${note.guild_id ?? "@me"}/${note.channel_id}/${note.id}`);
-                            closeModal?.();
-                        }}
-                    />
-                    <Menu.MenuItem
-                        label="Delete Note"
-                        id="delete"
-                        action={() => {
-                            noteHandler.deleteNote(note.id, notebook);
-                            updateParent?.();
-                        }}
-                    />
-                </Menu.Menu>
-            );
-        }}></div>
+                    {Object.keys(noteHandler.getAllNotes()).map((key: string) => {
+                        if (key !== notebook) {
+                            return (
+                                <Menu.MenuItem
+                                    label={`Move to ${key}`}
+                                    id={key}
+                                    action={() => {
+                                        noteHandler.moveNote(note, notebook, key);
+                                        updateParent?.();
+                                    }}
+                                />
+                            );
+                        }
+                    })}
+                </Menu.MenuItem>
+            ) : null}
+            <Menu.MenuItem
+                label="Copy ID"
+                id="copy-id"
+                action={() => Clipboard.copy(note.id)}
+            />
+        </Menu.Menu>
     );
+
 };
