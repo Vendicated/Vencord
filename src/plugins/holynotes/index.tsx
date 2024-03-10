@@ -24,7 +24,8 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Menu } from "@webpack/common";
+import { ChannelStore, Menu } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import { Popover as NoteButtonPopover } from "./components/icons/NoteButton";
 import { NoteModal } from "./components/modals/Notebook";
@@ -33,10 +34,9 @@ import { DataStoreToCache } from "./utils";
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { message }: { message: Message; }) => {
     children.push(
-        <Menu.MenuItem label="Add Messagge To" id="add-message-to-note">
+        <Menu.MenuItem label="Add Message To" id="add-message-to-note">
             {Object.keys(noteHandler.getAllNotes()).map((notebook: string, index: number) => (
                 <Menu.MenuItem
-                    key={index}
                     label={notebook}
                     id={notebook}
                     action={() => noteHandler.addNote(message, notebook)}
@@ -71,6 +71,8 @@ export default definePlugin({
             return {
                 label: "Save Note",
                 icon: NoteButtonPopover,
+                message: message,
+                channel: ChannelStore.getChannel(message.channel_id),
                 onClick: () => noteHandler.addNote(message, "Main")
             };
         });
