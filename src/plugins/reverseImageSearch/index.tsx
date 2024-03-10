@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Flex } from "@components/Flex";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -84,7 +84,7 @@ function makeSearchItem(src: string) {
     );
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     if (props?.reverseImageSearchType !== "img") return;
 
     const src = props.itemHref ?? props.itemSrc;
@@ -93,7 +93,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     group?.push(makeSearchItem(src));
 };
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!props?.src) return;
 
     const group = findGroupChildrenByChildId("copy-native-link", children) ?? children;
@@ -115,14 +115,8 @@ export default definePlugin({
             }
         }
     ],
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-        addContextMenuPatch("image-context", imageContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-        removeContextMenuPatch("image-context", imageContextMenuPatch);
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "image-context": imageContextMenuPatch
     }
 });
