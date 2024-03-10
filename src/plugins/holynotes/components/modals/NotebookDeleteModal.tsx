@@ -13,15 +13,7 @@ import Error from "./Error";
 import { RenderMessage } from "./RenderMessage";
 
 export default ({ onClose, notebook, ...props }: ModalProps & { onClose: () => void; notebook: string; }) => {
-    const [notes, setNotes] = React.useState({});
-
-    React.useEffect(() => {
-        const update = async () => {
-            const notes = await noteHandler.getNotes(notebook);
-            setNotes(notes);
-        };
-        update();
-    }, []);
+    const notes = noteHandler.getNotes(notebook);
 
     if (!notes) return <></>;
 
