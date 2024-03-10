@@ -25,3 +25,14 @@
     padding-top: 0;
     padding-bottom: 12px;
 }
+
+.vc-uvs-private-channel {
+    margin: 1rem;
+    padding: 12px;
+    background-color: var(--profile-body-background-color);
+    border-radius: 8px;
+}
+
+.vc-uvs-private-channel>div {
+    padding: 0;
+}
