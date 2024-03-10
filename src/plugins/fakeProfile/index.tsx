@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { removeDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,12 +25,6 @@ const cl = classNameFactory("vc-decoration-");
 
 import style from "./index.css?managed";
 
-type Badge = {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-};
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -45,51 +38,11 @@ interface UserProfileData {
     profile_effect: string;
     banner: string;
     avatar: string;
-    badges: Badge[];
     decoration: string;
 }
 
 
 let UsersData = {} as Record<string, UserProfileData>;
-const UserBadges: Record<string, ProfileBadge[]> = {};
-const addBadgesForAllUsers = () => {
-    Object.keys(UsersData).forEach(userId => {
-        const userBadges_ = UsersData[userId].badges;
-        if (userBadges_) {
-            userBadges_.forEach((badge: Badge) => {
-                const newBadge: ProfileBadge = {
-                    description: badge.description,
-                    image: badge.icon,
-                    position: BadgePosition.START,
-                    props: {
-                        style: {
-                            borderRadius: "50%",
-                            transform: "scale(0.9)"
-                        }
-                    },
-                    shouldShow: user => user.user.id === userId,
-                };
-                addBadge(newBadge);
-                if (!UserBadges[userId]) {
-                    UserBadges[userId] = [];
-                }
-                UserBadges[userId].push(newBadge);
-            });
-        }
-    });
-};
-
-const removeBadgesForAllUsers = () => {
-    Object.keys(UserBadges).forEach(userId => {
-        const userBadges = UserBadges[userId];
-        if (userBadges) {
-            userBadges.forEach(badge => {
-                removeBadge(badge);
-            });
-            UserBadges[userId] = [];
-        }
-    });
-};
 async function loadfakeProfile(noCache = false) {
     UsersData = {};
     const init = {} as RequestInit;
@@ -201,53 +154,6 @@ function ImageIcon(path: string) {
         </Tooltip>
     );
 }
-const BadgeIcon = ({ user, badgeImg, badgeText }: { user: User, badgeImg: string, badgeText: string; }) => {
-    if (UsersData[user.id]?.badges) {
-        const Icon = ImageIcon(badgeImg);
-        const tooltip = badgeText;
-        return <Icon tooltip={tooltip} />;
-    } else {
-        return null;
-    }
-};
-
-
-
-const BadgeMain = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
-
-    const validBadges = UsersData[user.id]?.badges;
-    if (!validBadges || validBadges.length === 0) return null;
-
-    const icons = validBadges.map((badge: Badge, index: number) => (
-        <BadgeIcon
-            key={index}
-            user={user}
-            badgeImg={badge.icon}
-            badgeText={badge.description}
-        />
-    ));
-
-    return (
-        <span
-            className="custom-badge"
-            style={{
-                display: "inline-flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginLeft: wantMargin ? 4 : 0,
-                verticalAlign: "top",
-                position: "relative",
-                top: wantTopMargin ? 2 : 0,
-                padding: !wantMargin ? 1 : 0,
-                gap: 2
-            }}
-        >
-            {icons}
-        </span>
-    );
-};
-
-
 
 export default definePlugin({
     name: "fakeProfile",
@@ -257,16 +163,6 @@ export default definePlugin({
     async start() {
         enableStyle(style);
         await loadfakeProfile();
-        if (settings.store.enableCustomBadges) {
-            addBadgesForAllUsers();
-        }
-        if (settings.store.showCustomBadgesinmessage) {
-            addDecoration("custom-badge", props =>
-                <ErrorBoundary noop>
-                    <BadgeMain user={props.message?.author} wantTopMargin={true} />
-                </ErrorBoundary>
-            );
-        }
         const response = await fetch(BASE_URL + "/fakeProfile");
         const data = await response.json();
         if (data.version !== VERSION) {
@@ -507,11 +403,9 @@ export default definePlugin({
             <Flex>
                 <Button
                     onClick={async () => {
-                        removeBadgesForAllUsers();
                         await loadfakeProfile(true);
-                        addBadgesForAllUsers();
                         Toasts.show({
-                            message: "Updated fakeProfile badges!",
+                            message: "Updated fakeProfile!",
                             id: Toasts.genId(),
                             type: Toasts.Type.SUCCESS
                         });
