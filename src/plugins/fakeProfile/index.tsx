@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { removeDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -15,7 +14,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Button, Forms, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, Toasts, useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
@@ -113,22 +112,10 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    enableCustomBadges: {
-        description: "Allows you to use custom badges",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
-    },
     enableAvatarDecorations: {
         description: "Allows you to use discord avatar decorations",
         type: OptionType.BOOLEAN,
         default: false
-    },
-    showCustomBadgesinmessage: {
-        description: "Show custom badges in message",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
     },
     nitroFirst: {
         description: "Banner/Avatar to use if both Nitro and fakeProfile Banner/Avatar are present",
@@ -145,15 +132,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-function ImageIcon(path: string) {
-    return ({ tooltip }: { tooltip: string; }) => (
-        <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
-                <img {...tooltipProps} src={path} height={20} width={20} />
-            )}
-        </Tooltip>
-    );
-}
 
 export default definePlugin({
     name: "fakeProfile",
@@ -174,11 +152,6 @@ export default definePlugin({
                     position: Toasts.Position.BOTTOM
                 }
             });
-        }
-    },
-    stop() {
-        if (settings.store.showCustomBadgesinmessage) {
-            removeDecoration("custom-badge");
         }
     },
     patches: [
