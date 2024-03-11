@@ -16,101 +16,66 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
+import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { SelectedChannelStore, Tooltip, useStateFromStores } from "@webpack/common";
 import { FluxStore } from "@webpack/types";
 
-const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
-const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
+import { MemberCount } from "./MemberCount";
+
+export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
+export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
+const settings = definePluginSettings({
+    toolTip: {
+        type: OptionType.BOOLEAN,
+        description: "If the member count should be displayed on the server tooltip",
+        default: true,
+        restartNeeded: true
+    },
+    memberList: {
+        type: OptionType.BOOLEAN,
+        description: "If the member count should be displayed on the member list",
+        default: true,
+        restartNeeded: true
+    }
+});
+
 const sharedIntlNumberFormat = new Intl.NumberFormat();
-const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
-
-function MemberCount() {
-    const { id: channelId, guild_id: guildId } = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
-    const { groups } = useStateFromStores(
-        [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, channelId)
-    );
-    const total = useStateFromStores(
-        [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId)
-    );
-
-    if (total == null)
-        return null;
-
-    const online =
-        (groups.length === 1 && groups[0].id === "unknown")
-            ? 0
-            : groups.reduce((count, curr) => count + (curr.id === "offline" ? 0 : curr.count), 0);
-
-    return (
-        <Flex id="vc-membercount" style={{
-            marginTop: "1em",
-            paddingInline: "1em",
-            justifyContent: "center",
-            alignContent: "center",
-            gap: 0
-        }}>
-            <Tooltip text={`${numberFormat(online)} online in this channel`} position="bottom">
-                {props => (
-                    <div {...props}>
-                        <span
-                            style={{
-                                backgroundColor: "var(--green-360)",
-                                width: "12px",
-                                height: "12px",
-                                borderRadius: "50%",
-                                display: "inline-block",
-                                marginRight: "0.5em"
-                            }}
-                        />
-                        <span style={{ color: "var(--green-360)" }}>{numberFormat(online)}</span>
-                    </div>
-                )}
-            </Tooltip>
-            <Tooltip text={`${numberFormat(total)} total server members`} position="bottom">
-                {props => (
-                    <div {...props}>
-                        <span
-                            style={{
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                border: "3px solid var(--primary-400)",
-                                display: "inline-block",
-                                marginRight: "0.5em",
-                                marginLeft: "1em"
-                            }}
-                        />
-                        <span style={{ color: "var(--primary-400)" }}>{numberFormat(total)}</span>
-                    </div>
-                )}
-            </Tooltip>
-        </Flex>
-    );
-}
+export const numberFormat = (value: number) => sharedIntlNumberFormat.format(value);
+export const cl = classNameFactory("vc-membercount-");
 
 export default definePlugin({
     name: "MemberCount",
-    description: "Shows the amount of online & total members in the server member list",
+    description: "Shows the amount of online & total members in the server member list and tooltip",
     authors: [Devs.Ven, Devs.Commandtechno],
+    settings,
 
-    patches: [{
-        find: "{isSidebarVisible:",
-        replacement: {
-            match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-            replace: ":[$1?.startsWith('members')?$self.render():null,$2"
+    patches: [
+        {
+            find: "{isSidebarVisible:",
+            replacement: {
+                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
+            },
+            predicate: () => settings.store.memberList
+        },
+        {
+            find: ".invitesDisabledTooltip",
+            replacement: {
+                match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
+                replace: ",$self.renderTooltip(arguments[0].guild)]"
+            },
+            predicate: () => settings.store.toolTip
         }
-    }],
-
-    render: ErrorBoundary.wrap(MemberCount, { noop: true })
+    ],
+    render: ErrorBoundary.wrap(MemberCount, { noop: true }),
+    renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
