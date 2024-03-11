@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { openImageModal, openUserProfile } from "@utils/discord";
+import { getGuildRoles, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -172,7 +172,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
-        "Roles": Object.keys(guild.roles).length - 1, // - @everyone
+        "Roles": Object.keys(getGuildRoles(guild.id)).length - 1, // - @everyone
     };
 
     return (
