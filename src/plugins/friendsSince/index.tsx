@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -25,21 +26,21 @@ export default definePlugin({
             find: ".AnalyticsSections.USER_PROFILE}",
             replacement: {
                 match: /\i.default,\{userId:(\i.id).{0,30}}\)/,
-                replace: "$&,$self.friendsSince($1)"
+                replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
         {
             find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
                 match: /\i.default,\{userId:(\i)}\)/,
-                replace: "$&,$self.friendsSince($1)"
+                replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         }
     ],
 
-    friendsSince(userId: string) {
+    friendsSince: ErrorBoundary.wrap(({ userId }: { userId: string; }) => {
         const friendsSince = RelationshipStore.getSince(userId);
-        if (!friendsSince) return;
+        if (!friendsSince) return null;
 
         return (
             <div className={lastSection.section}>
@@ -54,6 +55,6 @@ export default definePlugin({
                 </div>
             </div>
         );
-    }
+    }, { noop: true })
 });
 
