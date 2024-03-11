@@ -10,6 +10,7 @@ on:
             - scripts/build/**
             - package.json
             - pnpm-lock.yaml
+    workflow_dispatch:
 env:
     FORCE_COLOR: true
 
