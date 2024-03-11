@@ -1,0 +1,44 @@
+.vc-membercount-widget {
+    display: flex;
+    align-content: center;
+
+    --color-online: var(--green-360);
+    --color-total: var(--primary-400);
+}
+
+.vc-membercount-tooltip {
+    margin-top: 0.25em;
+    margin-left: 2px;
+}
+
+.vc-membercount-member-list {
+    justify-content: center;
+    margin-top: 1em;
+    padding-inline: 1em;
+}
+
+.vc-membercount-online {
+    color: var(--color-online);
+}
+
+.vc-membercount-total {
+    color: var(--color-total);
+}
+
+.vc-membercount-online-dot {
+    background-color: var(--color-online);
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5em;
+}
+
+.vc-membercount-total-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 3px solid var(--color-total);
+    margin: 0 0.5em 0 1em;
+}

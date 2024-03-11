@@ -19,7 +19,7 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -30,6 +30,8 @@ import type { ReactNode } from "react";
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
 function VencordPopout(onClose: () => void) {
+    const { useQuickCss } = useSettings(["useQuickCss"]);
+
     const pluginEntries = [] as ReactNode[];
 
     for (const plugin of Object.values(Vencord.Plugins.plugins)) {
@@ -68,11 +70,10 @@ function VencordPopout(onClose: () => void) {
             />
             <Menu.MenuCheckboxItem
                 id="vc-toolbox-quickcss-toggle"
-                checked={Settings.useQuickCss}
+                checked={useQuickCss}
                 label={"Enable QuickCSS"}
                 action={() => {
-                    Settings.useQuickCss = !Settings.useQuickCss;
-                    onClose();
+                    Settings.useQuickCss = !useQuickCss;
                 }}
             />
             <Menu.MenuItem
