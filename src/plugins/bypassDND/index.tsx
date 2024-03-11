@@ -8,8 +8,9 @@ import { type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
 import { type Message } from "discord-types/general";
 
 interface IMessageCreate {
@@ -104,7 +105,7 @@ export default definePlugin({
             try {
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
-                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || userStatus !== "dnd") {
+                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === getCurrentChannel().id && WindowStore.isFocused()) || userStatus !== "dnd") {
                     return;
                 }
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
