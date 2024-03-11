@@ -4,8 +4,13 @@
 }
 
 .vc-gp-banner {
-    width: 100%;
     cursor: pointer;
+    aspect-ratio: auto 240 / 135;
+    height: 334px;
+    width: 100%;
+    object-fit: cover;
+    overflow: clip;
+    overflow-clip-margin: content-box;
 }
 
 .vc-gp-header {

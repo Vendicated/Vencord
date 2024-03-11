@@ -131,9 +131,10 @@ export default definePlugin({
     getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate?: boolean; }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
-            const url = new URL(`${CDN_URL}/${avatarDecoration.asset}.png`);
-            url.searchParams.set("animate", (!!canAnimate && isAnimatedAvatarDecoration(avatarDecoration.asset)).toString());
-            return url.toString();
+            const parts = avatarDecoration.asset.split("_");
+            // Remove a_ prefix if it's animated and animation is disabled
+            if (isAnimatedAvatarDecoration(avatarDecoration.asset) && !canAnimate) parts.shift();
+            return `${CDN_URL}/${parts.join("_")}.png`;
         } else if (avatarDecoration?.skuId === RAW_SKU_ID) {
             return avatarDecoration.asset;
         }
