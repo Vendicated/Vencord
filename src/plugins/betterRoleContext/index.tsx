@@ -5,7 +5,7 @@
  */
 
 import { Devs } from "@utils/constants";
-import { getCurrentGuild } from "@utils/discord";
+import { getCurrentGuild, getGuildRoles } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
@@ -47,7 +47,9 @@ export default definePlugin({
     contextMenus: {
         "dev-context"(children, { id }: { id: string; }) {
             const guild = getCurrentGuild();
-            const role = guild?.roles[id];
+            if (!guild) return;
+
+            const role = getGuildRoles(guild.id)[id];
             if (!role) return;
 
             if (role.colorString) {

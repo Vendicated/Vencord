@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
-import { getUniqueUsername } from "@utils/discord";
+import { getGuildRoles, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { ContextMenuApi, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
@@ -78,6 +78,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const [selectedItemIndex, selectItem] = useState(0);
     const selectedItem = permissions[selectedItemIndex];
 
+    const roles = getGuildRoles(guild.id);
+
     return (
         <ModalRoot
             {...modalProps}
@@ -100,7 +102,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         <div className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
-                                const role = guild.roles[permission.id ?? ""];
+                                const role = roles[permission.id ?? ""];
 
                                 return (
                                     <button
@@ -201,7 +203,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 id="vc-pw-view-as-role"
                 label="View As Role"
                 action={() => {
-                    const role = guild.roles[roleId];
+                    const role = getGuildRoles(guild.id)[roleId];
                     if (!role) return;
 
                     onClose();
