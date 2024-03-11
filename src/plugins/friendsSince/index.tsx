@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React, RelationshipStore } from "@webpack/common";
 
-const { Heading, Text } = findByPropsLazy("Heading");
+const { Heading, Text } = findByPropsLazy("Heading", "Text");
 const container = findByPropsLazy("memberSinceContainer");
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
 const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");
@@ -37,22 +37,23 @@ export default definePlugin({
         }
     ],
 
-    friendsSince (userId: string) {
+    friendsSince(userId: string) {
         const friendsSince = RelationshipStore.getSince(userId);
         if (!friendsSince) return;
 
-        return <div className={lastSection.section}>
-            <React.Fragment>
+        return (
+            <div className={lastSection.section}>
                 <Heading variant="eyebrow" className={clydeMoreInfo.title}>
-                Friends Since
+                    Friends Since
                 </Heading>
+
                 <div className={container.memberSinceContainer}>
                     <Text variant="text-sm/normal" className={clydeMoreInfo.body}>
                         {getCreatedAtDate(friendsSince, locale.getLocale())}
                     </Text>
                 </div>
-            </React.Fragment>
-        </div>;
+            </div>
+        );
     }
 });
 
