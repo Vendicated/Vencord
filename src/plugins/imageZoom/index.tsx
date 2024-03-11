@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { ContextMenuApi, Menu, React, ReactDOM } from "@webpack/common";
+import { Menu, React, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -80,25 +80,25 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+    const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
+
     children.push(
         <Menu.MenuGroup id="image-zoom">
             <Menu.MenuCheckboxItem
                 id="vc-square"
                 label="Square Lens"
-                checked={settings.store.square}
+                checked={square}
                 action={() => {
-                    settings.store.square = !settings.store.square;
-                    ContextMenuApi.closeContextMenu();
+                    settings.store.square = !square;
                 }}
             />
             <Menu.MenuCheckboxItem
                 id="vc-nearest-neighbour"
                 label="Nearest Neighbour"
-                checked={settings.store.nearestNeighbour}
+                checked={nearestNeighbour}
                 action={() => {
-                    settings.store.nearestNeighbour = !settings.store.nearestNeighbour;
-                    ContextMenuApi.closeContextMenu();
+                    settings.store.nearestNeighbour = !nearestNeighbour;
                 }}
             />
             <Menu.MenuControlItem
@@ -196,6 +196,9 @@ export default definePlugin({
     ],
 
     settings,
+    contextMenus: {
+        "image-context": imageContextMenuPatch
+    },
 
     // to stop from rendering twice /shrug
     currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
@@ -245,7 +248,6 @@ export default definePlugin({
 
     start() {
         enableStyle(styles);
-        addContextMenuPatch("image-context", imageContextMenuPatch);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
@@ -256,6 +258,5 @@ export default definePlugin({
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
-        removeContextMenuPatch("image-context", imageContextMenuPatch);
     }
 });
