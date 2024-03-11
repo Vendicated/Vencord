@@ -26,6 +26,7 @@ import { User } from "discord-types/general";
 
 import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
+import { CustomVoiceChannelSection } from "./components/CustomVoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
@@ -52,6 +53,21 @@ export const settings = definePluginSettings({
         default: true,
         disabled: () => !settings.store.showVoiceActivityIcons
     },
+    voiceChannelSection: {
+        type: OptionType.SELECT,
+        description: 'What "Voice Channel Section" should be shown',
+        options: [
+            {
+                label: "Default",
+                value: "default",
+                default: true
+            },
+            {
+                label: "Custom",
+                value: "custom",
+            }
+        ]
+    }
 });
 
 interface UserProps {
@@ -72,11 +88,16 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     const result = `${guild.name} | ${channel.name}`;
 
     return (
-        <VoiceChannelSection
-            channel={channel}
-            label={result}
-            showHeader={settings.store.showVoiceChannelSectionHeader}
-        />
+        settings.store.voiceChannelSection === "default" ?
+            <VoiceChannelSection
+                channel={channel}
+                label={result}
+                showHeader={settings.store.showVoiceChannelSectionHeader}
+            /> : <CustomVoiceChannelSection
+                channel={channel}
+                joinDisabled={VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id)?.channelId === channelId}
+                showHeader={settings.store.showVoiceChannelSectionHeader}
+            />
     );
 });
 
@@ -118,6 +139,14 @@ export default definePlugin({
 
         );
     },
+  
+    patchPrivateChannelProfile({ user }: UserProps) {
+        if (!user) return;
+
+        return <div className="vc-uvs-private-channel">
+            <VoiceChannelField user={user} />
+        </div>;
+    },
 
     patches: [
         {
@@ -136,7 +165,7 @@ export default definePlugin({
                 replace: "$&$self.patchModal(arguments[0]),",
             }
         },
-        {
+                {
             // Patch Member List
             find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
             replacement: {
@@ -151,6 +180,14 @@ export default definePlugin({
                 match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
                 replace: "$&$self.patchUserList(arguments[0], true),",
             }
-        }
+        },
+        // Private Channel Profile - above Activities
+        {
+            find: "UserProfileTypes.PANEL,useDefaultClientTheme",
+            replacement: {
+                match: /user:(\i).+?voiceGuild,voiceChannel.+?:null,/,
+                replace: "$&$self.patchPrivateChannelProfile({user:$1}),"
+            }
+         }
     ],
 });
