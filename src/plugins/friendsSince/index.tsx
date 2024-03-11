@@ -18,7 +18,7 @@ const lastSection = findByPropsLazy("lastSection");
 
 export default definePlugin({
     name: "FriendsSince",
-    description: "Show when you became friends with someone in the user popout",
+    description: "Shows when you became friends with someone in the user popout",
     authors: [Devs.Elvyra],
     patches: [
         {
