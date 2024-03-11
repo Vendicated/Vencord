@@ -25,7 +25,6 @@ import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
-import { CustomVoiceChannelSection } from "./components/CustomVoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
@@ -40,21 +39,6 @@ export const settings = definePluginSettings({
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
     },
-    voiceChannelSection: {
-        type: OptionType.SELECT,
-        description: 'What "Voice Channel Section" should be shown',
-        options: [
-            {
-                label: "Default",
-                value: "default",
-                default: true
-            },
-            {
-                label: "Custom",
-                value: "custom",
-            }
-        ]
-    }
 });
 
 interface UserProps {
@@ -72,19 +56,12 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
 
     if (!guild) return null; // When in DM call
 
-    const result = `${guild.name} | ${channel.name}`;
-
     return (
-        settings.store.voiceChannelSection === "default" ?
-            <VoiceChannelSection
-                channel={channel}
-                label={result}
-                showHeader={settings.store.showVoiceChannelSectionHeader}
-            /> : <CustomVoiceChannelSection
-                channel={channel}
-                joinDisabled={VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id)?.channelId === channelId}
-                showHeader={settings.store.showVoiceChannelSectionHeader}
-            />
+        <VoiceChannelSection
+            channel={channel}
+            joinDisabled={VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id)?.channelId === channelId}
+            showHeader={settings.store.showVoiceChannelSectionHeader}
+        />
     );
 });
 
@@ -125,6 +102,7 @@ export default definePlugin({
     },
 
     patches: [
+        // User Profile Modal - below user info
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
@@ -133,6 +111,8 @@ export default definePlugin({
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
         },
+
+        // User Popout Modal - above Notes
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
