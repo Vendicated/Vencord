@@ -1,5 +1,10 @@
 name: Build DevBuild
 on:
+    workflow_run:
+        workflows: ["Upstream Sync"]
+        branches: [main]
+        types:
+            - completed
     push:
         branches:
             - main
