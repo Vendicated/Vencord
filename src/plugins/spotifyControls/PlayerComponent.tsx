@@ -371,6 +371,10 @@ export function Player() {
     if (!track || !device?.is_active || shouldHide)
         return null;
 
+    const exportTrackImageStyle = {
+        "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
+    } as React.CSSProperties;
+
     return (
         <ErrorBoundary fallback={() => (
             <div className="vc-spotify-fallback">
@@ -378,7 +382,7 @@ export function Player() {
                 <p >Check the console for errors</p>
             </div>
         )}>
-            <div id={cl("player")}>
+            <div id={cl("player")} style={exportTrackImageStyle}>
                 <Info track={track} />
                 <SeekBar />
                 <Controls />
