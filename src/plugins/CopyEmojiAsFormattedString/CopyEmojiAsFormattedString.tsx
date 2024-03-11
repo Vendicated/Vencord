@@ -34,23 +34,6 @@ export default definePlugin({
     name: "CopyEmojiAsFormattedString",
     description: "Add's button to copy emoji as formatted string!",
     authors: [Devs.HAPPY_ENDERMAN],
-
-    patches: [
-        {
-            find: "window.localStorage",
-            replacement: {
-                match: /delete window.localStorage/,
-                replace: "" // hell naw discord aint removing localstorage
-            }
-        },
-        {
-            find: "1081004946872352958",
-            replacement: {
-                match: /1081004946872352958/,
-                replace: "0" // hell naw discord aint removing localstorage
-            }
-        }
-    ],
     expressionPickerPatch(children, props) {
         if (!props.alreadyPatched) {
             let data = props.target.dataset as Emoji;
