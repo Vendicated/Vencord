@@ -84,7 +84,7 @@ export default definePlugin({
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
 
-        return `${hour}:${minutes}:${seconds}:${includeMilis ? milis : ""} ${day}-${month}-${year}`;
+        return `${hour}-${minutes}-${seconds}${includeMilis ? `-${milis}` : ""} ${day}-${month}-${year}`;
     },
 
     async saveImage(url: string) {
