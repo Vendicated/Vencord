@@ -27,7 +27,7 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                const res = await RestAPI.delete(findOption(option, "url"));
+                const res = await RestAPI.delete({ url: "" + findOption(option, "url") });
                 try {
                     if (res.ok == true) {
                         sendBotMessage(ctx.channel.id, {
@@ -77,7 +77,7 @@ export default definePlugin({
 
                                 "# Webhook Creator Information: \n " +
                                 "Creator UserID: " + response.user.id + "\n " +
-                                "Creator Username: " + response.username + " | ( <@" + res.user.id + "> )" + "\n " +
+                                "Creator Username: " + response.username + " | ( <@" + response.user.id + "> )" + "\n " +
                                 "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
                         });
                     });
