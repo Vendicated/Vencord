@@ -20,6 +20,7 @@ import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
+import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
@@ -62,7 +63,7 @@ Object.defineProperty(Function.prototype, "O", {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
         if (new Error().stack?.includes("discord.com") && this.p === "/assets/") {
-            logger.info("Found Webpack onChunksLoaded");
+            logger.info("Found main Webpack onChunksLoaded");
 
             delete (Function.prototype as any).O;
 
@@ -115,8 +116,9 @@ Object.defineProperty(Function.prototype, "m", {
     set(v: any) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
-        if (new Error().stack?.includes("discord.com")) {
-            logger.info("Found Webpack module factory");
+        const error = new Error();
+        if (error.stack?.includes("discord.com")) {
+            logger.info("Found Webpack module factory", error.stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
             patchFactories(v);
         }
 
@@ -157,14 +159,14 @@ function patchPush(webpackGlobal: any) {
     });
 }
 
-function patchFactories(factories: Record<string | number, (module: { exports: any; }, exports: any, require: any) => void>) {
+function patchFactories(factories: Record<string, (module: any, exports: any, require: WebpackInstance) => void>) {
     for (const id in factories) {
         let mod = factories[id];
 
         const originalMod = mod;
         const patchedBy = new Set();
 
-        const factory = factories[id] = function (module, exports, require) {
+        const factory = factories[id] = function (module: any, exports: any, require: WebpackInstance) {
             try {
                 mod(module, exports, require);
             } catch (err) {
