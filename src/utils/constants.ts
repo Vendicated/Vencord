@@ -426,6 +426,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Sampath: {
         name: "Sampath",
         id: 984015688807100419n,
+    },
+    Elvyra: {
+        name: "Elvyra",
+        id: 708275751816003615n,
     }
 } satisfies Record<string, Dev>);
 

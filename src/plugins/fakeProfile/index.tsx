@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
+import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -14,16 +16,22 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Button, Forms, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Forms, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
-import { API_URL, BASE_URL, INVITE_KEY, SKU_ID, VERSION } from "./constants";
+import { API_URL, BASE_URL, SKU_ID, VERSION } from "./constants";
 const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
 const cl = classNameFactory("vc-decoration-");
 
 import style from "./index.css?managed";
 
+type Badge = {
+    id: string;
+    description: string;
+    icon: string;
+    link?: string;
+};
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -31,25 +39,74 @@ export interface AvatarDecoration {
 interface UserProfile extends User {
     profileEffectId: string;
     userId: string;
+    themeColors?: Array<number>;
 
 }
 interface UserProfileData {
     profile_effect: string;
     banner: string;
     avatar: string;
+    badges: Badge[];
     decoration: string;
 }
 
 
 let UsersData = {} as Record<string, UserProfileData>;
+const UserBadges: Record<string, ProfileBadge[]> = {};
+const updateBadgesForAllUsers = () => {
+    Object.keys(UsersData).forEach(userId => {
+        const newBadges = UsersData[userId].badges;
+        const existingBadges = UserBadges[userId] || [];
+        if (newBadges) {
+            newBadges.forEach((badge, index) => {
+                const existingBadge = existingBadges[index];
+
+                if (!existingBadge) {
+                    const newBadge = {
+                        image: badge.icon,
+                        position: BadgePosition.START,
+                        props: {
+                            style: {
+                                borderRadius: "50%",
+                                transform: "scale(0.9)"
+                            }
+                        },
+                        shouldShow: user => user.user.id === userId,
+                    };
+
+                    addBadge(newBadge);
+
+                    if (!UserBadges[userId]) {
+                        UserBadges[userId] = [];
+                    }
+
+                    UserBadges[userId].splice(index, 0, newBadge);
+                }
+            });
+        }
+        existingBadges.forEach((existingBadge, index) => {
+            const badgeStillExists = newBadges && newBadges[index];
+
+            if (!badgeStillExists) {
+                removeBadge(existingBadge);
+                UserBadges[userId].splice(index, 1);
+            }
+        });
+    });
+};
+
 async function loadfakeProfile(noCache = false) {
-    UsersData = {};
-    const init = {} as RequestInit;
-    if (noCache)
-        init.cache = "no-cache";
-    const response = await fetch(API_URL + "/fakeProfile", init);
-    const data = await response.json();
-    UsersData = data;
+    try {
+        const init = {} as RequestInit;
+        if (noCache)
+            init.cache = "no-cache";
+
+        const response = await fetch(API_URL + "/fakeProfile", init);
+        const data = await response.json();
+        UsersData = data;
+    } catch (error) {
+        console.error("Error loading fake profile:", error);
+    }
 }
 
 function getUserEffect(profileId: string) {
@@ -59,10 +116,6 @@ function getUserEffect(profileId: string) {
     }
     return null;
 }
-interface UserProfile extends User {
-    themeColors?: Array<number>;
-}
-
 interface Colors {
     primary: number;
     accent: number;
@@ -112,10 +165,22 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
+    enableCustomBadges: {
+        description: "Allows you to use custom badges",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
     enableAvatarDecorations: {
         description: "Allows you to use discord avatar decorations",
         type: OptionType.BOOLEAN,
         default: false
+    },
+    showCustomBadgesinmessage: {
+        description: "Show custom badges in message",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
     },
     nitroFirst: {
         description: "Banner/Avatar to use if both Nitro and fakeProfile Banner/Avatar are present",
@@ -132,6 +197,62 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
+function ImageIcon(path: string) {
+    return ({ tooltip }: { tooltip: string; }) => (
+        <Tooltip text={tooltip} >
+            {(tooltipProps: any) => (
+                <img {...tooltipProps} src={path} height={20} width={20} />
+            )}
+        </Tooltip>
+    );
+}
+const BadgeIcon = ({ user, badgeImg, badgeText }: { user: User, badgeImg: string, badgeText: string; }) => {
+    if (UsersData[user.id]?.badges) {
+        const Icon = ImageIcon(badgeImg);
+        const tooltip = badgeText;
+        return <Icon tooltip={tooltip} />;
+    } else {
+        return null;
+    }
+};
+
+
+
+const BadgeMain = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
+
+    const validBadges = UsersData[user.id]?.badges;
+    if (!validBadges || validBadges.length === 0) return null;
+
+    const icons = validBadges.map((badge: Badge, index: number) => (
+        <BadgeIcon
+            key={index}
+            user={user}
+            badgeImg={badge.icon}
+            badgeText={badge.description}
+        />
+    ));
+
+    return (
+        <span
+            className="custom-badge"
+            style={{
+                display: "inline-flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginLeft: wantMargin ? 4 : 0,
+                verticalAlign: "top",
+                position: "relative",
+                top: wantTopMargin ? 2 : 0,
+                padding: !wantMargin ? 1 : 0,
+                gap: 2
+            }}
+        >
+            {icons}
+        </span>
+    );
+};
+
+
 
 export default definePlugin({
     name: "fakeProfile",
@@ -141,6 +262,16 @@ export default definePlugin({
     async start() {
         enableStyle(style);
         await loadfakeProfile();
+        if (settings.store.enableCustomBadges) {
+            updateBadgesForAllUsers();
+        }
+        if (settings.store.showCustomBadgesinmessage) {
+            addDecoration("custom-badge", props =>
+                <ErrorBoundary noop>
+                    <BadgeMain user={props.message?.author} wantTopMargin={true} />
+                </ErrorBoundary>
+            );
+        }
         const response = await fetch(BASE_URL + "/fakeProfile");
         const data = await response.json();
         if (data.version !== VERSION) {
@@ -152,6 +283,17 @@ export default definePlugin({
                     position: Toasts.Position.BOTTOM
                 }
             });
+        }
+        setInterval(async () => {
+            await loadfakeProfile(true);
+            if (settings.store.enableCustomBadges) {
+                updateBadgesForAllUsers();
+            }
+        }, data.reloadInterval);
+    },
+    stop() {
+        if (settings.store.showCustomBadgesinmessage) {
+            removeDecoration("custom-badge");
         }
     },
     patches: [
@@ -180,7 +322,7 @@ export default definePlugin({
             find: "DefaultCustomizationSections",
             replacement: {
                 match: /(?<={user:\i},"decoration"\),)/,
-                replace: "$self.DecorationSection(),"
+                replace: "$self.fakeProfileSection(),"
             }
         },
         {
@@ -227,17 +369,14 @@ export default definePlugin({
             find: "isAvatarDecorationAnimating:",
             group: true,
             replacement: [
-                // Add Decor avatar decoration hook to avatar decoration hook
                 {
                     match: /(?<=TryItOut:\i,guildId:\i}\),)(?<=user:(\i).+?)/,
                     replace: "vcAvatarDecoration=$self.useUserAvatarDecoration($1),"
                 },
-                // Use added hook
                 {
                     match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
                     replace: "$1??vcAvatarDecoration??($&)"
                 },
-                // Make memo depend on added hook
                 {
                     match: /(?<=size:\i}\),\[)/,
                     replace: "vcAvatarDecoration,"
@@ -247,7 +386,6 @@ export default definePlugin({
         {
             find: "renderAvatarWithPopout(){",
             replacement: [
-                // Use Decor avatar decoration hook
                 {
                     match: /(?<=getAvatarDecorationURL\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
                     replace: "$self.useUserAvatarDecoration($1)??$&"
@@ -365,7 +503,7 @@ export default definePlugin({
         const url = new URL(`https://cdn.discordapp.com/avatar-decoration-presets/${avatarDecoration?.asset}.png?passthrough=false`);
         return url.toString();
     },
-    DecorationSection() {
+    fakeProfileSection() {
         if (!settings.store.enableAvatarDecorations) return;
         return <CustomizationSection
             title={"fakeProfile"}
@@ -377,6 +515,7 @@ export default definePlugin({
                 <Button
                     onClick={async () => {
                         await loadfakeProfile(true);
+                        updateBadgesForAllUsers();
                         Toasts.show({
                             message: "Updated fakeProfile!",
                             id: Toasts.genId(),
@@ -386,12 +525,6 @@ export default definePlugin({
                     size={Button.Sizes.SMALL}
                 >
                     Reload fakeProfile
-                </Button>
-                <Button
-                    size={Button.Sizes.SMALL}
-                    onClick={() => VencordNative.native.openExternal(`https://discord.gg/${INVITE_KEY}`)}
-                >
-                    Join Discord
                 </Button>
             </Flex>
         </CustomizationSection>;
