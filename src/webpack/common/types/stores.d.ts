@@ -17,7 +17,7 @@
 */
 
 import { DraftType } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
 
@@ -171,4 +171,14 @@ export class DraftStore extends FluxStore {
     getState(): DraftState;
     getThreadDraftWithParentMessageId?(arg: any): any;
     getThreadSettings(channelId: string): any | null;
+}
+
+export class GuildStore extends FluxStore {
+    getGuild(guildId: string): Guild;
+    getGuildCount(): number;
+    getGuilds(): Record<string, Guild>;
+    getGuildIds(): string[];
+    getRole(guildId: string, roleId: string): Role;
+    getRoles(guildId: string): Record<string, Role>;
+    getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
