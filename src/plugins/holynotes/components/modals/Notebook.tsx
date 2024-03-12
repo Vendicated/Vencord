@@ -17,6 +17,7 @@ import Errors from "./Error";
 import HelpModal from "./HelpModal";
 import ManageNotebookButton from "./ManageNotebookButton";
 import { RenderMessage } from "./RenderMessage";
+import { NoteBookTabs } from "./NoteBookTab";
 
 const renderNotebook = ({
     notes, notebook, updateParent, sortDirection, sortType, searchInput, closeModal
@@ -63,6 +64,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
     const [currentNotebook, setCurrentNotebook] = React.useState("Main");
 
     const { quickSelect, quickSelectLabel, quickSelectQuick, quickSelectValue, quickSelectArrow } = findByProps("quickSelect");
+    //const { overflowChevron } = findByProps("overflowChevron");
 
     const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
 
@@ -95,7 +97,8 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                             <ModalCloseButton onClick={props.onClose} />
                         </ModalHeader>
                         <div className={classes("vc-notebook-tabbar-container")}>
-                            <TabBar
+                            <NoteBookTabs tabs={noteHandler.getAllNotes()} selectedTabId={currentNotebook} onSelectTab={setCurrentNotebook}/>
+                            {/* <TabBar
                                 type="top"
                                 look="brand"
                                 className={classes("vc-notebook-tabbar-bar", "vc-notebook-tabbar")}
@@ -106,7 +109,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                                         {notebook}
                                     </TabBar.Item>
                                 ))}
-                            </TabBar>
+                            </TabBar> */}
                         </div>
                     </div>
                     <ModalContent style={{ marginTop: "20px" }}>

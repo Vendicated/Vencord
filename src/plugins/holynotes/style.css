@@ -83,13 +83,20 @@ $modifier: var(--background-modifier-accent);
 }
 
 .vc-notebook-tabbar-bar {
-    overflow: auto;
+    overflow: hidden;
     align-items: stretch;
     display: flex;
     gap: 40px;
 }
 
-.vc-notebook-tabbar-bar::-webkit-scrollbar {
+.vc-notebook-overflow-chevron {
+    display: inline-block;
+    padding: 0 6px 2px;
+    height: 16px;
+    position: relative;
+    top: -10px;
+}
+/* .vc-notebook-tabbar-bar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
@@ -97,7 +104,7 @@ $modifier: var(--background-modifier-accent);
 .vc-notebook-tabbar-bar::-webkit-scrollbar-thumb {
     background-color: red;
     border-radius: 4px;
-}
+} */
 
 .vc-notebook-tabbar-container {
     border-bottom: 1px solid var(--profile-body-divider-color);
