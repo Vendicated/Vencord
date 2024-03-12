@@ -6,33 +6,38 @@
 
 import { classes } from "@utils/misc";
 import { findByCode, findByProps } from "@webpack";
-import { Button, Menu, Popout, React, TabBar } from "@webpack/common";
+import { Button, Clickable, Menu, Popout, React, TabBar } from "@webpack/common";
+import { Fragment } from "react";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
+
+
 
 export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
     const tabBarRef = React.useRef<HTMLDivElement>(null);
     const widthRef = React.useRef<number>(0);
     const tabWidthMapRef = React.useRef(new Map());
     const [overflowedTabs, setOverflowedTabs] = React.useState([]);
-    const { tabBar } = findByProps("tabBar");
+    const { tabBar, tabBarItem } = findByProps("tabBar");
     const { forwardRef } = findByProps("forwardRef");
 
     const calculateOverflowedTabs = React.useCallback(() => {
-        if (tabBarRef.current == null) return;
-        const overflowed = [];
+        if (!tabBarRef.current) return;
+
         let totalWidth = tabBarRef.current.getBoundingClientRect().width;
+
+        overflowedTabs.length = 0;
 
         if (totalWidth !== widthRef.current) {
             for (const tab of Object.keys(tabs)) {
                 if (tab !== selectedTabId) {
                     const tabWidth = tabWidthMapRef.current.get(tab)?.width || 0;
                     totalWidth -= tabWidth;
-                    if (totalWidth < 0) overflowed.push(tab);
+                    if (tab !== selectedTabId && totalWidth < 0) overflowedTabs.push(tab);
                 }
             }
-            setOverflowedTabs(overflowed);
-            widthRef.current = totalWidth;
+            setOverflowedTabs(overflowedTabs);
+            // widthRef.current = totalWidth;
         }
     }, [tabs, selectedTabId]);
 
@@ -47,6 +52,17 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
             resizeObserver.disconnect();
         };
     }, [calculateOverflowedTabs]);
+
+    const TabItem = React.forwardRef(({ id, selected, onClick, children }) => (
+        <Clickable
+            className={classes(tabBarItem)}
+            data-tab-id={id}
+            // innerRef={ref}
+            onClick={onClick}
+        >
+            {children}
+        </Clickable>
+    ));
 
     const renderOverflowMenu = React.useCallback(({ closePopout }) => {
         return (
@@ -85,47 +101,47 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
                 look="brand"
                 className={classes("vc-notebook-tabbar-bar", "vc-notebook-tabbar")}
             >
-                {
-                    Object.keys(tabs).map(tab => {
-                        if (!overflowedTabs.includes(tab)) {
-                            return (
-                                <forwardRef
-                                    id={tab}
-                                    selected={selectedTabId === tab}
-                                    ref={ref => {
-                                        const width = ref?.getBoundingClientRect().width || 0;
-                                        tabWidthMapRef.current.set(tab, { node: ref, width });
+                {Object.keys(tabs).map(tab => {
+                    if (!overflowedTabs.includes(tab)) {
+                        return (
+                            <TabItem
+                                id={tab}
+                                selected={selectedTabId === tab}
+                                className={classes("vc-notebook-tabbar-bar-item", "vc-notebook-tabbar-item")}
+                                ref={ref => {
+                                    const width = ref?.getBoundingClientRect().width || tabWidthMapRef.current.get(tab.id) || 0;
+                                    tabWidthMapRef.current.set(tab, width);
 
-                                    }}
-                                    onClick={selectedTabId !== tab ? () => onSelectTab(tab) : undefined}
-                                >
-                                    <TabBar.Item key={tab} id={tab} className={classes("vc-notebook-tabbar-bar-item", "vc-notebook-tabbar-item")}>
-                                        {tab}
-                                    </TabBar.Item>
-                                </forwardRef>
-                            );
-                        }
-                    })
+                                }}
+                            // onClick={selectedTabId !== tab && onSelectTab(tab)}
+                            >
+                                {tab}
+                            </TabItem>
+                        );
+                    }
+                })
                 }
                 {overflowedTabs.length > 0 && (
-                    <Popout
-                        renderPopout={renderOverflowMenu}
-                        position="bottom"
-                        align="right"
-                        spacing={0}
-                    >
-                        {() => (
-                            <Button
-                                className={"vc-notebook-overflow-chevron"}
-                                size={Button.Sizes.ICON}
-                                look={Button.Looks.BLANK}
-                            >
-                                <SvgOverFlowIcon />
-                            </Button>
-                        )
-                        }
+                    <Fragment>
+                        <Popout
+                            renderPopout={renderOverflowMenu}
+                            position="bottom"
+                            align="right"
+                            spacing={0}
+                        >
+                            {() => (
+                                <Button
+                                    className={"vc-notebook-overflow-chevron"}
+                                    size={Button.Sizes.ICON}
+                                    look={Button.Looks.BLANK}
+                                >
+                                    <SvgOverFlowIcon />
+                                </Button>
+                            )
+                            }
 
-                    </Popout>
+                        </Popout>
+                    </Fragment>
                 )}
             </TabBar>
         </div>

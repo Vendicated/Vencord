@@ -30,20 +30,6 @@ $modifier: var(--background-modifier-accent);
     transform: scale(1);
 }
 
-.vc-notebook-tabbar {
-    margin: 0;
-    padding: 10px 20px 0;
-    background-color: var(--background-tertiary);
-}
-
-.vc-notebook-tabbar-item {
-    font-size: 14px;
-}
-
-.vc-notebook-display-left {
-    flex: auto;
-    display: flex;
-}
 
 .vc-notebook-flex {
     overflow: hidden;
@@ -61,6 +47,11 @@ $modifier: var(--background-modifier-accent);
 
 .vc-notebook-flex .help-icon:hover {
     opacity: 1;
+}
+
+.vc-notebook-display-left {
+    flex: auto;
+    display: flex;
 }
 
 .vc-help-markdown {
@@ -81,6 +72,18 @@ $modifier: var(--background-modifier-accent);
 .vc-holy-note [class*="messageListItem"] {
     list-style-type: none;
 }
+
+.vc-notebook-tabbar {
+    overflow: hidden;
+    margin: 0;
+    padding: 10px 20px 0;
+    background-color: var(--background-tertiary);
+}
+
+.vc-notebook-tabbar-item {
+    font-size: 14px;
+}
+
 
 .vc-notebook-tabbar-bar {
     overflow: hidden;
