@@ -53,7 +53,7 @@ async function calculateGitChanges() {
         // github api only sends the long sha
         hash: c.sha.slice(0, 7),
         author: c.author.login,
-        message: c.commit.message
+        message: c.commit.message.substring(c.commit.message.indexOf("\n") + 1)
     }));
 }
 
