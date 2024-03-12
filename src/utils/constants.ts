@@ -428,8 +428,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 708275751816003615n,
     },
     Byron: {
-        name: "byron", // am i even allowed to add this right now?
-        id: 639577344276692992n,
+        name: "byron",
+        id: 639577344276692992n
     }
 } satisfies Record<string, Dev>);
 

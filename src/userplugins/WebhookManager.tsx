@@ -42,8 +42,9 @@ export default definePlugin({
                     }
                 }
                 catch (error) {
+                    console.log("WebhookManager encountered an error deleting a webhook. " + error);
                     sendBotMessage(ctx.channel.id, {
-                        content: "There was an error deleting the webhook. Did you input a valid webhook URL?"
+                        content: "There was an error deleting the webhook. Check the console for more info. Did you input a valid webhook URL?"
                     });
                 }
             }
