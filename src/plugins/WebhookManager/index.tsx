@@ -2,10 +2,15 @@
     Vencord is very swag
 */
 
-import definePlugin from "@utils/types";
+import definePlugin, { PluginNative } from "@utils/types";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage, findOption } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { RestAPI } from "@webpack/common";
+
+export let webhookDefaultName;
+export let webhookUrlGLOBAL;
+export let webhookMessageGLOBAL;
+const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "WebhookManager",
@@ -99,33 +104,28 @@ export default definePlugin({
                     description: "The message you want to send.",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
-                },
-                {
-                    name: "tts",
-                    description: "Send message with TTS?",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    required: false
                 }
             ],
             execute: async (option, ctx) => {
-                // discord seems to have updated their webhook api, sending messages has changed 
-                const request = new XMLHttpRequest();
-                request.open("POST", "" + findOption(option, "url"));
-                request.setRequestHeader('Content-type', 'application/json');
-                request.setRequestHeader('Accept', 'application/json');
-                request.setRequestHeader('Accept-Language', 'en');
 
-                const params = {
-                    content: "" + findOption(option, "message"),
-                    tts: "" + findOption(option, "tts") ?? false
-                };
+                var webhookUrl = findOption(option, "url");
+                var webhookMessage = findOption(option, "message");
+                webhookUrlGLOBAL = webhookUrl;
+                webhookMessageGLOBAL = webhookMessage;
+                await fetch("" + webhookUrl).then(response => response.json())
+                    .then(response => {
+                        webhookDefaultName = response.name;
+                    });
 
-                request.send(JSON.stringify(params));
+                Native.doSomething();
+
+
+
+
                 sendBotMessage(ctx.channel.id, {
-                    content: "Message sent. Check console for an advanced output."
+                    content: "Message sent.?"
                 });
-                console.log(params);
-                console.log(JSON.stringify(request));
+
             }
         }
     ]
