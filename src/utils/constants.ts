@@ -66,8 +66,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
-        name: "obscurity",
+    fawn: {
+        name: "fawn",
         id: 336678828233588736n,
     },
     rushii: {
