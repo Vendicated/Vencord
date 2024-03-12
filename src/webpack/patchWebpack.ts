@@ -30,14 +30,9 @@ const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 let webpackChunk: any[];
 
-// The property descriptors in the monkey patches are used to ensure that if anything else (maybe another mod) hooks the same stuff as we do, we don't overwrite their hooks.
-// Of course the other mods should also do this, but we can't control that, so lets at least make sure in our end we do it.
-const webpackChunkPropertyDescriptor = Object.getOwnPropertyDescriptor(window, WEBPACK_CHUNK);
-
 // Patch the window webpack chunk setter to monkey patch the push method before any chunks are pushed
 // This way we can patch the factory of everything being pushed to the modules array
 Object.defineProperty(window, WEBPACK_CHUNK, {
-    ...webpackChunkPropertyDescriptor,
     configurable: true,
 
     get: () => webpackChunk,
@@ -47,28 +42,20 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
                 logger.info(`Patching ${WEBPACK_CHUNK}.push`);
                 patchPush(v);
 
-                if (webpackChunkPropertyDescriptor) {
-                    Object.defineProperty(window, WEBPACK_CHUNK, webpackChunkPropertyDescriptor);
-                } else {
-                    // @ts-ignore
-                    delete window[WEBPACK_CHUNK];
-                    window[WEBPACK_CHUNK] = v;
-                }
+                // @ts-ignore
+                delete window[WEBPACK_CHUNK];
+                window[WEBPACK_CHUNK] = v;
             }
         }
 
         webpackChunk = v;
-        webpackChunkPropertyDescriptor?.set?.call(window, v);
     }
 });
-
-const oPropertyDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, "O");
 
 // wreq.O is the webpack onChunksLoaded function
 // Discord uses it to await for all the chunks to be loaded before initializing the app
 // We monkey patch it to also monkey patch the initialize app callback to get immediate access to the webpack require and run our listeners before doing it
 Object.defineProperty(Function.prototype, "O", {
-    ...oPropertyDescriptor,
     configurable: true,
 
     set(onChunksLoaded: any) {
@@ -77,11 +64,7 @@ Object.defineProperty(Function.prototype, "O", {
         if (new Error().stack?.includes("discord.com") && this.p === "/assets/") {
             logger.info("Found Webpack onChunksLoaded");
 
-            if (oPropertyDescriptor) {
-                Object.defineProperty(Function.prototype, "O", oPropertyDescriptor);
-            } else {
-                delete (Function.prototype as any).O;
-            }
+            delete (Function.prototype as any).O;
 
             const wreq = this;
 
@@ -116,12 +99,8 @@ Object.defineProperty(Function.prototype, "O", {
             value: onChunksLoaded,
             configurable: true
         });
-
-        oPropertyDescriptor?.set?.call(this, onChunksLoaded);
     }
 });
-
-const mPropertyDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, "m");
 
 // wreq.m is the webpack module factory.
 // normally, this is populated via webpackGlobal.push, which we patch below.
@@ -131,7 +110,6 @@ const mPropertyDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, 
 // Update: Discord now has TWO webpack instances. Their normal one and sentry
 // Sentry does not push chunks to the global at all, so this same patch now also handles their sentry modules
 Object.defineProperty(Function.prototype, "m", {
-    ...mPropertyDescriptor,
     configurable: true,
 
     set(v: any) {
@@ -146,8 +124,6 @@ Object.defineProperty(Function.prototype, "m", {
             value: v,
             configurable: true
         });
-
-        mPropertyDescriptor?.set?.call(this, v);
     }
 });
 
@@ -171,16 +147,12 @@ function patchPush(webpackGlobal: any) {
     handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
     handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
 
-    const webpackPushPropertyDescriptor = Object.getOwnPropertyDescriptor(webpackGlobal, "push");
-
     Object.defineProperty(webpackGlobal, "push", {
-        ...webpackPushPropertyDescriptor,
         configurable: true,
 
         get: () => handlePush,
         set(v) {
             handlePush.$$vencordOriginal = v;
-            webpackPushPropertyDescriptor?.set?.call(webpackGlobal, v);
         }
     });
 }
