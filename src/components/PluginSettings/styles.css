@@ -83,3 +83,7 @@
 .vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
 }
+
+.vc-plugins-filter-select-pointer {
+    cursor: pointer;
+}
