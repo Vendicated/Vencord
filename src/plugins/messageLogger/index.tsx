@@ -141,13 +141,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Whether to log deleted messages",
             default: true,
-            restartNeeded: true
         },
         logEdits: {
             type: OptionType.BOOLEAN,
             description: "Whether to log edited messages",
             default: true,
-            restartNeeded: true
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -209,7 +207,7 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any) {
+    shouldIgnore(message: any, is_edit: boolean = false) {
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
@@ -218,6 +216,7 @@ export default definePlugin({
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (is_edit ? !Settings.plugins.MessageLogger.logEdits : !Settings.plugins.MessageLogger.logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
@@ -231,7 +230,6 @@ export default definePlugin({
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
                     match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
-                    predicate: () => Settings.plugins.MessageLogger.logDeletes,
                     replace:
                         "MESSAGE_DELETE:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -242,7 +240,6 @@ export default definePlugin({
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
                     match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
-                    predicate: () => Settings.plugins.MessageLogger.logDeletes,
                     replace:
                         "MESSAGE_DELETE_BULK:function($1){" +
                         "   var cache = $2getOrCreate($1.channelId);" +
@@ -253,10 +250,9 @@ export default definePlugin({
                 {
                     // Add current cached content + new edit time to cached message's editHistory
                     match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
-                    predicate: () => Settings.plugins.MessageLogger.logEdits,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -266,7 +262,6 @@ export default definePlugin({
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
                     match: /(?<=getLastEditableMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
-                    predicate: () => Settings.plugins.MessageLogger.logEdits,
                     replace: "!$1.deleted &&"
                 }
             ]
