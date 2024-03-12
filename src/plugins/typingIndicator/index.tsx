@@ -125,7 +125,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz, Devs.obscurity],
+    authors: [Devs.Nuckyz, Devs.fawn],
     settings,
 
     patches: [
