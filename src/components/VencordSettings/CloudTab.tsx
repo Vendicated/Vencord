@@ -39,9 +39,7 @@ function validateUrl(url: string) {
 async function eraseAllData() {
     const res = await fetch(new URL("/v1/", getCloudUrl()), {
         method: "DELETE",
-        headers: new Headers({
-            Authorization: await getCloudAuth()
-        })
+        headers: { Authorization: await getCloudAuth() }
     });
 
     if (!res.ok) {
