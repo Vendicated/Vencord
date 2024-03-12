@@ -6,7 +6,10 @@
 
 import { findByPropsLazy } from "@webpack";
 
-export const TextAndImagesSettingsStores = findByPropsLazy("MessageDisplayCompact");
-export const StatusSettingsStores = findByPropsLazy("ShowCurrentGame");
+import * as t from "./types/settingsStores";
+
+
+export const TextAndImagesSettingsStores = findByPropsLazy("MessageDisplayCompact") as Record<string, t.SettingsStore>;
+export const StatusSettingsStores = findByPropsLazy("ShowCurrentGame") as Record<string, t.SettingsStore>;
 
 export const UserSettingsActionCreators = findByPropsLazy("PreloadedUserSettingsActionCreators");
