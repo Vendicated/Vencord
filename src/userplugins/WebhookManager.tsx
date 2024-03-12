@@ -7,7 +7,6 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessa
 import { Devs } from "@utils/constants";
 import { RestAPI } from "@webpack/common";
 
-
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
@@ -28,6 +27,8 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
+
+                //   const res = await REST.delete(findOption(option, "url"));
                 try {
                     await RestAPI.delete({
                         url: "" + findOption(option, "url")
@@ -71,7 +72,8 @@ export default definePlugin({
                                 "Webhook Type: " + response.type + "\n \n" +
 
                                 "# Webhook Creator Information: \n " +
-                                "Creator UserID: " + response.user.id + "\n" +
+                                "Creator UserID: " + response.user.id + "\n " +
+                                "Creator Username: " + response.user.name + "\n " +
                                 "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
                         });
                     });
@@ -102,26 +104,24 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                // discord seems to have updated their webhook api, sending messages has changed, will work on soon
+                // discord seems to have updated their webhook api, sending messages has changed 
                 const request = new XMLHttpRequest();
                 request.open("POST", "" + findOption(option, "url"));
                 request.setRequestHeader('Content-type', 'application/json');
-
-                const headers: Record<string, string> = {
-                    "Accept": "application/json",
-                    "Accept-Language": "en",
-                };
+                request.setRequestHeader('Accept', 'application/json');
+                request.setRequestHeader('Accept-Language', 'en');
 
                 const params = {
                     content: "" + findOption(option, "message"),
-                    tts: "" + findOption(option, "tts")
+                    tts: "" + findOption(option, "tts") ?? false
                 };
 
                 request.send(JSON.stringify(params));
-
                 sendBotMessage(ctx.channel.id, {
-                    content: "Message sent successfully!"
+                    content: "Message sent. Check console for an advanced output."
                 });
+                console.log(params);
+                console.log(JSON.stringify(request));
             }
         }
     ]
