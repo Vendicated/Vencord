@@ -27,20 +27,23 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-
-                //   const res = await REST.delete(findOption(option, "url"));
+                const res = await RestAPI.delete(findOption(option, "url"));
                 try {
-                    await RestAPI.delete({
-                        url: "" + findOption(option, "url")
-                    });
-                    sendBotMessage(ctx.channel.id, {
-                        content: "Webhook deleted successfully."
-                    });
+                    if (res.ok == true) {
+                        sendBotMessage(ctx.channel.id, {
+                            content: "Webhook deleted successfully."
+                        });
+                    }
+                    else {
+                        console.log("WebhookManager encountered an error deleting a webhook. " + res.status);
+                        sendBotMessage(ctx.channel.id, {
+                            content: "There was an error deleting the webhook. Check the console for more info."
+                        });
+                    }
                 }
-                catch
-                {
+                catch (error) {
                     sendBotMessage(ctx.channel.id, {
-                        content: "Webhook NOT deleted successfully."
+                        content: "There was an error deleting the webhook. Did you input a valid webhook URL?"
                     });
                 }
             }
@@ -58,8 +61,8 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                var webhookthing = findOption(option, "url");
-                await fetch("" + webhookthing).then(response => response.json())
+                var webhookUrl = findOption(option, "url");
+                await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
                         sendBotMessage(ctx.channel.id, {
                             content: "# Webhook Information:  \n" +
@@ -73,7 +76,7 @@ export default definePlugin({
 
                                 "# Webhook Creator Information: \n " +
                                 "Creator UserID: " + response.user.id + "\n " +
-                                "Creator Username: " + response.user.name + "\n " +
+                                "Creator Username: " + response.username + " | ( <@" + res.user.id + "> )" + "\n " +
                                 "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
                         });
                     });
