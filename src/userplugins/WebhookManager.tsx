@@ -73,7 +73,6 @@ export default definePlugin({
                                 "# Webhook Creator Information: \n " +
                                 "Creator UserID: " + response.user.id + "\n" +
                                 "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
-
                         });
                     });
             }
@@ -103,6 +102,7 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
+                // discord seems to have updated their webhook api, sending messages has changed, will work on soon
                 const request = new XMLHttpRequest();
                 request.open("POST", "" + findOption(option, "url"));
                 request.setRequestHeader('Content-type', 'application/json');
@@ -114,6 +114,7 @@ export default definePlugin({
 
                 const params = {
                     content: "" + findOption(option, "message"),
+                    tts: "" + findOption(option, "tts")
                 };
 
                 request.send(JSON.stringify(params));
