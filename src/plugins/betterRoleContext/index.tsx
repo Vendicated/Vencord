@@ -5,10 +5,10 @@
  */
 
 import { Devs } from "@utils/constants";
-import { getCurrentGuild, getGuildRoles } from "@utils/discord";
+import { getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Clipboard, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
+import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 
@@ -49,7 +49,7 @@ export default definePlugin({
             const guild = getCurrentGuild();
             if (!guild) return;
 
-            const role = getGuildRoles(guild.id)[id];
+            const role = GuildStore.getRole(guild.id, id);
             if (!role) return;
 
             if (role.colorString) {
