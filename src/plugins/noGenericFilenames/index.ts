@@ -73,15 +73,18 @@ export default definePlugin({
     ],
 
     getCurrentDate(): string {
+        var { includeMilis } = settings.store;
+
         const date = new Date();
         const hour = date.getHours().toString().padStart(2, "0");
         const minutes = date.getMinutes().toString().padStart(2, "0");
         const seconds = date.getSeconds().toString().padStart(2, "0");
+        const milis = date.getMilliseconds().toString().padStart(4, "0");
         const day = date.getDate().toString().padStart(2, "0");
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
 
-        return `${hour}:${minutes}:${seconds} ${day}-${month}-${year}`;
+        return `${hour}:${minutes}:${seconds}:${includeMilis ? milis : ""} ${day}-${month}-${year}`;
     },
 
     async saveImage(url: string) {
@@ -91,9 +94,6 @@ export default definePlugin({
 
         const filenameData = getFilenameData(new URL(url).pathname.split("/").pop()!);
         var name: string = "";
-
-        console.log(isGenericFilename(filenameData.name));
-        console.log(filenameData);
 
         if (isGenericFilename(filenameData.name)) {
             name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
