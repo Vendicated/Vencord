@@ -19,7 +19,7 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "../webpack";
+import { findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -48,6 +48,7 @@ export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: Stores.GuildStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
+export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
@@ -61,10 +62,6 @@ export let EmojiStore: t.EmojiStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 
-export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
-    openUntrustedLink: filters.byCode(".apply(this,arguments)")
-});
-
 /**
  * React hook that returns stateful data for one or more stores
  * You might need a custom comparator (4th argument) if your store data is an object
@@ -76,16 +73,19 @@ export const MaskedLinkStore = mapMangledModuleLazy('"MaskedLinkStore"', {
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores: <T>(
-    stores: t.FluxStore[],
-    mapper: () => T,
-    idk?: any,
-    isEqual?: (old: T, newer: T) => boolean
-) => T
-    = findByCodeLazy("useStateFromStores");
+export const { useStateFromStores }: {
+    useStateFromStores: <T>(
+        stores: t.FluxStore[],
+        mapper: () => T,
+        idk?: any,
+        isEqual?: (old: T, newer: T) => boolean
+    ) => T;
+}
+    = findByPropsLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
+waitForStore("UserProfileStore", m => UserProfileStore = m);
 waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);

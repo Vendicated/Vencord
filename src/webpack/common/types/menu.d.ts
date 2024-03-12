@@ -65,19 +65,24 @@ export interface Menu {
         id: string;
         interactive?: boolean;
     }>;
-    // TODO: Type me
-    MenuSliderControl: RC<any>;
+    MenuSliderControl: RC<{
+        minValue: number,
+        maxValue: number,
+        value: number,
+        onChange(value: number): void,
+        renderValue?(value: number): string,
+    }>;
 }
 
 export interface ContextMenuApi {
-    close(): void;
-    open(
+    closeContextMenu(): void;
+    openContextMenu(
         event: UIEvent,
         render?: Menu["Menu"],
         options?: { enableSpellCheck?: boolean; },
         renderLazy?: () => Promise<Menu["Menu"]>
     ): void;
-    openLazy(
+    openContextMenuLazy(
         event: UIEvent,
         renderLazy?: () => Promise<Menu["Menu"]>,
         options?: { enableSpellCheck?: boolean; }

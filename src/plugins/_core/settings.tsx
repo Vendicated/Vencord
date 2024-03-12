@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,20 +30,21 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Megu],
     required: true,
 
-    start() {
+    contextMenus: {
         // The settings shortcuts in the user settings cog context menu
         // read the elements from a hardcoded map which for obvious reason
         // doesn't contain our sections. This patches the actions of our
         // sections to manually use SettingsRouter (which only works on desktop
         // but the context menu is usually not available on mobile anyway)
-        addContextMenuPatch("user-settings-cog", children => () => {
-            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
+        "user-settings-cog"(children) {
+            const section = findGroupChildrenByChildId("VencordSettings", children);
             section?.forEach(c => {
-                if (c?.props?.id?.startsWith("Vencord")) {
-                    c.props.action = () => SettingsRouter.open(c.props.id);
+                const id = c?.props?.id;
+                if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
+                    c!.props.action = () => SettingsRouter.open(id);
                 }
             });
-        });
+        }
     },
 
     patches: [{
@@ -62,26 +63,26 @@ export default definePlugin({
         replacement: {
             get match() {
                 switch (Settings.plugins.Settings.settingsLocation) {
-                    case "top": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
-                    case "aboveNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
-                    case "belowNitro": return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
-                    case "belowActivity": return /(?<=\{section:(\i)\.ID\.DIVIDER},)\{section:"changelog"/;
-                    case "bottom": return /\{section:(\i)\.ID\.CUSTOM,\s*element:.+?}/;
+                    case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
+                    case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
+                    case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
+                    case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
+                    case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
                     case "aboveActivity":
                     default:
-                        return /\{section:(\i)\.ID\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
+                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
         }
     }],
 
-    customSections: [] as ((ID: Record<string, unknown>) => any)[],
+    customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
 
-    makeSettingsCategories({ ID }: { ID: Record<string, unknown>; }) {
+    makeSettingsCategories(SectionTypes: Record<string, unknown>) {
         return [
             {
-                section: ID.HEADER,
+                section: SectionTypes.HEADER,
                 label: "Vencord",
                 className: "vc-settings-header"
             },
@@ -103,7 +104,7 @@ export default definePlugin({
                 element: require("@components/VencordSettings/ThemesTab").default,
                 className: "vc-themes"
             },
-            !IS_WEB && {
+            !IS_UPDATER_DISABLED && {
                 section: "VencordUpdater",
                 label: "Updater",
                 element: require("@components/VencordSettings/UpdaterTab").default,
@@ -127,9 +128,9 @@ export default definePlugin({
                 element: require("@components/VencordSettings/PatchHelperTab").default,
                 className: "vc-patch-helper"
             },
-            ...this.customSections.map(func => func(ID)),
+            ...this.customSections.map(func => func(SectionTypes)),
             {
-                section: ID.DIVIDER
+                section: SectionTypes.DIVIDER
             }
         ].filter(Boolean);
     },

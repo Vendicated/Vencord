@@ -79,15 +79,20 @@ if (!IS_VANILLA) {
                     delete options.frame;
                 }
 
-                // This causes electron to freeze / white screen for some people
-                if ((settings as any).transparentUNSAFE_USE_AT_OWN_RISK) {
+                if (settings.transparent) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
                 }
 
-                if (settings.macosTranslucency && process.platform === "darwin") {
+                const needsVibrancy = process.platform === "darwin" || (settings.macosVibrancyStyle || settings.macosTranslucency);
+
+                if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    options.vibrancy = "sidebar";
+                    if (settings.macosTranslucency) {
+                        options.vibrancy = "sidebar";
+                    } else if (settings.macosVibrancyStyle) {
+                        options.vibrancy = settings.macosVibrancyStyle;
+                    }
                 }
 
                 process.env.DISCORD_PRELOAD = original;
@@ -124,6 +129,15 @@ if (!IS_VANILLA) {
     });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+
+    // Monkey patch commandLine to disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
+    const originalAppend = app.commandLine.appendSwitch;
+    app.commandLine.appendSwitch = function (...args) {
+        if (args[0] === "disable-features" && !args[1]?.includes("WidgetLayering")) {
+            args[1] += ",WidgetLayering";
+        }
+        return originalAppend.apply(this, args);
+    };
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }

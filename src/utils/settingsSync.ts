@@ -23,6 +23,7 @@ import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
+import { relaunch } from "./native";
 import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
@@ -117,10 +118,10 @@ export async function putCloudSettings(manual?: boolean) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
-            }),
+            },
             body: deflateSync(new TextEncoder().encode(settings))
         });
 
@@ -161,11 +162,11 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "GET",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 Accept: "application/octet-stream",
                 "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
-            }),
+            },
         });
 
         if (res.status === 404) {
@@ -229,7 +230,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: () => window.DiscordNative.app.relaunch(),
+                onClick: IS_WEB ? () => location.reload() : relaunch,
                 noPersist: true
             });
 
@@ -250,9 +251,7 @@ export async function deleteCloudSettings() {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "DELETE",
-            headers: new Headers({
-                Authorization: await getCloudAuth()
-            }),
+            headers: { Authorization: await getCloudAuth() },
         });
 
         if (!res.ok) {

@@ -18,23 +18,25 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, useState } from "@webpack/common";
+import { Alerts, Menu, Parser, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
+import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
 import ReviewsView from "./components/ReviewsView";
-import { UserType } from "./entities";
-import { getCurrentUserInfo } from "./reviewDbApi";
+import { NotificationType } from "./entities";
+import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => {
     children.push(
         <Menu.MenuItem
             label="View Reviews"
@@ -51,73 +53,79 @@ export default definePlugin({
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
+    contextMenus: {
+        "guild-header-popout": guildPopoutPatch
+    },
 
     patches: [
         {
-            find: "disableBorderColor:!0",
+            find: "showBorder:null",
             replacement: {
-                match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
+                match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
             }
         }
     ],
 
+    flux: {
+        CONNECTION_OPEN: initAuth,
+    },
+
     async start() {
         const s = settings.store;
-        const { token, lastReviewId, notifyReviews } = s;
+        const { lastReviewId, notifyReviews } = s;
 
-        if (!notifyReviews || !token) return;
+        const legacy = s as any as { token?: string; };
+        if (legacy.token) {
+            await updateAuth({ token: legacy.token });
+            legacy.token = undefined;
+            new Logger("ReviewDB").info("Migrated legacy settings");
+        }
+
+        await initAuth();
 
         setTimeout(async () => {
-            const user = await getCurrentUserInfo(token);
-            if (lastReviewId && lastReviewId < user.lastReviewID) {
-                s.lastReviewId = user.lastReviewID;
-                if (user.lastReviewID !== 0)
-                    showToast("You have new reviews on your profile!");
-            }
+            if (!Auth.token) return;
 
-            addContextMenuPatch("guild-header-popout", guildPopoutPatch);
+            const user = await getCurrentUserInfo(Auth.token);
+            updateAuth({ user });
 
-            if (user.banInfo) {
-                const endDate = new Date(user.banInfo.banEndDate);
-                if (endDate.getTime() > Date.now() && (s.user?.banInfo?.banEndDate ?? 0) < endDate.getTime()) {
-                    Alerts.show({
-                        title: "You have been banned from ReviewDB",
-                        body: (
-                            <>
-                                <p>
-                                    You are banned from ReviewDB {
-                                        user.type === UserType.Banned
-                                            ? "permanently"
-                                            : "until " + endDate.toLocaleString()
-                                    }
-                                </p>
-                                {user.banInfo.reviewContent && (
-                                    <p>Offending Review: {user.banInfo.reviewContent}</p>
-                                )}
-                                <p>Continued offenses will result in a permanent ban.</p>
-                            </>
-                        ),
-                        cancelText: "Appeal",
-                        confirmText: "Ok",
-                        onCancel: () =>
-                            VencordNative.native.openExternal(
-                                "https://reviewdb.mantikafasi.dev/api/redirect?"
-                                + new URLSearchParams({
-                                    token: settings.store.token!,
-                                    page: "dashboard/appeal"
-                                })
-                            )
-                    });
+            if (notifyReviews) {
+                if (lastReviewId && lastReviewId < user.lastReviewID) {
+                    s.lastReviewId = user.lastReviewID;
+                    if (user.lastReviewID !== 0)
+                        showToast("You have new reviews on your profile!");
                 }
             }
 
-            s.user = user;
-        }, 4000);
-    },
+            if (user.notification) {
+                const props = user.notification.type === NotificationType.Ban ? {
+                    cancelText: "Appeal",
+                    confirmText: "Ok",
+                    onCancel: async () =>
+                        VencordNative.native.openExternal(
+                            "https://reviewdb.mantikafasi.dev/api/redirect?"
+                            + new URLSearchParams({
+                                token: Auth.token!,
+                                page: "dashboard/appeal"
+                            })
+                        )
+                } : {};
 
-    stop() {
-        removeContextMenuPatch("guild-header-popout", guildPopoutPatch);
+                Alerts.show({
+                    title: user.notification.title,
+                    body: (
+                        Parser.parse(
+                            user.notification.content,
+                            false
+                        )
+                    ),
+                    ...props
+                });
+
+                readNotification(user.notification.id);
+            }
+        }, 4000);
     },
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {

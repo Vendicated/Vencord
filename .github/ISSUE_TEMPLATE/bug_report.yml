@@ -1,9 +1,22 @@
 name: Bug/Crash Report
-description: Create a bug or crash report for Vencord
+description: Create a bug or crash report for Vencord. ALWAYS FIRST USE OUR SUPPORT CHANNEL! ONLY USE THIS FORM IF YOU ARE A CONTRIBUTOR OR WERE TOLD TO DO SO IN THE SUPPORT CHANNEL.
 labels: [bug]
 title: "[Bug] <title>"
 
 body:
+  - type: markdown
+    attributes:
+      value: |
+        # READ THIS BEFORE OPENING AN ISSUE
+
+        This form is ONLY FOR DEVELOPERS. YOUR ISSUE WILL BE CLOSED AND YOU WILL POSSIBLY BE BLOCKED FROM THE REPOSITORY IF YOU IGNORE THIS.
+        
+        DO NOT USE THIS FORM, unless
+        - you are a vencord contributor
+        - you were given explicit permission to use this form by a moderator in our support server
+        
+        DO NOT USE THIS FORM FOR SECURITY RELATED ISSUES. [CREATE A SECURITY ADVISORY INSTEAD.](https://github.com/Vendicated/Vencord/security/advisories/new)
+  
   - type: input
     id: discord
     attributes:
@@ -63,4 +76,6 @@ body:
       description: We only accept reports for bugs that happen on Discord Stable. Canary and PTB are Development branches and may be unstable
       options:
         - label: I am using Discord Stable or tried on Stable and this bug happens there as well
+          required: true
+        - label: I have read the requirements for opening an issue above
           required: true

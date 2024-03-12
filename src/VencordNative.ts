@@ -7,6 +7,7 @@
 import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron";
+import { PluginIpcMappings } from "main/ipcPlugins";
 import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
@@ -17,13 +18,24 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
 }
 
+const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
+
+for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
+    const map = PluginHelpers[plugin] = {};
+    for (const [methodName, method] of Object.entries(methods)) {
+        map[methodName] = (...args: any[]) => invoke(method as IpcEvents, ...args);
+    }
+}
+
 export default {
     themes: {
         uploadTheme: (fileName: string, fileData: string) => invoke<void>(IpcEvents.UPLOAD_THEME, fileName, fileData),
         deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
         getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
         getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
-        getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName)
+        getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
+        getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
     },
 
     updater: {
@@ -48,7 +60,7 @@ export default {
         },
 
         addThemeChangeListener(cb: () => void) {
-            ipcRenderer.on(IpcEvents.THEME_UPDATE, cb);
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
         },
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
@@ -60,12 +72,5 @@ export default {
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
 
-    pluginHelpers: {
-        OpenInApp: {
-            resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
-        },
-        VoiceMessages: {
-            readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
-        }
-    }
+    pluginHelpers: PluginHelpers
 };

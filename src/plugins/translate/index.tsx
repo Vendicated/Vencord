@@ -18,11 +18,11 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
@@ -32,7 +32,7 @@ import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => () => {
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
     if (!message.content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
@@ -55,25 +55,18 @@ export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate",
     authors: [Devs.Ven],
-    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
+    contextMenus: {
+        "message": messageCtxPatch
+    },
     // not used, just here in case some other plugin wants it or w/e
     translate,
-
-    patches: [
-        {
-            find: ".activeCommandOption",
-            replacement: {
-                match: /(.)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&;try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}",
-            }
-        },
-    ],
 
     start() {
         addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
 
-        addContextMenuPatch("message", messageCtxPatch);
+        addChatBarButton("vc-translate", TranslateChatBarIcon);
 
         addButton("vc-translate", message => {
             if (!message.content) return null;
@@ -100,14 +93,8 @@ export default definePlugin({
 
     stop() {
         removePreSendListener(this.preSend);
-        removeContextMenuPatch("message", messageCtxPatch);
+        removeChatBarButton("vc-translate");
         removeButton("vc-translate");
         removeAccessory("vc-translation");
     },
-
-    chatBarIcon: (slateProps: any) => (
-        <ErrorBoundary noop>
-            <TranslateChatBarIcon slateProps={slateProps} />
-        </ErrorBoundary>
-    )
 });

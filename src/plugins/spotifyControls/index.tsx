@@ -31,7 +31,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -55,13 +55,19 @@ export default definePlugin({
                 replace: "return [$self.renderPlayer(),$1]"
             }
         },
-        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
         {
             find: ".PLAYER_DEVICES",
-            replacement: {
-                match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
-                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
-            }
+            replacement: [{
+                // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
+                match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
+                replace: "post:$1.bind(null,$2.post),$&"
+            },
+            {
+                // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
+                // Discord rejects 202 which causes the request to send twice. This patch prevents this.
+                match: /202===\i\.status/,
+                replace: "false",
+            }]
         },
         // Discord doesn't give you the repeat kind, only a boolean
         {
