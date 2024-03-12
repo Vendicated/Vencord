@@ -39,6 +39,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Show a more useful message when several users are typing"
+    },
+    usernameOnly: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show username instead of display name"
     }
 });
 
@@ -57,6 +62,19 @@ interface Props {
 }
 
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
+    // checks if usernameOnly is enabled
+    let name: string;
+    if (settings.store.usernameOnly) {
+        name = user.username;
+    } else {
+        name = (
+            GuildMemberStore.getNick(guildId!, user.id)
+            || (!guildId && RelationshipStore.getNickname(user.id))
+            || (user as any).globalName
+            || user.username
+        );
+    }
+
     return (
         <strong
             role="button"
@@ -78,11 +96,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                         src={user.getAvatarURL(guildId, 128)} />
                 </div>
             )}
-            {GuildMemberStore.getNick(guildId!, user.id)
-                || (!guildId && RelationshipStore.getNickname(user.id))
-                || (user as any).globalName
-                || user.username
-            }
+            {name}
         </strong>
     );
 }, { noop: true });
@@ -90,7 +104,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
-    authors: [Devs.zt],
+    authors: [Devs.zt, Devs.Mannu],
     patches: [
         // Style the indicator and add function call to modify the children before rendering
         {
