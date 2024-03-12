@@ -59,7 +59,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUploads(ctx.channel.id, DRAFT_TYPE)[0];
+                const upload = UploadStore.getUploads(ctx.channel.id, 5)[0];
                 if (upload) {
                     if (!upload.isImage) throw "Upload is not an image";
                     return upload.item.file;
