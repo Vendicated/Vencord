@@ -12,12 +12,7 @@ import { saveFile } from "@utils/web";
 import { Button } from "@webpack/common";
 import moment from "moment";
 
-const genericFilenames: string[] = [
-    "image",
-    "video",
-    "unknow",
-    "screenshot",
-];
+import FilenameUtil from "./utils/FilenameUtil";
 
 const defaultSettings = definePluginSettings({
     includeMillis: {
@@ -30,7 +25,7 @@ const defaultSettings = definePluginSettings({
         name: "Generic names list",
         description: "Comma separated list of generic names.",
         type: OptionType.STRING,
-        default: genericFilenames.join(","),
+        default: FilenameUtil.genericFilenamePatterns.join(","),
     },
     resetSettings: {
         name: "Reset settings",
@@ -77,10 +72,10 @@ const plugin = definePlugin({
 
         if (!data) return;
 
-        const filenameData = getFilenameData(new URL(url).pathname.split("/").pop()!);
+        const filenameData = FilenameUtil.getFilenameData(new URL(url).pathname.split("/").pop()!);
         var name: string = "";
 
-        if (isGenericFilename(filenameData.name)) {
+        if (FilenameUtil.isGenericFilename(filenameData.name)) {
             name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
         } else {
             name = `${filenameData.name}${filenameData.extension}`;
@@ -90,7 +85,7 @@ const plugin = definePlugin({
     },
 
     resetSettings() {
-        settings.store.coincidenceList = genericFilenames.join("|");
+        settings.store.coincidenceList = FilenameUtil.genericFilenamePatterns.join("|");
         settings.store.includeMillis = false;
         closeAllModals();
     }
@@ -103,23 +98,6 @@ async function fetchImage(url: string) {
     if (res.status !== 200) return;
 
     return await res.blob();
-}
-
-// TODO: Move to an util file
-function isGenericFilename(filename: string) {
-    let rex = /^(bruh)\s*(?:\(([\d]+)\))?$/g;
-    rex = new RegExp(rex.source.replace("bruh", genericFilenames.join("|")));
-    return rex.test(filename);
-}
-
-function getFilenameData(filename: string): { name: string, extension: string; } {
-    const regex = /^(.+?)(\.[^.]+)?$/;
-    const result = regex.exec(filename);
-
-    return {
-        name: result?.[1] ?? "",
-        extension: (result?.[2] ?? "")
-    };
 }
 
 export default plugin;
