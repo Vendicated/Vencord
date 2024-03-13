@@ -45,7 +45,7 @@ export default definePlugin({
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
                     const messages: Array<Message & { deleted?: boolean; }> = [...MessageStore.getMessages(message.channel_id)?._array ?? []].filter(m => !m.deleted).sort((a, b) => {
-                        return b.timestamp.toString().localeCompare(a.timestamp.toString());
+                        return a.timestamp.toString().localeCompare(b.timestamp.toString());
                     }); // Need to deep copy Message array when sorting
                     console.log(messages);
                     let reply: Message | null = null;
