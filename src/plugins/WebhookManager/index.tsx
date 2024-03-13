@@ -1,10 +1,12 @@
 /*
-    Vencord is very swag
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import definePlugin, { PluginNative } from "@utils/types";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage, findOption } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
+import definePlugin, { PluginNative } from "@utils/types";
 import { RestAPI } from "@webpack/common";
 
 export let webhookDefaultName;
@@ -34,7 +36,7 @@ export default definePlugin({
             execute: async (option, ctx) => {
                 const res = await RestAPI.delete({ url: "" + findOption(option, "url") });
                 try {
-                    if (res.ok == true) {
+                    if (res.ok === true) {
                         sendBotMessage(ctx.channel.id, {
                             content: "Webhook deleted successfully."
                         });
@@ -105,11 +107,21 @@ export default definePlugin({
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 }
+                /*
+                {
+                    name: "username",
+                    description: "Give the webhook a custom name (Leave blank for default).",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: true
+                }
+                */
+
             ],
             execute: async (option, ctx) => {
 
                 var webhookUrl = findOption(option, "url");
                 var webhookMessage = findOption(option, "message");
+                //   var webhookUsername = findOption(option, "username");
                 webhookUrlGLOBAL = webhookUrl;
                 webhookMessageGLOBAL = webhookMessage;
                 await fetch("" + webhookUrl).then(response => response.json())
@@ -117,13 +129,14 @@ export default definePlugin({
                         webhookDefaultName = response.name;
                     });
 
-                Native.doSomething();
-
-
-
+                Native.executeWebhook("" + webhookUrl, {
+                    content: webhookMessage,
+                    username: webhookDefaultName,
+                    avatar_url: ""
+                });
 
                 sendBotMessage(ctx.channel.id, {
-                    content: "Message sent.?"
+                    content: "Message sent successfully."
                 });
 
             }
