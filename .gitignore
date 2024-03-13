@@ -18,7 +18,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
 
-src/userplugins/
+src/userplugins
 
 ExtensionCache/
 settings/
