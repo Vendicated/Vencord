@@ -75,11 +75,11 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             embeds: [
                                 {
+                                    title: "Webhook Information",
                                     author: {
-                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`
                                     },
-
-                                    content: `# Webhook Information: \n
+                                    content: `
                                 Webhook Username: ${response.name}
                                 Webhook ID: ${response.id}
                                 Webhook Token: ${response.token}
@@ -87,7 +87,7 @@ export default definePlugin({
                                 Channel ID: ${response.channel_id}
                                 Server ID: ${response.guild_id}
 
-                                "Creator Profile: <@${response.user.id}>`
+                                Creator Profile: <@${response.user.id}>`
                                 }]
                         });
                     });
