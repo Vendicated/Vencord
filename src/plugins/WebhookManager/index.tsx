@@ -8,8 +8,10 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { RestAPI } from "@webpack/common";
+import { Logger } from "@utils/Logger";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
+const WMLogger = new Logger("WebhookManager");
 
 export default definePlugin({
     name: "WebhookManager",
@@ -39,14 +41,14 @@ export default definePlugin({
                         });
                     }
                     else {
-                        console.log("WebhookManager encountered an error deleting a webhook. " + res.status);
+                        WMLogger.error("WebhookManager encountered an error deleting a webhook. " + res.status);
                         sendBotMessage(ctx.channel.id, {
                             content: "There was an error deleting the webhook. Check the console for more info."
                         });
                     }
                 }
                 catch (error) {
-                    console.log("WebhookManager encountered an error deleting a webhook. " + error);
+                    WMLogger.error("WebhookManager encountered an error deleting a webhook. " + error);
                     sendBotMessage(ctx.channel.id, {
                         content: "There was an error deleting the webhook. Check the console for more info. Did you input a valid webhook URL?"
                     });
