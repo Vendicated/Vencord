@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import moment from "moment";
@@ -17,30 +18,7 @@ const genericFilenames: string[] = [
     "screenshot",
 ];
 
-async function fetchImage(url: string) {
-    const res = await fetch(url);
-    if (res.status !== 200) return;
-
-    return await res.blob();
-}
-
-function isGenericFilename(filename: string) {
-    let rex = /^(bruh)\s*(?:\(([\d]+)\))?$/g;
-    rex = new RegExp(rex.source.replace("bruh", genericFilenames.join("|")));
-    return rex.test(filename);
-}
-
-function getFilenameData(filename: string): { name: string, extension: string; } {
-    const regex = /^(.+?)(\.[^.]+)?$/;
-    const result = regex.exec(filename);
-
-    return {
-        name: result?.[1] ?? "",
-        extension: (result?.[2] ?? "")
-    };
-}
-
-const settings = definePluginSettings({
+const defaultSettings = definePluginSettings({
     includeMillis: {
         name: "Include millis",
         description: "Include milliseconds in the timestamp",
@@ -49,16 +27,16 @@ const settings = definePluginSettings({
     },
     coincidenceList: {
         name: "Generic names list",
-        description: "Comma separated list of generic file names, add your own posible coincidences here.",
+        description: "Comma separated list of generic names.",
         type: OptionType.STRING,
         default: genericFilenames.join(","),
     },
 });
 
-export default definePlugin({
+const plugin = definePlugin({
     name: "NoGenericFilenames",
     description: "Prevent discord downloads from overwriting files with generic names by adding a timestamp.",
-    settings: settings,
+    settings: defaultSettings,
     authors: [Devs.Sphirye],
 
     patches: [
@@ -99,4 +77,38 @@ export default definePlugin({
 
         saveFile(new File([data], name, { type: data.type }));
     },
+
+    resetSettings() {
+        settings.store.coincidenceList = genericFilenames.join("|");
+        settings.store.includeMillis = false;
+        closeAllModals();
+    }
 });
+
+const settings = defaultSettings;
+
+async function fetchImage(url: string) {
+    const res = await fetch(url);
+    if (res.status !== 200) return;
+
+    return await res.blob();
+}
+
+// TODO: Move to an util file
+function isGenericFilename(filename: string) {
+    let rex = /^(bruh)\s*(?:\(([\d]+)\))?$/g;
+    rex = new RegExp(rex.source.replace("bruh", genericFilenames.join("|")));
+    return rex.test(filename);
+}
+
+function getFilenameData(filename: string): { name: string, extension: string; } {
+    const regex = /^(.+?)(\.[^.]+)?$/;
+    const result = regex.exec(filename);
+
+    return {
+        name: result?.[1] ?? "",
+        extension: (result?.[2] ?? "")
+    };
+}
+
+export default plugin;
