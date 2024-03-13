@@ -1,0 +1,11 @@
+.vc-custom-sounds-card {
+    padding: 1em 1em 0;
+}
+
+.vc-custom-sounds-id {
+    color: var(--text-muted);
+}
+
+.vc-custom-sounds-upload {
+    display: inline;
+}

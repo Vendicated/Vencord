@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classNameFactory } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { Margins } from "@utils/margins";
 import { classes, identity } from "@utils/misc";
@@ -21,16 +22,17 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const Sounds: { playSound(id: string): SoundPlayer; } = findByPropsLazy("createSoundForPack", "createSound", "playSound");
+const { playSound }: { playSound(id: string): SoundPlayer; } = findByPropsLazy("createSoundForPack", "createSound", "playSound");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
+const cl = classNameFactory("vc-custom-sounds-");
 
 export function SoundOverrideComponent({ type, override, onChange }: { type: SoundType; override: SoundOverride; onChange: () => Promise<void>; }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const sound: React.MutableRefObject<SoundPlayer | null> = useRef(null);
+    const sound = useRef<SoundPlayer | null>(null);
     const update = useForceUpdater();
 
     return (
-        <Card style={{ padding: "1em 1em 0" }}>
+        <Card className={cl("card")}>
             <Switch
                 value={override.enabled}
                 onChange={value => {
@@ -41,7 +43,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                 className={Margins.bottom16}
                 hideBorder={true}
             >
-                {type.name} <span style={{ color: "var(--text-muted)" }}>({type.id})</span>
+                {type.name} <span className={cl("id")}>({type.id})</span>
             </Switch>
             <Button
                 color={Button.Colors.PRIMARY}
@@ -49,7 +51,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                 onClick={() => {
                     if (sound.current != null)
                         sound.current.stop();
-                    sound.current = Sounds.playSound(type.id);
+                    sound.current = playSound(type.id);
                 }}
                 disabled={!override.enabled}
             >
@@ -83,7 +85,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                             update();
                         }}
                         placeholder="Leave blank to use the default..."
-                        className={Margins.bottom16 + " sound-override-input"}
+                        className={Margins.bottom16}
                         disabled={!override.enabled}
                         maxLength={999_999}
                     />
@@ -91,8 +93,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                     <Button
                         color={Button.Colors.PRIMARY}
                         disabled={!override.enabled}
-                        style={{ display: "inline" }}
-                        className={classes(Margins.right8, Margins.bottom16)}
+                        className={classes(Margins.right8, Margins.bottom16, cl("upload"))}
                     >
                         Upload
                         <FileInput

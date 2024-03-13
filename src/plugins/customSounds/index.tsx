@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -21,15 +23,16 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "",
         component: () =>
-            <>{soundTypes.map(type =>
-                <React.Fragment key={type.id} >
+            <>
+                {soundTypes.map(type =>
                     <SoundOverrideComponent
+                        key={type.id}
                         type={type}
                         override={overrides[type.id]}
-                        onChange={async () => await DataStore.set(OVERRIDES_KEY, overrides)}
+                        onChange={() => DataStore.set(OVERRIDES_KEY, overrides)}
                     />
-                </React.Fragment>)
-            }</>
+                )}
+            </>
     }
 });
 
