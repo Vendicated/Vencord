@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { RendererSettings } from "@main/settings";
 import { app } from "electron";
-import { getSettings } from "main/ipcMain";
 
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
         frame.once("dom-ready", () => {
             if (frame.url.startsWith("https://open.spotify.com/embed/")) {
-                const settings = getSettings().plugins?.FixSpotifyEmbeds;
+                const settings = RendererSettings.store.plugins?.FixSpotifyEmbeds;
                 if (!settings?.enabled) return;
 
                 frame.executeJavaScript(`
