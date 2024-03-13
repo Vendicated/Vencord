@@ -11,6 +11,8 @@ import { saveFile } from "@utils/web";
 const genericFilenames: string[] = [
     "image",
     "video",
+    "unknow",
+    "screenshot",
 ];
 
 async function fetchImage(url: string) {
