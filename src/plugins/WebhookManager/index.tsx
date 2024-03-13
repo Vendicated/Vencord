@@ -90,7 +90,6 @@ export default definePlugin({
                             sourceChannelGet = "";
                         }
                         sendBotMessage(ctx.channel.id, {
-
                             embeds: [
                                 {
                                     // @ts-ignore
@@ -142,24 +141,23 @@ export default definePlugin({
                     required: true
                 },
                 {
-                    name: "rawjson",
-                    description: "Send message as raw JSON",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    required: false
-                },
-                {
                     name: "tts",
                     description: "Send with TTS",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
+                },
+                {
+                    name: "rawjson",
+                    description: "Send message as raw JSON",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    required: false
                 }
-
             ],
             execute: async (option, ctx) => {
 
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
-                const webhookUsername = findOption(option, "username");
+                let webhookUsername = findOption(option, "username");
                 if (findOption(option, "rawjson")) {
                     Native.executeWebhook("" + webhookUrl, {
                         webhookMessage
@@ -168,12 +166,11 @@ export default definePlugin({
                 else {
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
-                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json()),
+                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json().then(response => { response.name; })),
                         avatar_url: "",
                         tts: findOption(option, "tts")
                     });
                 }
-
                 sendBotMessage(ctx.channel.id, {
                     content: "Message sent successfully."
                 });
