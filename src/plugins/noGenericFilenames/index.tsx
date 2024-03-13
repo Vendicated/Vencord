@@ -21,11 +21,12 @@ const defaultSettings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    // Todo: Make patterns separate themselves by pipes instead of commas
     coincidenceList: {
         name: "Generic names list",
-        description: "Comma separated list of generic names.",
+        description: "Pipe symbol separated list of generic names.",
         type: OptionType.STRING,
-        default: FilenameUtil.genericFilenamePatterns.join(","),
+        default: FilenameUtil.genericFilenamePatterns.join("|"),
     },
     resetSettings: {
         name: "Reset settings",
