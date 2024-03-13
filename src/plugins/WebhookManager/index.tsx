@@ -27,7 +27,7 @@ export default definePlugin({
             options: [
                 {
                     name: "url",
-                    description: "The URL of the webhook.",
+                    description: "The URL of the webhook",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 }
@@ -62,7 +62,7 @@ export default definePlugin({
             options: [
                 {
                     name: "url",
-                    description: "The URL of the webhook.",
+                    description: "The URL of the webhook",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 }
@@ -100,19 +100,19 @@ export default definePlugin({
             options: [
                 {
                     name: "url",
-                    description: "The URL of the webhook.",
+                    description: "The URL of the webhook",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
                 {
                     name: "message",
-                    description: "The message you want to send.",
+                    description: "The message you want to send",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
                 {
                     name: "username",
-                    description: "Give the webhook a custom name (Leave blank for default).",
+                    description: "Send with a custom webhook username",
                     type: ApplicationCommandOptionType.STRING,
                     required: false
                 },
@@ -124,7 +124,7 @@ export default definePlugin({
                 },
                 {
                     name: "tts",
-                    description: "Send with TTS?",
+                    description: "Send with TTS",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
                 }
