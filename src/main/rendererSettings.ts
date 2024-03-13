@@ -35,5 +35,3 @@ ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = RendererSettings.plain);
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, data: Settings, pathToNotify?: string) => {
     RendererSettings.setData(data, pathToNotify);
 });
-
-RendererSettings.addChangeListener("plugins.AlwaysAnimate.enabled", v => console.log("AlwaysAnimate enabled:", v));
