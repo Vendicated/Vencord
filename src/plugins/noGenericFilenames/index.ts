@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
+import moment from "moment";
 
 const genericFilenames: string[] = [
     "image",
@@ -75,18 +76,13 @@ export default definePlugin({
     ],
 
     getCurrentDate(): string {
-        var { includeMilis } = settings.store;
+        const { includeMilis } = settings.store;
+        const m = moment();
+        const date = m.format("YYYY-MM-DD");
+        const time = m.format("H-MM-SS");
+        const millis = includeMilis ? `.${m.milliseconds()}` : "";
 
-        const date = new Date();
-        const hour = date.getHours().toString().padStart(2, "0");
-        const minutes = date.getMinutes().toString().padStart(2, "0");
-        const seconds = date.getSeconds().toString().padStart(2, "0");
-        const milis = date.getMilliseconds().toString().padStart(4, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const year = date.getFullYear();
-
-        return `${hour}-${minutes}-${seconds}${includeMilis ? `-${milis}` : ""} ${day}-${month}-${year}`;
+        return `${date} ${time}${millis}`;
     },
 
     async saveImage(url: string) {
@@ -96,6 +92,8 @@ export default definePlugin({
 
         const filenameData = getFilenameData(new URL(url).pathname.split("/").pop()!);
         var name: string = "";
+
+        console.log(this.getCurrentDate());
 
         if (isGenericFilename(filenameData.name)) {
             name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
