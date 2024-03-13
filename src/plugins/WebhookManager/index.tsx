@@ -6,9 +6,9 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { PluginNative } from "@utils/types";
 import { RestAPI } from "@webpack/common";
-import { Logger } from "@utils/Logger";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 const WMLogger = new Logger("WebhookManager");
@@ -72,15 +72,24 @@ export default definePlugin({
                 await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
                         WMLogger.info(JSON.stringify(response));
+                        if (response.type === 2) {
+                            const sourceGuild = response.source_guild;
+                            const sourceChannel = response.source_channel;
+                        }
                         sendBotMessage(ctx.channel.id, {
                             embeds: [
                                 {
-                                    title: "Webhook Information",
+                                    // @ts-ignore
+                                    title: ` ${response.name}'s Webhook Information`,
+                                    color: '#00007d',
                                     author: {
-                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`
+                                        // @ts-ignore
+                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                        proxy_icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                        name: response.name,
+                                        url: ""
                                     },
-                                    content: `
-                                Webhook Username: ${response.name}
+                                    description: `
                                 Webhook ID: ${response.id}
                                 Webhook Token: ${response.token}
                                 Webhook Type: ${response.type}
@@ -156,4 +165,4 @@ export default definePlugin({
             }
         }
     ]
-});;;;;
+});

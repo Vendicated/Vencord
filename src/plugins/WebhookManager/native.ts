@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-
 /*
 todo: also add web support (should be as easy as if navigator is on web or smthn like that, might even have a variable for that somewhere)
 (thank you official vendicated vending machine 2024 real)
@@ -22,7 +21,7 @@ export function executeWebhook(_, url: string, body: object) {
         {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             }
         });
     req.write(JSON.stringify(body));
