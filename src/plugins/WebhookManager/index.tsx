@@ -85,7 +85,7 @@ export default definePlugin({
 
                                 "# Webhook Creator Information: \n " +
                                 "Creator UserID: " + response.user.id + "\n " +
-                                "Creator Username: " + response.username + " | ( <@" + response.user.id + "> )" + "\n " +
+                                "Creator Username: " + response.user.username + " | ( <@" + response.user.id + "> )" + "\n " +
                                 "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
                         });
                     });
