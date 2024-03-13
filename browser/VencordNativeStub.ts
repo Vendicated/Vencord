@@ -26,6 +26,7 @@ import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
+import { Settings } from "../src/Vencord";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -104,7 +105,7 @@ window.VencordNative = {
                 return {};
             }
         },
-        set: async (s: string) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
+        set: async (s: Settings) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
         getSettingsDir: async () => "LocalStorage"
     },
 
