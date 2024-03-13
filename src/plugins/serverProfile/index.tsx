@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -12,7 +12,7 @@ import { Guild } from "discord-types/general";
 
 import { openGuildProfileModal } from "./GuildProfileModal";
 
-const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => () => {
+const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
     const group = findGroupChildrenByChildId("privacy", children);
 
     group?.push(
@@ -29,12 +29,8 @@ export default definePlugin({
     description: "Allows you to view info about a server by right clicking it in the server list",
     authors: [Devs.Ven, Devs.Nuckyz],
     tags: ["guild", "info"],
-
-    start() {
-        addContextMenuPatch(["guild-context", "guild-header-popout"], Patch);
-    },
-
-    stop() {
-        removeContextMenuPatch(["guild-context", "guild-header-popout"], Patch);
+    contextMenus: {
+        "guild-context": Patch,
+        "guild-header-popout": Patch
     }
 });
