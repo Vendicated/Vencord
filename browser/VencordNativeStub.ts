@@ -96,8 +96,15 @@ window.VencordNative = {
     },
 
     settings: {
-        get: () => localStorage.getItem("VencordSettings") || "{}",
-        set: async (s: string) => localStorage.setItem("VencordSettings", s),
+        get: () => {
+            try {
+                return JSON.parse(localStorage.getItem("VencordSettings") || "{}");
+            } catch (e) {
+                console.error("Failed to parse settings from localStorage: ", e);
+                return {};
+            }
+        },
+        set: async (s: string) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
         getSettingsDir: async () => "LocalStorage"
     },
 
