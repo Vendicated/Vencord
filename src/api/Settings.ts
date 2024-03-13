@@ -27,7 +27,6 @@ import { React } from "@webpack/common";
 
 import plugins from "~plugins";
 
-
 const logger = new Logger("Settings");
 export interface Settings {
     notifyAboutUpdates: boolean;
@@ -156,7 +155,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
             }
         }
         return v;
-    },
+    }
 });
 
 SettingsStore.addGlobalChangeListener((_, path) => {
