@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ActivityType } from ".";
+import { ActivityType, TimestampMode } from ".";
 
 interface PresetsType {
     appName: string,
     details?: string,
     state?: string,
     type: ActivityType,
+    timestampMode?: TimestampMode,
     imageBig: string,
     imageBigTooltip?: string,
     imageSmall?: string,
@@ -34,6 +35,7 @@ const Presets: Record<string, PresetsType> = {
         appName: "VSCode",
         details: "Idling",
         type: ActivityType.PLAYING,
+        timestampMode: TimestampMode.NOW,
         imageBig: "https://raw.githubusercontent.com/LeonardSSH/vscord/main/assets/icons/idle-vscode.png",
         imageBigTooltip: "Idling",
         imageSmall: "https://raw.githubusercontent.com/LeonardSSH/vscord/main/assets/icons/idle.png",
@@ -43,8 +45,10 @@ const Presets: Record<string, PresetsType> = {
     },
     Anime: {
         appName: "Anime",
-        details: "Episode 01",
+        details: "Anime",
+        state: "Episode unknown",
         type: ActivityType.WATCHING,
+        timestampMode: TimestampMode.NOW,
         imageBig: "https://i.pinimg.com/564x/65/ec/ac/65ecacb6aa2281c70a6733b37c750bc7.jpg",
     }
 };

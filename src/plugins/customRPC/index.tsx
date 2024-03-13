@@ -27,6 +27,8 @@ import { chooseFile, saveFile } from "@utils/web";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
+import Presets, { PresetsType } from "./presets";
+
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
@@ -43,7 +45,7 @@ interface ActivityAssets {
     small_text?: string;
 }
 
-interface Activity {
+export interface Activity {
     state?: string;
     details?: string;
     timestamps?: {
@@ -78,6 +80,30 @@ const enum TimestampMode {
 }
 
 const settings = definePluginSettings({
+    preset: {
+        type: OptionType.SELECT,
+        description: "Some default presets by Vencord",
+        onChange: onChange,
+        options: [
+            {
+                label: "None",
+                value: 0,
+                default: true
+            },
+            {
+                label: "Vencord",
+                value: 1,
+            },
+            {
+                label: "VSCode",
+                value: 2
+            },
+            {
+                label: "Anime",
+                value: 3
+            }
+        ]
+    },
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
@@ -255,7 +281,37 @@ const settings = definePluginSettings({
     }
 });
 
+function loadActivity(preset: PresetsType) {
+    settings.store.appID = "1";
+    settings.store.appName = preset.appName;
+    settings.store.details = preset.details;
+    settings.store.state = preset.state;
+    settings.store.type = preset.type;
+    settings.store.imageBig = preset.imageBig;
+    settings.store.imageBigTooltip = preset.imageBigTooltip;
+    settings.store.imageSmall = preset.imageSmall;
+    settings.store.imageSmallTooltip = preset.imageSmallTooltip;
+    settings.store.buttonOneText = preset.buttonOneText;
+    settings.store.buttonOneURL = preset.buttonOneURL;
+    settings.store.buttonTwoText = preset.buttonTwoText;
+    settings.store.buttonTwoURL = preset.buttonTwoURL;
+    return true;
+}
+
+function loadPreset() {
+    if (!settings.store.preset) return;
+    if (settings.store.preset === 1) {
+    }
+    if (settings.store.preset === 2) {
+        loadActivity(Presets.VSCode);
+    }
+    if (settings.store.preset === 3) {
+        loadActivity(Presets.Anime);
+    }
+}
+
 function onChange() {
+    loadPreset();
     setRpc(true);
     if (Settings.plugins.CustomRPC.enabled) setRpc();
 }
@@ -283,7 +339,7 @@ function isImageKeyValid(value: string) {
 async function exportBackup() {
     const filename = "rpc-backup.json";
     const backup = JSON.stringify({
-        appID: settings.store.appID,
+        appId: settings.store.appID,
         appName: settings.store.appName,
         details: settings.store.details,
         state: settings.store.state,
@@ -529,4 +585,4 @@ export default definePlugin({
     }
 });
 
-export { ActivityType };
+export { ActivityType, TimestampMode };
