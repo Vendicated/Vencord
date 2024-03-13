@@ -4,29 +4,35 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
+import type { Settings } from "@api/Settings";
 import { SettingsStore } from "@shared/SettingsStore";
 import { IpcEvents } from "@utils/IpcEvents";
 import { ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 
-import { SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
+import { NATIVE_SETTINGS_FILE, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
-function readSettings(): Partial<Settings> {
+function readSettings<T = object>(name: string, file: string): Partial<T> {
     try {
-        return JSON.parse(readFileSync(SETTINGS_FILE, "utf-8"));
-    } catch (err) {
-        console.error("Failed to read renderer settings", err);
+        return JSON.parse(readFileSync(file, "utf-8"));
+    } catch (err: any) {
+        if (err?.code !== "ENOENT")
+            console.error(`Failed to read ${name} settings`, err);
+
         return {};
     }
 }
 
-export const RendererSettings = new SettingsStore(readSettings());
+export const RendererSettings = new SettingsStore(readSettings<Settings>("renderer", SETTINGS_FILE));
 
 RendererSettings.addGlobalChangeListener(() => {
-    writeFileSync(SETTINGS_FILE, JSON.stringify(RendererSettings.plain, null, 4));
+    try {
+        writeFileSync(SETTINGS_FILE, JSON.stringify(RendererSettings.plain, null, 4));
+    } catch (e) {
+        console.error("Failed to write renderer settings", e);
+    }
 });
 
 ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
@@ -34,4 +40,14 @@ ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = RendererSettings.plain);
 
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, data: Settings, pathToNotify?: string) => {
     RendererSettings.setData(data, pathToNotify);
+});
+
+export const NativeSettings = new SettingsStore(readSettings("native", NATIVE_SETTINGS_FILE));
+
+NativeSettings.addGlobalChangeListener(() => {
+    try {
+        writeFileSync(NATIVE_SETTINGS_FILE, JSON.stringify(NativeSettings.plain, null, 4));
+    } catch (e) {
+        console.error("Failed to write native settings", e);
+    }
 });
