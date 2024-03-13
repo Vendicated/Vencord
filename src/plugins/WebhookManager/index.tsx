@@ -121,6 +121,12 @@ export default definePlugin({
                     description: "Send message as raw JSON",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
+                },
+                {
+                    name: "tts",
+                    description: "Send with TTS?",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    required: false
                 }
 
             ],
@@ -133,16 +139,15 @@ export default definePlugin({
                     Native.executeWebhook("" + webhookUrl, {
                         webhookMessage
                     });
-
                 }
                 else {
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
                         username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json()),
-                        avatar_url: ""
+                        avatar_url: "",
+                        tts: findOption(option, "tts")
                     });
                 }
-
 
                 sendBotMessage(ctx.channel.id, {
                     content: "Message sent successfully."
