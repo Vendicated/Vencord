@@ -281,20 +281,27 @@ const settings = definePluginSettings({
     }
 });
 
+function setDefaults() {
+    settings.store.details = undefined;
+    settings.store.state = undefined;
+    settings.store.type = ActivityType.PLAYING;
+    settings.store.startTime = TimestampMode.NONE;
+    settings.store.startTime = undefined;
+    settings.store.endTime = undefined;
+    settings.store.streamLink = undefined;
+    settings.store.imageBig = undefined;
+    settings.store.imageBigTooltip = undefined;
+    settings.store.imageSmall = undefined;
+    settings.store.imageSmallTooltip = undefined;
+    settings.store.buttonOneText = undefined;
+    settings.store.buttonOneURL = undefined;
+    settings.store.buttonTwoText = undefined;
+    settings.store.buttonTwoURL = undefined;
+}
+
 function loadActivity(preset: PresetsType) {
-    settings.store.appID = "1";
-    settings.store.appName = preset.appName;
-    settings.store.details = preset.details;
-    settings.store.state = preset.state;
-    settings.store.type = preset.type;
-    settings.store.imageBig = preset.imageBig;
-    settings.store.imageBigTooltip = preset.imageBigTooltip;
-    settings.store.imageSmall = preset.imageSmall;
-    settings.store.imageSmallTooltip = preset.imageSmallTooltip;
-    settings.store.buttonOneText = preset.buttonOneText;
-    settings.store.buttonOneURL = preset.buttonOneURL;
-    settings.store.buttonTwoText = preset.buttonTwoText;
-    settings.store.buttonTwoURL = preset.buttonTwoURL;
+    setDefaults();
+    Object.assign(settings.store, preset);
     return true;
 }
 
@@ -370,24 +377,8 @@ async function exportBackup() {
 async function loadBackup(data: string) {
     const backup = await JSON.parse(data);
     if (backup) {
-        settings.store.appID = backup.appID;
-        settings.store.appName = backup.appName;
-        settings.store.details = backup.details;
-        settings.store.state = backup.state;
-        settings.store.type = backup.type;
-        settings.store.streamLink = backup.streamLink;
-        settings.store.timestampMode = backup.timestampMode;
-        settings.store.startTime = backup.startTime;
-        settings.store.endTime = backup.endTime;
-        settings.store.imageBig = backup.imageBig;
-        settings.store.imageBigTooltip = backup.imageBigTooltip;
-        settings.store.imageSmall = backup.imageSmall;
-        settings.store.imageSmallTooltip = backup.imageSmallTooltip;
-        settings.store.buttonOneText = backup.buttonOneText;
-        settings.store.buttonOneURL = backup.buttonOneURL;
-        settings.store.buttonTwoText = backup.buttonTwoText;
-        settings.store.buttonTwoURL = backup.buttonTwoURL;
-        return true;
+        setDefaults();
+        Object.assign(settings.store, backup);
     }
 }
 
