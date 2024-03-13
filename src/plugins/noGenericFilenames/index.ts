@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import moment from "moment";
@@ -56,12 +57,7 @@ export default definePlugin({
     name: "NoGenericFilenames",
     description: "Prevent discord downloads from overwriting files with generic names by adding a timestamp.",
     settings: settings,
-    authors: [
-        {
-            id: 858410144349945867n,
-            name: "Kirigamium",
-        },
-    ],
+    authors: [Devs.Sphirye],
 
     patches: [
         {
