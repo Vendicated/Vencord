@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -16,7 +14,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Button, Forms, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, Toasts, useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
@@ -26,12 +24,6 @@ const cl = classNameFactory("vc-decoration-");
 
 import style from "./index.css?managed";
 
-type Badge = {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-};
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -46,55 +38,11 @@ interface UserProfileData {
     profile_effect: string;
     banner: string;
     avatar: string;
-    badges: Badge[];
     decoration: string;
 }
 
 
 let UsersData = {} as Record<string, UserProfileData>;
-const UserBadges: Record<string, ProfileBadge[]> = {};
-const updateBadgesForAllUsers = () => {
-    Object.keys(UsersData).forEach(userId => {
-        const newBadges = UsersData[userId].badges;
-        const existingBadges = UserBadges[userId] || [];
-        if (newBadges) {
-            newBadges.forEach((badge, index) => {
-                const existingBadge = existingBadges[index];
-
-                if (!existingBadge) {
-                    const newBadge = {
-                        image: badge.icon,
-                        position: BadgePosition.START,
-                        props: {
-                            style: {
-                                borderRadius: "50%",
-                                transform: "scale(0.9)"
-                            }
-                        },
-                        shouldShow: user => user.user.id === userId,
-                    };
-
-                    addBadge(newBadge);
-
-                    if (!UserBadges[userId]) {
-                        UserBadges[userId] = [];
-                    }
-
-                    UserBadges[userId].splice(index, 0, newBadge);
-                }
-            });
-        }
-        existingBadges.forEach((existingBadge, index) => {
-            const badgeStillExists = newBadges && newBadges[index];
-
-            if (!badgeStillExists) {
-                removeBadge(existingBadge);
-                UserBadges[userId].splice(index, 1);
-            }
-        });
-    });
-};
-
 async function loadfakeProfile(noCache = false) {
     try {
         const init = {} as RequestInit;
@@ -165,22 +113,10 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    enableCustomBadges: {
-        description: "Allows you to use custom badges",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
-    },
     enableAvatarDecorations: {
         description: "Allows you to use discord avatar decorations",
         type: OptionType.BOOLEAN,
         default: false
-    },
-    showCustomBadgesinmessage: {
-        description: "Show custom badges in message",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
     },
     nitroFirst: {
         description: "Banner/Avatar to use if both Nitro and fakeProfile Banner/Avatar are present",
@@ -197,81 +133,15 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-function ImageIcon(path: string) {
-    return ({ tooltip }: { tooltip: string; }) => (
-        <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
-                <img {...tooltipProps} src={path} height={20} width={20} />
-            )}
-        </Tooltip>
-    );
-}
-const BadgeIcon = ({ user, badgeImg, badgeText }: { user: User, badgeImg: string, badgeText: string; }) => {
-    if (UsersData[user.id]?.badges) {
-        const Icon = ImageIcon(badgeImg);
-        const tooltip = badgeText;
-        return <Icon tooltip={tooltip} />;
-    } else {
-        return null;
-    }
-};
-
-
-
-const BadgeMain = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
-
-    const validBadges = UsersData[user.id]?.badges;
-    if (!validBadges || validBadges.length === 0) return null;
-
-    const icons = validBadges.map((badge: Badge, index: number) => (
-        <BadgeIcon
-            key={index}
-            user={user}
-            badgeImg={badge.icon}
-            badgeText={badge.description}
-        />
-    ));
-
-    return (
-        <span
-            className="custom-badge"
-            style={{
-                display: "inline-flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginLeft: wantMargin ? 4 : 0,
-                verticalAlign: "top",
-                position: "relative",
-                top: wantTopMargin ? 2 : 0,
-                padding: !wantMargin ? 1 : 0,
-                gap: 2
-            }}
-        >
-            {icons}
-        </span>
-    );
-};
-
-
 
 export default definePlugin({
     name: "fakeProfile",
-    description: "Unlock Discord profile effects, themes, avatar decorations, and custom badges without the need for Nitro.",
+    description: "Unlock Discord profile effects, themes and avatar decorations without the need for Nitro.",
     authors: [Devs.Sampath, Devs.Alyxia, Devs.Remty, Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad],
     dependencies: ["MessageDecorationsAPI"],
     async start() {
         enableStyle(style);
         await loadfakeProfile();
-        if (settings.store.enableCustomBadges) {
-            updateBadgesForAllUsers();
-        }
-        if (settings.store.showCustomBadgesinmessage) {
-            addDecoration("custom-badge", props =>
-                <ErrorBoundary noop>
-                    <BadgeMain user={props.message?.author} wantTopMargin={true} />
-                </ErrorBoundary>
-            );
-        }
         const response = await fetch(BASE_URL + "/fakeProfile");
         const data = await response.json();
         if (data.version !== VERSION) {
@@ -286,15 +156,7 @@ export default definePlugin({
         }
         setInterval(async () => {
             await loadfakeProfile(true);
-            if (settings.store.enableCustomBadges) {
-                updateBadgesForAllUsers();
-            }
         }, data.reloadInterval);
-    },
-    stop() {
-        if (settings.store.showCustomBadgesinmessage) {
-            removeDecoration("custom-badge");
-        }
     },
     patches: [
         {
@@ -515,7 +377,6 @@ export default definePlugin({
                 <Button
                     onClick={async () => {
                         await loadfakeProfile(true);
-                        updateBadgesForAllUsers();
                         Toasts.show({
                             message: "Updated fakeProfile!",
                             id: Toasts.genId(),
