@@ -13,8 +13,8 @@ export default class FilenameUtil {
         "screenshot",
     ];
 
-    static isGenericFilename(filename: string) {
-        const regex = new RegExp(`^(?:${this.genericFilenamePatterns.join("|")})$`, "i");
+    static isGenericFilename(filename: string, patterns: string[]) {
+        const regex = new RegExp(`^(?:${patterns.join("|")})$`, "i");
         return regex.test(filename);
     }
 

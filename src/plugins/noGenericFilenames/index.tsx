@@ -75,7 +75,7 @@ const plugin = definePlugin({
         const filenameData = FilenameUtil.getFilenameData(new URL(url).pathname.split("/").pop()!);
         var name: string = "";
 
-        if (FilenameUtil.isGenericFilename(filenameData.name)) {
+        if (FilenameUtil.isGenericFilename(filenameData.name, this.coincidenceList.split("|"))) {
             name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
         } else {
             name = `${filenameData.name}${filenameData.extension}`;
@@ -88,7 +88,16 @@ const plugin = definePlugin({
         settings.store.coincidenceList = FilenameUtil.genericFilenamePatterns.join("|");
         settings.store.includeMillis = false;
         closeAllModals();
-    }
+    },
+
+    get coincidenceList(): string {
+        return settings.store.coincidenceList;
+    },
+
+    set coincidenceList(v: string) {
+        settings.store.coincidenceList = v;
+    },
+
 });
 
 const settings = defaultSettings;
