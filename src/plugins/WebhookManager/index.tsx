@@ -12,7 +12,8 @@ import { RestAPI } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 const WMLogger = new Logger("WebhookManager");
-
+let sourceGuildGet;
+let sourceChannelGet;
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
@@ -73,14 +74,27 @@ export default definePlugin({
                     .then(response => {
                         WMLogger.info(JSON.stringify(response));
                         if (response.type === 2) {
-                            const sourceGuild = response.source_guild;
-                            const sourceChannel = response.source_channel;
+                            const sourceGuild = `
+                            Source Server ID: ${response.source_guild.id}
+                            Source Server Name: ${response.source_guild.name}
+                            `;
+                            sourceGuildGet = sourceGuild;
+                            const sourceChannel = `
+                            Source Channel ID: ${response.source_channel.id}
+                            Source Channel Name: ${response.source_channel.name}
+                            `;
+                            sourceChannelGet = sourceChannel;
+                        }
+                        else {
+                            sourceGuildGet = "";
+                            sourceChannelGet = "";
                         }
                         sendBotMessage(ctx.channel.id, {
+
                             embeds: [
                                 {
                                     // @ts-ignore
-                                    title: ` ${response.name}'s Webhook Information`,
+                                    title: `Webhook Information`,
                                     color: '#00007d',
                                     author: {
                                         // @ts-ignore
@@ -95,6 +109,8 @@ export default definePlugin({
                                 Webhook Type: ${response.type}
                                 Channel ID: ${response.channel_id}
                                 Server ID: ${response.guild_id}
+                                ${sourceGuildGet}
+                                ${sourceChannelGet}
 
                                 Creator Profile: <@${response.user.id}>`
                                 }]
@@ -123,7 +139,7 @@ export default definePlugin({
                     name: "username",
                     description: "Send with a custom webhook username",
                     type: ApplicationCommandOptionType.STRING,
-                    required: false
+                    required: true
                 },
                 {
                     name: "rawjson",
