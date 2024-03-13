@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { debounce } from "@utils/debounce";
 import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
@@ -23,7 +24,6 @@ import { mergeDefaults } from "@utils/misc";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
-import { SettingsStore as SettingsStoreClass } from "shared/SettingsStore";
 
 import plugins from "~plugins";
 

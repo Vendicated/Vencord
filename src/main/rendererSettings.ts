@@ -5,10 +5,10 @@
  */
 
 import { Settings } from "@api/Settings";
+import { SettingsStore } from "@shared/SettingsStore";
 import { IpcEvents } from "@utils/IpcEvents";
 import { ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
-import { SettingsStore } from "shared/SettingsStore";
 
 import { SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
 
