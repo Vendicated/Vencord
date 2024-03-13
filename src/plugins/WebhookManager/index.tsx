@@ -72,6 +72,7 @@ export default definePlugin({
                 var webhookUrl = findOption(option, "url");
                 await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
+                        console.log(JSON.stringify(response));
                         sendBotMessage(ctx.channel.id, {
                             content: "# Webhook Information:  \n" +
                                 "Webhook Username: " + response.name + "\n " +
