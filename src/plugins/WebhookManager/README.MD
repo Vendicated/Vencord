@@ -4,13 +4,13 @@
 </div>
 
   ## Commands
-  - /sendwebhookmessage - *Sends a message through a webhook.*
+  - /webhook send - *Sends a message through a webhook.*
 
 
-  - /deletewebhook -  *Deletes a webhook.*
+  - /webhook delete -  *Deletes a webhook.*
 
   
-  - /webhookinfo - *Gets advanced details on the webhook such as the name, profile pic, server and channel ID, and additionally, information on person who created it*
+  - /webhook info - *Gets advanced details on the webhook such as the name, profile pic, server and channel ID, and additionally, information on person who created it*
   <details><summary>Full /webhookinfo Output</summary>
     - Webhook Username <br>
     - Webhook ID<br>
@@ -19,6 +19,7 @@
     - Server ID<br>
     - Webhook Profile Picture<br>
     - Webhook Type<br>
-    - Creator UserID<br>
-    - Creator Username<br>
+
+    
+    - Creator Profile<br>
   </details>

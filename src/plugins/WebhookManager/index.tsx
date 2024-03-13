@@ -21,7 +21,7 @@ export default definePlugin({
 
     commands: [
         {
-            name: "deletewebhook",
+            name: "webhook delete",
             description: "Delete a webhook.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
@@ -56,7 +56,7 @@ export default definePlugin({
             }
         },
         {
-            name: "webhookinfo",
+            name: "webhook info",
             description: "Retrieve information about a webhook.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
@@ -94,7 +94,7 @@ export default definePlugin({
             }
         },
         {
-            name: "sendwebhookmessage",
+            name: "webhook send",
             description: "Send a message through a webhook.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
