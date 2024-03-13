@@ -283,7 +283,7 @@ function isImageKeyValid(value: string) {
 async function exportBackup() {
     const filename = "rpc-backup.json";
     const backup = JSON.stringify({
-        appId: settings.store.appID,
+        appID: settings.store.appID,
         appName: settings.store.appName,
         details: settings.store.details,
         state: settings.store.state,
