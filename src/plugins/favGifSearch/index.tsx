@@ -200,23 +200,28 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
 
 export function getTargetString(urlStr: string) {
-    const url = new URL(urlStr);
-    switch (settings.store.searchOption) {
-        case "url":
-            return url.href;
-        case "path":
-            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-                // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
-                // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
-                return url.pathname.split("/").at(-1) ?? url.pathname;
-            return url.pathname;
-        case "hostandpath":
-            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-                return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
-            return `${url.host} ${url.pathname}`;
-
-        default:
-            return "";
+    try {
+        const url = new URL(urlStr);
+        switch (settings.store.searchOption) {
+            case "url":
+                return url.href;
+            case "path":
+                if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                    // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
+                    // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
+                    return url.pathname.split("/").at(-1) ?? url.pathname;
+                return url.pathname;
+            case "hostandpath":
+                if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                    return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
+                return `${url.host} ${url.pathname}`;
+    
+            default:
+                return "";
+        }
+    } catch (err) {
+        // Can't resolve URL, return as-is
+        return urlStr;
     }
 }
 
