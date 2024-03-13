@@ -5,8 +5,8 @@
  */
 
 import type { Settings } from "@api/Settings";
+import { IpcEvents } from "@shared/IpcEvents";
 import { SettingsStore } from "@shared/SettingsStore";
-import { IpcEvents } from "@utils/IpcEvents";
 import { ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 

@@ -20,8 +20,8 @@ import "./updater";
 import "./ipcPlugins";
 import "./settings";
 
-import { debounce } from "@utils/debounce";
-import { IpcEvents } from "@utils/IpcEvents";
+import { debounce } from "@shared/debounce";
+import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";

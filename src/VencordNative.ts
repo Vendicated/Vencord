@@ -6,7 +6,7 @@
 
 import { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
-import { IpcEvents } from "@utils/IpcEvents";
+import { IpcEvents } from "@shared/IpcEvents";
 import { IpcRes } from "@utils/types";
 import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
