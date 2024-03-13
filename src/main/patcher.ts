@@ -21,7 +21,7 @@ import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
-import { RendererSettings } from "./rendererSettings";
+import { RendererSettings } from "./settings";
 import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Vencord] Starting up...");

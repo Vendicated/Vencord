@@ -18,7 +18,7 @@
 
 import "./updater";
 import "./ipcPlugins";
-import "./rendererSettings";
+import "./settings";
 
 import { debounce } from "@utils/debounce";
 import { IpcEvents } from "@utils/IpcEvents";

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { RendererSettings } from "@main/settings";
 import { app } from "electron";
-import { RendererSettings } from "main/rendererSettings";
 
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {

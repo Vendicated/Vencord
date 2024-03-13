@@ -20,7 +20,7 @@ import { app, protocol, session } from "electron";
 import { join } from "path";
 
 import { ensureSafePath } from "./ipcMain";
-import { RendererSettings } from "./rendererSettings";
+import { RendererSettings } from "./settings";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
