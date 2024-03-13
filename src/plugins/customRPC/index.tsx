@@ -398,28 +398,31 @@ export default definePlugin({
         const [showErrorCard, setShowErrorCard] = useState(!gameActivitySetting);
         return (
             <>
-                <ErrorCard style={{ margin: "20px 0px", padding: "25px 30px", display: !showErrorCard ? "none" : "block" }}>
-                    <Text style={{ fontWeight: "bold", marginBottom: "3px" }}>Notice</Text>
-                    <Text>Game activity isn't enabled, people won't be able to see your custom presence!</Text>
-                    <Button
-                        color={Button.Colors.TRANSPARENT}
-                        style={{ marginTop: "10px" }} onClick={() => {
-                            StatusSettingsStores.ShowCurrentGame.updateSetting(true);
-                            setShowErrorCard(false);
-                            const message = "Game activity enabled";
-                            const type = Toasts.Type.SUCCESS;
-                            Toasts.show({
-                                id: Toasts.genId(),
-                                message,
-                                type,
-                                options: {
-                                    position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
-                                },
-                            });
-                        }}>
-                        Enable
-                    </Button>
-                </ErrorCard>
+                {
+                    showErrorCard &&
+                    <ErrorCard style={{ margin: "20px 0px", padding: "25px 30px" }}>
+                        <Text style={{ fontWeight: "bold", marginBottom: "3px" }}>Notice</Text>
+                        <Text>Game activity isn't enabled, people won't be able to see your custom presence!</Text>
+                        <Button
+                            color={Button.Colors.TRANSPARENT}
+                            style={{ marginTop: "10px" }} onClick={() => {
+                                StatusSettingsStores.ShowCurrentGame.updateSetting(true);
+                                setShowErrorCard(false);
+                                const message = "Game activity enabled";
+                                const type = Toasts.Type.SUCCESS;
+                                Toasts.show({
+                                    id: Toasts.genId(),
+                                    message,
+                                    type,
+                                    options: {
+                                        position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
+                                    },
+                                });
+                            }}>
+                            Enable
+                        </Button>
+                    </ErrorCard>
+                }
                 <Forms.FormText>
                     Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
