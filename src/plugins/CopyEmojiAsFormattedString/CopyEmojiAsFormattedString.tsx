@@ -35,7 +35,7 @@ export default definePlugin({
     description: "Add's button to copy emoji as formatted string!",
     authors: [Devs.HAPPY_ENDERMAN],
     expressionPickerPatch(children, props) {
-        if (!props.alreadyPatched) {
+        if (!children.find(element=>element.props.id === "copy-formatted-string")) {
             let data = props.target.dataset as Emoji;
             const firstChild = props.target.firstChild as HTMLImageElement;
 
