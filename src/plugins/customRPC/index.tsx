@@ -301,6 +301,7 @@ function loadActivity(preset: PresetsType) {
 function loadPreset() {
     if (!settings.store.preset) return;
     if (settings.store.preset === 1) {
+        loadActivity(Presets.Vencord);
     }
     if (settings.store.preset === 2) {
         loadActivity(Presets.VSCode);
@@ -339,7 +340,7 @@ function isImageKeyValid(value: string) {
 async function exportBackup() {
     const filename = "rpc-backup.json";
     const backup = JSON.stringify({
-        appId: settings.store.appID,
+        appID: settings.store.appID,
         appName: settings.store.appName,
         details: settings.store.details,
         state: settings.store.state,
@@ -420,6 +421,7 @@ async function importBackup(): Promise<void> {
         };
         reader.readAsText(file);
     }
+    settings.store.preset = 0;
 }
 
 async function createActivity(): Promise<Activity | undefined> {
