@@ -528,3 +528,5 @@ export default definePlugin({
         );
     }
 });
+
+export { ActivityType };
