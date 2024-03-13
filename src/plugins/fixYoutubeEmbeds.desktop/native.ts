@@ -5,13 +5,13 @@
  */
 
 import { app } from "electron";
-import { getSettings } from "main/ipcMain";
+import { RendererSettings } from "main/rendererSettings";
 
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
         frame.once("dom-ready", () => {
             if (frame.url.startsWith("https://www.youtube.com/")) {
-                const settings = getSettings().plugins?.FixYoutubeEmbeds;
+                const settings = RendererSettings.store.plugins?.FixYoutubeEmbeds;
                 if (!settings?.enabled) return;
 
                 frame.executeJavaScript(`

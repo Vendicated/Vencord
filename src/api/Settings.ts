@@ -54,7 +54,6 @@ export interface Settings {
     | "under-page"
     | "window"
     | undefined;
-    macosTranslucency: boolean | undefined;
     disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
@@ -90,8 +89,6 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
-    // Replaced by macosVibrancyStyle
-    macosTranslucency: undefined,
     macosVibrancyStyle: undefined,
     disableMinSize: false,
     winNativeTitleBar: false,
@@ -112,13 +109,8 @@ const DefaultSettings: Settings = {
     }
 };
 
-try {
-    var settings = JSON.parse(VencordNative.settings.get()) as Settings;
-    mergeDefaults(settings, DefaultSettings);
-} catch (err) {
-    var settings = mergeDefaults({} as Settings, DefaultSettings);
-    logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
-}
+const settings = VencordNative.settings.get();
+mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
@@ -164,11 +156,11 @@ export const SettingsStore = new SettingsStoreClass(settings, {
     },
 });
 
-SettingsStore.addGlobalChangeListener(() => {
+SettingsStore.addGlobalChangeListener((_, path) => {
     SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
     localStorage.Vencord_settingsDirty = true;
     saveSettingsOnFrequentAction();
-    VencordNative.settings.set(JSON.stringify(SettingsStore.plain, null, 4));
+    VencordNative.settings.set(SettingsStore.plain, path);
 });
 
 /**

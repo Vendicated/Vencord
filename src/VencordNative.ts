@@ -6,6 +6,7 @@
 
 import { IpcEvents } from "@utils/IpcEvents";
 import { IpcRes } from "@utils/types";
+import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
 import { PluginIpcMappings } from "main/ipcPlugins";
 import type { UserThemeHeader } from "main/themes";
@@ -46,8 +47,8 @@ export default {
     },
 
     settings: {
-        get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
-        set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
+        get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
+        set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
         getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
     },
 
