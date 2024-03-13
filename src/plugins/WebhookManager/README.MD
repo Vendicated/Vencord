@@ -21,5 +21,4 @@
     - Webhook Type<br>
     - Creator UserID<br>
     - Creator Username<br>
-    - Creator Profile<br>
   </details>

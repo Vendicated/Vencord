@@ -68,10 +68,10 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                let webhookUrl = findOption(option, "url");
+                const webhookUrl = findOption(option, "url");
                 await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
-                        console.log(JSON.stringify(response));
+                        WMLogger.info(JSON.stringify(response));
                         sendBotMessage(ctx.channel.id, {
                             content: "# Webhook Information:  \n" +
                                 "Webhook Username: " + response.name + "\n " +
@@ -122,19 +122,19 @@ export default definePlugin({
             ],
             execute: async (option, ctx) => {
 
-                let webhookUrl = findOption(option, "url");
-                let webhookMessage = findOption(option, "message");
-                let webhookUsername = findOption(option, "username");
+                const webhookUrl = findOption(option, "url");
+                const webhookMessage = findOption(option, "message");
+                const webhookUsername = findOption(option, "username");
                 if (findOption(option, "rawjson")) {
                     Native.executeWebhook("" + webhookUrl, {
-                        webhookMessage // doubt it will work but it might, might clash with other options such as the username, but once i'm home i'll continue testing.
+                        webhookMessage
                     });
 
                 }
                 else {
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
-                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json()), // still may have issues, supposed to go to webhook name if a custom name is not set, ?? should be the right operator
+                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json()),
                         avatar_url: ""
                     });
                 }
