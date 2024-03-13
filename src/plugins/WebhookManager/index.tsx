@@ -166,7 +166,7 @@ export default definePlugin({
                 else {
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
-                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json().then(response => { response.name; })),
+                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json().then(response => { webhookUsername = response.name; })),
                         avatar_url: "",
                         tts: findOption(option, "tts")
                     });
