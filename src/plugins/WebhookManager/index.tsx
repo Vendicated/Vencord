@@ -68,7 +68,7 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                var webhookUrl = findOption(option, "url");
+                let webhookUrl = findOption(option, "url");
                 await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
                         console.log(JSON.stringify(response));
@@ -105,28 +105,40 @@ export default definePlugin({
                     description: "The message you want to send.",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
-                }
-                /*
+                },
                 {
                     name: "username",
                     description: "Give the webhook a custom name (Leave blank for default).",
                     type: ApplicationCommandOptionType.STRING,
-                    required: true
+                    required: false
+                },
+                {
+                    name: "rawjson",
+                    description: "Send as a raw JSON",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    required: false
                 }
-                */
 
             ],
             execute: async (option, ctx) => {
 
-                var webhookUrl = findOption(option, "url");
-                var webhookMessage = findOption(option, "message");
-                //   var webhookUsername = findOption(option, "username");
+                let webhookUrl = findOption(option, "url");
+                let webhookMessage = findOption(option, "message");
+                let webhookUsername = findOption(option, "username");
+                if (findOption(option, "rawjson")) {
+                    Native.executeWebhook("" + webhookUrl, {
+                        webhookMessage // doubt it will work but it might, might clash with other options such as the username, but once i'm home i'll continue testing.
+                    });
 
-                Native.executeWebhook("" + webhookUrl, {
-                    content: webhookMessage,
-                    username: fetch("" + webhookUrl).then(response => response.json()), // yea might have issues, sleepy brain as well, will fix tmr
-                    avatar_url: ""
-                });
+                }
+                else {
+                    Native.executeWebhook("" + webhookUrl, {
+                        content: webhookMessage,
+                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json()), // still may have issues, supposed to go to webhook name if a custom name is not set, ?? should be the right operator
+                        avatar_url: ""
+                    });
+                }
+
 
                 sendBotMessage(ctx.channel.id, {
                     content: "Message sent successfully."
