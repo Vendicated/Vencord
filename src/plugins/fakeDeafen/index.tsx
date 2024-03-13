@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { addSettingsPanelButton, DeafenIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
@@ -46,12 +47,7 @@ export default definePlugin({
     name: "FakeDeafen",
     description: "You're deafened but you're not",
     dependencies: ["PhilsPluginLibrary"],
-    authors: [
-        {
-            id: 526331463709360141n,
-            name: "desu"
-        }
-    ],
+    authors: [Devs.desu],
 
     patches: [
         {

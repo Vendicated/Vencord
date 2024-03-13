@@ -200,7 +200,7 @@ async function getEntryPoint(dir: string, dirent: Dirent) {
 
 function isPluginFile({ name }: { name: string; }) {
 
-    const skipNames = ["betterMicrophone.desktop", "philsPluginLibrary", "betterScreenshare.desktop", "fakeDeafen"];
+    const skipNames = ["betterMicrophone.desktop", "philsPluginLibrary", "betterScreenshare.desktop"];
 
     if (name === "index.ts" || skipNames.includes(name)) {
         return false;
