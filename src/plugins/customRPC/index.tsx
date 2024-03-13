@@ -45,7 +45,7 @@ interface ActivityAssets {
     small_text?: string;
 }
 
-export interface Activity {
+interface Activity {
     state?: string;
     details?: string;
     timestamps?: {
