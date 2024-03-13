@@ -9,6 +9,7 @@ import { Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
 import { type Message } from "discord-types/general";
@@ -131,7 +132,7 @@ export default definePlugin({
                     }
                 }
             } catch (error) {
-                console.error(error);
+                new Logger("BypassDND").error("Failed to handle message", error);
             }
         }
     },
