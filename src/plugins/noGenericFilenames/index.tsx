@@ -76,7 +76,7 @@ const plugin = definePlugin({
         var name: string = "";
 
         if (FilenameUtil.isGenericFilename(filenameData.name, this.coincidenceList.split("|"))) {
-            name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
+            name = `${filenameData.name} ${this.getCurrentDate()}${filenameData.extension}`;
         } else {
             name = `${filenameData.name}${filenameData.extension}`;
         }
