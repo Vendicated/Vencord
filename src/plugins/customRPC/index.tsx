@@ -24,7 +24,7 @@ import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, Text, Toasts, UserStore, useState } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, Text, Toasts, UserStore } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -394,12 +394,11 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
-        const gameActivitySetting = StatusSettingsStores.ShowCurrentGame.useSetting();
-        const [showErrorCard, setShowErrorCard] = useState(!gameActivitySetting);
+        let gameActivitySetting = StatusSettingsStores.ShowCurrentGame.useSetting();
         return (
             <>
                 {
-                    showErrorCard &&
+                    !gameActivitySetting &&
                     <ErrorCard style={{ margin: "20px 0px", padding: "25px 30px" }}>
                         <Text style={{ fontWeight: "bold", marginBottom: "3px" }}>Notice</Text>
                         <Text>Game activity isn't enabled, people won't be able to see your custom presence!</Text>
@@ -407,7 +406,7 @@ export default definePlugin({
                             color={Button.Colors.TRANSPARENT}
                             style={{ marginTop: "10px" }} onClick={() => {
                                 StatusSettingsStores.ShowCurrentGame.updateSetting(true);
-                                setShowErrorCard(false);
+                                gameActivitySetting = true;
                                 const message = "Game activity enabled";
                                 const type = Toasts.Type.SUCCESS;
                                 Toasts.show({
