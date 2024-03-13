@@ -73,18 +73,22 @@ export default definePlugin({
                     .then(response => {
                         WMLogger.info(JSON.stringify(response));
                         sendBotMessage(ctx.channel.id, {
-                            content: "# Webhook Information:  \n" +
-                                "Webhook Username: " + response.name + "\n " +
-                                "Webhook ID: " + response.id + "\n " +
-                                "Webhook Token: " + response.token + "\n " +
-                                "Channel ID: " + response.channel_id + "\n " +
-                                "Server ID: " + response.guild_id + "\n " +
-                                "Webhook Profile Picture: " + "[Click Me](https://cdn.discordapp.com/avatars/" + response.id + "/" + response.avatar + ".png)" + "\n " +
-                                "Webhook Type: " + response.type + "\n \n" +
+                            embeds: [
+                                {
+                                    author: {
+                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                    },
 
-                                "# Webhook Creator Information: \n " +
-                                "Creator UserID: " + response.user.id + "\n " +
-                                "Creator Username: " + "<@" + response.user.id + ">" + "\n "
+                                    content: `# Webhook Information: \n
+                                Webhook Username: ${response.name}
+                                Webhook ID: ${response.id}
+                                Webhook Token: ${response.token}
+                                Webhook Type: ${response.type}
+                                Channel ID: ${response.channel_id}
+                                Server ID: ${response.guild_id}
+
+                                "Creator Profile: <@${response.user.id}>`
+                                }]
                         });
                     });
             }
@@ -114,7 +118,7 @@ export default definePlugin({
                 },
                 {
                     name: "rawjson",
-                    description: "Send as a raw JSON",
+                    description: "Send message as raw JSON",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
                 }
@@ -147,4 +151,4 @@ export default definePlugin({
             }
         }
     ]
-});
+});;;;;
