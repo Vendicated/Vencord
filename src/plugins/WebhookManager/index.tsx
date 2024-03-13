@@ -9,9 +9,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { RestAPI } from "@webpack/common";
 
-export let webhookDefaultName;
-export let webhookUrlGLOBAL;
-export let webhookMessageGLOBAL;
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
@@ -36,7 +33,7 @@ export default definePlugin({
             execute: async (option, ctx) => {
                 const res = await RestAPI.delete({ url: "" + findOption(option, "url") });
                 try {
-                    if (res.ok === true) {
+                    if (res.ok) {
                         sendBotMessage(ctx.channel.id, {
                             content: "Webhook deleted successfully."
                         });
@@ -85,8 +82,7 @@ export default definePlugin({
 
                                 "# Webhook Creator Information: \n " +
                                 "Creator UserID: " + response.user.id + "\n " +
-                                "Creator Username: " + response.user.username + " | ( <@" + response.user.id + "> )" + "\n " +
-                                "Creator Profile: [Click Me](https://img.discord.dog/" + response.user.id + ") \n"
+                                "Creator Username: " + "<@" + response.user.id + ">" + "\n "
                         });
                     });
             }
@@ -123,16 +119,10 @@ export default definePlugin({
                 var webhookUrl = findOption(option, "url");
                 var webhookMessage = findOption(option, "message");
                 //   var webhookUsername = findOption(option, "username");
-                webhookUrlGLOBAL = webhookUrl;
-                webhookMessageGLOBAL = webhookMessage;
-                await fetch("" + webhookUrl).then(response => response.json())
-                    .then(response => {
-                        webhookDefaultName = response.name;
-                    });
 
                 Native.executeWebhook("" + webhookUrl, {
                     content: webhookMessage,
-                    username: webhookDefaultName,
+                    username: fetch("" + webhookUrl).then(response => response.json()), // yea might have issues, sleepy brain as well, will fix tmr
                     avatar_url: ""
                 });
 
