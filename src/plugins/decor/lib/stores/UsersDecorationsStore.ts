@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 import { proxyLazy } from "@utils/lazy";
 import { useEffect, useState, zustandCreate } from "@webpack/common";
 import { User } from "discord-types/general";

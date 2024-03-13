@@ -18,7 +18,7 @@
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { CodeBlock } from "@components/CodeBlock";
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
