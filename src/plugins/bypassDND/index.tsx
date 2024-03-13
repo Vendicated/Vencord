@@ -33,9 +33,21 @@ function processIds(value) {
     return value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
 }
 
-async function showNotification(message: Message, guildId?: string): Promise<void> {
+async function showNotification(message, guildId) {
+    const channel = ChannelStore.getChannel(message.channel_id);
+    const channelRegex = /<#(\d{19})>/g;
+    const userRegex = /<@(\d{18})>/g;
+
+    message.content = message.content.replace(channelRegex, (match, channelId) => {
+        return `#${ChannelStore.getChannel(channelId)?.name}`;
+    });
+
+    message.content = message.content.replace(userRegex, (match, userId) => {
+        return `@${UserStore.getUser(userId)?.globalName}`;
+    });
+
     await Notifications.showNotification({
-        title: `${message.author.globalName ?? message.author.username} ${guildId ? `sent a message in ${ChannelStore.getChannel(message.channel_id)?.name}` : "sent a message in a DM"}`,
+        title: `${message.author.globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
         body: message.content,
         icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
         onClick: function () {
@@ -105,7 +117,8 @@ export default definePlugin({
             try {
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
-                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === getCurrentChannel().id && WindowStore.isFocused()) || userStatus !== "dnd") {
+                const currentChannelId = getCurrentChannel()?.id ?? "0";
+                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === currentChannelId && WindowStore.isFocused()) || userStatus !== "dnd") {
                     return;
                 }
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
