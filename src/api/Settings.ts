@@ -127,6 +127,9 @@ export const SettingsStore = new SettingsStoreClass(settings, {
         key,
         path
     }) {
+        const v = target[key];
+        if (!plugins) return v; // plugins not initialised yet. this means this path was reached by being called on the top level
+
         if (path === "plugins" && key in plugins)
             return target[key] = {
                 enabled: plugins[key].required ?? plugins[key].enabledByDefault ?? false
@@ -138,7 +141,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
             const plugin = path.slice("plugins.".length);
             if (plugin in plugins) {
                 const setting = plugins[plugin].options?.[key];
-                if (!setting) return target[key];
+                if (!setting) return v;
 
                 if ("default" in setting)
                     // normal setting with a default value
@@ -152,7 +155,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                 }
             }
         }
-        return target[key];
+        return v;
     },
 });
 
