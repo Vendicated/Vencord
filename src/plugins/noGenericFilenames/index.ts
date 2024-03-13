@@ -31,16 +31,12 @@ function isGenericFilename(filename: string) {
 }
 
 function getFilenameData(filename: string): { name: string, extension: string; } {
-    const regex = /^(.+)(\.[^.]+)$/;
+    const regex = /^(.+?)(\.[^.]+)?$/;
     const result = regex.exec(filename);
 
-    if (!result) {
-        throw new Error(`Invalid filename: ${filename}`);
-    }
-
     return {
-        name: result[1],
-        extension: result[2].substring(1),
+        name: result?.[1] ?? "",
+        extension: (result?.[2] ?? "")
     };
 }
 
@@ -89,12 +85,10 @@ export default definePlugin({
         const filenameData = getFilenameData(new URL(url).pathname.split("/").pop()!);
         var name: string = "";
 
-        console.log(this.getCurrentDate());
-
         if (isGenericFilename(filenameData.name)) {
             name = `${filenameData.name} ${this.getCurrentDate()}.${filenameData.extension}`;
         } else {
-            name = `${filenameData.name}.${filenameData.extension}`;
+            name = `${filenameData.name}${filenameData.extension}`;
         }
 
         saveFile(new File([data], name, { type: data.type }));
