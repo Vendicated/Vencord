@@ -19,7 +19,7 @@ interface IMessageCreate {
     message: Message;
 }
 
-function icon(enabled?: boolean) {
+function icon(enabled?: boolean): JSX.Element {
     return <svg
         width="18"
         height="18"
@@ -29,20 +29,20 @@ function icon(enabled?: boolean) {
     </svg>;
 }
 
-function processIds(value) {
+function processIds(value: string): string {
     return value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
 }
 
-async function showNotification(message, guildId) {
+async function showNotification(message: Message, guildId: string | undefined): Promise<void> {
     const channel = ChannelStore.getChannel(message.channel_id);
     const channelRegex = /<#(\d{19})>/g;
     const userRegex = /<@(\d{18})>/g;
 
-    message.content = message.content.replace(channelRegex, (match, channelId) => {
+    message.content = message.content.replace(channelRegex, (match, channelId: string) => {
         return `#${ChannelStore.getChannel(channelId)?.name}`;
     });
 
-    message.content = message.content.replace(userRegex, (match, userId) => {
+    message.content = message.content.replace(userRegex, (match, userId: string) => {
         return `@${UserStore.getUser(userId)?.globalName}`;
     });
 
@@ -50,7 +50,7 @@ async function showNotification(message, guildId) {
         title: `${message.author.globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
         body: message.content,
         icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-        onClick: function () {
+        onClick: function (): void {
             NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
         }
     });
@@ -113,7 +113,7 @@ export default definePlugin({
     description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
-        async MESSAGE_CREATE({ message, guildId, channelId }: IMessageCreate) {
+        async MESSAGE_CREATE({ message, guildId, channelId }: IMessageCreate): Promise<void> {
             try {
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
