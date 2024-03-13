@@ -42,10 +42,16 @@ function getFilenameData(filename: string): { name: string, extension: string; }
 
 const settings = definePluginSettings({
     includeMillis: {
-        name: "Include milis",
-        description: "Include miliseconds in the timestamp",
+        name: "Include millis",
+        description: "Include milliseconds in the timestamp",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    coincidenceList: {
+        name: "Generic names list",
+        description: "Comma separated list of generic file names, add your own posible coincidences here.",
+        type: OptionType.STRING,
+        default: genericFilenames.join(","),
     },
 });
 
@@ -68,11 +74,11 @@ export default definePlugin({
     ],
 
     getCurrentDate(): string {
-        const { includeMillis: includeMilis } = settings.store;
+        const { includeMillis } = settings.store;
         const m = moment();
         const date = m.format("YYYY-MM-DD");
         const time = m.format("H-MM-SS");
-        const millis = includeMilis ? `.${m.milliseconds()}` : "";
+        const millis = includeMillis ? `.${m.milliseconds()}` : "";
 
         return `${date} ${time}${millis}`;
     },
