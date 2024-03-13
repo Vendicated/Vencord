@@ -9,6 +9,7 @@ import { Devs } from "@utils/constants";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
+import { Button } from "@webpack/common";
 import moment from "moment";
 
 const genericFilenames: string[] = [
@@ -31,6 +32,16 @@ const defaultSettings = definePluginSettings({
         type: OptionType.STRING,
         default: genericFilenames.join(","),
     },
+    resetSettings: {
+        name: "Reset settings",
+        description: "",
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Button onClick={() => plugin.resetSettings()}>
+                Reset plugin settings to default values
+            </Button >
+        )
+    }
 });
 
 const plugin = definePlugin({
