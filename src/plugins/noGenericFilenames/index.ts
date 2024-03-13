@@ -45,12 +45,12 @@ function getFilenameData(filename: string): { name: string, extension: string; }
 }
 
 const settings = definePluginSettings({
-    includeMilis: {
+    includeMillis: {
         name: "Include milis",
         description: "Include miliseconds in the timestamp",
         type: OptionType.BOOLEAN,
         default: true,
-    }
+    },
 });
 
 export default definePlugin({
@@ -72,7 +72,7 @@ export default definePlugin({
     ],
 
     getCurrentDate(): string {
-        const { includeMilis } = settings.store;
+        const { includeMillis: includeMilis } = settings.store;
         const m = moment();
         const date = m.format("YYYY-MM-DD");
         const time = m.format("H-MM-SS");
