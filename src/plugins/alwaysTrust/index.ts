@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { definePluginSettings } from "@api/Settings";
 
 const settings = definePluginSettings({
     domain: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: 'Remove the untrusted domain popup',
+        description: "Remove the untrusted domain popup",
         restartNeeded: true
     },
     file: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: 'Remove the suspicious file popup',
+        description: "Remove the suspicious file popup",
         restartNeeded: true
     }
 });
