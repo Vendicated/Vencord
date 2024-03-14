@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, TabBar, Text, TextInput } from "@webpack/common";
+import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, Text, TextInput } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
 import { HolyNotes } from "plugins/holynotes/types";
 
@@ -16,8 +16,8 @@ import HelpIcon from "../icons/HelpIcon";
 import Errors from "./Error";
 import HelpModal from "./HelpModal";
 import ManageNotebookButton from "./ManageNotebookButton";
+import { CreateTabBar } from "./NoteBookTab";
 import { RenderMessage } from "./RenderMessage";
-import { NoteBookTabs } from "./NoteBookTab";
 
 const renderNotebook = ({
     notes, notebook, updateParent, sortDirection, sortType, searchInput, closeModal
@@ -97,19 +97,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                             <ModalCloseButton onClick={props.onClose} />
                         </ModalHeader>
                         <div className={classes("vc-notebook-tabbar-container")}>
-                            <NoteBookTabs tabs={noteHandler.getAllNotes()} selectedTabId={currentNotebook} onSelectTab={setCurrentNotebook}/>
-                            {/* <TabBar
-                                type="top"
-                                look="brand"
-                                className={classes("vc-notebook-tabbar-bar", "vc-notebook-tabbar")}
-                                selectedItem={currentNotebook}
-                                onItemSelect={setCurrentNotebook}>
-                                {Object.keys(noteHandler.getAllNotes()).map(notebook => (
-                                    <TabBar.Item key={notebook} id={notebook} className={classes("vc-notebook-tabbar-bar-item", "vc-notebook-tabbar-item")}>
-                                        {notebook}
-                                    </TabBar.Item>
-                                ))}
-                            </TabBar> */}
+                            <CreateTabBar tabs={noteHandler.getAllNotes()} firstSelectedTab={currentNotebook} onChangeTab={setCurrentNotebook} />
                         </div>
                     </div>
                     <ModalContent style={{ marginTop: "20px" }}>

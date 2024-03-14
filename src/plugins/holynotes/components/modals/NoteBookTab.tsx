@@ -5,9 +5,8 @@
  */
 
 import { classes } from "@utils/misc";
-import { findByCode, findByProps } from "@webpack";
+import { findByProps } from "@webpack";
 import { Button, Clickable, Menu, Popout, React, TabBar } from "@webpack/common";
-import { Fragment } from "react";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
 
@@ -18,53 +17,56 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
     const widthRef = React.useRef<number>(0);
     const tabWidthMapRef = React.useRef(new Map());
     const [overflowedTabs, setOverflowedTabs] = React.useState([]);
-    const { tabBar, tabBarItem } = findByProps("tabBar");
-    const { forwardRef } = findByProps("forwardRef");
+    const resizeObserverRef = React.useRef(null);
+    const [show, setShow] = React.useState(false);
 
-    const calculateOverflowedTabs = React.useCallback(() => {
+    const { isNotNullish } = findByProps("isNotNullish");
+
+
+    const handleResize = React.useCallback(() => {
         if (!tabBarRef.current) return;
+        const overflowed = [];
 
-        let totalWidth = tabBarRef.current.getBoundingClientRect().width;
-
-        overflowedTabs.length = 0;
-
+        const totalWidth = tabBarRef.current.getBoundingClientRect().width;
         if (totalWidth !== widthRef.current) {
-            for (const tab of Object.keys(tabs)) {
+            for (const tab of tabs) {
                 if (tab !== selectedTabId) {
-                    const tabWidth = tabWidthMapRef.current.get(tab)?.width || 0;
-                    totalWidth -= tabWidth;
-                    if (tab !== selectedTabId && totalWidth < 0) overflowedTabs.push(tab);
+                    const prevTabWidth = totalWidth?.current?.get(selectedTabId)?.width ?? 0;
+                    const newWidth = totalWidth - (prevTabWidth || 0);
+                    console.log(newWidth)
+                    if (newWidth > 0) overflowed.push(tab);
                 }
             }
-            setOverflowedTabs(overflowedTabs);
-            // widthRef.current = totalWidth;
+
+            setOverflowedTabs(overflowed);
         }
     }, [tabs, selectedTabId]);
 
 
     React.useEffect(() => {
-        const resizeObserver = new ResizeObserver(entries => {
-            calculateOverflowedTabs();
-        });
+        resizeObserverRef.current = new ResizeObserver(handleResize);
 
-        if (tabBarRef.current) resizeObserver.observe(tabBarRef.current);
+        if (tabBarRef.current) resizeObserverRef.current.observe(tabBarRef.current);
         return () => {
-            resizeObserver.disconnect();
+            if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
         };
-    }, [calculateOverflowedTabs]);
+    }, [handleResize]);
 
-    const TabItem = React.forwardRef(({ id, selected, onClick, children }) => (
-        <Clickable
-            className={classes(tabBarItem)}
-            data-tab-id={id}
-            // innerRef={ref}
-            onClick={onClick}
-        >
-            {children}
-        </Clickable>
-    ));
+    const TabItem = React.forwardRef(function ({ id, selected, onClick, children }, ref) {
+        return (
+            <Clickable
+                className={classes("vc-notebook-tabbar-item", selected ? "vc-notebook-selected" : "")}
+                data-tab-id={id}
+                innerRef={ref}
+                onClick={onClick}
+            >
+                {children}
+            </Clickable>
+        );
+    });
 
-    const renderOverflowMenu = React.useCallback(({ closePopout }) => {
+    const renderOverflowMenu = React.useCallback((closePopout: () => void) => {
+        console.log("renderOverflowMenu")
         return (
             <Menu.Menu
                 navId="notebook-tabs"
@@ -73,19 +75,15 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
                 onClose={closePopout}
                 onSelect={closePopout}
             >
-                {Object.keys(tabs).map(tab => {
-                    if (overflowedTabs.includes(tab) && selectedTabId !== tab) {
-                        return (
-                            <Menu.MenuItem
-                                id={tab}
-                                label={tab}
-                                action={() => onSelectTab(tab)}
-                            />
-                        );
-                    }
-                    return null;
-                }
-                )}
+                {tabs.map(tab => {
+                    return overflowedTabs.includes(tab) && selectedTabId !== tab ? (
+                        <Menu.MenuItem
+                            id={tab}
+                            label={tab}
+                            action={() => onSelectTab(tab)}
+                        />
+                    ) : null;
+                }).filter(isNotNullish)}
 
             </Menu.Menu>
         );
@@ -93,57 +91,79 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
 
     return (
         <div
-            className={classes(tabBar)}
+            className={classes("vc-notebook-tabbar")}
             ref={tabBarRef}
         >
-            <TabBar
-                type="top"
-                look="brand"
-                className={classes("vc-notebook-tabbar-bar", "vc-notebook-tabbar")}
-            >
-                {Object.keys(tabs).map(tab => {
-                    if (!overflowedTabs.includes(tab)) {
-                        return (
-                            <TabItem
-                                id={tab}
-                                selected={selectedTabId === tab}
-                                className={classes("vc-notebook-tabbar-bar-item", "vc-notebook-tabbar-item")}
-                                ref={ref => {
-                                    const width = ref?.getBoundingClientRect().width || tabWidthMapRef.current.get(tab.id) || 0;
-                                    tabWidthMapRef.current.set(tab, width);
 
-                                }}
-                            // onClick={selectedTabId !== tab && onSelectTab(tab)}
-                            >
-                                {tab}
-                            </TabItem>
-                        );
-                    }
-                })
-                }
-                {overflowedTabs.length > 0 && (
-                    <Fragment>
-                        <Popout
-                            renderPopout={renderOverflowMenu}
-                            position="bottom"
-                            align="right"
-                            spacing={0}
+            {tabs.map(tab => {
+                if (!overflowedTabs.includes(tab)) {
+                    return (
+                        <TabItem
+                            id={tab}
+                            selected={selectedTabId === tab}
+                            ref={el => {
+                                const width = tabWidthMapRef.current.get(tab)?.width ?? 0;
+                                tabWidthMapRef.current.set(tab, {
+                                    node: el,
+                                    width: el ? el.getBoundingClientRect().width : width
+                                });
+                            }}
+                            onClick={selectedTabId !== tab ? () => onSelectTab(tab) : undefined}
                         >
-                            {() => (
-                                <Button
-                                    className={"vc-notebook-overflow-chevron"}
-                                    size={Button.Sizes.ICON}
-                                    look={Button.Looks.BLANK}
-                                >
-                                    <SvgOverFlowIcon />
-                                </Button>
-                            )
-                            }
+                            {tab}
+                        </TabItem>
+                    );
+                }
+                return null;
+            }).filter(isNotNullish)
+            }
+            {overflowedTabs.length > 0 && (
+                <Popout
+                    shouldShow={show}
+                    onRequestClose={() => setShow(false)}
+                    renderPopout={() => renderOverflowMenu(() => setShow(false))}
+                    position="bottom"
+                    align="right"
+                    spacing={0}
+                >
+                    {() => (
+                        <Button
+                            className={"vc-notebook-overflow-chevron"}
+                            size={Button.Sizes.ICON}
+                            look={Button.Looks.BLANK}
+                            onClick={() => setShow(v => !v)}
+                        >
+                            <SvgOverFlowIcon />
+                        </Button>
+                    )
+                    }
 
-                        </Popout>
-                    </Fragment>
-                )}
-            </TabBar>
+                </Popout>
+
+            )}
         </div>
+    );
+}
+
+export function CreateTabBar({ tabs, firstSelectedTab, onChangeTab }) {
+    const [selectedTab, setSelectedTab] = React.useState(firstSelectedTab);
+
+    const tabKeys = Object.keys(tabs);
+    const mainTabIndex = tabKeys.indexOf("Main");
+    if (mainTabIndex !== -1 && mainTabIndex !== 0) {
+        tabKeys.splice(mainTabIndex, 1);
+        tabKeys.unshift("Main");
+    }
+
+    const renderSelectedTab = tabKeys.find(tab => tab === selectedTab);
+
+    return (
+        <NoteBookTabs
+            tabs={tabKeys}
+            selectedTabId={selectedTab}
+            onSelectTab={(tab) => {
+                setSelectedTab(tab);
+                if (onChangeTab) onChangeTab(tab);
+            }} />
     );
 }
