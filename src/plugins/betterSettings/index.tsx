@@ -84,7 +84,7 @@ export default definePlugin({
         { // Settings cog context menu
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /\(0,\i.default\)\(\)(?=\.filter)/,
+                match: /\(0,\i.default\)\(\)(?=\.filter\(\i=>\{let\{section:\i\}=)/,
                 replace: "$self.wrapMenu($&)"
             }
         }
