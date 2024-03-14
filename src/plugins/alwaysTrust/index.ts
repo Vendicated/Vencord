@@ -24,13 +24,13 @@ const settings = definePluginSettings({
     domain: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Remove the untrusted domain popup",
+        description: "Remove the untrusted domain popup when clicking untrusted domains",
         restartNeeded: true
     },
     file: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Remove the suspicious file popup",
+        description: "Remove the suspicious file popup when downloading executable files",
         restartNeeded: true
     }
 });
