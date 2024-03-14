@@ -346,26 +346,13 @@ function isImageKeyValid(value: string) {
 
 async function exportBackup() {
     const filename = "rpc-backup.json";
-    const backup = JSON.stringify({
-        appID: settings.store.appID,
-        appName: settings.store.appName,
-        details: settings.store.details,
-        state: settings.store.state,
-        type: settings.store.type,
-        streamLink: settings.store.streamLink,
-        timestampMode: settings.store.timestampMode,
-        startTime: settings.store.startTime,
-        endTime: settings.store.endTime,
-        imageBig: settings.store.imageBig,
-        imageBigTooltip: settings.store.imageBigTooltip,
-        imageSmall: settings.store.imageSmall,
-        imageSmallTooltip: settings.store.imageSmallTooltip,
-        buttonOneText: settings.store.buttonOneText,
-        buttonOneURL: settings.store.buttonOneURL,
-        buttonTwoText: settings.store.buttonTwoText,
-        buttonTwoURL: settings.store.buttonTwoURL,
-    });
-    const data = new TextEncoder().encode(backup);
+    const backup = {};
+    const filteredStore = Object.fromEntries(
+        Object.entries(settings.store)
+            .filter(([_, value]) => value !== undefined)
+    );
+    Object.assign(backup, filteredStore);
+    const data = new TextEncoder().encode(JSON.stringify(backup));
 
     if (IS_DISCORD_DESKTOP) {
         DiscordNative.fileManager.saveWithDialog(data, filename);
