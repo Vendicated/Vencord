@@ -215,7 +215,8 @@ export default function PluginSettings() {
     }, []);
 
     const sortedPlugins = React.useMemo(() => Object.values(Plugins)
-        .sort((a, b) => a.name.localeCompare(b.name)), []);
+        .sort((a, b) => a.name.localeCompare(b.name)), [])
+        .sort((a, b) => +(settings.plugins[b.name].favorite ?? false) - +(settings.plugins[a.name].favorite ?? false));
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
