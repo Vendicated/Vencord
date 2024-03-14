@@ -76,8 +76,8 @@ export default definePlugin({
         { // Load menu stuff on hover, not on click
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(?<=handleOpenSettingsContextMenu.{0,250}?\i\.el\(("\d+")\)\.then.*?Messages\.USER_SETTINGS,)(?=onClick:)/,
-                replace: "onMouseEnter(){let r=Vencord.Webpack.wreq;r.el($1).then(r.bind(r,$1));},"
+                match: /(?<=handleOpenSettingsContextMenu.{0,250}?\i\.el\(("[^"]+")\)\.then\([^;]*?("\d+").*?Messages\.USER_SETTINGS,)(?=onClick:)/,
+                replace: "onMouseEnter(){Vencord.Webpack.wreq.el($1).then(()=>Vencord.Webpack.wreq($2));},"
             },
             predicate: () => settings.store.eagerLoad
         },
