@@ -10,12 +10,7 @@ import { UserStore } from "@webpack/common";
 
 export default definePlugin({
     name: "UserStats",
-    authors: [
-        {
-            id: 0n,
-            name: "patryk_patryk_5",
-        },
-    ],
+    authors: [Devs.patryk_patryk_5],
     description: "This plugin tracks and displays the user's statistics on Vencord.",
     settings: {
         trackSentMessages: {
@@ -40,46 +35,37 @@ export default definePlugin({
         }
     },
     patches: [],
-    start() {
-        this.incrementSentMessages = function() {
-            window.userStats = window.userStats || { sentMessages: 0, receivedMessages: 0, onlineTime: 0 };
-            window.userStats.sentMessages += 1;
-            if ($self.settings.displayLiveStats) $self.updateLiveStats();
-        };
-
-        this.incrementReceivedMessages = function() {
-            window.userStats = window.userStats || { sentMessages: 0, receivedMessages: 0, onlineTime: 0 };
-            window.userStats.receivedMessages += 1;
-            if ($self.settings.displayLiveStats) $self.updateLiveStats();
-        };
-
-        this.startOnlineTimer = function() {
-            window.userStats = window.userStats || { sentMessages: 0, receivedMessages: 0, onlineTime: 0 };
-            window.userStats.loginTime = Date.now();
-        };
-
-        this.stopOnlineTimer = function() {
-            if (!window.userStats || !window.userStats.loginTime) return;
-            const logoutTime = Date.now();
-            window.userStats.onlineTime += logoutTime - window.userStats.loginTime;
-            delete window.userStats.loginTime;
-            if ($self.settings.displayLiveStats) $self.updateLiveStats();
-        };
-
-        this.displayStats = function() {
-            if (!window.userStats) return 'No stats available.';
-            const onlineTimeInHours = (window.userStats.onlineTime / (1000 * 60 * 60)).toFixed(2);
-            return `Sent Messages: ${window.userStats.sentMessages}, Received Messages: ${window.userStats.receivedMessages}, Online Time: ${onlineTimeInHours} hours`;
-        };
-
-        this.updateLiveStats = function() {
-            // This function should update the live stats in the Discord interface.
-            // The implementation depends on the structure of the Discord interface and may require additional patches.
-        };
-
-        this.resetStats = function() {
-            window.userStats = { sentMessages: 0, receivedMessages: 0, onlineTime: 0 };
-        };
+    userStats: { sentMessages: 0, receivedMessages: 0, onlineTime: 0 },
+    incrementSentMessages() {
+        this.userStats.sentMessages += 1;
+        if (this.settings.displayLiveStats) this.updateLiveStats();
     },
+    incrementReceivedMessages() {
+        this.userStats.receivedMessages += 1;
+        if (this.settings.displayLiveStats) this.updateLiveStats();
+    },
+    startOnlineTimer() {
+        this.userStats.loginTime = Date.now();
+    },
+    stopOnlineTimer() {
+        if (!this.userStats || !this.userStats.loginTime) return;
+        const logoutTime = Date.now();
+        this.userStats.onlineTime += logoutTime - this.userStats.loginTime;
+        delete this.userStats.loginTime;
+        if (this.settings.displayLiveStats) this.updateLiveStats();
+    },
+    displayStats() {
+        if (!this.userStats) return 'No stats available.';
+        const onlineTimeInHours = (this.userStats.onlineTime / (1000 * 60 * 60)).toFixed(2);
+        return `Sent Messages: ${this.userStats.sentMessages}, Received Messages: ${this.userStats.receivedMessages}, Online Time: ${onlineTimeInHours} hours`;
+    },
+    updateLiveStats() {
+        // This function should update the live stats in the Discord interface.
+        // The implementation depends on the structure of the Discord interface and may require additional patches.
+    },
+    resetStats() {
+        this.userStats = { sentMessages: 0, receivedMessages: 0, onlineTime: 0 };
+    },
+    start() {},
     stop() {},
 });
