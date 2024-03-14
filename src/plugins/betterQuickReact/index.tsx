@@ -13,7 +13,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 export const settings = definePluginSettings({
     frequentEmojis: {
-        description: "Use top frecency emojis instead of favourite emojis",
+        description: "Use frequently used emojis instead of favourite emojis",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -28,11 +28,11 @@ export const settings = definePluginSettings({
         description: "Columns of quick reactions to display",
         type: OptionType.SLIDER,
         default: 4,
-        markers: makeRange(4, 10, 1),
+        markers: makeRange(1, 12, 1),
         stickToMarkers: true
     },
     compactMode: {
-        description: "Scales the buttons to 75% of their original scale, while increasing the emoji to 125% scale to stay visible. Recommended to have a minimum of 5 columns",
+        description: "Scales the buttons to 75% of their original scale, whilst increasing the inner emoji to 125% scale. Emojis will be 93.75% of the original size. Recommended to have a minimum of 5 columns",
         type: OptionType.BOOLEAN,
         default: false
     }
@@ -45,6 +45,7 @@ export default definePlugin({
     settings,
 
     patches: [
+        // Remove favourite emojis from being inserted at the start of the reaction list
         {
             find: "this.favoriteEmojisWithoutFetchingLatest.concat",
             replacement: {
@@ -52,6 +53,7 @@ export default definePlugin({
                 replace: "($self.settings.store.frequentEmojis?[]:$1).concat"
             }
         },
+        // Override limit of emojis to display
         {
             find: "default.Messages.ADD_REACTION_NAMED.format",
             replacement: {
@@ -59,6 +61,7 @@ export default definePlugin({
                 replace: "$1.length>$self.getMaxQuickReactions()&&($2.length=$self.getMaxQuickReactions());"
             }
         },
+        // Add a custom class to identify the quick reactions have been modified and a CSS variable for the number of columns to display
         {
             find: "default.Messages.ADD_REACTION_NAMED.format",
             replacement: {
