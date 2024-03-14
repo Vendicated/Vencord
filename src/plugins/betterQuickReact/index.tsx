@@ -31,6 +31,11 @@ export const settings = definePluginSettings({
         markers: makeRange(4, 10, 1),
         stickToMarkers: true
     },
+    compactMode: {
+        description: "Scales the buttons to 75% of their original scale, while increasing the emoji to 125% scale to stay visible. Recommended to have a minimum of 5 columns",
+        type: OptionType.BOOLEAN,
+        default: false
+    }
 });
 
 export default definePlugin({
@@ -58,7 +63,7 @@ export default definePlugin({
             find: "default.Messages.ADD_REACTION_NAMED.format",
             replacement: {
                 match: /className:(\i)\.wrapper,/,
-                replace: "className:\"vc-better-quick-react \"+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
+                replace: "className:\"vc-better-quick-react \"+($self.settings.store.compactMode?\"vc-better-quick-react-compact \":\"\")+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
             }
         },
         // MenuGroup doesn't accept styles or anything special by default :/
