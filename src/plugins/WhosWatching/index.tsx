@@ -22,7 +22,7 @@ function getUsername(user: any): string {
     return RelationshipStore.getNickname(user.id) || user.globalName || user.username;
 }
 
-function Watching({ userIds, guildId }: WatchingProps): Element {
+function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
     // Missing Users happen when UserStore.getUser(id) returns null -- The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
     let missingUsers = 0;
     const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
