@@ -25,11 +25,6 @@ button.vc-uvs-join {
     margin: 4px !important;
 }
 
-span:has(.vc-uvs-join) {
-    min-width: unset;
-    width: unset;
-}
-
 .vc-uvs-channelinfo {
     display: flex;
     gap: 8px
