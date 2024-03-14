@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { Avatar, GuildMemberStore, React, RelationshipStore, Toasts } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
@@ -43,7 +43,22 @@ const settings = definePluginSettings({
     usernameOnly: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Show username instead of display name"
+        description: "Show username instead of display name",
+        onChange: () => {
+            if (settings.store.usernameOnly) return;
+            Vencord.Settings.plugins.ShowMeYourName.inTyping = false;
+            if (Vencord.Plugins.isPluginEnabled("ShowMeYourName")) {
+                Toasts.show({
+                    message: "Disabled In Typing in ShowMeYourName",
+                    type: Toasts.Type.MESSAGE,
+                    id: Toasts.genId(),
+                    options: {
+                        duration: 3000,
+                        position: Toasts.Position.BOTTOM
+                    }
+                });
+            }
+        }
     }
 });
 
