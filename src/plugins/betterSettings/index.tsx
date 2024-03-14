@@ -145,6 +145,7 @@ export default definePlugin({
                                 id={label.replace(/\W/, "_")}
                                 label={label}
                                 children={children}
+                                action={children[0].props.action}
                             />;
                         } else {
                             return children;
