@@ -64,8 +64,15 @@ export default definePlugin({
                 username = (user as any).globalName || username;
 
             const { nick } = author;
+            let usernameCmp = username;
+            let nickCmp = nick;
+            if (message.author.discriminator === "0") {
+                // Pomelo usernames are case-insensitive
+                usernameCmp = usernameCmp.toLowerCase();
+                nickCmp = nickCmp.toLowerCase();
+            }
             const prefix = withMentionPrefix ? "@" : "";
-            if (username === nick || isRepliedMessage && !settings.store.inReplies)
+            if (usernameCmp === nickCmp || isRepliedMessage && !settings.store.inReplies)
                 return prefix + nick;
             if (settings.store.mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
