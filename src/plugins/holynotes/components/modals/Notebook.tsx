@@ -64,13 +64,12 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
     const [currentNotebook, setCurrentNotebook] = React.useState("Main");
 
     const { quickSelect, quickSelectLabel, quickSelectQuick, quickSelectValue, quickSelectArrow } = findByProps("quickSelect");
-    //const { overflowChevron } = findByProps("overflowChevron");
 
     const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
 
-
     const notes = noteHandler.getNotes(currentNotebook);
     if (!notes) return <></>;
+    const { TabBar, selectedTab } = CreateTabBar({ tabs: noteHandler.getAllNotes(), firstSelectedTab: currentNotebook, onChangeTab: setCurrentNotebook });
 
     return (
         <ErrorBoundary>
@@ -97,7 +96,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                             <ModalCloseButton onClick={props.onClose} />
                         </ModalHeader>
                         <div className={classes("vc-notebook-tabbar-container")}>
-                            <CreateTabBar tabs={noteHandler.getAllNotes()} firstSelectedTab={currentNotebook} onChangeTab={setCurrentNotebook} />
+                            {TabBar}
                         </div>
                     </div>
                     <ModalContent style={{ marginTop: "20px" }}>

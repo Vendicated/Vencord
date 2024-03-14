@@ -95,15 +95,6 @@ $modifier: var(--background-modifier-accent);
     position: relative;
     top: -10px;
 }
-/* .vc-notebook-tabbar-bar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.vc-notebook-tabbar-bar::-webkit-scrollbar-thumb {
-    background-color: red;
-    border-radius: 4px;
-} */
 
 .vc-notebook-tabbar-container {
     border-bottom: 1px solid var(--profile-body-divider-color);

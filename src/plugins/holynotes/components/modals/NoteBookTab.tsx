@@ -21,21 +21,28 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
     const [show, setShow] = React.useState(false);
 
     const { isNotNullish } = findByProps("isNotNullish");
-
+    const { overflowIcon } = findByProps("overflowIcon");
 
     const handleResize = React.useCallback(() => {
         if (!tabBarRef.current) return;
         const overflowed = [];
 
-        const totalWidth = tabBarRef.current.getBoundingClientRect().width;
+        const totalWidth = tabBarRef.current.clientWidth;
         if (totalWidth !== widthRef.current) {
-            for (const tab of tabs) {
-                if (tab !== selectedTabId) {
-                    const prevTabWidth = totalWidth?.current?.get(selectedTabId)?.width ?? 0;
-                    const newWidth = totalWidth - (prevTabWidth || 0);
-                    console.log(newWidth)
-                    if (newWidth > 0) overflowed.push(tab);
+
+            // Thanks to daveyy1 for the help with this
+            let width = 0;
+            for (let i = 0; i < tabs.length; i++) {
+                const tab = tabs[i];
+                const tabRef = tabWidthMapRef.current.get(tab);
+
+                if (!tabRef) continue;
+                width += tabRef.width;
+
+                if (width > totalWidth) {
+                    overflowed.push(tab);
                 }
+
             }
 
             setOverflowedTabs(overflowed);
@@ -44,6 +51,8 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
 
 
     React.useEffect(() => {
+        handleResize();
+
         resizeObserverRef.current = new ResizeObserver(handleResize);
 
         if (tabBarRef.current) resizeObserverRef.current.observe(tabBarRef.current);
@@ -66,7 +75,6 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
     });
 
     const renderOverflowMenu = React.useCallback((closePopout: () => void) => {
-        console.log("renderOverflowMenu")
         return (
             <Menu.Menu
                 navId="notebook-tabs"
@@ -126,14 +134,15 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
                     align="right"
                     spacing={0}
                 >
-                    {() => (
+                    {props => (
                         <Button
+                            {...props}
                             className={"vc-notebook-overflow-chevron"}
                             size={Button.Sizes.ICON}
                             look={Button.Looks.BLANK}
                             onClick={() => setShow(v => !v)}
                         >
-                            <SvgOverFlowIcon />
+                            <SvgOverFlowIcon className={classes(overflowIcon)} width={16} height={16}/>
                         </Button>
                     )
                     }
@@ -141,13 +150,11 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
                 </Popout>
 
             )}
-        </div>
+        </div >
     );
 }
 
 export function CreateTabBar({ tabs, firstSelectedTab, onChangeTab }) {
-    const [selectedTab, setSelectedTab] = React.useState(firstSelectedTab);
-
     const tabKeys = Object.keys(tabs);
     const mainTabIndex = tabKeys.indexOf("Main");
     if (mainTabIndex !== -1 && mainTabIndex !== 0) {
@@ -155,15 +162,26 @@ export function CreateTabBar({ tabs, firstSelectedTab, onChangeTab }) {
         tabKeys.unshift("Main");
     }
 
-    const renderSelectedTab = tabKeys.find(tab => tab === selectedTab);
+    const [selectedTab, setSelectedTab] = React.useState(
+        firstSelectedTab || (tabKeys.length > 0 ? tabKeys[0] : null)
+    );
 
-    return (
-        <NoteBookTabs
+
+
+    const renderSelectedTab = React.useCallback(() => {
+        const selectedTabId = tabKeys.find(tab => tab === selectedTab);
+        return selectedTabId;
+    }, [tabs, selectedTab]);
+
+    return {
+        TabBar: <NoteBookTabs
             tabs={tabKeys}
             selectedTabId={selectedTab}
             onSelectTab={(tab) => {
                 setSelectedTab(tab);
                 if (onChangeTab) onChangeTab(tab);
-            }} />
-    );
+            }} />,
+        renderSelectedTab,
+        selectedTab
+    };
 }
