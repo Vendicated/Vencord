@@ -73,7 +73,7 @@ export default definePlugin({
     tags: ["voice", "activity"],
     settings,
 
-    patchModal({ user }: UserProps) {
+    patchModal: ErrorBoundary.wrap(({ user }: UserProps) => {
         if (!settings.store.showInUserProfileModal)
             return null;
 
@@ -82,24 +82,24 @@ export default definePlugin({
                 <VoiceChannelField user={user} />
             </div>
         );
-    },
+    }, { noop: true }),
 
-    patchPopout: ({ user }: UserProps) => {
+    patchPopout: ErrorBoundary.wrap(({ user }: UserProps) => {
         const isSelfUser = user.id === UserStore.getCurrentUser().id;
         return (
             <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
                 <VoiceChannelField user={user} />
             </div>
         );
-    },
+    }, { noop: true }),
 
-    patchPrivateChannelProfile({ user }: UserProps) {
-        if (!user) return;
+    patchPrivateChannelProfile: ErrorBoundary.wrap(({ user }: UserProps) => {
+        if (!user) return null;
 
         return <div className="vc-uvs-private-channel">
             <VoiceChannelField user={user} />
         </div>;
-    },
+    }, { noop: true }),
 
     patches: [
         // User Profile Modal - below user info
