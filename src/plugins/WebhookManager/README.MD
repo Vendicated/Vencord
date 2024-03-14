@@ -19,7 +19,6 @@
     - Server ID<br>
     - Webhook Profile Picture<br>
     - Webhook Type<br>
-
-    
     - Creator Profile<br>
+    - Creator UserID<br>
   </details>

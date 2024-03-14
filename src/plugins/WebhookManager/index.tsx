@@ -90,6 +90,7 @@ export default definePlugin({
                             sourceChannelGet = "";
                         }
                         sendBotMessage(ctx.channel.id, {
+                            content: `This webhook was created by <@${response.user.id}>.`,
                             embeds: [
                                 {
                                     // @ts-ignore
@@ -111,7 +112,7 @@ export default definePlugin({
                                 ${sourceGuildGet}
                                 ${sourceChannelGet}
 
-                                Creator Profile: <@${response.user.id}>`
+                                Creator UserID: ${response.user.id}`
                                 }]
                         });
                     });
