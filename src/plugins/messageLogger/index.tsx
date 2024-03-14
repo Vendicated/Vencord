@@ -207,7 +207,7 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any, is_edit: boolean = false) {
+    shouldIgnore(message: any, isEdit: boolean = false) {
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
@@ -216,7 +216,7 @@ export default definePlugin({
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-            (is_edit ? !Settings.plugins.MessageLogger.logEdits : !Settings.plugins.MessageLogger.logDeletes) ||
+            (isEdit ? !Settings.plugins.MessageLogger.logEdits : !Settings.plugins.MessageLogger.logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
