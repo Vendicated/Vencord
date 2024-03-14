@@ -1,0 +1,6 @@
+/* Fixes to make the quick reactions look better */
+
+[class*="wrapper_"][role="group"]:has(>[id*="message-quickreact-"]:nth-child(5)) {
+    padding: 4px 1px 6px;
+    gap: 2px;
+}
