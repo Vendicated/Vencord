@@ -126,7 +126,7 @@ export default definePlugin({
         {
             find: "UserProfileTypes.PANEL,useDefaultClientTheme",
             replacement: {
-                match: /user:(\i).+?voiceGuild,voiceChannel.+?:null,/,
+                match: /user:(\i){1,2}.+?voiceGuild,voiceChannel.+?:null,/,
                 replace: "$&$self.patchPrivateChannelProfile({user:$1}),"
             }
         }
