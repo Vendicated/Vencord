@@ -407,12 +407,10 @@ export default definePlugin({
                             style={{ marginTop: "10px" }} onClick={() => {
                                 StatusSettingsStores.ShowCurrentGame.updateSetting(true);
                                 hideErrorCard = true;
-                                const message = "Game activity enabled";
-                                const type = Toasts.Type.SUCCESS;
                                 Toasts.show({
                                     id: Toasts.genId(),
-                                    message,
-                                    type,
+                                    message: "Game activity enabled",
+                                    type: Toasts.Type.SUCCESS,
                                     options: {
                                         position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
                                     },
