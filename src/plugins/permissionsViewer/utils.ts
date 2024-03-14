@@ -17,8 +17,9 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { getGuildRoles } from "@utils/discord";
 import { wordsToTitle } from "@utils/text";
-import { GuildStore, i18n, Parser } from "@webpack/common";
+import { i18n, Parser } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
@@ -67,7 +68,9 @@ export function getPermissionDescription(permission: string): ReactNode {
     return "";
 }
 
-export function getSortedRoles({ roles, id }: Guild, member: GuildMember) {
+export function getSortedRoles({ id }: Guild, member: GuildMember) {
+    const roles = getGuildRoles(id);
+
     return [...member.roles, id]
         .map(id => roles[id])
         .sort((a, b) => b.position - a.position);
@@ -85,13 +88,13 @@ export function sortUserRoles(roles: Role[]) {
 }
 
 export function sortPermissionOverwrites<T extends { id: string; type: number; }>(overwrites: T[], guildId: string) {
-    const guild = GuildStore.getGuild(guildId);
+    const roles = getGuildRoles(guildId);
 
     return overwrites.sort((a, b) => {
         if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
 
-        const roleA = guild.roles[a.id];
-        const roleB = guild.roles[b.id];
+        const roleA = roles[a.id];
+        const roleB = roles[b.id];
 
         return roleB.position - roleA.position;
     });
