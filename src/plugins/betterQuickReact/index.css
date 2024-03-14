@@ -1,6 +1,13 @@
 /* Fixes to make the quick reactions look better */
 
-[class*="wrapper_"][role="group"]:has(>[id*="message-quickreact-"]:nth-child(5)) {
-    padding: 4px 1px 6px;
-    gap: 2px;
+.vc-better-quick-react[role="group"] {
+    padding: 4px 0 6px;
+    justify-self: center;
+    gap: 4px;
+    max-width: calc(var(--vc-better-quick-react-columns) * 44px);
+    grid-template-columns: repeat(var(--vc-better-quick-react-columns), 40px);
+}
+
+[class*="menu_"]:has(>div>.vc-better-quick-react[role="group"]) {
+    max-width: fit-content
 }

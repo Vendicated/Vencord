@@ -24,6 +24,13 @@ export const settings = definePluginSettings({
         markers: makeRange(1, 16, 1),
         stickToMarkers: true
     },
+    columns: {
+        description: "Columns of quick reactions to display",
+        type: OptionType.SLIDER,
+        default: 4,
+        markers: makeRange(4, 10, 1),
+        stickToMarkers: true
+    },
 });
 
 export default definePlugin({
@@ -35,10 +42,9 @@ export default definePlugin({
     patches: [
         {
             find: "this.favoriteEmojisWithoutFetchingLatest.concat",
-            predicate: () => settings.store.frequentEmojis,
             replacement: {
-                match: "this.favoriteEmojisWithoutFetchingLatest.concat",
-                replace: "[].concat"
+                match: /(this\.favoriteEmojisWithoutFetchingLatest)\.concat/,
+                replace: "($self.settings.store.frequentEmojis?[]:$1).concat"
             }
         },
         {
@@ -47,9 +53,24 @@ export default definePlugin({
                 match: /(\i)\.length>4&&\((\i)\.length=4\);/,
                 replace: "$1.length>$self.getMaxQuickReactions()&&($2.length=$self.getMaxQuickReactions());"
             }
+        },
+        {
+            find: "default.Messages.ADD_REACTION_NAMED.format",
+            replacement: {
+                match: /className:(\i)\.wrapper,/,
+                replace: "className:\"vc-better-quick-react \"+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
+            }
+        },
+        // MenuGroup doesn't accept styles or anything special by default :/
+        {
+            find: "{MenuGroup:function()",
+            replacement: {
+                match: /role:"group",/,
+                replace: "role:\"group\",style:arguments[0].style,"
+            }
         }
     ],
     getMaxQuickReactions() {
-        return settings.store.rows * 4;
+        return settings.store.rows * settings.store.columns;
     }
 });
