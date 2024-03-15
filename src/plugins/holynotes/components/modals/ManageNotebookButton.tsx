@@ -10,7 +10,7 @@ import { Button, React } from "@webpack/common";
 import NotebookCreateModal from "./NotebookCreateModal";
 import NotebookDeleteModal from "./NotebookDeleteModal";
 
-export default ({ notebook }: { notebook: string, setNotebook: React.Dispatch<React.SetStateAction<string>>; }) => {
+export default ({ notebook, setNotebook }: { notebook: string, setNotebook: React.Dispatch<React.SetStateAction<string>>; }) => {
     const isNotMain = notebook !== "Main";
 
     return (
@@ -18,7 +18,7 @@ export default ({ notebook }: { notebook: string, setNotebook: React.Dispatch<Re
             color={isNotMain ? Button.Colors.RED : Button.Colors.GREEN}
             onClick={
                 isNotMain
-                    ? () => openModal(props => <NotebookDeleteModal {...props} notebook={notebook} />)
+                    ? () => openModal(props => <NotebookDeleteModal {...props} notebook={notebook} onChangeTab={setNotebook} />)
                     : () => openModal(props => <NotebookCreateModal {...props} />)
             }
         >

@@ -12,11 +12,12 @@ import noteHandler from "plugins/holynotes/noteHandler";
 import Error from "./Error";
 import { RenderMessage } from "./RenderMessage";
 
-export default ({ onClose, notebook, ...props }: ModalProps & { onClose: () => void; notebook: string; }) => {
+export default ({ onClose, notebook, onChangeTab, ...props }: ModalProps & { onClose: () => void; notebook: string; onChangeTab: React.Dispatch<React.SetStateAction<string>>; }) => {
     const notes = noteHandler.getNotes(notebook);
 
     const handleDelete = () => {
         onClose();
+        onChangeTab("Main");
         noteHandler.deleteNotebook(notebook);
     };
 
