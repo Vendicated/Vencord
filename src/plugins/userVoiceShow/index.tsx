@@ -28,7 +28,7 @@ import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's voice channel in their profile modal",
@@ -38,7 +38,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
-    }
+    },
 });
 
 interface UserProps {
@@ -56,24 +56,24 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
 
     if (!guild) return null; // When in DM call
 
-    const result = `${guild.name} | ${channel.name}`;
-
     return (
         <VoiceChannelSection
             channel={channel}
-            label={result}
+            joinDisabled={VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id)?.channelId === channelId}
             showHeader={settings.store.showVoiceChannelSectionHeader}
         />
     );
 });
 
+
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows whether a User is currently in a voice channel somewhere in their profile",
-    authors: [Devs.LordElias],
+    authors: [Devs.LordElias, Devs.Johannes7k75],
+    tags: ["voice", "activity"],
     settings,
 
-    patchModal({ user }: UserProps) {
+    patchModal: ErrorBoundary.wrap(({ user }: UserProps) => {
         if (!settings.store.showInUserProfileModal)
             return null;
 
@@ -82,32 +82,52 @@ export default definePlugin({
                 <VoiceChannelField user={user} />
             </div>
         );
-    },
+    }, { noop: true }),
 
-    patchPopout: ({ user }: UserProps) => {
+    patchPopout: ErrorBoundary.wrap(({ user }: UserProps) => {
         const isSelfUser = user.id === UserStore.getCurrentUser().id;
         return (
             <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
                 <VoiceChannelField user={user} />
             </div>
         );
-    },
+    }, { noop: true }),
+
+    patchPrivateChannelProfile: ErrorBoundary.wrap(({ user }: UserProps) => {
+        if (!user) return null;
+
+        return <div className="vc-uvs-private-channel">
+            <VoiceChannelField user={user} />
+        </div>;
+    }, { noop: true }),
 
     patches: [
-        // above message box
+        // User Profile Modal - below user info
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
+                // paste my fancy custom button above the message field
                 replace: "$self.patchPopout(arguments[0]),$&",
             }
         },
-        // below username
+
+        // User Popout Modal - above Notes
         {
             find: ".USER_PROFILE_MODAL",
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
+                // paste my fancy custom button below the username
                 replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+
+        // Private Channel Profile - above Activities
+        {
+            find: "UserProfileTypes.PANEL,useDefaultClientTheme",
+            replacement: {
+                match: /user:(\i){1,2}.+?voiceGuild,voiceChannel.+?:null,/,
+                replace: "$&$self.patchPrivateChannelProfile({user:$1}),"
             }
         }
     ],
