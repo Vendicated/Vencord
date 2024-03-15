@@ -139,7 +139,7 @@ export default definePlugin({
                     name: "username",
                     description: "Send with a custom webhook username",
                     type: ApplicationCommandOptionType.STRING,
-                    required: true
+                    required: false
                 },
                 {
                     name: "tts",
@@ -165,9 +165,11 @@ export default definePlugin({
                     });
                 }
                 else {
+                    fetch("" + webhookUrl).then(response => response.json().then(response => { if (webhookUsername === "") { webhookUsername = response.name; } }));
+
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
-                        username: webhookUsername ?? fetch("" + webhookUrl).then(response => response.json().then(response => { webhookUsername = response.name; })),
+                        username: webhookUsername,
                         avatar_url: "",
                         tts: findOption(option, "tts")
                     });
