@@ -6,18 +6,18 @@
 
 import { classes } from "@utils/misc";
 import { findByProps } from "@webpack";
-import { Button, Clickable, Menu, Popout, React, TabBar } from "@webpack/common";
+import { Button, Clickable, Menu, Popout, React } from "@webpack/common";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
 
 
 
-export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
+export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: string[], selectedTabId: string, onSelectTab: (tab: string) => void }) {
     const tabBarRef = React.useRef<HTMLDivElement>(null);
     const widthRef = React.useRef<number>(0);
     const tabWidthMapRef = React.useRef(new Map());
-    const [overflowedTabs, setOverflowedTabs] = React.useState([]);
-    const resizeObserverRef = React.useRef(null);
+    const [overflowedTabs, setOverflowedTabs] = React.useState<string[]>([]);
+    const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
     const [show, setShow] = React.useState(false);
 
     const { isNotNullish } = findByProps("isNotNullish");
@@ -25,7 +25,7 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
 
     const handleResize = React.useCallback(() => {
         if (!tabBarRef.current) return;
-        const overflowed = [];
+        const overflowed = [] as string[];
 
         const totalWidth = tabBarRef.current.clientWidth;
         if (totalWidth !== widthRef.current) {
@@ -61,11 +61,12 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
         };
     }, [handleResize]);
 
-    const TabItem = React.forwardRef(function ({ id, selected, onClick, children }, ref) {
+    const TabItem = React.forwardRef(function ({ id, selected, onClick, children }: { id: string, selected: boolean, onClick: () => void, children: React.ReactNode }, ref) {
         return (
             <Clickable
                 className={classes("vc-notebook-tabbar-item", selected ? "vc-notebook-selected" : "")}
                 data-tab-id={id}
+                // @ts-expect-error
                 innerRef={ref}
                 onClick={onClick}
             >
@@ -109,14 +110,14 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }) {
                         <TabItem
                             id={tab}
                             selected={selectedTabId === tab}
-                            ref={el => {
+                            ref={(el: HTMLElement | null) => {
                                 const width = tabWidthMapRef.current.get(tab)?.width ?? 0;
                                 tabWidthMapRef.current.set(tab, {
                                     node: el,
                                     width: el ? el.getBoundingClientRect().width : width
                                 });
                             }}
-                            onClick={selectedTabId !== tab ? () => onSelectTab(tab) : undefined}
+                            onClick={selectedTabId !== tab ? () => onSelectTab(tab) : () => {}}
                         >
                             {tab}
                         </TabItem>
@@ -177,7 +178,7 @@ export function CreateTabBar({ tabs, firstSelectedTab, onChangeTab }) {
         TabBar: <NoteBookTabs
             tabs={tabKeys}
             selectedTabId={selectedTab}
-            onSelectTab={(tab) => {
+            onSelectTab={tab => {
                 setSelectedTab(tab);
                 if (onChangeTab) onChangeTab(tab);
             }} />,
