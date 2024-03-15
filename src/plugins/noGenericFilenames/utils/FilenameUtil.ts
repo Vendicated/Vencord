@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import plugin from "..";
+
 export default class FilenameUtil {
 
     static readonly genericFilenamePatterns: string[] = [
@@ -26,6 +28,18 @@ export default class FilenameUtil {
             name: result?.[1] ?? "",
             extension: (result?.[2] ?? "")
         };
+    }
+
+    static resolveFile(url: string, data: Blob) {
+        const fileDetails = this.getFilenameData(new URL(url).pathname.split("/").pop()!);
+        const coindicences = plugin.coincidenceList.split("|");
+
+        if (this.isGenericFilename(fileDetails.name, coindicences)) {
+            fileDetails.name += ` ${plugin.getCurrentDate()}`;
+        }
+
+        return new File([data], fileDetails.name + fileDetails.extension, { type: data.type });
+
     }
 
 }
