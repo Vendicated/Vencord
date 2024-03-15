@@ -196,7 +196,7 @@ export default definePlugin({
 
                 if (message.mention_roles.length > 0) {
                     for (const roleId of message.mention_roles) {
-                        const role = GuildStore.getGuild(channel.guild_id).roles[roleId];
+                        const role = GuildStore.getRole(channel.guild_id, roleId);
                         if (!role) continue;
                         const roleColor = role.colorString ?? `#${pingColor}`;
                         finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);

@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcEvents } from "@utils/IpcEvents";
+import { PluginIpcMappings } from "@main/ipcPlugins";
+import type { UserThemeHeader } from "@main/themes";
+import { IpcEvents } from "@shared/IpcEvents";
 import { IpcRes } from "@utils/types";
+import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
-import { PluginIpcMappings } from "main/ipcPlugins";
-import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
@@ -46,8 +47,8 @@ export default {
     },
 
     settings: {
-        get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
-        set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
+        get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
+        set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
         getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
     },
 
