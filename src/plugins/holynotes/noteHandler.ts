@@ -55,7 +55,7 @@ export default new (class NoteHandler {
     public addNote = async (message: Message, notebook: string) => {
         const notes = this.getNotes(notebook);
         const channel = ChannelStore.getChannel(message.channel_id);
-        const newNotes = Object.assign({ [message.id]: this._formatNote(channel, message) }, notes);
+        const newNotes = Object.values(Object.assign({ [message.id]: this._formatNote(channel, message) }, notes));
 
         noteHandlerCache.set(notebook, newNotes);
         saveCacheToDataStore(notebook, newNotes);
@@ -119,8 +119,8 @@ export default new (class NoteHandler {
             return;
         }
 
-        noteHandlerCache.set(notebookName, {});
-        saveCacheToDataStore(notebookName, {} as HolyNotes.Note[]);
+        noteHandlerCache.set(notebookName, []);
+        saveCacheToDataStore(notebookName, [{}] as HolyNotes.Note[]);
 
         return Toasts.show({
             id: Toasts.genId(),
