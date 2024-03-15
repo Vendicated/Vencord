@@ -5,11 +5,12 @@
  */
 
 import { classes } from "@utils/misc";
+
 export default ({ className }: { className?: string; }): JSX.Element => (
     <svg
         x="0"
         y="0"
-        className="vc-holynotes-icon"
+        className={classes("vc-holynotes-icon")}
         aria-hidden="true"
         role="img"
         width="24"
