@@ -124,8 +124,7 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
                     );
                 }
                 return null;
-            }).filter(isNotNullish)
-            }
+            }).filter(isNotNullish)}
             {overflowedTabs.length > 0 && (
                 <Popout
                     shouldShow={show}
@@ -145,9 +144,7 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
                         >
                             <SvgOverFlowIcon className={classes(overflowIcon)} width={16} height={16}/>
                         </Button>
-                    )
-                    }
-
+                    )}
                 </Popout>
 
             )}
