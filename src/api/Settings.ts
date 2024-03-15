@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
+import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/misc";
@@ -52,7 +53,6 @@ export interface Settings {
     | "under-page"
     | "window"
     | undefined;
-    macosTranslucency: boolean | undefined;
     disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
@@ -88,8 +88,6 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
-    // Replaced by macosVibrancyStyle
-    macosTranslucency: undefined,
     macosVibrancyStyle: undefined,
     disableMinSize: false,
     winNativeTitleBar: false,
@@ -110,13 +108,8 @@ const DefaultSettings: Settings = {
     }
 };
 
-try {
-    var settings = JSON.parse(VencordNative.settings.get()) as Settings;
-    mergeDefaults(settings, DefaultSettings);
-} catch (err) {
-    var settings = mergeDefaults({} as Settings, DefaultSettings);
-    logger.error("An error occurred while loading the settings. Corrupt settings file?\n", err);
-}
+const settings = VencordNative.settings.get();
+mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
@@ -125,76 +118,52 @@ const saveSettingsOnFrequentAction = debounce(async () => {
     }
 }, 60_000);
 
-type SubscriptionCallback = ((newValue: any, path: string) => void) & { _paths?: Array<string>; };
-const subscriptions = new Set<SubscriptionCallback>();
 
-const proxyCache = {} as Record<string, any>;
+export const SettingsStore = new SettingsStoreClass(settings, {
+    readOnly: true,
+    getDefaultValue({
+        target,
+        key,
+        path
+    }) {
+        const v = target[key];
+        if (!plugins) return v; // plugins not initialised yet. this means this path was reached by being called on the top level
 
-// Wraps the passed settings object in a Proxy to nicely handle change listeners and default values
-function makeProxy(settings: any, root = settings, path = ""): Settings {
-    return proxyCache[path] ??= new Proxy(settings, {
-        get(target, p: string) {
-            const v = target[p];
+        if (path === "plugins" && key in plugins)
+            return target[key] = {
+                enabled: plugins[key].required ?? plugins[key].enabledByDefault ?? false
+            };
 
-            // using "in" is important in the following cases to properly handle falsy or nullish values
-            if (!(p in target)) {
-                // Return empty for plugins with no settings
-                if (path === "plugins" && p in plugins)
-                    return target[p] = makeProxy({
-                        enabled: plugins[p].required ?? plugins[p].enabledByDefault ?? false
-                    }, root, `plugins.${p}`);
+        // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
+        // the default value.
+        if (path.startsWith("plugins.")) {
+            const plugin = path.slice("plugins.".length);
+            if (plugin in plugins) {
+                const setting = plugins[plugin].options?.[key];
+                if (!setting) return v;
 
-                // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
-                // the default value.
-                if (path.startsWith("plugins.")) {
-                    const plugin = path.slice("plugins.".length);
-                    if (plugin in plugins) {
-                        const setting = plugins[plugin].options?.[p];
-                        if (!setting) return v;
-                        if ("default" in setting)
-                            // normal setting with a default value
-                            return (target[p] = setting.default);
-                        if (setting.type === OptionType.SELECT) {
-                            const def = setting.options.find(o => o.default);
-                            if (def)
-                                target[p] = def.value;
-                            return def?.value;
-                        }
-                    }
-                }
-                return v;
-            }
+                if ("default" in setting)
+                    // normal setting with a default value
+                    return (target[key] = setting.default);
 
-            // Recursively proxy Objects with the updated property path
-            if (typeof v === "object" && !Array.isArray(v) && v !== null)
-                return makeProxy(v, root, `${path}${path && "."}${p}`);
-
-            // primitive or similar, no need to proxy further
-            return v;
-        },
-
-        set(target, p: string, v) {
-            // avoid unnecessary updates to React Components and other listeners
-            if (target[p] === v) return true;
-
-            target[p] = v;
-            // Call any listeners that are listening to a setting of this path
-            const setPath = `${path}${path && "."}${p}`;
-            delete proxyCache[setPath];
-            for (const subscription of subscriptions) {
-                if (!subscription._paths || subscription._paths.includes(setPath)) {
-                    subscription(v, setPath);
+                if (setting.type === OptionType.SELECT) {
+                    const def = setting.options.find(o => o.default);
+                    if (def)
+                        target[key] = def.value;
+                    return def?.value;
                 }
             }
-            // And don't forget to persist the settings!
-            PlainSettings.cloud.settingsSyncVersion = Date.now();
-            localStorage.Vencord_settingsDirty = true;
-            saveSettingsOnFrequentAction();
-            VencordNative.settings.set(JSON.stringify(root, null, 4));
-            return true;
         }
-    });
-}
+        return v;
+    }
+});
+
+SettingsStore.addGlobalChangeListener((_, path) => {
+    SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
+    localStorage.Vencord_settingsDirty = true;
+    saveSettingsOnFrequentAction();
+    VencordNative.settings.set(SettingsStore.plain, path);
+});
 
 /**
  * Same as {@link Settings} but unproxied. You should treat this as readonly,
@@ -210,7 +179,7 @@ export const PlainSettings = settings;
  * the updated settings to disk.
  * This recursively proxies objects. If you need the object non proxied, use {@link PlainSettings}
  */
-export const Settings = makeProxy(settings);
+export const Settings = SettingsStore.store;
 
 /**
  * Settings hook for React components. Returns a smart settings
@@ -223,45 +192,21 @@ export const Settings = makeProxy(settings);
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
-    if (paths) {
-        (forceUpdate as SubscriptionCallback)._paths = paths;
-    }
-
     React.useEffect(() => {
-        subscriptions.add(forceUpdate);
-        return () => void subscriptions.delete(forceUpdate);
+        if (paths) {
+            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
+            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+        } else {
+            SettingsStore.addGlobalChangeListener(forceUpdate);
+            return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
+        }
     }, []);
 
-    return Settings;
-}
-
-// Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
-type ResolvePropDeep<T, P> = P extends "" ? T :
-    P extends `${infer Pre}.${infer Suf}` ?
-    Pre extends keyof T ? ResolvePropDeep<T[Pre], Suf> : never : P extends keyof T ? T[P] : never;
-
-/**
- * Add a settings listener that will be invoked whenever the desired setting is updated
- * @param path Path to the setting that you want to watch, for example "plugins.Unindent.enabled" will fire your callback
- *             whenever Unindent is toggled. Pass an empty string to get notified for all changes
- * @param onUpdate Callback function whenever a setting matching path is updated. It gets passed the new value and the path
- *                 to the updated setting. This path will be the same as your path argument, unless it was an empty string.
- *
- * @example addSettingsListener("", (newValue, path) => console.log(`${path} is now ${newValue}`))
- *          addSettingsListener("plugins.Unindent.enabled", v => console.log("Unindent is now", v ? "enabled" : "disabled"))
- */
-export function addSettingsListener<Path extends keyof Settings>(path: Path, onUpdate: (newValue: Settings[Path], path: Path) => void): void;
-export function addSettingsListener<Path extends string>(path: Path, onUpdate: (newValue: Path extends "" ? any : ResolvePropDeep<Settings, Path>, path: Path extends "" ? string : Path) => void): void;
-export function addSettingsListener(path: string, onUpdate: (newValue: any, path: string) => void) {
-    if (path) {
-        ((onUpdate as SubscriptionCallback)._paths ??= []).push(path);
-    }
-
-    subscriptions.add(onUpdate);
+    return SettingsStore.store;
 }
 
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
-    const { plugins } = settings;
+    const { plugins } = SettingsStore.plain;
     if (name in plugins) return;
 
     for (const oldName of oldNames) {
@@ -269,7 +214,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
-            VencordNative.settings.set(JSON.stringify(settings, null, 4));
+            SettingsStore.markAsChanged();
             break;
         }
     }
