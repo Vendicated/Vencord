@@ -69,6 +69,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
 
     const notes = noteHandler.getNotes(currentNotebook);
     if (!notes) return <></>;
+
     const { TabBar, selectedTab } = CreateTabBar({ tabs: noteHandler.getAllNotes(), firstSelectedTab: currentNotebook, onChangeTab: setCurrentNotebook });
 
     return (
