@@ -22,7 +22,7 @@ import "./VoiceActivityIcon.css";
 
 import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/react";
-import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByCode, findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, PermissionStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 import { PropsWithChildren, SVGProps } from "react";
@@ -38,10 +38,10 @@ interface BaseIconProps extends SVGProps<SVGSVGElement> {
     width?: string | number;
 }
 
-function SvgIcon({ height = 24, width = 24, className, path, children, viewBox="0 0 24 24", ...svgProps }: PropsWithChildren<BaseIconProps>) {
+function SvgIcon({ height = 24, width = 24, className, path, children, viewBox = "0 0 24 24", ...svgProps }: PropsWithChildren<BaseIconProps>) {
     return (
         <svg
-            className={VoiceActivityClassFactory(className, "vc-icon")}
+            className={cl("svg").concat(" ", className ?? "")}
             width={width}
             height={height}
             viewBox={viewBox}
@@ -63,17 +63,13 @@ const Icons = {
     Stage: "M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5 17.8 9.94 16.5 12 16.5C14.06 16.5 15.5 17.8 15.5 19.5V20H8.5ZM7 13C7 10.24 9.24 8 12 8C14.76 8 17 10.24 17 13C17 13.91 16.74 14.75 16.31 15.49L17.62 16.25C18.17 15.29 18.5 14.19 18.5 13C18.5 9.42 15.58 6.5 12 6.5C8.42 6.5 5.5 9.42 5.5 13C5.5 14.18 5.82 15.29 6.38 16.25L7.69 15.49C7.26 14.75 7 13.91 7 13ZM2.5 13C2.5 7.75 6.75 3.5 12 3.5C17.25 3.5 21.5 7.75 21.5 13C21.5 14.73 21.03 16.35 20.22 17.75L21.51 18.5C22.45 16.88 23 15 23 13C23 6.93 18.07 2 12 2C5.93 2 1 6.93 1 13C1 15 1.55 16.88 2.48 18.49L3.77 17.74C2.97 16.35 2.5 14.73 2.5 13Z", // M14 13C14 14.1 13.1 15 12 15C10.9 15 10 14.1 10 13C10 11.9 10.9 11 12 11C13.1 11 14 11.9 14 13ZM8.5 20V19.5C8.5
 };
 
-
-
-
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
-const transitionTo: (path: string) => null = findByCodeLazy("transitionTo -");
 const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
 interface VoiceActivityIconProps {
     user: User;
-    dmChannel: boolean
+    dmChannel: boolean;
 }
 interface VoiceState {
     userId: string;
@@ -121,7 +117,6 @@ const cl = classNameFactory("vc-uvs-");
 export const VoiceActivityClassFactory = cl;
 
 export default ({ user, dmChannel }: VoiceActivityIconProps) => {
-    const { transitionTo, transitionToGuild } = Vencord.Webpack.Common.NavigationRouter;
     let channelPath: string;
     let text: string;
     let subtext: string;
@@ -145,8 +140,8 @@ export default ({ user, dmChannel }: VoiceActivityIconProps) => {
     }
 
     if (channel.id === currentUserVoiceState?.channelId)
-        className = `${cl("icon")} ${cl("iconCurrentCall")}`;
-    if (voiceState.selfStream) className = cl("iconLive");
+        className = `${className} ${cl("icon-current-call")}`;
+    if (voiceState.selfStream) className = cl("icon-live");
 
     if (guild) {
         text = guild.name;
@@ -179,25 +174,25 @@ export default ({ user, dmChannel }: VoiceActivityIconProps) => {
     else if (voiceState.selfVideo) Icon = Icons.Video;
 
     const canConnect = PermissionStore.can(CONNECT, channel);
-    if (!canConnect) className = `${className} ${cl("iconLocked")}`;
-    if (dmChannel) className = `${className} ${cl("iconContainer")}`;
+    if (!canConnect) className = `${className} ${cl("icon-locked")}`;
+    if (dmChannel) className = `${className} ${cl("icon-container")}`;
 
     return (
-        <div className={className} onClick={e => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (!canConnect && guild) transitionToGuild("guild.id");
-            if (channelPath) transitionTo(channelPath);
+        <div className={className} onClick={() => {
+            if (!canConnect && guild)
+                Vencord.Webpack.Common.NavigationRouter.transitionToGuild(guild.id);
+            else
+                Vencord.Webpack.Common.NavigationRouter.transitionTo(channelPath);
         }}>
             <Tooltip text={
                 <div className={cl("tooltip")}>
-                    <div className={cl("header")} style={{ fontWeight: "600" }}>
+                    <div className={cl("tooltip-header")} style={{ fontWeight: "600" }}>
                         {text}
                     </div>
-                    <div className={cl("subtext")}>
+                    <div className={cl("tooltip-subtext")}>
                         <div style={{ fontWeight: "400" }}>{subtext}</div>
                         {voiceChannelUsers && <div style={{ width: "fit-content", marginTop: 6, display: "flex", alignItems: "center" }}>
-                            <SvgIcon className={cl("tooltipIcon")} width="18" height="18" path={TooltipIcon}></SvgIcon>
+                            <SvgIcon className={cl("tooltip-icon")} width="18" height="18" path={TooltipIcon}></SvgIcon>
                             <UserSummaryItem
                                 users={voiceChannelUsers}
                                 guildId={guild.id}
@@ -211,7 +206,7 @@ export default ({ user, dmChannel }: VoiceActivityIconProps) => {
                 </div>
             }>
 
-                {tooltipProps => !voiceState.selfStream ? <SvgIcon {...tooltipProps} width="14" height="14" path={Icon}/> : <div {...tooltipProps}>Live</div>}
+                {tooltipProps => !voiceState.selfStream ? <SvgIcon {...tooltipProps} width="14" height="14" path={Icon} /> : <div {...tooltipProps}>Live</div>}
             </Tooltip>
         </div>
     );
