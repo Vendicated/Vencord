@@ -73,16 +73,7 @@ const plugin = definePlugin({
 
         if (!data) return;
 
-        const filenameData = FilenameUtil.getFilenameData(new URL(url).pathname.split("/").pop()!);
-        var name: string = "";
-
-        if (FilenameUtil.isGenericFilename(filenameData.name, this.coincidenceList.split("|"))) {
-            name = `${filenameData.name} ${this.getCurrentDate()}${filenameData.extension}`;
-        } else {
-            name = `${filenameData.name}${filenameData.extension}`;
-        }
-
-        saveFile(new File([data], name, { type: data.type }));
+        saveFile(FilenameUtil.resolveFile(url, data));
     },
 
     resetSettings() {
