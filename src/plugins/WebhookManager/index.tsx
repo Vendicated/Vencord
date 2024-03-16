@@ -141,6 +141,7 @@ export default definePlugin({
 
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
+                const webhookAttachment = findOption(option, "attachment");
                 let webhookUsername = findOption(option, "username");
                 if (findOption(option, "raw")) {
                     Native.executeWebhook("" + webhookUrl, {
@@ -154,7 +155,8 @@ export default definePlugin({
                         content: webhookMessage,
                         username: webhookUsername,
                         avatar_url: "",
-                        tts: findOption(option, "tts")
+                        tts: findOption(option, "tts"),
+                        attachments: webhookAttachment
                     });
 
                 }
