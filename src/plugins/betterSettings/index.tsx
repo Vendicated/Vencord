@@ -25,12 +25,12 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     organizeMenu: {
-        description: "Organizes the settings cog context menu",
+        description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
         default: true
     },
     eagerLoad: {
-        description: "Eagerly load menu contents",
+        description: "Removes the loading delay when opening the menu for the first time",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
