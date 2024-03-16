@@ -12,7 +12,6 @@ import { RestAPI } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 const WMLogger = new Logger("WebhookManager");
-let sourceGuildGet;
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
@@ -72,18 +71,6 @@ export default definePlugin({
                 await fetch("" + webhookUrl).then(response => response.json())
                     .then(response => {
                         WMLogger.info(JSON.stringify(response));
-                        if (response.type === 2) {
-                            const sourceWebhook = `
-                            Source Server ID: ${response.source_guild.id}
-                            Source Server Name: ${response.source_guild.name}
-                            Source Channel ID: ${response.source_channel.id}
-                            Source Channel Name: ${response.source_channel.name}
-                            `;
-                            sourceGuildGet = sourceWebhook;
-                        }
-                        else {
-                            sourceGuildGet = "";
-                        }
                         sendBotMessage(ctx.channel.id, {
                             content: `This webhook was created by <@${response.user.id}>.`,
                             embeds: [
@@ -94,7 +81,6 @@ export default definePlugin({
                                     author: {
                                         // @ts-ignore
                                         icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
-                                        proxy_icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
                                         name: response.name,
                                         url: ""
                                     },
@@ -103,10 +89,7 @@ export default definePlugin({
                                 Webhook Token: ${response.token}
                                 Webhook Type: ${response.type}
                                 Channel ID: ${response.channel_id}
-                                Server ID: ${response.guild_id}
-                                ${sourceGuildGet}
-
-                                Creator UserID: ${response.user.id}`
+                                Server ID: ${response.guild_id}`
                                 }]
                         });
                     });
@@ -142,7 +125,13 @@ export default definePlugin({
                     required: false
                 },
                 {
-                    name: "rawjson",
+                    name: "attachment",
+                    description: "Send with a custom attachment.",
+                    type: ApplicationCommandOptionType.ATTACHMENT,
+                    required: false
+                },
+                {
+                    name: "raw",
                     description: "Send message as raw JSON",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
@@ -153,13 +142,13 @@ export default definePlugin({
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
                 let webhookUsername = findOption(option, "username");
-                if (findOption(option, "rawjson")) {
+                if (findOption(option, "raw")) {
                     Native.executeWebhook("" + webhookUrl, {
                         webhookMessage
                     });
                 }
                 else {
-                    fetch("" + webhookUrl).then(response => response.json().then(response => { if (webhookUsername === "") { webhookUsername = response.name; } }));
+                    webhookUsername = undefined;
 
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
