@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -36,6 +37,39 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
+
+interface LayerProps extends HTMLAttributes<HTMLDivElement> {
+    mode: "SHOWN" | "HIDDEN";
+    baseLayer?: boolean;
+}
+
+function Layer({ mode, baseLayer = false, ...props }: LayerProps) {
+    const hidden = mode === "HIDDEN";
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => () => {
+        ComponentDispatch.dispatch("LAYER_POP_START");
+        ComponentDispatch.dispatch("LAYER_POP_COMPLETE");
+    }, []);
+
+    const node = (
+        <div
+            ref={containerRef}
+            aria-hidden={hidden}
+            className={cl({
+                [Classes.layer]: true,
+                [Classes.baseLayer]: baseLayer,
+                "stop-animations": hidden
+            })}
+            style={{ opacity: hidden ? 0 : undefined }}
+            {...props}
+        />
+    );
+
+    return baseLayer
+        ? node
+        : <FocusLock containerRef={containerRef}>{node}</FocusLock>;
+}
 
 export default definePlugin({
     name: "BetterSettings",
@@ -90,35 +124,12 @@ export default definePlugin({
         }
     ],
 
-    Layer({ mode, baseLayer = false, ...props }: {
-        mode: "SHOWN" | "HIDDEN";
-        baseLayer?: boolean;
-    } & HTMLAttributes<HTMLDivElement>) {
-        const hidden = mode === "HIDDEN";
-        const containerRef = useRef<HTMLDivElement>(null);
-
-        useEffect(() => () => {
-            ComponentDispatch.dispatch("LAYER_POP_START");
-            ComponentDispatch.dispatch("LAYER_POP_COMPLETE");
-        }, []);
-
-        const node = (
-            <div
-                ref={containerRef}
-                aria-hidden={hidden}
-                className={cl({
-                    [Classes.layer]: true,
-                    [Classes.baseLayer]: baseLayer,
-                    "stop-animations": hidden
-                })}
-                style={{ opacity: hidden ? 0 : undefined }}
-                {...props}
-            />
+    Layer(props: LayerProps) {
+        return (
+            <ErrorBoundary fallback={() => props.children as any}>
+                <Layer {...props} />
+            </ErrorBoundary>
         );
-
-        return baseLayer
-            ? node
-            : <FocusLock containerRef={containerRef}>{node}</FocusLock>;
     },
 
     wrapMenu(list: SettingsEntry[]) {
