@@ -125,8 +125,8 @@ export default definePlugin({
                     required: false
                 },
                 {
-                    name: "attachment",
-                    description: "Send with a custom attachment.",
+                    name: "pfp",
+                    description: "Send with a custom profile picture.",
                     type: ApplicationCommandOptionType.ATTACHMENT,
                     required: false
                 },
@@ -141,7 +141,7 @@ export default definePlugin({
 
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
-                const webhookAttachment = findOption(option, "attachment");
+                const webhookProfilePic = findOption(option, "pfp");
                 let webhookUsername = findOption(option, "username");
                 if (findOption(option, "raw")) {
                     Native.executeWebhook("" + webhookUrl, {
@@ -149,14 +149,15 @@ export default definePlugin({
                     });
                 }
                 else {
-                    webhookUsername = undefined;
+                    if (webhookUsername === "") {
+                        webhookUsername = undefined;
+                    }
 
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
                         username: webhookUsername,
-                        avatar_url: "",
+                        avatar_url: webhookProfilePic,
                         tts: findOption(option, "tts"),
-                        attachments: webhookAttachment
                     });
 
                 }
