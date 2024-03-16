@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -15,7 +16,7 @@ import { ContextMenuApi, FluxDispatcher, Menu, React, UserStore } from "@webpack
 import { Channel } from "discord-types/general";
 
 import { contextMenus } from "./components/contextMenu";
-import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
+import { openCategoryModal } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
 import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, initCategories, isPinned, migrateData, moveCategory, removeCategory } from "./data";
 
@@ -24,6 +25,7 @@ interface ChannelComponentProps {
     channel: Channel,
     selected: boolean;
 }
+
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
@@ -37,6 +39,7 @@ waitFor(["dispatch", "subscribe"], m => {
     m.subscribe("CONNECTION_OPEN", async () => {
         if (!Settings.plugins.PinDMs?.enabled) return;
 
+        // console.log("HI new connection");
         const id = UserStore.getCurrentUser()?.id;
         await initCategories(id);
         await migrateData(id);
@@ -65,7 +68,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or reorder pins, right click DMs",
-    authors: [Devs.Ven, Devs.Strencher, Devs.Aria],
+    authors: [Devs.Ven, Devs.Aria],
     settings,
     contextMenus,
 
@@ -165,15 +168,21 @@ export default definePlugin({
         instance = i;
     },
 
+    // startAt: StartAt.WebpackReady,
+    // flux: {
+    //     CONNECTION_OPEN: async () => {
+    //         console.log("HI new connection in flux property");
+    //         const id = UserStore.getCurrentUser()?.id;
+    //         await initCategories(id);
+    //         await migrateData(id);
+    //         forceUpdate();
+    //     }
+    // },
+
     isPinned,
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
-
-    start() {
-        requireSettingsMenu();
-    },
-
     makeProps(instance, { sections }: { sections: number[]; }) {
         this.sections = sections;
 
@@ -259,7 +268,7 @@ export default definePlugin({
         return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
     },
 
-    renderCategory({ section }: { section: number; }) {
+    renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
         const category = categories[section - 1];
 
         if (!category) return null;
@@ -329,7 +338,7 @@ export default definePlugin({
                 </svg>
             </h2>
         );
-    },
+    }),
 
     renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
         const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
@@ -346,6 +355,7 @@ export default definePlugin({
             </ChannelComponent>
         );
     },
+
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
         const category = categories[sectionIndex - 1];

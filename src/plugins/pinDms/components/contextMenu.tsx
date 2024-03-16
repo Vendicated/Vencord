@@ -11,7 +11,7 @@ import { addChannelToCategory, canMoveChannelInDirection, categories, isPinned, 
 import { forceUpdate, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
-function PinMenuItem(channelId: string) {
+function createPinMenuItem(channelId: string) {
     const pinned = isPinned(channelId);
 
     return (
@@ -23,7 +23,7 @@ function PinMenuItem(channelId: string) {
             {!pinned && (
                 <>
                     <Menu.MenuItem
-                        id="add-category"
+                        id="vc-add-category"
                         label="Add Category"
                         color="brand"
                         action={() => openCategoryModal(null, channelId)}
@@ -35,7 +35,7 @@ function PinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id={`pin-category-${category.name}`}
                                 label={category.name}
-                                action={() => addChannelToCategory(channelId, category.id).then(() => forceUpdate())}
+                                action={() => addChannelToCategory(channelId, category.id).then(forceUpdate)}
                             />
                         ))
                     }
@@ -48,7 +48,7 @@ function PinMenuItem(channelId: string) {
                         id="unpin-dm"
                         label="Unpin DM"
                         color="danger"
-                        action={() => removeChannelFromCategory(channelId).then(() => forceUpdate())}
+                        action={() => removeChannelFromCategory(channelId).then(forceUpdate)}
                     />
 
                     {
@@ -56,7 +56,7 @@ function PinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-up"
                                 label="Move Up"
-                                action={() => moveChannel(channelId, -1).then(() => forceUpdate())}
+                                action={() => moveChannel(channelId, -1).then(forceUpdate)}
                             />
                         )
                     }
@@ -66,7 +66,7 @@ function PinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-down"
                                 label="Move Down"
-                                action={() => moveChannel(channelId, 1).then(() => forceUpdate())}
+                                action={() => moveChannel(channelId, 1).then(forceUpdate)}
                             />
                         )
                     }
@@ -79,15 +79,14 @@ function PinMenuItem(channelId: string) {
 
 const GroupDMContext: NavContextMenuPatchCallback = (children, props) => {
     const container = findGroupChildrenByChildId("leave-channel", children);
-    if (container)
-        container.unshift(PinMenuItem(props.channel.id));
+    container?.unshift(createPinMenuItem(props.channel.id));
 };
 
 const UserContext: NavContextMenuPatchCallback = (children, props) => {
     const container = findGroupChildrenByChildId("close-dm", children);
     if (container) {
         const idx = container.findIndex(c => c?.props?.id === "close-dm");
-        container.splice(idx, 0, PinMenuItem(props.channel.id));
+        container.splice(idx, 0, createPinMenuItem(props.channel.id));
     }
 };
 

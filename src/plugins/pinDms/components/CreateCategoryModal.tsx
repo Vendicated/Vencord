@@ -5,7 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Forms, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
 
@@ -43,7 +43,7 @@ interface Props {
     modalProps: ModalProps;
 }
 
-const useCategory = (categoryId: string | null, initalChannelId: string | null) => {
+function useCategory(categoryId: string | null, initalChannelId: string | null) {
     const [category, setCategory] = useState<Category | null>(null);
 
     useEffect(() => {
@@ -57,13 +57,13 @@ const useCategory = (categoryId: string | null, initalChannelId: string | null) 
                 collapsed: false,
                 channels: [initalChannelId]
             });
-    }, []);
+    }, [categoryId, initalChannelId]);
 
     return {
         category,
         setCategory
     };
-};
+}
 
 export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Props) {
     const { category, setCategory } = useCategory(categoryId, initalChannelId);
@@ -127,5 +127,8 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
 }
 
 export const openCategoryModal = (categoryId: string | null, channelId: string | null) =>
-    openModal(modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initalChannelId={channelId} />);
+    openModalLazy(async () => {
+        requireSettingsMenu();
+        return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initalChannelId={channelId} />;
+    });
 

@@ -18,23 +18,21 @@ export interface Category {
     collapsed?: boolean;
 }
 
-export const KEYS = {
-    CATEGORY_BASE_KEY: "PinDMsCategories-",
-    CATEGORY_MIGRATED_PINDMS_KEY: "PinDMsMigratedPinDMs",
-    CATEGORY_MIGRATED_KEY: "PinDMsMigratedOldCategories",
-    OLD_CATEGORY_KEY: "BetterPinDMsCategories-"
-};
+const CATEGORY_BASE_KEY = "PinDMsCategories-";
+const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
+const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
+const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
 
 
 export let categories: Category[] = [];
 
 export async function saveCats(cats: Category[]) {
     const { id } = UserStore.getCurrentUser();
-    await DataStore.set(KEYS.CATEGORY_BASE_KEY + id, cats);
+    await DataStore.set(CATEGORY_BASE_KEY + id, cats);
 }
 
 export async function initCategories(userId: string) {
-    categories = await DataStore.get<Category[]>(KEYS.CATEGORY_BASE_KEY + userId) ?? [];
+    categories = await DataStore.get<Category[]>(CATEGORY_BASE_KEY + userId) ?? [];
 }
 
 export function getCategory(id: string) {
@@ -168,7 +166,7 @@ const getPinDMsPins = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split
 
 async function migratePinDMs() {
     if (categories.some(m => m.id === "oldPins")) {
-        return await DataStore.set(KEYS.CATEGORY_MIGRATED_PINDMS_KEY, true);
+        return await DataStore.set(CATEGORY_MIGRATED_PINDMS_KEY, true);
     }
 
     const pindmspins = getPinDMsPins();
@@ -184,20 +182,20 @@ async function migratePinDMs() {
         });
     }
 
-    await DataStore.set(KEYS.CATEGORY_MIGRATED_PINDMS_KEY, true);
+    await DataStore.set(CATEGORY_MIGRATED_PINDMS_KEY, true);
 }
 
 async function migrateOldCategories(userId: string) {
-    const oldCats = await DataStore.get<Category[]>(KEYS.OLD_CATEGORY_KEY + userId);
+    const oldCats = await DataStore.get<Category[]>(OLD_CATEGORY_KEY + userId);
     // dont want to migrate if the user has already has categories.
     if (categories.length === 0 && oldCats?.length) {
         categories.push(...(oldCats.filter(m => m.id !== "oldPins")));
     }
-    await DataStore.set(KEYS.CATEGORY_MIGRATED_KEY, true);
+    await DataStore.set(CATEGORY_MIGRATED_KEY, true);
 }
 
 export async function migrateData(userId: string) {
-    const m1 = await DataStore.get(KEYS.CATEGORY_MIGRATED_KEY), m2 = await DataStore.get(KEYS.CATEGORY_MIGRATED_PINDMS_KEY);
+    const m1 = await DataStore.get(CATEGORY_MIGRATED_KEY), m2 = await DataStore.get(CATEGORY_MIGRATED_PINDMS_KEY);
     if (m1 && m2) return;
 
     // want to migrate the old categories first and then slove any conflicts with the PinDMs pins
