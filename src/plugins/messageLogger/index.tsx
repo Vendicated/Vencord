@@ -207,7 +207,7 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any, isEdit: boolean = false) {
+    shouldIgnore(message: any, isEdit = false) {
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
