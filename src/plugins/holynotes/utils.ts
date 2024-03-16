@@ -25,9 +25,8 @@ export async function getFormatedEntries() {
     const notebooks: Record<string, HolyNotes.Note> = {};
 
     data.forEach(function (note) {
-        notebooks[note[0]] = note[1];
+        notebooks[note[0].toString()] = note[1];
     });
-
     return notebooks;
 }
 
@@ -35,7 +34,7 @@ export async function DataStoreToCache() {
     const data = await DataStore.entries(HolyNoteStore);
 
     data.forEach(function (note) {
-        noteHandlerCache.set(note[0], note[1]);
+        noteHandlerCache.set(note[0].toString(), note[1]);
     });
 }
 

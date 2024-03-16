@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
 import { findByCode } from "@webpack";
 import { ChannelStore, lodash, Toasts, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
@@ -49,7 +48,7 @@ export default new (class NoteHandler {
         for (const [key, value] of data) {
             notes[key] = value;
         }
-        return notes;
+        return notes as HolyNotes.Note[];
     }
 
     public addNote = async (message: Message, notebook: string) => {
@@ -71,7 +70,7 @@ export default new (class NoteHandler {
         const notes = this.getNotes(notebook);
 
         noteHandlerCache.set(notebook, lodash.omit(notes, noteId));
-        saveCacheToDataStore(notebook, lodash.omit(notes, noteId));
+        saveCacheToDataStore(notebook, lodash.omit(notes, noteId) as unknown as HolyNotes.Note[]);
 
         Toasts.show({
             id: Toasts.genId(),
@@ -89,8 +88,8 @@ export default new (class NoteHandler {
         noteHandlerCache.set(from, lodash.omit(origNotebook, note.id));
         noteHandlerCache.set(to, newNoteBook);
 
-        saveCacheToDataStore(from, lodash.omit(origNotebook, note.id));
-        saveCacheToDataStore(to, newNoteBook);
+        saveCacheToDataStore(from, lodash.omit(origNotebook, note.id) as unknown as HolyNotes.Note[]);
+        saveCacheToDataStore(to, newNoteBook as unknown as HolyNotes.Note[]);
 
 
         Toasts.show({
@@ -119,8 +118,8 @@ export default new (class NoteHandler {
             return;
         }
 
-        noteHandlerCache.set(notebookName, []);
-        saveCacheToDataStore(notebookName, [{}] as HolyNotes.Note[]);
+        noteHandlerCache.set(notebookName, [{}]);
+        saveCacheToDataStore(notebookName, [{} as HolyNotes.Note]);
 
         return Toasts.show({
             id: Toasts.genId(),
@@ -161,7 +160,7 @@ export default new (class NoteHandler {
 
         for (const notebook in notebooks) {
             noteHandlerCache.set(notebook, notebooks[notebook]);
-            saveCacheToDataStore(notebook, notebooks[notebook]);
+            saveCacheToDataStore(notebook, notebooks[notebook] as unknown as HolyNotes.Note[]);
         }
 
         Toasts.show({

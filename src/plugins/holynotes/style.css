@@ -1,3 +1,6 @@
+/* stylelint-disable shorthand-property-no-redundant-values */
+/* stylelint-disable length-zero-no-unit */
+
 /*
 $modifier: var(--background-modifier-accent);
 */
@@ -115,6 +118,7 @@ $modifier: var(--background-modifier-accent);
     color: var(--interactive-normal);
     border-bottom-width: 2px;
     border-bottom-style: solid;
+    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     border-bottom-color: transparent;
 }
 
