@@ -174,7 +174,7 @@ export default definePlugin({
             find: ".NITRO_BANNER,",
             replacement: {
                 // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
-                match: /style:\{(?=backgroundImage:(\i&&\i)\?"url\("\.concat\((\i),)/,
+                match: /style:\{(?=backgroundImage:(\i)\?"url\("\.concat\((\i),)/,
                 replace:
                     // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
                     'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
