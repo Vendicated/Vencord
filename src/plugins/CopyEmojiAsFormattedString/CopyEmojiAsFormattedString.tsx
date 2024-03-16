@@ -14,54 +14,78 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import {  Menu, React, Toasts, Clipboard } from "@webpack/common";
+import { Menu, Toasts, Clipboard } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { showToast } from "@webpack/common";
 
-
-
 interface Emoji {
-    type: "emoji",
-    id: string,
+    type: string;
+    id: string;
     name: string;
 }
 
+interface Target {
+    dataset: Emoji;
+    firstChild: HTMLImageElement;
+}
+
+function removeCountingPostfix(name: string): string {
+    return name.replace(/~\d+$/, "");
+}
+
+function getEmojiFormattedString(target: Target): string {
+    const { dataset } = target;
+
+    if (!dataset.id) {
+        const fiberKey = Object.keys(target).find((key) =>
+            /^__reactFiber\$\S+$/gm.test(key)
+        );
+
+        if (!fiberKey) return `:${dataset.name}:`;
+
+        const emojiUnicode =
+            target[fiberKey]?.child?.memoizedProps?.emoji?.surrogates;
+
+        return emojiUnicode || `:${dataset.name}:`;
+    }
+
+    const extension = target?.firstChild.src.match(
+        /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
+    )?.[1];
+
+    const emojiName = removeCountingPostfix(dataset.name);
+    const emojiId = dataset.id;
+
+    return extension === "gif"
+        ? `<a:${emojiName}:${emojiId}>`
+        : `<:${emojiName}:${emojiId}>`;
+}
+
 export default definePlugin({
-    name: "CopyEmojiAsFormattedString",
+    name: "Copy Emoji As Formatted String",
     description: "Add's button to copy emoji as formatted string!",
-    authors: [Devs.HAPPY_ENDERMAN],
-    expressionPickerPatch(children, props) {
-        if (!children.find(element=>element.props.id === "copy-formatted-string")) {
-            let data = props.target.dataset as Emoji;
-            const firstChild = props.target.firstChild as HTMLImageElement;
+    authors: [Devs.HAPPY_ENDERMAN, Devs.VISHNYA_NET_CHERESHNYA],
+    contextMenus: {
+        "expression-picker"(children, { target }: { target: Target }) {
+            if (target.dataset.type !== "emoji") return;
 
-            let isAnimated = firstChild && new URL(firstChild.src).pathname.endsWith(".gif");;
-            if (data.type === "emoji" && data.id) {
-
-                children.push(<Menu.MenuItem
+            children.push(
+                <Menu.MenuItem
                     id="copy-formatted-string"
                     key="copy-formatted-string"
                     label={`Copy as formatted string`}
                     action={() => {
-                        const formatted_emoji_string = `${isAnimated ? "<a:" : "<:"}${data.name}:${data.id}>`;
-                        Clipboard.copy(formatted_emoji_string);
-                        showToast("Success! Copied to clipboard as formatted string.", Toasts.Type.SUCCESS);
+                        Clipboard.copy(getEmojiFormattedString(target));
+                        showToast(
+                            "Success! Copied to clipboard as formatted string.",
+                            Toasts.Type.SUCCESS
+                        );
                     }}
-                />);
-            }
-            props.alreadyPatched = true;
-        }
+                />
+            );
+        },
     },
-    start() {
-        addContextMenuPatch("expression-picker", this.expressionPickerPatch);
-    },
-    stop() {
-        removeContextMenuPatch("expression-picker", this.expressionPickerPatch);
-    }
-
-
 });
