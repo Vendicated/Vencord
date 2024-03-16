@@ -30,7 +30,7 @@ const settings = definePluginSettings({
     file: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Remove the suspicious file popup when downloading executable files",
+        description: "Remove the 'Potentially Dangerous Download' popup when opening links",
         restartNeeded: true
     }
 });
