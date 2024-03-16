@@ -6,12 +6,12 @@
 
 import "./styles.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy, waitFor } from "@webpack";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
@@ -33,21 +33,6 @@ const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { ge
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
-
-// the flux property in definePlugin doenst fire, probably because startAt isnt Init
-waitFor(["dispatch", "subscribe"], m => {
-    m.subscribe("CONNECTION_OPEN", async () => {
-        if (!Settings.plugins.PinDMs?.enabled) return;
-
-        // console.log("HI new connection");
-        const id = UserStore.getCurrentUser()?.id;
-        await initCategories(id);
-        await migrateData(id);
-        forceUpdate();
-        // dont want to unsubscribe because if they switch accounts we want to reinit
-    });
-});
-
 
 export const settings = definePluginSettings({
     sortDmsByNewestMessage: {
@@ -168,16 +153,13 @@ export default definePlugin({
         instance = i;
     },
 
-    // startAt: StartAt.WebpackReady,
-    // flux: {
-    //     CONNECTION_OPEN: async () => {
-    //         console.log("HI new connection in flux property");
-    //         const id = UserStore.getCurrentUser()?.id;
-    //         await initCategories(id);
-    //         await migrateData(id);
-    //         forceUpdate();
-    //     }
-    // },
+    startAt: StartAt.WebpackReady,
+    async start() {
+        const id = UserStore.getCurrentUser()?.id;
+        await initCategories(id);
+        await migrateData(id);
+        forceUpdate();
+    },
 
     isPinned,
     categoryLen,
