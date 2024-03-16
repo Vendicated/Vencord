@@ -40,20 +40,20 @@ const badges: Record<string, ProfileBadge> = {
     "verified_developer": { id: "verified_developer", description: "Early Verified Bot Developer", icon: "6df5892e0f35b051f8b61eace34f4967" },
 };
 
-enum UserFlags {
-    STAFF = 1 << 0,
-    PARTNER = 1 << 1,
-    HYPESQUAD = 1 << 2,
-    BUG_HUNTER_LEVEL_1 = 1 << 3,
-    HYPESQUAD_ONLINE_HOUSE_1 = 1 << 6,
-    HYPESQUAD_ONLINE_HOUSE_2 = 1 << 7,
-    HYPESQUAD_ONLINE_HOUSE_3 = 1 << 8,
-    BUG_HUNTER_LEVEL_2 = 1 << 14,
-    VERIFIED_DEVELOPER = 1 << 17,
-    CERTIFIED_MODERATOR = 1 << 18,
-    PREMIUM_EARLY_SUPPORTER = 1 << 19,
-    ACTIVE_DEVELOPER = 1 << 22,
-}
+const UserFlags = {
+    STAFF: 1 << 0,
+    PARTNER: 1 << 1,
+    HYPESQUAD: 1 << 2,
+    BUG_HUNTER_LEVEL_1: 1 << 3,
+    HYPESQUAD_ONLINE_HOUSE_1: 1 << 6,
+    HYPESQUAD_ONLINE_HOUSE_2: 1 << 7,
+    HYPESQUAD_ONLINE_HOUSE_3: 1 << 8,
+    BUG_HUNTER_LEVEL_2: 1 << 14,
+    VERIFIED_DEVELOPER: 1 << 17,
+    CERTIFIED_MODERATOR: 1 << 18,
+    PREMIUM_EARLY_SUPPORTER: 1 << 19,
+    ACTIVE_DEVELOPER: 1 << 22,
+};
 
 const fetching = new Set<string>();
 const queue = new Queue(5);
@@ -105,10 +105,7 @@ async function getUser(id: string) {
 
     userObj = UserStore.getUser(id);
     const fakeBadges: ProfileBadge[] = [];
-    for (const key in UserFlags) {
-        const value = UserFlags[key as keyof typeof UserFlags];
-        if (Number.isNaN(Number(value)))
-            continue;
+    for (const [key, value] of Object.entries(UserFlags)) {
         if (userObj.hasFlag(value))
             fakeBadges.push(badges[key.toLowerCase()]);
     }
