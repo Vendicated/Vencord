@@ -27,8 +27,6 @@ import { chooseFile, saveFile } from "@utils/web";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
-import Presets, { PresetsType } from "./presets";
-
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 const Colors = findByPropsLazy("profileColors");
@@ -80,30 +78,6 @@ const enum TimestampMode {
 }
 
 const settings = definePluginSettings({
-    preset: {
-        type: OptionType.SELECT,
-        description: "Some default presets by Vencord",
-        onChange: onChange,
-        options: [
-            {
-                label: "None",
-                value: 0,
-                default: true
-            },
-            {
-                label: "Vencord",
-                value: 1,
-            },
-            {
-                label: "VSCode",
-                value: 2
-            },
-            {
-                label: "Anime",
-                value: 3
-            }
-        ]
-    },
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
@@ -299,27 +273,7 @@ function setDefaults() {
     settings.store.buttonTwoURL = undefined;
 }
 
-function loadActivity(preset: PresetsType) {
-    setDefaults();
-    Object.assign(settings.store, preset);
-    return true;
-}
-
-function loadPreset() {
-    if (!settings.store.preset) return;
-    if (settings.store.preset === 1) {
-        loadActivity(Presets.Vencord);
-    }
-    if (settings.store.preset === 2) {
-        loadActivity(Presets.VSCode);
-    }
-    if (settings.store.preset === 3) {
-        loadActivity(Presets.Anime);
-    }
-}
-
 function onChange() {
-    loadPreset();
     setRpc(true);
     if (Settings.plugins.CustomRPC.enabled) setRpc();
 }
@@ -399,7 +353,6 @@ async function importBackup(): Promise<void> {
         };
         reader.readAsText(file);
     }
-    settings.store.preset = 0;
 }
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -564,5 +517,3 @@ export default definePlugin({
         );
     }
 });
-
-export { ActivityType, TimestampMode };
