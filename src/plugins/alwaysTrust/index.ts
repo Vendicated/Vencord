@@ -24,7 +24,7 @@ const settings = definePluginSettings({
     domain: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Remove the untrusted domain popup when clicking untrusted domains",
+        description: "Remove the untrusted domain popup when opening links",
         restartNeeded: true
     },
     file: {
