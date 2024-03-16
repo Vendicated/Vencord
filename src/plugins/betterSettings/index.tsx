@@ -12,7 +12,7 @@ import { findByPropsLazy } from "@webpack";
 import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
-type SettingsEntry = { section: string, label: string };
+type SettingsEntry = { section: string, label: string; };
 
 const cl = classNameFactory("");
 const Classes = findByPropsLazy("animating", "baseLayer", "bg", "layer", "layers");
@@ -96,29 +96,36 @@ export default definePlugin({
     } & HTMLAttributes<HTMLDivElement>) {
         const hidden = mode === "HIDDEN";
         const containerRef = useRef<HTMLDivElement>(null);
+
         useEffect(() => () => {
             ComponentDispatch.dispatch("LAYER_POP_START");
             ComponentDispatch.dispatch("LAYER_POP_COMPLETE");
         }, []);
-        const node = <div
-            ref={containerRef}
-            aria-hidden={hidden}
-            className={cl({
-                [Classes.layer]: true,
-                [Classes.baseLayer]: baseLayer,
-                "stop-animations": hidden
-            })}
-            style={{ opacity: hidden ? 0 : undefined }}
-            {...props}
-        />;
-        if (baseLayer) return node;
-        else return <FocusLock containerRef={containerRef}>{node}</FocusLock>;
+
+        const node = (
+            <div
+                ref={containerRef}
+                aria-hidden={hidden}
+                className={cl({
+                    [Classes.layer]: true,
+                    [Classes.baseLayer]: baseLayer,
+                    "stop-animations": hidden
+                })}
+                style={{ opacity: hidden ? 0 : undefined }}
+                {...props}
+            />
+        );
+
+        return baseLayer
+            ? node
+            : <FocusLock containerRef={containerRef}>{node}</FocusLock>;
     },
 
     wrapMenu(list: SettingsEntry[]) {
         if (!settings.store.organizeMenu) return list;
 
-        const items = [{ label: null as string|null, items: [] as SettingsEntry[] }];
+        const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
+
         for (const item of list) {
             if (item.section === "HEADER") {
                 items.push({ label: item.label, items: [] });
@@ -128,6 +135,7 @@ export default definePlugin({
                 items.at(-1)!.items.push(item);
             }
         }
+
         return {
             filter(predicate: (item: SettingsEntry) => boolean) {
                 for (const category of items) {
@@ -141,12 +149,13 @@ export default definePlugin({
                     .map(({ label, items }) => {
                         const children = items.map(render);
                         if (label) {
-                            return <Menu.MenuItem
-                                id={label.replace(/\W/, "_")}
-                                label={label}
-                                children={children}
-                                action={children[0].props.action}
-                            />;
+                            return (
+                                <Menu.MenuItem
+                                    id={label.replace(/\W/, "_")}
+                                    label={label}
+                                    children={children}
+                                    action={children[0].props.action}
+                                />);
                         } else {
                             return children;
                         }
