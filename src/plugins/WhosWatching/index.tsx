@@ -47,7 +47,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
 }
 
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-const StreamKeyHelper: {
+const { encodeStreamKey }: {
     encodeStreamKey: (any) => string;
 } = findByPropsLazy("encodeStreamKey");
 
@@ -69,7 +69,7 @@ export default definePlugin({
     component: function ({ OriginalComponent }) {
         return (props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-            const viewers = ApplicationStreamingStore.getViewerIds(StreamKeyHelper.encodeStreamKey(stream));
+            const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
