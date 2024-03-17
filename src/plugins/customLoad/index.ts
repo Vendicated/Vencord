@@ -28,7 +28,7 @@ const settings = definePluginSettings({
         description: "Replace Event Quotes too",
         type: OptionType.BOOLEAN,
         default: true
-    }
+    },
     replacementText: {
         type: OptionType.STRING,
         description: "Replacement text (use the format)",
