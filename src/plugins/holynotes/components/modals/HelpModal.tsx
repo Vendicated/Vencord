@@ -8,6 +8,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, M
 import { findByProps } from "@webpack";
 import { Button, Forms, Text } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
+import { downloadNotes, uploadNotes } from "plugins/holynotes/utils";
 
 export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; }) => {
     const { colorStatusGreen } = findByProps("colorStatusGreen");
@@ -60,6 +61,21 @@ export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; 
                         onClick={() => {
                             noteHandler.refreshAvatars();
                         }}>Refresh Avatars</Button>
+
+                    <Button
+                        look={Button.Looks.FILLED}
+                        color={Button.Colors.GREEN}
+                        style={{ marginRight: "10px" }}
+                        onClick={() => {
+                            uploadNotes();
+                        }}>Import Notes</Button>
+                    <Button
+                        look={Button.Looks.FILLED}
+                        color={Button.Colors.GREEN}
+                        style={{ marginRight: "70px" }}
+                        onClick={() => {
+                            downloadNotes();
+                        }}>Export Notes</Button>
                     <Button
                         look={Button.Looks.FILLED}
                         color={Button.Colors.RED}

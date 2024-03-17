@@ -181,4 +181,34 @@ export default new (class NoteHandler {
             type: Toasts.Type.SUCCESS,
         });
     };
+
+    public exportNotes = async () => {
+        return this.getAllNotes();
+    };
+
+    public importNotes = async (notes: HolyNotes.Note[]) => {
+        try {
+            var parseNotes = JSON.parse(notes as unknown as string);
+        } catch (e) {
+            console.log(e);
+            return Toasts.show({
+                id: Toasts.genId(),
+                message: "Invalid JSON.",
+                type: Toasts.Type.FAILURE,
+            });
+        }
+
+        for (const notebook in parseNotes) {
+            noteHandlerCache.set(notebook, parseNotes[notebook]);
+            saveCacheToDataStore(notebook, parseNotes[notebook] as unknown as HolyNotes.Note[]);
+        }
+
+        Toasts.show({
+            id: Toasts.genId(),
+            message: "Successfully imported notes.",
+            type: Toasts.Type.SUCCESS,
+        });
+
+    };
 });
+
