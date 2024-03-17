@@ -38,6 +38,7 @@ const settings = definePluginSettings({
             if (!value) return "String is required.";
             return true;
     }
+}
 });
 
 const quotes = [
