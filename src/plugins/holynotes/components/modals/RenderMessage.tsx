@@ -92,10 +92,10 @@ export const RenderMessage = ({
                         Object.assign(
                             { ...note },
                             {
-                                author: new User({ ...note.author }),
-                                timestamp: new Date(note.timestamp),
+                                author: new User({ ...note?.author }),
+                                timestamp: new Date(note?.timestamp),
                                 // @ts-ignore
-                                embeds: note.embeds.map((embed: { timestamp: string | number | Date; }) =>
+                                embeds: note?.embeds?.map((embed: { timestamp: string | number | Date; }) =>
                                     embed.timestamp
                                         ? Object.assign(embed, {
                                             timestamp: new Date(embed.timestamp),

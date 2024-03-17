@@ -49,7 +49,7 @@ const renderNotebook = ({
     if (sortDirection) messageArray.reverse();
 
     const filteredMessages = messageArray.filter(message =>
-        message.props.note.content.toLowerCase().includes(searchInput.toLowerCase()),
+        message.props.note?.content?.toLowerCase().includes(searchInput.toLowerCase()),
     );
 
     return filteredMessages.length > 0 ? filteredMessages : <Errors />;

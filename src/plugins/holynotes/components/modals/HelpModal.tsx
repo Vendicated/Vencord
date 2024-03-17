@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps,ModalRoot, ModalSize } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { Button, Forms, Text } from "@webpack/common";
 import noteHandler from "plugins/holynotes/noteHandler";
@@ -56,10 +56,16 @@ export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; 
                     <Button
                         look={Button.Looks.FILLED}
                         color={Button.Colors.GREEN}
+                        style={{ marginRight: "10px" }}
                         onClick={() => {
                             noteHandler.refreshAvatars();
-                        }}
-                    >Refresh Avatars</Button>
+                        }}>Refresh Avatars</Button>
+                    <Button
+                        look={Button.Looks.FILLED}
+                        color={Button.Colors.RED}
+                        onClick={() => {
+                            noteHandler.deleteEverything();
+                        }}>Delete All Notes</Button>
                 </div>
             </ModalFooter>
         </ModalRoot>

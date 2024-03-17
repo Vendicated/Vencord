@@ -9,7 +9,7 @@ import { ChannelStore, lodash, Toasts, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { Discord, HolyNotes } from "./types";
-import { deleteCacheFromDataStore, saveCacheToDataStore } from "./utils";
+import { deleteCacheFromDataStore, DeleteEntireStore, saveCacheToDataStore } from "./utils";
 
 export const noteHandlerCache = new Map();
 
@@ -54,10 +54,10 @@ export default new (class NoteHandler {
     public addNote = async (message: Message, notebook: string) => {
         const notes = this.getNotes(notebook);
         const channel = ChannelStore.getChannel(message.channel_id);
-        const newNotes = Object.values(Object.assign({ [message.id]: this._formatNote(channel, message) }, notes));
+        const newNotes = Object.assign({ [message.id]: this._formatNote(channel, message) }, notes);
 
         noteHandlerCache.set(notebook, newNotes);
-        saveCacheToDataStore(notebook, newNotes);
+        saveCacheToDataStore(notebook, newNotes as unknown as HolyNotes.Note[]);
 
         Toasts.show({
             id: Toasts.genId(),
@@ -81,7 +81,7 @@ export default new (class NoteHandler {
 
     public moveNote = async (note: HolyNotes.Note, from: string, to: string) => {
         const origNotebook = this.getNotes(from);
-        const newNoteBook = lodash.clone(this.getNotes(to));
+        const newNoteBook = lodash.cloneDeep(this.getNotes(to));
 
         newNoteBook[note.id] = note;
 
@@ -99,7 +99,7 @@ export default new (class NoteHandler {
         });
     };
 
-    public newNoteBook = async (notebookName: string) => {
+    public newNoteBook = async (notebookName: string, silent?: Boolean) => {
         let notebookExists = false;
 
         for (const key of noteHandlerCache.keys()) {
@@ -118,10 +118,10 @@ export default new (class NoteHandler {
             return;
         }
 
-        noteHandlerCache.set(notebookName, [{}]);
-        saveCacheToDataStore(notebookName, [{} as HolyNotes.Note]);
+        noteHandlerCache.set(notebookName, {});
+        saveCacheToDataStore(notebookName, {} as HolyNotes.Note[]);
 
-        return Toasts.show({
+        if (!silent) return Toasts.show({
             id: Toasts.genId(),
             message: `Successfully created ${notebookName}.`,
             type: Toasts.Type.SUCCESS,
@@ -169,5 +169,16 @@ export default new (class NoteHandler {
             type: Toasts.Type.SUCCESS,
         });
 
+    };
+
+    public deleteEverything = async () => {
+        noteHandlerCache.clear();
+        await DeleteEntireStore();
+
+        Toasts.show({
+            id: Toasts.genId(),
+            message: "Successfully deleted all notes.",
+            type: Toasts.Type.SUCCESS,
+        });
     };
 });

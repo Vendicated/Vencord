@@ -7,7 +7,7 @@
 import { createStore } from "@api/DataStore";
 import { DataStore } from "@api/index";
 
-import { noteHandlerCache } from "./noteHandler";
+import noteHandler, { noteHandlerCache } from "./noteHandler";
 import { HolyNotes } from "./types";
 
 export const HolyNoteStore = createStore("HolyNoteData", "HolyNoteStore");
@@ -40,4 +40,5 @@ export async function DataStoreToCache() {
 
 export async function DeleteEntireStore() {
     await DataStore.clear(HolyNoteStore);
+    return noteHandler.newNoteBook("Main", true);
 }
