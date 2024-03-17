@@ -9,6 +9,7 @@ import { Settings } from "@api/Settings";
 import { UserStore } from "@webpack/common";
 
 import { DEFAULT_COLOR } from "./constants";
+import { forceUpdate } from "./index";
 
 export interface Category {
     id: string;
@@ -29,6 +30,13 @@ export let categories: Category[] = [];
 export async function saveCats(cats: Category[]) {
     const { id } = UserStore.getCurrentUser();
     await DataStore.set(CATEGORY_BASE_KEY + id, cats);
+}
+
+export async function init() {
+    const id = UserStore.getCurrentUser()?.id;
+    await initCategories(id);
+    await migrateData(id);
+    forceUpdate();
 }
 
 export async function initCategories(userId: string) {

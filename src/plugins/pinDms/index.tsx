@@ -12,13 +12,13 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { contextMenus } from "./components/contextMenu";
-import { openCategoryModal } from "./components/CreateCategoryModal";
+import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, initCategories, isPinned, migrateData, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -154,17 +154,16 @@ export default definePlugin({
     },
 
     startAt: StartAt.WebpackReady,
-    async start() {
-        const id = UserStore.getCurrentUser()?.id;
-        await initCategories(id);
-        await migrateData(id);
-        forceUpdate();
+    start: init,
+    flux: {
+        CONNECTION_OPEN: init,
     },
 
     isPinned,
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
+    requireSettingsMenu,
     makeProps(instance, { sections }: { sections: number[]; }) {
         this.sections = sections;
 
