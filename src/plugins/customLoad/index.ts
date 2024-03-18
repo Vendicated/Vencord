@@ -16,12 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { values } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 // These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
 // don't worry about it :P
+
+
+//i took away your encryption.
 
 const settings = definePluginSettings({
     replaceEvents: {
@@ -32,18 +36,18 @@ const settings = definePluginSettings({
     replacementText: {
         type: OptionType.STRING,
         description: "Replacement text (use the format)",
-            default: '"optionOne", "optionTwo"',
-        onChange: onChange,
+        default: '"optionOne", "optionTwo"',
         isValid: (value: string) => {
-            if (!value) return "String is required.";
-            return true;
+            if (!value) {
+                console.log("String is required.");
+            } else {
+                return true;
+            }
+        }
     }
-}
 });
 
-const quotes = [
-   replacementText
-];
+let quotes;
 
 export default definePlugin({
     name: "CustomQuotes",
@@ -68,14 +72,9 @@ export default definePlugin({
             ],
         },
     ],
-
-    xor(quote: string) {
-        const key = "read if cute";
-        const codes = Array.from(quote, (s, i) => s.charCodeAt(0) ^ (i % key.length));
-        return String.fromCharCode(...codes);
-    },
-
+    
     get quote() {
-        return this.xor(quotes[Math.floor(Math.random() * quotes.length)]);
+        const lines = JSON.parse(`[${settings.store.replacementText}]`);
+        return lines[Math.floor(Math.random() * lines.length)];
     }
 });
