@@ -1,0 +1,12 @@
+/* Center Profile */
+[class^="UserProfile_"] {
+    text-align: center;
+}
+[class^="UserProfileSection_"] {
+    margin-left: auto;
+    margin-right: auto;
+}
+#app-mount > div.App__appAsidePanelWrapper.appAsidePanelWrapper__714a6 > div.App__notAppAsidePanel.notAppAsidePanel__9d124 > div:nth-child(4) > div.BackdropLayer__layer.layer_ad604d > div > div > div:nth-child(1) > div > div > div.UserProfile__userProfileModalOverlayBackground.userProfileModalOverlayBackground__52d65.UserProfile__overlayBackground.overlayBackground__86b78 > div > div.u.u1342.u1342__container.container_b6b15b > div:nth-child(1) > div.u.u89.u89__info.info__40462.u.u1342.u1342__nameTag.nameTag__7814f.u.u1342.u1342__nameTagSmall.nameTagSmall__02127 > span {
+    margin-left: auto;
+    margin-right: auto;
+}
