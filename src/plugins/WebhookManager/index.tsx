@@ -126,8 +126,8 @@ export default definePlugin({
                 },
                 {
                     name: "pfp",
-                    description: "Send with a custom profile picture.",
-                    type: ApplicationCommandOptionType.ATTACHMENT,
+                    description: "Send with a custom profile picture. You must input a valid image URL.",
+                    type: ApplicationCommandOptionType.STRING,
                     required: false
                 },
                 {
@@ -141,7 +141,7 @@ export default definePlugin({
 
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
-                const webhookProfilePic = findOption(option, "pfp");
+                let webhookProfilePic = findOption(option, "pfp");
                 let webhookUsername = findOption(option, "username");
                 if (findOption(option, "raw")) {
                     Native.executeWebhook("" + webhookUrl, {
@@ -151,6 +151,10 @@ export default definePlugin({
                 else {
                     if (webhookUsername === "") {
                         webhookUsername = undefined;
+                    }
+
+                    if (webhookProfilePic === "") {
+                        webhookProfilePic = undefined;
                     }
 
                     Native.executeWebhook("" + webhookUrl, {
