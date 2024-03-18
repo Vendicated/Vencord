@@ -162,7 +162,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
     }
@@ -369,8 +369,8 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.*?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
-                replace: (_, props, rest, reactNode) => `let{fakeNitroNode}=${props};${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!fakeNitroNode?.fake)`
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
+                replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
         // Allow using custom app icons
@@ -474,7 +474,7 @@ export default definePlugin({
         if (typeof firstContent === "string") {
             content[0] = firstContent.trimStart();
             content[0] || content.shift();
-        } else if (firstContent?.type === "span") {
+        } else if (typeof firstContent?.props?.children === "string") {
             firstContent.props.children = firstContent.props.children.trimStart();
             firstContent.props.children || content.shift();
         }
@@ -484,7 +484,7 @@ export default definePlugin({
         if (typeof lastContent === "string") {
             content[lastIndex] = lastContent.trimEnd();
             content[lastIndex] || content.pop();
-        } else if (lastContent?.type === "span") {
+        } else if (typeof lastContent?.props?.children === "string") {
             lastContent.props.children = lastContent.props.children.trimEnd();
             lastContent.props.children || content.pop();
         }
@@ -585,13 +585,15 @@ export default definePlugin({
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
-            this.trimContent(children);
 
             return children;
         };
 
         try {
-            return modifyChildren(lodash.cloneDeep(content));
+            const newContent = modifyChildren(lodash.cloneDeep(content));
+            this.trimContent(newContent);
+
+            return newContent;
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;
@@ -791,8 +793,8 @@ export default definePlugin({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker
-                            , however you do not have permissions to embed links in the current channel.
+                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                            however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
                         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
@@ -864,7 +866,9 @@ export default definePlugin({
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }
