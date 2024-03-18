@@ -23,7 +23,7 @@ const settings = definePluginSettings({
             { label: "Recently Active", value: 0, default: true },
             { label: "Date Posted", value: 1 }
         ],
-        description: "Which layout to use as default"
+        description: "Which sort order to use as default"
     }
 });
 
