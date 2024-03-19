@@ -19,8 +19,9 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getGuildRoles } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -114,8 +115,7 @@ export default definePlugin({
     },
 
     roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+        const role = getGuildRoles(guildId)[id];
 
         return (
             <span style={{
