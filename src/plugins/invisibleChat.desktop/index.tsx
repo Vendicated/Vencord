@@ -96,6 +96,12 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "password, Password",
         description: "Saved Passwords (Seperated with a , )"
+    },
+
+    defaultEncPassword: {
+        type: OptionType.STRING,
+        default: "password",
+        description: "Default encryption password"
     }
 });
 
