@@ -27,12 +27,14 @@ import {
 } from "@utils/modal";
 import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
 
-import { encrypt } from "../index";
+import { encrypt, settings } from "../index";
 
 function EncModal(props: ModalProps) {
+    const defaultPassword = settings.store.defaultEncPassword.trim();
+
     const [secret, setSecret] = React.useState("");
     const [cover, setCover] = React.useState("");
-    const [password, setPassword] = React.useState("password");
+    const [password, setPassword] = React.useState(defaultPassword);
     const [noCover, setNoCover] = React.useState(false);
 
     const isValid = secret && (noCover || (cover && cover.trim().split(" ").length > 1));
@@ -60,7 +62,7 @@ function EncModal(props: ModalProps) {
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
-                    defaultValue={"password"}
+                    defaultValue={defaultPassword}
                     onChange={(e: string) => {
                         setPassword(e);
                     }}

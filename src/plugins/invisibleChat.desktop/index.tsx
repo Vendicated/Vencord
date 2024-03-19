@@ -91,7 +91,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     savedPasswords: {
         type: OptionType.STRING,
         default: "password, Password",
