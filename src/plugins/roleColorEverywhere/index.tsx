@@ -17,9 +17,11 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getGuildRoles } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -73,12 +75,18 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /\i.roleIcon,\.\.\.\i/,
-                    replace: "$&,color:$self.roleGroupColor(arguments[0])"
-                },
-                {
                     match: /null,\i," — ",\i\]/,
                     replace: "null,$self.roleGroupColor(arguments[0])]"
+                },
+            ],
+            predicate: () => settings.store.memberList,
+        },
+        {
+            find: ".Messages.THREAD_BROWSER_PRIVATE",
+            replacement: [
+                {
+                    match: /children:\[\i," — ",\i\]/,
+                    replace: "children:[$self.roleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList,
@@ -106,9 +114,8 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
+        const role = getGuildRoles(guildId)[id];
 
         return (
             <span style={{
@@ -119,7 +126,7 @@ export default definePlugin({
                 {title ?? label} &mdash; {count}
             </span>
         );
-    },
+    }, { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {

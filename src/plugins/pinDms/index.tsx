@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Channel } from "discord-types/general";
 
-import { addContextMenus, removeContextMenus } from "./contextMenus";
+import { contextMenus } from "./contextMenus";
 import { getPinAt, isPinned, settings, snapshotArray, sortedSnapshot, usePinnedDms } from "./settings";
 
 export default definePlugin({
@@ -29,9 +29,7 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Strencher],
 
     settings,
-
-    start: addContextMenus,
-    stop: removeContextMenus,
+    contextMenus,
 
     usePinCount(channelIds: string[]) {
         const pinnedDms = usePinnedDms();

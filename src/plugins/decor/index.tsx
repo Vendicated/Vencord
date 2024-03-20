@@ -6,21 +6,17 @@
 
 import "./ui/styles.css";
 
-import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { closeAllModals } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Forms, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUserDecorAvatarDecoration, useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
+import { settings } from "./settings";
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import DecorSection from "./ui/components/DecorSection";
 
@@ -30,27 +26,6 @@ export interface AvatarDecoration {
     skuId: string;
 }
 
-const settings = definePluginSettings({
-    changeDecoration: {
-        type: OptionType.COMPONENT,
-        description: "Change your avatar decoration",
-        component() {
-            return <div>
-                <DecorSection hideTitle hideDivider noMargin />
-                <Forms.FormText type="description" className={classes(Margins.top8, Margins.bottom8)}>
-                    You can also access Decor decorations from the <Link
-                        href="/settings/profile-customization"
-                        onClick={e => {
-                            e.preventDefault();
-                            closeAllModals();
-                            FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Profile Customization" });
-                        }}
-                    >Profiles</Link> page.
-                </Forms.FormText>
-            </div>;
-        }
-    }
-});
 export default definePlugin({
     name: "Decor",
     description: "Create and use your own custom avatar decorations, or pick your favorite from the presets.",
@@ -97,7 +72,7 @@ export default definePlugin({
             replacement: [
                 // Add Decor avatar decoration hook to avatar decoration hook
                 {
-                    match: /(?<=TryItOut:\i}\),)(?<=user:(\i).+?)/,
+                    match: /(?<=TryItOut:\i,guildId:\i}\),)(?<=user:(\i).+?)/,
                     replace: "vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1),"
                 },
                 // Use added hook
@@ -156,9 +131,10 @@ export default definePlugin({
     getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate?: boolean; }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
-            const url = new URL(`${CDN_URL}/${avatarDecoration.asset}.png`);
-            url.searchParams.set("animate", (!!canAnimate && isAnimatedAvatarDecoration(avatarDecoration.asset)).toString());
-            return url.toString();
+            const parts = avatarDecoration.asset.split("_");
+            // Remove a_ prefix if it's animated and animation is disabled
+            if (isAnimatedAvatarDecoration(avatarDecoration.asset) && !canAnimate) parts.shift();
+            return `${CDN_URL}/${parts.join("_")}.png`;
         } else if (avatarDecoration?.skuId === RAW_SKU_ID) {
             return avatarDecoration.asset;
         }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,21 +30,21 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Megu],
     required: true,
 
-    start() {
+    contextMenus: {
         // The settings shortcuts in the user settings cog context menu
         // read the elements from a hardcoded map which for obvious reason
         // doesn't contain our sections. This patches the actions of our
         // sections to manually use SettingsRouter (which only works on desktop
         // but the context menu is usually not available on mobile anyway)
-        addContextMenuPatch("user-settings-cog", children => () => {
-            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
+        "user-settings-cog"(children) {
+            const section = findGroupChildrenByChildId("VencordSettings", children);
             section?.forEach(c => {
                 const id = c?.props?.id;
                 if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
-                    c.props.action = () => SettingsRouter.open(id);
+                    c!.props.action = () => SettingsRouter.open(id);
                 }
             });
-        });
+        }
     },
 
     patches: [{
