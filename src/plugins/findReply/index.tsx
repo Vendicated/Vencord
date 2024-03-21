@@ -31,6 +31,29 @@ const FindReplyIcon = () => {
     </svg>;
 };
 
+function findReply(message: Message) {
+    const messages: Array<Message & { deleted?: boolean; }> = [...MessageStore.getMessages(message.channel_id)?._array ?? []].filter(m => !m.deleted).sort((a, b) => {
+        return a.timestamp.toString().localeCompare(b.timestamp.toString());
+    }); // Need to deep copy Message array when sorting
+    for (const other of messages) {
+        if (other.timestamp.toString().localeCompare(message.timestamp.toString()) <= 0) continue;
+        if (other.messageReference?.message_id === message.id) {
+            return other;
+        }
+        if (Vencord.Settings.plugins.FindReply.includePings) {
+            if (other.content?.includes(`<@${message.author.id}>`)) {
+                return other;
+            }
+        }
+        if (Vencord.Settings.plugins.FindReply.includeAuthor) {
+            if (messages.find(m => m.id === other.messageReference?.message_id)?.author.id === message.author.id) {
+                return other;
+            }
+        }
+    }
+    return null;
+}
+
 export default definePlugin({
     name: "FindReply",
     description: "Jumps to the earliest reply to a message in a channel (lets you follow past conversations more easily).",
@@ -38,37 +61,14 @@ export default definePlugin({
     start() {
         addButton("vc-findreply", message => {
             if (!message.id) return null;
+            const reply = findReply(message);
+            if (Vencord.Settings.plugins.FindReply.hideButtonIfNoReply && !reply) return null;
             return {
                 label: "Jump to Reply",
                 icon: FindReplyIcon,
                 message,
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
-                    const messages: Array<Message & { deleted?: boolean; }> = [...MessageStore.getMessages(message.channel_id)?._array ?? []].filter(m => !m.deleted).sort((a, b) => {
-                        return a.timestamp.toString().localeCompare(b.timestamp.toString());
-                    }); // Need to deep copy Message array when sorting
-                    console.log(messages);
-                    let reply: Message | null = null;
-                    for (const other of messages) {
-                        if (other.timestamp.toString().localeCompare(message.timestamp.toString()) <= 0) continue;
-                        if (other.messageReference?.message_id === message.id) {
-                            reply = other;
-                            break;
-                        }
-                        if (Vencord.Settings.plugins.FindReply.includePings) {
-                            if (other.content?.includes(`<@${message.author.id}>`)) {
-                                reply = other;
-                                break;
-                            }
-                        }
-                        if (Vencord.Settings.plugins.FindReply.includeAuthor) {
-                            if (messages.find(m => m.id === other.messageReference?.message_id)?.author.id === message.author.id) {
-                                reply = other;
-                                break;
-                            }
-                        }
-
-                    }
                     if (reply) {
                         const channelId = reply.channel_id;
                         const messageId = reply.id;
@@ -104,6 +104,13 @@ export default definePlugin({
             description: "Will also search for messages that reply to the author in general, not just that exact message",
             default: false,
             restartNeeded: false
+        },
+        hideButtonIfNoReply: {
+            type: OptionType.BOOLEAN,
+            description: "Hides the button if there are no replies to the message",
+            default: false,
+            restartNeeded: true
         }
     }
 });
+
