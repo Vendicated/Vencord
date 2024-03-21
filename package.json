@@ -19,6 +19,7 @@
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
+        "buildMobile": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildMobile.mjs",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
         "inject": "node scripts/runInstaller.mjs",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
