@@ -94,11 +94,11 @@ export const globPlugins = kind => ({
 
                     const target = getPluginTarget(file);
                     if (target) {
-                        if (target === "dev" && !watch) continue; // Skip dev plguins if not on  dev build
-                        if (target === "web" && kind === "discordDesktop") continue; // Skip web-only on discord desktop
-                        if (target === "desktop" && kind === "web") continue; // Skip dekstop oonly on web
-                        if (target === "discordDesktop" && kind !== "discordDesktop") continue; // Skip discord desktop on anything not that
-                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue; // Skip vekstop on anything not that
+                        if (target === "dev" && !watch) continue; // Skip devbuild plugins if not on devbuild
+                        if (target === "web" && kind === "discordDesktop") continue; // Skip web-only on Discord Desktop
+                        if (target === "desktop" && kind === "web") continue; // Skip desktop-only on web
+                        if (target === "discordDesktop" && kind !== "discordDesktop") continue; // Skip Discord Desktop plugins on any other target
+                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue; // Skip Vesktop plugins on any other target
                         if (target === "mobile" && kind !== "mobile") continue; // Skip mobile on anything not mobile
                     }
 
