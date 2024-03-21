@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, TextInput } from "@webpack/common";
+import { React, TextInput, useEffect } from "@webpack/common";
 
 // TODO: Refactor settings to use this as well
 interface TextInputProps {
@@ -54,6 +54,10 @@ export function CheckedTextInput({ value: initialValue, onChange, validate }: Te
             setError(res);
         }
     }
+
+    useEffect(() => {
+        handleChange(initialValue);
+    }, [initialValue]);
 
     return (
         <>
