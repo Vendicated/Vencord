@@ -27,6 +27,7 @@
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
+        "testMobile": "pnpm lint && pnpm buildMobile && pnpm testTsc",
         "testTsc": "tsc --noEmit",
         "uninject": "node scripts/runInstaller.mjs",
         "watch": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs --watch"
