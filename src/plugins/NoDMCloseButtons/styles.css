@@ -1,0 +1,4 @@
+.disabledCloseButton {
+    display: none !important;
+    pointer-events: none !important;
+}
