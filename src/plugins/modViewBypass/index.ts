@@ -12,33 +12,17 @@ export default definePlugin({
     description: "Open the mod view sidebar in guilds you don't have moderator permissions in, or where the experiment is disabled.",
     authors: [Devs.Sqaaakoi],
     patches: [
-        {
-            find: "canAccessGuildMemberModViewWithExperiment:",
+        "useCanAccessGuildMemberModView",
+        "canAccessGuildMemberModViewWithExperiment",
+        "isInGuildMemberModViewExperiment",
+        "useGuildMemberModViewExperiment",
+    ].map(f => {
+        return {
+            find: `${f}:`,
             replacement: {
-                match: /canAccessGuildMemberModViewWithExperiment:function\(\){return\s\i/,
-                replace: "canAccessGuildMemberModViewWithExperiment:function(){return ()=>true;",
-            },
-        },
-        {
-            find: "useCanAccessGuildMemberModView:",
-            replacement: {
-                match: /\i.default.hasAny\(/,
-                replace: "true; (",
-            },
-        },
-        {
-            find: "isInGuildMemberModViewExperiment:",
-            replacement: {
-                match: /isInGuildMemberModViewExperiment:function\(\){return\s\i/,
-                replace: "isInGuildMemberModViewExperiment:function(){return ()=>true;",
-            },
-        },
-        {
-            find: "useGuildMemberModViewExperiment:",
-            replacement: {
-                match: /useGuildMemberModViewExperiment:function\(\){return\s\i/,
-                replace: "useGuildMemberModViewExperiment:function(){return ()=>true;",
-            },
-        },
-    ],
+                match: new RegExp(`(${f}:function\\(\\){return\\s)\\i`),
+                replace: "$1()=>true;",
+            }
+        };
+    })
 });
