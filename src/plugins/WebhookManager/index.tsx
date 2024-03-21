@@ -76,8 +76,8 @@ export default definePlugin({
                             embeds: [
                                 {
                                     // @ts-ignore
-                                    title: `Webhook Information`,
-                                    color: '#00007d',
+                                    title: "Webhook Information",
+                                    color: "#00007d",
                                     author: {
                                         // @ts-ignore
                                         icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
