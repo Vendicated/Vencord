@@ -18,7 +18,6 @@ export default definePlugin({
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
     authors: [Devs.Byron],
     dependencies: ["CommandsAPI"],
-
     commands: [
         {
             name: "webhook delete",
