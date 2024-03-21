@@ -18,14 +18,14 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, Parser, showToast, useState } from "@webpack/common";
+import { Alerts, Menu, Parser, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { Auth, initAuth, updateAuth } from "./auth";
@@ -34,8 +34,9 @@ import ReviewsView from "./components/ReviewsView";
 import { NotificationType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
+import { showToast } from "./utils";
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => {
     children.push(
         <Menu.MenuItem
             label="View Reviews"
@@ -52,6 +53,9 @@ export default definePlugin({
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
+    contextMenus: {
+        "guild-header-popout": guildPopoutPatch
+    },
 
     patches: [
         {
@@ -68,8 +72,6 @@ export default definePlugin({
     },
 
     async start() {
-        addContextMenuPatch("guild-header-popout", guildPopoutPatch);
-
         const s = settings.store;
         const { lastReviewId, notifyReviews } = s;
 
@@ -124,10 +126,6 @@ export default definePlugin({
                 readNotification(user.notification.id);
             }
         }, 4000);
-    },
-
-    stop() {
-        removeContextMenuPatch("guild-header-popout", guildPopoutPatch);
     },
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {

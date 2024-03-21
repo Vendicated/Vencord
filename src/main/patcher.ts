@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { onceDefined } from "@utils/onceDefined";
+import { onceDefined } from "@shared/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
-import { getSettings, initIpc } from "./ipcMain";
+import { initIpc } from "./ipcMain";
+import { RendererSettings } from "./settings";
 import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Vencord] Starting up...");
@@ -41,8 +42,7 @@ require.main!.filename = join(asarPath, discordPkg.main);
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
-    const settings = getSettings();
-
+    const settings = RendererSettings.store;
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
         require("./patchWin32Updater");
@@ -79,19 +79,16 @@ if (!IS_VANILLA) {
                     delete options.frame;
                 }
 
-                // This causes electron to freeze / white screen for some people
-                if ((settings as any).transparentUNSAFE_USE_AT_OWN_RISK) {
+                if (settings.transparent) {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
                 }
 
-                const needsVibrancy = process.platform === "darwin" || (settings.macosVibrancyStyle || settings.macosTranslucency);
+                const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
 
                 if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
-                    if (settings.macosTranslucency) {
-                        options.vibrancy = "sidebar";
-                    } else if (settings.macosVibrancyStyle) {
+                    if (settings.macosVibrancyStyle) {
                         options.vibrancy = settings.macosVibrancyStyle;
                     }
                 }
@@ -130,6 +127,15 @@ if (!IS_VANILLA) {
     });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+
+    // Monkey patch commandLine to disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
+    const originalAppend = app.commandLine.appendSwitch;
+    app.commandLine.appendSwitch = function (...args) {
+        if (args[0] === "disable-features" && !args[1]?.includes("WidgetLayering")) {
+            args[1] += ",WidgetLayering";
+        }
+        return originalAppend.apply(this, args);
+    };
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }

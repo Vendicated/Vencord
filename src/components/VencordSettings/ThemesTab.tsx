@@ -10,11 +10,11 @@ import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import PluginModal from "@components/PluginSettings/PluginModal";
+import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import {
     Button,
     Card,
@@ -26,7 +26,7 @@ import {
     useRef,
     useState
 } from "@webpack/common";
-import { UserThemeHeader } from "main/themes";
+import { findByPropsLazy, findLazy, findByCodeLazy } from "@webpack";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";

@@ -18,6 +18,7 @@
 
 import "./styles.css";
 
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -26,7 +27,7 @@ import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ButtonLooks, ButtonWrapperClasses, Forms, Parser, Select, Tooltip, useMemo, useState } from "@webpack/common";
+import { Button, Forms, Parser, Select, useMemo, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -122,25 +123,49 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     );
 }
 
+const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+    if (!isMainChat) return null;
+
+    return (
+        <ChatBarButton
+            tooltip="Insert Timestamp"
+            onClick={() => {
+                const key = openModal(props => (
+                    <PickerModal
+                        rootProps={props}
+                        close={() => closeModal(key)}
+                    />
+                ));
+            }}
+            buttonProps={{ "aria-haspopup": "dialog" }}
+        >
+            <svg
+                aria-hidden="true"
+                role="img"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                style={{ scale: "1.2" }}
+            >
+                <g fill="none" fill-rule="evenodd">
+                    <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
+                    <rect width="24" height="24" />
+                </g>
+            </svg>
+        </ChatBarButton>
+    );
+};
+
 export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
     authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
-    dependencies: ["MessageEventsAPI"],
+    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
 
-    settings: settings,
-
-    patches: [
-        {
-            find: "ChannelTextAreaButtons",
-            replacement: {
-                match: /(\i)\.push.{1,30}disabled:(\i),.{1,20}\},"gift"\)\)/,
-                replace: "$&,(()=>{try{$2||$1.push($self.chatBarIcon(arguments[0]))}catch{}})()",
-            }
-        },
-    ],
+    settings,
 
     start() {
+        addChatBarButton("SendTimestamps", ChatBarIcon);
         this.listener = addPreSendListener((_, msg) => {
             if (settings.store.replaceMessageContents) {
                 msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
@@ -149,54 +174,8 @@ export default definePlugin({
     },
 
     stop() {
+        removeChatBarButton("SendTimestamps");
         removePreSendListener(this.listener);
-    },
-
-    chatBarIcon(chatBoxProps: { type: { analyticsName: string; }; }) {
-        if (chatBoxProps.type.analyticsName !== "normal") return null;
-
-        return (
-            <Tooltip text="Insert Timestamp">
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div style={{ display: "flex" }}>
-                        <Button
-                            aria-haspopup="dialog"
-                            aria-label="Insert Timestamp"
-                            size=""
-                            look={ButtonLooks.BLANK}
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                            innerClassName={ButtonWrapperClasses.button}
-                            onClick={() => {
-                                const key = openModal(props => (
-                                    <PickerModal
-                                        rootProps={props}
-                                        close={() => closeModal(key)}
-                                    />
-                                ));
-                            }}
-                            className={cl("button")}
-                        >
-                            <div className={ButtonWrapperClasses.buttonWrapper}>
-                                <svg
-                                    aria-hidden="true"
-                                    role="img"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="none" fill-rule="evenodd">
-                                        <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
-                                        <rect width="24" height="24" />
-                                    </g>
-                                </svg>
-                            </div>
-                        </Button>
-                    </div>
-                )
-                }
-            </Tooltip >
-        );
     },
 
     settingsAboutComponent() {
