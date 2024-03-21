@@ -31,7 +31,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
