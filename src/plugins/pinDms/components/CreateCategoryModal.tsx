@@ -128,7 +128,7 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
 
 export const openCategoryModal = (categoryId: string | null, channelId: string | null) =>
     openModalLazy(async () => {
-        requireSettingsMenu();
+        await requireSettingsMenu();
         return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initalChannelId={channelId} />;
     });
 
