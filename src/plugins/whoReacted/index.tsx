@@ -110,8 +110,8 @@ export default definePlugin({
 
         find: "cleanAutomaticAnchor(){",
         replacement: {
-            match: /constructor\(.{1,2}\){/,
-            replace: "$&$self.setScrollObj(this);"
+            match: /this\.automaticAnchor=null,this\.messageFetchAnchor=null,/,
+            replace: "$&$self.setScrollObj(this),"
         }
     }
     ],
@@ -129,7 +129,9 @@ export default definePlugin({
     _renderUsers({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
         React.useLayoutEffect(() => { // bc need to prevent autoscrolling
-            Scroll.setAutomaticAnchor(null);
+            if (Scroll.scrollCounter > 0) {
+                Scroll.setAutomaticAnchor(null);
+            }
         });
         React.useEffect(() => {
             const cb = (e: any) => {
