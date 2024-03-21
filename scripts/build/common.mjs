@@ -100,6 +100,7 @@ export const globPlugins = kind => ({
                         if (target === "discordDesktop" && kind !== "discordDesktop") continue; // Skip Discord Desktop plugins on any other target
                         if (target === "vencordDesktop" && kind !== "vencordDesktop") continue; // Skip Vesktop plugins on any other target
                         if (target === "mobile" && kind !== "mobile") continue; // Skip mobile on anything not mobile
+                        if (target === "webNoMobile" && kind === "mobile") continue; // Skip non-mobile plugins on mobile
                     }
 
                     const mod = `p${i}`;
