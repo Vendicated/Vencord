@@ -16,17 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
-import gitRemote from "~git-remote";
-
-export {
-    gitHash,
-    gitRemote
-};
-
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
@@ -66,8 +57,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
-        name: "obscurity",
+    fawn: {
+        name: "fawn",
         id: 336678828233588736n,
     },
     rushii: {
@@ -291,10 +282,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RyanCaoDev",
         id: 952235800110694471n,
     },
-    Strencher: {
-        name: "Strencher",
-        id: 415849376598982656n
-    },
     FieryFlames: {
         name: "Fiery",
         id: 890228870559698955n
@@ -426,6 +413,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Elvyra: {
         name: "Elvyra",
         id: 708275751816003615n,
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n
     }
 } satisfies Record<string, Dev>);
 
