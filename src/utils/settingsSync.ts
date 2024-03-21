@@ -118,10 +118,10 @@ export async function putCloudSettings(manual?: boolean) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
-            }),
+            },
             body: deflateSync(new TextEncoder().encode(settings))
         });
 
@@ -162,11 +162,11 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "GET",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 Accept: "application/octet-stream",
                 "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
-            }),
+            },
         });
 
         if (res.status === 404) {
@@ -251,9 +251,7 @@ export async function deleteCloudSettings() {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "DELETE",
-            headers: new Headers({
-                Authorization: await getCloudAuth()
-            }),
+            headers: { Authorization: await getCloudAuth() },
         });
 
         if (!res.ok) {
