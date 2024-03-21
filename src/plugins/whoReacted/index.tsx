@@ -129,7 +129,7 @@ export default definePlugin({
     _renderUsers({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
         React.useLayoutEffect(() => { // bc need to prevent autoscrolling
-            if (Scroll.scrollCounter > 0) {
+            if (Scroll?.scrollCounter > 0) {
                 Scroll.setAutomaticAnchor(null);
             }
         });
