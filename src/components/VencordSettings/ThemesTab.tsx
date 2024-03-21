@@ -15,6 +15,7 @@ import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import {
     Button,
     Card,
@@ -26,7 +27,6 @@ import {
     useRef,
     useState
 } from "@webpack/common";
-import { findByPropsLazy, findLazy, findByCodeLazy } from "@webpack";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
