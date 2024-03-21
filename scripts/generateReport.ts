@@ -428,10 +428,11 @@ function runTime(token: string) {
 
                 if (searchType === "findComponent") method = "find";
                 if (searchType === "findExportedComponent") method = "findByProps";
-                if (searchType === "waitFor" || searchType === "waitForComponent" || searchType === "waitForStore") {
+                if (searchType === "waitFor" || searchType === "waitForComponent") {
                     if (typeof args[0] === "string") method = "findByProps";
                     else method = "find";
                 }
+                if (searchType === "waitForStore") method = "findStore";
 
                 try {
                     let result: any;

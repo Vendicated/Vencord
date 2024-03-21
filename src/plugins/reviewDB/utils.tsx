@@ -17,7 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import { UserStore } from "@webpack/common";
+import { Toasts, UserStore } from "@webpack/common";
 
 import { Auth } from "./auth";
 import { Review, UserType } from "./entities";
@@ -40,4 +40,15 @@ export function canBlockReviewAuthor(profileId: string, review: Review) {
 
 export function canReportReview(review: Review) {
     return review.sender.discordID !== UserStore.getCurrentUser().id;
+}
+
+export function showToast(message: string, type = Toasts.Type.MESSAGE) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type,
+        options: {
+            position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
+        },
+    });
 }
