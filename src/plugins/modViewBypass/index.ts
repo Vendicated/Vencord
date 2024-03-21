@@ -9,20 +9,19 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ModViewBypass",
-    description: "Open the mod view sidebar in guilds you don't have moderator permissions in, or where the experiment is disabled.",
+    description: "Open the mod view sidebar in guilds you don't have moderator permissions in.",
     authors: [Devs.Sqaaakoi],
     patches: [
         "useCanAccessGuildMemberModView",
+        // these can probably be removed safely now and revert to the regular patch style
         "canAccessGuildMemberModViewWithExperiment",
         "isInGuildMemberModViewExperiment",
         "useGuildMemberModViewExperiment",
-    ].map(f => {
-        return {
-            find: `${f}:`,
-            replacement: {
-                match: new RegExp(`(${f}:function\\(\\){return\\s)\\i`),
-                replace: "$1()=>true;",
-            }
-        };
-    })
+    ].map(f => ({
+        find: `${f}:`,
+        replacement: {
+            match: new RegExp(`(${f}:function\\(\\){return\\s)\\i`),
+            replace: "$1()=>true;",
+        }
+    }))
 });
