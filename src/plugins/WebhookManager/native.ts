@@ -4,19 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
-todo: also add web support (should be as easy as if navigator is on web or smthn like that, might even have a variable for that somewhere)
-(thank you official vendicated vending machine 2024 real)
-const iframe = document.createElement("iframe")
-iframe.sandbox = "allow-scripts"
-iframe.srcdoc = `<script nonce="NDEsMjksMTM0LDU4LDIzNyw4OSw0NiwyMTY="> fetch("http://localhost:8080") </script>`
-document.body.append(iframe);
-setTimeout(() => iframe.remove(), 1000);
-*/
 import https from "https";
 
-
 export function executeWebhook(_, url: string, body: object) {
+    const { hostname, pathname } = new URL(url);
+
+    if (!["discord.com", "ptb.discord.com", "canary.discord.com"].includes(hostname) || !pathname.startsWith("/api/webhooks/")) {
+
+        throw new Error("This URL is not a valid webhook.");
+    }
+
     const req = https.request(url,
         {
             method: "POST",

@@ -12,6 +12,7 @@ import { RestAPI } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 const WMLogger = new Logger("WebhookManager");
+
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
@@ -163,12 +164,10 @@ export default definePlugin({
                         avatar_url: webhookProfilePic,
                         tts: findOption(option, "tts"),
                     });
-
                 }
                 sendBotMessage(ctx.channel.id, {
-                    content: "Message sent successfully."
+                    content: "Your message to the webhook has been executed."
                 });
-
             }
         }
     ]
