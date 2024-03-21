@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import { getGuildRoles } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -197,7 +196,7 @@ export default definePlugin({
 
                 if (message.mention_roles.length > 0) {
                     for (const roleId of message.mention_roles) {
-                        const role = getGuildRoles(channel.guild_id)[roleId];
+                        const role = GuildStore.getRole(channel.guild_id, roleId);
                         if (!role) continue;
                         const roleColor = role.colorString ?? `#${pingColor}`;
                         finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
