@@ -69,7 +69,6 @@ export default definePlugin({
         {
             find: ".privateChannelsHeaderContainer,",
             replacement: [
-                // Init
                 {
                     // Filter out pinned channels from the private channel list
                     match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
