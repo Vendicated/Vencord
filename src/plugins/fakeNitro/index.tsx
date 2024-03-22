@@ -156,6 +156,18 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
+    enableSoundboardBypass: {
+        description: "Allows the use of all servers' soundboards (others can't hear it)",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    enableSoundboardGuildLimitBypass: {
+        description: "Allows the use of all sounds in the server's soundboard no matter what the server's boost level is",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
     useHyperLinks: {
         description: "Whether to use hyperlinks when sending fake emojis and stickers",
         type: OptionType.BOOLEAN,
@@ -185,7 +197,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukios],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -371,6 +383,24 @@ export default definePlugin({
                 // Add the fake nitro emoji notice
                 match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
+            }
+        },
+        {
+            find: "canUseSoundboardEverywhere:function",
+            predicate: () => settings.store.enableSoundboardBypass,
+            replacement: {
+                // Allows using the soundboard everywhere
+                match: /canUseSoundboardEverywhere:function\(\i\){/,
+                replace: "$&return true;"
+            },
+        },
+        {
+            find: "available:e.available",
+            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
+            replacement: {
+                // Bypasses the guild limit for soundboard sounds by boost level
+                match: /available:e\.available/,
+                replace: "available:true"
             }
         },
         // Allow using custom app icons
