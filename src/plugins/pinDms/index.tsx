@@ -34,11 +34,19 @@ const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { ge
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
 
+export const enum PinOrder {
+    LastMessage,
+    Custom
+}
+
 export const settings = definePluginSettings({
-    sortDmsByNewestMessage: {
-        type: OptionType.BOOLEAN,
-        description: "Sort DMs by newest message",
-        default: false,
+    pinOrder: {
+        type: OptionType.SELECT,
+        description: "Which order should pinned DMs be displayed in?",
+        options: [
+            { label: "Most recent message", value: PinOrder.LastMessage, default: true },
+            { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
+        ],
         onChange: () => forceUpdate()
     },
 
@@ -351,7 +359,7 @@ export default definePlugin({
     getCategoryChannels(category: Category) {
         if (category.channels.length === 0) return [];
 
-        if (settings.store.sortDmsByNewestMessage) {
+        if (settings.store.pinOrder === PinOrder.LastMessage) {
             return PrivateChannelSortStore.getPrivateChannelIds().filter(c => category.channels.includes(c));
         }
 
