@@ -44,11 +44,11 @@ async function showNotification(message: Message, guildId: string | undefined): 
     });
 
     message.content = message.content.replace(userRegex, (match, userId: string) => {
-        return `@${UserStore.getUser(userId)?.globalName}`;
+        return `@${(UserStore.getUser(userId) as any).globalName}`;
     });
 
     await Notifications.showNotification({
-        title: `${message.author.globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
+        title: `${(message.author as any).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
         body: message.content,
         icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
         onClick: function (): void {
