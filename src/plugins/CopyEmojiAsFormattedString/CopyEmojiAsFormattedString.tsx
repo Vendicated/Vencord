@@ -23,6 +23,8 @@ import { Menu, Toasts, Clipboard } from "@webpack/common";
 import { showToast } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
 
+const { convertNameToSurrogate } = findByPropsLazy("convertNameToSurrogate");
+
 interface Emoji {
     type: string;
     id: string;
