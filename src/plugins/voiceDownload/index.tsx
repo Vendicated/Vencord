@@ -19,16 +19,11 @@ export default definePlugin({
     ],
 
     renderDownload: function (src) {
-        const url = src.split("?")[0];
-        const id = url.match(/(\d+)/g)[1];
-        const ext = url.split(".").pop();
-
         return (
             <ErrorBoundary>
                 <a
                     className="voiceDownload"
                     href={src}
-                    download={`voice.${id}.${ext}`}
                     target="_blank"
                     onClick={e => e.stopPropagation()}
                 > <this.Icon /> </a>
