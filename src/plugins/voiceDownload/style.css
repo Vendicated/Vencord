@@ -1,0 +1,12 @@
+.voiceDownload:hover {
+    color: white;
+}
+
+.voiceDownload {
+    width: 24px;
+    height: 24px;
+    color: var(--interactive-normal);
+    margin-left: 12px;
+    cursor: pointer;
+    position: relative;
+}
