@@ -38,6 +38,11 @@ declare module "~git-remote" {
     export default remote;
 }
 
+declare module "~translations" {
+    const translations: Record<string, Record<string, string>>;
+    export default translations;
+}
+
 declare module "~fileContent/*" {
     const content: string;
     export default content;

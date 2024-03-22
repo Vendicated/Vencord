@@ -31,6 +31,9 @@
         "watch": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs --watch"
     },
     "dependencies": {
+        "@fluent/bundle": "^0.18.0",
+        "@fluent/langneg": "^0.7.0",
+        "@fluent/sequence": "^0.8.0",
         "@sapphi-red/web-noise-suppressor": "0.3.3",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
