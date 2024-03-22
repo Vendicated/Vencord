@@ -96,6 +96,7 @@ export const globPlugins = kind => ({
                     if (target) {
                         if (target === "dev" && !watch) continue; // Skip devbuild plugins if not on devbuild
                         if (target === "web" && kind === "discordDesktop") continue; // Skip web-only on Discord Desktop
+                        if (target === "webDesktop" && kind === "discordDesktop") continue; // Skip webDesktop on Discord Desktop
                         if (target === "desktop" && kind === "web") continue; // Skip desktop-only on web
                         if (target === "discordDesktop" && kind !== "discordDesktop") continue; // Skip Discord Desktop plugins on any other target
                         if (target === "vencordDesktop" && kind !== "vencordDesktop") continue; // Skip Vesktop plugins on any other target
