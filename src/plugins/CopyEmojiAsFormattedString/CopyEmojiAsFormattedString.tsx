@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Menu, Toasts, Clipboard } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { Menu, Toasts, Clipboard } from "@webpack/common";
 import { showToast } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
 
 interface Emoji {
     type: string;
@@ -36,20 +38,14 @@ function removeCountingPostfix(name: string): string {
     return name.replace(/~\d+$/, "");
 }
 
-function getEmojiFormattedString(target: Target): string {
+function getEmojiFormattedString(target: Target, copyUnicode: boolean): string {
     const { dataset } = target;
 
     if (!dataset.id) {
-        const fiberKey = Object.keys(target).find((key) =>
-            /^__reactFiber\$\S+$/gm.test(key)
+        return (
+            (copyUnicode && convertNameToSurrogate(dataset.name)) ||
+            `:${dataset.name}:`
         );
-
-        if (!fiberKey) return `:${dataset.name}:`;
-
-        const emojiUnicode =
-            target[fiberKey]?.child?.memoizedProps?.emoji?.surrogates;
-
-        return emojiUnicode || `:${dataset.name}:`;
     }
 
     const extension = target?.firstChild.src.match(
@@ -64,10 +60,19 @@ function getEmojiFormattedString(target: Target): string {
         : `<:${emojiName}:${emojiId}>`;
 }
 
+const settings = definePluginSettings({
+    copyUnicode: {
+        type: OptionType.BOOLEAN,
+        description: "Copy unicode symbol instead name of unicode emojies",
+        default: false,
+    },
+});
+
 export default definePlugin({
     name: "Copy Emoji As Formatted String",
     description: "Add's button to copy emoji as formatted string!",
     authors: [Devs.HAPPY_ENDERMAN, Devs.VISHNYA_NET_CHERESHNYA],
+    settings: settings,
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target }) {
             if (target.dataset.type !== "emoji") return;
@@ -78,7 +83,12 @@ export default definePlugin({
                     key="copy-formatted-string"
                     label={`Copy as formatted string`}
                     action={() => {
-                        Clipboard.copy(getEmojiFormattedString(target));
+                        Clipboard.copy(
+                            getEmojiFormattedString(
+                                target,
+                                settings.store.copyUnicode
+                            )
+                        );
                         showToast(
                             "Success! Copied to clipboard as formatted string.",
                             Toasts.Type.SUCCESS
