@@ -165,7 +165,7 @@ export default definePlugin({
                     });
                 }
                 sendBotMessage(ctx.channel.id, {
-                    content: "Your message to the webhook has been executed."
+                    content: "Your webhook message has been executed."
                 });
             }
         }
