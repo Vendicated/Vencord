@@ -63,10 +63,6 @@ export default definePlugin({
             replacement: [
                 // Init
                 {
-                    match: /(?<=componentDidMount\(\){).{1,100}scrollToChannel/,
-                    replace: "$self._instance = this;$&"
-                },
-                {
                     // Filter out pinned channels from the private channel list
                     match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c))"
@@ -164,12 +160,22 @@ export default definePlugin({
     getSections,
     getAllUncollapsedChannels,
     requireSettingsMenu,
+
+    isInitialized() {
+        return Object.keys(this.instance.props.channels)?.length > 0;
+    },
+
     makeProps(instance, { sections }: { sections: number[]; }) {
+        this._instance = instance;
+
+        if (!this.isInitialized()) return { sections };
+
         this.sections = sections;
 
-        this.sections.splice(1, 0, ...this.getPinCount(instance.props.privateChannelIds || []));
+        this.sections.splice(1, 0, ...this.getSections());
 
         if (this.instance?.props?.privateChannelIds?.length === 0) {
+            // dont render direct messages header
             this.sections[this.sections.length - 1] = 0;
         }
 
@@ -199,10 +205,6 @@ export default definePlugin({
         return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
-    getPinCount(channelIds: string[]) {
-        return channelIds.length ? this.getSections() : [];
-    },
-
     isCategoryIndex(sectionIndex: number) {
         return this.sections && sectionIndex > 0 && sectionIndex < this.sections.length - 1;
     },
@@ -219,7 +221,6 @@ export default definePlugin({
     },
 
     collapseDMList() {
-        // console.log("HI");
         settings.store.dmSectioncollapsed = !settings.store.dmSectioncollapsed;
         forceUpdate();
     },
