@@ -34,17 +34,16 @@ export default definePlugin({
     patches: [
         {
             find: "getDefaultLayout(){",
-            replacement: {
-                match: /getDefaultLayout\(\){/,
-                replace: "$&return $self.getLayout();"
-            }
-        },
-        {
-            find: "getDefaultSortOrder(){",
-            replacement: {
-                match: /getDefaultSortOrder\(\){/,
-                replace: "$&return $self.getSortOrder();"
-            }
+            replacement: [
+                {
+                    match: /getDefaultLayout\(\){/,
+                    replace: "$&return $self.getLayout();"
+                },
+                {
+                    match: /getDefaultSortOrder\(\){/,
+                    replace: "$&return $self.getSortOrder();"
+                }
+            ]
         }
     ],
 
