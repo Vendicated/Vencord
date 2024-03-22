@@ -29,7 +29,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "OverrideForumDefaults",
-    description: "Override default forum layout/sort order, you can still change it on a per-channel basis.",
+    description: "Allows you to override default forum layout/sort order. you can still change it on a per-channel basis",
     authors: [Devs.Inbestigator],
     patches: [
         {
@@ -47,7 +47,9 @@ export default definePlugin({
             }
         }
     ],
-    getLayout: (): number => { return settings.store.defaultLayout ?? 0; },
-    getSortOrder: (): number => { return settings.store.defaultSortOrder ?? 0; },
+
+    getLayout: () => settings.store.defaultLayout,
+    getSortOrder: () => settings.store.defaultSortOrder,
+
     settings
 });
