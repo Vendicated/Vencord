@@ -16,27 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    domain: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Remove the untrusted domain popup when opening links",
+        restartNeeded: true
+    },
+    file: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Remove the 'Potentially Dangerous Download' popup when opening links",
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "AlwaysTrust",
     description: "Removes the annoying untrusted domain and suspicious file popup",
-    authors: [Devs.zt],
+    authors: [Devs.zt, Devs.Trwy],
     patches: [
         {
             find: ".displayName=\"MaskedLinkStore\"",
             replacement: {
                 match: /(?<=isTrustedDomain\(\i\){)return \i\(\i\)/,
                 replace: "return true"
-            }
+            },
+            predicate: () => settings.store.domain
         },
         {
             find: "isSuspiciousDownload:",
             replacement: {
                 match: /function \i\(\i\){(?=.{0,60}\.parse\(\i\))/,
                 replace: "$&return null;"
-            }
+            },
+            predicate: () => settings.store.file
         }
-    ]
+    ],
+    settings
 });
