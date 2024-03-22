@@ -17,8 +17,8 @@
 */
 
 import { Settings } from "@api/Settings";
-import { VENCORD_USER_AGENT } from "@utils/constants";
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
 import { UserProfileStore, UserStore } from "@webpack/common";

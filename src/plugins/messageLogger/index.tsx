@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, moment, Parser, Timestamp, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -45,7 +45,7 @@ function addDeleteStyle() {
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => () => {
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
     const { deleted, editHistory, id, channel_id } = message;
 
@@ -94,13 +94,12 @@ export default definePlugin({
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
 
-    start() {
-        addDeleteStyle();
-        addContextMenuPatch("message", patchMessageContextMenu);
+    contextMenus: {
+        "message": patchMessageContextMenu
     },
 
-    stop() {
-        removeContextMenuPatch("message", patchMessageContextMenu);
+    start() {
+        addDeleteStyle();
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
@@ -122,7 +121,7 @@ export default definePlugin({
 
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
-            timestamp: moment?.call(newMessage.edited_timestamp),
+            timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
         };
     },
@@ -137,6 +136,16 @@ export default definePlugin({
                 { label: "Red overlay", value: "overlay" }
             ],
             onChange: () => addDeleteStyle()
+        },
+        logDeletes: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log deleted messages",
+            default: true,
+        },
+        logEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log edited messages",
+            default: true,
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -198,8 +207,8 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
+    shouldIgnore(message: any, isEdit = false) {
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
         return ignoreBots && message.author?.bot ||
@@ -207,6 +216,7 @@ export default definePlugin({
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
@@ -242,7 +252,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -328,6 +338,7 @@ export default definePlugin({
             // Attachment renderer
             // Module 96063
             find: ".removeAttachmentHoverButton",
+            group: true,
             replacement: [
                 {
                     match: /(className:\i,attachment:\i),/,
