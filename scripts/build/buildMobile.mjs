@@ -82,7 +82,7 @@ await Promise.all(
         }),
         esbuild.build({
             ...commonOptions,
-            outfile: "dist/browser.js",
+            outfile: "dist/mobile.js",
             footer: { js: "//# sourceURL=VencordWeb" },
         })
     ]
