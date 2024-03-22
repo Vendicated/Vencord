@@ -1,17 +1,13 @@
 import "./style.css";
 
+import { Devs } from "@utils/constants";
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "VoiceDownload",
     description: "Download voice messages.",
-    authors: [
-        {
-            id: 469441552251355137n,
-            name: "puv",
-        },
-    ],
+    authors: [Devs.puv],
     patches: [
         {
             find: "className:C.rippleContainer",
