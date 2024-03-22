@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 export const generateKeys = async () => {
     const keyPair = await crypto.subtle.generateKey(
         {
@@ -40,7 +46,7 @@ export const encryptData = async (pemPublicKey, data) => {
 };
 
 export const decryptData = async (privateKey, encArray) => {
-    const decryptionPromises = encArray.map(async (encStr) => {
+    const decryptionPromises = encArray.map(async encStr => {
         const encBuffer = base64ToArrayBuffer(encStr);
 
         const dec = await crypto.subtle.decrypt(
@@ -56,18 +62,18 @@ export const decryptData = async (privateKey, encArray) => {
 
     const decryptedMessages = await Promise.all(decryptionPromises);
 
-    return decryptedMessages.join('');
+    return decryptedMessages.join("");
 };
 
 // Helper functions
-const arrayBufferToBase64 = (buffer) => {
+const arrayBufferToBase64 = buffer => {
     const binary = String.fromCharCode(...new Uint8Array(buffer));
     return btoa(binary);
 };
 
-const base64ToArrayBuffer = (base64String) => {
+const base64ToArrayBuffer = base64String => {
     const binaryString = atob(base64String);
-    const length = binaryString.length;
+    const { length } = binaryString;
     const buffer = new ArrayBuffer(length);
     const view = new Uint8Array(buffer);
 
@@ -83,7 +89,7 @@ export const formatPemKey = (keyData, type) => {
     return `-----BEGIN ${type.toUpperCase()} KEY-----\n` + base64Key + `\n-----END ${type.toUpperCase()} KEY----- `;
 };
 
-const importPemPublicKey = async (pemKey) => {
+const importPemPublicKey = async pemKey => {
     try {
         const trimmedPemKey = pemKey.trim();
 

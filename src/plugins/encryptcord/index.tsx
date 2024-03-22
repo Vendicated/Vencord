@@ -1,30 +1,35 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
-import { removeButton } from "@api/MessagePopover";
-import definePlugin from "@utils/types";
-import * as DataStore from "@api/DataStore";
-import { sleep } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { useEffect, useState, FluxDispatcher, PrivateChannelsStore } from "@webpack/common";
-import { generateKeys, encryptData, decryptData, formatPemKey } from "./rsa-utils";
-import { Devs } from "@utils/constants";
-import {
-    RestAPI,
-    SnowflakeUtils,
-    UserUtils,
-    UserStore,
-    MessageActions,
-} from "@webpack/common";
 import {
     ApplicationCommandInputType,
-    sendBotMessage,
     ApplicationCommandOptionType,
-    findOption,
+    sendBotMessage,
 } from "@api/Commands";
+import * as DataStore from "@api/DataStore";
+import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { removeButton } from "@api/MessagePopover";
+import { Devs } from "@utils/constants";
+import { sleep } from "@utils/misc";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import {
+    FluxDispatcher, MessageActions,
+    PrivateChannelsStore, RestAPI,
+    SnowflakeUtils,
+    useEffect, UserStore,
+    UserUtils, useState,
+} from "@webpack/common";
 import { Message } from "discord-types/general";
+
+import { decryptData, encryptData, formatPemKey, generateKeys } from "./rsa-utils";
 const MessageCreator = findByPropsLazy("createBotMessage");
 const CloudUtils = findByPropsLazy("CloudUpload");
-import { getCurrentChannel, openPrivateChannel } from "@utils/discord";
+import { getCurrentChannel } from "@utils/discord";
 
 let enabled;
 let setEnabled;
@@ -41,12 +46,12 @@ interface IMessageCreate {
 // Chat Bar Icon Component
 const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     [enabled, setEnabled] = useState(false);
-    let [buttonDisabled, setButtonDisabled] = useState(false);
+    const [buttonDisabled, setButtonDisabled] = useState(false);
 
     useEffect(() => {
         const listener: SendListener = async (_, message) => {
             if (enabled) {
-                const groupChannel = await DataStore.get('encryptcordChannelId');
+                const groupChannel = await DataStore.get("encryptcordChannelId");
                 if (getCurrentChannel().id !== groupChannel) {
                     sendBotMessage(getCurrentChannel().id, { content: `You must be in <#${groupChannel}> to send an encrypted message!\n> If you wish to send an unencrypted message, please click the button in the chatbar.` });
                     message.content = "";
@@ -54,13 +59,13 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 }
                 const trimmedMessage = message.content.trim();
                 await MessageActions.receiveMessage(groupChannel, await createMessage(trimmedMessage, UserStore.getCurrentUser().id, groupChannel, 0));
-                const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
-                const dmPromises = Object.keys(encryptcordGroupMembers).map(async (memberId) => {
+                const encryptcordGroupMembers = await DataStore.get("encryptcordGroupMembers");
+                const dmPromises = Object.keys(encryptcordGroupMembers).map(async memberId => {
                     const groupMember = await UserUtils.getUser(memberId).catch(() => null);
                     if (!groupMember) return;
                     const encryptedMessage = await encryptData(encryptcordGroupMembers[memberId].key, trimmedMessage);
                     const encryptedMessageString = JSON.stringify(encryptedMessage);
-                    await sendTempMessage(groupMember.id, encryptedMessageString, `message`);
+                    await sendTempMessage(groupMember.id, encryptedMessageString, "message");
                 });
 
                 await Promise.all(dmPromises);
@@ -78,18 +83,18 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
         <ChatBarButton
             tooltip={enabled ? "Send Unencrypted Messages" : "Send Encrypted Messages"}
             onClick={async () => {
-                if (await DataStore.get('encryptcordGroup') == false || (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
+                if (await DataStore.get("encryptcordGroup") === false || (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
                     setButtonDisabled(true);
                     await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
                     sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> [Tip] You can do \`/encryptcord leave\` to leave a group` });
                     await sleep(5000);
-                    if (await DataStore.get('encryptcordGroup') == true && (await DataStore.get('encryptcordChannelId') != getCurrentChannel().id)) {
+                    if (await DataStore.get("encryptcordGroup") === true && (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
                         sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
-                        await leave("", { channel: { id: await DataStore.get('encryptcordChannelId') } });
-                    } else if (await DataStore.get('encryptcordGroup') == true) {
+                        await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
+                    } else if (await DataStore.get("encryptcordGroup") === true) {
                         setButtonDisabled(false);
                         return;
-                    };
+                    }
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
                 }
                 setEnabled(!enabled);
@@ -97,7 +102,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
             }}
             buttonProps={{
                 style: {
-                    transition: 'transform 0.3s ease-in-out',
+                    transition: "transform 0.3s ease-in-out",
                     transform: `rotate(${enabled ? 0 : 15}deg)`,
                 },
                 disabled: buttonDisabled
@@ -138,14 +143,14 @@ export default definePlugin({
             find: "executeMessageComponentInteraction:",
             replacement: {
                 match: /await\s+l\.default\.post\({\s*url:\s*A\.Endpoints\.INTERACTIONS,\s*body:\s*C,\s*timeout:\s*3e3\s*},\s*t\s*=>\s*{\s*h\(T,\s*p,\s*f,\s*t\)\s*}\s*\)/,
-                replace: 'await $self.joinGroup(C);$&'
+                replace: "await $self.joinGroup(C);$&"
             }
         }
     ],
     async joinGroup(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
-        if (!sender || (sender.bot == true && sender.id != "1")) return;
-        if (interaction.data.component_type != 2) return;
+        if (!sender || (sender.bot === true && sender.id !== "1")) return;
+        if (interaction.data.component_type !== 2) return;
         switch (interaction.data.custom_id) {
             case "removeFromSelf":
                 await handleLeaving(sender.id, await DataStore.get("encryptcordGroupMembers") ?? {}, interaction.channel_id);
@@ -169,10 +174,10 @@ export default definePlugin({
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
-            if (message.author.id == UserStore.getCurrentUser().id) return;
+            if (message.author.id === UserStore.getCurrentUser().id) return;
             if (!message.content) return;
-            const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
-            if (!Object.keys(encryptcordGroupMembers).some(key => key == message.author.id)) {
+            const encryptcordGroupMembers = await DataStore.get("encryptcordGroupMembers");
+            if (!Object.keys(encryptcordGroupMembers).some(key => key === message.author.id)) {
                 switch (message.content.toLowerCase().split("```")[0]) {
                     case "groupdata":
                         const response = await fetch(message.attachments[0].url);
@@ -196,7 +201,7 @@ export default definePlugin({
             if (channelId !== dmChannelId) return;
             const sender = await UserUtils.getUser(message.author.id).catch(() => null);
             if (!sender) return;
-            const groupChannel = await DataStore.get('encryptcordChannelId');
+            const groupChannel = await DataStore.get("encryptcordChannelId");
             switch (message.content.toLowerCase()) {
                 case "leaving":
                     handleLeaving(sender.id, encryptcordGroupMembers, groupChannel);
@@ -253,18 +258,18 @@ export default definePlugin({
     async start() {
         addChatBarButton("Encryptcord", ChatBarIcon);
         const pair = await generateKeys();
-        await DataStore.set('encryptcordPublicKey', pair.publicKey);
-        await DataStore.set('encryptcordPrivateKey', pair.privateKey);
-        if (await DataStore.get("encryptcordGroup") == true) {
+        await DataStore.set("encryptcordPublicKey", pair.publicKey);
+        await DataStore.set("encryptcordPrivateKey", pair.privateKey);
+        if (await DataStore.get("encryptcordGroup") === true) {
             await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
         }
-        await DataStore.set('encryptcordGroup', false);
-        await DataStore.set('encryptcordChannelId', "");
-        await DataStore.set('encryptcordGroupMembers', {});
+        await DataStore.set("encryptcordGroup", false);
+        await DataStore.set("encryptcordChannelId", "");
+        await DataStore.set("encryptcordGroupMembers", {});
     },
     async stop() {
         removeButton("Encryptcord");
-        if (await DataStore.get("encryptcordGroup") == true) {
+        if (await DataStore.get("encryptcordGroup") === true) {
             await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
         }
     },
@@ -272,9 +277,9 @@ export default definePlugin({
 
 // Send Temporary Message
 async function sendTempMessage(recipientId: string, attachment: string, content: string, dm: boolean = true) {
-    if (recipientId == UserStore.getCurrentUser().id) return;
+    if (recipientId === UserStore.getCurrentUser().id) return;
     const dmChannelId = dm ? await PrivateChannelsStore.getOrEnsurePrivateChannel(recipientId) : recipientId;
-    if (attachment && attachment != "") {
+    if (attachment && attachment !== "") {
         const upload = await new CloudUtils.CloudUpload({
             file: new File([new Blob([attachment])], "file.text", { type: "text/plain; charset=utf-8" }),
             isClip: false,
@@ -293,7 +298,7 @@ async function sendTempMessage(recipientId: string, attachment: string, content:
                     }],
                     nonce: SnowflakeUtils.fromTimestamp(Date.now()),
                 },
-            }).then((response) => response.body.id);
+            }).then(response => response.body.id);
 
             await sleep(500);
             RestAPI.delete({
@@ -310,7 +315,7 @@ async function sendTempMessage(recipientId: string, attachment: string, content:
             content,
             nonce: SnowflakeUtils.fromTimestamp(Date.now()),
         },
-    }).then((response) => response.body.id);
+    }).then(response => response.body.id);
 
     await sleep(500);
     RestAPI.delete({
@@ -323,17 +328,17 @@ async function handleLeaving(senderId: string, encryptcordGroupMembers: object, 
     const updatedMembers = Object.keys(encryptcordGroupMembers).reduce((result, memberId) => {
         if (memberId !== senderId) {
             result[memberId] = encryptcordGroupMembers[memberId];
-            if (result[memberId].child == senderId) {
+            if (result[memberId].child === senderId) {
                 result[memberId].child = encryptcordGroupMembers[senderId].child;
             }
-            if (result[memberId].parent == senderId) {
+            if (result[memberId].parent === senderId) {
                 result[memberId].parent = encryptcordGroupMembers[senderId].parent;
             }
         }
         return result;
     }, {});
 
-    await DataStore.set('encryptcordGroupMembers', updatedMembers);
+    await DataStore.set("encryptcordGroupMembers", updatedMembers);
 
     await MessageActions.receiveMessage(groupChannel, await createMessage("", senderId, groupChannel, 2));
 }
@@ -346,9 +351,9 @@ async function handleMessage(message, senderId: string, groupChannel: string) {
 
 // Handle receiving group data
 async function handleGroupData(groupData) {
-    await DataStore.set('encryptcordChannelId', groupData.channel);
-    await DataStore.set('encryptcordGroupMembers', groupData.members);
-    await DataStore.set('encryptcordGroup', true);
+    await DataStore.set("encryptcordChannelId", groupData.channel);
+    await DataStore.set("encryptcordGroupMembers", groupData.members);
+    await DataStore.set("encryptcordGroup", true);
     await MessageActions.receiveMessage(groupData.channel, await createMessage("", UserStore.getCurrentUser().id, groupData.channel, 7));
     setEnabled(true);
 }
@@ -357,8 +362,8 @@ async function handleGroupData(groupData) {
 async function handleJoin(senderId: string, senderKey: string, encryptcordGroupMembers: object) {
     encryptcordGroupMembers[senderId] = { key: senderKey, parent: UserStore.getCurrentUser().id, child: null };
     encryptcordGroupMembers[UserStore.getCurrentUser().id].child = senderId;
-    await DataStore.set('encryptcordGroupMembers', encryptcordGroupMembers);
-    const groupChannel = await DataStore.get('encryptcordChannelId');
+    await DataStore.set("encryptcordGroupMembers", encryptcordGroupMembers);
+    const groupChannel = await DataStore.get("encryptcordChannelId");
     const newMember = await UserUtils.getUser(senderId).catch(() => null);
     if (!newMember) return;
 
@@ -370,10 +375,10 @@ async function handleJoin(senderId: string, senderKey: string, encryptcordGroupM
 
     const membersDataString = JSON.stringify({ members: membersData, channel: groupChannel });
 
-    const dmPromises = Object.keys(encryptcordGroupMembers).map(async (memberId) => {
+    const dmPromises = Object.keys(encryptcordGroupMembers).map(async memberId => {
         const groupMember = await UserUtils.getUser(memberId).catch(() => null);
         if (!groupMember) return;
-        await sendTempMessage(groupMember.id, membersDataString, `groupdata`);
+        await sendTempMessage(groupMember.id, membersDataString, "groupdata");
     });
 
     await Promise.all(dmPromises);
@@ -383,15 +388,15 @@ async function handleJoin(senderId: string, senderKey: string, encryptcordGroupM
             components: [{
                 type: 2,
                 style: 4,
-                label: 'I don\'t want to talk to you!',
-                custom_id: 'removeFromSelf'
+                label: "I don't want to talk to you!",
+                custom_id: "removeFromSelf"
             },
             {
                 type: 2,
                 style: 2,
-                label: '(Other users can still send/receive messages to/from them)',
+                label: "(Other users can still send/receive messages to/from them)",
                 disabled: true,
-                custom_id: 'encryptcord'
+                custom_id: "encryptcord"
             }]
         }]
     });
@@ -408,11 +413,11 @@ async function createMessage(message: string, senderId: string, channelId: strin
 // Start E2EE Group
 async function startGroup(opts, ctx) {
     const channelId = ctx.channel.id;
-    await DataStore.set('encryptcordChannelId', channelId);
-    await DataStore.set('encryptcordGroupMembers', {
+    await DataStore.set("encryptcordChannelId", channelId);
+    await DataStore.set("encryptcordGroupMembers", {
         [UserStore.getCurrentUser().id]: { key: await DataStore.get("encryptcordPublicKey"), parent: null, child: null }
     });
-    await DataStore.set('encryptcordGroup', true);
+    await DataStore.set("encryptcordGroup", true);
     sendBotMessage(channelId, { content: "Group created!\n> Other users can click the lock icon to join." });
     await MessageActions.receiveMessage(channelId, await createMessage("", UserStore.getCurrentUser().id, channelId, 7));
     setEnabled(true);
@@ -421,23 +426,23 @@ async function startGroup(opts, ctx) {
 // Leave the Group;
 async function leave(opts, ctx) {
     const channelId = ctx.channel.id;
-    if (!(await DataStore.get('encryptcordGroup'))) {
-        sendBotMessage(channelId, { content: `You're not in a group!` });
+    if (!(await DataStore.get("encryptcordGroup"))) {
+        sendBotMessage(channelId, { content: "You're not in a group!" });
         return;
     }
     const user = UserStore.getCurrentUser();
-    const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
+    const encryptcordGroupMembers = await DataStore.get("encryptcordGroupMembers");
 
-    const dmPromises = Object.keys(encryptcordGroupMembers).map(async (memberId) => {
+    const dmPromises = Object.keys(encryptcordGroupMembers).map(async memberId => {
         const groupMember = await UserUtils.getUser(memberId).catch(() => null);
         if (!groupMember) return;
-        await sendTempMessage(groupMember.id, "", `leaving`);
+        await sendTempMessage(groupMember.id, "", "leaving");
     });
 
     await Promise.all(dmPromises);
-    await DataStore.set('encryptcordGroup', false);
-    await DataStore.set('encryptcordChannelId', "");
-    await DataStore.set('encryptcordGroupMembers', {});
+    await DataStore.set("encryptcordGroup", false);
+    await DataStore.set("encryptcordChannelId", "");
+    await DataStore.set("encryptcordGroupMembers", {});
     await MessageActions.receiveMessage(channelId, await createMessage("", user.id, channelId, 2));
     setEnabled(false);
 }
@@ -445,9 +450,9 @@ async function leave(opts, ctx) {
 // View user data
 async function data(opts, ctx) {
     const channelId = ctx.channel.id;
-    const encryptcordGroupMembers = await DataStore.get('encryptcordGroupMembers');
-    const encryptcordPublicKey = await DataStore.get('encryptcordPublicKey');
-    const encryptcordPrivateKey = await DataStore.get('encryptcordPrivateKey');
+    const encryptcordGroupMembers = await DataStore.get("encryptcordGroupMembers");
+    const encryptcordPublicKey = await DataStore.get("encryptcordPublicKey");
+    const encryptcordPrivateKey = await DataStore.get("encryptcordPrivateKey");
     const exportedPrivateKey = await crypto.subtle.exportKey("pkcs8", encryptcordPrivateKey);
     const groupMembers = Object.keys(encryptcordGroupMembers);
     sendBotMessage(channelId, {
