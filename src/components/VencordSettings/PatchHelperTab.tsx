@@ -33,8 +33,8 @@ if (IS_DEV) {
     var differ = require("diff") as typeof import("diff");
 }
 
-const findCandidates = debounce(function ({ find, setModule, setError }) {
-    const candidates = search(find);
+const findCandidates = debounce(function ({ finds, setModule, setError }) {
+    const candidates = search(...finds);
     const keys = Object.keys(candidates);
     const len = keys.length;
     if (len === 0)
@@ -220,11 +220,12 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 
 interface FullPatchInputProps {
     setFind(v: string): void;
+    setFinds(v: string[]): void;
     setMatch(v: string): void;
     setReplacement(v: string | ReplaceFn): void;
 }
 
-function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputProps) {
+function FullPatchInput({ setFind, setFinds, setMatch, setReplacement }: FullPatchInputProps) {
     const [fullPatch, setFullPatch] = React.useState<string>("");
     const [fullPatchError, setFullPatchError] = React.useState<string>("");
 
@@ -256,7 +257,8 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
             if (!parsed.replacement.match) throw new Error("No 'replacement.match' field");
             if (!parsed.replacement.replace) throw new Error("No 'replacement.replace' field");
 
-            setFind(parsed.find);
+            setFind(JSON.stringify(parsed.find));
+            setFinds(parsed.find instanceof Array ? parsed.find : [parsed.find]);
             setMatch(parsed.replacement.match instanceof RegExp ? parsed.replacement.match.source : parsed.replacement.match);
             setReplacement(parsed.replacement.replace);
             setFullPatchError("");
@@ -274,6 +276,7 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
 
 function PatchHelper() {
     const [find, setFind] = React.useState<string>("");
+    const [finds, setFinds] = React.useState<string[]>([]);
     const [match, setMatch] = React.useState<string>("");
     const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
 
@@ -285,20 +288,39 @@ function PatchHelper() {
     const code = React.useMemo(() => {
         return `
 {
-    find: ${JSON.stringify(find)},
+    find: ${finds.length > 1 ? `[${finds.map(f => JSON.stringify(f)).join(", ")}]` : finds.length > 0 ? JSON.stringify(finds[0]) : "[]"},
     replacement: {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 }
         `.trim();
-    }, [find, match, replacement]);
+    }, [finds, match, replacement]);
 
     function onFindChange(v: string) {
         setFindError(void 0);
         setFind(v);
-        if (v.length) {
-            findCandidates({ find: v, setModule, setError: setFindError });
+    }
+
+    function onFindBlur() {
+        let finds = [] as string[];
+        const findArrayMatch = find.match(/^\[.*\]$/);
+
+        if (findArrayMatch) {
+            try {
+                const rawFinds = (0, eval)(`(${find})`);
+                finds = rawFinds instanceof Array ? rawFinds : [rawFinds];
+            } catch (e) {
+                setFindError((e as Error).message);
+                return;
+            }
+        } else if (find.length) {
+            finds = [find];
+        }
+
+        setFinds(finds);
+        if (finds.length) {
+            findCandidates({ finds, setModule, setError: setFindError });
         }
     }
 
@@ -317,6 +339,7 @@ function PatchHelper() {
             <Forms.FormTitle>full patch</Forms.FormTitle>
             <FullPatchInput
                 setFind={onFindChange}
+                setFinds={setFinds}
                 setMatch={onMatchChange}
                 setReplacement={setReplacement}
             />
@@ -326,6 +349,7 @@ function PatchHelper() {
                 type="text"
                 value={find}
                 onChange={onFindChange}
+                onBlur={onFindBlur}
                 error={findError}
             />
 
