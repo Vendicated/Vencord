@@ -12,7 +12,11 @@ import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
-import { type Message } from "discord-types/general";
+import type { Message, User as DiscordUser } from "discord-types/general";
+
+interface User extends DiscordUser {
+    globalName: string;
+}
 
 interface IMessageCreate {
     channelId: string;
@@ -44,11 +48,11 @@ async function showNotification(message: Message, guildId: string | undefined): 
     });
 
     message.content = message.content.replace(userRegex, (match, userId: string) => {
-        return `@${(UserStore.getUser(userId) as any).globalName}`;
+        return `@${(UserStore.getUser(userId) as User).globalName}`;
     });
 
     await Notifications.showNotification({
-        title: `${(message.author as any).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
+        title: `${(message.author as User).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
         body: message.content,
         icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
         onClick: function (): void {
