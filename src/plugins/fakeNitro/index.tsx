@@ -157,13 +157,13 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     enableSoundboardBypass: {
-        description: "Allow the use of soundboard everywhere (others can't hear them)",
+        description: "Allows the use of all servers' soundboards (others can't hear it)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
     },
     enableSoundboardGuildLimitBypass: {
-        description: "Allow the use of all sounds in the guild's soundboard no matter what the guild boost level is",
+        description: "Allows the use of all sounds in the server's soundboard no matter what the server's boost level is",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -197,7 +197,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukios],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
