@@ -35,3 +35,7 @@
 .theme-light .messagelogger-edited {
     opacity: 0.5;
 }
+
+.hiddenSpoiler__57186 .hiddenAttachment_dfecc7 .messagelogger-deleted-attachment {
+    filter: blur(var(--custom-message-attachment-spoiler-blur-radius)) !important;
+}
