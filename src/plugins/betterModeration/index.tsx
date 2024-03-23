@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
 import "./style.css";
 
-import definePlugin from "@utils/types";
-import { AutoModRule } from "./automod";
 import { sendBotMessage } from "@api/Commands";
-
-import { Message, Embed, GuildMember } from "discord-types/general";
-import { TestInputBoxComponent, renderTestTextHeader, ExportButton } from "./UI";
-
 import { Logger } from "@utils/Logger";
+import definePlugin from "@utils/types";
+import { Embed, GuildMember,Message } from "discord-types/general";
+
+import { AutoModRule } from "./automod";
+import { ExportButton,renderTestTextHeader, TestInputBoxComponent } from "./UI";
 
 const logger = new Logger("betterModeration");
 
