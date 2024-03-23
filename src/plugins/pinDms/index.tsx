@@ -221,7 +221,7 @@ export default definePlugin({
         if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
             return true;
         const cat = categories[sectionIndex - 1];
-        return this.isCategoryIndex(sectionIndex) && (cat.channels.length === 0 || cat?.channels[channelIndex]);
+        return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
     },
 
     isDMSectioncollapsed() {
