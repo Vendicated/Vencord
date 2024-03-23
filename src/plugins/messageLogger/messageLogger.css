@@ -36,6 +36,6 @@
     opacity: 0.5;
 }
 
-.hiddenSpoiler__57186 .hiddenAttachment_dfecc7 .messagelogger-deleted-attachment {
+.messagelogger-deleted-attachment [class^="hiddenAttachment_"] {
     filter: blur(var(--custom-message-attachment-spoiler-blur-radius)) !important;
 }
