@@ -168,15 +168,8 @@ export default definePlugin({
     getAllUncollapsedChannels,
     requireSettingsMenu,
 
-    isInitialized() {
-        return Object.keys(this.instance.props.channels)?.length > 0;
-    },
-
     makeProps(instance, { sections }: { sections: number[]; }) {
         this._instance = instance;
-
-        if (!this.isInitialized()) return { sections };
-
         this.sections = sections;
 
         this.sections.splice(1, 0, ...this.getSections());
