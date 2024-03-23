@@ -17,7 +17,7 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { PlainSettings, Settings } from "@api/Settings";
+import { PlainSettings, Settings, SettingsStore } from "@api/Settings";
 import { Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
@@ -137,7 +137,7 @@ export async function putCloudSettings(manual?: boolean) {
 
         const { written } = await res.json();
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(PlainSettings);
+        VencordNative.settings.set(/* This is really bad but it works */JSON.parse(JSON.stringify(SettingsStore.plain)));
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
 
@@ -222,7 +222,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         // sync with server timestamp instead of local one
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(PlainSettings);
+        VencordNative.settings.set(/* This is really bad but it works */JSON.parse(JSON.stringify(SettingsStore.plain)));
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
