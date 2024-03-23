@@ -197,7 +197,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukios],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukios, Devs.Loukios],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -385,11 +385,11 @@ export default definePlugin({
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
-
         {
             find: "canUseSoundboardEverywhere:function",
             predicate: () => settings.store.enableSoundboardBypass,
             replacement: {
+                // Allows using the soundboard everywhere
                 match: /canUseSoundboardEverywhere:function\(\i\){/,
                 replace: "$&return true;"
             },
@@ -398,6 +398,7 @@ export default definePlugin({
             find: "available:e.available",
             predicate: () => settings.store.enableSoundboardGuildLimitBypass,
             replacement: {
+                // Bypasses the guild limit for soundboard sounds by boost level
                 match: /available:e\.available/,
                 replace: "available:true"
             }
