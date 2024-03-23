@@ -1,0 +1,26 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.exportButton {
+  height: var(--custom-button-button-sm-height);
+  min-width: var(--custom-button-button-sm-width);
+  min-height: var(--custom-button-button-sm-height);
+}
+
+.AutomodTestBox {
+  margin-bottom: 0;
+  margin-top: 5px;
+  /*background-color: '#fafafa';*/
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.AutomodTestTextWarning {
+  display: none;
+  color: red;
+  font-size: 14px;
+  margin-top: 0;
+}
