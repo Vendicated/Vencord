@@ -75,7 +75,7 @@ export default definePlugin({
         addButton("vc-findreply", message => {
             if (!message.id) return null;
             const replies = findReplies(message);
-            if (Vencord.Settings.plugins.FindReply.hideButtonIfNoReply && !replies) return null;
+            if (Vencord.Settings.plugins.FindReply.hideButtonIfNoReply && !replies.length) return null;
             return {
                 label: "Jump to Reply",
                 icon: FindReplyIcon,
