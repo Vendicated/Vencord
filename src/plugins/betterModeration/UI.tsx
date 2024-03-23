@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-
-
-import { useState, useMemo, Button, Text, TextArea } from "@webpack/common";
-import { match_rules, AutoModRule, MatchedRule } from "./automod";
+import { Button, Text, TextArea, useMemo, useState } from "@webpack/common";
 import { GuildMember } from "discord-types/general";
+
+import { AutoModRule, match_rules, MatchedRule } from "./automod";
 
 
 export function renderTestTextHeader() {
@@ -35,7 +34,7 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
     return (
         <div>
             <TextArea
-                className="AutomodTestBox"
+                className="automod-test-box"
                 value={inputValue}
                 placeholder="Type something to test automod (Supports filters only)"
                 onChange={setInputValue}
@@ -43,7 +42,7 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
             />
             <p
                 style={{ display: warningText ? "block" : "none" }}
-                className="AutomodTestTextWarning"
+                className="automod-test-text-warning"
             >
                 {warningText}
             </p>
@@ -64,6 +63,6 @@ const download = (filename: string, content: string, type: string = "text/plain"
 export function ExportButton(props: { currentGuildId: string | null; currentBanList: Array<GuildMember> | null; }) {
     const { currentGuildId, currentBanList } = props;
     if (!currentGuildId || !currentBanList) return null;
-    return (<Button onClick={() => download(currentGuildId + "-bans.json", JSON.stringify(currentBanList, null, 4))} className={"exportButton"}>Export</Button>);
+    return (<Button onClick={() => download(currentGuildId + "-bans.json", JSON.stringify(currentBanList, null, 4))} className={"export-button"}>Export</Button>);
 }
 
