@@ -20,7 +20,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "UnlockedAvatarZoom",
-    description: "Unlocks the zoom mutliplier on the avatar modal",
+    description: "Unlocks the avatar zoom slider on the edit avatar modal",
     authors: [Devs.nakoyasha],
     settings,
     patches: [
