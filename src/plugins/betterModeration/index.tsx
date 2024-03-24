@@ -19,12 +19,13 @@
 import "./style.css";
 
 import { sendBotMessage } from "@api/Commands";
+import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Embed, GuildMember,Message } from "discord-types/general";
+import { Embed, GuildMember, Message } from "discord-types/general";
 
 import { AutoModRule } from "./automod";
-import { ExportButton,renderTestTextHeader, TestInputBoxComponent } from "./UI";
+import { ExportButton, renderTestTextHeader, TestInputBoxComponent } from "./UI";
 
 const logger = new Logger("betterModeration");
 
@@ -53,12 +54,7 @@ interface IGUILD_SETTINGS_LOADED_BANS_BATCH {
 
 export default definePlugin({
     name: "better moderation (Beta)",
-    authors: [
-        {
-            name: "__iamme__",
-            id: 984392761929256980n
-        }
-    ],
+    authors: [Devs.iamme],
     description: "echo automod logs in the automoded channel and test your automod rules, able to export bans as json",
     patches: [
         {
