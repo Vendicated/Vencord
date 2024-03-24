@@ -94,9 +94,10 @@ export default definePlugin({
     ],
     WrapperComponent: function ({ ...props }) {
         const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
 
-        if (!stream) return null;
+        if (!stream) return <div {...props}>{props.children}</div>;
+
+        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
 
         let missingUsers = 0;
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
