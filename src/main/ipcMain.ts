@@ -18,22 +18,21 @@
 
 import "./updater";
 import "./ipcPlugins";
+import "./settings";
 
-import { debounce } from "@utils/debounce";
-import { IpcEvents } from "@utils/IpcEvents";
-import { Queue } from "@utils/Queue";
+import { debounce } from "@shared/debounce";
+import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
-import { FSWatcher, mkdirSync, readFileSync, watch } from "fs";
-import { open, readdir, readFile, writeFile } from "fs/promises";
+import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
+import { open, readdir, readFile } from "fs/promises";
 import { join, normalize } from "path";
 
 import monacoHtml from "~fileContent/monacoWin.html;base64";
 
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
-import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE, THEMES_DIR } from "./utils/constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
-mkdirSync(SETTINGS_DIR, { recursive: true });
 mkdirSync(THEMES_DIR, { recursive: true });
 
 export function ensureSafePath(basePath: string, path: string) {
@@ -71,22 +70,6 @@ function getThemeData(fileName: string) {
     return readFile(safePath, "utf-8");
 }
 
-export function readSettings() {
-    try {
-        return readFileSync(SETTINGS_FILE, "utf-8");
-    } catch {
-        return "{}";
-    }
-}
-
-export function getSettings(): typeof import("@api/Settings").Settings {
-    try {
-        return JSON.parse(readSettings());
-    } catch {
-        return {} as any;
-    }
-}
-
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
 
 ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
@@ -101,12 +84,10 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     shell.openExternal(url);
 });
 
-const cssWriteQueue = new Queue();
-const settingsWriteQueue = new Queue();
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    cssWriteQueue.push(() => writeFile(QUICKCSS_PATH, css))
+    writeFileSync(QUICKCSS_PATH, css)
 );
 
 ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
@@ -116,13 +97,6 @@ ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
     // win & mac only
     "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
 }));
-
-ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
-ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
-
-ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
-    settingsWriteQueue.push(() => writeFile(SETTINGS_FILE, s));
-});
 
 
 export function initIpc(mainWindow: BrowserWindow) {
