@@ -11,7 +11,7 @@ import { AutoModRule, match_rules, MatchedRule } from "./automod";
 
 
 export function renderTestTextHeader() {
-    return (<Text variant="heading-lg/normal">Test AutoMod</Text>);
+    return (<Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>);
 }
 
 export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | null; }) {

@@ -23,3 +23,8 @@
     font-size: 14px;
     margin-top: 0;
 }
+
+.automod-test-header {
+    flex-grow: 1;
+    color: var(--header-primary);
+}

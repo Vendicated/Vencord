@@ -67,9 +67,9 @@ export default definePlugin({
             ],
         },
         {
-            find: ".categoryContainer,children:[",
+            find: ".Messages.GUILD_SETTINGS_AUTOMOD_MESSAGE_FILTER_DESCRIPTION",
             replacement: [{
-                match: /\.categoryContainer,children:\[/,
+                match: /\.textBadge.+?}\),/,
                 replace: "$&$self.renderTestTextHeader(), $self.renderInputBox(),"
             }]
         },
