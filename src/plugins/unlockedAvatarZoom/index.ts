@@ -25,7 +25,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "\"aria-label\":I.default.Messages.FORM_LABEL_AVATAR_SIZE",
+            find: ".Messages.AVATAR_UPLOAD_EDIT_MEDIA",
             replacement: {
                 match: /(maxValue:(\w))/,
                 replace: "maxValue:$self.settings.store.zoomMultiplier",
