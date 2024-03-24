@@ -47,7 +47,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".stickerIcon,",
+            find: "STICKER_BUTTON_LABEL,",
             replacement: [{
                 match: /(children:\(0,\w\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
