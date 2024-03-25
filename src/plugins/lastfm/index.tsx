@@ -101,25 +101,30 @@ function setActivity(activity: Activity | null) {
 
 const settings = definePluginSettings({
     username: {
-        description: "last.fm username",
+        description: "Last.fm username",
         type: OptionType.STRING,
     },
     apiKey: {
-        description: "last.fm api key",
+        description: "Last.fm API key",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "show link to last.fm profile",
+        description: "Show link to Last.fm profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
+    shareSong: {
+        description: "Show link to song on Last.fm",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
     hideWithSpotify: {
-        description: "hide last.fm presence if spotify is running",
+        description: "Hide Last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
     statusName: {
-        description: "custom status text",
+        description: "Custom status text",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -151,7 +156,7 @@ const settings = definePluginSettings({
         ],
     },
     useListeningStatus: {
-        description: 'show "Listening to" status instead of "Playing"',
+        description: 'Show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -171,7 +176,7 @@ const settings = definePluginSettings({
         ],
     },
     showLastFmLogo: {
-        description: "show the Last.fm logo by the album cover",
+        description: "Show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     }
@@ -179,7 +184,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "LastFMRichPresence",
-    description: "Little plugin for Last.fm rich presence",
+    description: "Adds support for Last.fm rich presence.",
     authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settingsAboutComponent: () => (
@@ -290,17 +295,18 @@ export default definePlugin({
                 large_text: trackData.album || undefined,
             };
 
-        const buttons: ActivityButton[] = [
-            {
-                label: "View Song",
-                url: trackData.url,
-            },
-        ];
+        const buttons: ActivityButton[] = [];
 
         if (settings.store.shareUsername)
             buttons.push({
                 label: "Last.fm Profile",
                 url: `https://www.last.fm/user/${settings.store.username}`,
+            });
+
+        if (settings.store.shareSong)
+            buttons.push({
+                label: "View Song",
+                url: trackData.url,
             });
 
         const statusName = (() => {
