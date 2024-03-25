@@ -107,7 +107,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     }
 
                     default: {
-                        permissions = Object.values(guild.roles).map(role => ({
+                        permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
