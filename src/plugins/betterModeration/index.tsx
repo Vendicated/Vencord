@@ -53,7 +53,7 @@ interface IGUILD_SETTINGS_LOADED_BANS_BATCH {
 }
 
 export default definePlugin({
-    name: "better moderation (Beta)",
+    name: "betterModeration",
     authors: [Devs.iamme],
     description: "echo automod logs in the automoded channel and test your automod rules, able to export bans as json",
     patches: [
