@@ -87,12 +87,25 @@ export default definePlugin({
             replacement: [
                 {
                     match: /return (\i)=(\(0,\i\.isBackendPersistedRule\)\((\i)\)&&!\(0,\i\.isDefaultRuleId\)\(\i\.id\))/,
-                    replace: "$1=$2; $self.saveOrUpdateRule($1,$3); return $1"
+                    replace: "$1=$2;$self.saveOrUpdateAutomodRule($1,$3);return $1"
+                }
+            ]
+        },
+        {
+            find: ".deleteAutomodRule",
+            replacement: [
+                {
+                    match: /\i\((\i.id),(\i.guildId)\)/,
+                    replace: "$&,$self.deleteAutomodRule($1,$2)"
                 }
             ]
         }
     ],
-    saveOrUpdateRule: async (type: boolean, rule: AutoModRule) => {
+    deleteAutomodRule: async (ruleid: string, guildId: string) => {
+        if (!currentRules) return;
+        currentRules = currentRules.filter(r => r.id !== ruleid);
+    },
+    saveOrUpdateAutomodRule: async (type: boolean, rule: AutoModRule) => {
         if (!currentRules) return;
         logger.info((type ? "Updated" : "Created") + " a Rule", rule);
         currentRules = currentRules.filter(r => r.id !== rule.id);
