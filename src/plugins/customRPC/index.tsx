@@ -20,10 +20,12 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { chooseFile, saveFile } from "@utils/web";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -253,6 +255,24 @@ const settings = definePluginSettings({
     }
 });
 
+function setDefaults() {
+    settings.store.details = undefined;
+    settings.store.state = undefined;
+    settings.store.type = ActivityType.PLAYING;
+    settings.store.startTime = TimestampMode.NONE;
+    settings.store.startTime = undefined;
+    settings.store.endTime = undefined;
+    settings.store.streamLink = undefined;
+    settings.store.imageBig = undefined;
+    settings.store.imageBigTooltip = undefined;
+    settings.store.imageSmall = undefined;
+    settings.store.imageSmallTooltip = undefined;
+    settings.store.buttonOneText = undefined;
+    settings.store.buttonOneURL = undefined;
+    settings.store.buttonTwoText = undefined;
+    settings.store.buttonTwoURL = undefined;
+}
+
 function onChange() {
     setRpc(true);
     if (Settings.plugins.CustomRPC.enabled) setRpc();
@@ -275,6 +295,64 @@ function isImageKeyValid(value: string) {
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
     return true;
+}
+
+
+async function exportBackup() {
+    const filename = "rpc-backup.json";
+    const backup = {};
+    const filteredStore = Object.fromEntries(
+        Object.entries(settings.store)
+            .filter(([_, value]) => value !== undefined)
+    );
+    Object.assign(backup, filteredStore);
+    const data = new TextEncoder().encode(JSON.stringify(backup));
+
+    if (IS_DISCORD_DESKTOP) {
+        DiscordNative.fileManager.saveWithDialog(data, filename);
+    } else {
+        saveFile(new File([data], filename, { type: "application/json" }));
+    }
+}
+
+async function loadBackup(data: string) {
+    const backup = await JSON.parse(data);
+    if (backup) {
+        setDefaults();
+        Object.assign(settings.store, backup);
+    }
+}
+
+
+async function importBackup(): Promise<void> {
+    if (IS_DISCORD_DESKTOP) {
+        const [file] = await DiscordNative.fileManager.openFiles({
+            filters: [
+                { name: "RPC Backup", extensions: ["json"] },
+                { name: "all", extensions: ["*"] }
+            ]
+        });
+        if (file) {
+            try {
+                await loadBackup(new TextDecoder().decode(file.data));
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+            }
+        }
+    } else {
+        const file = await chooseFile("application/json");
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                await loadBackup(reader.result as string);
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+            }
+        };
+        reader.readAsText(file);
+    }
 }
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -386,7 +464,7 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.Mannu],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
@@ -405,6 +483,29 @@ export default definePlugin({
                 <Forms.FormText>
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
+                <Forms.FormDivider />
+                <Forms.FormText>
+                    Click on the save & close after importing backup in order to see new changes. Save before exporting the backup.
+                </Forms.FormText>
+                <br />
+                <Flex>
+                    <Button
+                        onClick={() => importBackup()}
+                        size={Button.Sizes.TINY}
+                    >
+                        Import Backup
+                    </Button>
+                </Flex>
+                <br />
+                <Flex>
+                    <Button
+                        onClick={exportBackup}
+                        size={Button.Sizes.TINY}
+                    >
+                        Export Backup
+                    </Button>
+                </Flex>
+                <br />
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
