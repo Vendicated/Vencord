@@ -87,7 +87,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /return (\i)=(\(0,\i\.isBackendPersistedRule\)\((\i)\)&&!\(0,\i\.isDefaultRuleId\)\(\i\.id\))/,
-                    replace: "$1=$2;$self.saveOrUpdateAutomodRule($1,$3);return $1"
+                    replace: "$1=$2;$self.saveOrUpdateAutomodRule($1,$3);return $1=$1"
                 }
             ]
         },
@@ -103,6 +103,7 @@ export default definePlugin({
     ],
     deleteAutomodRule: async (ruleid: string, guildId: string) => {
         if (!currentRules) return;
+        logger.info("Deleted a Rule", ruleid);
         currentRules = currentRules.filter(r => r.id !== ruleid);
     },
     saveOrUpdateAutomodRule: async (type: boolean, rule: AutoModRule) => {
