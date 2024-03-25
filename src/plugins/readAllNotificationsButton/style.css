@@ -1,9 +1,14 @@
-
 /* recolour and reshape Read All Button*/
-[class^=scroller__] > button:first-of-type {
-  color: var(--interactive-normal); /* text color */
-  background-color: var(--background-tertiary); /* button color */
-  border-radius: 5px; /* increase radius for "more roundness" */
+.vc-readAllNotis-button {
+    color: var(--interactive-normal) !important; /* text color */
+    background-color: var(--background-tertiary) !important; /* button color */
+    border-radius: 5px !important; /* increase radius for "more roundness" */
+    margin: 2px 0 8px 9px /* original styles */
+}
+
+.vc-readAllNotis-button:hover {
+  background-color: var(--brand-experiment) !important;
+  color: var(--text-0) !important;
 }
 
 
