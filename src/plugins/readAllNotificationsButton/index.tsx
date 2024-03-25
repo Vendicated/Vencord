@@ -51,7 +51,7 @@ const ReadAllButton = () => (
         onClick={onClick}
         size={Button.Sizes.MIN}
         color={Button.Colors.BRAND}
-        style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
+        className="vc-readAllNotis-button"
     >Read all</Button>
 );
 
