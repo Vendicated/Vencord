@@ -427,8 +427,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 421405303951851520n
     },
     KrystalSkull: {
-        name: "krystalskulloffical"
-        id: 929208515883569182
+        name: "krystalskulloffical",
+        id: 929208515883569182n
     
 } satisfies Record<string, Dev>);
 
