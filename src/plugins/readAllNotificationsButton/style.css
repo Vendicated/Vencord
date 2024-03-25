@@ -1,14 +1,15 @@
+
 /* recolour and reshape Read All Button*/
 .vc-readAllNotis-button {
-    color: var(--interactive-normal) !important; /* text color */
-    background-color: var(--background-tertiary) !important; /* button color */
-    border-radius: 5px !important; /* increase radius for "more roundness" */
-    margin: 2px 0 8px 9px /* original styles */
+    color: var(--interactive-normal) !important; /* text color */
+    background-color: var(--background-tertiary) !important; /* button color */
+    border-radius: 5px !important; /* increase radius for "more roundness" */
+    margin: 2px 0 8px 9px /* original styles */
 }
 
 .vc-readAllNotis-button:hover {
-  background-color: var(--brand-experiment) !important;
-  color: var(--text-0) !important;
+    background-color: var(--brand-experiment) !important;
+    color: var(--text-0) !important;
 }
 
 
