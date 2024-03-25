@@ -332,7 +332,7 @@ export default definePlugin({
             state: trackData.artist,
             assets,
 
-            buttons: buttons.map(v => v.label),
+            buttons: buttons.length > 0 && buttons.map(v => v.label) || undefined,
             metadata: {
                 button_urls: buttons.map(v => v.url),
             },
