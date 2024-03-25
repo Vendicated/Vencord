@@ -21,7 +21,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
+import { Avatar, GuildMemberStore, React, RelationshipStore, Toasts } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
@@ -39,6 +39,26 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Show a more useful message when several users are typing"
+    },
+    usernameOnly: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show username instead of display name",
+        onChange: () => {
+            if (settings.store.usernameOnly) return;
+            Vencord.Settings.plugins.ShowMeYourName.inTyping = false;
+            if (Vencord.Plugins.isPluginEnabled("ShowMeYourName")) {
+                Toasts.show({
+                    message: "Disabled In Typing in ShowMeYourName",
+                    type: Toasts.Type.MESSAGE,
+                    id: Toasts.genId(),
+                    options: {
+                        duration: 3000,
+                        position: Toasts.Position.BOTTOM
+                    }
+                });
+            }
+        }
     }
 });
 
@@ -57,6 +77,19 @@ interface Props {
 }
 
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
+    // checks if usernameOnly is enabled
+    let name: string;
+    if (settings.store.usernameOnly) {
+        name = user.username;
+    } else {
+        name = (
+            GuildMemberStore.getNick(guildId!, user.id)
+            || (!guildId && RelationshipStore.getNickname(user.id))
+            || (user as any).globalName
+            || user.username
+        );
+    }
+
     return (
         <strong
             role="button"
@@ -78,11 +111,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                         src={user.getAvatarURL(guildId, 128)} />
                 </div>
             )}
-            {GuildMemberStore.getNick(guildId!, user.id)
-                || (!guildId && RelationshipStore.getNickname(user.id))
-                || (user as any).globalName
-                || user.username
-            }
+            {name}
         </strong>
     );
 }, { noop: true });
@@ -90,7 +119,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
-    authors: [Devs.zt],
+    authors: [Devs.zt, Devs.Mannu],
     patches: [
         // Style the indicator and add function call to modify the children before rendering
         {
