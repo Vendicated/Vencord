@@ -417,14 +417,8 @@ async function setRpc(disable?: boolean) {
 
 function toggleRPC() {
     console.log(activeRPC);
-
-    if (activeRPC) {
-        setRpc(false);
-        activeRPC = false;
-    } else {
-        setRpc(true);
-        activeRPC = true;
-    }
+    setRpc(!activeRPC);
+    activeRPC = !activeRPC;
 }
 
 function RPCToggleButton() {
