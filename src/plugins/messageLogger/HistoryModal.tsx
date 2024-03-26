@@ -34,7 +34,7 @@ export function HistoryModal({ modalProps, close, message }: { modalProps: Modal
 
     return <ModalRoot {...modalProps} size={ModalSize.LARGE}>
         <ModalHeader className={cl("head")}>
-            <Text variant="heading-lg/semibold">Message edit history</Text>
+            <Text variant="heading-lg/semibold">Message Edit History</Text>
             <ModalCloseButton onClick={close} />
             <div className={cl("revisions")}>
                 { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() ? (
