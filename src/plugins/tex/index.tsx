@@ -63,7 +63,7 @@ function LazyLatex(props) {
     const katex = useKatex();
     return katex
         ? <Latex {...props} katex={katex} />
-        : <LatexPlaceholder className="tex-loading" delim={delim}>{formula}</LatexPlaceholder>;
+        : <LatexPlaceholder className="vc-tex-loading" delim={delim}>{formula}</LatexPlaceholder>;
 }
 
 function Latex({ katex, formula, displayMode, delim }) {
@@ -93,7 +93,7 @@ function LatexError({ formula, delim, error }) {
                     onMouseLeave={onMouseLeave}
                     onMouseEnter={onMouseEnter}
                     delim={delim}
-                    className="tex-error"
+                    className="vc-tex-error"
                 >
                     {pre}<strong>{mid}</strong>{suf}
                 </LatexPlaceholder>
@@ -104,7 +104,7 @@ function LatexError({ formula, delim, error }) {
 
 function LatexPlaceholder({ className, delim, children, ...props }) {
     return (
-        <code className={classes(className, "tex-placeholder inline")} {...props}>
+        <code className={classes(className, "vc-tex-placeholder inline")} {...props}>
             {delim}
             {children}
             {delim}

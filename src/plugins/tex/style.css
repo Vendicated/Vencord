@@ -3,6 +3,6 @@
     display: inline-block;
 }
 
-.tex-error {
+.vc-tex-error {
     color: var(--status-danger);
 }
