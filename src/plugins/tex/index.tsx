@@ -7,28 +7,16 @@
 import "./style.css";
 
 import { Devs } from "@utils/constants";
-import { makeLazy } from "@utils/lazy";
+import { getKatex } from "@utils/dependencies";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { React, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
 
-const SCRIPT_URL = "https://unpkg.com/katex@0.16.9/dist/katex.mjs";
-const STYLE_URL = "https://unpkg.com/katex@0.16.9/dist/katex.min.css";
-
-let theKatex: undefined | any = undefined;
-export const loadKatex = makeLazy(async () => {
-    const style = document.createElement("link");
-    style.setAttribute("rel", "stylesheet");
-    style.setAttribute("href", STYLE_URL);
-    document.head.appendChild(style);
-    return theKatex = (await import(SCRIPT_URL)).default;
-});
-
 export function useKatex() {
-    const [katex, setKatex] = useState(theKatex);
+    const [katex, setKatex] = useState();
     useEffect(() => {
         if(katex === undefined)
-            loadKatex().then(setKatex);
+            getKatex().then(setKatex);
     });
     return katex;
 }

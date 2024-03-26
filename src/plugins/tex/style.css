@@ -1,3 +1,5 @@
+@import url("https://unpkg.com/katex@0.16.9/dist/katex.min.css");
+
 .katex-display {
     margin: 0;
     display: inline-block;
