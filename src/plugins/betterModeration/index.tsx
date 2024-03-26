@@ -25,13 +25,11 @@ import definePlugin from "@utils/types";
 import { Embed, GuildMember, Message } from "discord-types/general";
 
 import { AutoModRule } from "./automod";
-import { ExportButton, renderTestTextHeader, TestInputBoxComponent } from "./UI";
+import { renderTestTextHeader, TestInputBoxComponent } from "./UI";
 
 const logger = new Logger("betterModeration");
 
 
-let currentBanList: Array<GuildMember> | null = null;
-let currentGuildId: string | null = null;
 let currentRules: Array<AutoModRule> | null = null;
 
 interface EMessage extends Message {
@@ -55,17 +53,8 @@ interface IGUILD_SETTINGS_LOADED_BANS_BATCH {
 export default definePlugin({
     name: "betterModeration",
     authors: [Devs.iamme],
-    description: "echo automod logs in the automoded channel and test your automod rules, able to export bans as json",
+    description: "echo automod logs in the automoded channel and be able test your automod rules",
     patches: [
-        {
-            find: ".default.searchGuildBans",
-            replacement: [
-                {
-                    match: /\.searchButton,children:\i\.default\.Messages\.SEARCH\}\)/,
-                    replace: "$&, $self.renderExportButton()"
-                }
-            ],
-        },
         {
             find: ".Messages.GUILD_SETTINGS_AUTOMOD_MESSAGE_FILTER_DESCRIPTION",
             replacement: [{
@@ -118,13 +107,7 @@ export default definePlugin({
     },
     renderInputBox: () => { return <TestInputBoxComponent currentRules={currentRules} />; },
     renderTestTextHeader: renderTestTextHeader,
-    renderExportButton: () => { return <ExportButton currentGuildId={currentGuildId} currentBanList={currentBanList} />; },
     flux: {
-        async GUILD_SETTINGS_LOADED_BANS_BATCH({ type, bans, guildId }: IGUILD_SETTINGS_LOADED_BANS_BATCH) {
-            if (type !== "GUILD_SETTINGS_LOADED_BANS_BATCH") return;
-            currentBanList = bans;
-            currentGuildId = guildId;
-        },
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;

@@ -49,20 +49,3 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
         </div>
     );
 }
-
-const download = (filename: string, content: string, type: string = "text/plain") => {
-    const link = document.createElement("a");
-    const file = new Blob([content], { type: type });
-    link.href = URL.createObjectURL(file);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
-};
-
-
-export function ExportButton(props: { currentGuildId: string | null; currentBanList: Array<GuildMember> | null; }) {
-    const { currentGuildId, currentBanList } = props;
-    if (!currentGuildId || !currentBanList) return null;
-    return (<Button onClick={() => download(currentGuildId + "-bans.json", JSON.stringify(currentBanList, null, 4))} className={"export-button"}>Export</Button>);
-}
-
