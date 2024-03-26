@@ -20,12 +20,13 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, Toasts, UserStore } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -77,7 +78,28 @@ const enum TimestampMode {
     CUSTOM,
 }
 
+const presetOptions: { label: string; value: string; }[] = [];
+const names = loadPresets();
+for (let i = 0; i < names.length; i++) {
+    presetOptions.push({
+        label: names[i].name,
+        value: names[i].name,
+    });
+}
+
+
 const settings = definePluginSettings({
+    presets: {
+        type: OptionType.SELECT,
+        description: "Select your saved preset",
+        onChange: loadPreset,
+        options: [
+            {
+                label: "None",
+                value: "none",
+            },
+        ].concat(presetOptions)
+    },
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
@@ -355,6 +377,105 @@ async function importBackup(): Promise<void> {
     }
 }
 
+function savePresets(presets) {
+    localStorage.setItem("rpcPresets", JSON.stringify(presets));
+}
+
+function loadPresets() {
+    const presetsJSON = localStorage.getItem("rpcPresets");
+    return presetsJSON ? JSON.parse(presetsJSON) : [];
+}
+
+function delPreset() {
+    const presets = loadPresets();
+    const presetIndex = presets.findIndex((preset: any) => preset.name === settings.store.appName);
+
+    if (presetIndex !== -1) {
+        presets.splice(presetIndex, 1);
+        savePresets(presets);
+        setDefaults();
+        Toasts.show({
+            message: "Preset has been successfully deleted",
+            id: Toasts.genId(),
+            type: Toasts.Type.SUCCESS,
+            options: {
+                position: Toasts.Position.BOTTOM,
+            },
+        });
+    } else {
+        Toasts.show({
+            message: "Preset not found, are you sure it exists?. Ctrl + R will help",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+            },
+        });
+    }
+}
+
+function savePreset() {
+    const presets = loadPresets();
+    const presetName = settings.store.appName || "Untitled";
+
+    if (presets.length >= 5) {
+        Toasts.show({
+            message: "Cannot  create more than 5 presets.",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+                duration: 3000
+            }
+        });
+        return;
+    }
+
+    if (presets.some(preset => preset.name === presetName)) {
+        Toasts.show({
+            message: "Preset with same name already exist",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+                duration: 3000
+            }
+        });
+        return;
+    }
+
+    const newPreset = {
+        name: settings.store.appName || "Untitled",
+        settings: { ...settings.store }
+    };
+    presets.push(newPreset);
+    savePresets(presets);
+    Toasts.show({
+        message: "Saved. Reload discord to see changes",
+        id: Toasts.genId(),
+        type: Toasts.Type.SUCCESS,
+        options: {
+            position: Toasts.Position.BOTTOM,
+            duration: 3000
+        }
+    });
+}
+
+function loadPreset() {
+    if (settings.store.presets === "none") {
+        return;
+    }
+    const presets = loadPresets();
+    const presetIndex = presets.findIndex((preset: any) => preset.name === settings.store.presets);
+    if (presetIndex === -1) {
+        return;
+    }
+    Object.assign(settings.store, presets[presetIndex].settings);
+    settings.store.presets = presets[presetIndex].name || "none";
+    setRpc();
+}
+
+
 async function createActivity(): Promise<Activity | undefined> {
     const {
         appID,
@@ -491,20 +612,31 @@ export default definePlugin({
                 <Flex>
                     <Button
                         onClick={() => importBackup()}
-                        size={Button.Sizes.TINY}
+                        size={Button.Sizes.MIN}
                     >
                         Import Backup
                     </Button>
-                </Flex>
-                <br />
-                <Flex>
                     <Button
+                        style={{ marginLeft: "8px" }}
                         onClick={exportBackup}
-                        size={Button.Sizes.TINY}
+                        size={Button.Sizes.MIN}
                     >
                         Export Backup
                     </Button>
                 </Flex>
+                <br />
+                <Forms.FormDivider />
+                <Forms.FormText>
+                    Click on the Save and close after selecing preset before clicking on delete. reload discord to see changes.
+                </Forms.FormText>
+                <Button onClick={savePreset} size={Button.Sizes.MIN}>
+                    Save Preset
+                </Button>
+                <Button
+                    style={{ marginLeft: "8px" }}
+                    onClick={delPreset} size={Button.Sizes.MIN}>
+                    Delete Preset
+                </Button>
                 <br />
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
