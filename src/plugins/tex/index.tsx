@@ -1,11 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./style.css";
 
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { React, Tooltip, useMemo } from "@webpack/common";
-import { useEffect, useState } from "@webpack/common";
+import { React, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
 
 const SCRIPT_URL = "https://unpkg.com/katex@0.16.9/dist/katex.mjs";
 const STYLE_URL = "https://unpkg.com/katex@0.16.9/dist/katex.min.css";
