@@ -35,7 +35,7 @@ import textStyle from "./deleteStyleText.css?managed";
 import { showHistory } from "./HistoryModal";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
-const FormattedMessage = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
+const { getMessage } = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -248,7 +248,7 @@ export default definePlugin({
     },
 
     Messages: proxyLazy(() => ({
-        DELETED_MESSAGE_COUNT: FormattedMessage.getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}"),
+        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
     })),
 
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
@@ -444,20 +444,6 @@ export default definePlugin({
                 }
             ]
         },
-
-        // {
-        //     // MessageStore caching internals
-        //     // Module 819525
-        //     find: "e.getOrCreate=function(t)",
-        //     replacement: [
-        //         // {
-        //         //     // DEBUG: log getOrCreate return values from MessageStore caching internals
-        //         //     match: /getOrCreate=function(.+?)return/,
-        //         //     replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
-        //         // }
-        //     ]
-        // }
-
         {
             // Message grouping
             // Module 51714
@@ -481,6 +467,19 @@ export default definePlugin({
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
                 },
             ],
-        },
+        }
+
+        // {
+        //     // MessageStore caching internals
+        //     // Module 819525
+        //     find: "e.getOrCreate=function(t)",
+        //     replacement: [
+        //         // {
+        //         //     // DEBUG: log getOrCreate return values from MessageStore caching internals
+        //         //     match: /getOrCreate=function(.+?)return/,
+        //         //     replace: "getOrCreate=function$1console.log('getOrCreate',n);return"
+        //         // }
+        //     ]
+        // }
     ]
 });
