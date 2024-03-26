@@ -6,12 +6,13 @@
 
 import "./style.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Timestamp } from "@webpack/common";
-import { Message } from "discord-types/general";
-import { HTMLAttributes } from "react";
+import type { Message } from "discord-types/general";
+import type { HTMLAttributes } from "react";
 
 const { getMessageTimestampId } = findByPropsLazy("getMessageTimestampId");
 const { calendarFormat, dateFormat, isSameDay } = findByPropsLazy("calendarFormat", "dateFormat", "isSameDay", "accessibilityLabelCalendarFormat");
@@ -19,6 +20,36 @@ const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
     return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
+}
+
+function ReplyTimestamp({
+    referencedMessage,
+    baseMessage,
+}: {
+    referencedMessage: { state: number, message?: Message },
+    baseMessage: Message;
+}) {
+    if(referencedMessage.state === 0) {
+        const refTimestamp = referencedMessage.message!.timestamp as any;
+        const baseTimestamp = baseMessage.timestamp as any;
+        return (
+            <Timestamp
+                id={getMessageTimestampId(referencedMessage.message)}
+                className="vc-reply-timestamp"
+                compact={isSameDay(refTimestamp, baseTimestamp)}
+                timestamp={refTimestamp}
+                isInline={false}
+            >
+                <Sep>[</Sep>
+                { isSameDay(refTimestamp, baseTimestamp)
+                    ? dateFormat(refTimestamp, "LT")
+                    : calendarFormat(refTimestamp)
+                }
+                <Sep>]</Sep>
+            </Timestamp>
+        );
+    }
+    return null;
 }
 
 export default definePlugin({
@@ -36,30 +67,5 @@ export default definePlugin({
         }
     ],
 
-    ReplyTimestamp({
-        referencedMessage,
-        baseMessage,
-    }: {
-        referencedMessage: { state: number, message?: Message },
-        baseMessage: Message;
-    }) {
-        if(referencedMessage.state === 0) {
-            const refTimestamp = referencedMessage.message!.timestamp as any;
-            const baseTimestamp = baseMessage.timestamp as any;
-            return <Timestamp
-                id={getMessageTimestampId(referencedMessage.message)}
-                className="vc-reply-timestamp"
-                compact={isSameDay(refTimestamp, baseTimestamp)}
-                timestamp={refTimestamp}
-                isInline={false}
-            >
-                <Sep>[</Sep>
-                { isSameDay(refTimestamp, baseTimestamp)
-                    ? dateFormat(refTimestamp, "LT")
-                    : calendarFormat(refTimestamp)
-                }
-                <Sep>]</Sep>
-            </Timestamp>;
-        }
-    },
+    ReplyTimestamp: ErrorBoundary.wrap(ReplyTimestamp, { noop: true }),
 });
