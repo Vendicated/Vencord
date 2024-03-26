@@ -1,0 +1,8 @@
+.katex-display {
+    margin: 0;
+    display: inline-block;
+}
+
+.tex-error {
+    color: var(--status-danger);
+}
