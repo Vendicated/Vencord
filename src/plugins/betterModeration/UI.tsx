@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button, Text, TextArea, useMemo, useState } from "@webpack/common";
-import { GuildMember } from "discord-types/general";
+import { Text, TextArea, useMemo, useState } from "@webpack/common";
 
 import { AutoModRule, match_rules, MatchedRule } from "./automod";
 
@@ -23,8 +22,6 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
     useMemo(() => {
         if (!inputValue || !currentRules) return null;
         const match: undefined | MatchedRule = currentRules ? match_rules(inputValue, currentRules) : undefined;
-        console.log(match);
-        console.log(inputValue);
         if (match !== undefined) {
             setWarningText(`Match: ${match.rule.name}, filter: ${JSON.stringify(match.filter)}`);
         } else {

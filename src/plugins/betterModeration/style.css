@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-.export-button {
-    height: var(--custom-button-button-sm-height);
-    min-width: var(--custom-button-button-sm-width);
-    min-height: var(--custom-button-button-sm-height);
-}
-
 .automod-test-box {
     margin-bottom: 0;
     margin-top: 5px;
