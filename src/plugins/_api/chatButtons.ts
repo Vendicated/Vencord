@@ -13,10 +13,10 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     patches: [{
-        find: '"gift")),(null',
+        find: '"sticker")',
         replacement: {
-            match: /!\i\.isMobile&&(?=\(\i\.isDM.+?&&(\i)\.push\(.{0,50}"gift")/,
-            replace: "$&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),!0)&&"
+            match: /!\i\.isMobile(?=.+?(\i)\.push\(.{0,50}"gift")/,
+            replace: "$& &&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),true)"
         }
     }]
 });
