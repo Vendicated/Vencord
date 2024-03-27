@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: ".Messages.AVATAR_UPLOAD_EDIT_MEDIA",
             replacement: {
-                match: /(maxValue:(\w))/,
+                match: /maxValue:\d/,
                 replace: "maxValue:$self.settings.store.zoomMultiplier",
             }
         }
