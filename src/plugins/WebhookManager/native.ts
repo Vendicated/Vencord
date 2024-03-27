@@ -10,7 +10,6 @@ export function executeWebhook(_, url: string, body: object) {
     const { hostname, pathname } = new URL(url);
 
     if (!["discord.com", "ptb.discord.com", "canary.discord.com"].includes(hostname) || !pathname.startsWith("/api/webhooks/")) {
-
         throw new Error("This URL is not a valid webhook.");
     }
 
