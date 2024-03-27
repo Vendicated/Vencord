@@ -55,7 +55,7 @@ export default definePlugin({
     patches: [
         // sound class
         {
-            find: "Error(\"could not play audio\")",
+            find: 'Error("could not play audio")',
             replacement: [
                 // override URL
                 {
@@ -74,7 +74,7 @@ export default definePlugin({
             find: "createSoundForPack:function(){",
             replacement: {
                 match: /\i\.\i\.getSoundpack\(\)/,
-                replace: "$self.isOverriden(arguments[0]) ? \"classic\" : $&"
+                replace: '$self.isOverriden(arguments[0]) ? "classic" : $&'
             }
         }
     ],

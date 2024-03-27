@@ -11,7 +11,6 @@ export interface SoundType {
 
 export interface SoundOverride {
     enabled: boolean;
-    useFile: boolean;
     url: string;
     volume: number;
 }
