@@ -314,7 +314,7 @@ async function runtime(token: string) {
         });
 
         let wreq: typeof Vencord.Webpack.wreq;
-        let chunkGroups = null as Record<number, string[]> | null;
+        // let chunkGroups = null as Record<number, string[]> | null;
 
         const { canonicalizeMatch, Logger } = Vencord.Util;
 
@@ -326,17 +326,16 @@ async function runtime(token: string) {
 
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
-        const lazyChunkRegex = canonicalizeMatch(/\.el\("(.+?)"\)\.then\(\i\.bind\(\i,"(.+?)"\)\)/g);
+        const lazyChunkRegex = canonicalizeMatch(/Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/g);
+        const chunkIdsRegex = canonicalizeMatch(/\("(.+?)"\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
-            if (chunkGroups == null) return;
-
             const lazyChunks = factoryCode.matchAll(lazyChunkRegex);
-            const validChunkGroups = new Set<[chunkGroupId: string, entryPoint: string]>();
+            const validChunkGroups = new Set<[chunkIds: string[], entryPoint: string]>();
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, chunkGroupId, entryPoint]) => {
-                const chunkIds = chunkGroups![chunkGroupId];
-                if (chunkIds == null) return;
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
+                const chunkIds = Array.from(rawChunkIds.matchAll(chunkIdsRegex)).map(m => m[1]);
+                if (chunkIds.length === 0) return;
 
                 let invalidChunkGroup = false;
 
@@ -357,14 +356,16 @@ async function runtime(token: string) {
                 }
 
                 if (!invalidChunkGroup) {
-                    validChunkGroups.add([chunkGroupId, entryPoint]);
+                    validChunkGroups.add([chunkIds, entryPoint]);
                 }
             }));
 
             // Loads all found valid chunk groups
             await Promise.all(
                 Array.from(validChunkGroups)
-                    .map(([chunkGroupId]) => (wreq as any).el(chunkGroupId).catch(() => { }))
+                    .map(([chunkIds]) =>
+                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                    )
             );
 
             // Requires the entry points for all valid chunk groups
@@ -410,7 +411,7 @@ async function runtime(token: string) {
             console.log("[PUP_DEBUG]", "Loading all chunks...");
 
             wreq = webpackRequire;
-            const sym = Symbol("Vencord.chunkGroupsExtract");
+            /* const sym = Symbol("Vencord.chunkGroupsExtract");
 
             Object.defineProperty(Object.prototype, sym, {
                 get() {
@@ -421,7 +422,7 @@ async function runtime(token: string) {
             });
 
             await (wreq as any).el(sym);
-            delete Object.prototype[sym];
+            delete Object.prototype[sym]; */
 
             Vencord.Webpack.factoryListeners.add(factory => {
                 let isResolved = false;

@@ -62,7 +62,7 @@ Object.defineProperty(Function.prototype, "O", {
     set(onChunksLoaded: any) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
-        if (new Error().stack?.includes("discord.com") && this.p === "/assets/") {
+        if (new Error().stack?.includes("discord.com")) {
             logger.info("Found main Webpack onChunksLoaded");
 
             delete (Function.prototype as any).O;
