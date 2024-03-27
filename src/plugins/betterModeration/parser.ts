@@ -7,7 +7,7 @@
 // discord automod parser
 
 // an enumeration class Flags using an object
-const Flags = {
+const Flags: { NONE: number, START: number, END: number, START_AND_END: number; } = {
     NONE: 0,
     START: 1,
     END: 2,
@@ -15,7 +15,7 @@ const Flags = {
 };
 
 // a function match_keywords that takes a text and an array of keywords as input
-function match_keywords(text, keywords, allowed = []) {
+function match_keywords(text: string, keywords: Array<string>, allowed: Array<string> = []): [boolean, string | null] { // [boolean, string | null]
     for (const keyword of keywords) {
         if (match_keyword(text, keyword, allowed)) {
             return [true, keyword]; // Return true if the keyword is found
@@ -25,9 +25,9 @@ function match_keywords(text, keywords, allowed = []) {
 }
 
 // a function match_keyword that takes a text, a keyword, and an optional array of allowed words as input
-function match_keyword(text, keyword, allowed = []) {
+function match_keyword(text: string, keyword: string, allowed: Array<string> = []): boolean | null {
     // Determine the flag based on the keyword
-    const flag = (keyword.startsWith("*") ? Flags.START : 0) + (keyword.endsWith("*") ? Flags.END : 0);
+    const flag: number = (keyword.startsWith("*") ? Flags.START : 0) + (keyword.endsWith("*") ? Flags.END : 0);
 
     // Remove the asterisks from the keyword if necessary
     if (flag === Flags.START || flag === Flags.START_AND_END) {
@@ -44,10 +44,10 @@ function match_keyword(text, keyword, allowed = []) {
         return false;
     }
 
-    let tok = "";
-    let matchingIndex = 0;
-    let beforeSpace = null;
-    let index2 = 0;
+    let tok: string = "";
+    let matchingIndex: number = 0;
+    let beforeSpace: boolean | null = null;
+    let index2: number = 0;
 
     // Iterate over each character in the text
     for (let index = 0; index < text.length; index++) {
@@ -67,7 +67,7 @@ function match_keyword(text, keyword, allowed = []) {
         if (matchingIndex === 0) {
             index2 = index - 1;
             while (index2 !== -1 && text[index2] !== " ") {
-                const char2 = text[index2];
+                const char2: string = text[index2];
                 tok += char2;
                 index2--;
             }
@@ -85,7 +85,7 @@ function match_keyword(text, keyword, allowed = []) {
             index += 1;
             index2 = index;
             while (index !== text.length && text[index] !== " ") {
-                const char2 = text[index];
+                const char2: string = text[index];
                 tok += char2;
                 index++;
             }
@@ -115,7 +115,7 @@ function match_keyword(text, keyword, allowed = []) {
         else if (char === keyword[matchingIndex]) {
             index--;
             while (index !== -1 && text[index] !== " ") {
-                const char2 = text[index];
+                const char2: string = text[index];
                 tok += char2;
                 index--;
             }
@@ -127,6 +127,7 @@ function match_keyword(text, keyword, allowed = []) {
             tok += char;
         }
     }
+    return null;
 }
 
 function tests() {
@@ -154,4 +155,4 @@ function tests() {
     console.log("tests ended");
 }
 
-export { match_keyword,match_keywords };
+export { match_keyword, match_keywords };

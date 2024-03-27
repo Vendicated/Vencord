@@ -22,7 +22,7 @@ import { sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Embed, GuildMember, Message } from "discord-types/general";
+import { Embed, Message } from "discord-types/general";
 
 import { AutoModRule } from "./automod";
 import { renderTestTextHeader, TestInputBoxComponent } from "./UI";
@@ -42,12 +42,6 @@ interface IMessageCreate {
     isPushNotification: boolean;
     channelId: string;
     message: EMessage;
-}
-
-interface IGUILD_SETTINGS_LOADED_BANS_BATCH {
-    type: "GUILD_SETTINGS_LOADED_BANS_BATCH";
-    bans: Array<GuildMember>;
-    guildId: string;
 }
 
 export default definePlugin({
