@@ -315,7 +315,6 @@ async function runtime(token: string) {
         });
 
         let wreq: typeof Vencord.Webpack.wreq;
-        // let chunkGroups = null as Record<number, string[]> | null;
 
         const { canonicalizeMatch, Logger } = Vencord.Util;
 
@@ -412,18 +411,6 @@ async function runtime(token: string) {
             console.log("[PUP_DEBUG]", "Loading all chunks...");
 
             wreq = webpackRequire;
-            /* const sym = Symbol("Vencord.chunkGroupsExtract");
-
-            Object.defineProperty(Object.prototype, sym, {
-                get() {
-                    chunkGroups = this;
-                },
-                set() { },
-                configurable: true,
-            });
-
-            await (wreq as any).el(sym);
-            delete Object.prototype[sym]; */
 
             Vencord.Webpack.factoryListeners.add(factory => {
                 let isResolved = false;
