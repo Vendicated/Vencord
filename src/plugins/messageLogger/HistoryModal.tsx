@@ -8,10 +8,11 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Parser, Text, Timestamp, useState } from "@webpack/common";
+import { Text, Timestamp, useMemo, useState } from "@webpack/common";
 
 const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
+const { default: renderMessageMarkup } = findByPropsLazy("renderAutomodMessageMarkup");
 
 const cl = classNameFactory("vc-ml-modal-");
 
@@ -29,7 +30,10 @@ export function openHistoryModal(message: any) {
 export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any }) {
     const [selected, selectItem] = useState(message.editHistory.length);
     const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(a => a.timestamp)];
-    const contents = [...message.editHistory.map(a => a.content), message.content];
+    const contents = useMemo(() => {
+        return [...message.editHistory.map(a => a.content), message.content]
+            .map(content => renderMessageMarkup({ ...message, content }).content);
+    }, []);
 
     return <ModalRoot {...modalProps} size={ModalSize.LARGE}>
         <ModalHeader className={cl("head")}>
@@ -65,7 +69,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
             {...contents.map((content, index) =>
                 <div className={cl("content", { "content-active": selected === index })}>
                     <div className={`${CodeContainerClasses.markup} ${MiscClasses.messageContent}`}>
-                        {Parser.parse(content)}
+                        {content}
                     </div>
                 </div>
             )}
