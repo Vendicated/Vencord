@@ -29,27 +29,25 @@ function ReplyTimestamp({
     referencedMessage: { state: number, message?: Message },
     baseMessage: Message;
 }) {
-    if(referencedMessage.state === 0) {
-        const refTimestamp = referencedMessage.message!.timestamp as any;
-        const baseTimestamp = baseMessage.timestamp as any;
-        return (
-            <Timestamp
-                id={getMessageTimestampId(referencedMessage.message)}
-                className="vc-reply-timestamp"
-                compact={isSameDay(refTimestamp, baseTimestamp)}
-                timestamp={refTimestamp}
-                isInline={false}
-            >
-                <Sep>[</Sep>
-                { isSameDay(refTimestamp, baseTimestamp)
-                    ? dateFormat(refTimestamp, "LT")
-                    : calendarFormat(refTimestamp)
-                }
-                <Sep>]</Sep>
-            </Timestamp>
-        );
-    }
-    return null;
+    if (referencedMessage.state !== 0) return null;
+    const refTimestamp = referencedMessage.message!.timestamp as any;
+    const baseTimestamp = baseMessage.timestamp as any;
+    return (
+        <Timestamp
+            id={getMessageTimestampId(referencedMessage.message)}
+            className="vc-reply-timestamp"
+            compact={isSameDay(refTimestamp, baseTimestamp)}
+            timestamp={refTimestamp}
+            isInline={false}
+        >
+            <Sep>[</Sep>
+            { isSameDay(refTimestamp, baseTimestamp)
+                ? dateFormat(refTimestamp, "LT")
+                : calendarFormat(refTimestamp)
+            }
+            <Sep>]</Sep>
+        </Timestamp>
+    );
 }
 
 export default definePlugin({
