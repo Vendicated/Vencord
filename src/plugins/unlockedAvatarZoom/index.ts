@@ -12,7 +12,7 @@ const settings = definePluginSettings({
     zoomMultiplier: {
         type: OptionType.NUMBER,
         description: "Zoom multiplier",
-        default: 2,
+        default: 4,
     },
 });
 
