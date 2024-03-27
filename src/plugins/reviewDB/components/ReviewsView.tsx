@@ -31,7 +31,7 @@ import ReviewComponent from "./ReviewComponent";
 const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
 const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
 
-const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA");
+const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
 const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
 
 interface UserProps {
