@@ -173,7 +173,7 @@ export default definePlugin({
         {
             find: "Messages.ROLE_ICON_ALT_TEXT",
             replacement: {
-                match: /function \i\(\i\){.*?\)}\)}/,
+                match: /function \i\(\i\){let \i,{className:.*?\)}\)}/,
                 replace: "$self.RoleIconComponent=$&;$&",
             }
         }
