@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// discord automod parser
+// custom discord automod parser
 
-// an enumeration class Flags using an object
+
 const Flags: { NONE: number, START: number, END: number, START_AND_END: number; } = {
     NONE: 0,
     START: 1,
@@ -14,18 +14,17 @@ const Flags: { NONE: number, START: number, END: number, START_AND_END: number; 
     START_AND_END: 3
 };
 
-// a function match_keywords that takes a text and an array of keywords as input
-function match_keywords(text: string, keywords: Array<string>, allowed: Array<string> = []): [boolean, string | null] { // [boolean, string | null]
+function matchKeywords(text: string, keywords: Array<string>, allowed: Array<string> = []): [boolean, string | null] { // [boolean, string | null]
     for (const keyword of keywords) {
-        if (match_keyword(text, keyword, allowed)) {
+        if (matchKeyword(text, keyword, allowed)) {
             return [true, keyword]; // Return true if the keyword is found
         }
     }
     return [false, null]; // Return false if none of the keywords are found
 }
 
-// a function match_keyword that takes a text, a keyword, and an optional array of allowed words as input
-function match_keyword(text: string, keyword: string, allowed: Array<string> = []): boolean | null {
+
+function matchKeyword(text: string, keyword: string, allowed: Array<string> = []): boolean | null {
     // Determine the flag based on the keyword
     const flag: number = (keyword.startsWith("*") ? Flags.START : 0) + (keyword.endsWith("*") ? Flags.END : 0);
 
@@ -49,7 +48,7 @@ function match_keyword(text: string, keyword: string, allowed: Array<string> = [
     let beforeSpace: boolean | null = null;
     let index2: number = 0;
 
-    // Iterate over each character in the text
+
     for (let index = 0; index < text.length; index++) {
         const char = text[index];
 
@@ -91,19 +90,19 @@ function match_keyword(text: string, keyword: string, allowed: Array<string> = [
             }
 
             // Check if the flag is START_AND_END and the token is not found in the allowed words
-            if (flag === Flags.START_AND_END && !match_keywords(tok, allowed)[0]) {
+            if (flag === Flags.START_AND_END && !matchKeywords(tok, allowed)[0]) {
                 return true;
             }
             // Check if the flag is NONE and the token is not found in the allowed words
-            else if (flag === Flags.NONE && ((index2 !== text.length && text[index2] === " ") || index2 === text.length) && beforeSpace && !match_keywords(tok, allowed)[0]) {
+            else if (flag === Flags.NONE && ((index2 !== text.length && text[index2] === " ") || index2 === text.length) && beforeSpace && !matchKeywords(tok, allowed)[0]) {
                 return true;
             }
             // Check if the flag is START and the token is not found in the allowed words
-            else if (flag === Flags.START && ((index2 !== text.length && text[index2] === " ") || index2 === text.length) && !match_keywords(tok, allowed)[0]) { // match_keywords gives null
+            else if (flag === Flags.START && ((index2 !== text.length && text[index2] === " ") || index2 === text.length) && !matchKeywords(tok, allowed)[0]) { // matchKeywords gives null
                 return true;
             }
             // Check if the flag is END and the token is not found in the allowed words
-            else if (flag === Flags.END && beforeSpace && !match_keywords(tok, allowed)[0]) {
+            else if (flag === Flags.END && beforeSpace && !matchKeywords(tok, allowed)[0]) {
                 return true;
             }
 
@@ -149,10 +148,10 @@ function tests() {
         console.log(`test ${i + 1}. ${JSON.stringify(words[i])}`);
         for (let j = 0; j < patterns.length; j++) {
             console.log("pattern:", JSON.stringify(patterns[j]));
-            console.log("match?:", match_keyword(words[i], patterns[j], []));
+            console.log("match?:", matchKeyword(words[i], patterns[j], []));
         }
     }
     console.log("tests ended");
 }
 
-export { match_keyword, match_keywords };
+export { matchKeyword, matchKeywords };

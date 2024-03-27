@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { match_keywords } from "./parser";
+import { matchKeywords } from "./parser";
 
 /*
 const action_types = {
@@ -40,11 +40,11 @@ export interface MatchedRule {
     regex: boolean;
 }
 
-export function match_rules(text: string, rules: Array<AutoModRule>): MatchedRule | null {
+export function matchRules(text: string, rules: Array<AutoModRule>): MatchedRule | null {
     let [matched, keyword]: [boolean, string | null] = [false, null];
     for (const rule of rules) {
         if (rule.triggerMetadata?.keywordFilter && rule.enabled && rule.triggerMetadata.keywordFilter.length > 0) {
-            [matched, keyword] = match_keywords(text, rule.triggerMetadata.keywordFilter, rule.triggerMetadata.allow_list);
+            [matched, keyword] = matchKeywords(text, rule.triggerMetadata.keywordFilter, rule.triggerMetadata.allow_list);
             if (matched) {
                 return { rule: rule, filter: keyword, regex: false };
             }

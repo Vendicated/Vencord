@@ -6,7 +6,7 @@
 
 import { Text, TextArea, useMemo, useState } from "@webpack/common";
 
-import { AutoModRule, match_rules, MatchedRule } from "./automod";
+import { AutoModRule, matchRules, MatchedRule } from "./automod";
 
 
 export function renderTestTextHeader() {
@@ -21,8 +21,8 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
 
     useMemo(() => {
         if (!inputValue || !currentRules) return null;
-        const match: undefined | MatchedRule = currentRules ? match_rules(inputValue, currentRules) : undefined;
-        if (match !== undefined) {
+        const match: null | MatchedRule = currentRules ? matchRules(inputValue, currentRules) : null;
+        if (match !== null) {
             setWarningText(`Match: ${match.rule.name}, filter: ${JSON.stringify(match.filter)}`);
         } else {
             setWarningText("");
