@@ -5,13 +5,15 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     zoomMultiplier: {
-        type: OptionType.NUMBER,
+        type: OptionType.SLIDER,
         description: "Zoom multiplier",
+        markers: makeRange(2, 16),
         default: 4,
     },
 });
