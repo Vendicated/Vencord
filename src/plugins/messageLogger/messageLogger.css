@@ -40,7 +40,7 @@
     cursor: pointer;
 }
 
-.messagelogger-modal-head {
+.vc-ml-modal-head {
     display: grid;
     grid-template:
         "t x" auto
@@ -48,12 +48,12 @@
         / 1fr auto;
 }
 
-.messagelogger-modal-head:nth-child(1) { grid-area: "t"; }
-.messagelogger-modal-head:nth-child(2) { grid-area: "x"; }
-.messagelogger-modal-head:nth-child(3) { grid-area: "r"; }
+.vc-ml-modal-head:nth-child(1) { grid-area: "t"; }
+.vc-ml-modal-head:nth-child(2) { grid-area: "x"; }
+.vc-ml-modal-head:nth-child(3) { grid-area: "r"; }
 
 /* For correct sizing, the revisions are all stacked in a 1x1 grid, with all but one being invisible */
-.messagelogger-modal-contents {
+.vc-ml-modal-contents {
     padding-top: 1em;
     height: 25em;
     max-height: 90%;
@@ -61,42 +61,42 @@
     grid-template: "a" 1fr / 1fr;
 }
 
-.messagelogger-modal-content {
+.vc-ml-modal-content {
     grid-area: a;
 }
 
-.messagelogger-modal-content:not(.messagelogger-modal-content-active) {
+.vc-ml-modal-content:not(.vc-ml-modal-content-active) {
     visibility: hidden;
 }
 
-.messagelogger-modal-revisions {
+.vc-ml-modal-revisions {
     display: flex;
     flex-flow: row wrap;
     gap: 0.5em;
 }
 
-.messagelogger-modal-revision-lost {
+.vc-ml-modal-revision-lost {
     cursor: unset;
     color: var(--icon-muted); /* interactive-muted is hard to see on dark background. This one looks good on both dark and light theme. */
     background: none;
 }
 
-.messagelogger-modal-revision {
+.vc-ml-modal-revision {
     cursor: pointer;
     color: var(--interactive-normal);
     background: none;
 }
 
-.messagelogger-modal-timestamp {
+.vc-ml-modal-timestamp {
     cursor: unset;
 }
 
-.messagelogger-modal-revision:hover {
+.vc-ml-modal-revision:hover {
     color: var(--interactive-hover);
     background-color: var(--background-modifier-hover)
 }
 
-.messagelogger-modal-revision-active {
+.vc-ml-modal-revision-active {
     color: var(--interactive-active);
     background-color: var(--background-modifier-active)
 }

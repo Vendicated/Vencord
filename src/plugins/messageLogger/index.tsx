@@ -23,16 +23,15 @@ import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
-import { showHistory } from "./HistoryModal";
+import { openHistoryModal } from "./HistoryModal";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 const { getMessage } = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
@@ -148,8 +147,8 @@ export default definePlugin({
         },
         collapseDeleted: {
             type: OptionType.BOOLEAN,
-            description: "Whether to collapse deleted messages",
-            default: true
+            description: "Whether to collapse deleted messages, similar to blocked messages",
+            default: false
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -159,7 +158,7 @@ export default definePlugin({
         inlineEdits: {
             type: OptionType.BOOLEAN,
             description: "Whether to display edit history as part of message content",
-            default: false
+            default: true
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -239,7 +238,7 @@ export default definePlugin({
             <span
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
-                onClick={() => showHistory(message)}
+                onClick={() => openHistoryModal(message)}
                 aria-role="button"
             >
                 {children}
@@ -247,7 +246,7 @@ export default definePlugin({
         );
     },
 
-    Messages: proxyLazy(() => ({
+    Messages: proxyLazyWebpack(() => ({
         DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
     })),
 

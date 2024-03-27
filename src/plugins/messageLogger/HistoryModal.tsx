@@ -6,28 +6,27 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import { Parser, Text, Timestamp, useState } from "@webpack/common";
 
 const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
 
-const cl = classNameFactory("messagelogger-modal-");
+const cl = classNameFactory("vc-ml-modal-");
 
-export function showHistory(message: any) {
+export function openHistoryModal(message: any) {
     const key = openModal(props =>
         <ErrorBoundary>
             <HistoryModal
                 modalProps={props}
-                close={() => closeModal(key)}
                 message={message}
             />
         </ErrorBoundary>
     );
 }
 
-export function HistoryModal({ modalProps, close, message }: { modalProps: ModalProps; close(): void; message: any }) {
+export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any }) {
     const [selected, selectItem] = useState(message.editHistory.length);
     const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(a => a.timestamp)];
     const contents = [...message.editHistory.map(a => a.content), message.content];
@@ -35,7 +34,7 @@ export function HistoryModal({ modalProps, close, message }: { modalProps: Modal
     return <ModalRoot {...modalProps} size={ModalSize.LARGE}>
         <ModalHeader className={cl("head")}>
             <Text variant="heading-lg/semibold">Message Edit History</Text>
-            <ModalCloseButton onClick={close} />
+            <ModalCloseButton onClick={modalProps.onClose} />
             <div className={cl("revisions")}>
                 { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() ? (
                     <button className={cl("revision-lost")} disabled>
