@@ -106,13 +106,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod?.exports) continue;
+        if (!mod?.exports || mod.exports === window) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
-        if (mod.exports.default && filter(mod.exports.default)) {
+        if (mod.exports.default && mod.exports.default !== window && filter(mod.exports.default)) {
             const found = mod.exports.default;
             return isWaitFor ? [found, key] : found;
         }
