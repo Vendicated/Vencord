@@ -405,10 +405,10 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
 /**
  * Extract and load chunks using their entry point
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
- * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
+ * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A promise that resolves when the chunks were loaded
  */
-export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.el\("(.+?)"\)\.then\(\i\.bind\(\i,"(.+?)"\)\)/) {
+export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/) {
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -450,10 +450,10 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /\.
  *
  * Extract and load chunks using their entry point
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
- * @param matcher A RegExp that returns the chunk group id as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
+ * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves when the chunks were loaded, on first call
  */
-export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /\.el\("(.+?)"\)\.then\(\i\.bind\(\i,"(.+?)"\)\)/) {
+export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return () => extractAndLoadChunks(code, matcher);
