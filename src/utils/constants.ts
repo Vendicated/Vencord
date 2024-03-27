@@ -427,8 +427,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 421405303951851520n
     },
     Byron: {
-        name: "byron",
-        id: 639577344276692992n
+        name: "byeoon",
+        id: 1167275288036655133n
     }
 } satisfies Record<string, Dev>);
 
