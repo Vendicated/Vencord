@@ -1,0 +1,18 @@
+.vc-bps-center > * {
+    justify-content: center;
+}
+
+.vc-bps-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.vc-bps-guild-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+}
