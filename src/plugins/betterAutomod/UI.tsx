@@ -4,10 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Text, TextArea, useMemo, useState } from "@webpack/common";
+import { Text, TextArea, Forms, useMemo, useState } from "@webpack/common";
 
 import { AutoModRule, matchRules, MatchedRule } from "./automod";
 
+export function settingsAboutComponent() {
+    return (<>
+        <Forms.FormTitle tag="h3">Description and How to use:</Forms.FormTitle>
+        <Forms.FormText style={{ fontSize: "14px" }}>
+            <Text>
+                This plugin allows you to test your AutoMod rules. Simply input a message into the box in the automod settings,
+                it will check if the message matches any of your rules.
+                <br />it echos automod logs to the automoded channel to do so:
+                <br />You must setup a logs channel and you should have the permissions to view it.
+            </Text>
+        </Forms.FormText>
+    </>);
+}
 
 export function renderTestTextHeader() {
     return (<Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>);
@@ -46,3 +59,4 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
         </div>
     );
 }
+export { Forms };

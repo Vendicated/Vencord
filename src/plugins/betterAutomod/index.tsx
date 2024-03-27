@@ -21,11 +21,13 @@ import "./style.css";
 import { sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Embed, Message } from "discord-types/general";
 
 import { AutoModRule } from "./automod";
-import { renderTestTextHeader, TestInputBoxComponent } from "./UI";
+import { renderTestTextHeader, TestInputBoxComponent, settingsAboutComponent } from "./UI";
+
+import { definePluginSettings } from "@api/Settings";
 
 const logger = new Logger("betterModeration");
 
@@ -44,17 +46,37 @@ interface IMessageCreate {
     message: EMessage;
 }
 
+
+const settings = definePluginSettings({
+    testBox: {
+        type: OptionType.BOOLEAN,
+        description: "enable Automod Test box",
+        default: true,
+        restartNeeded: true
+    },
+    echoIt: {
+        type: OptionType.BOOLEAN,
+        description: "echo Automod embed",
+        default: true
+    }
+});
+
 export default definePlugin({
-    name: "betterModeration",
+    name: "betterAutomod",
     authors: [Devs.iamme],
     description: "echo automod logs in the automoded channel and be able test your automod rules",
+    settings: settings,
+    settingsAboutComponent: settingsAboutComponent,
     patches: [
         {
             find: ".Messages.GUILD_SETTINGS_AUTOMOD_MESSAGE_FILTER_DESCRIPTION",
-            replacement: [{
-                match: /\.textBadge.+?}\),/,
-                replace: "$&$self.renderTestTextHeader(), $self.renderInputBox(),"
-            }]
+            replacement: [
+                {
+                    match: /\.textBadge.+?}\),/,
+                    replace: "$&$self.renderTestTextHeader(), $self.renderInputBox(),"
+                }
+            ],
+            predicate: () => settings.store.testBox
         },
         {
             find: "Endpoints.GUILD_AUTOMOD_RULES(e)});",
@@ -63,7 +85,8 @@ export default definePlugin({
                     match: /return (Array.isArray\(\i\.body\)\?\i\.body\.map\(\i\):\[\])/,
                     replace: "let the_rules = $1;$self.setRules(the_rules);return the_rules"
                 }
-            ]
+            ],
+            predicate: () => settings.store.testBox
         },
         {
             find: "saveRule:async(",
@@ -72,7 +95,8 @@ export default definePlugin({
                     match: /return (\i)=(\(0,\i\.isBackendPersistedRule\)\((\i)\)&&!\(0,\i\.isDefaultRuleId\)\(\i\.id\))/,
                     replace: "$1=$2;$self.saveOrUpdateAutomodRule($1,$3);return $1=$1"
                 }
-            ]
+            ],
+            predicate: () => settings.store.testBox
         },
         {
             find: ".deleteAutomodRule",
@@ -81,7 +105,8 @@ export default definePlugin({
                     match: /\i\((\i.id),(\i.guildId)\)/,
                     replace: "$&,$self.deleteAutomodRule($1,$2)"
                 }
-            ]
+            ],
+            predicate: () => settings.store.testBox
         }
     ],
     deleteAutomodRule: async (ruleid: string, guildId: string) => {
@@ -103,6 +128,7 @@ export default definePlugin({
     renderTestTextHeader: renderTestTextHeader,
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
+            if (!settings.store.echoIt) return;
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (message?.echoed) return;
