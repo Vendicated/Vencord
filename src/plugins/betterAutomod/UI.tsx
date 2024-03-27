@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Text, TextArea, Forms, useMemo, useState } from "@webpack/common";
+import { Link } from "@components/Link";
+import { Forms, Text, TextArea, useMemo, useState } from "@webpack/common";
 
-import { AutoModRule, matchRules, MatchedRule } from "./automod";
+import { AutoModRule, MatchedRule,matchRules } from "./automod";
 
 export function settingsAboutComponent() {
     return (<>
@@ -17,6 +18,7 @@ export function settingsAboutComponent() {
                 it will check if the message matches any of your rules.
                 <br />it echos automod logs to the automoded channel to do so:
                 <br />You must setup a logs channel and you should have the permissions to view it.
+                <br />for more info about automod check <Link href="https://discord.com/blog/automod-launch-automatic-community-moderation">here</Link>
             </Text>
         </Forms.FormText>
     </>);

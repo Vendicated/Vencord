@@ -49,6 +49,6 @@ export function matchRules(text: string, rules: Array<AutoModRule>): MatchedRule
                 return { rule: rule, filter: keyword, regex: false };
             }
         }
-    };
+    }
     return null;
 }
