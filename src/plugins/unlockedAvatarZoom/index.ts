@@ -18,7 +18,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "UnlockedAvatarZoom",
-    description: "Unlocks the avatar zoom slider on the edit avatar modal",
+    description: "Unlocks and allows you to use custom multipliers for the zoom slider in the \"Edit Image\" modal (aka while cropping a profile picture)",
     authors: [Devs.nakoyasha],
     settings,
     patches: [
