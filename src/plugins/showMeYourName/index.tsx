@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 rini
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,42 +9,50 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "discord-types/general";
-
-interface UsernameProps {
-    author: { nick: string; };
-    message: Message;
-    withMentionPrefix?: boolean;
-    isRepliedMessage: boolean;
-    userOverride?: User;
-}
+import { UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
-    mode: {
+    primaryLabel: {
         type: OptionType.SELECT,
-        description: "How to display usernames and nicks",
+        description: "What should be the primary display? (the text with the role color)",
         options: [
-            { label: "Username then nickname", value: "user-nick", default: true },
-            { label: "Nickname then username", value: "nick-user" },
-            { label: "Username only", value: "user" },
+            { label: "Username", value: "user", default: true },
+            { label: "Nickname", value: "nick" },
+            { label: "ID", value: "id" },
+            { label: "Display Name", value: "display" },
         ],
+        restartNeeded: true
     },
-    displayNames: {
+    username: {
         type: OptionType.BOOLEAN,
-        description: "Use display names in place of usernames",
-        default: false
+        description: "If the username should be shown in brackets",
+        default: true,
+        restartNeeded: true
     },
-    inReplies: {
+    nickname: {
         type: OptionType.BOOLEAN,
-        default: false,
-        description: "Also apply functionality to reply previews",
+        description: "If the nickname should be shown in brackets",
+        default: true,
+        restartNeeded: true
     },
+    id: {
+        type: OptionType.BOOLEAN,
+        description: "If the ID should be shown in brackets",
+        default: true,
+        restartNeeded: true
+    },
+    DisplayName: {
+        type: OptionType.BOOLEAN,
+        description: "If the display name should be shown in brackets",
+        default: true,
+        restartNeeded: true
+    }
 });
 
 export default definePlugin({
     name: "ShowMeYourName",
-    description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.Rini, Devs.TheKodeToad],
+    description: "Allows you to configure what is shown as a users username",
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.Samwich],
     patches: [
         {
             find: ".useCanSeeRemixBadge)",
@@ -56,24 +64,53 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+    renderUsername: data => {
         try {
-            const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+            const messageuser = UserStore.getUser(data.message.author.id) as any;
+            let primaryLabel;
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
-            if (username === nick || isRepliedMessage && !settings.store.inReplies)
-                return prefix + nick;
-            if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
-            if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-            return prefix + username;
+            const extraData: string[] = [];
+
+            if(settings.store.username && settings.store.primaryLabel !== "user")
+            {
+                extraData.push(messageuser.username);
+            }
+            if(settings.store.nickname && settings.store.primaryLabel !== "nick" && data.author.nick !== messageuser.globalName)
+            {
+                extraData.push(data.author.nick);
+            }
+
+            if(settings.store.id && settings.store.primaryLabel !== "id")
+            {
+                extraData.push(messageuser.id);
+            }
+
+            if(settings.store.DisplayName && settings.store.primaryLabel !== "display")
+            {
+                extraData.push(messageuser.globalName);
+            }
+            // set the primary label to whatever the user set
+            switch(settings.store.primaryLabel)
+            {
+                case "user":
+                    primaryLabel = messageuser.username;
+                    break;
+                case "nick":
+                    primaryLabel = data.author.nick;
+                    break;
+                case "id":
+                    primaryLabel = messageuser.id;
+                    break;
+                case "display":
+                    // @ts-ignore
+                    primaryLabel = messageuser.globalName;
+                    break;
+            }
+            // return the text with all the values
+            return <>{primaryLabel}<span className="vc-smyn-suffix">{extraData.length ? ` (${extraData.join(", ")})` : ""}</span></>;
+
         } catch {
-            return author?.nick;
+            return "oops";
         }
     },
 });
