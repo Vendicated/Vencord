@@ -65,7 +65,7 @@ export default definePlugin({
         {
             find: ".messageAttachment,",
             replacement: {
-                match: /\{width:\i,height:\i\}=(\i).*?(?=className:\i\(\i\.messageAttachment,)/,
+                match: /\{width:\i,height:\i\}=(\i).*?(?=className:\i\(\)\(\i\.messageAttachment,)/,
                 replace: "$&style:$self.style($1),"
             }
         }
