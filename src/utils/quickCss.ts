@@ -57,9 +57,11 @@ export async function toggle(isEnabled: boolean) {
 async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
-    const { themeLinks, enabledThemes } = Settings;
+    const { themeLinks, disabledThemeLinks, enabledThemes } = Settings;
 
-    const links: string[] = [...themeLinks];
+    let links: string[] = [...themeLinks];
+
+    links = links.filter(link => !disabledThemeLinks.includes(link));
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {

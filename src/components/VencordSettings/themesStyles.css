@@ -27,3 +27,21 @@
 .vc-settings-theme-author::before {
     content: "by ";
 }
+
+.vc-settings-theme-add-theme-content {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vc-settings-theme-add-theme-footer {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.vc-settings-theme-add-theme-error {
+    color: var(--text-danger);
+}
