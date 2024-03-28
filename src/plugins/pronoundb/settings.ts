@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import { PronounsFormat } from "./pronoundbUtils";
+import { PronounsFormat, PronounSource } from "./pronoundbUtils";
 
 export const settings = definePluginSettings({
     pronounsFormat: {
@@ -34,6 +34,21 @@ export const settings = definePluginSettings({
             {
                 label: "Capitalized",
                 value: PronounsFormat.Capitalized
+            }
+        ]
+    },
+    pronounSource: {
+        type: OptionType.SELECT,
+        description: "Where to source pronouns from",
+        options: [
+            {
+                label: "Prefer PronounDB, fall back to Discord",
+                value: PronounSource.PreferPDB,
+                default: true
+            },
+            {
+                label: "Prefer Discord, fall back to PronounDB (might lead to inconsistency between pronouns in chat and profile)",
+                value: PronounSource.PreferDiscord
             }
         ]
     },

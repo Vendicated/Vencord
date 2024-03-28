@@ -18,6 +18,8 @@
 
 import { Clipboard, Toasts } from "@webpack/common";
 
+import { DevsById } from "./constants";
+
 /**
  * Recursively merges defaults into an object and returns the same object
  * @param obj Object
@@ -73,6 +75,16 @@ export function isObject(obj: unknown): obj is object {
 }
 
 /**
+ * Check if an object is empty or in other words has no own properties
+ */
+export function isObjectEmpty(obj: object) {
+    for (const k in obj)
+        if (Object.hasOwn(obj, k)) return false;
+
+    return true;
+}
+
+/**
  * Returns null if value is not a URL, otherwise return URL object.
  * Avoids having to wrap url checks in a try/catch
  */
@@ -100,3 +112,5 @@ export function identity<T>(value: T): T {
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
+
+export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);

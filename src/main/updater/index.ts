@@ -16,4 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import(IS_STANDALONE ? "./http" : "./git");
+if (!IS_UPDATER_DISABLED)
+    import(IS_STANDALONE ? "./http" : "./git");

@@ -18,127 +18,138 @@
 
 import "./style.css";
 
-import { Settings } from "@api/Settings";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
+import ExpandableHeader from "@components/ExpandableHeader";
+import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button } from "@webpack/common";
-import { User } from "discord-types/general";
+import { Logger } from "@utils/Logger";
+import definePlugin from "@utils/types";
+import { Alerts, Menu, Parser, useState } from "@webpack/common";
+import { Guild, User } from "discord-types/general";
 
+import { Auth, initAuth, updateAuth } from "./auth";
+import { openReviewsModal } from "./components/ReviewModal";
 import ReviewsView from "./components/ReviewsView";
-import { UserType } from "./entities/User";
-import { getCurrentUserInfo } from "./Utils/ReviewDBAPI";
-import { authorize, showToast } from "./Utils/Utils";
+import { NotificationType } from "./entities";
+import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
+import { settings } from "./settings";
+import { showToast } from "./utils";
+
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => {
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-server-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(props.guild.id, props.guild.name)}
+        />
+    );
+};
 
 export default definePlugin({
     name: "ReviewDB",
     description: "Review other users (Adds a new settings to profiles)",
     authors: [Devs.mantikafasi, Devs.Ven],
 
+    settings,
+    contextMenus: {
+        "guild-header-popout": guildPopoutPatch
+    },
+
     patches: [
         {
-            find: "disableBorderColor:!0",
+            find: "showBorder:null",
             replacement: {
-                match: /\(.{0,10}\{user:(.),setNote:.,canDM:.,.+?\}\)/,
+                match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
             }
         }
     ],
 
-    options: {
-        authorize: {
-            type: OptionType.COMPONENT,
-            description: "Authorize with ReviewDB",
-            component: () => (
-                <Button onClick={authorize}>
-                    Authorize with ReviewDB
-                </Button>
-            )
-        },
-        notifyReviews: {
-            type: OptionType.BOOLEAN,
-            description: "Notify about new reviews on startup",
-            default: true,
-        },
-        showWarning: {
-            type: OptionType.BOOLEAN,
-            description: "Display warning to be respectful at the top of the reviews list",
-            default: true,
-        },
-        hideTimestamps: {
-            type: OptionType.BOOLEAN,
-            description: "Hide timestamps on reviews",
-            default: false,
-        },
-        website: {
-            type: OptionType.COMPONENT,
-            description: "ReviewDB website",
-            component: () => (
-                <Button onClick={() => {
-                    window.open("https://reviewdb.mantikafasi.dev");
-                }}>
-                    ReviewDB website
-                </Button>
-            )
-        },
-        supportServer: {
-            type: OptionType.COMPONENT,
-            description: "ReviewDB Support Server",
-            component: () => (
-                <Button onClick={() => {
-                    window.open("https://discord.gg/eWPBSbvznt");
-                }}>
-                    ReviewDB Support Server
-                </Button>
-            )
-        },
+    flux: {
+        CONNECTION_OPEN: initAuth,
     },
 
     async start() {
-        const settings = Settings.plugins.ReviewDB;
-        if (!settings.notifyReviews || !settings.token) return;
+        const s = settings.store;
+        const { lastReviewId, notifyReviews } = s;
+
+        const legacy = s as any as { token?: string; };
+        if (legacy.token) {
+            await updateAuth({ token: legacy.token });
+            legacy.token = undefined;
+            new Logger("ReviewDB").info("Migrated legacy settings");
+        }
+
+        await initAuth();
 
         setTimeout(async () => {
-            const user = await getCurrentUserInfo(settings.token);
-            if (settings.lastReviewId < user.lastReviewID) {
-                settings.lastReviewId = user.lastReviewID;
-                if (user.lastReviewID !== 0)
-                    showToast("You have new reviews on your profile!");
-            }
+            if (!Auth.token) return;
 
-            if (user.banInfo) {
-                const endDate = new Date(user.banInfo.banEndDate);
-                if (endDate > new Date() && (settings.user?.banInfo?.banEndDate ?? 0) < endDate) {
+            const user = await getCurrentUserInfo(Auth.token);
+            updateAuth({ user });
 
-                    Alerts.show({
-                        title: "You have been banned from ReviewDB",
-                        body: <>
-                            <p>
-                                You are banned from ReviewDB {(user.type === UserType.Banned) ? "permanently" : "until " + endDate.toLocaleString()}
-                            </p>
-                            <p>
-                                Offending Review: {user.banInfo.reviewContent}
-                            </p>
-                            <p>
-                                Continued offenses will result in a permanent ban.
-                            </p>
-                        </>,
-                        cancelText: "Appeal",
-                        confirmText: "Ok",
-                        onCancel: () => {
-                            window.open("https://forms.gle/Thj3rDYaMdKoMMuq6");
-                        }
-                    });
+            if (notifyReviews) {
+                if (lastReviewId && lastReviewId < user.lastReviewID) {
+                    s.lastReviewId = user.lastReviewID;
+                    if (user.lastReviewID !== 0)
+                        showToast("You have new reviews on your profile!");
                 }
             }
 
-            settings.user = user;
+            if (user.notification) {
+                const props = user.notification.type === NotificationType.Ban ? {
+                    cancelText: "Appeal",
+                    confirmText: "Ok",
+                    onCancel: async () =>
+                        VencordNative.native.openExternal(
+                            "https://reviewdb.mantikafasi.dev/api/redirect?"
+                            + new URLSearchParams({
+                                token: Auth.token!,
+                                page: "dashboard/appeal"
+                            })
+                        )
+                } : {};
+
+                Alerts.show({
+                    title: user.notification.title,
+                    body: (
+                        Parser.parse(
+                            user.notification.content,
+                            false
+                        )
+                    ),
+                    ...props
+                });
+
+                readNotification(user.notification.id);
+            }
         }, 4000);
     },
 
-    getReviewsComponent: (user: User) => (
-        <ErrorBoundary message="Failed to render Reviews">
-            <ReviewsView userId={user.id} />
-        </ErrorBoundary>
-    )
+    getReviewsComponent: ErrorBoundary.wrap((user: User) => {
+        const [reviewCount, setReviewCount] = useState<number>();
+
+        return (
+            <ExpandableHeader
+                headerText="User Reviews"
+                onMoreClick={() => openReviewsModal(user.id, user.username)}
+                moreTooltipText={
+                    reviewCount && reviewCount > 50
+                        ? `View all ${reviewCount} reviews`
+                        : "Open Review Modal"
+                }
+                onDropDownClick={state => settings.store.reviewsDropdownState = !state}
+                defaultState={settings.store.reviewsDropdownState}
+            >
+                <ReviewsView
+                    discordId={user.id}
+                    name={user.username}
+                    onFetchReviews={r => setReviewCount(r.reviewCount)}
+                    showInput
+                />
+            </ExpandableHeader>
+        );
+    }, { message: "Failed to render Reviews" })
 });

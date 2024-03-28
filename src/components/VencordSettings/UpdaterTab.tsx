@@ -46,7 +46,7 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                 if (code === "ENOENT")
                     var err = `Command \`${path}\` not found.\nPlease install it and try again`;
                 else {
-                    var err = `An error occured while running \`${cmd}\`:\n`;
+                    var err = `An error occurred while running \`${cmd}\`:\n`;
                     err += stderr || `Code \`${code}\`. See the console for more info`;
                 }
 
@@ -81,9 +81,12 @@ function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string
 
 function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
-        <Card style={{ padding: ".5em" }}>
+        <Card style={{ padding: "0 0.5em" }}>
             {updates.map(({ hash, author, message }) => (
-                <div>
+                <div style={{
+                    marginTop: "0.5em",
+                    marginBottom: "0.5em"
+                }}>
                     <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
@@ -113,7 +116,7 @@ function Updatable(props: CommonProps) {
                 </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
+                    {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
                 </Forms.FormText>
             )}
 
@@ -249,4 +252,4 @@ function Updater() {
     );
 }
 
-export default IS_WEB ? null : wrapTab(Updater, "Updater");
+export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");

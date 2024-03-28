@@ -1,0 +1,58 @@
+.vc-author-modal-root {
+    padding: 1em;
+}
+
+.vc-author-modal-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.vc-author-modal-name {
+    text-transform: none;
+    flex-grow: 0;
+    background: var(--background-tertiary);
+    border-radius: 0 9999px 9999px 0;
+    padding: 6px 0.8em 6px 0.5em;
+    font-size: 20px;
+    height: 20px;
+    position: relative;
+    text-wrap: nowrap;
+}
+
+.vc-author-modal-name::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 16px;
+    background: var(--background-tertiary);
+    z-index: -1;
+    left: -16px;
+    top: 0;
+}
+
+.vc-author-modal-avatar {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+}
+
+.vc-author-modal-links {
+    margin-left: auto;
+    display: flex;
+    gap: 0.2em;
+}
+
+.vc-author-modal-links img {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    border: 4px solid var(--background-tertiary);
+    box-sizing: border-box
+}
+
+.vc-author-modal-plugins {
+    display: grid;
+    gap: 0.5em;
+}

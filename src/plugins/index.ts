@@ -17,9 +17,10 @@
 */
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { Patch, Plugin } from "@utils/types";
+import { Patch, Plugin, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -85,9 +86,15 @@ for (const p of pluginsValues) {
     }
 }
 
-export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
+export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
+    logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins)
         if (isPluginEnabled(name)) {
+            const p = Plugins[name];
+
+            const startAt = p.startAt ?? StartAt.WebpackReady;
+            if (startAt !== target) continue;
+
             startPlugin(Plugins[name]);
         }
 });
@@ -113,7 +120,7 @@ export function startDependenciesRecursive(p: Plugin) {
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, flux } = p;
+    const { name, commands, flux, contextMenus } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -148,11 +155,17 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
+    if (contextMenus) {
+        for (const navId in contextMenus) {
+            addContextMenuPatch(navId, contextMenus[navId]);
+        }
+    }
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, flux } = p;
+    const { name, commands, flux, contextMenus } = p;
     if (p.stop) {
         logger.info("Stopping plugin", name);
         if (!p.started) {
@@ -183,6 +196,12 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (flux) {
         for (const event in flux) {
             FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
+        }
+    }
+
+    if (contextMenus) {
+        for (const navId in contextMenus) {
+            removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
 

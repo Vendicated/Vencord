@@ -20,7 +20,7 @@ import { Logger } from "@utils/Logger";
 
 const logger = new Logger("ServerListAPI");
 
-export enum ServerListRenderPosition {
+export const enum ServerListRenderPosition {
     Above,
     In,
 }

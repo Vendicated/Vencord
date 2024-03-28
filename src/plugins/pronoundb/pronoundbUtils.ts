@@ -17,17 +17,26 @@
 */
 
 import { Settings } from "@api/Settings";
-import { VENCORD_USER_AGENT } from "@utils/constants";
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
+import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
-import { UserStore } from "@webpack/common";
+import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { PronounCode, PronounMapping, PronounsResponse } from "./types";
 
+type PronounsWithSource = [string | null, string];
+const EmptyPronouns: PronounsWithSource = [null, ""];
+
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
     Capitalized = "CAPITALIZED"
+}
+
+export const enum PronounSource {
+    PreferPDB,
+    PreferDiscord
 }
 
 // A map of cached pronouns so the same request isn't sent twice
@@ -46,46 +55,67 @@ const bulkFetch = debounce(async () => {
     }
 });
 
-export function useFormattedPronouns(id: string): string | null {
+function getDiscordPronouns(id: string, useGlobalProfile: boolean = false) {
+    const globalPronouns = UserProfileStore.getUserProfile(id)?.pronouns;
+
+    if (useGlobalProfile) return globalPronouns;
+
+    return (
+        UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.guild_id)?.pronouns
+        || globalPronouns
+    );
+}
+
+export function useFormattedPronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
+    // Discord is so stupid you can put tons of newlines in pronouns
+    const discordPronouns = getDiscordPronouns(id, useGlobalProfile)?.trim().replace(NewLineRe, " ");
+
     const [result] = useAwaiter(() => fetchPronouns(id), {
         fallbackValue: getCachedPronouns(id),
         onError: e => console.error("Fetching pronouns failed: ", e)
     });
 
-    // If the result is present and not "unspecified", and there is a mapping for the code, then return the mappings
-    if (result && result !== "unspecified" && PronounMapping[result])
-        return formatPronouns(result);
+    if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
+        return [discordPronouns, "Discord"];
 
-    return null;
+    if (result && result !== "unspecified")
+        return [formatPronouns(result), "PronounDB"];
+
+    return [discordPronouns, "Discord"];
 }
 
-export function useProfilePronouns(id: string) {
-    const pronouns = useFormattedPronouns(id);
+export function useProfilePronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {
+    const pronouns = useFormattedPronouns(id, useGlobalProfile);
 
-    if (!settings.store.showInProfile) return null;
-    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return null;
+    if (!settings.store.showInProfile) return EmptyPronouns;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return EmptyPronouns;
 
     return pronouns;
 }
 
 
+const NewLineRe = /\n+/g;
+
 // Gets the cached pronouns, if you're too impatient for a promise!
-export function getCachedPronouns(id: string): PronounCode | null {
-    return cache[id] ?? null;
+export function getCachedPronouns(id: string): string | null {
+    const cached = cache[id];
+    if (cached && cached !== "unspecified") return cached;
+
+    return cached || null;
 }
 
 // Fetches the pronouns for one id, returning a promise that resolves if it was cached, or once the request is completed
-export function fetchPronouns(id: string): Promise<PronounCode> {
+export function fetchPronouns(id: string): Promise<string> {
     return new Promise(res => {
-        // If cached, return the cached pronouns
-        if (id in cache) res(getCachedPronouns(id)!);
+        const cached = getCachedPronouns(id);
+        if (cached) return res(cached);
+
         // If there is already a request added, then just add this callback to it
-        else if (id in requestQueue) requestQueue[id].push(res);
+        if (id in requestQueue) return requestQueue[id].push(res);
+
         // If not already added, then add it and call the debounced function to make sure the request gets executed
-        else {
-            requestQueue[id] = [res];
-            bulkFetch();
-        }
+        requestQueue[id] = [res];
+        bulkFetch();
     });
 }
 
@@ -116,7 +146,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     }
 }
 
-export function formatPronouns(pronouns: PronounCode): string {
+export function formatPronouns(pronouns: string): string {
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
     // For capitalized pronouns, just return the mapping (it is by default capitalized)
     if (pronounsFormat === PronounsFormat.Capitalized) return PronounMapping[pronouns];

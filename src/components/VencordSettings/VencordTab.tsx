@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -49,6 +48,7 @@ function VencordSettings() {
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -75,10 +75,10 @@ function VencordSettings() {
                 title: "Use Windows' native title bar instead of Discord's custom one",
                 note: "Requires a full restart"
             }),
-            !IS_WEB && false /* This causes electron to freeze / white screen for some people */ && {
+            !IS_WEB && {
                 key: "transparent",
-                title: "Enable window transparency",
-                note: "Requires a full restart"
+                title: "Enable window transparency.",
+                note: "You need a theme that supports transparency or this will do nothing. Will stop the window from being resizable. Requires a full restart"
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
@@ -90,11 +90,6 @@ function VencordSettings() {
                 title: "Disable minimum window size",
                 note: "Requires a full restart"
             },
-            IS_DISCORD_DESKTOP && isMac && {
-                key: "macosTranslucency",
-                title: "Enable translucent window",
-                note: "Requires a full restart"
-            }
         ];
 
     return (
@@ -152,6 +147,70 @@ function VencordSettings() {
                 ))}
             </Forms.FormSection>
 
+
+            {needsVibrancySettings && <>
+                <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+                <Select
+                    className={Margins.bottom20}
+                    placeholder="Window vibrancy style"
+                    options={[
+                        // Sorted from most opaque to most transparent
+                        {
+                            label: "No vibrancy", value: undefined
+                        },
+                        {
+                            label: "Under Page (window tinting)",
+                            value: "under-page"
+                        },
+                        {
+                            label: "Content",
+                            value: "content"
+                        },
+                        {
+                            label: "Window",
+                            value: "window"
+                        },
+                        {
+                            label: "Selection",
+                            value: "selection"
+                        },
+                        {
+                            label: "Titlebar",
+                            value: "titlebar"
+                        },
+                        {
+                            label: "Header",
+                            value: "header"
+                        },
+                        {
+                            label: "Sidebar",
+                            value: "sidebar"
+                        },
+                        {
+                            label: "Tooltip",
+                            value: "tooltip"
+                        },
+                        {
+                            label: "Menu",
+                            value: "menu"
+                        },
+                        {
+                            label: "Popover",
+                            value: "popover"
+                        },
+                        {
+                            label: "Fullscreen UI (transparent but slightly muted)",
+                            value: "fullscreen-ui"
+                        },
+                        {
+                            label: "HUD (Most transparent)",
+                            value: "hud"
+                        },
+                    ]}
+                    select={v => settings.macosVibrancyStyle = v}
+                    isSelected={v => settings.macosVibrancyStyle === v}
+                    serialize={identity} />
+            </>}
 
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
         </SettingsTab>
@@ -258,7 +317,11 @@ function DonateCard({ image }: DonateCardProps) {
                 src={image}
                 alt=""
                 height={128}
-                style={{ marginLeft: "auto", transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : "" }}
+                style={{
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    marginLeft: "auto",
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                }}
             />
         </Card>
     );

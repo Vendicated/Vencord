@@ -16,105 +16,171 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
-import { classes } from "@utils/misc";
-import { useAwaiter } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
-import { Forms, React, Text, UserStore } from "@webpack/common";
-import type { KeyboardEvent } from "react";
+import { useAwaiter, useForceUpdater } from "@utils/react";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
-import { addReview, getReviews } from "../Utils/ReviewDBAPI";
-import { authorize, showToast } from "../Utils/Utils";
+import { Auth, authorize } from "../auth";
+import { Review } from "../entities";
+import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
+import { settings } from "../settings";
+import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Classes = findByPropsLazy("inputDefault", "editable");
 
-export default function ReviewsView({ userId }: { userId: string; }) {
-    const { token } = Settings.plugins.ReviewDB;
-    const [refetchCount, setRefetchCount] = React.useState(0);
-    const [reviews, _, isLoading] = useAwaiter(() => getReviews(userId), {
-        fallbackValue: [],
-        deps: [refetchCount],
-    });
-    const username = UserStore.getUser(userId)?.username ?? "";
+const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
+const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
 
-    const dirtyRefetch = () => setRefetchCount(refetchCount + 1);
+const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
+const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
 
-    if (isLoading) return null;
+interface UserProps {
+    discordId: string;
+    name: string;
+}
 
-    function onKeyPress({ key, target }: KeyboardEvent<HTMLTextAreaElement>) {
-        if (key === "Enter") {
-            addReview({
-                userid: userId,
-                comment: (target as HTMLInputElement).value,
-                star: -1
-            }).then(res => {
-                if (res?.success) {
-                    (target as HTMLInputElement).value = ""; // clear the input
-                    dirtyRefetch();
-                } else if (res?.message) {
-                    showToast(res.message);
-                }
-            });
+interface Props extends UserProps {
+    onFetchReviews(data: Response): void;
+    refetchSignal?: unknown;
+    showInput?: boolean;
+    page?: number;
+    scrollToTop?(): void;
+    hideOwnReview?: boolean;
+}
+
+export default function ReviewsView({
+    discordId,
+    name,
+    onFetchReviews,
+    refetchSignal,
+    scrollToTop,
+    page = 1,
+    showInput = false,
+    hideOwnReview = false,
+}: Props) {
+    const [signal, refetch] = useForceUpdater(true);
+
+    const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+        fallbackValue: null,
+        deps: [refetchSignal, signal, page],
+        onSuccess: data => {
+            if (settings.store.hideBlockedUsers)
+                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+
+            scrollToTop?.();
+            onFetchReviews(data!);
         }
-    }
+    });
+
+    if (!reviewData) return null;
 
     return (
-        <div className="vc-reviewdb-view">
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{
-                    marginBottom: "8px",
-                    color: "var(--header-primary)"
-                }}
-            >
-                User Reviews
-            </Text>
+        <>
+            <ReviewList
+                refetch={refetch}
+                reviews={reviewData!.reviews}
+                hideOwnReview={hideOwnReview}
+                profileId={discordId}
+            />
+
+            {showInput && (
+                <ReviewsInputComponent
+                    name={name}
+                    discordId={discordId}
+                    refetch={refetch}
+                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
+                />
+            )}
+        </>
+    );
+}
+
+function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
+    const myId = UserStore.getCurrentUser().id;
+
+    return (
+        <div className={cl("view")}>
             {reviews?.map(review =>
+                (review.sender.discordID !== myId || !hideOwnReview) &&
                 <ReviewComponent
                     key={review.id}
                     review={review}
-                    refetch={dirtyRefetch}
+                    refetch={refetch}
+                    profileId={profileId}
                 />
             )}
+
             {reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+                <Forms.FormText className={cl("placeholder")}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
             )}
-            <textarea
-                className={classes(Classes.inputDefault, "enter-comment")}
-                onKeyDownCapture={e => {
-                    if (e.key === "Enter") {
-                        e.preventDefault(); // prevent newlines
-                    }
-                }}
-                placeholder={
-                    token
-                        ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
-                            ? `Update review for @${username}`
-                            : `Review @${username}`)
-                        : "You need to authorize to review users!"
-                }
-                onKeyDown={onKeyPress}
-                onClick={() => {
-                    if (!token) {
-                        showToast("Opening authorization window...");
-                        authorize();
-                    }
-                }}
-
-                style={{
-                    marginTop: "6px",
-                    resize: "none",
-                    marginBottom: "12px",
-                    overflow: "hidden",
-                    background: "transparent",
-                    border: "1px solid var(--profile-message-input-border-color)",
-                    fontSize: "14px",
-                }}
-            />
         </div>
+    );
+}
+
+
+export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
+    const { token } = Auth;
+    const editorRef = useRef<any>(null);
+    const inputType = ChatInputTypes.FORM;
+    inputType.disableAutoFocus = true;
+
+    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
+
+    return (
+        <>
+            <div onClick={() => {
+                if (!token) {
+                    showToast("Opening authorization window...");
+                    authorize();
+                }
+            }}>
+                <InputComponent
+                    className={cl("input")}
+                    channel={channel}
+                    placeholder={
+                        !token
+                            ? "You need to authorize to review users!"
+                            : isAuthor
+                                ? `Update review for @${name}`
+                                : `Review @${name}`
+                    }
+                    type={inputType}
+                    disableThemedBackground={true}
+                    setEditorRef={ref => editorRef.current = ref}
+                    textValue=""
+                    onSubmit={
+                        async res => {
+                            const response = await addReview({
+                                userid: discordId,
+                                comment: res.value,
+                            });
+
+                            if (response) {
+                                refetch();
+
+                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
+
+                                // clear editor
+                                Transforms.delete(slateEditor, {
+                                    at: {
+                                        anchor: Editor.start(slateEditor, []),
+                                        focus: Editor.end(slateEditor, []),
+                                    }
+                                });
+                            }
+
+                            // even tho we need to return this, it doesnt do anything
+                            return {
+                                shouldClear: false,
+                                shouldRefocus: true,
+                            };
+                        }
+                    }
+                />
+            </div>
+
+        </>
     );
 }

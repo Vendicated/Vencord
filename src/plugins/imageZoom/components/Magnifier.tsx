@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
 import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
@@ -32,6 +33,8 @@ export interface MagnifierProps {
     size: number,
     instance: any;
 }
+
+const cl = classNameFactory("vc-imgzoom-");
 
 export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
     const [ready, setReady] = useState(false);
@@ -120,14 +123,13 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
         waitFor(() => instance.state.readyState === "READY", () => {
             const elem = document.getElementById(ELEMENT_ID) as HTMLDivElement;
             element.current = elem;
-            elem.firstElementChild!.setAttribute("draggable", "false");
+            elem.querySelector("img,video")?.setAttribute("draggable", "false");
             if (instance.props.animated) {
                 originalVideoElementRef.current = elem!.querySelector("video")!;
                 originalVideoElementRef.current.addEventListener("timeupdate", syncVideos);
-                setReady(true);
-            } else {
-                setReady(true);
             }
+
+            setReady(true);
         });
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("keyup", onKeyUp);
@@ -152,11 +154,13 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
 
     if (!ready) return null;
 
-    const box = element.current!.getBoundingClientRect();
+    const box = element.current?.getBoundingClientRect();
+
+    if (!box) return null;
 
     return (
         <div
-            className="vc-imgzoom-lens"
+            className={cl("lens", { "nearest-neighbor": settings.store.nearestNeighbour, square: settings.store.square })}
             style={{
                 opacity,
                 width: size.current + "px",

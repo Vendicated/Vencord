@@ -19,10 +19,12 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
+import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenu, FluxDispatcher, GuildMemberStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
+import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
 
@@ -76,6 +78,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const [selectedItemIndex, selectItem] = useState(0);
     const selectedItem = permissions[selectedItemIndex];
 
+    const roles = GuildStore.getRoles(guild.id);
+
     return (
         <ModalRoot
             {...modalProps}
@@ -98,7 +102,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         <div className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
-                                const role = guild.roles[permission.id ?? ""];
+                                const role = roles[permission.id ?? ""];
 
                                 return (
                                     <button
@@ -108,8 +112,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         <div
                                             className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
-                                                if (permission.type === PermissionType.Role)
-                                                    ContextMenu.open(e, () => (
+                                                if ((settings.store as any).unsafeViewAsRole && permission.type === PermissionType.Role)
+                                                    ContextMenuApi.openContextMenu(e, () => (
                                                         <RoleContextMenu
                                                             guild={guild}
                                                             roleId={permission.id!}
@@ -133,9 +137,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             <Text variant="text-md/normal">
                                                 {
                                                     permission.type === PermissionType.Role
-                                                        ? role?.name || "Unknown Role"
+                                                        ? role?.name ?? "Unknown Role"
                                                         : permission.type === PermissionType.User
-                                                            ? user?.tag || "Unknown User"
+                                                            ? (user && getUniqueUsername(user)) ?? "Unknown User"
                                                             : (
                                                                 <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
                                                                     @owner
@@ -192,14 +196,14 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     return (
         <Menu.Menu
             navId={cl("role-context-menu")}
-            onClose={ContextMenu.close}
+            onClose={ContextMenuApi.closeContextMenu}
             aria-label="Role Options"
         >
             <Menu.MenuItem
                 id="vc-pw-view-as-role"
                 label="View As Role"
                 action={() => {
-                    const role = guild.roles[roleId];
+                    const role = GuildStore.getRole(guild.id, roleId);
                     if (!role) return;
 
                     onClose();

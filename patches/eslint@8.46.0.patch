@@ -1,0 +1,49 @@
+diff --git a/lib/rules/no-useless-escape.js b/lib/rules/no-useless-escape.js
+index 0e0f6f09f2c35f3276173c08f832cde9f2cf56a0..7dc22851715f3574d935f513c1b5e35552985711 100644
+--- a/lib/rules/no-useless-escape.js
++++ b/lib/rules/no-useless-escape.js
+@@ -65,13 +65,31 @@ module.exports = {
+             escapeBackslash: "Replace the `\\` with `\\\\` to include the actual backslash character."
+         },
+
+-        schema: []
++        schema: [{
++            type: "object",
++            properties: {
++                extra: {
++                    type: "string",
++                    default: ""
++                },
++                extraCharClass: {
++                    type: "string",
++                    default: ""
++                },
++            },
++            additionalProperties: false
++        }]
+     },
+
+     create(context) {
++        const options = context.options[0] || {};
++        const { extra, extraCharClass } = options;
+         const sourceCode = context.sourceCode;
+         const parser = new RegExpParser();
+
++        const NON_CHARCLASS_ESCAPES = union(REGEX_NON_CHARCLASS_ESCAPES, new Set(extra));
++        const CHARCLASS_ESCAPES = union(REGEX_GENERAL_ESCAPES, new Set(extraCharClass));
++
+         /**
+          * Reports a node
+          * @param {ASTNode} node The node to report
+@@ -200,9 +218,9 @@ module.exports = {
+                     let allowedEscapes;
+
+                     if (characterClassStack.length) {
+-                        allowedEscapes = unicodeSets ? REGEX_CLASSSET_CHARACTER_ESCAPES : REGEX_GENERAL_ESCAPES;
++                        allowedEscapes = unicodeSets ? REGEX_CLASSSET_CHARACTER_ESCAPES : CHARCLASS_ESCAPES;
+                     } else {
+-                        allowedEscapes = REGEX_NON_CHARCLASS_ESCAPES;
++                        allowedEscapes = NON_CHARCLASS_ESCAPES;
+                     }
+                     if (allowedEscapes.has(escapedChar)) {
+                         return;

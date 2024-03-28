@@ -16,18 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel } from "discord-types/general";
+import { DraftType } from "@webpack/common";
+import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
+
+type GenericFunction = (...args: any[]) => any;
 
 export class FluxStore {
     constructor(dispatcher: FluxDispatcher, eventHandlers?: Partial<Record<FluxEvents, (data: any) => void>>);
 
+    addChangeListener(callback: () => void): void;
+    addReactChangeListener(callback: () => void): void;
+    removeChangeListener(callback: () => void): void;
+    removeReactChangeListener(callback: () => void): void;
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
     initialize(): void;
     initializeIfNeeded(): void;
+    registerActionHandlers: GenericFunction;
+    syncWith: GenericFunction;
+    waitFor: GenericFunction;
     __getLocalVars(): Record<string, any>;
 }
 
@@ -138,4 +148,37 @@ export class EmojiStore extends FluxStore {
         unicodeAliases: Record<string, string>;
         get favoriteEmojisWithoutFetchingLatest(): Emoji[];
     };
+}
+
+export interface DraftObject {
+    channelId: string;
+    timestamp: number;
+    draft: string;
+}
+
+interface DraftState {
+    [userId: string]: {
+        [channelId: string]: {
+            [key in DraftType]?: Omit<DraftObject, "channelId">;
+        } | undefined;
+    } | undefined;
+}
+
+
+export class DraftStore extends FluxStore {
+    getDraft(channelId: string, type: DraftType): string;
+    getRecentlyEditedDrafts(type: DraftType): DraftObject[];
+    getState(): DraftState;
+    getThreadDraftWithParentMessageId?(arg: any): any;
+    getThreadSettings(channelId: string): any | null;
+}
+
+export class GuildStore extends FluxStore {
+    getGuild(guildId: string): Guild;
+    getGuildCount(): number;
+    getGuilds(): Record<string, Guild>;
+    getGuildIds(): string[];
+    getRole(guildId: string, roleId: string): Role;
+    getRoles(guildId: string): Record<string, Role>;
+    getAllGuildRoles(): Record<string, Record<string, Role>>;
 }

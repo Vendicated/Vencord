@@ -16,24 +16,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "../suppressExperimentalWarnings.js";
+import "../checkNodeVersion.js";
+
 import { exec, execSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { constants as FsConstants, readFileSync } from "fs";
+import { access, readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
+// wtf is this assert syntax
+import PackageJSON from "../../package.json" assert { type: "json" };
+import { getPluginTarget } from "../utils.mjs";
+
+export const VERSION = PackageJSON.version;
+// https://reproducible-builds.org/docs/source-date-epoch/
+export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
+export const isDev = watch || process.argv.includes("--dev");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
-export const gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
+export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 export const banner = {
     js: `
 // Vencord ${gitHash}
 // Standalone: ${isStandalone}
 // Platform: ${isStandalone === "false" ? process.platform : "Universal"}
+// Updater disabled: ${updaterDisabled}
 `.trim()
 };
 
 const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
+
+export function existsAsync(path) {
+    return access(path, FsConstants.F_OK)
+        .then(() => true)
+        .catch(() => false);
+}
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -62,24 +81,24 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
             let code = "";
             let plugins = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!existsSync(`./src/${dir}`)) continue;
+                if (!await existsAsync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
-                    if (file.startsWith(".")) continue;
+                    if (file.startsWith("_") || file.startsWith(".")) continue;
                     if (file === "index.ts") continue;
-                    const fileBits = file.split(".");
-                    if (fileBits.length > 2 && ["ts", "tsx"].includes(fileBits.at(-1))) {
-                        const mod = fileBits.at(-2);
-                        if (mod === "dev" && !watch) continue;
-                        if (mod === "web" && kind === "discordDesktop") continue;
-                        if (mod === "desktop" && kind === "web") continue;
-                        if (mod === "discordDesktop" && kind !== "discordDesktop") continue;
-                        if (mod === "vencordDesktop" && kind !== "vencordDesktop") continue;
+
+                    const target = getPluginTarget(file);
+                    if (target) {
+                        if (target === "dev" && !watch) continue;
+                        if (target === "web" && kind === "discordDesktop") continue;
+                        if (target === "desktop" && kind === "web") continue;
+                        if (target === "discordDesktop" && kind !== "discordDesktop") continue;
+                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue;
                     }
 
                     const mod = `p${i}`;
@@ -124,11 +143,14 @@ export const gitRemotePlugin = {
             namespace: "git-remote", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
-            const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
-            const remote = res.stdout.trim()
-                .replace("https://github.com/", "")
-                .replace("git@github.com:", "")
-                .replace(/.git$/, "");
+            let remote = process.env.VENCORD_REMOTE;
+            if (!remote) {
+                const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+                remote = res.stdout.trim()
+                    .replace("https://github.com/", "")
+                    .replace("git@github.com:", "")
+                    .replace(/.git$/, "");
+            }
 
             return { contents: `export default "${remote}"` };
         });

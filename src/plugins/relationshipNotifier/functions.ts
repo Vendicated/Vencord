@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { UserUtils } from "@webpack/common";
 
 import settings from "./settings";
@@ -36,18 +37,26 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
         return;
     }
 
-    const user = await UserUtils.fetchUser(id)
+    const user = await UserUtils.getUser(id)
         .catch(() => null);
     if (!user) return;
 
     switch (type) {
         case RelationshipType.FRIEND:
             if (settings.store.friends)
-                notify(`${user.tag} removed you as a friend.`, user.getAvatarURL(undefined, undefined, false));
+                notify(
+                    `${getUniqueUsername(user)} removed you as a friend.`,
+                    user.getAvatarURL(undefined, undefined, false),
+                    () => openUserProfile(user.id)
+                );
             break;
-        case RelationshipType.FRIEND_REQUEST:
+        case RelationshipType.INCOMING_REQUEST:
             if (settings.store.friendRequestCancels)
-                notify(`A friend request from ${user.tag} has been removed.`, user.getAvatarURL(undefined, undefined, false));
+                notify(
+                    `A friend request from ${getUniqueUsername(user)} has been removed.`,
+                    user.getAvatarURL(undefined, undefined, false),
+                    () => openUserProfile(user.id)
+                );
             break;
     }
 }
