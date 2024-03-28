@@ -191,7 +191,7 @@ export default definePlugin({
         },
         {
             // Hide the new version of unreads box for hidden channels
-            find: '.displayName="ChannelListUnreadsStore"',
+            find: '="ChannelListUnreadsStore",',
             replacement: {
                 match: /(?<=if\(null==(\i))(?=.{0,160}?getHasImportantUnread\)\(\i\))/g, // Global because Discord has multiple methods like that in the same module
                 replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
@@ -442,7 +442,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="GuildChannelStore"',
+            find: '="GuildChannelStore",',
             replacement: [
                 {
                     // Make GuildChannelStore contain hidden channels
@@ -465,7 +465,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="NowPlayingViewStore"',
+            find: '="NowPlayingViewStore",',
             replacement: {
                 // Make active now voice states on hidden channels
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,

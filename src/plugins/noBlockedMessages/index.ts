@@ -38,8 +38,8 @@ export default definePlugin({
             ]
         },
         ...[
-            'displayName="MessageStore"',
-            'displayName="ReadStateStore"'
+            '="MessageStore",',
+            '="ReadStateStore",'
         ].map(find => ({
             find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,

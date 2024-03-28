@@ -210,7 +210,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '.displayName="LocalActivityStore"',
+            find: '="LocalActivityStore",',
             replacement: [
                 {
                     match: /HANG_STATUS.+?(?=!\i\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
