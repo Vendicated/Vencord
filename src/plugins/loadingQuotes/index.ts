@@ -81,11 +81,11 @@ export default definePlugin({
             find: ".LOADING_DID_YOU_KNOW}",
             replacement: [
                 {
-                    match: /\._loadingText=function\(\)\{/,
+                    match: /"_loadingText",function\(\)\{/,
                     replace: "$&return $self.quote;",
                 },
                 {
-                    match: /\._eventLoadingText=function\(\)\{/,
+                    match: /"_eventLoadingText",function\(\)\{/,
                     replace: "$&return $self.quote;",
                     predicate: () => settings.store.replaceEvents
                 }
