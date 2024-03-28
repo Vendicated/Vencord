@@ -69,7 +69,7 @@ export default definePlugin({
             }]
         },
         {
-            find: '"ChannelTextAreaButtons"',
+            find: '.gifts)',
             replacement: {
                 match: /,\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)/,
                 replace: (m, _, jsx, compo, type) => {
