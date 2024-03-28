@@ -49,3 +49,49 @@ declare module "*.css?managed" {
     const name: string;
     export default name;
 }
+
+declare module "opus-recorder" { // no types :sob: https://github.com/chris-rudmin/opus-recorder/issues/276
+    export default class Recorder {
+        constructor(config?: {
+            bufferLength?: number;
+            encoderPath?: string;
+            mediaTrackConstraints?: MediaStreamConstraints | boolean;
+            monitorGain?: number;
+            numberOfChannels?: number;
+            recordingGain?: number;
+            sourceNode?: MediaStreamAudioSourceNode;
+
+            encoderApplication?: number;
+            encoderBitRate?: number;
+            encoderComplexity?: number;
+            encoderFrameSize?: number;
+            encoderSampleRate?: number;
+            maxFramesPerPage?: number;
+            originalSampleRateOverride?: number;
+            resampleQuality?: number;
+            streamPages?: boolean;
+
+            wavBitDepth?: number;
+        });
+
+        close(): void;
+
+        pause(flush?: boolean): void;
+
+        resume(): Promise<void> | void;
+
+        start(): Promise<void>;
+
+        stop(): void;
+
+        ondataavailable(audio: ArrayBuffer): void;
+
+        onpause(): void;
+
+        onresume(): void;
+
+        onstart(): void;
+
+        onstop(): void;
+    }
+}
