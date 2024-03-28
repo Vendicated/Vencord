@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -27,14 +26,6 @@ export default definePlugin({
             }
         }
     ],
-
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    },
 
     findChannelId(message) {
         const { embeds: [embed] } = message;
