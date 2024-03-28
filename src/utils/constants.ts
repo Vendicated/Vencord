@@ -390,6 +390,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "maisy",
         id: 257109471589957632n,
     },
+    MrDiamond: {
+        name: "MrDiamond",
+        id: 523338295644782592n
+    },
     Mopi: {
         name: "Mopi",
         id: 1022189106614243350n

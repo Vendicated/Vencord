@@ -192,7 +192,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
                 }
             }}
             query={query}
-            placeholder="Search Favorite Gifs"
+            placeholder={Vencord.Plugins.isPluginEnabled("FavoriteAnything") ? "Search Favorite Media" : "Search Favorite GIFs"}
         />
     );
 }
