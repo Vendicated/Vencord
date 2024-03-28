@@ -83,3 +83,25 @@ export function BlockButton({ onClick, isBlocked }: { onClick(): void; isBlocked
         </Tooltip>
     );
 }
+
+export function ReplyButton({ onClick }: { onClick(): void; }) {
+    return (
+        <Tooltip text="Reply Review">
+            {props => (
+                <div
+                    {...props}
+                    className={iconClasses.button}
+                    onClick={onClick}
+                    role="button"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            fill="currentColor"
+                            d="M2.3 7.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L5.42 9H11a7 7 0 0 1 7 7v4a1 1 0 1 0 2 0v-4a9 9 0 0 0-9-9H5.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z"
+                        />
+                    </svg>
+                </div>
+            )}
+        </Tooltip>
+    );
+}

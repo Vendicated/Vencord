@@ -71,7 +71,7 @@ export const settings = definePluginSettings({
                 </Button>
 
                 <Button onClick={async () => {
-                    let url = "https://reviewdb.mantikafasi.dev/";
+                    let url = "https://reviewdb.mantikafasi.dev";
                     const token = await getToken();
                     if (token)
                         url += "/api/redirect?token=" + encodeURIComponent(token);
