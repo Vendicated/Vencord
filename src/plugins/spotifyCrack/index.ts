@@ -51,7 +51,7 @@ export default definePlugin({
             },
         },
         {
-            find: '.displayName="SpotifyStore"',
+            find: '"displayName","SpotifyStore")',
             replacement: [
                 {
                     predicate: () => settings.store.noSpotifyAutoPause,
