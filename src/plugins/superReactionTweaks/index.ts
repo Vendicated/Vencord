@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { UserStore } from "@webpack/common";
 
 export const settings = definePluginSettings({
     superReactByDefault: {
@@ -49,7 +50,7 @@ export default definePlugin({
             find: ".trackEmojiSearchEmpty,200",
             replacement: {
                 match: /(\.trackEmojiSearchEmpty,200(?=.+?isBurstReaction:(\i).+?(\i===\i\.EmojiIntention.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
-                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.settings.store.superReactByDefault&&${isReactionIntention})`
+                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
             }
         }
     ],
@@ -59,5 +60,9 @@ export default definePlugin({
         if (settings.store.unlimitedSuperReactionPlaying) return true;
         if (playingCount <= settings.store.superReactionPlayingLimit) return true;
         return false;
+    },
+
+    get shouldSuperReactByDefault() {
+        return settings.store.superReactByDefault && UserStore.getCurrentUser().premiumType != null;
     }
 });

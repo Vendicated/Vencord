@@ -24,7 +24,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
-    authors: [Devs.Lumap],
+    authors: [Devs.Nobody],
     settings,
     patches: [
         {
