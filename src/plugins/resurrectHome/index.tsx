@@ -59,7 +59,7 @@ export default definePlugin({
             find: "GuildHomeFeedbackExperiment.definition.id",
             replacement: [
                 {
-                    match: /return{showFeedback:\i,setOnDismissedFeedback:(\i)}/,
+                    match: /return{showFeedback:.+?,setOnDismissedFeedback:(\i)}/,
                     replace: "return{showFeedback:false,setOnDismissedFeedback:$1}"
                 }
             ]

@@ -61,8 +61,8 @@ export default definePlugin({
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i;if\()(?<=avatarDecoration:(\i).+?)/,
-                    replace: "$1.skuId===$self.SKU_ID||"
+                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
+                    replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
         },
