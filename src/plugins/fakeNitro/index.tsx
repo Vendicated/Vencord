@@ -214,7 +214,7 @@ export default definePlugin({
                 {
                     // Make the emoji always available if the intention allows it
                     match: /if\(!\i\.available/,
-                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${1},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
+                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
                 }
             ]
         },
@@ -386,6 +386,14 @@ export default definePlugin({
             find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
+            }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
         }
