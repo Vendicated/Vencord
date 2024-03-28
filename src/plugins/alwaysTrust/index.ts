@@ -41,7 +41,7 @@ export default definePlugin({
     authors: [Devs.zt, Devs.Trwy],
     patches: [
         {
-            find: ".displayName=\"MaskedLinkStore\"",
+            find: '="MaskedLinkStore",',
             replacement: {
                 match: /(?<=isTrustedDomain\(\i\){)return \i\(\i\)/,
                 replace: "return true"
