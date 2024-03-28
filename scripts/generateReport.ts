@@ -457,7 +457,10 @@ async function runtime(token: string) {
                 .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
 
             // Loads and requires a chunk
-            if (!isWasm) await wreq.e(id as any);
+            if (!isWasm) {
+                await wreq.e(id as any);
+                if (wreq.m[id]) wreq(id as any);
+            }
         }));
 
         console.log("[PUP_DEBUG]", "Finished loading all chunks!");
