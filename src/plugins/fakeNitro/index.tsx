@@ -214,7 +214,7 @@ export default definePlugin({
                 {
                     // Make the emoji always available if the intention allows it
                     match: /if\(!\i\.available/,
-                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${1},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
+                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
                 }
             ]
         },
