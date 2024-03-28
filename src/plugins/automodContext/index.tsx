@@ -12,7 +12,7 @@ import { findByPropsLazy } from "@webpack";
 import { Button, NavigationRouter, SelectedGuildStore, Text } from "@webpack/common";
 const Kangaroo = findByPropsLazy("jumpToMessage");
 
-import style from "./style.css?managed";
+import "./style.css";
 
 export default definePlugin({
     name: "AutomodContext",
