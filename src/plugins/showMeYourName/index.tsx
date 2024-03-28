@@ -9,6 +9,7 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Toasts } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -39,12 +40,43 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
+    inTyping: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Also apply the functionality to typing previwes. (Enable TypingTweaks)",
+        onChange: () => {
+            if (!settings.store.inTyping) return;
+            if (!Vencord.Plugins.isPluginEnabled("TypingTweaks")) {
+                settings.store.inTyping = false;
+                Toasts.show({
+                    message: "Enable TypingTweaks",
+                    type: Toasts.Type.FAILURE,
+                    id: Toasts.genId(),
+                    options: {
+                        duration: 3000,
+                        position: Toasts.Position.BOTTOM
+                    }
+                });
+                return;
+            }
+            Vencord.Settings.plugins.TypingTweaks.usernameOnly = true;
+            Toasts.show({
+                message: "Enabled Username Only in TypingTweaks",
+                type: Toasts.Type.SUCCESS,
+                id: Toasts.genId(),
+                options: {
+                    duration: 3000,
+                    position: Toasts.Position.BOTTOM
+                }
+            });
+        }
+    },
 });
 
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.Rini, Devs.TheKodeToad],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.Mannu],
     patches: [
         {
             find: ".useCanSeeRemixBadge)",
