@@ -39,6 +39,7 @@ export interface Menu {
         action?(e: MouseEvent): void;
         icon?: ComponentType<any>;
 
+        showIconFirst?: boolean;
         color?: string;
         render?: ComponentType<any>;
         onChildrenScroll?: Function;
