@@ -67,7 +67,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "AnonymiseFileNames",
-    authors: [Devs.obscurity],
+    authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
     patches: [
         {
@@ -77,6 +77,13 @@ export default definePlugin({
                 replace:
                     "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=$self.anonymise(f)),$1(...args)),",
             },
+        },
+        {
+            find: "message.attachments",
+            replacement: {
+                match: /(\i.uploadFiles\((\i),)/,
+                replace: "$2.forEach(f=>f.filename=$self.anonymise(f)),$1"
+            }
         },
         {
             find: ".Messages.ATTACHMENT_UTILITIES_SPOILER",
