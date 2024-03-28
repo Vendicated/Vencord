@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
 import { join } from "path";
