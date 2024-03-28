@@ -47,6 +47,8 @@ export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", 
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
+export const { FormattedMessage }: { FormattedMessage: typeof t.FormattedMessage; } = findByPropsLazy("FormattedMessage");
+
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
