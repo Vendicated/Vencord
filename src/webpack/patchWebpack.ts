@@ -24,7 +24,7 @@ import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
@@ -159,6 +159,8 @@ function patchPush(webpackGlobal: any) {
     });
 }
 
+let webpackNotInitializedLogged = false;
+
 function patchFactories(factories: Record<string, (module: any, exports: any, require: WebpackInstance) => void>) {
     for (const id in factories) {
         let mod = factories[id];
@@ -167,13 +169,22 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         const patchedBy = new Set();
 
         const factory = factories[id] = function (module: any, exports: any, require: WebpackInstance) {
+            if (wreq == null) {
+                if (!webpackNotInitializedLogged) {
+                    webpackNotInitializedLogged = true;
+                    logger.error("Webpack require was not initialized, running modules without patches instead.");
+                }
+
+                return void originalMod(module, exports, require);
+            }
+
             try {
                 mod(module, exports, require);
             } catch (err) {
                 // Just rethrow discord errors
                 if (mod === originalMod) throw err;
 
-                logger.error("Error in patched chunk", err);
+                logger.error("Error in patched module", err);
                 return void originalMod(module, exports, require);
             }
 
