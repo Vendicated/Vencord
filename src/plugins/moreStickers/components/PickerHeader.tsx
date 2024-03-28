@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 import { React, TextInput } from "@webpack/common";
 
 import { Header } from "./header";
