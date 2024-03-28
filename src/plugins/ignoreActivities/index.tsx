@@ -210,10 +210,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: '.displayName="LocalActivityStore"',
+            find: '="LocalActivityStore",',
             replacement: [
                 {
-                    match: /HANG_STATUS.+?(?=!\i\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
+                    match: /HANG_STATUS.+?(?=!\i\(\)\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
                     replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
                 }
             ]

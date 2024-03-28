@@ -29,7 +29,7 @@ export default definePlugin({
         {
             find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
             replacement: {
-                match: /,?(?=this\.idleTimeout=new \i\.Timeout)/,
+                match: /,?(?=\i\(this,"idleTimeout",new \i\.Timeout\))/,
                 replace: ";return;"
             }
         },

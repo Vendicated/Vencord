@@ -388,6 +388,14 @@ export default definePlugin({
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
             }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
+                replace: "true"
+            }
         }
     ],
 

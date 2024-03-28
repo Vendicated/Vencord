@@ -26,7 +26,7 @@ export default definePlugin({
         "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
     patches: [
         {
-            find: "onCloseImage=",
+            find: '"onCloseImage",',
             replacement: {
                 match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
