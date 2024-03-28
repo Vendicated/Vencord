@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, SearchableSelect, Switch, useMemo } from "@webpack/common";
+import { Forms, SearchableSelect, Switch, useEffect, useMemo, useState } from "@webpack/common";
 
 import { Languages } from "./languages";
 import { settings } from "./settings";
@@ -57,23 +58,43 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
     );
 }
 
-function AutoTranslateToggle() {
-    const value = settings.use(["autoTranslate"]).autoTranslate;
+export function AutoTranslateRecievedSetting() {
+    const currentChannel = Vencord.Util.getCurrentChannel();
+
+    const [state, setState] = useState(false);
+
+    useEffect(() => {
+        DataStore.get("autoTranslateReceived").then(state => {
+            setState(state[currentChannel.id] ?? false);
+        });
+    }, []);
+
+    async function handleChange(state: boolean) {
+        const newState = { ...await DataStore.get("autoTranslateReceived") };
+        newState[currentChannel.id] = state;
+
+        await DataStore.set("autoTranslateReceived", newState).then(() => setState(state));
+    }
 
     return (
-        <Switch
-            value={value}
-            onChange={v => settings.store.autoTranslate = v}
-            note={settings.def.autoTranslate.description}
-            hideBorder
-        >
-            Auto Translate
-        </Switch>
+        <Forms.FormSection>
+            <Switch
+                value={state}
+                onChange={handleChange}
+                note={`Automatically translate all messages in the current channel (#${currentChannel.name})`}
+                hideBorder
+                style={{ marginBottom: "0.5em" }}
+            >
+                Auto Translate Recieved Messages
+            </Switch>
+        </Forms.FormSection>
     );
 }
 
 
 export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
+    const { autoTranslate } = settings.use(["autoTranslate"]);
+
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
@@ -94,7 +115,15 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
 
                 <Forms.FormDivider className={Margins.bottom16} />
 
-                <AutoTranslateToggle />
+                <Switch
+                    value={autoTranslate}
+                    onChange={v => settings.store.autoTranslate = v}
+                    note={settings.def.autoTranslate.description}
+                    hideBorder
+                >
+                    Auto Translate
+                </Switch>
+                <AutoTranslateRecievedSetting />
             </ModalContent>
         </ModalRoot>
     );

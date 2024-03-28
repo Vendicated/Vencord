@@ -80,6 +80,6 @@
     margin-top: 0.5em;
 }
 
-.vc-plugins-info-button svg:not(:hover, :focus) {
+.vc-plugins-info-button svg:not(:hover, :focus), .vc-plugins-setting-footer {
     color: var(--text-muted);
 }
