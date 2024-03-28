@@ -152,6 +152,10 @@
     background-color: var(--background-modifier-selected);
 }
 
+.vc-channeltabs-ghost-tab {
+    visibility: hidden;
+}
+
 .vc-channeltabs-hoverable:hover,
 .vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
     background: var(--bg-overlay-hover);

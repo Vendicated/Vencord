@@ -5,10 +5,13 @@
  */
 
 import { DataStore } from "@api/index";
-import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts } from "@webpack/common";
+import { classNameFactory } from "@api/Styles";
+import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useState } from "@webpack/common";
 
 import { logger, settings } from "./constants";
 import { BasicChannelTabsProps, ChannelTabsProps, PersistedTabs } from "./types";
+
+const cl = classNameFactory("vc-channeltabs-");
 
 function replaceArray<T>(array: T[], ...values: T[]) {
     const len = array.length;
@@ -36,11 +39,18 @@ export const { openedTabs } = _;
 let update = (save = true) => {
     logger.warn("Update function not set");
 };
+let bumpGhostTabCount = () => {
+    logger.warn("Set ghost tab function not set");
+};
+let clearGhostTabs = () => {
+    logger.warn("Clear ghost tab function not set");
+};
 
 export function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true) {
     const id = genId();
     openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : false });
     if (switchToTab) moveToTab(id);
+    clearGhostTabs();
     update(save);
 }
 
@@ -71,6 +81,8 @@ export function closeTab(id: number) {
         }
         else moveToTab(openTabs[Math.max(i - 1, 0)].id);
     }
+    if (i !== openTabs.length) bumpGhostTabCount();
+    else clearGhostTabs();
     update();
 }
 
@@ -228,4 +240,21 @@ export function toggleCompactTab(id: number) {
         compact: !openTabs[i].compact
     };
     update();
+}
+
+export function useGhostTabs() {
+    let timeout;
+    const [count, setCount] = useState(0);
+    bumpGhostTabCount = () => {
+        setCount(count + 1);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            setCount(0);
+        }, 3000);
+    };
+    clearGhostTabs = () => {
+        clearTimeout(timeout);
+        setCount(0);
+    };
+    return new Array<JSX.Element>(count).fill(<div className={cl("tab", "ghost-tab")} />);
 }

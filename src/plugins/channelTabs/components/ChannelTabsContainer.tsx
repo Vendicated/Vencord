@@ -21,7 +21,7 @@ import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, closeTab, createTab, handleChannelSwitch, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, closeTab, createTab, handleChannelSwitch, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
@@ -36,6 +36,7 @@ const cl = classNameFactory("vc-channeltabs-");
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const [userId, setUserId] = useState("");
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+    const GhostTabs = useGhostTabs();
 
     const _update = useForceUpdater();
     const update = useCallback((save = true) => {
@@ -116,11 +117,14 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             >
                 <PlusSmallIcon height={20} width={20} />
             </button>
+
+            {GhostTabs}
         </div >
         {showBookmarkBar && <>
             <div className={cl("separator")} />
             <BookmarkContainer {...props} userId={userId} />
         </>}
+
     </div>;
 }
 
