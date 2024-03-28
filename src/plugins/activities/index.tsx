@@ -53,7 +53,7 @@ export default definePlugin({
         {
             find: "textRuler,",
             replacement: {
-                match: /var \i=(\i)=>\{.*?let{activities:\i,.*?children:\[.*?null!=\i&&(\i\.some\(\i\.\i\)\?.*?:null)/,
+                match: /(\i)=>\{.*?let{activities:\i,.*?children:\[.*?null!=\i&&(\i\.some\(\i=>\(0,\i\.\i\)\(\i,\i\)\)\?.*?:null)/,
                 replace: (m, activities, icon) => m.replace(icon, `$self.ActivitiesComponent(${activities})`)
             },
             predicate: () => settings.store.moreActivityIcons
