@@ -35,7 +35,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".handleSendMessage=",
+            find: ".handleSendMessage",
             replacement: {
                 // props.chatInputType...then((function(isMessageValid)... var parsedMessage = b.c.parse(channel,... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply);
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)

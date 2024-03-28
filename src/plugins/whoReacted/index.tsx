@@ -93,28 +93,30 @@ export default definePlugin({
     description: "Renders the avatars of users who reacted to a message",
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
-    patches: [{
-        find: ",reactionRef:",
-        replacement: {
-            match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
-            replace: "$&$1?null:$self.renderUsers(this.props),"
-        }
-    }, {
-        find: '.displayName="MessageReactionsStore";',
-        replacement: {
-            match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
-            replace: "$&;$self.reactions=$1"
-        }
-    },
-    {
+    patches: [
+        {
+            find: ",reactionRef:",
+            replacement: {
+                match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
+                replace: "$&$1?null:$self.renderUsers(this.props),"
+            }
+        }, {
+            find: '"MessageReactionsStore"',
+            replacement: {
+                match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
+                replace: "$&;$self.reactions=$1"
+            }
+        },
+        {
 
-        find: "cleanAutomaticAnchor(){",
-        replacement: {
-            match: /this\.automaticAnchor=null,this\.messageFetchAnchor=null,/,
-            replace: "$&$self.setScrollObj(this),"
+            find: "cleanAutomaticAnchor(){",
+            replacement: {
+                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                replace: "$&$self.setScrollObj(this);"
+            }
         }
-    }
     ],
+
     setScrollObj(scroll: any) {
         Scroll = scroll;
     },

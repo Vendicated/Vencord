@@ -67,7 +67,8 @@ const IGNORED_DISCORD_ERRORS = [
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
     /\[GatewaySocket\].{0,110}Cannot access '/,
-    "search for 'name' in undefined"
+    "search for 'name' in undefined",
+    "Attempting to set fast connect zstd when unsupported"
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {

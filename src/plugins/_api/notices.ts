@@ -26,7 +26,7 @@ export default definePlugin({
     required: true,
     patches: [
         {
-            find: 'displayName="NoticeStore"',
+            find: '"NoticeStore"',
             replacement: [
                 {
                     match: /\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
