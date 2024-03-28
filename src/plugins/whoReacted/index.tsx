@@ -29,7 +29,7 @@ import { Message, ReactionEmoji, User } from "discord-types/general";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-
+let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
 
@@ -91,21 +91,35 @@ function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
-    authors: [Devs.Ven, Devs.KannaDev],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
-    patches: [{
-        find: ",reactionRef:",
-        replacement: {
-            match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
-            replace: "$&$1?null:$self.renderUsers(this.props),"
+    patches: [
+        {
+            find: ",reactionRef:",
+            replacement: {
+                match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
+                replace: "$&$1?null:$self.renderUsers(this.props),"
+            }
+        }, {
+            find: '"MessageReactionsStore"',
+            replacement: {
+                match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
+                replace: "$&;$self.reactions=$1"
+            }
+        },
+        {
+
+            find: "cleanAutomaticAnchor(){",
+            replacement: {
+                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                replace: "$&$self.setScrollObj(this);"
+            }
         }
-    }, {
-        find: '.displayName="MessageReactionsStore";',
-        replacement: {
-            match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
-            replace: "$&;$self.reactions=$1"
-        }
-    }],
+    ],
+
+    setScrollObj(scroll: any) {
+        Scroll = scroll;
+    },
 
     renderUsers(props: RootObject) {
         return props.message.reactions.length > 10 ? null : (
@@ -114,9 +128,13 @@ export default definePlugin({
             </ErrorBoundary>
         );
     },
-
     _renderUsers({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
+        React.useLayoutEffect(() => { // bc need to prevent autoscrolling
+            if (Scroll?.scrollCounter > 0) {
+                Scroll.setAutomaticAnchor(null);
+            }
+        });
         React.useEffect(() => {
             const cb = (e: any) => {
                 if (e.messageId === message.id)
