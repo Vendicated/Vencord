@@ -79,11 +79,11 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /this\.renderDM=\(.+?(\i\.default),{channel.+?this.renderRow=(\i)=>{/,
-                    replace: "$&if($self.isChannelIndex($2.section, $2.row))return $self.renderChannel($2.section,$2.row,$1);"
+                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
+                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
                 },
                 {
-                    match: /this\.renderSection=(\i)=>{/,
+                    match: /"renderSection",(\i)=>{/,
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
@@ -93,11 +93,11 @@ export default definePlugin({
 
                 // Fix Row Height
                 {
-                    match: /(?<=this\.getRowHeight=.{1,100}return 1===)\i/,
+                    match: /(?<="getRowHeight",.{1,100}return 1===)\i/,
                     replace: "($&-$self.categoryLen())"
                 },
                 {
-                    match: /this.getRowHeight=\((\i),(\i)\)=>{/,
+                    match: /"getRowHeight",\((\i),(\i)\)=>{/,
                     replace: "$&if($self.isChannelHidden($1,$2))return 0;"
                 },
 
