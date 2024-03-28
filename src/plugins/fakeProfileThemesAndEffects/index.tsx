@@ -99,15 +99,15 @@ export default definePlugin(Object.defineProperties({
         {
             find: "isProfileEffectRecord:function(){",
             replacement: {
-                match: /default:function\(\){return (\i)}.+?[ ,;}]\1=(?!=)/,
-                replace: "$&$self.ProfileEffectRecord="
+                match: /default:function\(\){return (\i)}.+(?=}$)/,
+                replace: "$&;$self.ProfileEffectRecord=$1"
             }
         },
         // ProfileEffectStore
         {
             find: '"ProfileEffectStore"',
             replacement: {
-                match: /default:function\(\){return (\i)}.+?[ ,;}]\1=(?!=)/,
+                match: /function\(\i,(\i),.+[,;}]\1\.default=(?!=)/,
                 replace: "$&$self.ProfileEffectStore="
             }
         },
@@ -158,8 +158,8 @@ export default definePlugin(Object.defineProperties({
         {
             find: ".Section.PREMIUM_PURCHASE",
             replacement: {
-                match: /default:function\(\){return (\i)}.+?[ ,;}]\1=([^=].+?})(?=;|}$).*(?=}$)/,
-                replace: (wpModule, _listName, List) => (
+                match: /function\(\i,(\i),.+[,;}]\1\.default=([^=].+?})(?=;|}$).*(?=}$)/,
+                replace: (wpModule, _wpModuleVar, List) => (
                     `${wpModule};$self.ProfileEffectModalList=`
                     + List
                         // Removes the "Exclusive to Nitro" and "Preview The Shop" sections
