@@ -18,20 +18,20 @@
 
 import { PatchReplacement, ReplaceFn } from "./types";
 
-export function canonicalizeMatch(match: RegExp | string) {
+export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     if (typeof match === "string") return match;
     const canonSource = match.source
         .replaceAll("\\i", "[A-Za-z_$][\\w$]*");
-    return new RegExp(canonSource, match.flags);
+    return new RegExp(canonSource, match.flags) as T;
 }
 
-export function canonicalizeReplace(replace: string | ReplaceFn, pluginName: string): string | ReplaceFn {
+export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginName: string): T {
     const self = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`;
 
     if (typeof replace !== "function")
-        return replace.replaceAll("$self", self);
+        return replace.replaceAll("$self", self) as T;
 
-    return (...args) => replace(...args).replaceAll("$self", self);
+    return ((...args) => replace(...args).replaceAll("$self", self)) as T;
 }
 
 export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {
