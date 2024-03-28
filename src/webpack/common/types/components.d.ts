@@ -460,3 +460,7 @@ export type Dots = ComponentType<PropsWithChildren<{
     themed?: boolean;
     className?: string;
 }>>;
+
+type FocusLock = ComponentType<PropsWithChildren<{
+    containerRef: RefObject<HTMLElement>
+}>>;

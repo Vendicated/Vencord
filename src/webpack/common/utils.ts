@@ -19,7 +19,7 @@
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -37,7 +37,10 @@ export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
 
-export const RestAPI: t.RestAPI = findByPropsLazy("getAPIBaseURL", "get");
+export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
+    const mod = findByProps("getAPIBaseURL");
+    return mod.HTTP ?? mod;
+});
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
