@@ -53,7 +53,7 @@ function useCategory(categoryId: string | null, initalChannelId: string | null) 
             setCategory({
                 id: Toasts.genId(),
                 name: `Pin Category ${categories.length + 1}`,
-                color: 10070709,
+                color: DEFAULT_COLOR,
                 collapsed: false,
                 channels: [initalChannelId]
             });
