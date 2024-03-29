@@ -49,8 +49,10 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                 setStream(stream);
                 const audioCtx = new AudioContext();
                 const source = audioCtx.createMediaStreamSource(stream);
-                const blob = await (await fetch("https://www.unpkg.com/opus-recorder@8.0.5/dist/encoderWorker.min.js")).blob();
-                if (!url) url = URL.createObjectURL(blob);
+                if (!url){
+                    const blob = await (await fetch("https://www.unpkg.com/opus-recorder@8.0.5/dist/encoderWorker.min.js")).blob();
+                    url = URL.createObjectURL(blob);
+                }
                 const recorder = new Recorder({ sourceNode: source, encoderPath: url, streamPages: true });
                 setRecorder(recorder);
                 recorder.ondataavailable=e => {
