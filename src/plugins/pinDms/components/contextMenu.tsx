@@ -8,7 +8,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Menu } from "@webpack/common";
 
 import { addChannelToCategory, canMoveChannelInDirection, categories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
-import { forceUpdate, settings } from "../index";
+import { forceUpdate, PinOrder, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
 function createPinMenuItem(channelId: string) {
@@ -52,7 +52,7 @@ function createPinMenuItem(channelId: string) {
                     />
 
                     {
-                        !settings.store.sortDmsByNewestMessage && canMoveChannelInDirection(channelId, -1) && (
+                        settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
                             <Menu.MenuItem
                                 id="move-up"
                                 label="Move Up"
@@ -62,7 +62,7 @@ function createPinMenuItem(channelId: string) {
                     }
 
                     {
-                        !settings.store.sortDmsByNewestMessage && canMoveChannelInDirection(channelId, 1) && (
+                        settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, 1) && (
                             <Menu.MenuItem
                                 id="move-down"
                                 label="Move Down"
