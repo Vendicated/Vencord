@@ -25,7 +25,7 @@ To generate:
 
 copy(Object.fromEntries(
     Array.from(
-        temp1.querySelectorAll("[data-language-code]"),
+        document.querySelectorAll("[data-language-code]"),
         e => [e.dataset.languageCode, e.children[1].textContent]
     ).sort((a, b) => a[1] === "Detect language" ? -1 : b[1] === "Detect language" ? 1 : a[1].localeCompare(b[1]))
 ))
