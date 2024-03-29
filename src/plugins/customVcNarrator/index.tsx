@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
@@ -40,7 +40,7 @@ const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentC
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-async function speak(text: string, settings: any = vcNarrator.settings.store) {
+async function speak(text: string, settings: any = Settings.plugins.VcNarratorCustom) {
     if (text.trim().length === 0) return;
     const response = await fetch("https://tiktok-tts.weilnet.workers.dev/api/generation", {
         method: "POST",
@@ -53,7 +53,7 @@ async function speak(text: string, settings: any = vcNarrator.settings.store) {
         referrerPolicy: "no-referrer",
         body: JSON.stringify({
             text: text,
-            voice: vcNarrator.settings.store.customVoice
+            voice: Settings.plugins.VcNarratorCustom.customVoice
         })
     });
 
@@ -77,7 +77,7 @@ async function speak(text: string, settings: any = vcNarrator.settings.store) {
 }
 
 function clean(str: string) {
-    const replacer = vcNarrator.settings.store.latinOnly
+    const replacer = Settings.plugins.VcNarratorCustom.latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
         : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
 
@@ -161,17 +161,17 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 */
 
 function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign({}, vcNarrator.settings.store, tempSettings);
+    const settings = Object.assign({}, Settings.plugins.VcNarratorCustom, tempSettings);
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
     speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
 }
 
-const vcNarrator = definePlugin({
-    name: "VcNarrator Custom",
+export default definePlugin({
+    name: "VcNarratorCustom",
     description: "Announces when users join, leave, or move voice channels via narrator. TikTok TTS version; speechSynthesis is pretty boring",
-    authors: [Devs.Ven, Devs.Nyako],
+    authors: [Devs.Ven, Devs.Nyako, Devs.Loukios],
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
@@ -184,7 +184,7 @@ const vcNarrator = definePlugin({
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
                 const isMe = userId === myId;
-                if (isMe && vcNarrator.settings.store.ignoreSelf) continue;
+                if (isMe && Settings.plugins.VcNarratorCustom.ignoreSelf) continue;
                 if (!isMe) {
                     if (!myChanId) continue;
                     if (channelId !== myChanId && oldChannelId !== myChanId) continue;
@@ -193,8 +193,8 @@ const vcNarrator = definePlugin({
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
 
-                const template = vcNarrator.settings.store[type + "Message"];
-                const user = isMe && !vcNarrator.settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
+                const template = Settings.plugins.VcNarratorCustom[type + "Message"];
+                const user = isMe && !Settings.plugins.VcNarratorCustom.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
                 const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? displayName);
                 const channel = ChannelStore.getChannel(id).name;
@@ -211,7 +211,7 @@ const vcNarrator = definePlugin({
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
-            speak(formatText(vcNarrator.settings.store[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
+            speak(formatText(Settings.plugins.VcNarratorCustom[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         },
 
         AUDIO_TOGGLE_SELF_DEAF() {
@@ -220,87 +220,89 @@ const vcNarrator = definePlugin({
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-            speak(formatText(vcNarrator.settings.store[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
+            speak(formatText(Settings.plugins.VcNarratorCustom[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         }
     },
 
-
-    settings: definePluginSettings({
-        customVoice: {
-            type: OptionType.STRING,
-            description: "Custom voice id, currently just tiktok",
-            default: "en_us_001"
-        },
-        volume: {
-            type: OptionType.SLIDER,
-            description: "Narrator Volume",
-            default: 1,
-            markers: [0, 0.25, 0.5, 0.75, 1],
-            stickToMarkers: false
-        },
-        rate: {
-            type: OptionType.SLIDER,
-            description: "Narrator Speed",
-            default: 1,
-            markers: [0.1, 0.5, 1, 2, 5, 10],
-            stickToMarkers: false
-        },
-        sayOwnName: {
-            description: "Say own name",
-            type: OptionType.BOOLEAN,
-            default: false
-        },
-        ignoreSelf: {
-            description: "Ignore yourself for all events.",
-            type: OptionType.BOOLEAN,
-            default: false
-        },
-        latinOnly: {
-            description: "Strip non latin characters from names before saying them",
-            type: OptionType.BOOLEAN,
-            default: false
-        },
-        joinMessage: {
-            type: OptionType.STRING,
-            description: "Join Message",
-            default: "{{USER}} joined"
-        },
-        leaveMessage: {
-            type: OptionType.STRING,
-            description: "Leave Message",
-            default: "{{USER}} left"
-        },
-        moveMessage: {
-            type: OptionType.STRING,
-            description: "Move Message",
-            default: "{{USER}} moved to {{CHANNEL}}"
-        },
-        muteMessage: {
-            type: OptionType.STRING,
-            description: "Mute Message (only self for now)",
-            default: "{{USER}} Muted"
-        },
-        unmuteMessage: {
-            type: OptionType.STRING,
-            description: "Unmute Message (only self for now)",
-            default: "{{USER}} unmuted"
-        },
-        deafenMessage: {
-            type: OptionType.STRING,
-            description: "Deafen Message (only self for now)",
-            default: "{{USER}} deafened"
-        },
-        undeafenMessage: {
-            type: OptionType.STRING,
-            description: "Undeafen Message (only self for now)",
-            default: "{{USER}} undeafened"
-        }
-    }),
+    optionsCache: null as Record<string, PluginOptionsItem> | null,
+    get options() {
+        return this.optionsCache ??= {
+            customVoice: {
+                type: OptionType.STRING,
+                description: "Custom voice id, currently just tiktok",
+                default: "en_us_001"
+            },
+            volume: {
+                type: OptionType.SLIDER,
+                description: "Narrator Volume",
+                default: 1,
+                markers: [0, 0.25, 0.5, 0.75, 1],
+                stickToMarkers: false
+            },
+            rate: {
+                type: OptionType.SLIDER,
+                description: "Narrator Speed",
+                default: 1,
+                markers: [0.1, 0.5, 1, 2, 5, 10],
+                stickToMarkers: false
+            },
+            sayOwnName: {
+                description: "Say own name",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            ignoreSelf: {
+                description: "Ignore yourself for all events.",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            latinOnly: {
+                description: "Strip non latin characters from names before saying them",
+                type: OptionType.BOOLEAN,
+                default: false
+            },
+            joinMessage: {
+                type: OptionType.STRING,
+                description: "Join Message",
+                default: "{{USER}} joined"
+            },
+            leaveMessage: {
+                type: OptionType.STRING,
+                description: "Leave Message",
+                default: "{{USER}} left"
+            },
+            moveMessage: {
+                type: OptionType.STRING,
+                description: "Move Message",
+                default: "{{USER}} moved to {{CHANNEL}}"
+            },
+            muteMessage: {
+                type: OptionType.STRING,
+                description: "Mute Message (only self for now)",
+                default: "{{USER}} Muted"
+            },
+            unmuteMessage: {
+                type: OptionType.STRING,
+                description: "Unmute Message (only self for now)",
+                default: "{{USER}} unmuted"
+            },
+            deafenMessage: {
+                type: OptionType.STRING,
+                description: "Deafen Message (only self for now)",
+                default: "{{USER}} deafened"
+            },
+            undeafenMessage: {
+                type: OptionType.STRING,
+                description: "Undeafen Message (only self for now)",
+                default: "{{USER}} undeafened"
+            }
+        };
+    },
 
     settingsAboutComponent({ tempSettings: s }) {
 
         const types = useMemo(
-            () => Object.keys(vcNarrator.settings.store).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+            () => Object.keys(Vencord.Plugins.plugins.VcNarratorCustom.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
             [],
         );
 
@@ -338,5 +340,3 @@ const vcNarrator = definePlugin({
         );
     }
 });
-
-export default vcNarrator;
