@@ -28,7 +28,7 @@ const VENCORD_SRC_DIR = join(__dirname, "..");
 
 const execFile = promisify(cpExecFile);
 
-const isFlatpak = process.platform === "linux" && Boolean(process.env.FLATPAK_ID?.includes("discordapp") || process.env.FLATPAK_ID?.includes("Discord"));
+const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
 
 if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
 
@@ -60,7 +60,8 @@ async function calculateGitChanges() {
     return commits ? commits.split("\n").map(line => {
         const [author, hash, ...rest] = line.split("/");
         return {
-            hash, author, message: rest.join("/")
+            hash, author,
+            message: rest.join("/").split("\n")[0]
         };
     }) : [];
 }
