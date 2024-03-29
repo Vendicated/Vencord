@@ -278,17 +278,17 @@ export default definePlugin({
 // Send Temporary Message
 async function sendTempMessage(recipientId: string, attachment: string, content: string, dm: boolean = true) {
     if (recipientId === UserStore.getCurrentUser().id) return;
-    const dmChannelId = dm ? await PrivateChannelsStore.getOrEnsurePrivateChannel(recipientId) : recipientId;
+    const channelId = dm ? await PrivateChannelsStore.getOrEnsurePrivateChannel(recipientId) : recipientId;
     if (attachment && attachment !== "") {
         const upload = await new CloudUtils.CloudUpload({
             file: new File([new Blob([attachment])], "file.text", { type: "text/plain; charset=utf-8" }),
             isClip: false,
             isThumbnail: false,
             platform: 1,
-        }, dmChannelId, false, 0);
+        }, channelId, false, 0);
         upload.on("complete", async () => {
             const messageId = await RestAPI.post({
-                url: `/channels/${dmChannelId}/messages`,
+                url: `/channels/${channelId}/messages`,
                 body: {
                     content,
                     attachments: [{
@@ -301,16 +301,14 @@ async function sendTempMessage(recipientId: string, attachment: string, content:
             }).then(response => response.body.id);
 
             await sleep(500);
-            RestAPI.delete({
-                url: `/channels/${dmChannelId}/messages/${messageId}`
-            });
+            MessageActions.deleteMessage(channelId, messageId);
         });
         await upload.upload();
         return;
     }
 
     const messageId = await RestAPI.post({
-        url: `/channels/${dmChannelId}/messages`,
+        url: `/channels/${channelId}/messages`,
         body: {
             content,
             nonce: SnowflakeUtils.fromTimestamp(Date.now()),
@@ -318,9 +316,7 @@ async function sendTempMessage(recipientId: string, attachment: string, content:
     }).then(response => response.body.id);
 
     await sleep(500);
-    RestAPI.delete({
-        url: `/channels/${dmChannelId}/messages/${messageId}`
-    });
+    MessageActions.deleteMessage(channelId, messageId);
 }
 
 // Handle leaving group
