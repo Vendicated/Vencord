@@ -394,15 +394,6 @@ export default definePlugin({
                 replace: "$&return true;"
             },
         },
-        {
-            find: "available:e.available",
-            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
-            replacement: {
-                // Bypasses the guild limit for soundboard sounds by boost level
-                match: /available:e\.available/,
-                replace: "available:true"
-            }
-        },
         // Allow using custom app icons
         {
             find: "canUsePremiumAppIcons:function",
@@ -422,6 +413,7 @@ export default definePlugin({
         // Make all Soundboard sounds available
         {
             find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            predicate: () => settings.store.enableSoundboardGuildLimitBypass,
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
