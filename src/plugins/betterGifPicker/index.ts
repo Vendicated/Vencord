@@ -15,8 +15,8 @@ export default definePlugin({
         {
             find: ".GIFPickerResultTypes.SEARCH",
             replacement: [{
-                match: "this.state={resultType:null}",
-                replace: 'this.state={resultType:"Favorites"}'
+                match: /(?<="state",{resultType:)null/,
+                replace: '"Favorites"'
             }]
         }
     ]
