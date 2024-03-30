@@ -162,7 +162,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
     }
@@ -185,7 +185,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -277,7 +277,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="UserSettingsProtoStore"',
+            find: '"UserSettingsProtoStore"',
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
@@ -386,6 +386,14 @@ export default definePlugin({
             find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
+            }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
         }
@@ -585,13 +593,15 @@ export default definePlugin({
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
-            this.trimContent(children);
 
             return children;
         };
 
         try {
-            return modifyChildren(lodash.cloneDeep(content));
+            const newContent = modifyChildren(lodash.cloneDeep(content));
+            this.trimContent(newContent);
+
+            return newContent;
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;
@@ -791,8 +801,8 @@ export default definePlugin({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker
-                            , however you do not have permissions to embed links in the current channel.
+                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                            however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
                         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
@@ -864,7 +874,9 @@ export default definePlugin({
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }

@@ -138,7 +138,7 @@ export default definePlugin({
             all: true,
             // Render null instead of the buttons if the channel is hidden
             replacement: {
-                match: /(?<=renderOpenChatButton=\(\)=>{)/,
+                match: /(?<="renderOpenChatButton",\(\)=>{)/,
                 replace: "if($self.isHiddenChannel(this.props.channel))return null;"
             }
         },
@@ -191,10 +191,10 @@ export default definePlugin({
         },
         {
             // Hide the new version of unreads box for hidden channels
-            find: '.displayName="ChannelListUnreadsStore"',
+            find: '="ChannelListUnreadsStore",',
             replacement: {
-                match: /(?<=if\(null==(\i))(?=.{0,160}?getHasImportantUnread\)\(\i\))/g, // Global because Discord has multiple methods like that in the same module
-                replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
+                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i)\))/g, // Global because Discord has multiple methods like that in the same module
+                replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
@@ -218,19 +218,19 @@ export default definePlugin({
             find: "Missing channel in Channel.renderHeaderToolbar",
             replacement: [
                 {
-                    match: /(?<=renderHeaderToolbar=\(\)=>{.+?case \i\.\i\.GUILD_TEXT:)(?=.+?(\i\.push.{0,50}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
+                    match: /(?<="renderHeaderToolbar",\(\)=>{.+?case \i\.\i\.GUILD_TEXT:)(?=.+?(\i\.push.{0,50}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
                     replace: (_, pushNotificationButtonExpression, channel, isLurking) => `if(!${isLurking}&&$self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
-                    match: /(?<=renderHeaderToolbar=\(\)=>{.+?case \i\.\i\.GUILD_MEDIA:)(?=.+?(\i\.push.{0,40}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
+                    match: /(?<="renderHeaderToolbar",\(\)=>{.+?case \i\.\i\.GUILD_MEDIA:)(?=.+?(\i\.push.{0,40}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
                     replace: (_, pushNotificationButtonExpression, channel, isLurking) => `if(!${isLurking}&&$self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
-                    match: /renderMobileToolbar=\(\)=>{.+?case \i\.\i\.GUILD_DIRECTORY:(?<=let{channel:(\i).+?)/,
+                    match: /"renderMobileToolbar",\(\)=>{.+?case \i\.\i\.GUILD_DIRECTORY:(?<=let{channel:(\i).+?)/,
                     replace: (m, channel) => `${m}if($self.isHiddenChannel(${channel}))break;`
                 },
                 {
-                    match: /(?<=renderHeaderBar=\(\)=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
+                    match: /(?<="renderHeaderBar",\(\)=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
                     replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
@@ -305,27 +305,27 @@ export default definePlugin({
             ]
         },
         {
-            find: ".avatars),children",
+            find: '+1]})},"overflow"))',
             replacement: [
                 {
                     // Create a variable for the channel prop
-                    match: /maxUsers:\i,users:\i.+?=(\i).+?;/,
+                    match: /maxUsers:\i,users:\i.+?}=(\i).*?;/,
                     replace: (m, props) => `${m}let{shcChannel}=${props};`
                 },
                 {
                     // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
                     match: /\i>0(?=&&.{0,60}renderPopout)/,
-                    replace: m => `($self.isHiddenChannel(shcChannel,true)?true:${m})`
+                    replace: m => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)?true:${m})`
                 },
                 {
                     // Prevent Discord from overwriting the last children with the plus button if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<=\.value\(\),(\i)=.+?length-)1(?=\]=.{0,60}renderPopout)/,
-                    replace: (_, amount) => `($self.isHiddenChannel(shcChannel,true)&&${amount}<=0?0:1)`
+                    replace: (_, amount) => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}<=0?0:1)`
                 },
                 {
                     // Show only the plus text without overflowed children amount if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<="\+",)(\i)\+1/,
-                    replace: (m, amount) => `$self.isHiddenChannel(shcChannel,true)&&${amount}<=0?"":${m}`
+                    replace: (m, amount) => `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}<=0?"":${m}`
                 }
             ]
         },
@@ -442,7 +442,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="GuildChannelStore"',
+            find: '="GuildChannelStore",',
             replacement: [
                 {
                     // Make GuildChannelStore contain hidden channels
@@ -465,7 +465,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="NowPlayingViewStore"',
+            find: '="NowPlayingViewStore",',
             replacement: {
                 // Make active now voice states on hidden channels
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
