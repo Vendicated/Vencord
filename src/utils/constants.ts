@@ -420,7 +420,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Hanzy: {
         name: "hanzydev",
-        id: 1093131781043126322n,
+        id: 592141705818406932n,
     },
     Inbestigator: {
         name: "Inbestigator",
