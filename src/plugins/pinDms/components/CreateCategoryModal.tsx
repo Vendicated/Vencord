@@ -31,9 +31,9 @@ interface ColorPickerWithSwatchesProps {
 }
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>(".presets,", "customColor:");
+const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>("presets,", "customColor:");
 
-export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}el\("(.+?)"\).{0,50}"UserSettings"/);
+export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\).{0,50}"UserSettings"/);
 
 const cl = classNameFactory("vc-pindms-modal-");
 
@@ -53,7 +53,7 @@ function useCategory(categoryId: string | null, initalChannelId: string | null) 
             setCategory({
                 id: Toasts.genId(),
                 name: `Pin Category ${categories.length + 1}`,
-                color: 10070709,
+                color: DEFAULT_COLOR,
                 collapsed: false,
                 channels: [initalChannelId]
             });
