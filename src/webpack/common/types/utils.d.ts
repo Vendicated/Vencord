@@ -145,6 +145,7 @@ export class FormattedMessage<
 > {
     /**
      * @throws {SyntaxError} Argument `message` must follow the proper syntax.
+     * @see {@link https://gist.github.com/ryan-0324/f8602ce80d4f71e5687adbbe44bf825d}
      */
     constructor(message: string, locale?: string, hasMarkdown?: Markdown);
 
