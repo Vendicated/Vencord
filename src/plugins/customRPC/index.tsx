@@ -394,7 +394,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
-        let hideErrorCard = StatusSettingsStores.ShowCurrentGame.useSetting();
+        let gameActivityEnabled = StatusSettingsStores.ShowCurrentGame.useSetting();
         return (
             <>
                 {
