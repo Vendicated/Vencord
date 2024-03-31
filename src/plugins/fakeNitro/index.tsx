@@ -25,6 +25,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import type { CustomEmoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -162,7 +163,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji name.",
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
     }
@@ -185,7 +186,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -277,7 +278,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="UserSettingsProtoStore"',
+            find: '"UserSettingsProtoStore"',
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
@@ -386,6 +387,14 @@ export default definePlugin({
             find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
+            }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
         }
@@ -585,13 +594,15 @@ export default definePlugin({
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
-            this.trimContent(children);
 
             return children;
         };
 
         try {
-            return modifyChildren(lodash.cloneDeep(content));
+            const newContent = modifyChildren(lodash.cloneDeep(content));
+            this.trimContent(newContent);
+
+            return newContent;
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;
@@ -774,6 +785,16 @@ export default definePlugin({
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
     },
 
+    canUseEmote(e: CustomEmoji, channelId: string) {
+        if (e.require_colons === false) return true;
+        if (e.available === false) return false;
+
+        if (this.canUseEmotes)
+            return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
+        else
+            return !e.animated && e.guildId === this.guildId;
+    },
+
     start() {
         const s = settings.store;
 
@@ -791,8 +812,8 @@ export default definePlugin({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker
-                            , however you do not have permissions to embed links in the current channel.
+                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                            however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
                         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
@@ -864,18 +885,16 @@ export default definePlugin({
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${sticker.name}](${url})` : url}`;
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }
 
             if (s.enableEmojiBypass) {
-                const canUseEmotes = this.canUseEmotes && hasExternalEmojiPerms(channelId);
-
                 for (const emoji of messageObj.validNonShortcutEmojis) {
-                    if (!emoji.require_colons) continue;
-                    if (emoji.available !== false && canUseEmotes) continue;
-                    if (emoji.guildId === guildId && !emoji.animated) continue;
+                    if (this.canUseEmote(emoji, channelId)) continue;
 
                     hasBypass = true;
 
@@ -905,18 +924,12 @@ export default definePlugin({
         this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
-            const { guildId } = this;
-
             let hasBypass = false;
-
-            const canUseEmotes = this.canUseEmotes && hasExternalEmojiPerms(channelId);
 
             messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
                 if (emoji == null) return emojiStr;
-                if (!emoji.require_colons) return emojiStr;
-                if (emoji.available !== false && canUseEmotes) return emojiStr;
-                if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
+                if (this.canUseEmote(emoji, channelId)) return emojiStr;
 
                 hasBypass = true;
 
