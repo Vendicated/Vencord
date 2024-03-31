@@ -16,7 +16,7 @@ export default definePlugin({
         {
             find: "call_ringing_beat\"",
             replacement: {
-                match: /500===\i\.random\(1,1e3\)/,
+                match: /500===\i\(\)\.random\(1,1e3\)/,
                 replace: "true"
             }
         },
