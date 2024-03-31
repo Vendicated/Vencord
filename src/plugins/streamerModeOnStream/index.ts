@@ -37,7 +37,7 @@ function stopStreamerMode() {
 }
 
 export default definePlugin({
-    name: "Streamer Mode On Stream",
+    name: "StreamerModeOnStream",
     description: "Automatically enables streamer mode when you start streaming in Discord.",
     authors: [Devs.Kodarru],
 
