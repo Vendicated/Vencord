@@ -18,9 +18,13 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, UserStore } from "@webpack/common";
 
-function startStreamerMode() {
+function startStreamerMode(data) {
+    const userID = UserStore.getCurrentUser().id;
+    const streamKey = data.streamKey.split(":")[3];
+    if (streamKey !== userID) return;
+
     FluxDispatcher.dispatch({
         type: "STREAMER_MODE_UPDATE",
         key: "enabled",
@@ -28,7 +32,11 @@ function startStreamerMode() {
     });
 }
 
-function stopStreamerMode() {
+function stopStreamerMode(data) {
+    const userID = UserStore.getCurrentUser().id;
+    const streamKey = data.streamKey.split(":")[3];
+    if (streamKey !== userID) return;
+
     FluxDispatcher.dispatch({
         type: "STREAMER_MODE_UPDATE",
         key: "enabled",
@@ -37,7 +45,7 @@ function stopStreamerMode() {
 }
 
 export default definePlugin({
-    name: "StreamerModeOnStream",
+    name: "Streamer Mode On Stream",
     description: "Automatically enables streamer mode when you start streaming in Discord.",
     authors: [Devs.Kodarru],
 
