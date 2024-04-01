@@ -56,7 +56,7 @@ function getUrl(data: Data) {
     if (data.t === "Emoji")
         return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=2048`;
 }
 
 async function fetchSticker(id: string) {
@@ -86,9 +86,6 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
         url: `/guilds/${guildId}/stickers`,
         body: data,
     });
-
-    new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + data);
-    new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + sticker.name);
 
     FluxDispatcher.dispatch({
         type: "GUILD_STICKERS_CREATE_SUCCESS",
@@ -165,7 +162,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
+        new Logger("EmoteCloner").error("Failed to clone", data.name, "to server ", guildId, e);
         Toasts.show({
             message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
