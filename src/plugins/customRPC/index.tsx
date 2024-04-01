@@ -20,10 +20,13 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { localStorage } from "@utils/localStorage";
+import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { chooseFile, saveFile } from "@utils/web";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, Flex, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, Toasts, UserStore } from "@webpack/common";
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -75,7 +78,28 @@ const enum TimestampMode {
     CUSTOM,
 }
 
+const presetOptions: { label: string; value: string; }[] = [];
+const names = loadPresets();
+for (let i = 0; i < names.length; i++) {
+    presetOptions.push({
+        label: names[i].name,
+        value: names[i].name,
+    });
+}
+
+
 const settings = definePluginSettings({
+    presets: {
+        type: OptionType.SELECT,
+        description: "Select your saved preset",
+        onChange: loadPreset,
+        options: [
+            {
+                label: "None",
+                value: "none",
+            },
+        ].concat(presetOptions)
+    },
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
@@ -253,6 +277,24 @@ const settings = definePluginSettings({
     }
 });
 
+function setDefaults() {
+    settings.store.details = undefined;
+    settings.store.state = undefined;
+    settings.store.type = ActivityType.PLAYING;
+    settings.store.startTime = TimestampMode.NONE;
+    settings.store.startTime = undefined;
+    settings.store.endTime = undefined;
+    settings.store.streamLink = undefined;
+    settings.store.imageBig = undefined;
+    settings.store.imageBigTooltip = undefined;
+    settings.store.imageSmall = undefined;
+    settings.store.imageSmallTooltip = undefined;
+    settings.store.buttonOneText = undefined;
+    settings.store.buttonOneURL = undefined;
+    settings.store.buttonTwoText = undefined;
+    settings.store.buttonTwoURL = undefined;
+}
+
 function onChange() {
     setRpc(true);
     if (Settings.plugins.CustomRPC.enabled) setRpc();
@@ -276,6 +318,163 @@ function isImageKeyValid(value: string) {
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
     return true;
 }
+
+
+async function exportBackup() {
+    const filename = "rpc-backup.json";
+    const backup = {};
+    const filteredStore = Object.fromEntries(
+        Object.entries(settings.store)
+            .filter(([_, value]) => value !== undefined)
+    );
+    Object.assign(backup, filteredStore);
+    const data = new TextEncoder().encode(JSON.stringify(backup));
+
+    if (IS_DISCORD_DESKTOP) {
+        DiscordNative.fileManager.saveWithDialog(data, filename);
+    } else {
+        saveFile(new File([data], filename, { type: "application/json" }));
+    }
+}
+
+async function loadBackup(data: string) {
+    const backup = await JSON.parse(data);
+    if (backup) {
+        setDefaults();
+        Object.assign(settings.store, backup);
+    }
+}
+
+
+async function importBackup(): Promise<void> {
+    if (IS_DISCORD_DESKTOP) {
+        const [file] = await DiscordNative.fileManager.openFiles({
+            filters: [
+                { name: "RPC Backup", extensions: ["json"] },
+                { name: "all", extensions: ["*"] }
+            ]
+        });
+        if (file) {
+            try {
+                await loadBackup(new TextDecoder().decode(file.data));
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+            }
+        }
+    } else {
+        const file = await chooseFile("application/json");
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                await loadBackup(reader.result as string);
+            } catch (err) {
+                new Logger("SettingsSync").error(err);
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+function savePresets(presets) {
+    localStorage.setItem("rpcPresets", JSON.stringify(presets));
+}
+
+function loadPresets() {
+    const presetsJSON = localStorage.getItem("rpcPresets");
+    return presetsJSON ? JSON.parse(presetsJSON) : [];
+}
+
+function delPreset() {
+    const presets = loadPresets();
+    const presetIndex = presets.findIndex((preset: any) => preset.name === settings.store.appName);
+
+    if (presetIndex !== -1) {
+        presets.splice(presetIndex, 1);
+        savePresets(presets);
+        setDefaults();
+        Toasts.show({
+            message: "Preset has been successfully deleted",
+            id: Toasts.genId(),
+            type: Toasts.Type.SUCCESS,
+            options: {
+                position: Toasts.Position.BOTTOM,
+            },
+        });
+    } else {
+        Toasts.show({
+            message: "Preset not found, are you sure it exists?. Ctrl + R will help",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+            },
+        });
+    }
+}
+
+function savePreset() {
+    const presets = loadPresets();
+    const presetName = settings.store.appName || "Untitled";
+
+    if (presets.length >= 5) {
+        Toasts.show({
+            message: "Cannot  create more than 5 presets.",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+                duration: 3000
+            }
+        });
+        return;
+    }
+
+    if (presets.some(preset => preset.name === presetName)) {
+        Toasts.show({
+            message: "Preset with same name already exist",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.BOTTOM,
+                duration: 3000
+            }
+        });
+        return;
+    }
+
+    const newPreset = {
+        name: settings.store.appName || "Untitled",
+        settings: { ...settings.store }
+    };
+    presets.push(newPreset);
+    savePresets(presets);
+    Toasts.show({
+        message: "Saved. Reload discord to see changes",
+        id: Toasts.genId(),
+        type: Toasts.Type.SUCCESS,
+        options: {
+            position: Toasts.Position.BOTTOM,
+            duration: 3000
+        }
+    });
+}
+
+function loadPreset() {
+    if (settings.store.presets === "none") {
+        return;
+    }
+    const presets = loadPresets();
+    const presetIndex = presets.findIndex((preset: any) => preset.name === settings.store.presets);
+    if (presetIndex === -1) {
+        return;
+    }
+    Object.assign(settings.store, presets[presetIndex].settings);
+    settings.store.presets = presets[presetIndex].name || "none";
+    setRpc();
+}
+
 
 async function createActivity(): Promise<Activity | undefined> {
     const {
@@ -386,7 +585,7 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.Mannu],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
@@ -405,6 +604,40 @@ export default definePlugin({
                 <Forms.FormText>
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
+                <Forms.FormDivider />
+                <Forms.FormText>
+                    Click on the save & close after importing backup in order to see new changes. Save before exporting the backup.
+                </Forms.FormText>
+                <br />
+                <Flex>
+                    <Button
+                        onClick={() => importBackup()}
+                        size={Button.Sizes.MIN}
+                    >
+                        Import Backup
+                    </Button>
+                    <Button
+                        style={{ marginLeft: "8px" }}
+                        onClick={exportBackup}
+                        size={Button.Sizes.MIN}
+                    >
+                        Export Backup
+                    </Button>
+                </Flex>
+                <br />
+                <Forms.FormDivider />
+                <Forms.FormText>
+                    Click on the Save and close after selecing preset before clicking on delete. reload discord to see changes.
+                </Forms.FormText>
+                <Button onClick={savePreset} size={Button.Sizes.MIN}>
+                    Save Preset
+                </Button>
+                <Button
+                    style={{ marginLeft: "8px" }}
+                    onClick={delPreset} size={Button.Sizes.MIN}>
+                    Delete Preset
+                </Button>
+                <br />
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
