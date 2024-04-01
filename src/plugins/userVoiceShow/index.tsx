@@ -130,9 +130,8 @@ export default definePlugin({
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
-                // paste my fancy custom button above the message field
-                replace: "$self.patchPopout(arguments[0]),$&",
+                match: /applicationId:\i\.id}\),(?=.{0,50}setNote:\i)/,
+                replace: "$&$self.patchPopout(arguments[0]),",
             }
         },
 

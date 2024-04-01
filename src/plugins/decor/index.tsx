@@ -43,13 +43,13 @@ export default definePlugin({
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /(?<={user:\i},"decoration"\),)/,
+                match: /(?<=USER_SETTINGS_AVATAR_DECORATION},"decoration"\),)/,
                 replace: "$self.DecorSection(),"
             }
         },
         // Decoration modal module
         {
-            find: ".decorationGridItem",
+            find: ".decorationGridItem,",
             replacement: [
                 {
                     match: /(?<==)\i=>{let{children.{20,100}decorationGridItem/,
@@ -61,8 +61,8 @@ export default definePlugin({
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i;if\()(?<=avatarDecoration:(\i).+?)/,
-                    replace: "$1.skuId===$self.SKU_ID||"
+                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
+                    replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
         },
