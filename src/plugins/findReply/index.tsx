@@ -100,7 +100,7 @@ export default definePlugin({
                             if (!madeComponent) {
                                 madeComponent = true;
                                 element = document.createElement("div");
-                                document.querySelector("[class^=base__]")!.appendChild(element);
+                                document.querySelector("[class^=base_]")!.appendChild(element);
                                 root = ReactDOM.createRoot(element);
                             }
                             root!.render(<ReplyNavigator replies={replies}/>);
