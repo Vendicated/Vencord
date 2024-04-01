@@ -87,6 +87,9 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
         body: data,
     });
 
+    new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + data);
+    new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + sticker.name);
+
     FluxDispatcher.dispatch({
         type: "GUILD_STICKERS_CREATE_SUCCESS",
         guildId,
@@ -146,7 +149,6 @@ async function fetchBlob(url: string) {
 async function doClone(guildId: string, data: Sticker | Emoji) {
     try {
         if (data.t === "Sticker") {
-            new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + data);
             await cloneSticker(guildId, data);
         }
         else
