@@ -162,7 +162,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("EmoteCloner").error("Failed to clone", data.name, "to server ", guildId, e);
+        new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
         Toasts.show({
             message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
