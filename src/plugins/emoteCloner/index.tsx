@@ -145,8 +145,10 @@ async function fetchBlob(url: string) {
 
 async function doClone(guildId: string, data: Sticker | Emoji) {
     try {
-        if (data.t === "Sticker")
+        if (data.t === "Sticker") {
+            new Logger("EmoteCloner").info("hiiii hi hi hi :3 " + data);
             await cloneSticker(guildId, data);
+        }
         else
             await cloneEmoji(guildId, data);
 
