@@ -185,7 +185,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -277,7 +277,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="UserSettingsProtoStore"',
+            find: '"UserSettingsProtoStore"',
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
@@ -386,6 +386,14 @@ export default definePlugin({
             find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
+            }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
         }
