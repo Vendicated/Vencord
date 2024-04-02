@@ -83,38 +83,31 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ",\"ChannelTextAreaButtons\")",
+            find: ".default.getSentUserIds().includes",
             replacement: {
-                match: /,(.null===.+?"gift"..)/,
-                replace: ",$self.settings.store.giftButton&&$1"
+                match: /(referral.{5})(\(null.{8,10}gifts.+?gift.{3},)/,
+                replace: "$1$self.settings.store.giftButton && $2"
             }
         },
         {
-            find: ",\"ChannelTextAreaButtons\")",
+            find: ".default.getSentUserIds().includes",
             replacement: {
-                match: /,(.null===.+?"gif"..)/,
-                replace: ",$self.settings.store.gifButton&&$1"
+                match: /\(null.{8,10}gifs.+?gif.{3},/,
+                replace: "$self.settings.store.gifButton && $&"
             }
         },
         {
-            find: ",\"ChannelTextAreaButtons\")",
+            find: ".default.getSentUserIds().includes",
             replacement: {
-                match: /,(.null===.+?"sticker"..)/,
-                replace: ",$self.settings.store.stickerButton&&$1"
+                match: /\(null.{8,10}stickers.+?sticker.{3},/,
+                replace: "$self.settings.store.stickerButton && $&"
             }
         },
         {
-            find: ",\"ChannelTextAreaButtons\")",
+            find: ".default.getSentUserIds().includes",
             replacement: {
-                match: /,(.null===.+?"emoji"..)/,
-                replace: ",$self.settings.store.emojiButton&&$1"
-            }
-        },
-        {
-            find: ",\"ChannelTextAreaButtons\")",
-            replacement: {
-                match: /,(.null===.+?"gift"..)/,
-                replace: ",$self.settings.store.giftButton&&$1"
+                match: /\(null.{8,10}emojis.+?emoji.{3},/,
+                replace: "$self.settings.store.emojiButton && $&"
             }
         },
         {
