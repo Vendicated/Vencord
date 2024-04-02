@@ -33,7 +33,7 @@ const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaul
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
-enum IndicatorMode {
+const enum IndicatorMode {
     Dots = 1 << 0,
     Avatars = 1 << 1
 }
