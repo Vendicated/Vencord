@@ -98,12 +98,13 @@ interface Executable {
     name: string;
     is_launcher: boolean;
 }
-
-type ImageAttributes = ImgHTMLAttributes<HTMLImageElement> & {
-    src: string;
-    alt: string;
+interface ApplicationIcon {
+    image: ImgHTMLAttributes<HTMLImageElement> & {
+        src: string;
+        alt: string;
+    };
     activity: Activity;
-};
+}
 
 interface ActivityListIcon {
     iconElement: JSX.Element;
@@ -126,7 +127,7 @@ const fetchedApplications = new Map<string, Application | null>();
 const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
 
 function getApplicationIcons(activities: Activity[]) {
-    const applicationIcons: ImageAttributes[] = [];
+    const applicationIcons: ApplicationIcon[] = [];
     const applications = activities.filter(activity => activity.application_id || activity.platform);
 
     for (const activity of applications) {
@@ -140,11 +141,17 @@ function getApplicationIcons(activities: Activity[]) {
                 if (image.startsWith("mp:")) {
                     const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
                     if (settings.store.renderGifs || !discordMediaLink.endsWith(".gif")) {
-                        applicationIcons.push({ src: discordMediaLink, alt, activity });
+                        applicationIcons.push({
+                            image: { src: discordMediaLink, alt },
+                            activity
+                        });
                     }
                 } else {
                     const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
-                    applicationIcons.push({ src, alt, activity });
+                    applicationIcons.push({
+                        image: { src, alt },
+                        activity
+                    });
                 }
             };
 
@@ -174,14 +181,23 @@ function getApplicationIcons(activities: Activity[]) {
             if (application) {
                 if (application.icon) {
                     const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
-                    applicationIcons.push({ src, alt: application.name, activity });
+                    applicationIcons.push({
+                        image: { src, alt: application.name },
+                        activity
+                    });
                 } else if (platform === "xbox") {
-                    applicationIcons.push({ src: xboxUrl, alt: "Xbox", activity });
+                    applicationIcons.push({
+                        image: { src: xboxUrl, alt: "Xbox" },
+                        activity
+                    });
                 }
             }
         } else {
             if (platform === "xbox") {
-                applicationIcons.push({ src: xboxUrl, alt: "Xbox", activity });
+                applicationIcons.push({
+                    image: { src: xboxUrl, alt: "Xbox" },
+                    activity
+                });
             }
         }
     }
@@ -211,16 +227,16 @@ export default definePlugin({
         }
         const applicationIcons = getApplicationIcons(activities);
         if (applicationIcons.length) {
-            const compareImageSource = (a: ImageAttributes, b: ImageAttributes) => {
-                return a.src === b.src;
+            const compareImageSource = (a: ApplicationIcon, b: ApplicationIcon) => {
+                return a.image.src === b.image.src;
             };
             const uniqueIcons = applicationIcons.filter((element, index, array) => {
                 return array.findIndex(el => compareImageSource(el, element)) === index;
             });
-            for (const iconAttrs of uniqueIcons) {
+            for (const appIcon of uniqueIcons) {
                 icons.push({
-                    iconElement: <img {...iconAttrs} />,
-                    tooltip: iconAttrs.activity.details ?? iconAttrs.activity.name
+                    iconElement: <img {...appIcon.image} />,
+                    tooltip: appIcon.activity.details ?? appIcon.activity.name
                 });
             }
         }
