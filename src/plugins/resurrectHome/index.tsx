@@ -89,8 +89,8 @@ export default definePlugin({
         {
             find: "61eef9_2",
             replacement: {
-                match: /(?<=getMutableGuildChannelsForGuild\(\i\)\);)(?=if\(null==\i\|\|)/,
-                replace: "if($self.useForceServerHome())return false;"
+                match: /getMutableGuildChannelsForGuild\(\i\);return\(0,\i\.useStateFromStores\).+?\]\)(?=}function)/,
+                replace: m => `${m}&&!$self.useForceServerHome()`
             }
         }
     ],
