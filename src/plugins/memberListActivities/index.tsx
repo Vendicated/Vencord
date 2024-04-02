@@ -24,6 +24,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { Tooltip } from "@webpack/common";
+import type { ImgHTMLAttributes } from "react";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
 import { TwitchIcon } from "./components/TwitchIcon";
@@ -97,6 +99,17 @@ interface Executable {
     is_launcher: boolean;
 }
 
+type ImageAttributes = ImgHTMLAttributes<HTMLImageElement> & {
+    src: string;
+    alt: string;
+    activity: Activity;
+};
+
+interface ActivityListIcon {
+    iconElement: JSX.Element;
+    tooltip?: JSX.Element | string;
+}
+
 const ApplicationStore: {
     getApplication: (id: string) => Application | null;
 } = findStoreLazy("ApplicationStore");
@@ -112,6 +125,70 @@ const fetchedApplications = new Map<string, Application | null>();
 
 const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
 
+function getApplicationIcons(activities: Activity[]) {
+    const applicationIcons: ImageAttributes[] = [];
+    const applications = activities.filter(activity => activity.application_id || activity.platform);
+
+    for (const activity of applications) {
+        const { assets, application_id, platform } = activity;
+        if (!application_id && !platform) {
+            continue;
+        }
+        if (assets) {
+
+            const addImage = (image: string, alt: string) => {
+                if (image.startsWith("mp:")) {
+                    const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
+                    if (settings.store.renderGifs || !discordMediaLink.endsWith(".gif")) {
+                        applicationIcons.push({ src: discordMediaLink, alt, activity });
+                    }
+                } else {
+                    const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
+                    applicationIcons.push({ src, alt, activity });
+                }
+            };
+
+            // Prefer large image
+            const largeImage = assets.large_image;
+            if (largeImage) {
+                addImage(largeImage, assets.large_text ?? "Large Text");
+            } else {
+                const smallImage = assets.small_image;
+                if (smallImage) {
+                    addImage(smallImage, assets.small_text ?? "Small Text");
+                }
+            }
+        } else if (application_id) {
+            let application = ApplicationStore.getApplication(application_id);
+            if (!application) {
+                if (fetchedApplications.has(application_id)) {
+                    application = fetchedApplications.get(application_id) as Application | null;
+                } else {
+                    fetchedApplications.set(application_id, null);
+                    fetchApplication(application_id).then(app => {
+                        fetchedApplications.set(application_id, app);
+                    });
+                }
+            }
+
+            if (application) {
+                if (application.icon) {
+                    const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
+                    applicationIcons.push({ src, alt: application.name, activity });
+                } else if (platform === "xbox") {
+                    applicationIcons.push({ src: xboxUrl, alt: "Xbox", activity });
+                }
+            }
+        } else {
+            if (platform === "xbox") {
+                applicationIcons.push({ src: xboxUrl, alt: "Xbox", activity });
+            }
+        }
+    }
+
+    return applicationIcons;
+}
+
 export default definePlugin({
     name: "MemberListActivities",
     description: "Shows activity icons in the member list",
@@ -121,88 +198,54 @@ export default definePlugin({
     settings,
 
     patchActivityList: (activities: Activity[]): JSX.Element | null => {
-        const icons: JSX.Element[] = [];
+        const icons: ActivityListIcon[] = [];
 
-        if (activities.some(activity => activity.name === "Spotify")) {
-            icons.push(<SpotifyIcon />);
+        const spotifyActivity = activities.find(({ name }) => name === "Spotify");
+        if (spotifyActivity) {
+            icons.push({ iconElement: <SpotifyIcon />, tooltip: spotifyActivity.details ?? spotifyActivity.name });
         }
 
-        if (activities.some(activity => activity.name === "Twitch")) {
-            icons.push(<TwitchIcon />);
+        const twitchActivity = activities.find(({ name }) => name === "Twitch");
+        if (twitchActivity) {
+            icons.push({ iconElement: <TwitchIcon />, tooltip: twitchActivity.details ?? twitchActivity.name });
         }
-
-        const applications = activities.filter(activity => activity.application_id || activity.platform);
-        applications.forEach(activity => {
-            const { assets, application_id, platform } = activity;
-            if (!application_id && !platform) {
-                return;
+        const applicationIcons = getApplicationIcons(activities);
+        if (applicationIcons.length) {
+            const compareImageSource = (a: ImageAttributes, b: ImageAttributes) => {
+                return a.src === b.src;
+            };
+            const uniqueIcons = applicationIcons.filter((element, index, array) => {
+                return array.findIndex(el => compareImageSource(el, element)) === index;
+            });
+            for (const iconAttrs of uniqueIcons) {
+                icons.push({
+                    iconElement: <img {...iconAttrs} />,
+                    tooltip: iconAttrs.activity.details ?? iconAttrs.activity.name
+                });
             }
-            if (assets) {
-
-                const addImage = (image: string, alt: string) => {
-                    if (image.startsWith("mp:")) {
-                        const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
-                        if (settings.store.renderGifs || !discordMediaLink.endsWith(".gif")) {
-                            icons.push(<img src={discordMediaLink} alt={alt}/>);
-                        }
-                    } else {
-                        const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
-                        icons.push(<img src={src} alt={alt}/>);
-                    }
-                };
-
-                // Prefer large image
-                const largeImage = assets.large_image;
-                if (largeImage) {
-                    addImage(largeImage, assets.large_text ?? "Large Text");
-                } else {
-                    const smallImage = assets.small_image;
-                    if (smallImage) {
-                        addImage(smallImage, assets.small_text ?? "Small Text");
-                    }
-                }
-            } else if (application_id) {
-                let application = ApplicationStore.getApplication(application_id);
-                if (!application) {
-                    if (fetchedApplications.has(application_id)) {
-                        application = fetchedApplications.get(application_id) as Application | null;
-                    } else {
-                        fetchedApplications.set(application_id, null);
-                        fetchApplication(application_id).then(app => {
-                            fetchedApplications.set(application_id, app);
-                        });
-                    }
-                }
-
-                if (application) {
-                    if (application.icon) {
-                        const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
-                        icons.push(<img src={src} alt={application.name} />);
-                    } else if (platform === "xbox") {
-                        icons.push(<img src={xboxUrl} alt="Xbox" />);
-                    }
-                }
-            } else {
-                if (platform === "xbox") {
-                    icons.push(<img src={xboxUrl} alt="Xbox" />);
-                }
-            }
-        });
+        }
 
         if (icons.length) {
-            const compareJSXElementsSource = (a: JSX.Element, b: JSX.Element) => {
-                return a.props?.src === b.props?.src;
-            };
-            const uniqueIcons = icons.filter((element, index, array) => {
-                return array.findIndex(el => compareJSXElementsSource(el, element)) === index;
-            });
             return <ErrorBoundary noop>
                 <div className={cl("row")}>
-                    {uniqueIcons.map((icon, i) => (
-                        <div key={i} className={cl("icon")} style={{ width: `${settings.store.iconSize}px`, height: `${settings.store.iconSize}px` }}>
-                            {icon}
-                        </div>
-                    ))}
+                    {icons.map(({ iconElement, tooltip }, i) => {
+                        return (
+                            <div key={i} className={cl("icon")} style={{
+                                width: `${settings.store.iconSize}px`,
+                                height: `${settings.store.iconSize}px`
+                            }}>
+                                {tooltip ? <Tooltip text={tooltip}>
+                                    {({ onMouseEnter, onMouseLeave }) => (
+                                        <div
+                                            onMouseEnter={onMouseEnter}
+                                            onMouseLeave={onMouseLeave}>
+                                            {iconElement}
+                                        </div>
+                                    )}
+                                </Tooltip> : iconElement}
+                            </div>
+                        );
+                    })}
                 </div>
             </ErrorBoundary>;
         } else {
