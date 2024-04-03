@@ -9,7 +9,7 @@ import { Settings } from "@api/Settings";
 import { UserStore } from "@webpack/common";
 
 import { DEFAULT_COLOR } from "./constants";
-import { forceUpdate } from "./index";
+import { forceUpdate, PinOrder, PrivateChannelSortStore, settings } from "./index";
 
 export interface Category {
     id: string;
@@ -106,7 +106,12 @@ export function categoryLen() {
 }
 
 export function getAllUncollapsedChannels() {
-    return categories.filter(c => !c.collapsed).map(c => c.channels).flat();
+    return categories.filter(c => !c.collapsed).map(c => {
+        if (settings.store.pinOrder === PinOrder.LastMessage)
+            return PrivateChannelSortStore.getPrivateChannelIds().filter(channel => c.channels.includes(channel));
+
+        return c.channels;
+    }).flat();
 }
 
 export function getSections() {

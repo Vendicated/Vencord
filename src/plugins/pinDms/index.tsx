@@ -29,7 +29,7 @@ interface ChannelComponentProps {
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
