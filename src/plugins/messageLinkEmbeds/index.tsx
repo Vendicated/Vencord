@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
@@ -389,4 +389,8 @@ export default definePlugin({
             );
         }, 4 /* just above rich embeds */);
     },
+
+    stop() {
+        removeAccessory("messageLinkEmbed");
+    }
 });
