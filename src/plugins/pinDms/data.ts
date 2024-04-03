@@ -106,12 +106,12 @@ export function categoryLen() {
 }
 
 export function getAllUncollapsedChannels() {
-    return categories.filter(c => !c.collapsed).map(c => {
-        if (settings.store.pinOrder === PinOrder.LastMessage)
-            return PrivateChannelSortStore.getPrivateChannelIds().filter(channel => c.channels.includes(channel));
+    if (settings.store.pinOrder === PinOrder.LastMessage) {
+        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
+        return categories.filter(c => !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
+    }
 
-        return c.channels;
-    }).flat();
+    return categories.filter(c => !c.collapsed).flatMap(c => c.channels);
 }
 
 export function getSections() {
