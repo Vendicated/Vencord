@@ -129,15 +129,9 @@ function getGuildCandidates(data: Data) {
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
-        for (const emoji of emojis) {
-            if (emoji.animated === isAnimated) {
+        for (const emoji of emojis)
+            if (emoji.animated === isAnimated && !emoji.managed)
                 count++;
-                if (emoji.managed === true) {
-                    count--;
-                }
-            }
-
-        }
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
