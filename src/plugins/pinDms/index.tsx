@@ -236,7 +236,7 @@ export default definePlugin({
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
+        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
