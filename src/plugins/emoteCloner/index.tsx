@@ -132,10 +132,11 @@ function getGuildCandidates(data: Data) {
         for (const emoji of emojis) {
             if (emoji.animated === isAnimated) {
                 count++;
+                if (emoji.managed === true) {
+                    count--;
+                }
             }
-            if (emoji.managed === true) {
-                count--; // twitch emojis do not count towards the limit
-            }
+
         }
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
