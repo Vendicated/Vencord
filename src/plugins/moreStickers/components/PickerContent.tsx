@@ -69,6 +69,9 @@ function PickerContentRowGrid({
     onSend = () => { },
     isHovered = false
 }: PickerContentRowGrid) {
+    if (FFmpegStateContext === undefined) {
+        throw new Error("FFmpegStateContext is not defined");
+    }
     const ffmpegState = React.useContext(FFmpegStateContext);
 
     return (
