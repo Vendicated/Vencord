@@ -9,6 +9,7 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { GuildMemberStore, RelationshipStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -61,8 +62,8 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /\.map\((\i)=>(\i)\.(\i)\.getName\((\i),this\.props\.channel\.id,(\i)\)\)/,
-                replace: ".map($1 => { let user = $1; user.nick = $2.$3.getName($4, this.props.channel.id, $5); return user; })"
+                match: /\.map\(\i=>\i\.\i\.getName\(\i,this\.props\.channel\.id,\i\)\)/,
+                replace: ""
             }
         },
         // Style the indicator and add function call to modify the children before rendering
@@ -103,17 +104,19 @@ export default definePlugin({
 
         let index = 0;
 
-        console.log("children", children);
-        console.log("props", props);
-        console.log("users", users);
-
         return children.map(c => {
             if (c.type === "strong") {
                 const user = users[index++];
-                console.log("user", user);
                 if (!user) return c;
+
+                const nick = GuildMemberStore.getNick(props.guildId!, user.id)
+                    || (!props.guildId && RelationshipStore.getNickname(user.id))
+                    || (user as any).globalName
+                    || user.username;
+                if (!nick) return c;
+
                 return <><strong>{this.renderUsername({
-                    author: { nick: user.nick },
+                    author: { nick },
                     message: undefined,
                     isRepliedMessage: false,
                     withMentionPrefix: false,
