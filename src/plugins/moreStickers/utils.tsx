@@ -17,6 +17,13 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+
+import { React } from "@webpack/common";
+import { FFmpegState } from './types';
+
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { toBlobURL } from '@ffmpeg/util';
+
 export const cl = classNameFactory("vc-more-stickers-");
 export const clPicker = (className: string, ...args: any[]) => cl("picker-" + className, ...args);
 
@@ -45,4 +52,16 @@ export class Mutex {
         // Return the new promise
         return rv;
     }
+}
+
+export const FFmpegStateContext = React.createContext<FFmpegState | undefined>(undefined);
+
+export async function loadFFmpeg(ffmpeg: FFmpeg, setLoaded: (loaded: boolean) => void) {
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+
+    await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+    setLoaded(true);
 }
