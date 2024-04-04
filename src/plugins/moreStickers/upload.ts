@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
+import { FFmpegState, Sticker } from "./types";
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
-import { Sticker } from "./types";
 
 const MessageUpload = findByPropsLazy("instantBatchUpload");
 const CloudUploadParent = findByPropsLazy("CloudUpload");
@@ -27,6 +29,9 @@ const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
 const promptToUploadParent = findByPropsLazy("promptToUpload");
+
+
+export const ffmpeg = new FFmpeg();
 
 async function resizeImage(url: string) {
     const originalImage = new Image();
@@ -77,13 +82,31 @@ async function resizeImage(url: string) {
     return blob;
 }
 
+async function toGIF(url: string, ffmpeg: FFmpeg): Promise<[File, () => Promise<boolean>]> {
+    const filename = (new URL(url)).pathname.split("/").pop() ?? "image.png";
+    await ffmpeg.writeFile(filename, await fetchFile(url));
+
+    const outputFilename = "output.gif";
+    await ffmpeg.exec(["-i", filename, outputFilename]);
+
+    const data = await ffmpeg.readFile(outputFilename);
+    await ffmpeg.deleteFile(filename);
+    await ffmpeg.deleteFile(outputFilename);
+    if (typeof data === "string") {
+        throw new Error("Could not read file");
+    }
+    return [new File([data.buffer], outputFilename, { type: 'image/gif' }), () => ffmpeg.deleteFile(outputFilename)];
+}
+
 export async function sendSticker({
     channelId,
     sticker,
     sendAsLink,
     ctrlKey,
-    shiftKey
-}: { channelId: string; sticker: Sticker; sendAsLink?: boolean; ctrlKey: boolean; shiftKey: boolean; }) {
+    shiftKey,
+    ffmpegState
+}: { channelId: string; sticker: Sticker; sendAsLink?: boolean; ctrlKey: boolean; shiftKey: boolean; ffmpegState?: FFmpegState; }) {
+
     let messageContent = "";
     const { textEditor } = Vencord.Plugins.plugins.MoreStickers as any;
     if (DraftStore) {
@@ -99,50 +122,76 @@ export async function sendSticker({
     }
 
     if ((ctrlKey || !sendAsLink) && !shiftKey) {
-        const response = await fetch(sticker.image, { cache: "force-cache" });
-        // const blob = await response.blob();
-        const orgImageUrl = URL.createObjectURL(await response.blob());
-        const processedImage = await resizeImage(orgImageUrl);
+        let file: File | null = null;
+        let cleanup: (() => Promise<boolean>) | null = null;
 
-        const filename = sticker.filename ?? (new URL(sticker.image)).pathname.split("/").pop();
-        let mimeType = "image/png";
-        switch (filename?.split(".").pop()?.toLowerCase()) {
-            case "jpg":
-            case "jpeg":
-                mimeType = "image/jpeg";
-                break;
-            case "gif":
-                mimeType = "image/gif";
-                break;
-            case "webp":
-                mimeType = "image/webp";
-                break;
-            case "svg":
-                mimeType = "image/svg+xml";
-                break;
+        try {
+            if (sticker?.isAnimated) {
+                if (!ffmpegState) {
+                    throw new Error("FFmpeg state is not provided");
+                }
+                if (!ffmpegState?.ffmpeg) {
+                    throw new Error("FFmpeg is not provided");
+                }
+                if (!ffmpegState?.isLoaded) {
+                    throw new Error("FFmpeg is not loaded");
+                }
+
+                const [gif, _cleanup] = await toGIF(sticker.image, ffmpegState.ffmpeg);
+                file = gif;
+                cleanup = _cleanup;
+            }
+            else {
+                const response = await fetch(sticker.image, { cache: "force-cache" });
+                // const blob = await response.blob();
+                const orgImageUrl = URL.createObjectURL(await response.blob());
+                const processedImage = await resizeImage(orgImageUrl);
+
+                const filename = sticker.filename ?? (new URL(sticker.image)).pathname.split("/").pop();
+                let mimeType = "image/png";
+                switch (filename?.split(".").pop()?.toLowerCase()) {
+                    case "jpg":
+                    case "jpeg":
+                        mimeType = "image/jpeg";
+                        break;
+                    case "gif":
+                        mimeType = "image/gif";
+                        break;
+                    case "webp":
+                        mimeType = "image/webp";
+                        break;
+                    case "svg":
+                        mimeType = "image/svg+xml";
+                        break;
+                }
+                file = new File([processedImage], filename!, { type: mimeType });
+            }
+
+            if (ctrlKey) {
+                promptToUploadParent.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
+                return;
+            }
+
+            MessageUpload.uploadFiles({
+                channelId,
+                draftType: 0,
+                hasSpoiler: false,
+                options: messageOptions || {},
+                parsedMessage: {
+                    content: messageContent
+                },
+                uploads: [
+                    new CloudUploadParent.CloudUpload({
+                        file,
+                        platform: 1
+                    }, channelId, false, 0)
+                ]
+            });
+        } finally {
+            if (cleanup) {
+                cleanup();
+            }
         }
-        const file = new File([processedImage], filename!, { type: mimeType });
-
-        if (ctrlKey) {
-            promptToUploadParent.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
-            return;
-        }
-
-        MessageUpload.uploadFiles({
-            channelId,
-            draftType: 0,
-            hasSpoiler: false,
-            options: messageOptions || {},
-            parsedMessage: {
-                content: messageContent
-            },
-            uploads: [
-                new CloudUploadParent.CloudUpload({
-                    file,
-                    platform: 1
-                }, channelId, false, 0)
-            ]
-        });
     } else if (shiftKey) {
         if (!messageContent.endsWith(" ") || !messageContent.endsWith("\n")) messageContent += " ";
         messageContent += sticker.image;

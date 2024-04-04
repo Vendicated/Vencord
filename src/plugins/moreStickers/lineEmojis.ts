@@ -80,7 +80,8 @@ export function convertSticker(s: LineEmoji): Sticker {
         id: toStickerId(s.id, s.stickerPackId),
         image: s.animationUrl || s.staticUrl,
         title: s.id,
-        stickerPackId: toStickerPackId(s.stickerPackId)
+        stickerPackId: toStickerPackId(s.stickerPackId),
+        isAnimated: !!s.animationUrl
     };
 }
 
