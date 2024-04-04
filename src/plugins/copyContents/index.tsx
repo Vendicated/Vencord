@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// lots of this code was stolen from the viewRaw plugin (the message hover menu stuff) :3
 import { addButton, removeButton } from "@api/MessagePopover";
 import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
