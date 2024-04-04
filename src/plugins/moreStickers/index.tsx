@@ -142,6 +142,10 @@ export default definePlugin({
         channel: Channel,
         closePopout: () => void;
     }) {
+        if (FFmpegStateContext === undefined) {
+            return <div>FFmpegStateContext is undefined</div>;
+        }
+
         const [query, setQuery] = React.useState<string | undefined>();
         const [stickerPackMetas, setStickerPackMetas] = React.useState<StickerPackMeta[]>([]);
         const [stickerPacks, setStickerPacks] = React.useState<StickerPack[]>([]);
@@ -182,10 +186,6 @@ export default definePlugin({
                 ffmpegLoaded[1](true);
             });
         }, []);
-
-        if (FFmpegStateContext === undefined) {
-            return <div>FFmpegStateContext is undefined</div>;
-        }
 
         return (
             <Wrapper>
