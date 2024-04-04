@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+
 export interface LineSticker {
     animationUrl: string,
     fallbackStaticUrl?: string,
@@ -66,6 +68,7 @@ export interface Sticker {
     title: string;
     stickerPackId: StickerPackMeta["id"];
     filename?: string;
+    isAnimated?: boolean;
 }
 
 export interface StickerPackMeta {
@@ -80,4 +83,9 @@ export interface StickerPackMeta {
 
 export interface StickerPack extends StickerPackMeta {
     stickers: Sticker[];
+}
+
+export interface FFmpegState {
+    ffmpeg?: FFmpeg;
+    isLoaded: boolean;
 }

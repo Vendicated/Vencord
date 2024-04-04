@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 import { React } from "@webpack/common";
 
 import { Sticker, StickerPack } from "../types";
 import { sendSticker } from "../upload";
 import { RecentlyUsedIcon } from "./icons";
 import { addRecentSticker, getRecentStickers, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
-import { clPicker } from "../utils";
+import { clPicker, FFmpegStateContext } from "../utils";
 
 export interface PickerContent {
     stickerPacks: StickerPack[];
@@ -70,6 +69,8 @@ function PickerContentRowGrid({
     onSend = () => { },
     isHovered = false
 }: PickerContentRowGrid) {
+    const ffmpegState = React.useContext(FFmpegStateContext);
+
     return (
         <div
             role="gridcell"
@@ -80,7 +81,7 @@ function PickerContentRowGrid({
             onClick={e => {
                 if (!channelId) return;
 
-                sendSticker({ channelId, sticker, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
+                sendSticker({ channelId, sticker, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, ffmpegState });
                 addRecentSticker(sticker);
                 onSend(sticker, e.ctrlKey);
             }}

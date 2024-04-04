@@ -23,14 +23,16 @@ import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+
 import { PickerSidebar } from "./components/PickerCategoriesSidebar";
 import { PickerContent } from "./components/PickerContent";
 import { PickerHeader } from "./components/PickerHeader";
 import { Settings } from "./components/settings";
 import { Wrapper } from "./components/wrapper";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
-import { StickerPack, StickerPackMeta } from "./types";
-import { cl } from "./utils";
+import { StickerPack, StickerPackMeta, FFmpegState } from "./types";
+import { cl, FFmpegStateContext, loadFFmpeg } from "./utils";
 
 export default definePlugin({
     name: "MoreStickers",
@@ -146,6 +148,11 @@ export default definePlugin({
         const [counter, setCounter] = React.useState(0);
         const [selectedStickerPackId, setSelectedStickerPackId] = React.useState<string | null>(null);
 
+        const ffmpegLoaded = React.useState(false);
+        const ffmpeg = React.useState<FFmpeg | undefined>(undefined);
+
+        // loadFFmpeg(ffmpeg[0], ffmpegLoaded[1]);
+
         const getMetasSignature = (m: StickerPackMeta[]) => m.map(x => x.id).sort().join(",");
 
         React.useEffect(() => {
@@ -177,14 +184,19 @@ export default definePlugin({
                 </svg>
 
                 <PickerHeader onQueryChange={setQuery} />
-                <PickerContent
-                    stickerPacks={stickerPacks}
-                    selectedStickerPackId={selectedStickerPackId}
-                    setSelectedStickerPackId={setSelectedStickerPackId}
-                    channelId={channel.id}
-                    closePopout={closePopout}
-                    query={query}
-                />
+                <FFmpegStateContext.Provider value={{
+                    ffmpeg: ffmpeg[0],
+                    isLoaded: ffmpegLoaded[0]
+                }}>
+                    <PickerContent
+                        stickerPacks={stickerPacks}
+                        selectedStickerPackId={selectedStickerPackId}
+                        setSelectedStickerPackId={setSelectedStickerPackId}
+                        channelId={channel.id}
+                        closePopout={closePopout}
+                        query={query}
+                    />
+                </FFmpegStateContext.Provider>
                 <PickerSidebar
                     packMetas={
                         stickerPackMetas.map(meta => ({
