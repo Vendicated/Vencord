@@ -20,10 +20,6 @@ interface UsernameProps {
     userOverride?: User;
 }
 
-interface NickUser extends User {
-    nick: string;
-}
-
 const settings = definePluginSettings({
     mode: {
         type: OptionType.SELECT,
@@ -99,7 +95,7 @@ export default definePlugin({
         }
     },
 
-    renderTypingNames(props: any, users: NickUser[], children: any) {
+    renderTypingNames(props: any, users: User[], children: any) {
         if (!Array.isArray(children)) return children;
 
         let index = 0;
