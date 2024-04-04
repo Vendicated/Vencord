@@ -116,9 +116,11 @@ async function basicModal(title: string, message: string, footer: ((props: Modal
                 </Forms.FormText>
             </ModalContent>
 
-            <ModalFooter>
-                {footer && footer(props)}
-            </ModalFooter>
+            {footer && (
+                <ModalFooter>
+                    {footer(props)}
+                </ModalFooter>
+            )}
         </ModalRoot>
     );
 }
