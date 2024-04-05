@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { Button, Forms, Menu, Text } from "@webpack/common";
+import { Button, Forms, Menu,/* SettingsRouter, */Text } from "@webpack/common";
 
 import { ResponseType } from "./types";
 
@@ -61,21 +61,35 @@ async function basicModal(title: string, message: string, footer: ((props: Modal
 }
 
 function showMissingApiKeyModal() {
-    // TODO - make the modal have a button that brings you to the settings page
     basicModal("API Key Required", "You need to provide an API key within the settings of this plugin in order to report phishing links.", props => (
-        <Button
-            color={Button.Colors.PRIMARY}
-            onClick={props.onClose}
-        >
-            Close
-        </Button>
+        <>
+            <Button
+                onClick={() => {
+                    // TODO: open the settings page for this plugin
+                    // SettingsRouter.open("PhishReportSettings");
+                    props.onClose();
+                }}
+                color={Button.Colors.BRAND}
+                look={Button.Looks.FILLED}
+            >
+                Go to Settings
+            </Button>
+            <Button
+                onClick={props.onClose}
+                color={Button.Colors.PRIMARY}
+                look={Button.Looks.LINK}
+            >
+                Close
+            </Button>
+        </>
     ));
 }
 
 async function showErrorModal(message: string) {
     basicModal("Error", message, props => (
         <Button
-            color={Button.Colors.PRIMARY}
+            color={Button.Colors.BRAND}
+            look={Button.Looks.FILLED}
             onClick={props.onClose}
         >
             Close
@@ -112,10 +126,16 @@ async function startTakedown(url: string, apiKey: string) {
                     window.open(`https://phish.report/cases/${result.id}`, "_blank");
                     props.onClose();
                 }}
-                size={Button.Sizes.SMALL}
-                color={Button.Colors.LINK}
+                color={Button.Colors.BRAND}
             >
                 View Case
+            </Button>
+            <Button
+                onClick={props.onClose}
+                color={Button.Colors.PRIMARY}
+                look={Button.Looks.LINK}
+            >
+                Close
             </Button>
         </>
     ));
@@ -163,5 +183,5 @@ export default definePlugin({
     settings,
     contextMenus: {
         "message": messageContextMenuPatch
-    },
+    }
 });
