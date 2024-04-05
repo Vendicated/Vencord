@@ -49,7 +49,7 @@ export default definePlugin({
         },
         // Decoration modal module
         {
-            find: ".decorationGridItem",
+            find: ".decorationGridItem,",
             replacement: [
                 {
                     match: /(?<==)\i=>{let{children.{20,100}decorationGridItem/,
