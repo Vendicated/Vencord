@@ -150,12 +150,14 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
 
     if (flux) {
+        logger.info("Subscribing to flux events of plugin", name);
         for (const event in flux) {
             FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
         }
     }
 
     if (contextMenus) {
+        logger.info("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
@@ -194,12 +196,14 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
 
     if (flux) {
+        logger.info("Unsubscribing from flux events of plugin", name);
         for (const event in flux) {
             FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
         }
     }
 
     if (contextMenus) {
+        logger.info("Removing context menus patches of plugin", name);
         for (const navId in contextMenus) {
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
