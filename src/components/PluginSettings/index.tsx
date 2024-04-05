@@ -34,7 +34,7 @@ import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash,Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -315,7 +315,6 @@ export default function PluginSettings() {
                 <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.bottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
-                        className={InputStyles.inputDefault}
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
