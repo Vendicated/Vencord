@@ -45,7 +45,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.USER_PROFILE_MODAL", // Note: the module is lazy-loaded
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
                 replace: '(arguments[0].user.bot||arguments[0].isCurrentUser)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
