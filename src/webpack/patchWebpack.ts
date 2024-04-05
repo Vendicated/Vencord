@@ -62,6 +62,7 @@ Object.defineProperty(Function.prototype, "O", {
     set(onChunksLoaded: any) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
+        // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
         if (new Error().stack?.includes("discord.com") && this.e.toString().includes("Promise.all")) {
             logger.info("Found main Webpack onChunksLoaded");
 
@@ -141,13 +142,13 @@ function patchPush(webpackGlobal: any) {
     }
 
     handlePush.$$vencordOriginal = webpackGlobal.push;
+    handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
     // Webpack overwrites .push with its own push like so: `d.push = n.bind(null, d.push.bind(d));`
     // it wraps the old push (`d.push.bind(d)`). this old push is in this case our handlePush.
     // If we then repatched the new push, we would end up with recursive patching, which leads to our patches
     // being applied multiple times.
     // Thus, override bind to use the original push
     handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
-    handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
 
     Object.defineProperty(webpackGlobal, "push", {
         configurable: true,
@@ -227,12 +228,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             }
         } as any as { toString: () => string, original: any, (...args: any[]): void; };
 
-        factory.toString = mod.toString.bind(mod);
+        factory.toString = originalMod.toString.bind(originalMod);
         factory.original = originalMod;
 
         for (const factoryListener of factoryListeners) {
             try {
-                factoryListener(factory);
+                factoryListener(originalMod);
             } catch (err) {
                 logger.error("Error in Webpack factory listener", err);
             }
