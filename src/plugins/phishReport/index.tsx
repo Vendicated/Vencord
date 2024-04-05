@@ -20,77 +20,12 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { Button, Forms, Menu, Text } from "@webpack/common";
 
-const debug = false;
+import { ResponseType } from "./types";
 
-enum ResponseType {
-    Success,
-    Error,
-}
-
-interface SuccessResponse {
-    kind: ResponseType.Success;
-    id: string;
-}
-
-interface ErrorResponse {
-    kind: ResponseType.Error;
-    message: string;
-}
-
-// Create a new case on phish.report
-async function startTakedownFetch(url: string, apiBase: string, apiKey: string): Promise<SuccessResponse | ErrorResponse> {
-    if (debug) {
-        return {
-            kind: ResponseType.Success,
-            id: "1234",
-        };
-    }
-
-    let response: Response;
-    try {
-        response = await fetch(apiBase + "/api/v0/cases", {
-            method: "POST",
-            headers: {
-                "authorization": "Bearer " + apiKey,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({
-                url,
-                ignore_duplicates: false,
-            }),
-        });
-    } catch (e) {
-        return {
-            kind: ResponseType.Error,
-            message: "Failed to connect to phish.report via proxy.",
-        };
-    }
-
-    let data: any;
-    try {
-        data = await response.json();
-    } catch (e) {
-        return {
-            kind: ResponseType.Error,
-            message: `Failed to parse the response from phish.report, got HTTP status code: ${response.status}`,
-        };
-    }
-
-    if (response.ok) {
-        data.kind = ResponseType.Success;
-        return data;
-    } else {
-        if (!data.message) {
-            data.message = `Failed to report the phishing link. HTTP status code: ${response.status}`;
-        }
-
-        data.kind = ResponseType.Error;
-        return data;
-    }
-}
+const Native = VencordNative.pluginHelpers.PhishReport as PluginNative<typeof import("./native")>;
 
 async function basicModal(title: string, message: string, footer: ((props: ModalProps) => JSX.Element) | undefined) {
     openModal(props =>
@@ -148,7 +83,7 @@ async function showErrorModal(message: string) {
     ));
 }
 
-async function startTakedown(url: string, apiBase: string, apiKey: string) {
+async function startTakedown(url: string, apiKey: string) {
     // attempt to follow the url, if it's a redirect (bypasses most URL shorteners)
     // this also checks for dead links
     let newUrl = url;
@@ -164,7 +99,7 @@ async function startTakedown(url: string, apiBase: string, apiKey: string) {
     }
 
     // create a new case on phish.report
-    const result = await startTakedownFetch(newUrl, apiBase, apiKey);
+    const result = await Native.sendTakedownRequest(newUrl, apiKey);
     if (result.kind === ResponseType.Error) {
         return showErrorModal(result.message);
     }
@@ -206,19 +141,13 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
                 // start the entire process
                 const src = props.itemHref ?? props.itemSrc;
-                startTakedown(src, settings.store.apiBase, settings.store.apiKey);
+                startTakedown(src, settings.store.apiKey);
             }}
         />
     ));
 };
 
 const settings = definePluginSettings({
-    apiBase: {
-        description: "Base URL for the phish.report API (without leading slash)",
-        type: OptionType.STRING,
-        default: "https://stefan-phishreport-70.deno.dev",
-        restartNeeded: false,
-    },
     apiKey: {
         description: "API key for phish.report",
         type: OptionType.STRING,
@@ -234,5 +163,5 @@ export default definePlugin({
     settings,
     contextMenus: {
         "message": messageContextMenuPatch
-    }
+    },
 });
