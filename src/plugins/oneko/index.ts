@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-export const onekoSettings = definePluginSettings({
+export const settings = definePluginSettings({
     speed: {
         description: "Speed of Da Cat :3",
         type: OptionType.NUMBER,
