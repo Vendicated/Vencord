@@ -30,6 +30,7 @@ interface ChannelComponentProps {
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+const PrivateChannelReadStateStore = findStoreLazy("PrivateChannelReadStateStore") as { getUnreadPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
@@ -226,15 +227,24 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
-            return this.instance.props.selectedChannelId !== PrivateChannelSortStore.getPrivateChannelIds().filter(c => !this.isPinned(c))[channelIndex];
+        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex) {
+            const channelId = PrivateChannelSortStore.getPrivateChannelIds().filter(c => !this.isPinned(c))[channelIndex];
+
+            return this.instance.props.selectedChannelId !== channelId && !PrivateChannelReadStateStore.getUnreadPrivateChannelIds().includes(channelId);
+        }
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
+        if (category.collapsed) {
+            const channelId = this.getCategoryChannels(category)[channelIndex];
+
+            return this.instance.props.selectedChannelId !== channelId && !PrivateChannelReadStateStore.getUnreadPrivateChannelIds().includes(channelId);
+        }
+
+        return false;
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
