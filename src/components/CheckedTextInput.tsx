@@ -41,14 +41,20 @@ export function CheckedTextInput({ value: externalValue, onChange, validate }: T
     const [value, setValue] = React.useState(externalValue);
     const [error, setError] = React.useState<string>();
     React.useEffect(() => {
-        handleChange(externalValue);
+        handleExternalChange(externalValue);
     }, [externalValue]);
-    function handleChange(v: string) {
+    function handleInputChange(v: string) {
+        handleChange(v,true);
+    }
+    function handleExternalChange(v:string) {
+        handleChange(v,false);
+    }
+    function handleChange(v: string, triggerOnChange:boolean) {
         setValue(v);
         const res = validate(v);
         if (res === true) {
             setError(void 0);
-            onChange(v);
+            if (triggerOnChange) onChange(v);
         } else {
             setError(res);
         }
@@ -59,7 +65,7 @@ export function CheckedTextInput({ value: externalValue, onChange, validate }: T
             <TextInput
                 type="text"
                 value={value}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 error={error}
             />
         </>
