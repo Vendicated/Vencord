@@ -84,7 +84,7 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
-                    replace: "$&if($self.isChannelHidden($1.section, $1.row))return null;if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
+                    replace: "$&if(!$self.isVisibleUnpinnedChannel($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
                 },
                 {
                     match: /"renderSection",(\i)=>{/,
@@ -328,6 +328,10 @@ export default definePlugin({
             </h2>
         );
     }),
+
+    isVisibleUnpinnedChannel(sectionIndex: number, channelIndex: number) {
+        return !this.isChannelHidden(sectionIndex, channelIndex) && !this.isChannelIndex(sectionIndex, channelIndex);
+    },
 
     renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
         const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
