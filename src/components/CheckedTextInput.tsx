@@ -20,9 +20,6 @@ import { React, TextInput } from "@webpack/common";
 
 // TODO: Refactor settings to use this as well
 interface TextInputProps {
-    /**
-     * WARNING: Changing this between renders will have no effect!
-     */
     value: string;
     /**
      * This will only be called if the new value passed validate()
@@ -40,10 +37,12 @@ interface TextInputProps {
  * A very simple wrapper around Discord's TextInput that validates input and shows
  * the user an error message and only calls your onChange when the input is valid
  */
-export function CheckedTextInput({ value: initialValue, onChange, validate }: TextInputProps) {
-    const [value, setValue] = React.useState(initialValue);
+export function CheckedTextInput({ value: externalValue, onChange, validate }: TextInputProps) {
+    const [value, setValue] = React.useState(externalValue);
     const [error, setError] = React.useState<string>();
-
+    React.useEffect(() => {
+        handleChange(externalValue);
+    }, [externalValue]);
     function handleChange(v: string) {
         setValue(v);
         const res = validate(v);
