@@ -48,7 +48,7 @@ function FriendsIndicator() {
             textTransform: "uppercase",
             textAlign: "center",
         }}>
-            {onlineFriends} online
+            {onlineFriends} <span id="vc-friendcount-text">friends</span>
         </span>
     );
 }
@@ -66,7 +66,7 @@ function ServersIndicator() {
             textTransform: "uppercase",
             textAlign: "center",
         }}>
-            {guildCount} servers
+            {guildCount} <span id="vc-guildcount-text">servers</span>
         </span>
     );
 }
@@ -110,7 +110,7 @@ export default definePlugin({
     renderIndicator: () => {
         const { mode } = Settings.plugins.ServerListIndicators;
         return <ErrorBoundary noop>
-            <div style={{ marginBottom: "4px" }}>
+            <div id="vc-serverlist-indicators" style={{ marginBottom: "4px" }}>
                 {!!(mode & IndicatorType.FRIEND) && <FriendsIndicator />}
                 {!!(mode & IndicatorType.SERVER) && <ServersIndicator />}
             </div>
