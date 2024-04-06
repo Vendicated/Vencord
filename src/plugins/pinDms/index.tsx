@@ -83,7 +83,7 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
-                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
+                    replace: "$&if($self.isChannelHidden($1.section, $1.row))return null;if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
                 },
                 {
                     match: /"renderSection",(\i)=>{/,
@@ -210,8 +210,6 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
-            return true;
         const cat = categories[sectionIndex - 1];
         return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
     },
@@ -229,7 +227,7 @@ export default definePlugin({
         if (categoryIndex === 0) return false;
 
         if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
-            return true;
+            return this.instance.props.selectedChannelId !== PrivateChannelSortStore.getPrivateChannelIds().filter(c => !this.isPinned(c))[channelIndex];
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
