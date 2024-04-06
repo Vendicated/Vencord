@@ -113,7 +113,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
+                    replace: "[...$&,...$self.getAllVisibleChannels()]"
                 },
 
             ]
@@ -137,7 +137,7 @@ export default definePlugin({
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)).filter((c, r)) => !isChannelHidden(dms, r)))
-                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)).filter((c,r)=>!$self.isChannelHidden($self.getSections().length + 1, r)))"
+                replace: "$self.getAllVisibleChannels()"
             }
         },
 
@@ -146,7 +146,7 @@ export default definePlugin({
             find: ".getFlattenedGuildIds()],",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
-                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                replace: "$self.getAllVisibleChannels()"
             }
         },
     ],
@@ -250,11 +250,11 @@ export default definePlugin({
         if (!isPinned(channelId))
             return (
                 (rowHeight + padding) * 2 // header
-                + rowHeight * this.getAllUncollapsedChannels().length // pins
+                + rowHeight * categories.flatMap(c => c.channels).length // pins
                 + originalOffset // original pin offset minus pins
             );
 
-        return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
+        return rowHeight * (this.getAllVisibleChannels().indexOf(channelId) + preRenderedChildren) + padding;
     },
 
     renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
@@ -365,12 +365,17 @@ export default definePlugin({
         return category?.channels ?? [];
     },
 
-    getAllUncollapsedChannels() {
-        if (settings.store.pinOrder === PinOrder.LastMessage) {
-            const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
-            return categories.flatMap((c, s) => sortedChannels.filter(channel => c.channels.includes(channel)).filter((ch, r) => !this.isChannelHidden(s + 1, r)));
-        }
+    getAllVisibleChannels() {
+        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
 
-        return categories.flatMap((c, s) => c.channels.filter((ch, r) => !this.isChannelHidden(s + 1, r)));
+        const visiblePinnedChannels = categories.flatMap((c, s) => {
+            if (settings.store.pinOrder === PinOrder.LastMessage)
+                return sortedChannels.filter(channel => c.channels.includes(channel)).filter((ch, r) => !this.isChannelHidden(s + 1, r));
+
+            return c.channels.filter((ch, r) => !this.isChannelHidden(s + 1, r));
+        });
+        const visibleUnpinnedChannels = sortedChannels.filter(c => !this.isPinned(c)).filter((c, r) => !this.isChannelHidden(this.getSections().length + 1, r));
+
+        return visiblePinnedChannels.concat(visibleUnpinnedChannels);
     }
 });
