@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { definePluginSettings } from "@api/Settings";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -29,7 +28,7 @@ function runner() {
             .replace("(isReducedMotion)", "(false)"))
         .then(eval);
 }
-export const onekoSettings = definePluginSettings({
+export const settings = definePluginSettings({
     speed: {
         description: "Speed of Da Cat :3",
         type: OptionType.SLIDER,
@@ -50,7 +49,7 @@ export default definePlugin({
     // Listing adryd here because this literally just evals her script
     authors: [Devs.Ven, Devs.adryd, Devs.varram],
 
-    settings: onekoSettings,
+    settings,
 
     start() {
         runner();
