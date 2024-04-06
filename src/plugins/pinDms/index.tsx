@@ -18,7 +18,7 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -136,8 +136,8 @@ export default definePlugin({
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
-                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
-                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)).filter((c, r)) => !isChannelHidden(dms, r)))
+                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)).filter((c,r)=>!$self.isChannelHidden($self.getSections().length + 1, r)))"
             }
         },
 
@@ -166,7 +166,6 @@ export default definePlugin({
     isPinned,
     categoryLen,
     getSections,
-    getAllUncollapsedChannels,
     requireSettingsMenu,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
@@ -364,5 +363,14 @@ export default definePlugin({
         }
 
         return category?.channels ?? [];
+    },
+
+    getAllUncollapsedChannels() {
+        if (settings.store.pinOrder === PinOrder.LastMessage) {
+            const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
+            return categories.flatMap((c, s) => sortedChannels.filter(channel => c.channels.includes(channel)).filter((ch, r) => !this.isChannelHidden(s + 1, r)));
+        }
+
+        return categories.flatMap((c, s) => c.channels.filter((ch, r) => !this.isChannelHidden(s + 1, r)));
     }
 });
