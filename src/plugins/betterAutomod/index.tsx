@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Embed, Message } from "discord-types/general";
 
 import { AutoModRule } from "./automod";
-import { renderTestTextHeader, settingsAboutComponent,TestInputBoxComponent } from "./UI";
+import { renderTestTextHeader, settingsAboutComponent, TestInputBoxComponent } from "./UI";
 
 const logger = new Logger("betterModeration");
 
@@ -63,7 +63,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "betterAutomod",
     authors: [Devs.iamme],
-    description: "echo automod logs in the automoded channel and be able test your automod rules",
+    description: "echo automod logs in the automoded channel and make it possible to test your automod rules",
     settings: settings,
     settingsAboutComponent: settingsAboutComponent,
     patches: [
@@ -78,17 +78,15 @@ export default definePlugin({
             predicate: () => settings.store.testBox
         },
         {
-            find: "Endpoints.GUILD_AUTOMOD_RULES(e)});",
-            replacement: [
-                {
-                    match: /return (Array.isArray\(\i\.body\)\?\i\.body\.map\(\i\):\[\])/,
-                    replace: "let the_rules = $1;$self.setRules(the_rules);return the_rules"
-                }
-            ],
+            find: "syncRules:async",
+            replacement: {
+                match: /\.fetchAutomodRules\)\(\i\),\i=\i\((\i)\),\i=\i\(\)\.rules;/, //,o=E(r),i=t().rules;
+                replace: "$&$self.setRules($1);"
+            },
             predicate: () => settings.store.testBox
         },
         {
-            find: "saveRule:async(",
+            find: "saveRule:async",
             replacement: [
                 {
                     match: /return (\i)=(\(0,\i\.isBackendPersistedRule\)\((\i)\)&&!\(0,\i\.isDefaultRuleId\)\(\i\.id\))/,
@@ -98,30 +96,28 @@ export default definePlugin({
             predicate: () => settings.store.testBox
         },
         {
-            find: ".deleteAutomodRule",
-            replacement: [
-                {
-                    match: /\i\((\i.id),(\i.guildId)\)/,
-                    replace: "$&,$self.deleteAutomodRule($1,$2)"
-                }
-            ],
+            find: "removeRule:(",
+            replacement: {
+                match: /\}=\i\(\),\i=\i\[(\i)\].+?,\i\);/,
+                replace: "$&$self.deleteAutomodRule($1);"
+            },
             predicate: () => settings.store.testBox
         }
     ],
-    deleteAutomodRule: async (ruleid: string, guildId: string) => {
+    deleteAutomodRule: async (ruleid: string) => {
         if (!currentRules) return;
-        logger.info("Deleted a Rule", ruleid);
         currentRules = currentRules.filter(r => r.id !== ruleid);
+        logger.info("Deleted a Rule", ruleid);
     },
     saveOrUpdateAutomodRule: async (type: boolean, rule: AutoModRule) => {
         if (!currentRules) return;
-        logger.info((type ? "Updated" : "Created") + " a Rule", rule);
         currentRules = currentRules.filter(r => r.id !== rule.id);
         currentRules.push(rule);
+        logger.info((type ? "Updated" : "Created") + " a Rule", rule);
     },
     setRules: (rules: Array<AutoModRule>) => {
-        logger.info("loading Rules", rules);
         currentRules = rules;
+        logger.info("loading Rules", rules);
     },
     renderInputBox: () => { return <TestInputBoxComponent currentRules={currentRules} />; },
     renderTestTextHeader: renderTestTextHeader,

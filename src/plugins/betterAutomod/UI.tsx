@@ -7,7 +7,7 @@
 import { Link } from "@components/Link";
 import { Forms, Text, TextArea, useMemo, useState } from "@webpack/common";
 
-import { AutoModRule, MatchedRule,matchRules } from "./automod";
+import { AutoModRule, MatchedRule, matchRules } from "./automod";
 
 export function settingsAboutComponent() {
     return (<>
@@ -61,4 +61,3 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
         </div>
     );
 }
-export { Forms };

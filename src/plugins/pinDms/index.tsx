@@ -29,16 +29,24 @@ interface ChannelComponentProps {
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
 
+export const enum PinOrder {
+    LastMessage,
+    Custom
+}
+
 export const settings = definePluginSettings({
-    sortDmsByNewestMessage: {
-        type: OptionType.BOOLEAN,
-        description: "Sort DMs by newest message",
-        default: false,
+    pinOrder: {
+        type: OptionType.SELECT,
+        description: "Which order should pinned DMs be displayed in?",
+        options: [
+            { label: "Most recent message", value: PinOrder.LastMessage, default: true },
+            { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
+        ],
         onChange: () => forceUpdate()
     },
 
@@ -61,11 +69,6 @@ export default definePlugin({
         {
             find: ".privateChannelsHeaderContainer,",
             replacement: [
-                // Init
-                {
-                    match: /(?<=componentDidMount\(\){).{1,100}scrollToChannel/,
-                    replace: "$self._instance = this;$&"
-                },
                 {
                     // Filter out pinned channels from the private channel list
                     match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
@@ -164,12 +167,15 @@ export default definePlugin({
     getSections,
     getAllUncollapsedChannels,
     requireSettingsMenu,
+
     makeProps(instance, { sections }: { sections: number[]; }) {
+        this._instance = instance;
         this.sections = sections;
 
-        this.sections.splice(1, 0, ...this.getPinCount(instance.props.privateChannelIds || []));
+        this.sections.splice(1, 0, ...this.getSections());
 
         if (this.instance?.props?.privateChannelIds?.length === 0) {
+            // dont render direct messages header
             this.sections[this.sections.length - 1] = 0;
         }
 
@@ -199,10 +205,6 @@ export default definePlugin({
         return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
-    getPinCount(channelIds: string[]) {
-        return channelIds.length ? this.getSections() : [];
-    },
-
     isCategoryIndex(sectionIndex: number) {
         return this.sections && sectionIndex > 0 && sectionIndex < this.sections.length - 1;
     },
@@ -211,7 +213,7 @@ export default definePlugin({
         if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
             return true;
         const cat = categories[sectionIndex - 1];
-        return this.isCategoryIndex(sectionIndex) && (cat.channels.length === 0 || cat?.channels[channelIndex]);
+        return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
     },
 
     isDMSectioncollapsed() {
@@ -219,7 +221,6 @@ export default definePlugin({
     },
 
     collapseDMList() {
-        // console.log("HI");
         settings.store.dmSectioncollapsed = !settings.store.dmSectioncollapsed;
         forceUpdate();
     },
@@ -235,7 +236,7 @@ export default definePlugin({
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
+        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
@@ -350,7 +351,7 @@ export default definePlugin({
     getCategoryChannels(category: Category) {
         if (category.channels.length === 0) return [];
 
-        if (settings.store.sortDmsByNewestMessage) {
+        if (settings.store.pinOrder === PinOrder.LastMessage) {
             return PrivateChannelSortStore.getPrivateChannelIds().filter(c => category.channels.includes(c));
         }
 
