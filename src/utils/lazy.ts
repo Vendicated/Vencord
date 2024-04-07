@@ -116,8 +116,12 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
                     attempts,
                     true
                 );
-
-            return Reflect.get(target[kGET](), p, receiver);
+            const obj = target[kGET]();
+            if (typeof obj === "object") {
+                return Reflect.get(obj, p, receiver);
+            } else {
+                return ()=>obj; // don't call Reflect.get if it's a primitive
+            }
         }
     }) as any;
 }
