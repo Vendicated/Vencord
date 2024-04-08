@@ -1,37 +1,22 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import * as DataStore from "@api/DataStore";
-import { Devs, VENCORD_USER_AGENT } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import settings from "./settings";
-
-
-const EditIcon = findByCodeLazy("M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409");
-const DeleteIcon = findByCodeLazy("M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z");
 const classNames = findByPropsLazy("customStatusSection");
 
 
+import { CogWheel, DeleteIcon } from "@components/Icons";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
@@ -70,18 +55,19 @@ export default definePlugin({
 
     patches: [
         {
-            find: "showCommunicationDisabledStyles",
+            find: "copyMetaData:\"User Tag\"",
             replacement: {
 
-                match: /(?<=return\s*\(0,\w{1,3}\.jsxs?\)\(.+!\w{1,3}&&)(\[{0,1}\(0,\w{1,3}.jsxs?\)\(.+?\{.+?\}\)*\]{0,1})/,
-                replace: "[$1, $self.getTimezonesComponent(e)]"
+                match: /return(\(0,.\.jsx\)\(.\.default,{className:.+?}\)]}\)}\))/,
+                replace: "return [$1, $self.getProfileTimezonesComponent(arguments[0])]"
             },
         },
         {
-            find: "().customStatusSection",
+            // thank you https://github.com/Syncxv/vc-timezones/blob/master/index.tsx for saving me from painful work
+            find: ".badgesContainer,",
             replacement: {
-                match: /user:(\w),nickname:\w,.*?children.*?\(\)\.customStatusSection.*?\}\),/,
-                replace: "$&$self.getProfileTimezonesComponent({user:$1}),"
+                match: /id:\(0,\i\.getMessageTimestampId\)\(\i\),timestamp.{1,50}}\),/,
+                replace: "$&,$self.getTimezonesComponent(arguments[0]),"
             }
         }
     ],
@@ -161,7 +147,7 @@ export default definePlugin({
                         display: "flex"
                     }}
                 >
-                    <EditIcon
+                    <CogWheel
                         style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
                         onClick={() => {
                             if (!isInEditMode) {
@@ -236,6 +222,7 @@ export default definePlugin({
     },
 
     getTimezonesComponent: ({ message }: { message: Message; }) => {
+
         const { showTimezonesInChat, preference } = settings.use(["preference", "showTimezonesInChat"]);
         const [timezone, setTimezone] = React.useState<string | undefined>();
 
@@ -250,7 +237,7 @@ export default definePlugin({
 
         return (
             <span className={classes(styles.timestampInline, styles.timestamp)}>
-                {timezone && "• " + getTimeString(timezone, message.timestamp.toDate())}
+                {timezone && "• " + getTimeString(timezone, message.timestamp)}
             </span>);
     }
 });

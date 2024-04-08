@@ -1,27 +1,16 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import * as DataStore from "@api/DataStore";
-import { VENCORD_USER_AGENT } from "@utils/constants";
-import { debounce } from "@utils/debounce";
-import { findLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 export const DATASTORE_KEY = "plugins.Timezones.savedTimezones";
+
+import { debounce } from "@shared/debounce";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
+
 import { CustomTimezonePreference } from "./settings";
 
 export interface TimezoneDB {
@@ -31,10 +20,11 @@ export interface TimezoneDB {
 export const API_URL = "https://timezonedb.catvibers.me";
 const Cache: Record<string, string> = {};
 
-const PreloadedUserSettings = findLazy(m => m.ProtoClass?.typeName === "discord_protos.discord_users.v1.PreloadedUserSettings");
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+
 export function getTimeString(timezone: string, timestamp = new Date()): string {
     try {
-        const locale = PreloadedUserSettings.getCurrentValue().localization.locale.value;
+        const locale = UserSettingsProtoStore.settings.localization.locale.value;
         return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", timeZone: timezone }).format(timestamp); // we hate javascript
     } catch (e) {
         return "Error"; // incase it gets invalid timezone from api, probably not gonna happen but if it does this will prevent discord from crashing
@@ -123,7 +113,6 @@ const timezonesLink = `https://gist.githubusercontent.com/ArjixWasTaken/${gist}/
 export const getAllTimezones = async (): Promise<string[]> => {
     if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
         try {
-            // @ts-expect-error fuck you typescript
             return Intl.supportedValuesOf("timeZone");
         } catch { }
     }
