@@ -14,7 +14,12 @@ import { Channel } from "discord-types/general";
 const SortedVoiceStateStore = findByPropsLazy("getVoiceStatesForChannel");
 
 async function getVoiceChannelMentions(channel: Channel) {
-    return await SortedVoiceStateStore.getVoiceStatesForChannel(channel).filter((value: any) => value.user.id !== UserStore.getCurrentUser().id).map((value: any) => { return `<@${value.user.id}>`; }).join(" ");
+    return await SortedVoiceStateStore.getVoiceStatesForChannel(channel)
+        .filter((value: any) => value.user.id !== UserStore.getCurrentUser().id)
+        .map((value: any) => {
+            return `<@${value.user.id}>`;
+        })
+        .join(" ");
 }
 
 export default definePlugin({
