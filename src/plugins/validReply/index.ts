@@ -56,7 +56,7 @@ export default definePlugin({
             retries: 2
         }).then(res => {
             const reply:Message|undefined = res?.body?.[0];
-            if (!reply) return;
+            if (!reply || reply.id!==message) return;
             ReplyStore.updateExistingMessageIfCached(reply);
             FluxDispatcher.dispatch({
                 type: "MESSAGE_UPDATE",
