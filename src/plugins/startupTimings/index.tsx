@@ -17,8 +17,9 @@
 */
 
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin from "@utils/types";
+
+import StartupTimingPage from "./StartupTimingPage";
 
 export default definePlugin({
     name: "StartupTimings",
@@ -31,5 +32,5 @@ export default definePlugin({
             replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
         }
     }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
+    StartupTimingPage
 });
