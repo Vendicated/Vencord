@@ -155,7 +155,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n
+        id: 715746190813298788n
     },
     dzshn: {
         name: "dzshn",
