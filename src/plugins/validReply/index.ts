@@ -21,7 +21,7 @@ const fetching = new Map<string,string>();
 let ReplyStore:any;
 export default definePlugin({
     name: "ValidReply",
-    description: "Fixes \"Message could not be loaded\" upon hovering over the reply",
+    description: 'Fixes "Message could not be loaded" upon hovering over the reply',
     authors: [Devs.newwares],
     patches: [
         {
