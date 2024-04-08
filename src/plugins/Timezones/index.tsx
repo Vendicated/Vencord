@@ -237,7 +237,11 @@ export default definePlugin({
 
         return (
             <span className={classes(styles.timestampInline, styles.timestamp)}>
-                {timezone && "• " + getTimeString(timezone, message.timestamp)}
+                {
+                    timezone && "• " + getTimeString(timezone,
+                        /* message.timestamp is actually Date but as discord-types is outdated I had to do this */
+                        ((message.timestamp as unknown) as Date))
+                }
             </span>);
     }
 });
