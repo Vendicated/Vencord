@@ -7,6 +7,7 @@
 import type { Settings } from "@api/Settings";
 import { IpcEvents } from "@shared/IpcEvents";
 import { SettingsStore } from "@shared/SettingsStore";
+import { mergeDefaults } from "@utils/mergeDefaults";
 import { ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 
@@ -54,28 +55,8 @@ const DefaultNativeSettings: NativeSettings = {
     plugins: {}
 };
 
-/**
- * Recursively merges defaults into an object and returns the same object
- * Can't use the version in misc.tsx because navigator is not defined at this point
- * @param obj Object
- * @param defaults Defaults
- * @returns obj
- */
-function mergeDefaultsNative<T>(obj: T, defaults: T): T {
-    for (const key in defaults) {
-        const v = defaults[key];
-        if (typeof v === "object" && !Array.isArray(v)) {
-            obj[key] ??= {} as any;
-            mergeDefaultsNative(obj[key], v);
-        } else {
-            obj[key] ??= v;
-        }
-    }
-    return obj;
-}
-
 const nativeSettings = readSettings<NativeSettings>("native", NATIVE_SETTINGS_FILE);
-mergeDefaultsNative(nativeSettings, DefaultNativeSettings);
+mergeDefaults(nativeSettings, DefaultNativeSettings);
 
 export const NativeSettings = new SettingsStore(nativeSettings);
 
