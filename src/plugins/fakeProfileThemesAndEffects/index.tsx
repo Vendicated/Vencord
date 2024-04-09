@@ -34,8 +34,8 @@ export const settings = definePluginSettings({
 
 const pluginName = "FakeProfileThemesAndEffects";
 
-export default definePlugin(Object.defineProperties({
-    name: pluginName,
+export default definePlugin({
+    name: "FakeProfileThemesAndEffects",
     description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible, zero-width characters",
     authors: [Devs.ryan],
     patches: [
@@ -210,14 +210,14 @@ export default definePlugin(Object.defineProperties({
         [ProfileEffectStore.profileEffects]
     ),
 
+    set CustomizationSection(comp: Parameters<typeof setCustomizationSection>[0]) { setCustomizationSection(comp); },
+    set CustomColorPicker(comp: Parameters<typeof setCustomColorPicker>[0]) { setCustomColorPicker(comp); },
+    set useAvatarColors(hook: Parameters<typeof setUseAvatarColors>[0]) { setUseAvatarColors(hook); },
+    set ProfileEffectRecord(obj: Parameters<typeof setProfileEffectRecord>[0]) { setProfileEffectRecord(obj); },
+    set ProfileEffectStore(store: Parameters<typeof setProfileEffectStore>[0]) { setProfileEffectStore(store); },
+
     settingsAboutComponent,
     settings,
     decodeUserBioFPTEHook,
     profilePreviewHook
-}, {
-    CustomizationSection: { set: setCustomizationSection },
-    CustomColorPicker: { set: setCustomColorPicker },
-    useAvatarColors: { set: setUseAvatarColors },
-    ProfileEffectRecord: { set: setProfileEffectRecord },
-    ProfileEffectStore: { set: setProfileEffectStore }
-}));
+});
