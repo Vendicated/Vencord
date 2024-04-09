@@ -11,6 +11,7 @@
 
   - /webhook info - *Gets advanced details on the webhook such as the name, profile pic, server and channel ID, and additionally, information on person who created it*
   <details><summary>Full /webhookinfo Output</summary>
+
     - Webhook Username
 
     - Webhook ID
