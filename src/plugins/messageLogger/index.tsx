@@ -409,7 +409,7 @@ export default definePlugin({
                 },
                 {
                     // Make edit marker clickable
-                    match: /"span",\{/,
+                    match: /"span",\{(?=className:\i\.edited,)/,
                     replace: "$self.EditMarker,{message:arguments[0].message,"
                 }
             ]
