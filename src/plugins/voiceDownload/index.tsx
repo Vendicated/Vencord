@@ -6,34 +6,31 @@
 
 import "./style.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "VoiceDownload",
-    description: "Download voice messages.",
+    description: "Adds a download to voice messages. (Opens a new browser tab)",
     authors: [Devs.puv],
     patches: [
         {
-            find: "className:C.rippleContainer",
+            find: "rippleContainer,children",
             replacement: {
-                match: /\(0,i.jsx\).{0,150},children:.{0,50}\("source",{src:(.{1,2})}\)}\)/,
+                match: /\(0,\i\.jsx\).{0,150},children:.{0,50}\("source",{src:(\i)}\)}\)/,
                 replace: "[$&, $self.renderDownload($1)]"
             }
         }
     ],
 
-    renderDownload: function (src) {
+    renderDownload(src) {
         return (
-            <ErrorBoundary>
-                <a
-                    className="voice-download"
-                    href={src}
-                    target="_blank"
-                    onClick={e => e.stopPropagation()}
-                > <this.Icon /> </a>
-            </ErrorBoundary>
+            <a
+                className="voice-download"
+                href={src}
+                target="_blank"
+                onClick={e => e.stopPropagation()}
+            > <this.Icon /> </a>
         );
     },
 
