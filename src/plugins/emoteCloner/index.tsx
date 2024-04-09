@@ -363,7 +363,7 @@ export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz, Devs.Byron],
+    authors: [Devs.Ven, Devs.Nuckyz],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
