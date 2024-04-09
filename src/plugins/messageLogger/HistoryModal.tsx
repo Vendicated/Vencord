@@ -40,7 +40,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
             <Text variant="heading-lg/semibold">Message Edit History</Text>
             <ModalCloseButton onClick={modalProps.onClose} />
             <div className={cl("revisions")}>
-                { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() ? (
+                { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
                     <button className={cl("revision-lost")} disabled>
                         <Timestamp
                             className={cl("timestamp")}
@@ -49,9 +49,10 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
                             isInline={false}
                         />
                     </button>
-                ) : null }
+                ) }
                 {...timestamps.map((timestamp, index) =>
                     <button
+                        key={timestamp}
                         className={cl("revision", { "revision-active": selected === index })}
                         onClick={() => selectItem(index)}
                     >
@@ -67,7 +68,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
         </ModalHeader>
         <ModalContent className={cl("contents")}>
             {...contents.map((content, index) =>
-                <div className={cl("content", { "content-active": selected === index })}>
+                <div key={timestamps[index]} className={cl("content", { "content-active": selected === index })}>
                     <div className={`${CodeContainerClasses.markup} ${MiscClasses.messageContent}`}>
                         {content}
                     </div>
