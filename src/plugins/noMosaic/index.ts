@@ -11,21 +11,15 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./styles.css?managed";
 
+const MAX_WIDTH = 550;
+const MAX_HEIGHT = 350;
+
 const settings = definePluginSettings({
     inlineVideo: {
         description: "Play videos without carousel modal",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    },
-    mediaLayoutType: {
-        description: "Choose media layout type",
-        type: OptionType.SELECT,
-        restartNeeded: true,
-        options: [
-            { label: "STATIC, render loading image but image isn't resposive, no problem unless discord window width is too small", value: "STATIC", default: true },
-            { label: "RESPONSIVE, image is responsive but not render loading image, cause messages shift when loaded", value: "RESPONSIVE" },
-        ]
     }
 });
 
@@ -42,7 +36,7 @@ export default definePlugin({
             find: ".oneByTwoLayoutThreeGrid",
             replacement: [{
                 match: /mediaLayoutType:\i\.\i\.MOSAIC/,
-                replace: "mediaLayoutType:$self.mediaLayoutType()",
+                replace: "mediaLayoutType:'RESPONSIVE'",
             },
             {
                 match: /null!==\(\i=\i\.get\(\i\)\)&&void 0!==\i\?\i:"INVALID"/,
@@ -59,15 +53,43 @@ export default definePlugin({
         },
         {
             find: "Messages.REMOVE_ATTACHMENT_TOOLTIP_TEXT",
-            replacement: {
+            replacement: [{
                 match: /\i===\i\.\i\.MOSAIC/,
                 replace: "true"
+            },
+            {
+                match: /\i!==\i\.\i\.MOSAIC/,
+                replace: "false"
+            }]
+        },
+        {
+            find: ".messageAttachment,",
+            replacement: {
+                match: /\{width:\i,height:\i\}=(\i).*?(?=className:\i\(\)\(\i\.messageAttachment,)/,
+                replace: "$&style:$self.style($1),"
             }
         }
     ],
 
-    mediaLayoutType() {
-        return settings.store.mediaLayoutType;
+    style({ width, height }) {
+        if (!width || !height) return {};
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if (width / height > MAX_WIDTH / MAX_HEIGHT) {
+                height = Math.ceil(MAX_WIDTH / (width / height));
+                width = MAX_WIDTH;
+            } else {
+                width = Math.ceil(MAX_HEIGHT * (width / height));
+                height = MAX_HEIGHT;
+            }
+        }
+
+        return {
+            maxWidth: width,
+            width: "100%",
+            aspectRatio: `${width} / ${height}`
+        };
+
     },
 
     start() {
