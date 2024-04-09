@@ -79,6 +79,8 @@ for (const p of pluginsValues) {
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
+            if (!Array.isArray(patch.find))
+                patch.find = [patch.find];
             if (!Array.isArray(patch.replacement))
                 patch.replacement = [patch.replacement];
             patches.push(patch);

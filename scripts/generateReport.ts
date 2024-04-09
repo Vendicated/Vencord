@@ -299,6 +299,9 @@ function runTime(token: string) {
                 delete patch.predicate;
                 delete patch.group;
 
+                if (!Array.isArray(patch.find))
+                    patch.find = [patch.find];
+
                 if (!Array.isArray(patch.replacement))
                     patch.replacement = [patch.replacement];
 
