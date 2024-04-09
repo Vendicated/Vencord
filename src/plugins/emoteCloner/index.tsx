@@ -56,7 +56,7 @@ function getUrl(data: Data) {
     if (data.t === "Emoji")
         return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=2048`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}`;
 }
 
 async function fetchSticker(id: string) {
@@ -129,15 +129,9 @@ function getGuildCandidates(data: Data) {
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
-        for (const emoji of emojis) {
-            if (emoji.animated === isAnimated) {
-                count++;
-            }
-            if (emoji.managed === true) {
-                count--; // twitch emojis do not count towards the limit
-            }
-        }
-        return count = emojiSlots;
+        for (const emoji of emojis)
+            if (emoji.animated === isAnimated) count++;
+        return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -151,9 +145,8 @@ async function fetchBlob(url: string) {
 
 async function doClone(guildId: string, data: Sticker | Emoji) {
     try {
-        if (data.t === "Sticker") {
+        if (data.t === "Sticker")
             await cloneSticker(guildId, data);
-        }
         else
             await cloneEmoji(guildId, data);
 
