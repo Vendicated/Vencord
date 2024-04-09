@@ -253,7 +253,8 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
             if (patch.predicate && !patch.predicate()) continue;
-            if (!code.includes(patch.find)) continue;
+            // We change all patch.find to array in plugins/index
+            if (!(patch.find as string[]).every(f => code.includes(f))) continue;
 
             patchedBy.add(patch.plugin);
 
@@ -261,7 +262,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             const previousMod = mod;
             const previousCode = code;
 
-            // we change all patch.replacement to array in plugins/index
+            // We change all patch.replacement to array in plugins/index
             for (const replacement of patch.replacement as PatchReplacement[]) {
                 if (replacement.predicate && !replacement.predicate()) continue;
 
