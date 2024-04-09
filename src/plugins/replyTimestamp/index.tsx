@@ -22,15 +22,24 @@ function Sep(props: HTMLAttributes<HTMLElement>) {
     return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
 }
 
+// Canonically declared in ReferencedMessageStore
+declare const enum ReferencedMessageState {
+    LOADED = 0,
+    NOT_LOADED = 1,
+    DELETED = 2,
+}
+
+type ReferencedMessage = { state: ReferencedMessageState.LOADED; message: Message } | { state: ReferencedMessageState.NOT_LOADED | ReferencedMessageState.DELETED };
+
 function ReplyTimestamp({
     referencedMessage,
     baseMessage,
 }: {
-    referencedMessage: { state: number, message?: Message },
+    referencedMessage: ReferencedMessage,
     baseMessage: Message;
 }) {
-    if (referencedMessage.state !== 0) return null;
-    const refTimestamp = referencedMessage.message!.timestamp as any;
+    if (referencedMessage.state !== ReferencedMessageState.LOADED) return null;
+    const refTimestamp = referencedMessage.message.timestamp as any;
     const baseTimestamp = baseMessage.timestamp as any;
     return (
         <Timestamp
