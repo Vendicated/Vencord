@@ -82,7 +82,7 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 { // Fade in on layer
-                    match: /(?<=(\i)\.contextType=\i\.AccessibilityPreferencesContext;)/,
+                    match: /(?<=\((\i),"contextType",\i\.AccessibilityPreferencesContext\);)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade
                 },
@@ -107,11 +107,11 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
-        { // Load menu stuff on hover, not on click
+        { // Load menu TOC eagerly
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(?<=handleOpenSettingsContextMenu.{0,250}?\i\.el\(("[^"]+")\)\.then\([^;]*?("\d+").*?Messages\.USER_SETTINGS,)(?=onClick:)/,
-                replace: "onMouseEnter(){Vencord.Webpack.wreq.el($1).then(()=>Vencord.Webpack.wreq($2));},"
+                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
+                replace: "(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
         },
