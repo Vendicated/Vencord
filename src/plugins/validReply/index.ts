@@ -6,6 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 import { Channel } from "discord-types/general/index.js";
@@ -19,6 +20,7 @@ interface Reply {
 }
 const fetching = new Map<string,string>();
 let ReplyStore:any;
+const MessageRecords = findByPropsLazy("canEditMessageWithStickers", "createMessageRecord", "updateMessageRecord", "updateServerMessage");
 export default definePlugin({
     name: "ValidReply",
     description: 'Fixes "Message could not be loaded" upon hovering over the reply',
@@ -57,7 +59,10 @@ export default definePlugin({
         }).then(res => {
             const reply:Message|undefined = res?.body?.[0];
             if (!reply || reply.id!==message) return;
-            ReplyStore.updateExistingMessageIfCached(reply);
+            ReplyStore.set(reply.channel_id, reply.id, {
+                state: 0,
+                message: MessageRecords.createMessageRecord(reply)
+            });
             FluxDispatcher.dispatch({
                 type: "MESSAGE_UPDATE",
                 message: reply
