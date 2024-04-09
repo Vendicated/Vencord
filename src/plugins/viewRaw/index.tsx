@@ -55,6 +55,7 @@ function cleanMessage(msg: Message) {
     const cloneAny = clone as any;
     delete cloneAny.editHistory;
     delete cloneAny.deleted;
+    delete cloneAny.firstEditTimestamp;
     cloneAny.attachments?.forEach(a => delete a.deleted);
 
     return clone;
