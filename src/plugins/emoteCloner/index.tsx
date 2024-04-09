@@ -54,9 +54,9 @@ const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -130,7 +130,8 @@ function getGuildCandidates(data: Data) {
 
         let count = 0;
         for (const emoji of emojis)
-            if (emoji.animated === isAnimated) count++;
+            if (emoji.animated === isAnimated && !emoji.managed)
+                count++;
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
