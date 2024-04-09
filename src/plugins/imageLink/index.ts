@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ImageLink",
-    description: 'Suppresses the hiding of links for "simple embeds"',
+    description: "Never hide image links in messages, even if it's the only content",
     authors: [Devs.Kyuuhachi],
 
     patches: [
