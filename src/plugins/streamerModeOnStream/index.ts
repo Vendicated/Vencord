@@ -39,7 +39,7 @@ const stopStreamerMode = (data: StreamEvent) => toggleStreamerMode(data, false);
 
 export default definePlugin({
     name: "streamerModeOnStream",
-    description: "Automatically enables streamer mode when you start streaming in Discord.",
+    description: "Automatically enables streamer mode when you start streaming in Discord",
     authors: [Devs.Kodarru],
 
     start() {
