@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, proxyLazyWebpack } from "@webpack";
+import { findByPropsLazy, proxyLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -246,7 +246,7 @@ export default definePlugin({
         );
     },
 
-    Messages: proxyLazyWebpack(() => ({
+    Messages: proxyLazy(() => ({
         DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
     })),
 
