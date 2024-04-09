@@ -80,7 +80,7 @@ export default definePlugin({
         {
             find: "syncRules:async",
             replacement: {
-                match: /\.fetchAutomodRules\)\(\i\),\i=\i\((\i)\),\i=\i\(\)\.rules;/, //,o=E(r),i=t().rules;
+                match: /\.fetchAutomodRules\)\(\i\),\i=\i\((\i)\),\i=\i\(\)\.rules;/,
                 replace: "$&$self.setRules($1);"
             },
             predicate: () => settings.store.testBox
