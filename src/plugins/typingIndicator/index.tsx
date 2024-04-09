@@ -16,19 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+
+const enum IndicatorMode {
+    Dots = 1 << 0,
+    Avatars = 1 << 1
+}
 
 function getDisplayName(guildId: string, userId: string) {
     const user = UserStore.getUser(userId);
@@ -90,11 +98,24 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         return (
             <Tooltip text={tooltipText!}>
                 {props => (
-                    <div
-                        {...props}
-                        style={{ marginLeft: 6, height: 16, display: "flex", alignItems: "center", zIndex: 0, cursor: "pointer" }}
-                    >
-                        <ThreeDots dotRadius={3} themed={true} />
+                    <div className="vc-typing-indicator" {...props}>
+                        {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
+                            <UserSummaryItem
+                                users={typingUsersArray.map(id => UserStore.getUser(id))}
+                                guildId={guildId}
+                                renderIcon={false}
+                                max={3}
+                                showDefaultAvatarsForNullUsers
+                                showUserPopout
+                                size={16}
+                                className="vc-typing-indicator-avatars"
+                            />
+                        )}
+                        {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
+                            <div className="vc-typing-indicator-dots">
+                                <ThreeDots dotRadius={3} themed={true} />
+                            </div>
+                        )}
                     </div>
                 )}
             </Tooltip>
@@ -119,13 +140,22 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for blocked users.",
         default: false
+    },
+    indicatorMode: {
+        type: OptionType.SELECT,
+        description: "How should the indicator be displayed?",
+        options: [
+            { label: "Avatars and animated dots", value: IndicatorMode.Dots | IndicatorMode.Avatars, default: true },
+            { label: "Animated dots", value: IndicatorMode.Dots },
+            { label: "Avatars", value: IndicatorMode.Avatars },
+        ],
     }
 });
 
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz, Devs.fawn],
+    authors: [Devs.Nuckyz, Devs.fawn, Devs.Sqaaakoi],
     settings,
 
     patches: [
