@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, i18n, Menu, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Menu, Tooltip, useEffect, useState } from "@webpack/common";
 
 const ChannelRowClasses = findByPropsLazy("modeConnected", "modeLocked", "icon");
 
@@ -148,10 +148,10 @@ export default definePlugin({
         },
         // Add View Server Home Button to Server Guide
         {
-            find: [".unreadImportant)", "text:"],
+            find: "487e85_1",
             replacement: {
-                match: /\.name,.+?}\),\i/,
-                replace: "$&,$self.ViewServerHomeButton(arguments[0])"
+                match: /(?<=text:(\i)\?\i\.\i\.Messages\.SERVER_GUIDE:\i\.\i\.Messages\.GUILD_HOME,)/,
+                replace: "badge:$self.ViewServerHomeButton({serverGuide:$1}),"
             }
         },
         // Disable view Server Home override when the Server Home is unmouted
@@ -164,8 +164,8 @@ export default definePlugin({
         }
     ],
 
-    ViewServerHomeButton: ErrorBoundary.wrap(({ text }: { text?: string; }) => {
-        if (text == null || text !== i18n.Messages.SERVER_GUIDE) return null;
+    ViewServerHomeButton: ErrorBoundary.wrap(({ serverGuide }: { serverGuide?: boolean; }) => {
+        if (serverGuide !== true) return null;
 
         return <ViewServerHomeButton />;
     }),

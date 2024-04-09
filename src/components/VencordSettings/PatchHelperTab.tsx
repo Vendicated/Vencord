@@ -180,6 +180,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 
     return (
         <>
+            {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
             <Forms.FormTitle className="">replacement</Forms.FormTitle>
             <TextInput
                 value={replacement?.toString()}
