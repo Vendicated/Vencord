@@ -41,7 +41,7 @@ export default definePlugin({
                     }
                     else {
                         sendBotMessage(ctx.channel.id, {
-                            content: "There was an error with deleting the webhook, error code: " + res.status
+                            content: "There was an error with deleting the webhook, Error: " + res.status
                         });
                     }
                 }
@@ -112,7 +112,7 @@ export default definePlugin({
                 },
                 {
                     name: "username",
-                    description: "Send with a custom webhook username",
+                    description: "Send with a custom username",
                     type: ApplicationCommandOptionType.STRING,
                     required: false
                 },
@@ -147,13 +147,11 @@ export default definePlugin({
                     });
                 }
                 else {
-                    if (webhookUsername === "") {
+                    if (webhookUsername === "")
                         webhookUsername = undefined;
-                    }
 
-                    if (webhookProfilePic === "") {
+                    if (webhookProfilePic === "")
                         webhookProfilePic = undefined;
-                    }
 
                     Native.executeWebhook("" + webhookUrl, {
                         content: webhookMessage,
