@@ -54,5 +54,15 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Download Discord's cached version (more secure, but may be compressed)",
         default: true
+    },
+    showInMessageHoverMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Show 'download all' button in message hover menu",
+        default: false
+    },
+    showInContextMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Show 'Quick Download' button in context menu",
+        default: true
     }
 });

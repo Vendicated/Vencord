@@ -8,7 +8,7 @@ import { BrowserWindow, dialog, IpcMainInvokeEvent } from "electron";
 import { createWriteStream, existsSync, PathLike } from "fs";
 import http from "http";
 import https from "https";
-import { getSettings } from "main/ipcMain";
+import { NativeSettings, RendererSettings } from "main/settings";
 import path from "path";
 import { LiteralUnion } from "type-fest";
 
@@ -22,6 +22,8 @@ function isValidDownloadFolder(dir: string) {
 }
 
 export async function selectMediaFolder(event: IpcMainInvokeEvent): Promise<LiteralUnion<"cancelled" | "invalid", string>> {
+    const nsettings = NativeSettings.store.plugins?.MediaDownloader;
+    const rsettings = RendererSettings.store.plugins?.MediaDownloader;
     const res = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow()!, {
         properties: ["openDirectory"]
     });
@@ -30,6 +32,8 @@ export async function selectMediaFolder(event: IpcMainInvokeEvent): Promise<Lite
     const dir = res.filePaths[0];
     if (!isValidDownloadFolder(dir)) return "invalid";
 
+    // TODO: change this to 'nsettings' when ready
+    rsettings.directory = dir;
     return dir;
 }
 
@@ -75,12 +79,14 @@ function parseContentType(header: string | undefined) {
 }
 
 export function downloadFile(event: IpcMainInvokeEvent, sourceURL: string, proxyURL: string) {
-    const settings = getSettings().plugins?.MediaDownloader;
-    if (!settings || !settings.enabled) return Promise.reject("Media downloader plugin is not enabled :?");
-    if (!isValidDownloadFolder(settings.directory)) return Promise.reject("A valid downloads folder is not selected!");
+    const rsettings = RendererSettings.store.plugins?.MediaDownloader;
+    const nsettings = NativeSettings.store.plugins?.MediaDownloader;
+    if (!rsettings || !rsettings.enabled) return Promise.reject("Media downloader plugin is not enabled :?");
+    // TODO: change to 'nsettings' when ready
+    if (!rsettings || !isValidDownloadFolder(rsettings.directory)) return Promise.reject("A valid downloads folder is not selected!");
 
     // TODO: more intelligently choose between them
-    const url = new URL(settings.useProxy ? proxyURL : sourceURL);
+    const url = new URL(rsettings.useProxy ? proxyURL : sourceURL);
     if (!url) return Promise.reject("URL could not be validated!");
 
     const protocol = chooseProtocol(url.protocol);
@@ -94,7 +100,9 @@ export function downloadFile(event: IpcMainInvokeEvent, sourceURL: string, proxy
             // TODO: decide if filtering out non-media this way is reliable and/or important
             // if (fileCategory && fileCategory !== "image" && fileCategory !== "video") return false;
 
-            const outputPath = generateFilePath(url, settings.directory, fileSubtype);
+
+            // TODO: change to 'nsettings' when ready
+            const outputPath = generateFilePath(url, rsettings.directory, fileSubtype);
             if (!outputPath) {
                 reject("Unable to find an available filename to save under. :(");
                 return;

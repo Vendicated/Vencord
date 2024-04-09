@@ -9,6 +9,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { ChannelStore } from "@webpack/common";
 
+import { imageContextMenuPatch, messageContextMenuPatch } from "./contextMenu";
 import { DownloadImagesIcon } from "./DownloadImagesIcon";
 import { settings } from "./settings";
 
@@ -21,10 +22,10 @@ export default definePlugin({
     authors: [Devs.Eloelle],
     settings: settings,
 
-    // TODO: Add other interactions such as floating download button on individual media
     start() {
         addButton("vc-imagedownload", message => {
             if (message.attachments.length === 0 && message.embeds.length === 0) return null;
+            if (!settings.store.showInMessageHoverMenu) return null;
             return {
                 label: "Download All Images & Videos",
                 icon: DownloadImagesIcon,
@@ -55,5 +56,10 @@ export default definePlugin({
     },
     stop() {
         removeButton("vc-imagedownload");
+    },
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "image-context": imageContextMenuPatch
     }
+    // TODO: Add floating download button on individual media
 });
