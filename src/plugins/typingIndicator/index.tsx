@@ -145,9 +145,9 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "How should the indicator be displayed?",
         options: [
-            { label: "Animated dots", value: IndicatorMode.Dots, default: true },
+            { label: "Avatars and animated dots", value: IndicatorMode.Dots | IndicatorMode.Avatars, default: true },
+            { label: "Animated dots", value: IndicatorMode.Dots },
             { label: "Avatars", value: IndicatorMode.Avatars },
-            { label: "Avatars and animated dots", value: IndicatorMode.Dots | IndicatorMode.Avatars }
         ],
     }
 });
