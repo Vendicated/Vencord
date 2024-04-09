@@ -25,7 +25,7 @@ function startStreamerMode(data: { streamKey: string }) {
     const streamKey = data.streamKey.split(":")[3];
     if (streamKey !== userID) return;
 
-    dispatchStreamer(true)
+    dispatchStreamer(true);
 }
 
 function stopStreamerMode(data: { streamKey: string }) {
@@ -33,7 +33,7 @@ function stopStreamerMode(data: { streamKey: string }) {
     const streamKey = data.streamKey.split(":")[3];
     if (streamKey !== userID) return;
 
-    dispatchStreamer(false)
+    dispatchStreamer(false);
 }
 
 function dispatchStreamer(value: boolean) {
