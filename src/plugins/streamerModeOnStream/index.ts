@@ -20,29 +20,23 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher, UserStore } from "@webpack/common";
 
-function startStreamerMode(data: { streamKey: string }) {
-    const userID = UserStore.getCurrentUser().id;
-    const streamKey = data.streamKey.split(":")[3];
-    if (streamKey !== userID) return;
-
-    dispatchStreamer(true);
+interface StreamEvent {
+    streamKey: string;
 }
 
-function stopStreamerMode(data: { streamKey: string }) {
-    const userID = UserStore.getCurrentUser().id;
-    const streamKey = data.streamKey.split(":")[3];
-    if (streamKey !== userID) return;
+function toggleStreamerMode({ streamKey }: StreamEvent, value: boolean) {
+    const streamKey = data.streamKey.split(":").pop();
+    if (streamKey !==  UserStore.getCurrentUser().id) return;
 
-    dispatchStreamer(false);
-}
-
-function dispatchStreamer(value: boolean) {
     FluxDispatcher.dispatch({
         type: "STREAMER_MODE_UPDATE",
         key: "enabled",
-        value: value
+        value
     });
 }
+
+const startStreamerMode = (data: StreamEvent) => toggleStreamerMode(data, true);
+const stopStreamerMode = (data: StreamEvent) => toggleStreamerMode(data, false);
 
 export default definePlugin({
     name: "streamerModeOnStream",
