@@ -99,21 +99,23 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             <Tooltip text={tooltipText!}>
                 {props => (
                     <div className="vc-typing-indicator" {...props}>
-                        {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && <UserSummaryItem
-                            users={typingUsersArray.map(id => UserStore.getUser(id))}
-                            guildId={guildId}
-                            renderIcon={false}
-                            max={3}
-                            showDefaultAvatarsForNullUsers
-                            showUserPopout
-                            size={16}
-                            className="vc-typing-indicator-avatars"
-                        />}
-                        {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && <div
-                            className="vc-typing-indicator-dots"
-                        >
-                            <ThreeDots dotRadius={3} themed={true} />
-                        </div>}
+                        {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
+                            <UserSummaryItem
+                                users={typingUsersArray.map(id => UserStore.getUser(id))}
+                                guildId={guildId}
+                                renderIcon={false}
+                                max={3}
+                                showDefaultAvatarsForNullUsers
+                                showUserPopout
+                                size={16}
+                                className="vc-typing-indicator-avatars"
+                            />
+                        )}
+                        {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
+                            <div className="vc-typing-indicator-dots">
+                                <ThreeDots dotRadius={3} themed={true} />
+                            </div>
+                        )}
                     </div>
                 )}
             </Tooltip>
