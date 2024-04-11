@@ -18,9 +18,9 @@
 
 import { PermissionValue } from "./RolesAndUsersPermissions";
 
-export function PermissionDeniedIcon() {
+export function PermissionDeniedIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
     return (
-        <svg
+        <svg {...props}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -31,9 +31,9 @@ export function PermissionDeniedIcon() {
     );
 }
 
-export function PermissionPassthroughIcon() {
+export function PermissionPassthroughIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
     return (
-        <svg
+        <svg {...props}
             height="24"
             width="24"
             viewBox="0 0 16 16"
@@ -46,9 +46,9 @@ export function PermissionPassthroughIcon() {
     );
 }
 
-export function PermissionAllowedIcon() {
+export function PermissionAllowedIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
     return (
-        <svg
+        <svg {...props}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -59,10 +59,10 @@ export function PermissionAllowedIcon() {
     );
 }
 
-export function PermissionIcon({ permissionValue }: { permissionValue: PermissionValue; }) {
+export function PermissionIcon({ permissionValue, ...props }: { permissionValue: PermissionValue; } & React.SVGProps<SVGSVGElement>) {
     switch (permissionValue) {
-        case PermissionValue.Deny: return PermissionDeniedIcon();
-        case PermissionValue.Allow: return PermissionAllowedIcon();
-        case PermissionValue.Passthrough: return PermissionPassthroughIcon();
+        case PermissionValue.Deny: return PermissionDeniedIcon(props);
+        case PermissionValue.Allow: return PermissionAllowedIcon(props);
+        case PermissionValue.Passthrough: return PermissionPassthroughIcon(props);
     }
 }
