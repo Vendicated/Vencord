@@ -18,3 +18,7 @@ https://github.com/Vendicated/Vencord/assets/119569726/c7543516-f691-42c5-baa2-6
 
 All badges can fit easily, for example here's Vencord's creator: Vee (vending.machine):
 ![image](https://github.com/Vendicated/Vencord/assets/119569726/fc768079-5027-482b-ac52-a652812d482d)
+
+---
+
+_Discord currently has a small bug where an author who isn't the current user will return their premiumType as undefined. There is nothing we can do about this until Discord fixes this bug_
