@@ -1,5 +1,3 @@
-# ShowBadgesInChat
-
 Shows profile badges in chat. The badges include all built-in Discord badges. It also proudly displays your Vencord donor/contributor badges.
 
 ---
