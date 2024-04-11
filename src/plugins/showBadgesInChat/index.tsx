@@ -129,3 +129,6 @@ export default definePlugin({
         removeDecoration("vc-show-badges-in-chat");
     }
 });
+
+    }
+});
