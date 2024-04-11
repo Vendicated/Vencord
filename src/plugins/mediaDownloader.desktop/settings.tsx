@@ -64,5 +64,17 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show 'Quick Download' button in context menu",
         default: true
+    },
+    addHoverButtonToImageAttachments: {
+        type: OptionType.BOOLEAN,
+        description: "Add 'quick download' button to images, not just video and audio",
+        default: true,
+        restartNeeded: true
+    },
+    hijackHoverButtonForQuickDownload: {
+        type: OptionType.BOOLEAN,
+        description: "Use the configured quick-download settings instead of opening in browser",
+        default: true,
+        restartNeeded: true
     }
 });
