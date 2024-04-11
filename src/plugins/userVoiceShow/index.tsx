@@ -104,7 +104,7 @@ export default definePlugin({
         },
         // below username
         {
-            find: ".USER_PROFILE_MODAL",
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
