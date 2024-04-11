@@ -165,25 +165,23 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         </ScrollerThin>
                         <ScrollerThin className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => {
+                                const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
+                                const permissionValue = permissions !== undefined
+                                    ? permissions === 0n ? PermissionValue.Passthrough
+                                        : (permissions & bit) === bit ? PermissionValue.Allow : PermissionValue.Deny
+                                    : undefined;
+                                const overwriteValue = overwriteAllow !== undefined || overwriteDeny !== undefined
+                                    ? overwriteAllow !== undefined && (overwriteAllow & bit) === bit ? PermissionValue.Allow
+                                        : overwriteDeny !== undefined && (overwriteDeny & bit) === bit ? PermissionValue.Deny
+                                            : PermissionValue.Passthrough
+                                    : undefined;
+                                const computedPermissionValue = overwriteValue !== undefined && overwriteValue !== PermissionValue.Passthrough
+                                    ? overwriteValue
+                                    : permissionValue;
+
                                 return <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
-                                        <PermissionIcon permissionValue={(() => {
-                                            const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
-                                            const permissionValue = permissions !== undefined
-                                                ? permissions === 0n ? PermissionValue.Passthrough
-                                                    : (permissions & bit) === bit ? PermissionValue.Allow : PermissionValue.Deny
-                                                : undefined;
-                                            const overwriteValue = overwriteAllow !== undefined || overwriteDeny !== undefined
-                                                ? overwriteAllow !== undefined && (overwriteAllow & bit) === bit ? PermissionValue.Allow
-                                                    : overwriteDeny !== undefined && (overwriteDeny & bit) === bit ? PermissionValue.Deny
-                                                        : PermissionValue.Passthrough
-                                                : undefined;
-                                            const computedPermissionValue = overwriteValue !== undefined && overwriteValue !== PermissionValue.Passthrough
-                                                ? overwriteValue
-                                                : permissionValue;
-
-                                            return computedPermissionValue ?? PermissionValue.Passthrough;
-                                        })()} />
+                                        <PermissionIcon permissionValue={computedPermissionValue ?? PermissionValue.Passthrough} />
                                     </div>
                                     <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
 
