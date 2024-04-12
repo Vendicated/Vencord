@@ -81,11 +81,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>> & {
-    V6OrEarlierAPIError: Error;
-    V8APIError: Error;
-    getAPIBaseURL(withVersion?: boolean): string;
-};
+export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
 export type Permissions = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"
