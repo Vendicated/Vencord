@@ -25,7 +25,7 @@ import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, Menu, Per
 import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
-import { cl, getPermissionDescription, getPermissionString } from "../utils";
+import { cl, getComputedPermissionValue, getOverwriteValue, getPermissionDescription, getPermissionString, getPermissionValue } from "../utils";
 import { PermissionIcon } from "./icons";
 
 export const enum PermissionType {
@@ -166,18 +166,9 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         <ScrollerThin className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => {
                                 const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
-                                const permissionValue = permissions !== undefined
-                                    ? permissions === 0n ? PermissionValue.Passthrough
-                                        : (permissions & bit) === bit ? PermissionValue.Allow : PermissionValue.Deny
-                                    : undefined;
-                                const overwriteValue = overwriteAllow !== undefined || overwriteDeny !== undefined
-                                    ? overwriteAllow !== undefined && (overwriteAllow & bit) === bit ? PermissionValue.Allow
-                                        : overwriteDeny !== undefined && (overwriteDeny & bit) === bit ? PermissionValue.Deny
-                                            : PermissionValue.Passthrough
-                                    : undefined;
-                                const computedPermissionValue = overwriteValue !== undefined && overwriteValue !== PermissionValue.Passthrough
-                                    ? overwriteValue
-                                    : permissionValue;
+                                const permissionValue = getPermissionValue(bit, permissions);
+                                const overwriteValue = getOverwriteValue(bit, overwriteAllow, overwriteDeny);
+                                const computedPermissionValue = getComputedPermissionValue(overwriteValue, permissionValue);
 
                                 return <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
