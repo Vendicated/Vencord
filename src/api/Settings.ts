@@ -162,7 +162,7 @@ SettingsStore.addGlobalChangeListener((_, path) => {
     SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
     localStorage.Vencord_settingsDirty = true;
     saveSettingsOnFrequentAction();
-    VencordNative.settings.set(SettingsStore.plain);
+    VencordNative.settings.set(SettingsStore.plain, path);
 });
 
 /**
