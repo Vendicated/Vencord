@@ -94,7 +94,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
 
 function ChatBadges({ author }: any) {
     return (
-        <span style={{ display: "inline-flex", marginLeft: 4, verticalAlign: "top" }}>
+        <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
