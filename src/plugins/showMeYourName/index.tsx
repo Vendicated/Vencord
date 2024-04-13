@@ -49,7 +49,7 @@ export default definePlugin({
         {
             find: ".useCanSeeRemixBadge)",
             replacement: {
-                match: /(?<=onContextMenu:\i,children:).*?\}/,
+                match: /(?<=onContextMenu:\i,children:).*?\)}/,
                 replace: "$self.renderUsername(arguments[0])}"
             }
         },
