@@ -254,7 +254,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             const patch = patches[i];
             if (patch.predicate && !patch.predicate()) continue;
             // We change all patch.find to array in plugins/index
-            if (!(patch.find as string[]).every(f => code.includes(f))) continue;
+            if (!code.includes(patch.find)) continue;
 
             patchedBy.add(patch.plugin);
 
