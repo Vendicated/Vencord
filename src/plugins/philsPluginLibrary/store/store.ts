@@ -65,12 +65,10 @@ export function createPluginStore<Z extends PluginSettings = {}>(pluginName: str
 
     const get: PluginGet<Z> = () => {
         const storeSettings = settingStorage.get(storeName);
+
         if (!startupStates[storeName]) { //We do this so that we can load all the saved data without the proxy attempting to overwrite it
             const startupInfo = Settings.plugins[pluginName].stores[storeName];
-
-            storeSettings.simpleMode = startupInfo.simpleMode;
-            storeSettings.profiles = startupInfo.profiles || [];
-            storeSettings.currentProfile = startupInfo.currentProfile || { name: '' };
+            Object.keys(startupInfo).forEach((prop) => storeSettings[prop] = startupInfo[prop]);
 
             startupStates[storeName] = true;
         }
@@ -84,29 +82,16 @@ export function createPluginStore<Z extends PluginSettings = {}>(pluginName: str
     const use: PluginUse<Z> = () => { useSettings().plugins[pluginName].stores[storeName]; return get(); }; //useSettings is called to update renderer (after settings change)
 
     const initialSettings: Z = f(set, get);
-    const settingData = Settings.plugins[pluginName].stores[storeName];
-    const filteredInitialSettings: unknown = {//We make sure that everything we pass to the IPC is allowed
-        profiles: settingData.profiles || [],
-        currentProfile: settingData.currentProfile || { name: '' },
-        simpleMode: settingData.simpleMode ?? false
-    };
-
     const proxiedSettings = createObjectProxy(initialSettings as unknown, updateCallback); //Setup our proxy that allows us connections to the datastore
 
     function updateCallback(updatedObject: any) {
         if (!startupStates[storeName]) return; //Wait for the startup information to overwrite the blank proxy
-
-        Settings.plugins[pluginName].stores[storeName] = { //Whenever the proxy is updated we also update the datastore with data that we know can pass through the IPC
-            simpleMode: updatedObject.simpleMode ?? false,
-            profiles: updatedObject.profiles.map((profile) => ({ ...profile })),
-            currentProfile: { ...updatedObject.currentProfile } //No clue if this has to be spread or not (disregard the inconsistency ig)
-        };
+        Settings.plugins[pluginName].stores[storeName] = JSON.parse(JSON.stringify(updatedObject));
     }
 
     for (const key of Object.keys(initialSettings)) { proxiedSettings[key] = initialSettings[key]; } //Set them so the nested objects also become proxies
     settingStorage.set(storeName, proxiedSettings);
 
-    set({ ...filteredInitialSettings as Z, ...Settings.plugins[pluginName].stores[storeName] });
     updateCallback(initialSettings);
 
     return {
