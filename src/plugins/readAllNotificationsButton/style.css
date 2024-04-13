@@ -1,11 +1,8 @@
 .vc-ranb-button {
-    color: var(--interactive-normal);
-    padding: 0 0.5em;
+    background-color: rgb(30, 46, 226);
+    padding: 0.3em;
     margin-bottom: 0.5em;
-    width: 100%;
     box-sizing: border-box;
-}
-
-.vc-ranb-button:hover {
-    color: var(--interactive-active);
+    position: relative; 
+    margin-left: 5.5px;
 }
