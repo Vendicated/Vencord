@@ -12,11 +12,7 @@ import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
-import type { Message, User as DiscordUser } from "discord-types/general";
-
-interface User extends DiscordUser {
-    globalName: string;
-}
+import type { Message } from "discord-types/general";
 
 interface IMessageCreate {
     channelId: string;
@@ -39,26 +35,34 @@ function processIds(value: string): string {
 }
 
 async function showNotification(message: Message, guildId: string | undefined): Promise<void> {
-    const channel = ChannelStore.getChannel(message.channel_id);
-    const channelRegex = /<#(\d{19})>/g;
-    const userRegex = /<@(\d{18})>/g;
+    try {
+        const channel = ChannelStore.getChannel(message.channel_id);
+        const channelRegex = /<#(\d{19})>/g;
+        const userRegex = /<@(\d{18})>/g;
 
-    message.content = message.content.replace(channelRegex, (match, channelId: string) => {
-        return `#${ChannelStore.getChannel(channelId)?.name}`;
-    });
+        message.content = message.content.replace(channelRegex, (match: any, channelId: string) => {
+            return `#${ChannelStore.getChannel(channelId)?.name}`;
+        });
 
-    message.content = message.content.replace(userRegex, (match, userId: string) => {
-        return `@${(UserStore.getUser(userId) as User).globalName}`;
-    });
+        message.content = message.content.replace(userRegex, (match: any, userId: string) => {
+            return `@${(UserStore.getUser(userId) as any).globalName}`;
+        });
 
-    await Notifications.showNotification({
-        title: `${(message.author as User).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
-        body: message.content,
-        icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-        onClick: function (): void {
-            NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
+        await Notifications.showNotification({
+            title: `${(message.author as any).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
+            body: message.content,
+            icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
+            onClick: function (): void {
+                NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
+            }
+        });
+
+        if (settings.store.notificationSound) {
+            new Audio("https://discord.com/assets/9422aef94aa931248105.mp3").play();
         }
-    });
+    } catch (error) {
+        new Logger("BypassDND").error("Failed to notify user: ", error);
+    }
 }
 
 function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatchCallback {
@@ -110,6 +114,11 @@ const settings = definePluginSettings({
     allowOutsideOfDms: {
         type: OptionType.BOOLEAN,
         description: "Allow selected users to bypass DND outside of DMs too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)"
+    },
+    notificationSound: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the notification sound should be played",
+        default: true,
     }
 });
 
@@ -136,7 +145,7 @@ export default definePlugin({
                     }
                 }
             } catch (error) {
-                new Logger("BypassDND").error("Failed to handle message", error);
+                new Logger("BypassDND").error("Failed to handle message: ", error);
             }
         }
     },
