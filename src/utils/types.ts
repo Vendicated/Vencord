@@ -36,7 +36,7 @@ export interface PatchReplacement {
 
 export interface Patch {
     plugin: string;
-    find: string | string[];
+    find: string;
     replacement: PatchReplacement | PatchReplacement[];
     /** Whether this patch should apply to multiple modules */
     all?: boolean;
