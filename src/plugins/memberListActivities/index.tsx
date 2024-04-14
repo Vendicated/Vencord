@@ -24,7 +24,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Tooltip } from "@webpack/common";
+import { Tooltip, useMemo } from "@webpack/common";
+import { User } from "discord-types/general";
 import type { ImgHTMLAttributes } from "react";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
@@ -104,6 +105,7 @@ interface ApplicationIcon {
         alt: string;
     };
     activity: Activity;
+    application?: Application;
 }
 
 interface ActivityListIcon {
@@ -124,7 +126,47 @@ const DefaultActivityIcon = findComponentByCodeLazy("M6,7 L2,7 L2,6 L6,6 L6,7 Z 
 
 const fetchedApplications = new Map<string, Application | null>();
 
-const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
+const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png"; // TODO: replace with "renderXboxImage"?
+
+function getActivityImage(activity: Activity): string | undefined {
+    if (activity.type === 2 && activity.name === "Spotify") {
+        // get either from large or small image
+        const image = activity.assets?.large_image ?? activity.assets?.small_image;
+        // image needs to replace 'spotify:
+        if (image?.startsWith("spotify:")) {
+            // spotify cover art is always https://i.scdn.co/image/ID
+            return image.replace("spotify:", "https://i.scdn.co/image/");
+        }
+    }
+    // TODO: we could support other assets here, like showing the small/large image counterpart in comparison to that was shown in the activity list
+}
+
+const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
+    const image = useMemo(() => {
+        const activityImage = getActivityImage(activity);
+        if (activityImage) {
+            return activityImage;
+        }
+        const icon = getApplicationIcons([activity])[0];
+        return icon?.image.src;
+    }, [activity]);
+
+    const hasDetails = activity.details ?? activity.state;
+    return (
+        <ErrorBoundary>
+            <div className={cl("activity")}>
+                {image && <img className={cl("activity-image")} src={image} alt="Activity logo" />}
+                <div className={cl("activity-title")}>{activity.name}</div>
+                {hasDetails && <div className={cl("activity-divider")} />}
+                <div className={cl("activity-details")}>
+                    <div>{activity.details}</div>
+                    <div>{activity.state}</div>
+                </div>
+            </div>
+        </ErrorBoundary>
+    );
+};
+
 
 function getApplicationIcons(activities: Activity[]) {
     const applicationIcons: ApplicationIcon[] = [];
@@ -183,12 +225,14 @@ function getApplicationIcons(activities: Activity[]) {
                     const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
                     applicationIcons.push({
                         image: { src, alt: application.name },
-                        activity
+                        activity,
+                        application
                     });
                 } else if (platform === "xbox") {
                     applicationIcons.push({
                         image: { src: xboxUrl, alt: "Xbox" },
-                        activity
+                        activity,
+                        application
                     });
                 }
             }
@@ -213,17 +257,23 @@ export default definePlugin({
 
     settings,
 
-    patchActivityList: (activities: Activity[]): JSX.Element | null => {
+    patchActivityList: ({ activities, user }: { activities: Activity[], user: User }): JSX.Element | null => {
         const icons: ActivityListIcon[] = [];
 
         const spotifyActivity = activities.find(({ name }) => name === "Spotify");
         if (spotifyActivity) {
-            icons.push({ iconElement: <SpotifyIcon />, tooltip: spotifyActivity.details ?? spotifyActivity.name });
+            icons.push({
+                iconElement: <SpotifyIcon />,
+                tooltip: <ActivityTooltip activity={spotifyActivity} />
+            });
         }
 
         const twitchActivity = activities.find(({ name }) => name === "Twitch");
         if (twitchActivity) {
-            icons.push({ iconElement: <TwitchIcon />, tooltip: twitchActivity.details ?? twitchActivity.name });
+            icons.push({
+                iconElement: <TwitchIcon />,
+                tooltip: <ActivityTooltip activity={twitchActivity} />
+            });
         }
         const applicationIcons = getApplicationIcons(activities);
         if (applicationIcons.length) {
@@ -236,7 +286,7 @@ export default definePlugin({
             for (const appIcon of uniqueIcons) {
                 icons.push({
                     iconElement: <img {...appIcon.image} />,
-                    tooltip: appIcon.activity.details ?? appIcon.activity.name
+                    tooltip: <ActivityTooltip activity={appIcon.activity} />
                 });
             }
         }
@@ -244,24 +294,22 @@ export default definePlugin({
         if (icons.length) {
             return <ErrorBoundary noop>
                 <div className={cl("row")}>
-                    {icons.map(({ iconElement, tooltip }, i) => {
-                        return (
-                            <div key={i} className={cl("icon")} style={{
-                                width: `${settings.store.iconSize}px`,
-                                height: `${settings.store.iconSize}px`
-                            }}>
-                                {tooltip ? <Tooltip text={tooltip}>
-                                    {({ onMouseEnter, onMouseLeave }) => (
-                                        <div
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}>
-                                            {iconElement}
-                                        </div>
-                                    )}
-                                </Tooltip> : iconElement}
-                            </div>
-                        );
-                    })}
+                    {icons.map(({ iconElement, tooltip }, i) => (
+                        <div key={i} className={cl("icon")} style={{
+                            width: `${settings.store.iconSize}px`,
+                            height: `${settings.store.iconSize}px`
+                        }}>
+                            {tooltip ? <Tooltip text={tooltip}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <div
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}>
+                                        {iconElement}
+                                    </div>
+                                )}
+                            </Tooltip> : iconElement}
+                        </div>
+                    ))}
                 </div>
             </ErrorBoundary>;
         } else {
@@ -282,7 +330,7 @@ export default definePlugin({
             find: "default.getHangStatusActivity():null!",
             replacement: {
                 match: /null!=(\i)&&\i.some\(\i=>\(0,\i.default\)\(\i,\i\)\)\?/,
-                replace: "$self.patchActivityList($1),false?"
+                replace: "$self.patchActivityList(e),false?"
             }
         },
     ],
