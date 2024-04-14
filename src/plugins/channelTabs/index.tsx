@@ -64,7 +64,7 @@ export default definePlugin({
             find: ".messageContainer,onKeyDown",
             replacement: {
                 match: /.jumpButton,onJump:\i=>(\i)\(\i,(\i)\.id\)/,
-                replace: ".jumpButton,onJump: ev => { if (ev.ctrlKey) $self.open($2); else $1(ev, $2.id) }"
+                replace: ".jumpButton,onJump: event => { if (event.ctrlKey) $self.open($2); else $1(event, $2.id) }"
             }
         },
         // ctrl click to open in new tab in inbox mentions
@@ -72,7 +72,7 @@ export default definePlugin({
             find: ".deleteRecentMention(",
             replacement: {
                 match: /.jumpButton,onJump:(\i)(?=.{0,40}message:(\i))/,
-                replace: ".jumpButton,onJump: ev => { if (ev.ctrlKey) $self.open($2); else $1(ev) }"
+                replace: ".jumpButton,onJump: event => { if (event.ctrlKey) $self.open($2); else $1(event) }"
             }
         },
         // ctrl click to open in new tab in search results

@@ -18,19 +18,17 @@
 
 import { classNameFactory } from "@api/Styles";
 import { useForceUpdater } from "@utils/react";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, closeTab, createTab, handleChannelSwitch, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
-import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
+import { BasicContextMenu } from "./ContextMenus";
 
 type TabSet = Record<string, ChannelTabsProps[]>;
 
 const { PlusSmallIcon } = findByPropsLazy("PlusSmallIcon");
-const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
-
 const cl = classNameFactory("vc-channeltabs-");
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
@@ -87,30 +85,9 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
         >
             <div className={cl("tab-container")}>
-                {openedTabs.map((tab, i) => <div
-                    className={cl("tab", { "tab-compact": tab.compact, "tab-selected": isTabSelected(tab.id) })}
-                    key={i}
-                    onAuxClick={e => {
-                        if (e.button === 1 /* middle click */)
-                            closeTab(tab.id);
-                    }}
-                    onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={tab} />)}
-                >
-                    <button
-                        className={cl("button", "channel-info")}
-                        onClick={() => moveToTab(tab.id)}
-                    >
-                        <ChannelTab {...tab} index={i} />
-                    </button>
-
-                    {openedTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
-                        className={cl("button", "close-button", { "close-button-compact": tab.compact, "hoverable": !tab.compact })}
-                        onClick={() => closeTab(tab.id)}
-                    >
-                        <XIcon height={16} width={16} />
-                    </button>}
-                </div>)
-                }
+                {openedTabs.map((tab, i) =>
+                    <ChannelTab {...tab} index={i} />
+                )}
 
                 <button
                     onClick={() => createTab(props, true)}

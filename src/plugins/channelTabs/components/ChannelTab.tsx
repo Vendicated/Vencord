@@ -16,20 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Dots, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-import { ChannelTabsProps, CircleQuestionIcon, moveDraggedTabs, settings } from "../util";
+import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
+import { TabContextMenu } from "./ContextMenus";
 
 const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
 const { FriendsIcon } = findByPropsLazy("FriendsIcon");
+const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
 
-const cl = (name: string) => `vc-channeltabs-${name}`;
+const cl = classNameFactory("vc-channeltabs-");
 
 const GuildIcon = ({ guild }: { guild: Guild; }) => {
     return guild.icon
@@ -192,7 +195,7 @@ function ChannelTabContent(props: ChannelTabsProps & {
 }
 
 export default function ChannelTab(props: ChannelTabsProps & { index: number; }) {
-    const { channelId, guildId, id, index } = props;
+    const { channelId, guildId, id, index, compact } = props;
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
 
@@ -233,15 +236,35 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }), []);
     drag(drop(ref));
 
-    return (
-        <div
-            ref={ref}
-            className={cl("tab-inner")}
-            data-compact={props.compact}
+    return <div
+        className={cl("tab", { "tab-compact": compact, "tab-selected": isTabSelected(id) })}
+        key={index}
+        ref={ref}
+        onAuxClick={e => {
+            if (e.button === 1 /* middle click */)
+                closeTab(id);
+        }}
+        onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={props} />)}
+    >
+        <button
+            className={cl("button", "channel-info")}
+            onClick={() => moveToTab(id)}
         >
-            <ChannelTabContent {...props} guild={guild} channel={channel as any} />
-        </div>
-    );
+            <div
+                className={cl("tab-inner")}
+                data-compact={compact}
+            >
+                <ChannelTabContent {...props} guild={guild} channel={channel} />
+            </div>
+        </button>
+
+        {openedTabs.length > 1 && (compact ? isTabSelected(id) : true) && <button
+            className={cl("button", "close-button", { "close-button-compact": compact, "hoverable": !compact })}
+            onClick={() => closeTab(id)}
+        >
+            <XIcon height={16} width={16} />
+        </button>}
+    </div>;
 }
 
 export const PreviewTab = (props: ChannelTabsProps) => {
@@ -250,7 +273,7 @@ export const PreviewTab = (props: ChannelTabsProps) => {
 
     return (
         <div className={classes(cl("preview-tab"), props.compact ? cl("preview-tab-compact") : null)}>
-            <ChannelTabContent {...props} guild={guild} channel={channel as any} />
+            <ChannelTabContent {...props} guild={guild} channel={channel} />
         </div>
     );
 };
