@@ -442,7 +442,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /(?
     }
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds?.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
+        const chunkIds = Array.from(rawChunkIds.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
