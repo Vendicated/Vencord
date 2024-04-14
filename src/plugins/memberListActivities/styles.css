@@ -41,7 +41,7 @@
 
 .vc-mla-activity-divider {
     width: 100%;
-    border-top: 1px dotted rgba(255, 255, 255, 0.2);
+    border-top: 1px dotted rgba(255, 255, 255, 20%);
     margin-top: 3px;
     margin-bottom: 3px;
 }
@@ -49,6 +49,5 @@
 .vc-mla-activity-details {
     display: flex;
     flex-direction: column;
-    /* discord gray */
     color: var(--text-muted);
 }
