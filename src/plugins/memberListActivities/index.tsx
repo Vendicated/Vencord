@@ -138,7 +138,7 @@ function getActivityImage(activity: Activity): string | undefined {
             return image.replace("spotify:", "https://i.scdn.co/image/");
         }
     }
-    // TODO: we could support other assets here, like showing the small/large image counterpart in comparison to that was shown in the activity list
+    // TODO: we could support other assets here
 }
 
 const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
@@ -147,7 +147,7 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
         if (activityImage) {
             return activityImage;
         }
-        const icon = getApplicationIcons([activity])[0];
+        const icon = getApplicationIcons([activity], true)[0];
         return icon?.image.src;
     }, [activity]);
 
@@ -168,7 +168,7 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
 };
 
 
-function getApplicationIcons(activities: Activity[]) {
+function getApplicationIcons(activities: Activity[], preferSmall = false) {
     const applicationIcons: ApplicationIcon[] = [];
     const applications = activities.filter(activity => activity.application_id || activity.platform);
 
@@ -197,14 +197,21 @@ function getApplicationIcons(activities: Activity[]) {
                 }
             };
 
-            // Prefer large image
+            const smallImage = assets.small_image;
+            const smallText = assets.small_text ?? "Small Text";
             const largeImage = assets.large_image;
-            if (largeImage) {
-                addImage(largeImage, assets.large_text ?? "Large Text");
-            } else {
-                const smallImage = assets.small_image;
+            const largeText = assets.large_text ?? "Large Text";
+            if (preferSmall) {
                 if (smallImage) {
-                    addImage(smallImage, assets.small_text ?? "Small Text");
+                    addImage(smallImage, smallText);
+                } else if (largeImage) {
+                    addImage(largeImage, largeText);
+                }
+            } else {
+                if (largeImage) {
+                    addImage(largeImage, largeText);
+                } else if (smallImage) {
+                    addImage(smallImage, smallText);
                 }
             }
         } else if (application_id) {
