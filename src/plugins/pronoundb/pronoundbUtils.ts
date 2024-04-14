@@ -137,7 +137,6 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
         return await req.json()
             .then((res: PronounsResponse) => {
                 Object.assign(cache, res);
-                console.log(res);
                 return res;
             });
     } catch (e) {
