@@ -155,22 +155,11 @@ export function extractPronouns(pronounSet: { [locale: string]: PronounCode[] })
     const pronouns = pronounSet.en;
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
 
-    const shouldCapitalise = (pronoun: string) => {
-        // if a pronoun is a sentence we keep the capitalisation.
-        return pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronoun);
-    };
-
     if (pronouns.length === 1) {
-        if (shouldCapitalise(pronouns[0]))
+        if (pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0]))
             return PronounMapping[pronouns[0]];
-        else if (
-            pronounsFormat === PronounsFormat.Lowercase
-            && ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0])
-        ) return PronounMapping[pronouns[0]];
         else return PronounMapping[pronouns[0]].toLowerCase();
     }
-    return pronouns.map(pronoun => {
-        const mappedPronoun = PronounMapping[pronoun + "S"];
-        return shouldCapitalise(mappedPronoun) ? mappedPronoun : mappedPronoun.toLowerCase();
-    }).join("/");
+    const pronounString = pronouns.map(pronoun => PronounMapping[pronoun + "S"]).join("/");
+    return pronounsFormat === PronounsFormat.Capitalized ? pronounString : pronounString.toLowerCase();
 }
