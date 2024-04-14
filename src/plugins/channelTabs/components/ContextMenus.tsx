@@ -26,22 +26,24 @@ import { Bookmark, BookmarkFolder, Bookmarks, ChannelTabsProps, UseBookmarkMetho
 export function BasicContextMenu() {
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
-    return <Menu.Menu
-        navId="channeltabs-context"
-        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="ChannelTabs Context Menu"
-    >
-        <Menu.MenuGroup>
-            <Menu.MenuCheckboxItem
-                checked={showBookmarkBar}
-                id="show-bookmark-bar"
-                label="Bookmark Bar"
-                action={() => {
-                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
-                }}
-            />
-        </Menu.MenuGroup>
-    </Menu.Menu>;
+    return (
+        <Menu.Menu
+            navId="channeltabs-context"
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label="ChannelTabs Context Menu"
+        >
+            <Menu.MenuGroup>
+                <Menu.MenuCheckboxItem
+                    checked={showBookmarkBar}
+                    id="show-bookmark-bar"
+                    label="Bookmark Bar"
+                    action={() => {
+                        settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                    }}
+                />
+            </Menu.MenuGroup>
+        </Menu.Menu>
+    );
 }
 
 export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
@@ -54,44 +56,46 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
     const [color, setColor] = useState(isBookmarkFolder(bookmark) ? bookmark.iconColor : undefined);
     const placeholder = bookmarkPlaceholderName(bookmark);
 
-    return <ModalRoot {...modalProps}>
-        <ModalHeader>
-            <Text variant="heading-lg/semibold">Edit Bookmark</Text>
-        </ModalHeader>
-        <ModalContent>
-            <Forms.FormTitle className={Margins.top16}>Bookmark Name</Forms.FormTitle>
-            <TextInput
-                value={name === placeholder ? undefined : name}
-                placeholder={placeholder}
-                onChange={v => setName(v)}
-            />
-            {isBookmarkFolder(bookmark) && <>
-                <Forms.FormTitle className={Margins.top16}>Folder Color</Forms.FormTitle>
-                <Select
-                    options={
-                        Object.entries(bookmarkFolderColors).map(([name, value]) => ({
-                            label: name,
-                            value,
-                            default: bookmark.iconColor === value
-                        }))
-                    }
-                    isSelected={v => color === v}
-                    select={setColor}
-                    serialize={String}
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader>
+                <Text variant="heading-lg/semibold">Edit Bookmark</Text>
+            </ModalHeader>
+            <ModalContent>
+                <Forms.FormTitle className={Margins.top16}>Bookmark Name</Forms.FormTitle>
+                <TextInput
+                    value={name === placeholder ? undefined : name}
+                    placeholder={placeholder}
+                    onChange={v => setName(v)}
                 />
-            </>}
-        </ModalContent>
-        <ModalFooter>
-            <Button
-                onClick={() => onSave(name || placeholder, color!)}
-            >Save</Button>
-            <Button
-                color={Button.Colors.TRANSPARENT}
-                look={Button.Looks.LINK}
-                onClick={() => closeModal(modalKey)}
-            >Cancel</Button>
-        </ModalFooter>
-    </ModalRoot>;
+                {isBookmarkFolder(bookmark) && <>
+                    <Forms.FormTitle className={Margins.top16}>Folder Color</Forms.FormTitle>
+                    <Select
+                        options={
+                            Object.entries(bookmarkFolderColors).map(([name, value]) => ({
+                                label: name,
+                                value,
+                                default: bookmark.iconColor === value
+                            }))
+                        }
+                        isSelected={v => color === v}
+                        select={setColor}
+                        serialize={String}
+                    />
+                </>}
+            </ModalContent>
+            <ModalFooter>
+                <Button
+                    onClick={() => onSave(name || placeholder, color!)}
+                >Save</Button>
+                <Button
+                    color={Button.Colors.TRANSPARENT}
+                    look={Button.Looks.LINK}
+                    onClick={() => closeModal(modalKey)}
+                >Cancel</Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
 }
 
 function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
@@ -102,68 +106,72 @@ function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
 }) {
     const [folderIndex, setIndex] = useState(-1);
 
-    return <ModalRoot {...modalProps}>
-        <ModalHeader>
-            <Text variant="heading-lg/semibold">Add Bookmark to Folder</Text>
-        </ModalHeader>
-        <ModalContent>
-            <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
-            <Select
-                options={[...Object.entries(bookmarks)
-                    .filter(([, bookmark]) => isBookmarkFolder(bookmark))
-                    .map(([index, bookmark]) => ({
-                        label: bookmark.name,
-                        value: parseInt(index, 10)
-                    })),
-                {
-                    label: "Create one",
-                    value: -1,
-                    default: true
-                }]}
-                isSelected={v => v === folderIndex}
-                select={setIndex}
-                serialize={String}
-            />
-        </ModalContent>
-        <ModalFooter>
-            <Button
-                onClick={() => onSave(folderIndex)}
-            >Save</Button>
-            <Button
-                color={Button.Colors.TRANSPARENT}
-                look={Button.Looks.LINK}
-                onClick={() => closeModal(modalKey)}
-            >Cancel</Button>
-        </ModalFooter>
-    </ModalRoot>;
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader>
+                <Text variant="heading-lg/semibold">Add Bookmark to Folder</Text>
+            </ModalHeader>
+            <ModalContent>
+                <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
+                <Select
+                    options={[...Object.entries(bookmarks)
+                        .filter(([, bookmark]) => isBookmarkFolder(bookmark))
+                        .map(([index, bookmark]) => ({
+                            label: bookmark.name,
+                            value: parseInt(index, 10)
+                        })),
+                    {
+                        label: "Create one",
+                        value: -1,
+                        default: true
+                    }]}
+                    isSelected={v => v === folderIndex}
+                    select={setIndex}
+                    serialize={String}
+                />
+            </ModalContent>
+            <ModalFooter>
+                <Button
+                    onClick={() => onSave(folderIndex)}
+                >Save</Button>
+                <Button
+                    color={Button.Colors.TRANSPARENT}
+                    look={Button.Looks.LINK}
+                    onClick={() => closeModal(modalKey)}
+                >Cancel</Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
 }
 
 function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
-    return <ModalRoot {...modalProps}>
-        <ModalHeader>
-            <Text variant="heading-lg/semibold">Are you sure?</Text>
-        </ModalHeader>
-        <ModalContent>
-            <Forms.FormText className={Margins.top16}>
-                Deleting a bookmark folder will also delete all bookmarks within it.
-            </Forms.FormText>
-        </ModalContent>
-        <ModalFooter>
-            <Button
-                color={Button.Colors.RED}
-                onClick={onConfirm}
-            >
-                Delete
-            </Button>
-            <Button
-                color={Button.Colors.TRANSPARENT}
-                look={Button.Looks.LINK}
-                onClick={() => closeModal(modalKey)}
-            >
-                Cancel
-            </Button>
-        </ModalFooter>
-    </ModalRoot>;
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader>
+                <Text variant="heading-lg/semibold">Are you sure?</Text>
+            </ModalHeader>
+            <ModalContent>
+                <Forms.FormText className={Margins.top16}>
+                    Deleting a bookmark folder will also delete all bookmarks within it.
+                </Forms.FormText>
+            </ModalContent>
+            <ModalFooter>
+                <Button
+                    color={Button.Colors.RED}
+                    onClick={onConfirm}
+                >
+                    Delete
+                </Button>
+                <Button
+                    color={Button.Colors.TRANSPARENT}
+                    look={Button.Looks.LINK}
+                    onClick={() => closeModal(modalKey)}
+                >
+                    Cancel
+                </Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
 }
 
 export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: Bookmarks, index: number, methods: UseBookmarkMethods; }) {
@@ -171,93 +179,95 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
     const bookmark = bookmarks[index];
     const isFolder = isBookmarkFolder(bookmark);
 
-    return <Menu.Menu
-        navId="channeltabs-bookmark-context"
-        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="ChannelTabs Bookmark Context Menu"
-    >
-        {bookmarkNotificationDot && !isFolder && <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="mark-as-read"
-                label={i18n.Messages.MARK_AS_READ}
-                disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
-                action={() => ackChannel(ChannelStore.getChannel(bookmark.channelId))}
-            />
-        </Menu.MenuGroup>}
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="edit-bookmark"
-                label="Edit Bookmark"
-                action={() => {
-                    const key = openModal(modalProps =>
-                        <EditModal
-                            modalProps={modalProps}
-                            modalKey={key}
-                            bookmark={bookmark}
-                            onSave={(name, color) => {
-                                methods.editBookmark(index, { name });
-                                if (color) methods.editBookmark(index, { iconColor: color });
-                                closeModal(key);
-                            }
-                            }
-                        />
-                    );
-                }}
-            />
-            <Menu.MenuItem
-                id="delete-bookmark"
-                label="Delete Bookmark"
-                action={() => {
-                    if (isFolder) {
+    return (
+        <Menu.Menu
+            navId="channeltabs-bookmark-context"
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label="ChannelTabs Bookmark Context Menu"
+        >
+            {bookmarkNotificationDot && !isFolder && <Menu.MenuGroup>
+                <Menu.MenuItem
+                    id="mark-as-read"
+                    label={i18n.Messages.MARK_AS_READ}
+                    disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
+                    action={() => ackChannel(ChannelStore.getChannel(bookmark.channelId))}
+                />
+            </Menu.MenuGroup>}
+            <Menu.MenuGroup>
+                <Menu.MenuItem
+                    id="edit-bookmark"
+                    label="Edit Bookmark"
+                    action={() => {
                         const key = openModal(modalProps =>
-                            <DeleteFolderConfirmationModal
+                            <EditModal
                                 modalProps={modalProps}
                                 modalKey={key}
-                                onConfirm={() => {
-                                    methods.deleteBookmark(index);
+                                bookmark={bookmark}
+                                onSave={(name, color) => {
+                                    methods.editBookmark(index, { name });
+                                    if (color) methods.editBookmark(index, { iconColor: color });
                                     closeModal(key);
-                                }}
-                            />);
-                    }
-                    else methods.deleteBookmark(index);
-                }}
-            />
-            <Menu.MenuItem
-                id="add-to-folder"
-                label="Add Bookmark to Folder"
-                disabled={isFolder}
-                action={() => {
-                    const key = openModal(modalProps =>
-                        <AddToFolderModal
-                            modalProps={modalProps}
-                            modalKey={key}
-                            bookmarks={bookmarks}
-                            onSave={index => {
-                                if (index === -1) {
-                                    const folderIndex = methods.addFolder();
-                                    methods.addBookmark(bookmark as Bookmark, folderIndex);
                                 }
-                                else methods.addBookmark(bookmark as Bookmark, index);
-                                methods.deleteBookmark(bookmarks.indexOf(bookmark));
-                                closeModal(key);
-                            }
-                            }
-                        />
-                    );
-                }}
-            />
-        </Menu.MenuGroup>
-        <Menu.MenuGroup>
-            <Menu.MenuCheckboxItem
-                checked={showBookmarkBar}
-                id="show-bookmark-bar"
-                label="Bookmark Bar"
-                action={() => {
-                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
-                }}
-            />
-        </Menu.MenuGroup>
-    </Menu.Menu>;
+                                }
+                            />
+                        );
+                    }}
+                />
+                <Menu.MenuItem
+                    id="delete-bookmark"
+                    label="Delete Bookmark"
+                    action={() => {
+                        if (isFolder) {
+                            const key = openModal(modalProps =>
+                                <DeleteFolderConfirmationModal
+                                    modalProps={modalProps}
+                                    modalKey={key}
+                                    onConfirm={() => {
+                                        methods.deleteBookmark(index);
+                                        closeModal(key);
+                                    }}
+                                />);
+                        }
+                        else methods.deleteBookmark(index);
+                    }}
+                />
+                <Menu.MenuItem
+                    id="add-to-folder"
+                    label="Add Bookmark to Folder"
+                    disabled={isFolder}
+                    action={() => {
+                        const key = openModal(modalProps =>
+                            <AddToFolderModal
+                                modalProps={modalProps}
+                                modalKey={key}
+                                bookmarks={bookmarks}
+                                onSave={index => {
+                                    if (index === -1) {
+                                        const folderIndex = methods.addFolder();
+                                        methods.addBookmark(bookmark as Bookmark, folderIndex);
+                                    }
+                                    else methods.addBookmark(bookmark as Bookmark, index);
+                                    methods.deleteBookmark(bookmarks.indexOf(bookmark));
+                                    closeModal(key);
+                                }
+                                }
+                            />
+                        );
+                    }}
+                />
+            </Menu.MenuGroup>
+            <Menu.MenuGroup>
+                <Menu.MenuCheckboxItem
+                    checked={showBookmarkBar}
+                    id="show-bookmark-bar"
+                    label="Bookmark Bar"
+                    action={() => {
+                        settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                    }}
+                />
+            </Menu.MenuGroup>
+        </Menu.Menu>
+    );
 }
 
 export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
@@ -265,63 +275,65 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
     const [compact, setCompact] = useState(tab.compact);
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
 
-    return <Menu.Menu
-        navId="channeltabs-tab-context"
-        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-        aria-label="ChannelTabs Tab Context Menu"
-    >
-        <Menu.MenuGroup>
-            {channel &&
-                <Menu.MenuItem
-                    id="mark-as-read"
-                    label={i18n.Messages.MARK_AS_READ}
-                    disabled={!ReadStateStore.hasUnread(channel.id)}
-                    action={() => ackChannel(channel)}
+    return (
+        <Menu.Menu
+            navId="channeltabs-tab-context"
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label="ChannelTabs Tab Context Menu"
+        >
+            <Menu.MenuGroup>
+                {channel &&
+                    <Menu.MenuItem
+                        id="mark-as-read"
+                        label={i18n.Messages.MARK_AS_READ}
+                        disabled={!ReadStateStore.hasUnread(channel.id)}
+                        action={() => ackChannel(channel)}
+                    />
+                }
+                <Menu.MenuCheckboxItem
+                    checked={compact}
+                    id="toggle-compact-tab"
+                    label="Compact"
+                    action={() => {
+                        setCompact(compact => !compact);
+                        toggleCompactTab(tab.id);
+                    }}
                 />
-            }
-            <Menu.MenuCheckboxItem
-                checked={compact}
-                id="toggle-compact-tab"
-                label="Compact"
-                action={() => {
-                    setCompact(compact => !compact);
-                    toggleCompactTab(tab.id);
-                }}
-            />
-        </Menu.MenuGroup>
-        {openedTabs.length !== 1 && <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="close-tab"
-                label="Close Tab"
-                action={() => closeTab(tab.id)}
-            />
-            <Menu.MenuItem
-                id="close-other-tabs"
-                label="Close Other Tabs"
-                action={() => closeOtherTabs(tab.id)}
-            />
-            <Menu.MenuItem
-                id="close-right-tabs"
-                label="Close Tabs to the Right"
-                disabled={openedTabs.indexOf(tab) === openedTabs.length - 1}
-                action={() => closeTabsToTheRight(tab.id)}
-            />
-            <Menu.MenuItem
-                id="reopen-closed-tab"
-                label="Reopen Closed Tab"
-                disabled={!hasClosedTabs()}
-                action={() => reopenClosedTab()}
-            />
-        </Menu.MenuGroup>}
-        <Menu.MenuGroup>
-            <Menu.MenuCheckboxItem
-                checked={showBookmarkBar}
-                id="show-bookmark-bar"
-                label="Bookmark Bar"
-                action={() => {
-                    settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
-                }}
-            />
-        </Menu.MenuGroup>
-    </Menu.Menu>;
+            </Menu.MenuGroup>
+            {openedTabs.length !== 1 && <Menu.MenuGroup>
+                <Menu.MenuItem
+                    id="close-tab"
+                    label="Close Tab"
+                    action={() => closeTab(tab.id)}
+                />
+                <Menu.MenuItem
+                    id="close-other-tabs"
+                    label="Close Other Tabs"
+                    action={() => closeOtherTabs(tab.id)}
+                />
+                <Menu.MenuItem
+                    id="close-right-tabs"
+                    label="Close Tabs to the Right"
+                    disabled={openedTabs.indexOf(tab) === openedTabs.length - 1}
+                    action={() => closeTabsToTheRight(tab.id)}
+                />
+                <Menu.MenuItem
+                    id="reopen-closed-tab"
+                    label="Reopen Closed Tab"
+                    disabled={!hasClosedTabs()}
+                    action={() => reopenClosedTab()}
+                />
+            </Menu.MenuGroup>}
+            <Menu.MenuGroup>
+                <Menu.MenuCheckboxItem
+                    checked={showBookmarkBar}
+                    id="show-bookmark-bar"
+                    label="Bookmark Bar"
+                    action={() => {
+                        settings.store.showBookmarkBar = !settings.store.showBookmarkBar;
+                    }}
+                />
+            </Menu.MenuGroup>
+        </Menu.Menu>
+    );
 }

@@ -91,7 +91,7 @@ export default definePlugin({
                 replace: "$&;$1.maxHeight-=$self.containerHeight"
             }
         },
-        // scuffed workaround for discord shitcode, see comments in ChannelTabContainer.tsx
+        // workaround for app directory killing our component, see comments in ChannelTabContainer.tsx
         {
             find: ".ApplicationDirectoryEntrypointNames.EXTERNAL",
             replacement: {
@@ -119,12 +119,14 @@ export default definePlugin({
         currentChannel: BasicChannelTabsProps,
         children: JSX.Element;
     }) {
-        return <>
-            <ErrorBoundary>
-                <ChannelsTabsContainer {...currentChannel} />
-            </ErrorBoundary>
-            {children}
-        </>;
+        return (
+            <>
+                <ErrorBoundary>
+                    <ChannelsTabsContainer {...currentChannel} />
+                </ErrorBoundary>
+                {children}
+            </>
+        );
     },
 
     open(message: Message) {

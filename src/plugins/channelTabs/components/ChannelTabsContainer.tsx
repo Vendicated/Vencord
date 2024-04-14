@@ -80,52 +80,54 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     handleChannelSwitch(props);
     saveTabs(userId);
 
-    return <div
-        className={cl("container")}
-        ref={ref}
-        onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
-    >
-        <div className={cl("tab-container")}>
-            {openedTabs.map((tab, i) => <div
-                className={cl("tab", { "tab-compact": tab.compact, "tab-selected": isTabSelected(tab.id) })}
-                key={i}
-                onAuxClick={e => {
-                    if (e.button === 1 /* middle click */)
-                        closeTab(tab.id);
-                }}
-                onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={tab} />)}
-            >
-                <button
-                    className={cl("button", "channel-info")}
-                    onClick={() => moveToTab(tab.id)}
+    return (
+        <div
+            className={cl("container")}
+            ref={ref}
+            onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
+        >
+            <div className={cl("tab-container")}>
+                {openedTabs.map((tab, i) => <div
+                    className={cl("tab", { "tab-compact": tab.compact, "tab-selected": isTabSelected(tab.id) })}
+                    key={i}
+                    onAuxClick={e => {
+                        if (e.button === 1 /* middle click */)
+                            closeTab(tab.id);
+                    }}
+                    onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={tab} />)}
                 >
-                    <ChannelTab {...tab} index={i} />
+                    <button
+                        className={cl("button", "channel-info")}
+                        onClick={() => moveToTab(tab.id)}
+                    >
+                        <ChannelTab {...tab} index={i} />
+                    </button>
+
+                    {openedTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                        className={cl("button", "close-button", { "close-button-compact": tab.compact, "hoverable": !tab.compact })}
+                        onClick={() => closeTab(tab.id)}
+                    >
+                        <XIcon height={16} width={16} />
+                    </button>}
+                </div>)
+                }
+
+                <button
+                    onClick={() => createTab(props, true)}
+                    className={cl("button", "new-button", "hoverable")}
+                >
+                    <PlusSmallIcon height={20} width={20} />
                 </button>
 
-                {openedTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
-                    className={cl("button", "close-button", { "close-button-compact": tab.compact, "hoverable": !tab.compact })}
-                    onClick={() => closeTab(tab.id)}
-                >
-                    <XIcon height={16} width={16} />
-                </button>}
-            </div>)
-            }
+                {GhostTabs}
+            </div >
+            {showBookmarkBar && <>
+                <div className={cl("separator")} />
+                <BookmarkContainer {...props} userId={userId} />
+            </>}
 
-            <button
-                onClick={() => createTab(props, true)}
-                className={cl("button", "new-button", "hoverable")}
-            >
-                <PlusSmallIcon height={20} width={20} />
-            </button>
-
-            {GhostTabs}
-        </div >
-        {showBookmarkBar && <>
-            <div className={cl("separator")} />
-            <BookmarkContainer {...props} userId={userId} />
-        </>}
-
-    </div>;
+        </div>
+    );
 }
 
 export function ChannelTabsPreview(p) {
@@ -138,20 +140,22 @@ export function ChannelTabsPreview(p) {
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
 
-    return <>
-        <Forms.FormTitle>Startup tabs</Forms.FormTitle>
-        <Flex flexDirection="row" style={{ gap: "2px" }}>
-            {currentTabs.map(t => <>
-                <PreviewTab {...t} />
-            </>)}
-        </Flex>
-        <Flex flexDirection="row-reverse">
-            <Button
-                onClick={() => {
-                    setCurrentTabs([...openedTabs]);
-                    setValue({ ...tabSet, [id]: [...openedTabs] });
-                }}
-            >Set to currently open tabs</Button>
-        </Flex>
-    </>;
+    return (
+        <>
+            <Forms.FormTitle>Startup tabs</Forms.FormTitle>
+            <Flex flexDirection="row" style={{ gap: "2px" }}>
+                {currentTabs.map(t => <>
+                    <PreviewTab {...t} />
+                </>)}
+            </Flex>
+            <Flex flexDirection="row-reverse">
+                <Button
+                    onClick={() => {
+                        setCurrentTabs([...openedTabs]);
+                        setValue({ ...tabSet, [id]: [...openedTabs] });
+                    }}
+                >Set to currently open tabs</Button>
+            </Flex>
+        </>
+    );
 }

@@ -104,12 +104,14 @@ function ChannelTabContent(props: ChannelTabsProps & {
 
     if (guild) {
         if (channel)
-            return <>
-                <GuildIcon guild={guild} />
-                {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
-                <NotificationDot channelIds={[channel.id]} />
-                <TypingIndicator isTyping={isTyping} />
-            </>;
+            return (
+                <>
+                    <GuildIcon guild={guild} />
+                    {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
+                    <NotificationDot channelIds={[channel.id]} />
+                    <TypingIndicator isTyping={isTyping} />
+                </>
+            );
         else {
             let name = `${i18n.Messages.UNKNOWN_CHANNEL} (${channelId})`;
             switch (channelId) {
@@ -129,10 +131,12 @@ function ChannelTabContent(props: ChannelTabsProps & {
                     name = i18n.Messages.SERVER_GUIDE;
                     break;
             }
-            return <>
-                <GuildIcon guild={guild} />
-                {!compact && <Text className={cl("name-text")}>{name}</Text>}
-            </>;
+            return (
+                <>
+                    <GuildIcon guild={guild} />
+                    {!compact && <Text className={cl("name-text")}>{name}</Text>}
+                </>
+            );
         }
     }
 
@@ -143,40 +147,48 @@ function ChannelTabContent(props: ChannelTabsProps & {
                 ? user.globalName || user.username
                 : getUniqueUsername(user);
 
-            return <>
-                <Avatar
-                    size="SIZE_24"
-                    src={user.getAvatarURL(guildId, 128)}
-                    status={showStatusIndicators ? status : undefined}
-                    isTyping={isTyping}
-                    isMobile={isMobile}
-                />
-                {!compact && <Text className={cl("name-text")} data-pomelo={user.isPomelo()}>
-                    {username}
-                </Text>}
-                <NotificationDot channelIds={[channel.id]} />
-                {!showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
-            </>;
+            return (
+                <>
+                    <Avatar
+                        size="SIZE_24"
+                        src={user.getAvatarURL(guildId, 128)}
+                        status={showStatusIndicators ? status : undefined}
+                        isTyping={isTyping}
+                        isMobile={isMobile}
+                    />
+                    {!compact && <Text className={cl("name-text")} data-pomelo={user.isPomelo()}>
+                        {username}
+                    </Text>}
+                    <NotificationDot channelIds={[channel.id]} />
+                    {!showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
+                </>
+            );
         } else { // Group DM
-            return <>
-                <ChannelIcon channel={channel} />
-                {!compact && <Text className={cl("name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
-                <NotificationDot channelIds={[channel.id]} />
-                <TypingIndicator isTyping={isTyping} />
-            </>;
+            return (
+                <>
+                    <ChannelIcon channel={channel} />
+                    {!compact && <Text className={cl("name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
+                    <NotificationDot channelIds={[channel.id]} />
+                    <TypingIndicator isTyping={isTyping} />
+                </>
+            );
         }
     }
 
     if (guildId === "@me" || guildId === undefined)
-        return <>
-            <FriendsIcon />
-            {!compact && <Text className={cl("name-text")}>{i18n.Messages.FRIENDS}</Text>}
-        </>;
+        return (
+            <>
+                <FriendsIcon />
+                {!compact && <Text className={cl("name-text")}>{i18n.Messages.FRIENDS}</Text>}
+            </>
+        );
 
-    return <>
-        <CircleQuestionIcon />
-        {!compact && <Text className={cl("name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
-    </>;
+    return (
+        <>
+            <CircleQuestionIcon />
+            {!compact && <Text className={cl("name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
+        </>
+    );
 }
 
 export default function ChannelTab(props: ChannelTabsProps & { index: number; }) {
@@ -221,21 +233,24 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }), []);
     drag(drop(ref));
 
-    const tab = <div
-        ref={ref}
-        className={cl("tab-inner")}
-        data-compact={props.compact}
-    >
-        <ChannelTabContent {...props} guild={guild} channel={channel as any} />
-    </div>;
-    return tab;
+    return (
+        <div
+            ref={ref}
+            className={cl("tab-inner")}
+            data-compact={props.compact}
+        >
+            <ChannelTabContent {...props} guild={guild} channel={channel as any} />
+        </div>
+    );
 }
 
 export const PreviewTab = (props: ChannelTabsProps) => {
     const guild = GuildStore.getGuild(props.guildId);
     const channel = ChannelStore.getChannel(props.channelId);
 
-    return <div className={classes(cl("preview-tab"), props.compact ? cl("preview-tab-compact") : null)}>
-        <ChannelTabContent {...props} guild={guild} channel={channel as any} />
-    </div>;
+    return (
+        <div className={classes(cl("preview-tab"), props.compact ? cl("preview-tab-compact") : null)}>
+            <ChannelTabContent {...props} guild={guild} channel={channel as any} />
+        </div>
+    );
 };
