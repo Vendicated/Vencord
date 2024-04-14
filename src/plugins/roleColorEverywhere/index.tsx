@@ -54,7 +54,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
+                    replace: "$&,color:#fff; background-color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -65,7 +65,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
-                    replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
+                    replace: "$&color: #fff, background-color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
@@ -118,7 +118,8 @@ export default definePlugin({
 
         return (
             <span style={{
-                color: role?.colorString,
+                backgroundColor: role?.colorString,
+                color: "#FFF",
                 fontWeight: "unset",
                 letterSpacing: ".05em"
             }}>
@@ -129,8 +130,12 @@ export default definePlugin({
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {
+            // style: {
+            //     color: this.getColor(userId, { guildId })
+            // }
             style: {
-                color: this.getColor(userId, { guildId })
+                "background-color": this.getColor(userId, { guildId }),
+                color: "#FFF"
             }
         };
     }
