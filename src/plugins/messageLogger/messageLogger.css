@@ -1,7 +1,3 @@
-.messagelogger-deleted [class^="buttons"] {
-    display: none;
-}
-
 .messagelogger-deleted
 :is(
     video,
