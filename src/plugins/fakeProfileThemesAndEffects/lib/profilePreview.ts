@@ -14,11 +14,11 @@ function updatePreview() {
 
 let primaryColor: number | null = null;
 export function usePrimaryColor(initialState: typeof primaryColor) {
-    const temp = useState(() => primaryColor = initialState);
+    const [state, setState] = useState(() => primaryColor = initialState);
     return [
-        temp[0],
+        state,
         (color: typeof primaryColor) => {
-            temp[1](primaryColor = color);
+            setState(primaryColor = color);
             if (showPreview) updatePreview();
         }
     ] as const;
@@ -26,11 +26,11 @@ export function usePrimaryColor(initialState: typeof primaryColor) {
 
 let accentColor: number | null = null;
 export function useAccentColor(initialState: typeof accentColor) {
-    const temp = useState(() => accentColor = initialState);
+    const [state, setState] = useState(() => accentColor = initialState);
     return [
-        temp[0],
+        state,
         (color: typeof accentColor) => {
-            temp[1](accentColor = color);
+            setState(accentColor = color);
             if (showPreview) updatePreview();
         }
     ] as const;
@@ -38,11 +38,11 @@ export function useAccentColor(initialState: typeof accentColor) {
 
 let profileEffect: ProfileEffectConfig | null = null;
 export function useProfileEffect(initialState: typeof profileEffect) {
-    const temp = useState(() => profileEffect = initialState);
+    const [state, setState] = useState(() => profileEffect = initialState);
     return [
-        temp[0],
+        state,
         (effect: typeof profileEffect) => {
-            temp[1](profileEffect = effect);
+            setState(profileEffect = effect);
             if (showPreview) updatePreview();
         }
     ] as const;
@@ -50,11 +50,11 @@ export function useProfileEffect(initialState: typeof profileEffect) {
 
 let showPreview = true;
 export function useShowPreview(initialState: typeof showPreview) {
-    const temp = useState(() => showPreview = initialState);
+    const [state, setState] = useState(() => showPreview = initialState);
     return [
-        temp[0],
+        state,
         (preview: typeof showPreview) => {
-            temp[1](showPreview = preview);
+            setState(showPreview = preview);
             updatePreview();
         }
     ] as const;

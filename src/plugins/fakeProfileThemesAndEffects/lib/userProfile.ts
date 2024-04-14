@@ -11,7 +11,7 @@ export interface UserProfile {
     bio: string;
     premiumType: number | null | undefined;
     profileEffectId: string | undefined;
-    themeColors: [number, number] | undefined;
+    themeColors: [primaryColor: number, accentColor: number] | undefined;
 }
 
 function updateUserThemeColors(user: UserProfile, primary: number, accent: number) {

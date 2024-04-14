@@ -21,7 +21,7 @@ export function encodeColorsLegacy(primary: number, accent: number) {
  * @param str The legacy-format string to extract profile theme colors from
  * @returns The profile theme colors. Colors will be -1 if not found.
  */
-export function decodeColorsLegacy(str: string): [number, number] {
+export function decodeColorsLegacy(str: string): [primaryColor: number, accentColor: number] {
     const colors = str.matchAll(/(?<=#)[\dA-Fa-f]{1,6}/g);
     return [parseInt(colors.next().value?.[0], 16) || -1, parseInt(colors.next().value?.[0], 16) || -1];
 }
