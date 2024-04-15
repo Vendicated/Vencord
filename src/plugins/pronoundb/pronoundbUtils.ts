@@ -142,9 +142,8 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
         console.error("PronounDB fetching failed: ", e);
-        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: { en: ["unspecified"] } }] as const));
+        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: { en: ["unspecified"] } }])) as PronounsResponse;
         Object.assign(cache, dummyPronouns);
-        // @ts-ignore
         return dummyPronouns;
     }
 }
