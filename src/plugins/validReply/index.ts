@@ -60,8 +60,7 @@ export default definePlugin({
             const reply:Message|undefined = res?.body?.[0];
             if (!reply) return;
             if (reply.id!==message) {
-                const dummy = { id: message, channel_id: channel, deleted: true };
-                ReplyStore.set(dummy.channel_id, dummy.id, {
+                ReplyStore.set(channel, message, {
                     state: 2
                 });
                 FluxDispatcher.dispatch({
