@@ -58,7 +58,19 @@ export default definePlugin({
             retries: 2
         }).then(res => {
             const reply:Message|undefined = res?.body?.[0];
-            if (!reply || reply.id!==message) return;
+            if (!reply) return;
+            if (reply.id!==message) {
+                const dummy = { id: message, channel_id: channel, deleted: true };
+                ReplyStore.set(dummy.channel_id, dummy.id, {
+                    state: 2
+                });
+                FluxDispatcher.dispatch({
+                    type: "MESSAGE_DELETE",
+                    channelId: channel,
+                    message
+                });
+                return;
+            }
             ReplyStore.set(reply.channel_id, reply.id, {
                 state: 0,
                 message: MessageRecords.createMessageRecord(reply)
