@@ -51,3 +51,9 @@
     flex-direction: column;
     color: var(--text-muted);
 }
+
+.vc-mla-activity-time-bar {
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}

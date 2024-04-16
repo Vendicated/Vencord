@@ -47,6 +47,11 @@ const settings = definePluginSettings({
     },
 });
 
+interface Timestamp {
+    start?: number;
+    end?: number;
+}
+
 interface Activity {
     created_at: number;
     id: string;
@@ -68,6 +73,7 @@ interface Activity {
         small_text?: string;
         small_image?: string;
     };
+    timestamps?: Timestamp;
     platform?: string;
 }
 
@@ -121,6 +127,13 @@ const { fetchApplication }: {
     fetchApplication: (id: string) => Promise<Application | null>;
 } = findByPropsLazy("fetchApplication");
 
+const TimeBar: React.ComponentType<React.PropsWithChildren<{
+    start: number;
+    end: number;
+    themed: boolean;
+    className: string;
+}>> = findComponentByCodeLazy("isSingleLine");
+
 // if discord one day decides changes their icon this needs to be updated
 const DefaultActivityIcon = findComponentByCodeLazy("M6,7 L2,7 L2,6 L6,6 L6,7 Z M8,5 L2,5 L2,4 L8,4 L8,5 Z M8,3 L2,3 L2,2 L8,2 L8,3 Z M8.88888889,0 L1.11111111,0 C0.494444444,0 0,0.494444444 0,1.11111111 L0,8.88888889 C0,9.50253861 0.497461389,10 1.11111111,10 L8.88888889,10 C9.50253861,10 10,9.50253861 10,8.88888889 L10,1.11111111 C10,0.494444444 9.5,0 8.88888889,0 Z");
 
@@ -141,6 +154,13 @@ function getActivityImage(activity: Activity): string | undefined {
     // TODO: we could support other assets here
 }
 
+function getValidTimestamps(activity: Activity): Required<Timestamp> | null {
+    if (activity.timestamps?.start !== undefined && activity.timestamps?.end !== undefined) {
+        return activity.timestamps as Required<Timestamp>;
+    }
+    return null;
+}
+
 const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
     const image = useMemo(() => {
         const activityImage = getActivityImage(activity);
@@ -150,6 +170,7 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
         const icon = getApplicationIcons([activity], true)[0];
         return icon?.image.src;
     }, [activity]);
+    const timestamps = useMemo(() => getValidTimestamps(activity), [activity]);
 
     const hasDetails = activity.details ?? activity.state;
     return (
@@ -162,6 +183,7 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
                     <div>{activity.details}</div>
                     <div>{activity.state}</div>
                 </div>
+                {timestamps && <TimeBar start={timestamps.start} end={timestamps.end} themed={false} className={cl("activity-time-bar")}/>}
             </div>
         </ErrorBoundary>
     );
