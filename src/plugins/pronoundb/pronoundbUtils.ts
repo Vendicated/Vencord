@@ -150,7 +150,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
 
 export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
     if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
-    // PronounDB returns an empty set instead of {sets: {["unspecified"]}}.
+    // PronounDB returns an empty set instead of {sets: {en: ["unspecified"]}}.
     const pronouns = pronounSet.en;
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
 
