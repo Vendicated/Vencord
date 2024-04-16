@@ -27,14 +27,14 @@ export interface UserProfilePronounsProps {
 
 export interface PronounsResponse {
     [id: string]: {
-        sets: {
+        sets?: {
             [locale: string]: PronounCode[];
         }
     }
 }
 
 export interface CachePronouns {
-    sets: {
+    sets?: {
         [locale: string]: PronounCode[];
     }
 }

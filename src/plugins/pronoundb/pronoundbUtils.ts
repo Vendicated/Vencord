@@ -142,14 +142,14 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
         console.error("PronounDB fetching failed: ", e);
-        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: { en: ["unspecified"] } }])) as PronounsResponse;
+        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: {} }]));
         Object.assign(cache, dummyPronouns);
         return dummyPronouns;
     }
 }
 
-export function extractPronouns(pronounSet: { [locale: string]: PronounCode[] }): string {
-    if (!pronounSet || !pronounSet?.en) return PronounMapping.unspecified;
+export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
+    if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
     // for some reason pronounDB returns empty sets sometimes instead of nothing?
     const pronouns = pronounSet.en;
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
