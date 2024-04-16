@@ -342,7 +342,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(className:\i,item:\i),/,
-                    replace: "$1,item: {deleted},"
+                    replace: "$1,item: deleted,"
                 },
                 {
                     match: /\[\i\.obscured\]:.+?,/,
