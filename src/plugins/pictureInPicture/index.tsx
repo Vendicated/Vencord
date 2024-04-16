@@ -28,9 +28,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".nonMediaMosaicItem]",
+            find: ".nonMediaAttachment]",
             replacement: {
-                match: /\.nonMediaMosaicItem\]:!(\i).{0,10}children:\[(\S)/,
+                match: /\.nonMediaAttachment\]:!(\i).{0,10}children:\[(\S)/,
                 replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
