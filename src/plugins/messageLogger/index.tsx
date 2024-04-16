@@ -337,12 +337,12 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: ".removeAttachmentHoverButton",
+            find: ".removeMosaicItemHoverButton",
             group: true,
             replacement: [
                 {
-                    match: /(className:\i,attachment:\i),/,
-                    replace: "$1,attachment: {deleted},"
+                    match: /(className:\i,item:\i),/,
+                    replace: "$1,item: deleted,"
                 },
                 {
                     match: /\[\i\.obscured\]:.+?,/,
