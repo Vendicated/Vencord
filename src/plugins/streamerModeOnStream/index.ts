@@ -44,7 +44,7 @@ export default definePlugin({
     flux: {
         async STREAM_CREATE() {
             startStreamerMode();
-        }
+        },
 
         async STREAM_DELETE() {
             stopStreamerMode();
