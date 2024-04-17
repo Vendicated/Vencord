@@ -27,7 +27,6 @@ import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, Select
 
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-const Colors = findByPropsLazy("profileColors");
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -406,7 +405,7 @@ export default definePlugin({
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
-                <div style={{ width: "284px" }} className={Colors.profileColors}>
+                <div style={{ width: "284px" }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}
