@@ -21,7 +21,7 @@ import { useAwaiter } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
@@ -37,8 +37,7 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const FileInput: FileInput = findByCodeLazy("activateUploadDialogue=");
-
+const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 const cl = classNameFactory("vc-settings-theme-");
 
 interface ThemeCardProps {
