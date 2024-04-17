@@ -428,9 +428,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Kodarru: {
         name: "Kodarru",
-        id: 785227396218748949n,
+        id: 785227396218748949n
     },
-        nakoyasha: {
+    nakoyasha: {
         name: "nakoyasha",
         id: 222069018507345921n
     },
