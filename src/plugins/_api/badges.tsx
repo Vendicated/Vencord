@@ -41,7 +41,7 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => isPluginDev(user.id),
-    link: "https://github.com/sponsors/vendicated"
+    link: "https://github.com/Vendicated/Vencord"
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
@@ -134,7 +134,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://patreon.com/equicord");
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
