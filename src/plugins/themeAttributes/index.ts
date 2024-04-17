@@ -13,6 +13,7 @@ export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
     authors: [Devs.Ven],
+    required: true,
 
     patches: [
         // Add data-tab-id to all tab bar items

@@ -1,0 +1,80 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable alpha-value-notation */
+/* stylelint-disable rule-empty-line-before */
+/* stylelint-disable indentation */
+/* stylelint-disable selector-class-pattern */
+#authorized-apps-tab .deleteApp_b3a490 {
+    opacity: 1;
+    border: none;
+    background-color: var(--button-danger-background);
+    transition: background-color .17s ease,color .17s ease;
+  }
+  #authorized-apps-tab .deleteApp_b3a490:hover {
+    background-color: var(--button-danger-background-hover);
+  }
+  #authorized-apps-tab .children_aba8cb {
+    counter-reset: section -1;
+    position: relative;
+  }
+  #authorized-apps-tab .children_aba8cb > .authedApp__71a52 {
+    counter-increment: section;
+  }
+  #authorized-apps-tab .children_aba8cb::after {
+    counter-increment: section;
+    content: "Authorized Apps: "counter(section);
+    order: -1;
+    position: absolute;
+    color: var(--header-primary);
+    top: -44px;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+  }
+  #authorized-apps-tab .children_aba8cb .flexChild__3da10 > h3 {
+    display: flex;
+  }
+  #authorized-apps-tab .sectionTitle__3e02b {
+    opacity: 0;
+  }
+  #authorized-apps-tab .appAvatar__1fa87 {
+    width: 46px;
+    height: 46px;
+    background-color: var(--background-floating);
+    box-shadow: 0 0 0 5px var(--background-floating);
+  }
+  #authorized-apps-tab .headerInfo__7273f {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: -50px;
+  }
+  #authorized-apps-tab .headerInfo__7273f > h4 {
+    margin-left: 0;
+    font-size: 20px;
+  }
+  #authorized-apps-tab .authedApp__71a52:not(:nth-child(2)) {
+    margin-top: 40px;
+  }
+  #authorized-apps-tab .permission__8fb49 {
+    border-bottom: 1px solid hsl(var(--primary-300-hsl)/.3);
+    padding: 6px;
+    height: fit-content;
+    transition: .05s;
+  }
+  #authorized-apps-tab .permission__8fb49:hover {
+    border-color: var(--primary-300);
+  }
+  #authorized-apps-tab .authedApp__71a52 {
+    background-color: var(--background-secondary-alt);
+    transition: box-shadow .2s ease-out,transform .2s ease-out,background .2s ease-out,opacity .2s ease-in,-webkit-box-shadow .2s ease-out,-webkit-transform .2s ease-out;
+    border: none;
+    border-radius: 8px;
+  }
+  #authorized-apps-tab .authedApp__71a52:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+  }
+  #authorized-apps-tab .authedApp__71a52:hover .appAvatar__1fa87 {
+    box-shadow: 0 0 0 5px var(--background-floating),var(--elevation-high);
+  }

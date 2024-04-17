@@ -69,7 +69,6 @@ export const settings = definePluginSettings({
                 >
                     Support ReviewDB development
                 </Button>
-
                 <Button onClick={async () => {
                     let url = "https://reviewdb.mantikafasi.dev";
                     const token = await getToken();

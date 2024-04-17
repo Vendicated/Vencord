@@ -25,7 +25,7 @@ import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
-import { getThemeInfo } from "../src/main/themes";
+import { getThemeInfo } from "../src/utils/themes/bd";
 import { Settings } from "../src/Vencord";
 
 // Discord deletes this so need to store in variable
@@ -47,7 +47,7 @@ window.VencordNative = {
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
         getThemesDir: async () => "",
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
-            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
+            entries.map(([name, css]) => ({ fileName: name as string, content: css }))
         ),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
@@ -59,7 +59,7 @@ window.VencordNative = {
     },
 
     updater: {
-        getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
+        getRepo: async () => ({ ok: true, value: "https://github.com/Equicord/Equicord" }),
         getUpdates: async () => ({ ok: true, value: [] }),
         update: async () => ({ ok: true, value: false }),
         rebuild: async () => ({ ok: true, value: true }),

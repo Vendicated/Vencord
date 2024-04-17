@@ -1,32 +1,82 @@
 name: test
 on:
-    push:
-    pull_request:
-        branches:
-            - main
-            - dev
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-    test:
-        runs-on: ubuntu-latest
+  DetermineRunner:
+    name: Determine Runner
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.set-runner.outputs.runner }}
+    steps:
+      - name: Determine which runner to use
+        id: set-runner
+        uses: benjaminmichaelis/get-soonest-available-runner@v1.1.0
+        with:
+          primary-runner: "self-hosted"
+          fallback-runner: "ubuntu-latest"
+          min-available-runners: 1
+          github-token: ${{ env.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
-        steps:
-            - uses: actions/checkout@v3
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+  Test:
+    name: Test For Pushes
+    needs: DetermineRunner
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ${{ needs.DetermineRunner.outputs.runner}}
 
-            - name: Use Node.js 18
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-                  cache: "pnpm"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
 
-            - name: Lint & Test if desktop version compiles
-              run: pnpm test
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Test if web version compiles
-              run: pnpm buildWeb
+      - name: Lint & Test if desktop version compiles
+        run: pnpm test
 
-            - name: Test if plugin structure is valid
-              run: pnpm generatePluginJson
+      - name: Test if web version compiles
+        run: pnpm buildWeb
+
+      - name: Test if plugin structure is valid
+        run: pnpm generatePluginJson
+
+  TestForPRs:
+    name: Test For Pull Requests
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & Test if desktop version compiles
+        run: pnpm test
+
+      - name: Test if web version compiles
+        run: pnpm buildWeb
+
+      - name: Test if plugin structure is valid
+        run: pnpm generatePluginJson

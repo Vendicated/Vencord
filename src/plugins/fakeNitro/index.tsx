@@ -405,17 +405,19 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        return (UserStore.getCurrentUser().premiumType ?? 0) > 0;
+        // @ts-ignore
+        return (UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser().premiumType ?? 0) > 0;
     },
 
     get canUseStickers() {
-        return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+        // @ts-ignore
+        return (UserStore?.getCurrentUser()?._realPremiumType ?? UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
     handleProtoChange(proto: any, user: any) {
         if (proto == null || typeof proto === "string" || !UserSettingsProtoStore || !PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators) return;
-
-        const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+        // @ts-ignore
+        const premiumType: number = user?._realPremiumType ?? user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
         if (premiumType !== 2) {
             proto.appearance ??= AppearanceSettingsActionCreators.create();
@@ -442,7 +444,8 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
-        const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
+        // @ts-ignore
+        const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
         if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !ProtoUtils) return;
@@ -893,6 +896,7 @@ export default definePlugin({
             }
 
             if (s.enableEmojiBypass) {
+
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (this.canUseEmote(emoji, channelId)) continue;
 

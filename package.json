@@ -2,17 +2,22 @@
     "name": "vencord",
     "private": "true",
     "version": "1.7.7",
-    "description": "The cutest Discord client mod",
-    "homepage": "https://github.com/Vendicated/Vencord#readme",
+    "description": "The cutest Discord client mod with extras",
+    "homepage": "https://github.com/Equicord/Equicord#readme",
     "bugs": {
-        "url": "https://github.com/Vendicated/Vencord/issues"
+        "url": "https://github.com/Equicord/Equicord/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Vendicated/Vencord.git"
+        "url": "git+https://github.com/Equicord/Equicord.git"
     },
     "license": "GPL-3.0-or-later",
     "author": "Vendicated",
+    "contributors": [
+        "Equicord",
+        "Thororen1234",
+        "Yeetov"
+    ],
     "directories": {
         "doc": "docs"
     },
@@ -24,7 +29,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
+        "test": "pnpm build && pnpm lint:fix && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
         "testTsc": "tsc --noEmit",
         "uninject": "node scripts/runInstaller.mjs",
@@ -32,16 +37,21 @@
     },
     "dependencies": {
         "@sapphi-red/web-noise-suppressor": "0.3.3",
+        "@types/less": "^3.0.6",
+        "@types/stylus": "^0.48.42",
+        "@types/tinycolor2": "^1.4.6",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
-        "eslint-plugin-simple-header": "^1.0.2",
+        "axios": "^1.6.8",
         "fflate": "^0.7.4",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "monaco-editor": "^0.43.0",
         "nanoid": "^4.0.2",
+        "usercss-meta": "^0.12.0",
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
+        "@react-spring/web": "^9.7.3",
         "@types/chrome": "^0.0.246",
         "@types/diff": "^5.0.3",
         "@types/lodash": "^4.14.194",
@@ -56,7 +66,7 @@
         "esbuild": "^0.15.18",
         "eslint": "^8.46.0",
         "eslint-import-resolver-alias": "^1.1.2",
-        "eslint-plugin-path-alias": "^1.0.0",
+        "eslint-plugin-simple-header": "^1.0.2",
         "eslint-plugin-simple-import-sort": "^10.0.0",
         "eslint-plugin-unused-imports": "^2.0.0",
         "highlight.js": "10.6.0",
@@ -74,8 +84,8 @@
     "packageManager": "pnpm@8.10.2",
     "pnpm": {
         "patchedDependencies": {
-            "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
-            "eslint@8.46.0": "patches/eslint@8.46.0.patch"
+            "eslint@8.46.0": "patches/eslint@8.46.0.patch",
+            "@types/less@3.0.6": "patches/@types__less@3.0.6.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [

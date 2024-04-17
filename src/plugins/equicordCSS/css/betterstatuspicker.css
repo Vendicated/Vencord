@@ -1,0 +1,56 @@
+/* stylelint-disable length-zero-no-unit */
+/* stylelint-disable selector-class-pattern */
+/* stylelint-disable rule-empty-line-before */
+/* stylelint-disable selector-id-pattern */
+#account-status-picker--online {
+    --brand-experiment-560: var(--green-360);
+}
+#account-status-picker--dnd {
+    --brand-experiment-560: var(--red-400);
+}
+#account-status-picker--idle {
+    --brand-experiment-560: var(--yellow-330);
+}
+#account-status-picker--invisible {
+    --brand-experiment-560: var(--primary-400);
+}
+#account .submenu_aed9ee .separator__174fc {
+    display: none;
+}
+#account .submenu_aed9ee .description_d1e167 {
+    height: fit-content;
+    overflow: hidden;
+    max-height: 0rem;
+    transition: .2s ease !important;
+    width: 100%;
+    flex: 0 0 100%;
+    display: flex;
+}
+#account .submenu_aed9ee .item__183e8.focused_dcafb9 .description_d1e167 {
+    max-height: 4rem;
+}
+.statusItem__24445 {
+    display: flex;
+    flex-wrap: wrap;
+}
+.statusItem__24445 .icon__1d1c6 {
+    margin-right: 10px;
+    flex: 0 0 10px;
+}
+.status__8c19b {
+    width: calc(100% - 20px);
+    display: flex;
+}
+#account-status-picker--idle .statusItem__24445::after {
+    content: "Active but idle/away.";
+    height: fit-content;
+    overflow: hidden;
+    max-height: 0rem;
+    transition: .2s ease !important;
+    width: 100%;
+    flex: 0 0 100%;
+    display: flex;
+}
+#account-status-picker--idle.focused_dcafb9 .statusItem__24445::after {
+    max-height: 4rem;
+}

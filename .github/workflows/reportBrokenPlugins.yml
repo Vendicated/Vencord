@@ -1,64 +1,63 @@
 name: Test Patches
 on:
-    workflow_dispatch:
-    schedule:
-        # Every day at midnight
-        - cron: 0 0 * * *
+  workflow_dispatch:
+  schedule:
+    # Every day at midnight
+    - cron: 0 0 * * *
 
 jobs:
-    TestPlugins:
-        if: github.repository == 'Vendicated/Vencord'
-        runs-on: ubuntu-latest
+  TestPlugins:
+    name: Test Patches
+    if: github.repository == 'Equicord/Equicord'
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v3
-              if: ${{ github.event_name == 'schedule' }}
-              with:
-                  ref: dev
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ github.event_name == 'schedule' }}
 
-            - uses: actions/checkout@v3
-              if: ${{ github.event_name == 'workflow_dispatch' }}
+      - uses: actions/checkout@v4
+        if: ${{ github.event_name == 'workflow_dispatch' }}
 
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+      - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-            - name: Use Node.js 19
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 19
-                  cache: "pnpm"
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
 
-            - name: Install dependencies
-              run: |
-                  pnpm install --frozen-lockfile
-                  pnpm add puppeteer
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm add puppeteer
 
-                  sudo apt-get install -y chromium-browser
+          sudo apt-get install -y chromium-browser
 
-            - name: Build web
-              run: pnpm buildWeb --standalone --dev
+      - name: Build web
+        run: pnpm buildWeb --standalone --dev
 
-            - name: Create Report
-              timeout-minutes: 10
-              run: |
-                  export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=$(which chromium-browser)
+      - name: Create Report
+        timeout-minutes: 10
+        run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          export CHROMIUM_BIN=$(which chromium-browser)
 
-                  esbuild scripts/generateReport.ts > dist/report.mjs
-                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
-              env:
-                  DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          esbuild scripts/generateReport.ts > dist/report.mjs
+          node dist/report.mjs >> $GITHUB_STEP_SUMMARY
+        env:
+          DISCORD_TOKEN: ${{ secrets.DTOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.WEBHOOK }}
 
-            - name: Create Report (Canary)
-              timeout-minutes: 10
-              if: success() || failure() # even run if previous one failed
-              run: |
-                  export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=$(which chromium-browser)
-                  export USE_CANARY=true
+      - name: Create Report (Canary)
+        timeout-minutes: 10
+        if: success() || failure() # even run if previous one failed
+        run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          export CHROMIUM_BIN=$(which chromium-browser)
+          export USE_CANARY=true
 
-                  esbuild scripts/generateReport.ts > dist/report.mjs
-                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
-              env:
-                  DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          esbuild scripts/generateReport.ts > dist/report.mjs
+          node dist/report.mjs >> $GITHUB_STEP_SUMMARY
+        env:
+          DISCORD_TOKEN: ${{ secrets.DTOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.WEBHOOK }}

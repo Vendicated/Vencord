@@ -1,0 +1,21 @@
+.vc-hide-message-accessory {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.vc-hide-message-accessory svg {
+    margin-right: 4px;
+    vertical-align: text-bottom;
+}
+
+.vc-hide-message-reveal {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-hide-message-reveal:is(:hover, :focus) {
+    text-decoration: underline;
+}

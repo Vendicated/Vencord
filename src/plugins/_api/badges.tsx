@@ -28,10 +28,10 @@ import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
+const CONTRIBUTOR_BADGE = "https://i.imgur.com/OypoHrV.png";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Vencord/Equicord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     props: {
@@ -41,20 +41,26 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => isPluginDev(user.id),
-    link: "https://github.com/Vendicated/Vencord"
+    link: "https://github.com/sponsors/vendicated"
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(noCache = false) {
+
     DonorBadges = {};
 
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
+    const one = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
+
+    const two = await fetch("https://raw.githubusercontent.com/Equicord/Ignore/main/badges.json", init)
+        .then(r => r.json());
+
+    DonorBadges = { ...one, ...two };
 }
 
 export default definePlugin({
@@ -128,7 +134,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal("https://patreon.com/equicord");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
@@ -142,7 +148,7 @@ export default definePlugin({
                                         }}
                                     >
                                         <Heart />
-                                        Vencord Donor
+                                        Equicord Donor
                                     </Forms.FormTitle>
                                 </Flex>
                             </Modals.ModalHeader>
@@ -163,10 +169,10 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
+                                        This Badge is a special perk for Equicord Donors
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                        Please consider supporting the development of Equicord by becoming a donor. It would mean a lot!
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>

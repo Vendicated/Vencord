@@ -25,6 +25,7 @@ import { UploadHandler, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DRAFT_TYPE = 0;
+const SLASH_COMMAND_DRAFT_TYPE = 5;
 const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
 const FRAMES = 10;
@@ -59,7 +60,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUploads(ctx.channel.id, DRAFT_TYPE)[0];
+                const upload = UploadStore.getUploads(ctx.channel.id, SLASH_COMMAND_DRAFT_TYPE)[0];
                 if (upload) {
                     if (!upload.isImage) throw "Upload is not an image";
                     return upload.item.file;

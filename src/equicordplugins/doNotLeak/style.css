@@ -1,0 +1,50 @@
+/* stylelint-disable length-zero-no-unit */
+/* stylelint-disable selector-class-pattern */
+
+body.youcanleaknow .attachmentContentItem_ef9fc2 {
+    filter: blur(0px) brightness(1)!important;
+}
+
+body.youcanleaknow .messageContent__21e69 {
+    filter: blur(0px)!important;
+}
+
+body.youcanleaknow .embed_d3cbe3 {
+    filter: blur(0px)!important;
+}
+
+body:has([aria-label="Share Your Screen"].buttonActive__407a7) .attachmentContentItem_ef9fc2 {
+    filter: blur(30px) brightness(0.1);
+}
+
+body:has([aria-label="Share Your Screen"].buttonActive__407a7) .messageContent__21e69 {
+    filter: blur(6px)
+}
+
+body:has([aria-label="Share Your Screen"].buttonActive__407a7) .embed_d3cbe3 {
+    filter: blur(6px)
+}
+
+body.hideinstreamermode:has(.colorStreamerMode_e927c0) .attachmentContentItem_ef9fc2 {
+    filter: blur(30px) brightness(0.1);
+}
+
+body.hideinstreamermode:has(.colorStreamerMode_e927c0) .messageContent__21e69 {
+    filter: blur(6px)
+}
+
+body.hideinstreamermode:has(.colorStreamerMode_e927c0) .embed_d3cbe3 {
+    filter: blur(6px)
+}
+
+body.hoverToView .messageContent__21e69:hover {
+    filter: blur(0px) brightness(1)!important;
+}
+
+body.hoverToView .embed_d3cbe3:hover {
+    filter: blur(0px) brightness(1)!important;
+}
+
+body.hoverToView .attachmentContentItem_ef9fc2:hover {
+    filter: blur(0px) brightness(1)!important;
+}

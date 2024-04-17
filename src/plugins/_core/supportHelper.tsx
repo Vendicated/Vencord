@@ -17,7 +17,7 @@
 */
 
 import { DataStore } from "@api/index";
-import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { Devs, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
@@ -33,8 +33,8 @@ const REMEMBER_DISMISS_KEY = "Vencord-SupportHelper-Dismiss";
 
 const AllowedChannelIds = [
     SUPPORT_CHANNEL_ID,
-    "1024286218801926184", // Vencord > #bot-spam
-    "1033680203433660458", // Vencord > #v
+    "1173659827881390160", // Equicord > #dev
+    "1173342942858055721", // Equicord > #support
 ];
 
 export default definePlugin({
@@ -45,15 +45,15 @@ export default definePlugin({
     dependencies: ["CommandsAPI"],
 
     commands: [{
-        name: "vencord-debug",
-        description: "Send Vencord Debug info",
+        name: "equicord-debug",
+        description: "Send Equicord Debug info",
         predicate: ctx => AllowedChannelIds.includes(ctx.channel.id),
         async execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
             const client = (() => {
                 if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
-                if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
+                if (IS_VESKTOP) return `Vesktop w Equicord v${VesktopNative.app.getVersion()}`;
                 if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
 
                 // @ts-expect-error
@@ -80,7 +80,7 @@ export default definePlugin({
             }
 
             const debugInfo = `
-**Vencord Debug Info**
+**Equicord Debug Info**
 >>> ${Object.entries(info).map(([k, v]) => `${k}: ${v}`).join("\n")}
 
 Enabled Plugins (${enabledPlugins.length + enabledApiPlugins.length}):
@@ -95,7 +95,24 @@ ${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            if (channelId !== SUPPORT_CHANNEL_ID) return;
+            if (!SUPPORT_CHANNEL_IDS.includes(channelId)) return;
+
+            if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport")) return Alerts.show({
+                title: "You are entering the support channel!",
+                body: <div>
+                    <style>
+                        {'[class*="backdrop_"][style*="backdrop-filter"]{backdrop-filter:blur(16px) brightness(0.25) !important;}'}
+                    </style>
+                    <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
+                    <Forms.FormText>Are you sure you want to do this?</Forms.FormText>
+                    <Forms.FormText>The support channel is full of brainrotted idiots,</Forms.FormText>
+                    <Forms.FormText>potentially including you!</Forms.FormText>
+                    <Forms.FormText>Are you sure you're up to date with upstream?</Forms.FormText>
+                    <Forms.FormText>Are you ready to endure other people's brainrot?</Forms.FormText>
+                </div>,
+                confirmText: "Get mental health support",
+                onConfirm: () => history.back()
+            });
 
             if (isPluginDev(UserStore.getCurrentUser().id)) return;
 
@@ -115,6 +132,6 @@ ${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "
                     onConfirm: rememberDismiss
                 });
             }
-        }
+        },
     }
 });

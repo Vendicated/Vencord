@@ -18,7 +18,6 @@
 
 import type { Channel, User } from "discord-types/general";
 
-// eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
@@ -101,7 +100,6 @@ waitFor("showToast", m => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;
 });
-
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually

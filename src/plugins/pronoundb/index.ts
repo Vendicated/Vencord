@@ -33,9 +33,10 @@ const PRONOUN_TOOLTIP_PATCH = {
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven],
+    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
+        // Add next to username (compact mode)
         {
             find: "showCommunicationDisabledStyles",
             replacement: [

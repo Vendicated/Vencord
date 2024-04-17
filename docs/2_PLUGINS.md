@@ -2,7 +2,7 @@
 
 Welcome to Megu's Plugin Guide! In this file, you will learn about how to write your own plugin!
 
-You don't need to run `pnpm build` every time you make a change. Instead, use `pnpm watch` - this will auto-compile Vencord whenever you make a change. If using code patches (recommended), you will need to CTRL+R to load the changes.
+You don't need to run `pnpm build` every time you make a change. Instead, use `pnpm watch` - this will auto-compile Equicord whenever you make a change. If using code patches (recommended), you will need to CTRL+R to load the changes.
 
 ## Plugin Entrypoint
 
@@ -37,9 +37,9 @@ Change the name, description, and authors to your own information.
 
 Replace `12345n` with your user ID ending in `n` (e.g., `545581357812678656n`). If you don't want to share your Discord account, use `0n` instead!
 
-## How Plugins Work In Vencord
+## How Plugins Work In Equicord
 
-Vencord uses a different way of making mods than you're used to.
+Equicord uses a different way of making mods than you're used to.
 Instead of monkeypatching webpack, we directly modify the code before Discord loads it.
 
 This is _significantly_ more efficient than monkeypatching webpack, and is surprisingly easy, but it may be confusing at first.
@@ -103,7 +103,7 @@ The match value _can_ be a string, rather than regex, however usually regex will
 
 Once you've made your plugin, make sure you run `pnpm test` and make sure your code is nice and clean!
 
-If you want to publish your plugin into the Vencord repo, move your plugin from `src/userplugins` into the `src/plugins` folder and open a PR!
+If you want to publish your plugin into the Equicord repo, move your plugin from `src/userplugins` into the `src/plugins` folder and open a PR!
 
 > **Warning**
 > Make sure you've read [CONTRIBUTING.md](../CONTRIBUTING.md) before opening a PR

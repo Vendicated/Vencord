@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -65,12 +65,17 @@ function Indicator() {
 
 }
 
-const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
-    if (!isMainChat) return null;
+const settings = definePluginSettings({
+    savedPasswords: {
+        type: OptionType.STRING,
+        default: "password, Password",
+        description: "Saved Passwords (Seperated with a , )"
+    }
+});
 
+const generateChatButton: ChatBarButton = () => {
     return (
-        <ChatBarButton
-            tooltip="Encrypt Message"
+        <ChatBarButton tooltip="Encrypt Message"
             onClick={() => buildEncModal()}
 
             buttonProps={{
@@ -91,19 +96,11 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
-const settings = definePluginSettings({
-    savedPasswords: {
-        type: OptionType.STRING,
-        default: "password, Password",
-        description: "Saved Passwords (Seperated with a , )"
-    }
-});
-
 export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way!",
     authors: [Devs.SammCheese],
-    dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI"],
+    dependencies: ["MessagePopoverAPI"],
     patches: [
         {
             // Indicator
@@ -122,7 +119,10 @@ export default definePlugin({
     ),
     settings,
     async start() {
-        addButton("InvisibleChat", message => {
+        const { default: StegCloak } = await getStegCloak();
+        steggo = new StegCloak(true, false);
+
+        addButton("invDecrypt", message => {
             return this.INV_REGEX.test(message?.content)
                 ? {
                     label: "Decrypt Message",
@@ -138,16 +138,12 @@ export default definePlugin({
                 }
                 : null;
         });
-
-        addChatBarButton("InvisibleChat", ChatBarIcon);
-
-        const { default: StegCloak } = await getStegCloak();
-        steggo = new StegCloak(true, false);
+        addChatBarButton("invButton", generateChatButton);
     },
 
     stop() {
-        removeButton("InvisibleChat");
-        removeButton("InvisibleChat");
+        removeButton("invDecrypt");
+        removeChatBarButton("invButton");
     },
 
     // Gets the Embed of a Link
@@ -190,6 +186,7 @@ export default definePlugin({
         });
     },
 
+    chatBarIcon: ErrorBoundary.wrap(generateChatButton, { noop: true }),
     popOverIcon: () => <PopOverIcon />,
     indicator: ErrorBoundary.wrap(Indicator, { noop: true })
 });

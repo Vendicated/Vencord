@@ -1,0 +1,69 @@
+/* stylelint-disable property-no-vendor-prefix */
+/* stylelint-disable selector-attribute-quotes */
+/* stylelint-disable declaration-block-single-line-max-declarations */
+/* stylelint-disable selector-class-pattern */
+
+/* Make pronouns stand out more */
+[class*="pronouns"] {
+    color: var(--text-normal);
+    font-size: 12px;
+    font-weight: 800;
+    background: #ffffff20;
+    padding: 0.10rem 0.5rem;
+    margin: 0.25rem 0 0;
+    border-radius: 1rem;
+}
+
+/* No Family Center (No Parental Controls) */
+*[aria-label="Family Centre"] {
+    display: none;
+}
+
+/* Spin Spotify */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.assetslargeimageuserpopoutv2-9ksyvz .assetslargeimage-8u5dlz .nouserdrag-2hbvze .assetslargeimagespotify-17me3m {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.vc-spotify-button .vc-spotify-button-icon {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.vc-spotify-button:hover {
+    animation: spin 1.5s ease-in-out infinite
+}
+
+/* Server List Scrollbar by icanttellyou */
+[class*="none_"]::-webkit-scrollbar {
+    width: 5px;
+    background: transparent;
+    border: none;
+}
+
+[class*="none_"]::-webkit-scrollbar-thumb {
+    background: #101115;
+}
+
+
+/* No, I don't want to make a thread from a chain of more than 2 replies by F53 */
+[class*="threadSuggestionBar_"] {
+    display: none;
+}
+
+/* show full about me */
+[style="-webkit-line-clamp: 6;"] {
+    -webkit-line-clamp: 10000000 !important;
+}
+
+.sidebar__02e8d .side_b4b3f6 .item__48dda[data-tab-id=DISCOVERY_LANDING_PAGE]::before{-webkit-mask:var(--si-discovery) center/contain no-repeat;mask:var(--si-discovery) center/contain no-repeat}

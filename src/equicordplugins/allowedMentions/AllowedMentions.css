@@ -1,0 +1,5 @@
+.vc-allowed-mentions-popout-menu {
+    height: 250px;
+    width: 200px;
+    text-overflow: ellipsis;
+}

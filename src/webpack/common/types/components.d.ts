@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { Moment } from "moment";
 import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
@@ -153,7 +154,7 @@ export type Switch = ComponentType<PropsWithChildren<{
 }>>;
 
 export type Timestamp = ComponentType<PropsWithChildren<{
-    timestamp: Date;
+    timestamp: Date | Moment;
     isEdited?: boolean;
 
     className?: string;
@@ -189,8 +190,7 @@ export type TextInput = ComponentType<PropsWithChildren<{
 export type TextArea = ComponentType<PropsWithRef<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
 }>>;
-
-interface SelectOption {
+export interface SelectOption {
     disabled?: boolean;
     value: any;
     label: string;
@@ -240,7 +240,7 @@ export type Select = ComponentType<PropsWithChildren<{
 export type SearchableSelect = ComponentType<PropsWithChildren<{
     placeholder?: string;
     options: ReadonlyArray<SelectOption>; // TODO
-    value?: SelectOption;
+    value?: SelectOption | string[];
 
     /**
      * - 0 ~ Filled
@@ -394,6 +394,7 @@ export type Paginator = ComponentType<{
     pageSize: number;
     totalCount: number;
 
+    className?: string;
     onPageChange?(page: number): void;
     hideMaxPage?: boolean;
 }>;
@@ -455,5 +456,5 @@ export type Avatar = ComponentType<PropsWithChildren<{
 }>>;
 
 type FocusLock = ComponentType<PropsWithChildren<{
-    containerRef: RefObject<HTMLElement>
+    containerRef: RefObject<HTMLElement>;
 }>>;

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
 import { filters, findByPropsLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";

@@ -1,0 +1,100 @@
+/* stylelint-disable rule-empty-line-before */
+/* stylelint-disable selector-class-pattern */
+/* stylelint-disable comment-empty-line-before */
+/* stylelint-disable color-function-notation */
+/* stylelint-disable hue-degree-notation */
+:root {
+    /* || Gradients */
+    --gradient-special: 140deg, hsl(245, calc(var(--saturaton-factor, 1)*79%), 72%) 0%, hsl(287, calc(var(--saturaton-factor, 1)*80%), 70%) 100%;
+    --gradient-blurple: 140deg, hsl(235, calc(var(--saturation-factor, 1)*85%), 72%) 0%, hsl(235, calc(var(--saturation-factor, 1)*85%), 60%) 100%;
+    --gradient-green: 140deg, hsl(139, calc(var(--saturaton-factor, 1)*47%), 44%) 0%, hsl(139, calc(var(--saturaton-factor, 1)*66%), 24%) 100%;
+    --gradient-yellow: 140deg, hsl(38, calc(var(--saturaton-factor, 1)*96%), 54%) 0%, hsl(38, calc(var(--saturaton-factor, 1)*82%), 41%) 100%;
+    --gradient-red: 140deg, hsl(359, calc(var(--saturaton-factor, 1)*83%), 59%) 0%, hsl(359, calc(var(--saturaton-factor, 1)*54%), 37%) 100%;
+    --gradient-grey: 140deg, hsl(214, calc(var(--saturaton-factor, 1)*10%), 50%) 0%, hsl(216, calc(var(--saturaton-factor, 1)*11%), 26%) 100%;
+    /* || Transitions */
+    --button-transition: 0.1s linear;
+    --font-default: 500;
+    --font-hover: 525;
+    --fontsize-hover: 15px;
+    --transform-normal: scale(1);
+    --transform-hover: scale(1.15);
+    --button-transform-hover: scale(1.04);
+}
+
+/* || Filled Buttons */
+.lookFilled-yCfaCM {
+    transform: var(--transform-normal);
+    transition: var(--button-transition);
+    background: var(--gradient);
+}
+.lookFilled-yCfaCM:hover {
+    transform: var(--button-transform-hover);
+}
+.lookFilled-yCfaCM[disabled] {
+    transform: none;
+}
+.lookFilled-yCfaCM.colorBrand-I6CyqQ {
+    --gradient: linear-gradient(var(--gradient-blurple));
+}
+.lookFilled-yCfaCM.colorGreen-3y-Z79, .lookFilled-yCfaCM.button-1EGGcP.buttonActive-Uc1jHx {
+    --gradient: linear-gradient(var(--gradient-green));
+}
+.lookFilled-yCfaCM.colorYellow-Pgtmch {
+    --gradient: linear-gradient(var(--gradient-yellow));
+}
+.lookFilled-yCfaCM.colorRed-rQXKgM {
+    --gradient: linear-gradient(var(--gradient-red));
+}
+.lookFilled-yCfaCM.colorPrimary-2AuQVo, .lookFilled-yCfaCM.colorGrey-2iAG-B, .lookFilled-yCfaCM.buttonColor-3bP3fX {
+    --gradient: linear-gradient(var(--gradient-grey));
+}
+
+/* || Context Menus */
+.menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_) {
+    font-weight: var(--font-default);
+    transition: var(--button-transition);
+}
+.menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_).focused-3qFvc8, .menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_):active {
+    font-size: var(--fontsize-hover);
+    font-weight: var(--font-hover);
+    background: var(--gradient);
+}
+.menu-1QACrS .colorDefault-CDqZdO.focused-3qFvc8, .menu-1QACrS .colorDefault-CDqZdO:active {
+    --gradient: linear-gradient(var(--gradient-blurple));
+}
+.menu-1QACrS .colorDanger-3n-KnP.focused-3qFvc8, .menu-1QACrS .colorDanger-3n-KnP:active,
+.menu-1QACrS #status-picker-dnd.focused-3qFvc8,
+.menu-1QACrS #status-picker-dnd:active {
+    --gradient: linear-gradient(var(--gradient-red));
+}
+.menu-1QACrS .colorPremium-vwmYZQ.focused-3qFvc8, .menu-1QACrS .colorPremium-vwmYZQ:active {
+    --gradient: linear-gradient(var(--gradient-special)) ;
+}
+.menu-1QACrS #status-picker-online.focused-3qFvc8, .menu-1QACrS #status-picker-online:active {
+    --gradient: linear-gradient(var(--gradient-green));
+}
+.menu-1QACrS #status-picker-idle.focused-3qFvc8, .menu-1QACrS #status-picker-idle:active {
+    --gradient: linear-gradient(var(--gradient-yellow));
+}
+.menu-1QACrS #status-picker-invisible.focused-3qFvc8, .menu-1QACrS #status-picker-invisible:active {
+    --gradient: linear-gradient(var(--gradient-grey));
+}
+
+/* || Message Actions */
+.wrapper-2vIMkT .button-3bklZh {
+    background: var(--gradient);
+}
+.wrapper-2vIMkT .button-3bklZh img, .wrapper-2vIMkT .button-3bklZh svg {
+    transition: var(--button-transition);
+    transform: var(--transform-normal);
+}
+.wrapper-2vIMkT .button-3bklZh:hover {
+    --gradient: linear-gradient(var(--gradient-blurple));
+}
+.wrapper-2vIMkT .button-3bklZh:hover svg {
+    transform: var(--transform-hover);
+    color: white;
+}
+.wrapper-2vIMkT .button-3bklZh.dangerous-Y36ifs:hover {
+    --gradient: linear-gradient(var(--gradient-red)) ;
+}

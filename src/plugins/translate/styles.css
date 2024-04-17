@@ -3,8 +3,7 @@
 }
 
 .vc-trans-modal-header {
-    justify-content: space-between;
-    align-content: center;
+    place-content: space-between center;
 }
 
 .vc-trans-modal-header h1 {

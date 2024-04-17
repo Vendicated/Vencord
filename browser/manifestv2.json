@@ -1,40 +1,43 @@
 {
     "manifest_version": 2,
     "minimum_chrome_version": "91",
-
-    "name": "Vencord Web",
-    "description": "The cutest Discord mod now in your browser",
-    "author": "Vendicated",
-    "homepage_url": "https://github.com/Vendicated/Vencord",
+    "name": "Equicord Web",
+    "description": "The other cutest Discord mod now in your browser",
+    "author": "Thororen",
+    "homepage_url": "https://github.com/Equicord/Equicord",
     "icons": {
         "128": "icon.png"
     },
-
     "permissions": [
         "webRequest",
         "webRequestBlocking",
         "*://*.discord.com/*",
         "https://raw.githubusercontent.com/*"
     ],
-
     "content_scripts": [
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["content.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
             "all_frames": true
         }
     ],
-
     "background": {
-        "scripts": ["background.js"]
+        "scripts": [
+            "background.js"
+        ]
     },
-
-    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
-
+    "web_accessible_resources": [
+        "dist/Vencord.js",
+        "dist/Vencord.css"
+    ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "vencord-firefox@vendicated.dev",
+            "id": "Equicord@equicord.patrickdk.com",
             "strict_min_version": "91.0"
         }
     }

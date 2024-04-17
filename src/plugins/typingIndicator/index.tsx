@@ -29,7 +29,6 @@ import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
@@ -37,6 +36,7 @@ const enum IndicatorMode {
     Dots = 1 << 0,
     Avatars = 1 << 1
 }
+
 
 function getDisplayName(guildId: string, userId: string) {
     const user = UserStore.getUser(userId);

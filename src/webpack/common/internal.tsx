@@ -18,7 +18,6 @@
 
 import { LazyComponent } from "@utils/react";
 
-// eslint-disable-next-line path-alias/no-relative
 import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 
 export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {

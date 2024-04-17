@@ -19,7 +19,7 @@ For a friendly introduction to plugins, see [Megu's Plugin Guide!](docs/2_PLUGIN
 
 Because plugins modify code directly, incompatibilities are a problem.
 
-Thus, 3rd party plugins are not supported, instead all plugins are part of Vencord itself.
+Thus, 3rd party plugins are not supported, instead all plugins are part of Equicord itself.
 This way we can ensure compatibility and high quality patches.
 
 Follow the below guide to make your first plugin!

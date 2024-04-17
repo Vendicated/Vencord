@@ -17,18 +17,32 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
-
         "baseUrl": "./src/",
         "paths": {
-            "@main/*": ["./main/*"],
-            "@api/*": ["./api/*"],
-            "@components/*": ["./components/*"],
-            "@utils/*": ["./utils/*"],
-            "@shared/*": ["./shared/*"],
-            "@webpack/types": ["./webpack/common/types"],
-            "@webpack/common": ["./webpack/common"],
-            "@webpack": ["./webpack/webpack"]
+            "@api/*": [
+                "./api/*"
+            ],
+            "@components/*": [
+                "./components/*"
+            ],
+            "@utils/*": [
+                "./utils/*"
+            ],
+            "@shared/*": [
+                "./shared/*"
+            ],
+            "@webpack/types": [
+                "./webpack/common/types"
+            ],
+            "@webpack/common": [
+                "./webpack/common"
+            ],
+            "@webpack": [
+                "./webpack/webpack"
+            ]
         }
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": [
+        "src/**/*"
+    ]
 }

@@ -35,6 +35,7 @@ export interface Settings {
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    disabledThemeLinks: string[];
     enabledThemes: string[];
     frameless: boolean;
     transparent: boolean;
@@ -75,6 +76,12 @@ export interface Settings {
         settingsSync: boolean;
         settingsSyncVersion: number;
     };
+
+    userCssVars: {
+        [themeId: string]: {
+            [varName: string]: string;
+        };
+    };
 }
 
 const DefaultSettings: Settings = {
@@ -83,6 +90,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    disabledThemeLinks: [],
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,
@@ -102,10 +110,12 @@ const DefaultSettings: Settings = {
 
     cloud: {
         authenticated: false,
-        url: "https://api.vencord.dev/",
+        url: "https://equicord.patrickdk.com/",
         settingsSync: false,
         settingsSyncVersion: 0
-    }
+    },
+
+    userCssVars: {}
 };
 
 const settings = VencordNative.settings.get();

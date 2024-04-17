@@ -207,7 +207,6 @@ export function getTargetString(urlStr: string) {
         // Can't resolve URL, return as-is
         return urlStr;
     }
-
     switch (settings.store.searchOption) {
         case "url":
             return url.href;

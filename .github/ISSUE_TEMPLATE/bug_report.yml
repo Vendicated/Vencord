@@ -1,5 +1,5 @@
 name: Bug/Crash Report
-description: Create a bug or crash report for Vencord. ALWAYS FIRST USE OUR SUPPORT CHANNEL! ONLY USE THIS FORM IF YOU ARE A CONTRIBUTOR OR WERE TOLD TO DO SO IN THE SUPPORT CHANNEL.
+description: Create a bug or crash report for Equicord. ALWAYS FIRST USE OUR SUPPORT CHANNEL! ONLY USE THIS FORM IF YOU ARE A CONTRIBUTOR OR WERE TOLD TO DO SO IN THE SUPPORT CHANNEL.
 labels: [bug]
 title: "[Bug] <title>"
 
@@ -12,10 +12,10 @@ body:
         This form is ONLY FOR DEVELOPERS. YOUR ISSUE WILL BE CLOSED AND YOU WILL POSSIBLY BE BLOCKED FROM THE REPOSITORY IF YOU IGNORE THIS.
         
         DO NOT USE THIS FORM, unless
-        - you are a vencord contributor
+        - you are a equicord/vencord contributor
         - you were given explicit permission to use this form by a moderator in our support server
         
-        DO NOT USE THIS FORM FOR SECURITY RELATED ISSUES. [CREATE A SECURITY ADVISORY INSTEAD.](https://github.com/Vendicated/Vencord/security/advisories/new)
+        DO NOT USE THIS FORM FOR SECURITY RELATED ISSUES. [CREATE A SECURITY ADVISORY INSTEAD.](https://github.com/Equicord/Equicord/security/advisories/new)
   
   - type: input
     id: discord
@@ -40,7 +40,7 @@ body:
     attributes:
       label: What is the expected behaviour?
       description: Simply detail what the expected behaviour is.
-      placeholder: I expect Vencord/Discord to open the ... page instead of ..., it prevents me from doing ...
+      placeholder: I expect Equicord/Discord to open the ... page instead of ..., it prevents me from doing ...
     validations:
       required: true
 

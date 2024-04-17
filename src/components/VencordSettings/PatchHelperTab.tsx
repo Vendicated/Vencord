@@ -180,7 +180,8 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 
     return (
         <>
-            <Forms.FormTitle>replacement</Forms.FormTitle>
+            {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
+            <Forms.FormTitle className="">replacement</Forms.FormTitle>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -188,7 +189,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
             />
             {!isFunc && (
                 <div className="vc-text-selectable">
-                    <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
+                    <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
                         "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
                         "$$": "Insert a $",
@@ -266,7 +267,7 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
     }
 
     return <>
-        <Forms.FormText>Paste your full JSON patch here to fill out the fields</Forms.FormText>
+        <Forms.FormText className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Forms.FormText>
         <TextArea value={fullPatch} onChange={setFullPatch} onBlur={update} />
         {fullPatchError !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{fullPatchError}</Forms.FormText>}
     </>;
@@ -321,7 +322,7 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <Forms.FormTitle>find</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>find</Forms.FormTitle>
             <TextInput
                 type="text"
                 value={find}
@@ -329,7 +330,7 @@ function PatchHelper() {
                 error={findError}
             />
 
-            <Forms.FormTitle>match</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>match</Forms.FormTitle>
             <CheckedTextInput
                 value={match}
                 onChange={onMatchChange}
@@ -342,6 +343,7 @@ function PatchHelper() {
                 }}
             />
 
+            <div className={Margins.top8} />
             <ReplacementInput
                 replacement={replacement}
                 setReplacement={setReplacement}

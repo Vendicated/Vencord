@@ -17,7 +17,6 @@
 */
 
 import "./settingsStyles.css";
-import "./themesStyles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";

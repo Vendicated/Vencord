@@ -1,23 +1,40 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "ignorePatterns": ["dist", "browser"],
+    "ignorePatterns": [
+        "dist",
+        "browser"
+    ],
     "plugins": [
         "@typescript-eslint",
         "simple-header",
         "simple-import-sort",
-        "unused-imports",
-        "path-alias"
+        "unused-imports"
     ],
     "settings": {
         "import/resolver": {
             "alias": {
                 "map": [
-                    ["@webpack", "./src/webpack"],
-                    ["@webpack/common", "./src/webpack/common"],
-                    ["@utils", "./src/utils"],
-                    ["@api", "./src/api"],
-                    ["@components", "./src/components"]
+                    [
+                        "@webpack",
+                        "./src/webpack"
+                    ],
+                    [
+                        "@webpack/common",
+                        "./src/webpack/common"
+                    ],
+                    [
+                        "@utils",
+                        "./src/utils"
+                    ],
+                    [
+                        "@api",
+                        "./src/api"
+                    ],
+                    [
+                        "@components",
+                        "./src/components"
+                    ]
                 ]
             }
         }
@@ -29,37 +46,120 @@
         "simple-header/header": [
             "error",
             {
-                "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
-                "templates": { "author": [".*", "Vendicated and contributors"] }
+                "files": [
+                    "scripts/header-new.txt",
+                    "scripts/header-old.txt"
+                ],
+                "templates": {
+                    "author": [
+                        ".*",
+                        "Vendicated and contributors"
+                    ]
+                }
             }
         ],
-        "quotes": ["error", "double", { "avoidEscape": true }],
-        "jsx-quotes": ["error", "prefer-double"],
+        "quotes": [
+            "error",
+            "double",
+            {
+                "avoidEscape": true
+            }
+        ],
+        "jsx-quotes": [
+            "error",
+            "prefer-double"
+        ],
         "no-mixed-spaces-and-tabs": "error",
-        "indent": ["error", 4, { "SwitchCase": 1 }],
-        "arrow-parens": ["error", "as-needed"],
-        "eol-last": ["error", "always"],
-        "@typescript-eslint/func-call-spacing": ["error", "never"],
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "arrow-parens": [
+            "error",
+            "as-needed"
+        ],
+        "eol-last": [
+            "error",
+            "always"
+        ],
+        "@typescript-eslint/func-call-spacing": [
+            "error",
+            "never"
+        ],
         "no-multi-spaces": "error",
         "no-trailing-spaces": "error",
         "no-whitespace-before-property": "error",
-        "semi": ["error", "always"],
-        "semi-style": ["error", "last"],
-        "space-in-parens": ["error", "never"],
-        "block-spacing": ["error", "always"],
-        "object-curly-spacing": ["error", "always"],
-        "eqeqeq": ["error", "always", { "null": "ignore" }],
-        "spaced-comment": ["error", "always", { "markers": ["!"] }],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "semi-style": [
+            "error",
+            "last"
+        ],
+        "space-in-parens": [
+            "error",
+            "never"
+        ],
+        "block-spacing": [
+            "error",
+            "always"
+        ],
+        "object-curly-spacing": [
+            "error",
+            "always"
+        ],
+        "eqeqeq": [
+            "error",
+            "always",
+            {
+                "null": "ignore"
+            }
+        ],
+        "spaced-comment": [
+            "error",
+            "always",
+            {
+                "markers": [
+                    "!"
+                ]
+            }
+        ],
         "yoda": "error",
-        "prefer-destructuring": ["error", {
-                "VariableDeclarator": { "array": false, "object": true },
-                "AssignmentExpression": { "array": false, "object": false }
-        }],
-        "operator-assignment": ["error", "always"],
+        "prefer-destructuring": [
+            "error",
+            {
+                "VariableDeclarator": {
+                    "array": false,
+                    "object": true
+                },
+                "AssignmentExpression": {
+                    "array": false,
+                    "object": false
+                }
+            }
+        ],
+        "operator-assignment": [
+            "error",
+            "always"
+        ],
         "no-useless-computed-key": "error",
-        "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
+        "no-unneeded-ternary": [
+            "error",
+            {
+                "defaultAssignment": false
+            }
+        ],
         "no-invalid-regexp": "error",
-        "no-constant-condition": ["error", { "checkLoops": false }],
+        "no-constant-condition": [
+            "error",
+            {
+                "checkLoops": false
+            }
+        ],
         "no-duplicate-imports": "error",
         "no-extra-semi": "error",
         "dot-notation": "error",
@@ -87,12 +187,8 @@
         "use-isnan": "error",
         "prefer-const": "error",
         "prefer-spread": "error",
-
         "simple-import-sort/imports": "error",
         "simple-import-sort/exports": "error",
-
-        "unused-imports/no-unused-imports": "error",
-
-        "path-alias/no-relative": "error"
+        "unused-imports/no-unused-imports": "error"
     }
 }

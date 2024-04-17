@@ -137,16 +137,6 @@ export default definePlugin({
             ],
             onChange: () => addDeleteStyle()
         },
-        logDeletes: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log deleted messages",
-            default: true,
-        },
-        logEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log edited messages",
-            default: true,
-        },
         ignoreBots: {
             type: OptionType.BOOLEAN,
             description: "Whether to ignore messages by bots",
@@ -171,6 +161,16 @@ export default definePlugin({
             type: OptionType.STRING,
             description: "Comma-separated list of guild IDs to ignore",
             default: ""
+        },
+        logDeletes: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log deleted messages",
+            default: true,
+        },
+        logEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log edited messages",
+            default: true,
         },
     },
 

@@ -18,7 +18,6 @@
 
 import type * as Stores from "discord-types/stores";
 
-// eslint-disable-next-line path-alias/no-relative
 import { findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
@@ -44,6 +43,7 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
+export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
