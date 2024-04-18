@@ -33,10 +33,10 @@ const discordBadges: readonly [number, string, string][] = Object.freeze([
 
 function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Element | null {
     switch (badge) {
-        case "VencordDonor":
+        case "EquicordDonor":
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
-                    {badges.getDonorBadges(author.id)?.map((badge: any) => (
+                    {badges.getEquicordDonorBadges(author.id)?.map((badge: any) => (
                         <RoleIconComponent
                             className={roleIconClassName}
                             name={badge.description}
@@ -46,10 +46,10 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                     ))}
                 </span>
             );
-        case "EquicordDonor":
+        case "VencordDonor":
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
-                    {badges.getEquicordDonorBadges(author.id)?.map((badge: any) => (
+                    {badges.getDonorBadges(author.id)?.map((badge: any) => (
                         <RoleIconComponent
                             className={roleIconClassName}
                             name={badge.description}
@@ -108,8 +108,8 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
 function ChatBadges({ author }: any) {
     return (
         <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
-            {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
+            {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
             {settings.store.showDiscordNitro && <CheckBadge badge={"DiscordNitro"} author={author} />}
