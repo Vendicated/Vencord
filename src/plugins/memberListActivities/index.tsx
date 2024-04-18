@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { React, Tooltip, useMemo } from "@webpack/common";
+import { moment, React, Tooltip, useMemo } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { SpotifyIcon } from "./components/SpotifyIcon";
@@ -71,14 +71,22 @@ const fetchedApplications = new Map<string, Application | null>();
 
 const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png"; // TODO: replace with "renderXboxImage"?
 
-function getActivityImage(activity: Activity): string | undefined {
+function getActivityImage(activity: Activity, application?: Application): string | undefined {
     if (activity.type === 2 && activity.name === "Spotify") {
         // get either from large or small image
         const image = activity.assets?.large_image ?? activity.assets?.small_image;
-        // image needs to replace 'spotify:
+        // image needs to replace 'spotify:'
         if (image?.startsWith("spotify:")) {
             // spotify cover art is always https://i.scdn.co/image/ID
             return image.replace("spotify:", "https://i.scdn.co/image/");
+        }
+    }
+    if (activity.type === 1 && activity.name === "Twitch") {
+        const image = activity.assets?.large_image;
+        // image needs to replace 'twitch:'
+        if (image?.startsWith("twitch:")) {
+            // twitch images are always https://static-cdn.jtvnw.net/previews-ttv/live_user_USERNAME-RESOLTUON.jpg
+            return `${image.replace("twitch:", "https://static-cdn.jtvnw.net/previews-ttv/live_user_")}-108x60.jpg`;
         }
     }
     // TODO: we could support other assets here
@@ -91,9 +99,27 @@ function getValidTimestamps(activity: Activity): Required<Timestamp> | null {
     return null;
 }
 
-const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
+function getValidStartTimeStamp(activity: Activity): number | null {
+    if (activity.timestamps?.start !== undefined) {
+        return activity.timestamps.start;
+    }
+    return null;
+}
+
+const customFormat = (momentObj: moment.Moment): string => {
+    const hours = momentObj.hours();
+    const formattedTime = momentObj.format("mm:ss");
+    return hours > 0 ? `${momentObj.format("HH:")}${formattedTime}` : formattedTime;
+};
+
+function formatElapsedTime(startTime: moment.Moment, endTime: moment.Moment): string {
+    const duration = moment.duration(endTime.diff(startTime));
+    return `${customFormat(moment.utc(duration.asMilliseconds()))} elapsed`;
+}
+
+const ActivityTooltip = ({ activity, application }: Readonly<{ activity: Activity, application?: Application }>) => {
     const image = useMemo(() => {
-        const activityImage = getActivityImage(activity);
+        const activityImage = getActivityImage(activity, application);
         if (activityImage) {
             return activityImage;
         }
@@ -101,6 +127,7 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
         return icon?.image.src;
     }, [activity]);
     const timestamps = useMemo(() => getValidTimestamps(activity), [activity]);
+    const startTime = useMemo(() => getValidStartTimeStamp(activity), [activity]);
 
     const hasDetails = activity.details ?? activity.state;
     return (
@@ -112,13 +139,17 @@ const ActivityTooltip = ({ activity }: Readonly<{ activity: Activity }>) => {
                 <div className={cl("activity-details")}>
                     <div>{activity.details}</div>
                     <div>{activity.state}</div>
+                    {!timestamps && startTime &&
+                        <div className={cl("activity-time-bar")}>
+                            {formatElapsedTime(moment(startTime), moment())}
+                        </div>
+                    }
                 </div>
-                {timestamps && <TimeBar start={timestamps.start} end={timestamps.end} themed={false} className={cl("activity-time-bar")}/>}
+                {timestamps && <TimeBar start={timestamps.start} end={timestamps.end} themed={false} className={cl("activity-time-bar")}/> }
             </div>
         </ErrorBoundary>
     );
 };
-
 
 function getApplicationIcons(activities: Activity[], preferSmall = false) {
     const applicationIcons: ApplicationIcon[] = [];
@@ -245,7 +276,7 @@ export default definePlugin({
             for (const appIcon of uniqueIcons) {
                 icons.push({
                     iconElement: <img {...appIcon.image} />,
-                    tooltip: <ActivityTooltip activity={appIcon.activity} />
+                    tooltip: <ActivityTooltip activity={appIcon.activity} application={appIcon.application} />
                 });
             }
         }
