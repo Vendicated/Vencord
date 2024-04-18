@@ -40,11 +40,11 @@ export default definePlugin({
     authors: [Devs.Kodarru],
     flux: {
         async STREAM_CREATE(StreamData: StreamEvent) {
-            toggleStreamerMode(StreamEvent, true);
+            toggleStreamerMode(StreamData, true);
         },
 
         async STREAM_DELETE(StreamData: StreamEvent) {
-            toggleStreamerMode(StreamEvent, false);
+            toggleStreamerMode(StreamData, false);
         }
     }
 });
