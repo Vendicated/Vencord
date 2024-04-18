@@ -148,7 +148,7 @@ export default definePlugin({
                                         }}
                                     >
                                         <Heart />
-                                        Equicord Donor
+                                        Vencord Donor
                                     </Forms.FormTitle>
                                 </Flex>
                             </Modals.ModalHeader>
@@ -169,10 +169,10 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Equicord Donors
+                                        This Badge is a special perk for Vencord Donors
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Equicord by becoming a donor. It would mean a lot!
+                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>
