@@ -77,7 +77,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                         className={roleIconClassName}
                         name={"Vencord Contributor"}
                         size={20}
-                        src={"https://i.imgur.com/OypoHrV.png"}
+                        src={"https://vencord.dev/assets/favicon.png"}
                     />
                 </span>
             ) : null;
@@ -120,7 +120,7 @@ function ChatBadges({ author }: any) {
     return (
         <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
             {settings.store.showEquicordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
-            {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributor"} author={author} />}
+            {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributer"} author={author} />}
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
