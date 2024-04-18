@@ -56,7 +56,7 @@ const EquicordContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => isEquicordPluginDev(user.id),
-    link: "https://github.com/Vendicated/Vencord"
+    link: "https://github.com/Equicord/Equicord"
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
