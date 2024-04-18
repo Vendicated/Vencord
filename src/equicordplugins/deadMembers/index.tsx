@@ -17,8 +17,8 @@ export default definePlugin({
         {
             find: "UsernameDecorationTypes:function()",
             replacement: {
-                match: /(\i)=\{className:\i.username,style:.*?onContextMenu:\i,children:.*?\}/,
-                replace: "$&,{}=$1.children=$self.wrapMessageAuthor(arguments[0],$1.children)"
+                match: /(\i)=\{className:\i.username,style:.*?onContextMenu:\i,children:.*?\};/,
+                replace: "$&$1.children=$self.wrapMessageAuthor(arguments[0],$1.children);"
             }
         },
         {
