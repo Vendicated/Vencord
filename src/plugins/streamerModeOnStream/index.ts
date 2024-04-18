@@ -42,12 +42,12 @@ export default definePlugin({
     description: "Automatically enables streamer mode when you start streaming in Discord",
     authors: [Devs.Kodarru],
     flux: {
-        async STREAM_CREATE() {
-            startStreamerMode();
+        async STREAM_CREATE(StreamData: StreamEvent) {
+            startStreamerMode(StreamData);
         },
 
-        async STREAM_DELETE() {
-            stopStreamerMode();
+        async STREAM_DELETE(StreamData: StreamEvent) {
+            stopStreamerMode(StreamData);
         }
     }
 });
