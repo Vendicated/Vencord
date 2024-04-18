@@ -39,7 +39,7 @@ const QuestButtonComponent = () => {
 
 export default definePlugin({
     name: "BetterQuests",
-    description: "Puts the quest button in more accessibile place",
+    description: "Puts the quest button in more accessibile place.",
     authors: [Devs.kvba],
 
     patches: [
