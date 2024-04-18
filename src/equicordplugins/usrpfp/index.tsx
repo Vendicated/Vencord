@@ -36,7 +36,7 @@ export default definePlugin({
     authors: [Devs.nexpid, Devs.thororen, Devs.FoxStorm1, Devs.coolesding],
     settings,
     settingsAboutComponent: () => (
-        <div>
+        <>
             <Link href="https://userpfp.github.io/UserPFP/#how-to-request-a-profile-picture-pfp">
                 <b>Submit your own pfp here</b>
             </Link>
@@ -44,7 +44,7 @@ export default definePlugin({
             <Link href="https://ko-fi.com/coolesding">
                 <b>Support UserPFP</b>
             </Link>
-        </div>
+        </>
     ),
     patches: [
         {

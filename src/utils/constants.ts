@@ -593,7 +593,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 1189903210564038697n,
     },
     bhop: {
-        name: "femie",
+        name: "femeie",
         id: 442626774841556992n,
     },
 } satisfies Record<string, Dev>);
