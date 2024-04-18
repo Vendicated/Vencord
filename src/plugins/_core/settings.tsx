@@ -26,7 +26,7 @@ import gitHash from "~git-hash";
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
-    authors: [Devs.Ven, Devs.Megu],
+    authors: [Devs.Ven, Devs.Megu, Devs.HAPPY_ENDERMAN],
     required: true,
 
     patches: [{
