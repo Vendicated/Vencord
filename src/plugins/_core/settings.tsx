@@ -52,7 +52,7 @@ export default definePlugin({
                     case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
                     case "aboveActivity":
                     default:
-                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS/;
+                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS,.+?\}/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
