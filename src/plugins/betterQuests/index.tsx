@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
@@ -37,9 +38,9 @@ const QuestButtonComponent = () => {
 };
 
 export default definePlugin({
-    name: "betterQuests",
+    name: "BetterQuests",
     description: "Puts the quest button in more accessibile place",
-    authors: [{ name: "kvba", id: 105170831130234880n }],
+    authors: [Devs.kvba],
 
     patches: [
         {
