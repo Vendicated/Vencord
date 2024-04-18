@@ -162,7 +162,7 @@ SettingsStore.addGlobalChangeListener((_, path) => {
     SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
     localStorage.Vencord_settingsDirty = true;
     saveSettingsOnFrequentAction();
-    VencordNative.settings.set(/* This is really bad but it works */JSON.parse(JSON.stringify(SettingsStore.plain)), path);
+    VencordNative.settings.set(SettingsStore.plain, path);
 });
 
 /**
