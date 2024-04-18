@@ -6,7 +6,7 @@
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
@@ -31,7 +31,7 @@ function replaceQuestionMarks(content: string): string {
 export default definePlugin({
     name: "QuestionMarkReplace",
     description: "Replace all question marks with chosen string, if message only contains question marks.",
-    authors: [Devs.nyx],
+    authors: [EquicordDevs.nyx],
 
     settings,
 

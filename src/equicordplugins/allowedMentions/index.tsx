@@ -7,7 +7,7 @@
 import { addPreSendListener, MessageExtra, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, GuildStore, PermissionsBits, PermissionStore } from "@webpack/common";
@@ -17,7 +17,7 @@ import { AllowedMentions, AllowedMentionsBar, AllowedMentionsProps, AllowedMenti
 
 export default definePlugin({
     name: "AllowedMentions",
-    authors: [Devs.arHSM, Devs.amia],
+    authors: [EquicordDevs.arHSM, Devs.amia],
     description: "Fine grained control over whom to ping when sending or editing a message.",
     dependencies: ["MessageEventsAPI"],
     settings: definePluginSettings({

@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal } from "@utils/modal";
@@ -286,7 +286,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "FakeProfileThemes",
     description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible, zero-width characters",
-    authors: [Devs.ryan],
+    authors: [EquicordDevs.ryan],
     patches: [
         {
             find: '"UserProfileStore"',

@@ -45,23 +45,23 @@ const ContributorBadge: ProfileBadge = {
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let EquicordDonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
-async function loadBadges(noCache = false) {
-
-    DonorBadges = {};
-
+async function loadBadges(url: string, noCache = false) {
     const init = {} as RequestInit;
-    if (noCache)
-        init.cache = "no-cache";
+    if (noCache) init.cache = "no-cache";
 
-    const one = await fetch("https://badges.vencord.dev/badges.json", init)
-        .then(r => r.json());
-
-    const two = await fetch("https://raw.githubusercontent.com/Equicord/Ignore/main/badges.json", init)
-        .then(r => r.json());
-
-    DonorBadges = { ...one, ...two };
+    return await fetch(url, init).then(r => r.json());
 }
+
+async function loadAllBadges(noCache = false) {
+    const vencordBadges = await loadBadges("https://badges.vencord.dev/badges.json", noCache);
+    const equicordBadges = await loadBadges("https://raw.githubusercontent.com/Equicord/Ignore/main/badges.json", noCache);
+
+    DonorBadges = vencordBadges;
+    EquicordDonorBadges = equicordBadges;
+}
+
 
 export default definePlugin({
     name: "BadgeAPI",
@@ -99,7 +99,7 @@ export default definePlugin({
 
     toolboxActions: {
         async "Refetch Badges"() {
-            await loadBadges(true);
+            await loadAllBadges(true);
             Toasts.show({
                 id: Toasts.genId(),
                 message: "Successfully refetched badges!",
@@ -110,7 +110,7 @@ export default definePlugin({
 
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);
-        await loadBadges();
+        await loadAllBadges();
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
@@ -173,6 +173,76 @@ export default definePlugin({
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
                                         Please consider supporting the development of Equicord by becoming a donor. It would mean a lot!
+                                    </Forms.FormText>
+                                </div>
+                            </Modals.ModalContent>
+                            <Modals.ModalFooter>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <DonateButton />
+                                </Flex>
+                            </Modals.ModalFooter>
+                        </Modals.ModalRoot>
+                    </ErrorBoundary>
+                ));
+            },
+        }));
+    },
+
+    getEquicordDonorBadges(userId: string) {
+        return EquicordDonorBadges[userId]?.map(badge => ({
+            image: badge.badge,
+            description: badge.tooltip,
+            position: BadgePosition.START,
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                }
+            },
+            onClick() {
+                const modalKey = openModal(props => (
+                    <ErrorBoundary noop onError={() => {
+                        closeModal(modalKey);
+                        // Will get my own in the future
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                    }}>
+                        <Modals.ModalRoot {...props}>
+                            <Modals.ModalHeader>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <Forms.FormTitle
+                                        tag="h2"
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center",
+                                            margin: 0
+                                        }}
+                                    >
+                                        <Heart />
+                                        Equicord Donor
+                                    </Forms.FormTitle>
+                                </Flex>
+                            </Modals.ModalHeader>
+                            <Modals.ModalContent>
+                                <Flex>
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                </Flex>
+                                <div style={{ padding: "1em" }}>
+                                    <Forms.FormText>
+                                        This Badge is a special perk for Equicord Donors
+                                    </Forms.FormText>
+                                    <Forms.FormText className={Margins.top20}>
+                                        Please consider supporting the development of Equicord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>

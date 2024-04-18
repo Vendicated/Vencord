@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
@@ -31,7 +31,7 @@ waitFor("HiddenVisually", mod => {
 export default definePlugin({
     name: "MessageLatency",
     description: "Displays an indicator for messages that took ≥n seconds to send",
-    authors: [Devs.arHSM],
+    authors: [EquicordDevs.arHSM],
     settings: definePluginSettings({
         latency: {
             type: OptionType.NUMBER,

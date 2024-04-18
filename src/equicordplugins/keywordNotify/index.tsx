@@ -10,7 +10,7 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput, UserStore, UserUtils, useState } from "@webpack/common";
@@ -90,7 +90,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "KeywordNotify",
-    authors: [Devs.camila314],
+    authors: [EquicordDevs.camila314],
     description: "Sends a notification if a given message matches certain keywords or regexes",
     settings,
     patches: [

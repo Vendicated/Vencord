@@ -5,7 +5,7 @@
  */
 
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -37,6 +37,19 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
                     {badges.getDonorBadges(author.id)?.map((badge: any) => (
+                        <RoleIconComponent
+                            className={roleIconClassName}
+                            name={badge.description}
+                            size={20}
+                            src={badge.image}
+                        />
+                    ))}
+                </span>
+            );
+        case "EquicordDonor":
+            return (
+                <span style={{ order: settings.store.VencordDonorPosition }}>
+                    {badges.getEquicordDonorBadges(author.id)?.map((badge: any) => (
                         <RoleIconComponent
                             className={roleIconClassName}
                             name={badge.description}
@@ -96,6 +109,7 @@ function ChatBadges({ author }: any) {
     return (
         <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
+            {settings.store.showVencordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
             {settings.store.showDiscordNitro && <CheckBadge badge={"DiscordNitro"} author={author} />}
@@ -105,7 +119,7 @@ function ChatBadges({ author }: any) {
 
 export default definePlugin({
     name: "ShowBadgesInChat",
-    authors: [Devs.Inbestigator, Devs.KrystalSkull],
+    authors: [Devs.Inbestigator, EquicordDevs.KrystalSkull],
     description: "Shows the message author's badges beside their name in chat.",
     dependencies: ["MessageDecorationsAPI"],
     patches: [

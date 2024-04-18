@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { Forms, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
@@ -54,7 +54,7 @@ const { encodeStreamKey }: {
 export default definePlugin({
     name: "WhosWatching",
     description: "Lets you view what users are watching your stream by hovering over the screenshare icon",
-    authors: [Devs.fres],
+    authors: [EquicordDevs.fres],
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",

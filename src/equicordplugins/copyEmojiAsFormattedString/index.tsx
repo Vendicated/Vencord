@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Clipboard, Menu, showToast, Toasts } from "@webpack/common";
 
@@ -54,7 +54,7 @@ function getEmojiFormattedString(target: Target): string {
 export default definePlugin({
     name: "CopyEmojiAsString",
     description: "Add's button to copy emoji as formatted string!",
-    authors: [Devs.HAPPY_ENDERMAN, Devs.VISHNYA_NET_CHERESHNYA],
+    authors: [EquicordDevs.HAPPY_ENDERMAN, EquicordDevs.VISHNYA_NET_CHERESHNYA],
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target; }) {
             if (target.dataset.type !== "emoji") return;

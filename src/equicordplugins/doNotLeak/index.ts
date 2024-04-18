@@ -18,7 +18,7 @@
 
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import styles from "./style.css?managed";
@@ -54,7 +54,7 @@ migratePluginSettings("DoNotLeak", "Do Not Leak!");
 export default definePlugin({
     name: "DoNotLeak",
     description: "Hide all message contents and attachments when you're streaming or sharing your screen.",
-    authors: [Devs.Perny],
+    authors: [EquicordDevs.Perny],
     settings,
     start() {
         document.addEventListener("keyup", keyUpHandler);

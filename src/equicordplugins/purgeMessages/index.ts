@@ -17,7 +17,7 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { MessageStore, UserStore } from "@webpack/common";
@@ -45,7 +45,7 @@ export default definePlugin({
     name: "MessagePurge",
     description: "Purges messages from a channel",
     dependencies: ["CommandsAPI"],
-    authors: [Devs.bhop, Devs.nyx],
+    authors: [EquicordDevs.bhop, EquicordDevs.nyx],
     commands: [
         {
             name: "purge",

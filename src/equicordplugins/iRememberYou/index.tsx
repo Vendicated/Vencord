@@ -8,7 +8,7 @@ import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { Heart } from "@components/Heart";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -370,7 +370,7 @@ class DataUI {
 export default definePlugin({
     name: "IRememberYou",
     description: "Locally saves everyone you've been communicating with (including servers), in case of lose",
-    authors: [Devs.zoodogood],
+    authors: [EquicordDevs.zoodogood],
     dependencies: ["MessageEventsAPI"],
     patches: [],
 

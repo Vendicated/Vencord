@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -20,7 +20,7 @@ interface ModifiedUser extends User {
 export default definePlugin({
     name: "NoNitroUpsell",
     description: "Removes ALL of Discord's nitro upsells by tricking the client into thinking you have nitro.",
-    authors: [Devs.thororen],
+    authors: [EquicordDevs.thororen],
     ready(user: ModifiedUser): void {
         if (!user) return;
         if ("_realPremiumType" in user) return;

@@ -5,7 +5,7 @@
  */
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 import type { Guild } from "discord-types/general";
@@ -26,9 +26,9 @@ export default definePlugin({
     name: "emojiDumper",
     description: "Context menu to dump and download a server's emojis.",
     authors: [
-        Devs.Cortex,
+        EquicordDevs.Cortex,
         Devs.Samwich,
-        Devs.Woosh,
+        EquicordDevs.Woosh,
     ],
     start() {
         addContextMenuPatch(["guild-context", "guild-header-popout"], Patch);

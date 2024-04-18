@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
 import { PassiveUpdateState, VoiceState } from "@webpack/types";
@@ -101,7 +101,7 @@ let runOneTime = true;
 export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
-    authors: [Devs.MaxHerbold, Devs.D3SOX],
+    authors: [EquicordDevs.MaxHerbold, Devs.D3SOX],
 
     settings,
 

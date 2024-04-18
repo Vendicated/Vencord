@@ -7,13 +7,13 @@
 import "./style.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "VoiceDownload",
     description: "Download voice messages.",
-    authors: [Devs.puv],
+    authors: [EquicordDevs.puv],
     patches: [
         {
             find: ".rippleContainer",

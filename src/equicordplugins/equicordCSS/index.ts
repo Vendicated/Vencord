@@ -19,7 +19,7 @@
 // Import required modules and components
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 // Importing the style managed fixes on and off switch
@@ -81,7 +81,7 @@ migratePluginSettings("EquicordCSS", "EquicordBuiltIn");
 export default definePlugin({
     name: "EquicordCSS",
     description: "CSS for Equicord users. You will need to look at the settings.",
-    authors: [Devs.FoxStorm1, Devs.thororen],
+    authors: [EquicordDevs.FoxStorm1, EquicordDevs.thororen],
     dependencies: ["ThemeAttributes"],
     settings,
     start() {

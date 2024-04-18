@@ -19,7 +19,7 @@
 import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Clipboard, Toasts } from "@webpack/common";
 
@@ -57,7 +57,7 @@ function getUsernames(contacts: ContactsList[], type: number): string[] {
 export default definePlugin({
     name: "ExportContacts",
     description: "Export a list of friends to your clipboard. Adds a new button to the menu bar for the friends tab.",
-    authors: [Devs.dat_insanity],
+    authors: [EquicordDevs.dat_insanity],
     patches: [
         {
             find: "fetchRelationships(){",

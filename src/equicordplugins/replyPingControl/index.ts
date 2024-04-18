@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { MessageStore, showToast, UserStore } from "@webpack/common";
 import { MessageJSON } from "discord-types/general";
@@ -43,7 +43,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "ReplyPingControl",
     description: "Control whether to always or never get pinged on message replies, with a whitelist feature",
-    authors: [Devs.ant0n, Devs.MrDiamond],
+    authors: [Devs.ant0n, EquicordDevs.MrDiamond],
     settings,
 
     patches: [{

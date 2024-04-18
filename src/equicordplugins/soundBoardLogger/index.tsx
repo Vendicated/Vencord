@@ -6,7 +6,7 @@
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
@@ -29,10 +29,10 @@ const chatBarIcon: ChatBarButton = () => {
 export default definePlugin({
     name: "SoundBoardLogger",
     authors: [
-        Devs.ImpishMoxxie,
-        Devs.fres,
+        EquicordDevs.Moxxie,
+        EquicordDevs.fres,
         Devs.echo,
-        Devs.thororen
+        EquicordDevs.thororen
     ],
     settings,
     patches: [

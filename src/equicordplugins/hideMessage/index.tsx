@@ -11,7 +11,7 @@ import { get, set } from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu } from "@webpack/common";
 
@@ -129,7 +129,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "HideMessage",
     description: "Adds a context menu option to hide messages",
-    authors: [Devs.Hanzy],
+    authors: [EquicordDevs.Hanzy],
     settings,
 
     contextMenus: {

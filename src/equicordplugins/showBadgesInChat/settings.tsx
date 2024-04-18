@@ -23,6 +23,18 @@ const settings = definePluginSettings({
         hidden: true,
         default: 0
     },
+    showEquicordDonor: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to show Vencord donor badges in chat.",
+        hidden: true,
+        default: true
+    },
+    EquicordDonorPosition: {
+        type: OptionType.NUMBER,
+        description: "The position of the Vencord Donor badges.",
+        hidden: true,
+        default: 1
+    },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
         description: "Enable to show Vencord contributor badges in chat.",
@@ -33,7 +45,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Contributor badge.",
         hidden: true,
-        default: 1
+        default: 2
     },
     showDiscordProfile: {
         type: OptionType.BOOLEAN,
@@ -45,7 +57,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord profile badges.",
         hidden: true,
-        default: 2
+        default: 3
     },
     showDiscordNitro: {
         type: OptionType.BOOLEAN,
@@ -57,7 +69,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord Nitro badge.",
         hidden: true,
-        default: 3
+        default: 4
     },
     badgeSettings: {
         type: OptionType.COMPONENT,
@@ -71,6 +83,7 @@ export default settings;
 const BadgeSettings = () => {
     const [images, setImages] = useState([
         { src: "https://cdn.discordapp.com/emojis/1026533070955872337.png", shown: settings.store.showVencordDonor, title: "Vencord donor badges", key: "VencordDonor", position: settings.store.VencordDonorPosition },
+        { src: "https://i.imgur.com/KsxHlbD.png", shown: settings.store.showEquicordDonor, title: "Equicord donor badges", key: "EquicordDonor", position: settings.store.EquicordDonorPosition },
         { src: "https://i.imgur.com/OypoHrV.png", shown: settings.store.showVencordContributor, title: "Vencord/Equicord contributor badge", key: "VencordContributer", position: settings.store.VencordContributorPosition },
         { src: "https://cdn.discordapp.com/badge-icons/bf01d1073931f921909045f3a39fd264.png", shown: settings.store.showDiscordProfile, title: "Discord profile badges (HypeSquad, Discord Staff, Active Developer, etc.)", key: "DiscordProfile", position: settings.store.DiscordProfilePosition },
         { src: "https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png", shown: settings.store.showDiscordNitro, title: "Nitro badge", key: "DiscordNitro", position: settings.store.DiscordNitroPosition }
@@ -82,6 +95,10 @@ const BadgeSettings = () => {
                 case "VencordDonor":
                     settings.store.VencordDonorPosition = image.position;
                     settings.store.showVencordDonor = image.shown;
+                    break;
+                case "EquiordDonor":
+                    settings.store.EquicordDonorPosition = image.position;
+                    settings.store.showEquicordDonor = image.shown;
                     break;
                 case "VencordContributer":
                     settings.store.VencordContributorPosition = image.position;

@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "UnlimitedAccounts",
     description: "Increases the amount of accounts you can add.",
-    authors: [Devs.Balaclava, Devs.thororen],
+    authors: [EquicordDevs.Balaclava, EquicordDevs.thororen],
     patches: [
         {
             find: "multiaccount_cta_tooltip_seen",

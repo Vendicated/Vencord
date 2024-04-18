@@ -2,13 +2,15 @@
 
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord
 
+Thank you to [Suncord](https://github.com/verticalsync/Suncord) by verticalsync for letting me rob your code sometimes :3
+
 ![image](https://i.ibb.co/xgNr2gq/image-2023-11-24-122019133.png)
 
 ## Features
 
 -   Third-party plugins implemented into the main build.
 -   100+ plugins built-in.
-    -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, PermissionsViewer, 
+    -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, PermissionsViewer,
         CustomCommands, ShowHiddenChannels, PronounDB
 -   Fairly lightweight despite the many inbuilt plugins
 -   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience, I recommend stable!)

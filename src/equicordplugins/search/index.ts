@@ -17,12 +17,12 @@
 */
 
 import { ApplicationCommandOptionType, findOption } from "@api/Commands";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "Search",
-    authors: [Devs.JacobTm, Devs.thororen],
+    authors: [Devs.JacobTm, EquicordDevs.thororen],
     description: "Searchs the web.",
     dependencies: ["CommandsAPI"],
     commands: [{
