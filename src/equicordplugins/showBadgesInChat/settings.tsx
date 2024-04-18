@@ -21,7 +21,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Donor badges.",
         hidden: true,
-        default: 1
+        default: 0
     },
     showVencordDonor: {
         type: OptionType.BOOLEAN,
@@ -33,7 +33,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Donor badges.",
         hidden: true,
-        default: 0
+        default: 1
     },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
