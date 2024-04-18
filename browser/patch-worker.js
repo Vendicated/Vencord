@@ -26,13 +26,15 @@ limitations under the License.
     'use strict';
     var Worker_ = window.Worker;
     var URL = window.URL || window.webkitURL;
-    // Create dummy worker for the following purposes:
-    // 1. Don't override the global Worker object if the fallback isn't
-    //    going to work (future API changes?)
-    // 2. Use it to trigger early validation of postMessage calls
-    // Note: Blob constructor is supported since Chrome 20, but since
-    // some of the used Chrome APIs are only supported as of Chrome 20,
-    //  I don't bother adding a BlobBuilder fallback.
+    /*
+    Create dummy worker for the following purposes:
+    1. Don't override the global Worker object if the fallback isn't
+       going to work (future API changes?)
+    2. Use it to trigger early validation of postMessage calls
+    Note: Blob constructor is supported since Chrome 20, but since
+    some of the used Chrome APIs are only supported as of Chrome 20,
+    I don't bother adding a BlobBuilder fallback.
+    */
     var dummyWorker = new Worker_(
         URL.createObjectURL(new Blob([], { type: 'text/javascript' })));
     window.Worker = function Worker(scriptURL) {
