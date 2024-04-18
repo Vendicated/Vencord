@@ -22,9 +22,10 @@ import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
+const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 
@@ -392,6 +393,8 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
+        const { profileThemeStyle } = useProfileThemeStyle({});
+
         return (
             <>
                 <Forms.FormText>
@@ -405,7 +408,7 @@ export default definePlugin({
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
-                <div style={{ width: "284px" }}>
+                <div style={{ width: "284px", ...profileThemeStyle }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}
