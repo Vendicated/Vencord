@@ -18,7 +18,7 @@
 
 import { Clipboard, Toasts } from "@webpack/common";
 
-import { DevsById } from "./constants";
+import { DevsById, EquicordDevsById } from "./constants";
 
 /**
  * Recursively merges defaults into an object and returns the same object
@@ -114,3 +114,4 @@ export function identity<T>(value: T): T {
 export const isMobile = navigator.userAgent.includes("Mobi");
 
 export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const isEquicordPluginDev = (id: string) => Object.hasOwn(EquicordDevsById, id);

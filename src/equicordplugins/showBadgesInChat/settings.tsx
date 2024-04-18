@@ -13,7 +13,7 @@ import { Text, useEffect, UserStore, useState } from "@webpack/common";
 const settings = definePluginSettings({
     showEquicordDonor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Vencord donor badges in chat.",
+        description: "Enable to show Equicord donor badges in chat.",
         hidden: true,
         default: true
     },
@@ -22,6 +22,18 @@ const settings = definePluginSettings({
         description: "The position of the Vencord Donor badges.",
         hidden: true,
         default: 0
+    },
+    showEquicordContributor: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to show Equicord contributor badges in chat.",
+        hidden: true,
+        default: true
+    },
+    EquicordContributorPosition: {
+        type: OptionType.NUMBER,
+        description: "The position of the Equicord Contributor badge.",
+        hidden: true,
+        default: 1
     },
     showVencordDonor: {
         type: OptionType.BOOLEAN,
@@ -33,7 +45,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Donor badges.",
         hidden: true,
-        default: 1
+        default: 2
     },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
@@ -45,7 +57,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Contributor badge.",
         hidden: true,
-        default: 2
+        default: 3
     },
     showDiscordProfile: {
         type: OptionType.BOOLEAN,
@@ -57,7 +69,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord profile badges.",
         hidden: true,
-        default: 3
+        default: 4
     },
     showDiscordNitro: {
         type: OptionType.BOOLEAN,
@@ -69,7 +81,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord Nitro badge.",
         hidden: true,
-        default: 4
+        default: 5
     },
     badgeSettings: {
         type: OptionType.COMPONENT,
@@ -83,6 +95,7 @@ export default settings;
 const BadgeSettings = () => {
     const [images, setImages] = useState([
         { src: "https://i.imgur.com/KsxHlbD.png", shown: settings.store.showEquicordDonor, title: "Equicord donor badges", key: "EquicordDonor", position: settings.store.EquicordDonorPosition },
+        { src: "https://github.com/Equicord/Ignore/blob/main/icon.png?raw=true", shown: settings.store.showEquicordContributor, title: "Equicord donor badges", key: "EquicordDonor", position: settings.store.EquicordContributorPosition },
         { src: "https://cdn.discordapp.com/emojis/1026533070955872337.png", shown: settings.store.showVencordDonor, title: "Vencord donor badges", key: "VencordDonor", position: settings.store.VencordDonorPosition },
         { src: "https://i.imgur.com/OypoHrV.png", shown: settings.store.showVencordContributor, title: "Vencord/Equicord contributor badge", key: "VencordContributer", position: settings.store.VencordContributorPosition },
         { src: "https://cdn.discordapp.com/badge-icons/bf01d1073931f921909045f3a39fd264.png", shown: settings.store.showDiscordProfile, title: "Discord profile badges (HypeSquad, Discord Staff, Active Developer, etc.)", key: "DiscordProfile", position: settings.store.DiscordProfilePosition },
@@ -95,6 +108,10 @@ const BadgeSettings = () => {
                 case "EquiordDonor":
                     settings.store.EquicordDonorPosition = image.position;
                     settings.store.showEquicordDonor = image.shown;
+                    break;
+                case "EquiordContributer":
+                    settings.store.EquicordContributorPosition = image.position;
+                    settings.store.showEquicordContributor = image.shown;
                     break;
                 case "VencordDonor":
                     settings.store.VencordDonorPosition = image.position;

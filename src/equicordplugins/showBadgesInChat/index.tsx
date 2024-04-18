@@ -6,7 +6,7 @@
 
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { isPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
@@ -35,7 +35,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
     switch (badge) {
         case "EquicordDonor":
             return (
-                <span style={{ order: settings.store.VencordDonorPosition }}>
+                <span style={{ order: settings.store.EquicordDonorPosition }}>
                     {badges.getEquicordDonorBadges(author.id)?.map((badge: any) => (
                         <RoleIconComponent
                             className={roleIconClassName}
@@ -46,6 +46,17 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                     ))}
                 </span>
             );
+        case "EquicordContributer":
+            return isEquicordPluginDev(author.id) ? (
+                <span style={{ order: settings.store.EquicordContributorPosition }}>
+                    <RoleIconComponent
+                        className={roleIconClassName}
+                        name={"Equicord Contributor"}
+                        size={20}
+                        src={"https://github.com/Equicord/Ignore/blob/main/icon.png?raw=true"}
+                    />
+                </span>
+            ) : null;
         case "VencordDonor":
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
@@ -64,7 +75,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                 <span style={{ order: settings.store.VencordContributorPosition }}>
                     <RoleIconComponent
                         className={roleIconClassName}
-                        name={"Vencord/Equicord Contributor"}
+                        name={"Vencord Contributor"}
                         size={20}
                         src={"https://i.imgur.com/OypoHrV.png"}
                     />
@@ -108,7 +119,8 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
 function ChatBadges({ author }: any) {
     return (
         <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
-            {settings.store.showVencordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
+            {settings.store.showEquicordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
+            {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributor"} author={author} />}
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}

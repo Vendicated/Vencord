@@ -9,7 +9,7 @@ import "./contributorModal.css";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { DevsById } from "@utils/constants";
+import { DevsById, EquicordDevsById } from "@utils/constants";
 import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Forms, MaskedLink, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
@@ -63,8 +63,8 @@ function ContributorModal({ user }: { user: User; }) {
 
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
-        const pluginsByAuthor = DevsById[user.id]
-            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
+        const pluginsByAuthor = DevsById[user.id] || EquicordDevsById[user.id]
+            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id] || EquicordDevsById[user.id]))
             : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
 
         return pluginsByAuthor

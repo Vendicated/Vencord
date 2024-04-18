@@ -23,15 +23,16 @@ import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { isPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://i.imgur.com/OypoHrV.png";
+const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
+const EQUICORD_CONTRIBUTOR_BADGE = "https://github.com/Equicord/Ignore/blob/main/icon.png?raw=true";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord/Equicord Contributor",
+    description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     props: {
@@ -41,6 +42,20 @@ const ContributorBadge: ProfileBadge = {
         }
     },
     shouldShow: ({ user }) => isPluginDev(user.id),
+    link: "https://github.com/Vendicated/Vencord"
+};
+
+const EquicordContributorBadge: ProfileBadge = {
+    description: "Equicord Contributor",
+    image: EQUICORD_CONTRIBUTOR_BADGE,
+    position: BadgePosition.START,
+    props: {
+        style: {
+            borderRadius: "50%",
+            transform: "scale(0.9)" // The image is a bit too big compared to default badges
+        }
+    },
+    shouldShow: ({ user }) => isEquicordPluginDev(user.id),
     link: "https://github.com/Vendicated/Vencord"
 };
 
@@ -110,6 +125,7 @@ export default definePlugin({
 
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);
+        Vencord.Api.Badges.addBadge(EquicordContributorBadge);
         await loadAllBadges();
     },
 

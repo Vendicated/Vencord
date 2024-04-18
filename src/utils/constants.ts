@@ -581,3 +581,11 @@ export const DevsById = /* #__PURE__*/ (() =>
             .map(([_, v]) => [v.id, v] as const)
     ))
 )() as Record<string, Dev>;
+
+export const EquicordDevsById = /* #__PURE__*/ (() =>
+    Object.freeze(Object.fromEntries(
+        Object.entries(EquicordDevs)
+            .filter(d => d[1].id !== 0n)
+            .map(([_, v]) => [v.id, v] as const)
+    ))
+)() as Record<string, Dev>;

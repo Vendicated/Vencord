@@ -18,7 +18,7 @@
 
 import { DataStore } from "@api/index";
 import { Devs, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_ID } from "@utils/constants";
-import { isPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { isOutdated } from "@utils/updater";
@@ -115,6 +115,7 @@ ${makeCodeblock(enabledPlugins.join(", ") + "\n\n" + enabledApiPlugins.join(", "
             });
 
             if (isPluginDev(UserStore.getCurrentUser().id)) return;
+            if (isEquicordPluginDev(UserStore.getCurrentUser().id)) return;
 
             if (isOutdated && gitHash !== await DataStore.get(REMEMBER_DISMISS_KEY)) {
                 const rememberDismiss = () => DataStore.set(REMEMBER_DISMISS_KEY, gitHash);
