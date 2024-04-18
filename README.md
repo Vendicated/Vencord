@@ -2,7 +2,7 @@
 
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord
 
-Thank you to [Suncord](https://github.com/verticalsync/Suncord) by verticalsync for letting me rob your code sometimes :3
+Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for letting me rob your code sometimes :3
 
 ![image](https://i.ibb.co/xgNr2gq/image-2023-11-24-122019133.png)
 
