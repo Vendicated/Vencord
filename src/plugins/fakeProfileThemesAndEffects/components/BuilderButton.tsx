@@ -25,7 +25,7 @@ export const BuilderButton = ({ label, tooltip, selectedStyle, buttonProps }: Bu
                     role="button"
                     tabIndex={0}
                     style={{
-                        ...selectedStyle || { border: "2px dashed var(--header-secondary)" },
+                        ...selectedStyle ?? { border: "2px dashed var(--header-secondary)" },
                         display: "grid",
                         placeItems: "center",
                         height: "60px",

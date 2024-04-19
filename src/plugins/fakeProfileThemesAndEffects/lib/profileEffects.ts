@@ -39,7 +39,7 @@ export interface ProfileEffect extends Pick<ProfileEffectConfig, "id"> {
 }
 
 export let ProfileEffectRecord: {
-    new(effect: Omit<ProfileEffect, "config">): typeof effect & Pick<ProfileEffectConfig, "type">;
+    new (effect: Omit<ProfileEffect, "config">): typeof effect & Pick<ProfileEffectConfig, "type">;
     fromServer: (effect: Pick<ProfileEffectConfig, "id" | "sku_id">) => Omit<ProfileEffect, "config"> & Pick<ProfileEffectConfig, "type">;
 };
 

@@ -43,7 +43,7 @@ export function Builder({ guildId }: BuilderProps) {
                     <BuilderButton
                         label="Effect"
                         tooltip={effect?.title}
-                        selectedStyle={effect !== null ? {
+                        selectedStyle={effect ? {
                             background: `top / cover url(${effect.thumbnailPreviewSrc}), top / cover url(/assets/f328a6f8209d4f1f5022.png)`
                         } : undefined}
                         buttonProps={{
@@ -56,7 +56,7 @@ export function Builder({ guildId }: BuilderProps) {
                         style={{
                             display: "flex",
                             alignItems: "center",
-                            flexDirection: "column",
+                            flexDirection: "column"
                         }}
                     >
                         <Button
