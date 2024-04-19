@@ -18,6 +18,33 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Message, User } from "discord-types/general";
+
+const defaultId = "-0";
+
+const CachedInfo = new Array<string | Number>(defaultId, 0);
+interface SearchFinishProps {
+    type?: string,
+    searchId?: string,
+    guildId?: string | null,
+    messages?: Array<Array<Message>>,
+    threads?: Array<any>,
+    members?: Array<User>,
+    totalResults: Number,
+    analyticsId?: null,
+    hasError?: Boolean,
+    doingHistoricalIndex?: Boolean,
+    documentsIndexed?: Number;
+}
+
+function searchFinish(payload: SearchFinishProps) {
+    console.log(payload);
+    if (payload.messages && payload.messages.length) {
+        CachedInfo[0] = payload.messages.pop()![0]?.id ?? defaultId;
+        CachedInfo[1] = payload.totalResults;
+        console.log("CHECKS " + CachedInfo[0]);
+    }
+}
 
 export default definePlugin({
     name: "SearchFix",
@@ -26,22 +53,37 @@ export default definePlugin({
     authors: [Devs.Jaxx],
     patches: [
         {
-            find: ".displayName=\"SearchStore\";",
+            find: '"SearchStore"',
             replacement: {
                 match: /(\i)\.offset=null!==\((\i)=(\i)\.offset\)&&void 0!==(\i)\?(\i):0/i,
-                replace: (_, v, v1,query,v3,v4) => `$self.main(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
+                replace: (_, v, v1, query, v3, v4) => `$self.main(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
             }
         }
     ],
-    main(query){
+    main(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
+        console.log("CHECKS");
+        console.log(query);
         if (query.offset > 5000) {
-            query.sort_order = query.sort_order === "asc" ? "desc" : "asc";
+            const currentAsc = query.sort_order === "asc"; // 1: old to new | 0: new to old
 
-            if (query.offset > 5000 - 5000) {
+            if ((CachedInfo[1] as number) - 5000 > 5000) {
                 query.offset = 0;
+                if (CachedInfo[0] !== defaultId) {
+                    if (currentAsc) {
+                        query.min_id = CachedInfo[0] as string;
+                    }
+                    else {
+                        query.max_id = CachedInfo[0] as string;
+                    }
+                }
             } else {
+                query.sort_order = currentAsc ? "desc" : "asc";
                 query.offset -= 5000;
             }
         }
-    }
+    },
+    flux: {
+        "SEARCH_FINISH": searchFinish,
+    },
+
 });
