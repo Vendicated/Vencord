@@ -24,6 +24,7 @@ import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import { VoiceChannelIdSection } from "./components/VoiceChannelIdSection";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
@@ -50,7 +51,12 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     if (!channelId) return null;
 
     const channel = ChannelStore.getChannel(channelId);
-    if (!channel) return null;
+    if (!channel) return (
+        <VoiceChannelIdSection
+            channelId={channelId}
+            showHeader={settings.store.showVoiceChannelSectionHeader}
+        />
+    );
 
     const guild = GuildStore.getGuild(channel.guild_id);
 
@@ -92,6 +98,14 @@ export default definePlugin({
             </div>
         );
     },
+    patchProfilePanel: ({ id }: { id: string; }) => {
+        const user = UserStore.getUser(id);
+        return (
+            <div className={""}>
+                <VoiceChannelField user={user} />
+            </div>
+        );
+    },
 
     patches: [
         // above message box
@@ -108,6 +122,14 @@ export default definePlugin({
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+        {
+            find: "\"Profile Panel: user cannot be undefined\"",
+            replacement: {
+                // createElement(Divider, {}), createElement(NoteComponent)
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
+                replace: "$self.patchProfilePanel({ id: $1.recipients[0] }),$&"
             }
         }
     ],
