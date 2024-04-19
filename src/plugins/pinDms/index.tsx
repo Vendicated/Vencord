@@ -29,7 +29,7 @@ interface ChannelComponentProps {
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
@@ -236,7 +236,7 @@ export default definePlugin({
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
+        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
