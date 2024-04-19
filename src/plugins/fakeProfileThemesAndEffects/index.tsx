@@ -10,7 +10,7 @@ import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { useMemo } from "@webpack/common";
 
-import { Builder, BuilderProps, setCustomColorPicker, setCustomizationSection, setProfileEffectModal, settingsAboutComponent, setUseAvatarColors } from "./components";
+import { Builder, type BuilderProps, setCustomColorPicker, setCustomizationSection, setProfileEffectModal, settingsAboutComponent, setUseAvatarColors } from "./components";
 import { ProfileEffectRecord, ProfileEffectStore, setProfileEffectRecord, setProfileEffectStore } from "./lib/profileEffects";
 import { profilePreviewHook } from "./lib/profilePreview";
 import { decodeUserBioFPTEHook } from "./lib/userProfile";

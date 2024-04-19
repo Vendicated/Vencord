@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ModalProps, openModal } from "@utils/modal";
+import { type ModalProps, openModal } from "@utils/modal";
 import { extractAndLoadChunksLazy } from "@webpack";
 import type { ComponentType, FunctionComponent, PropsWithChildren, ReactNode } from "react";
 

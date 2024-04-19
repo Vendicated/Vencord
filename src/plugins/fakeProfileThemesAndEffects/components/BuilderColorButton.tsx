@@ -6,7 +6,7 @@
 
 import { Popout } from "@webpack/common";
 
-import { BuilderButton, BuilderButtonProps, CustomColorPicker, CustomColorPickerProps } from ".";
+import { BuilderButton, type BuilderButtonProps, CustomColorPicker, type CustomColorPickerProps } from ".";
 
 export interface BuilderColorButtonProps extends Pick<BuilderButtonProps, "label">, Pick<CustomColorPickerProps, "suggestedColors"> {
     color: number | null;
