@@ -34,8 +34,8 @@ export function encodeColorsLegacy(primary: number, accent: number) {
  * @see {@link encodeColorsLegacy}
  */
 export function decodeColorsLegacy(str: string): [primaryColor: number, accentColor: number] {
-    const colors = str.matchAll(/(?<=#)[\dA-Fa-f]{1,6}/g);
-    return [parseInt(colors.next().value?.[0], 16) || -1, parseInt(colors.next().value?.[0], 16) || -1];
+    const [primary, accent] = str.matchAll(/(?<=#)[\dA-Fa-f]{1,6}/g);
+    return [primary ? parseInt(primary[0], 16) : -1, accent ? parseInt(accent[0], 16) : -1];
 }
 
 /**
