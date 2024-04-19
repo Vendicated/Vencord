@@ -16,17 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
-import gitRemote from "~git-remote";
-
-export {
-    gitHash,
-    gitRemote
-};
-
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
@@ -58,6 +49,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cynosphere",
         id: 150745989836308480n
     },
+    Trwy: {
+        name: "trey",
+        id: 354427199023218689n
+    },
     Megu: {
         name: "Megumin",
         id: 545581357812678656n
@@ -66,8 +61,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
-        name: "obscurity",
+    fawn: {
+        name: "fawn",
         id: 336678828233588736n,
     },
     rushii: {
@@ -160,7 +155,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n
+        id: 715746190813298788n
     },
     dzshn: {
         name: "dzshn",
@@ -290,10 +285,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RyanCaoDev: {
         name: "RyanCaoDev",
         id: 952235800110694471n,
-    },
-    Strencher: {
-        name: "Strencher",
-        id: 415849376598982656n
     },
     FieryFlames: {
         name: "Fiery",
@@ -430,6 +421,26 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Elvyra: {
         name: "Elvyra",
         id: 708275751816003615n,
+    },
+    Inbestigator: {
+        name: "Inbestigator",
+        id: 761777382041714690n
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n
+    },
+    nakoyasha: {
+        name: "nakoyasha",
+        id: 222069018507345921n
+    },
+    Sqaaakoi: {
+        name: "Sqaaakoi",
+        id: 259558259491340288n
+    },
+    Byron: {
+        name: "byeoon",
+        id: 1167275288036655133n
     }
 } satisfies Record<string, Dev>);
 

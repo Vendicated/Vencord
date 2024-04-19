@@ -137,6 +137,16 @@ export default definePlugin({
             ],
             onChange: () => addDeleteStyle()
         },
+        logDeletes: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log deleted messages",
+            default: true,
+        },
+        logEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log edited messages",
+            default: true,
+        },
         ignoreBots: {
             type: OptionType.BOOLEAN,
             description: "Whether to ignore messages by bots",
@@ -197,8 +207,8 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
+    shouldIgnore(message: any, isEdit = false) {
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
         return ignoreBots && message.author?.bot ||
@@ -206,6 +216,7 @@ export default definePlugin({
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
@@ -214,7 +225,7 @@ export default definePlugin({
         {
             // MessageStore
             // Module 171447
-            find: "displayName=\"MessageStore\"",
+            find: '"MessageStore"',
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
@@ -241,7 +252,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -326,12 +337,12 @@ export default definePlugin({
         {
             // Attachment renderer
             // Module 96063
-            find: ".removeAttachmentHoverButton",
+            find: ".removeMosaicItemHoverButton",
             group: true,
             replacement: [
                 {
-                    match: /(className:\i,attachment:\i),/,
-                    replace: "$1,attachment: {deleted},"
+                    match: /(className:\i,item:\i),/,
+                    replace: "$1,item: deleted,"
                 },
                 {
                     match: /\[\i\.obscured\]:.+?,/,
@@ -369,7 +380,7 @@ export default definePlugin({
         {
             // ReferencedMessageStore
             // Module 778667
-            find: "displayName=\"ReferencedMessageStore\"",
+            find: '"ReferencedMessageStore"',
             replacement: [
                 {
                     match: /MESSAGE_DELETE:function\((\i)\).+?},/,
