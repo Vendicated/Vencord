@@ -15,27 +15,22 @@ import SelectorModal from "./selectorModal";
 export default function ColorwaysButton({
     listItemClass = "ColorwaySelectorBtnContainer",
     listItemWrapperClass = "",
-    listItemTooltipClass = "colorwaysBtn-tooltipContent",
-    position = "top"
+    listItemTooltipClass = "colorwaysBtn-tooltipContent"
 }: {
     listItemClass?: string;
     listItemWrapperClass?: string;
     listItemTooltipClass?: string;
-    position?: string;
 }) {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
-    const [pos, setPos] = useState<string>("bottom");
     const [isThin, setIsThin] = useState<boolean>(false);
     async function setButtonVisibility() {
-        const [showColorwaysButton, colorwaysBtnPos, useThinMenuButton] = await DataStore.getMany([
+        const [showColorwaysButton, useThinMenuButton] = await DataStore.getMany([
             "showColorwaysButton",
-            "colorwaysBtnPos",
             "useThinMenuButton"
         ]);
 
         setVisibility(showColorwaysButton);
-        setPos(colorwaysBtnPos);
         setIsThin(useThinMenuButton);
     }
 
@@ -62,7 +57,7 @@ export default function ColorwaysButton({
             {({ onMouseEnter, onMouseLeave, onClick }) => {
                 return (
                     <>
-                        {visibility ? <div className={listItemClass}>
+                        {visibility && <div className={listItemClass}>
                             <div
                                 className={listItemWrapperClass + " ColorwaySelectorBtn"}
                                 onMouseEnter={async () => {
@@ -75,7 +70,7 @@ export default function ColorwaysButton({
                                     openModal(props => <SelectorModal modalProps={props} />);
                                 }}
                             ><PalleteIcon /></div>
-                        </div> : <></>}
+                        </div>}
                     </>
                 );
             }}
@@ -90,7 +85,7 @@ export default function ColorwaysButton({
             {({ onMouseEnter, onMouseLeave, onClick }) => {
                 return (
                     <>
-                        {visibility ? <div className={listItemClass}>
+                        {visibility && <div className={listItemClass}>
                             <div
                                 className={listItemWrapperClass + " ColorwaySelectorBtn ColorwaySelectorBtn_thin"}
                                 onMouseEnter={async () => {
@@ -103,7 +98,7 @@ export default function ColorwaysButton({
                                     openModal(props => <SelectorModal modalProps={props} />);
                                 }}
                             ><Text variant="text-xs/normal" style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</Text></div>
-                        </div> : <></>}
+                        </div>}
                     </>
                 );
             }}

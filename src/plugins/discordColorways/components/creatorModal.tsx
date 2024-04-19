@@ -13,7 +13,6 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { findByCode } from "@webpack";
 import {
     Button,
     Forms,
@@ -26,11 +25,10 @@ import {
     useState,
 } from "@webpack/common";
 
-import { ColorPicker, LazySwatchLoaded } from "..";
+import { ColorPicker } from "..";
 import { knownThemeVars } from "../constants";
 import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
-import extractAndRequireModuleIds from "../util/requireModule";
 import { getHex, hexToString } from "../utils";
 import { ConflictingColorsModal } from "./conflictingColorsModal";
 import { ThemePreviewCategory } from "./themePreview";
@@ -56,13 +54,6 @@ export default function CreatorModal({
     const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
 
     useEffect(() => {
-        if (!LazySwatchLoaded) {
-            extractAndRequireModuleIds(
-                findByCode(
-                    "hasFullScreenLayer"
-                )
-            );
-        }
         const parsedID = colorwayID?.split("colorway:")[1];
         if (parsedID) {
             const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
@@ -83,6 +74,15 @@ export default function CreatorModal({
             }
         }
     });
+    const colorPickerProps = {
+        suggestedColors: [
+            "#313338",
+            "#2b2d31",
+            "#1e1f22",
+            "#5865f2",
+        ],
+        showEyeDropper: true
+    };
 
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal">
@@ -104,7 +104,7 @@ export default function CreatorModal({
                     Colors:
                 </Forms.FormTitle>
                 <div className="colorwayCreator-colorPreviews">
-                    {presetColorArray.includes("primary") ?
+                    {presetColorArray.includes("primary") &&
                         <ColorPicker
                             label={<Text className="colorwaysPicker-colorLabel">Primary</Text>}
                             color={parseInt(primaryColor, 16)}
@@ -115,15 +115,9 @@ export default function CreatorModal({
                                 }
                                 setPrimaryColor(hexColor);
                             }}
-                            showEyeDropper={true}
-                            suggestedColors={[
-                                "#313338",
-                                "#2b2d31",
-                                "#1e1f22",
-                                "#5865f2",
-                            ]}
-                        /> : <></>}
-                    {presetColorArray.includes("secondary") ?
+                            {...colorPickerProps}
+                        />}
+                    {presetColorArray.includes("secondary") &&
                         <ColorPicker
                             label={<Text className="colorwaysPicker-colorLabel">Secondary</Text>}
                             color={parseInt(secondaryColor, 16)}
@@ -134,15 +128,9 @@ export default function CreatorModal({
                                 }
                                 setSecondaryColor(hexColor);
                             }}
-                            showEyeDropper={true}
-                            suggestedColors={[
-                                "#313338",
-                                "#2b2d31",
-                                "#1e1f22",
-                                "#5865f2",
-                            ]}
-                        /> : <></>}
-                    {presetColorArray.includes("tertiary") ?
+                            {...colorPickerProps}
+                        />}
+                    {presetColorArray.includes("tertiary") &&
                         <ColorPicker
                             label={<Text className="colorwaysPicker-colorLabel">Tertiary</Text>}
                             color={parseInt(tertiaryColor, 16)}
@@ -153,15 +141,9 @@ export default function CreatorModal({
                                 }
                                 setTertiaryColor(hexColor);
                             }}
-                            showEyeDropper={true}
-                            suggestedColors={[
-                                "#313338",
-                                "#2b2d31",
-                                "#1e1f22",
-                                "#5865f2",
-                            ]}
-                        /> : <></>}
-                    {presetColorArray.includes("accent") ?
+                            {...colorPickerProps}
+                        />}
+                    {presetColorArray.includes("accent") &&
                         <ColorPicker
                             label={<Text className="colorwaysPicker-colorLabel">Accent</Text>}
                             color={parseInt(accentColor, 16)}
@@ -172,14 +154,8 @@ export default function CreatorModal({
                                 }
                                 setAccentColor(hexColor);
                             }}
-                            showEyeDropper={true}
-                            suggestedColors={[
-                                "#313338",
-                                "#2b2d31",
-                                "#1e1f22",
-                                "#5865f2",
-                            ]}
-                        /> : <></>}
+                            {...colorPickerProps}
+                        />}
                 </div>
                 <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
                     <div
@@ -217,7 +193,7 @@ export default function CreatorModal({
                         }}>
                             <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                {preset === "default" ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                                {preset === "default" && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                             </svg>
                             <Text variant="eyebrow" tag="h5">Default</Text>
                         </div>
@@ -228,7 +204,7 @@ export default function CreatorModal({
                             }}>
                                 <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                    {preset === pre.id ? <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" /> : <></>}
+                                    {preset === pre.id && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                                 </svg>
                                 <Text variant="eyebrow" tag="h5">{pre.name}</Text>
                             </div>;
@@ -264,7 +240,7 @@ export default function CreatorModal({
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway") + (preset === "default" ? "" : ": Made for " + getPreset()[preset].name),
-                            import: customColorwayCSS,
+                            "dc-import": customColorwayCSS,
                             accent: "#" + accentColor,
                             primary: "#" + primaryColor,
                             secondary: "#" + secondaryColor,

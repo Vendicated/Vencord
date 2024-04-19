@@ -190,14 +190,13 @@ export function ConflictingColorsModal({
                                                         }}
                                                     >Primary</div>
                                                     : (theme.primaryVariables
-                                                        ? <div
+                                                        && <div
                                                             className="colorwayCreator-colorPreview colorwayCreator-colorPreview_primary"
                                                             style={{ backgroundColor: `hsl(${getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l)})`, color: getFontOnBg(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l)})`)) }}
                                                             onClick={() => {
                                                                 setPrimaryColor(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.primaryVariables.l)})`));
                                                             }}
-                                                        >Primary</div>
-                                                        : <></>))
+                                                        >Primary</div>))
                                         }
                                         {theme.secondary && getComputedStyle(document.body).getPropertyValue(theme.secondary).match(/^\d.*%$/)
                                             ? <div
@@ -222,14 +221,13 @@ export function ConflictingColorsModal({
                                                     }}
                                                 >Secondary</div>
                                                 : (theme.secondaryVariables
-                                                    ? <div
+                                                    && <div
                                                         className="colorwayCreator-colorPreview colorwayCreator-colorPreview_secondary"
                                                         style={{ backgroundColor: `hsl(${getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l)})`, color: getFontOnBg(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l)})`)) }}
                                                         onClick={() => {
                                                             setSecondaryColor(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.secondaryVariables.l)})`));
                                                         }}
-                                                    >Secondary</div>
-                                                    : <></>))
+                                                    >Secondary</div>))
                                         }
                                         {theme.tertiary && getComputedStyle(document.body).getPropertyValue(theme.tertiary).match(/^\d.*%$/)
                                             ? <div
@@ -254,14 +252,13 @@ export function ConflictingColorsModal({
                                                     }}
                                                 >Tertiary</div>
                                                 : (theme.tertiaryVariables
-                                                    ? <div
+                                                    && <div
                                                         className="colorwayCreator-colorPreview colorwayCreator-colorPreview_tertiary"
                                                         style={{ backgroundColor: `hsl(${getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l)})`, color: getFontOnBg(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l)})`)) }}
                                                         onClick={() => {
                                                             setTertiaryColor(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.tertiaryVariables.l)})`));
                                                         }}
-                                                    >Tertiary</div>
-                                                    : <></>))}
+                                                    >Tertiary</div>))}
                                         {theme.accent && getComputedStyle(document.body).getPropertyValue(theme.accent).match(/^\d.*%$/)
                                             ? <div
                                                 className="colorwayCreator-colorPreview colorwayCreator-colorPreview_accent"
@@ -285,14 +282,13 @@ export function ConflictingColorsModal({
                                                     }}
                                                 >Accent</div>
                                                 : (theme.accentVariables
-                                                    ? <div
+                                                    && <div
                                                         className="colorwayCreator-colorPreview colorwayCreator-colorPreview_accent"
                                                         style={{ backgroundColor: `hsl(${getComputedStyle(document.body).getPropertyValue(theme.accentVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l)})`, color: getFontOnBg(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.accentVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l)})`)) }}
                                                         onClick={() => {
                                                             setAccentColor(getHex(`hsl(${getComputedStyle(document.body).getPropertyValue(theme.accentVariables.h)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.s)} ${!getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l).includes("%") ? (getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l) + "%") : getComputedStyle(document.body).getPropertyValue(theme.accentVariables.l)})`));
                                                         }}
-                                                    >Accent</div>
-                                                    : <></>))}
+                                                    >Accent</div>))}
                                     </div>
                                 </div>
                             );

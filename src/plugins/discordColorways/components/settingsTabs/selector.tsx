@@ -7,10 +7,8 @@
 /* eslint-disable arrow-parens */
 
 import * as DataStore from "@api/DataStore";
-import { CloseIcon, SearchIcon } from "@components/Icons";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { openModal } from "@utils/modal";
-import { findByCode } from "@webpack";
 import {
     Forms,
     Select,
@@ -21,13 +19,12 @@ import {
     useState,
 } from "@webpack/common";
 
-import { ColorwayCSS, LazySwatchLoaded } from "..";
-import { fallbackColorways } from "../constants";
-import { Colorway } from "../types";
-import extractAndRequireModuleIds from "../util/requireModule";
-import { ColorPickerModal } from "./colorPicker";
-import CreatorModal from "./creatorModal";
-import ColorwayInfoModal from "./infoModal";
+import { ColorwayCSS } from "../..";
+import { fallbackColorways } from "../../constants";
+import { Colorway } from "../../types";
+import { ColorPickerModal } from "../colorPicker";
+import CreatorModal from "../creatorModal";
+import ColorwayInfoModal from "../infoModal";
 
 export default function Selector({
     visibleTabProps = "all",
@@ -37,7 +34,6 @@ export default function Selector({
     const [currentColorway, setCurrentColorway] = useState<string>("");
     const [colorways, setColorways] = useState<Colorway[]>([]);
     const [customColorways, setCustomColorways] = useState<Colorway[]>([]);
-    const [searchBarVisibility, setSearchBarVisibility] = useState<boolean>(false);
     const [searchString, setSearchString] = useState<string>("");
     const [loaderHeight, setLoaderHeight] = useState<string>("2px");
     const [visibility, setVisibility] = useState<string>(visibleTabProps);
@@ -121,7 +117,22 @@ export default function Selector({
         <SettingsTab title="Colors">
             <div className="colorwaysSettingsSelector-wrapper">
                 <div className="colorwaySelector-doublePillBar">
-                    {searchBarVisibility === true ? (
+                    <div className="colorwaySelector-pillWrapper">
+                        <Select look={1} optionClassName="colorwaySelector-pillOption" className="colorwaySelector-pill colorwaySelector-pill_select" popoutClassName="colorwaySelector-pillPopout" options={[{
+                            value: "all",
+                            label: "All"
+                        },
+                        {
+                            value: "official",
+                            label: "Official"
+                        },
+                        {
+                            value: "custom",
+                            label: "Custom"
+                        }]} select={value => {
+                            setVisibility(value);
+                            DataStore.set("colorwaysBtnPos", value);
+                        }} isSelected={value => visibility === value} serialize={String} />
                         <TextInput
                             inputClassName="colorwaySelector-searchInput"
                             className="colorwaySelector-search"
@@ -132,27 +143,7 @@ export default function Selector({
                                 setSearchString(e);
                             }}
                         />
-                    ) : (
-                        <div className="colorwaySelector-pillWrapper">
-                            <Forms.FormTitle style={{ marginBottom: 0 }}>Show:</Forms.FormTitle>
-                            <Select look={1} optionClassName="colorwaySelector-pillOption" className="colorwaySelector-pill" popoutClassName="colorwaySelector-pillPopout" options={[{
-                                value: "all",
-                                label: "All"
-                            },
-                            {
-                                value: "official",
-                                label: "Official"
-                            },
-                            {
-                                value: "custom",
-                                label: "Custom"
-                            }]} select={value => {
-                                setVisibility(value);
-                                DataStore.set("colorwaysBtnPos", value);
-                            }} isSelected={value => visibility === value} serialize={String} />
-                        </div>
-                    )}
-                    <div className="colorwaySelector-pillSeparator" />
+                    </div>
                     <div className="colorwaySelector-pillWrapper">
                         <Tooltip text="Refresh Colorways...">
                             {({ onMouseEnter, onMouseLeave }) => {
@@ -205,15 +196,6 @@ export default function Selector({
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                         onClick={() => {
-                                            if (!LazySwatchLoaded) {
-                                                extractAndRequireModuleIds(
-                                                    findByCode(
-                                                        "Promise.all",
-                                                        "openModalLazy",
-                                                        "location_page"
-                                                    )
-                                                );
-                                            }
                                             openModal((props) => (
                                                 <CreatorModal
                                                     modalProps={props}
@@ -258,65 +240,21 @@ export default function Selector({
                                 );
                             }}
                         </Tooltip>
-                        {searchBarVisibility === false ? (
-                            <Tooltip text="Search...">
-                                {({ onMouseEnter, onMouseLeave }) => {
-                                    return (
-                                        <div
-                                            className="colorwaySelector-pill"
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}
-                                            onClick={() =>
-                                                setSearchBarVisibility(true)
-                                            }
-                                        >
-                                            <SearchIcon
-                                                width={14}
-                                                height={14}
-                                            />
-                                        </div>
-                                    );
-                                }}
-                            </Tooltip>
-                        ) : (
-                            <Tooltip text="Close Search">
-                                {({ onMouseEnter, onMouseLeave }) => {
-                                    return (
-                                        <div
-                                            className="colorwaySelector-pill"
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}
-                                            onClick={() => {
-                                                searchColorways("");
-                                                setSearchString("");
-                                                setSearchBarVisibility(false);
-                                            }}
-                                        >
-                                            <CloseIcon width={14} height={14} />
-                                        </div>
-                                    );
-                                }}
-                            </Tooltip>
-                        )}
                     </div>
                 </div>
                 <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }}></div></div>
                 <div className="ColorwaySelectorWrapper">
-                    {visibleColorwayArray.length === 0 ? (
-                        <>
-                            <Forms.FormTitle
-                                style={{
-                                    marginBottom: 0,
-                                    width: "100%",
-                                    textAlign: "center",
-                                }}
-                            >
-                                No colorways...
-                            </Forms.FormTitle>
-                        </>
-                    ) : (
-                        <></>
-                    )}
+                    {visibleColorwayArray.length === 0 &&
+                        <Forms.FormTitle
+                            style={{
+                                marginBottom: 0,
+                                width: "100%",
+                                textAlign: "center",
+                            }}
+                        >
+                            No colorways...
+                        </Forms.FormTitle>
+                    }
                     {visibleColorwayArray.map((color, ind) => {
                         var colors: Array<string> = color.colors || [
                             "accent",
@@ -407,10 +345,10 @@ export default function Selector({
                                                         );
                                                         DataStore.set(
                                                             "actveColorway",
-                                                            color.import
+                                                            color["dc-import"]
                                                         );
                                                         ColorwayCSS.set(
-                                                            color.import
+                                                            color["dc-import"]
                                                         );
                                                     }
                                                     DataStore.get(

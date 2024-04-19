@@ -8,18 +8,15 @@ import {
     ModalProps,
     ModalRoot,
 } from "@utils/modal";
-import { wreq } from "@webpack";
 import {
     Clipboard,
     Forms,
     ScrollerThin,
     TextInput,
     Toasts,
-    useEffect,
     useState,
 } from "@webpack/common";
 
-import { LazySwatchLoaded } from "..";
 import { colorVariables } from "../css";
 
 interface ToolboxItem {
@@ -157,12 +154,6 @@ export function ColorPickerModal({ modalProps }: { modalProps: ModalProps; }) {
         });
         setColorVarItems(results);
     }
-
-    useEffect(() => {
-        if (!LazySwatchLoaded) {
-            wreq.e(409214);
-        }
-    });
 
     return (
         <ModalRoot {...modalProps} className="colorwayCreator-modal colorwayCreator-menuWrapper">

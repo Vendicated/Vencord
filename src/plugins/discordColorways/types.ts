@@ -6,7 +6,7 @@
 
 export interface Colorway {
     name: string,
-    import: string,
+    "dc-import": string,
     accent: string,
     primary: string,
     secondary: string,

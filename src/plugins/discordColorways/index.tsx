@@ -27,15 +27,15 @@ import {
 import { ColorPickerModal } from "./components/colorPicker";
 import ColorwaysButton from "./components/colorwaysButton";
 import CreatorModal from "./components/creatorModal";
-import Selector from "./components/selector";
-import { SettingsPage } from "./components/settingsPage";
+import { ImportExportColorwaysPage } from "./components/settingsTabs/importExportPage";
+import { OnDemandWaysPage } from "./components/settingsTabs/onDemandSettings";
+import Selector from "./components/settingsTabs/selector";
+import { SettingsPage } from "./components/settingsTabs/settingsPage";
 import Spinner from "./components/spinner";
 import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
 import { ColorPickerProps } from "./types";
 import { getHex, stringToHex } from "./utils";
-
-export let LazySwatchLoaded = false;
 
 export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return <Spinner className="colorways-creator-module-warning" />;
@@ -46,7 +46,6 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
         customColorways,
         colorwaySourcesFiles,
         showColorwaysButton,
-        colorwaysBtnPos,
         onDemandWays,
         onDemandWaysTintedText,
         useThinMenuButton,
@@ -56,7 +55,6 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
         "customColorways",
         "colorwaySourceFiles",
         "showColorwaysButton",
-        "colorwaysBtnPos",
         "onDemandWays",
         "onDemandWaysTintedText",
         "useThinMenuButton",
@@ -72,9 +70,6 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 
     if (!showColorwaysButton)
         DataStore.set("showColorwaysButton", false);
-
-    if (!colorwaysBtnPos)
-        DataStore.set("colorwaysBtnPos", "bottom");
 
     if (!onDemandWays)
         DataStore.set("onDemandWays", false);
@@ -114,7 +109,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
             id="colorways-send-id"
             label={<Flex flexDirection="row" style={{ alignItems: "center", gap: 8 }}>
                 <SwatchIcon width={16} height={16} style={{ scale: "0.8" }} />
-                Share Colorway via ID
+                Share Colorway ID
             </Flex>}
             action={() => {
                 const colorwayIDArray = `#${getHex(getComputedStyle(document.body).getPropertyValue("--brand-experiment")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-primary")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-secondary")).split("#")[1]},#${getHex(getComputedStyle(document.body).getPropertyValue("--background-tertiary")).split("#")[1]}`;
@@ -132,20 +127,33 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.4.0",
+    pluginVersion: "5.5.0",
     creatorVersion: "1.18",
     toolboxActions: {
         "Change Colorway": () => SettingsRouter.open("ColorwaysSettings"),
-        "Open Colorway Creator": () =>
-            openModal(props => (
-                <ColorPickerModal modalProps={props} />
-            )),
-        "Open Color Stealer": () =>
-            openModal(props => (
-                <ColorPickerModal modalProps={props} />
-            )),
+        "Open Colorway Creator": () => openModal(props => <ColorPickerModal modalProps={props} />),
+        "Open Color Stealer": () => openModal(props => <ColorPickerModal modalProps={props} />),
     },
     patches: [
+        // Credits to Kyuuhachi for the BetterSettings plugin patches
+        {
+            find: "this.renderArtisanalHack()",
+            replacement: [
+                {
+                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                    replace: "$&,_:$1",
+                    predicate: () => true
+                }
+            ]
+        },
+        {
+            find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
+            replacement: {
+                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
+                replace: "(async ()=>$2)(),"
+            },
+            predicate: () => true
+        },
         {
             find: "colorPickerFooter:",
             replacement: {
@@ -163,7 +171,6 @@ export default definePlugin({
     ],
     set ColorPicker(e) {
         ColorPicker = e;
-        LazySwatchLoaded = true;
     },
 
     customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
@@ -186,6 +193,18 @@ export default definePlugin({
                 label: "Settings",
                 element: SettingsPage,
                 className: "dc-colorway-settings"
+            },
+            {
+                section: "ColorwaysOnDemand",
+                label: "On Demand",
+                element: OnDemandWaysPage,
+                className: "dc-colorway-ondemand"
+            },
+            {
+                section: "ColorwaysImportExport",
+                label: "Backup/Restore",
+                element: ImportExportColorwaysPage,
+                className: "dc-colorway-import-export"
             },
             ...this.customSections.map(func => func(SectionTypes)),
             {

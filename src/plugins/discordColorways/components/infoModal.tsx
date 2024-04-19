@@ -90,7 +90,7 @@ export default function ColorwayInfoModal({
                             selectable={true}
                             className="colorwayInfo-cssCodeblock"
                         >
-                            {colorwayProps.import}
+                            {colorwayProps["dc-import"]}
                         </Text>
                     </div>
                     <ThemePreviewCategory
@@ -170,7 +170,7 @@ export default function ColorwayInfoModal({
                         size={Button.Sizes.MEDIUM}
                         look={Button.Looks.FILLED}
                         onClick={() => {
-                            Clipboard.copy(colorwayProps.import);
+                            Clipboard.copy(colorwayProps["dc-import"]);
                             Toasts.show({
                                 message: "Copied CSS to Clipboard",
                                 type: 1,
