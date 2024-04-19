@@ -20,8 +20,8 @@ import { classNameFactory } from "@api/Styles";
 import { copyWithToast } from "@utils/misc";
 import { Button, Forms, Toasts } from "@webpack/common";
 
-import { Native, settings } from "../..";
-import { DEFAULT_IMAGE_CACHE_DIR } from "../../utils/constants";
+import { Native, settings } from "..";
+import { DEFAULT_IMAGE_CACHE_DIR } from "../utils/constants";
 
 const cl = classNameFactory("folder-upload");
 
