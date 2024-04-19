@@ -29,7 +29,7 @@ import definePlugin from "@utils/types";
 import { Forms, Toasts } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
-const EQUICORD_CONTRIBUTOR_BADGE = "https://github.com/Equicord/Ignore/blob/main/icon.png?raw=true";
+const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/UpcDwX0.png";
 
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
