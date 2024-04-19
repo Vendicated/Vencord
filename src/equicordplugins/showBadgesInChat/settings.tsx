@@ -105,11 +105,11 @@ const BadgeSettings = () => {
     useEffect(() => {
         images.forEach(image => {
             switch (image.key) {
-                case "EquiordDonor":
+                case "EquicordDonor":
                     settings.store.EquicordDonorPosition = image.position;
                     settings.store.showEquicordDonor = image.shown;
                     break;
-                case "EquiordContributer":
+                case "EquicordContributer":
                     settings.store.EquicordContributorPosition = image.position;
                     settings.store.showEquicordContributor = image.shown;
                     break;
