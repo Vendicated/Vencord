@@ -7,12 +7,22 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
+import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { filters, find, findByPropsLazy, handleModuleNotFound } from "@webpack";
 import { React, RelationshipStore } from "@webpack/common";
 
 const { Heading, Text } = findByPropsLazy("Heading", "Text");
-const container = findByPropsLazy("memberSinceContainer");
+// Workaround for module differing on stable & canary
+// FIXME: remove once merged into stable
+const getMemberSinceContainer = makeLazy(() => {
+    for (const name of ["memberSinceWrapper", "memberSinceContainer"]) {
+        const mod = find(filters.byProps(name), { isIndirect: true });
+        if (mod) return mod[name];
+    }
+    handleModuleNotFound("findByProps", "memberSinceWrapper/memberSinceContainer");
+    return "";
+});
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
 const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");
 const locale = findByPropsLazy("getLocale");
@@ -49,7 +59,7 @@ export default definePlugin({
                     Friends Since
                 </Heading>
 
-                <div className={container.memberSinceContainer}>
+                <div className={getMemberSinceContainer()}>
                     {!!getCurrentChannel()?.guild_id && (
                         <svg
                             aria-hidden="true"
