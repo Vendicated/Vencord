@@ -5,25 +5,6 @@ import { init, getUserPFP, addUser, removeUser, hasUser } from "./data"
 import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage, ApplicationCommandOptionType, Argument, CommandContext } from "@api/Commands";
 
 
-let data = {
-    avatars: {} as Record<string, string>,
-};
-
-
-
-function pfp(cmd: string, id:string, pfp:string) {
-    console.log(cmd+" "+id+" "+pfp)
-    if (cmd == "add") {
-        const user = {
-            id: id,
-            profilepic: pfp
-        }
-        addUser(user)
-    } else if (cmd == "remove") {
-        removeUser(id)
-    }
-}
-
 export default definePlugin({
     data,
     name: "CustomPFP",
@@ -63,9 +44,12 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
-                console.log(option)
-                console.log(option[0].value)
-                pfp("add", option[0].value, option[1].value)
+                const user = {
+                    id = option[0].value,
+                    profilepic = option[1].value
+
+                }
+                addUser(user)
             },
         },
         {
@@ -79,7 +63,7 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
-                    pfp("remove", option[0].value)
+                    removeUser(option[0].value)
                 }
         }
     ],
@@ -91,7 +75,5 @@ export default definePlugin({
 
     async start() {
         await init()
-
-
     },
 });
