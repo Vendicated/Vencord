@@ -92,7 +92,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
-function handleModuleNotFound(method: string, ...filter: unknown[]) {
+export function handleModuleNotFound(method: string, ...filter: unknown[]) {
     const err = new Error(`webpack.${method} found no module`);
     logger.error(err, "Filter:", filter);
 
