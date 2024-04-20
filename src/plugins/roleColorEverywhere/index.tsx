@@ -50,7 +50,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
