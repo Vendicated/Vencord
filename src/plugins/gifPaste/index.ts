@@ -30,7 +30,7 @@ const settings = definePluginSettings({
     commandBehavior: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Should plugin's behaviour be the same for commands?",
+        description: "Should plugin's behavior be the same for commands?",
         restartNeeded: true
     }
 });
