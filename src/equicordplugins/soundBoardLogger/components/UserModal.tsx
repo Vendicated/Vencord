@@ -13,7 +13,7 @@ import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Clickable, Forms, Text, Timestamp } from "@webpack/common";
 import moment from "moment";
 
-import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User,UserSummaryItem } from "../utils";
+import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "../utils";
 import { DownloadIcon, IconWithTooltip, PlayIcon } from "./Icons";
 
 export function openUserModal(item, user, sounds) {
@@ -53,7 +53,7 @@ export default function UserModal({ item, user, sounds, closeModal }: { item: So
                 <Flex flexDirection="column" style={{ gap: "7px", height: "68px", justifyContent: "space-between" }}>
                     <Text variant="text-md/bold" style={{ height: "20px" }}>{item.soundId}</Text>
                     <Text variant="text-md/normal">Played {currentUser.plays.length} {currentUser.plays.length === 1 ? "time" : "times"}.</Text>
-                    <Text variant="text-md/normal">Last played: <Timestamp timestamp={moment(currentUser.plays.at(-1))} /></Text>
+                    <Text variant="text-md/normal">Last played: <Timestamp timestamp={new Date(moment(currentUser.plays.at(-1)).toDate())} /></Text>
                 </Flex>
             </Flex>
             <Text variant="heading-lg/semibold" tag="h2" className={classes(Margins.top16, Margins.bottom8)}>
