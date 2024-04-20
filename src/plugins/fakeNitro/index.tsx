@@ -17,14 +17,15 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, EmojiStore, FluxDispatcher, lodash, Parser, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import type { CustomEmoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -51,8 +52,6 @@ const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsA
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
-const USE_EXTERNAL_EMOJIS = 1n << 18n;
-const USE_EXTERNAL_STICKERS = 1n << 37n;
 
 const enum EmojiIntentions {
     REACTION = 0,
@@ -108,6 +107,7 @@ const enum FakeNoticeType {
 const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
+const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -156,12 +156,37 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    useHyperLinks: {
+        description: "Whether to use hyperlinks when sending fake emojis and stickers",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    hyperLinkText: {
+        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
+        type: OptionType.STRING,
+        default: "{{NAME}}"
     }
-});
+}).withPrivateSettings<{
+    disableEmbedPermissionCheck: boolean;
+}>();
+
+function hasPermission(channelId: string, permission: bigint) {
+    const channel = ChannelStore.getChannel(channelId);
+
+    if (!channel || channel.isPrivate()) return true;
+
+    return PermissionStore.can(permission, channel);
+}
+
+const hasExternalEmojiPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.USE_EXTERNAL_EMOJIS);
+const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.USE_EXTERNAL_STICKERS);
+const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
+const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.obscurity, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
     description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
@@ -253,7 +278,7 @@ export default definePlugin({
             }
         },
         {
-            find: '.displayName="UserSettingsProtoStore"',
+            find: '"UserSettingsProtoStore"',
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
@@ -345,8 +370,8 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=isDiscoverable:\i,emojiComesFromCurrentGuild:\i,.+?}=(\i).+?;)(.+?return )(.{0,1000}\.Messages\.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION.+?)(?=},)/,
-                replace: (_, props, rest, reactNode) => `let{fakeNitroNode}=${props};${rest}$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!fakeNitroNode?.fake)`
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
+                replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
         // Allow using custom app icons
@@ -362,6 +387,14 @@ export default definePlugin({
             find: ".FreemiumAppIconIds.DEFAULT&&(",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
+                replace: "true"
+            }
+        },
+        // Make all Soundboard sounds available
+        {
+            find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            replacement: {
+                match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
         }
@@ -447,13 +480,23 @@ export default definePlugin({
 
     trimContent(content: Array<any>) {
         const firstContent = content[0];
-        if (typeof firstContent === "string") content[0] = firstContent.trimStart();
-        if (content[0] === "") content.shift();
+        if (typeof firstContent === "string") {
+            content[0] = firstContent.trimStart();
+            content[0] || content.shift();
+        } else if (typeof firstContent?.props?.children === "string") {
+            firstContent.props.children = firstContent.props.children.trimStart();
+            firstContent.props.children || content.shift();
+        }
 
         const lastIndex = content.length - 1;
         const lastContent = content[lastIndex];
-        if (typeof lastContent === "string") content[lastIndex] = lastContent.trimEnd();
-        if (content[lastIndex] === "") content.pop();
+        if (typeof lastContent === "string") {
+            content[lastIndex] = lastContent.trimEnd();
+            content[lastIndex] || content.pop();
+        } else if (typeof lastContent?.props?.children === "string") {
+            lastContent.props.children = lastContent.props.children.trimEnd();
+            lastContent.props.children || content.pop();
+        }
     },
 
     clearEmptyArrayItems(array: Array<any>) {
@@ -465,7 +508,7 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
-        // If content has more than one child or it's a single ReactElement like a header or list
+        // If content has more than one child or it's a single ReactElement like a header, list or span
         if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
         let nextIndex = content.length;
@@ -551,13 +594,15 @@ export default definePlugin({
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
-            this.trimContent(children);
 
             return children;
         };
 
         try {
-            return modifyChildren(lodash.cloneDeep(content));
+            const newContent = modifyChildren(lodash.cloneDeep(content));
+            this.trimContent(newContent);
+
+            return newContent;
         } catch (err) {
             new Logger("FakeNitro").error(err);
             return content;
@@ -574,7 +619,7 @@ export default definePlugin({
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
-            if (!settings.store.transformCompoundSentence && !item.startsWith("http")) continue;
+            if (!settings.store.transformCompoundSentence && !item.startsWith("http") && !hyperLinkRegex.test(item)) continue;
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
@@ -619,8 +664,7 @@ export default definePlugin({
             case "image": {
                 if (
                     !settings.store.transformCompoundSentence
-                    && !contentItems.includes(embed.url!)
-                    && !contentItems.includes(embed.image?.proxyURL!)
+                    && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
                 ) return false;
 
                 if (settings.store.transformEmojis) {
@@ -681,24 +725,8 @@ export default definePlugin({
         }
     },
 
-    hasPermissionToUseExternalEmojis(channelId: string): boolean {
-        const channel = ChannelStore.getChannel(channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
-
-        return PermissionStore.can(USE_EXTERNAL_EMOJIS, channel);
-    },
-
-    hasPermissionToUseExternalStickers(channelId: string) {
-        const channel = ChannelStore.getChannel(channelId);
-
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return true;
-
-        return PermissionStore.can(USE_EXTERNAL_STICKERS, channel);
-    },
-
     getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${Settings.plugins.FakeNitro.stickerSize}`;
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -707,7 +735,7 @@ export default definePlugin({
         const { frames, width, height } = await parseURL(stickerLink);
 
         const gif = GIFEncoder();
-        const resolution = Settings.plugins.FakeNitro.stickerSize;
+        const resolution = settings.store.stickerSize;
 
         const canvas = document.createElement("canvas");
         canvas.width = resolution;
@@ -757,6 +785,16 @@ export default definePlugin({
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
     },
 
+    canUseEmote(e: CustomEmoji, channelId: string) {
+        if (e.require_colons === false) return true;
+        if (e.available === false) return false;
+
+        if (this.canUseEmotes)
+            return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
+        else
+            return !e.animated && e.guildId === this.guildId;
+    },
+
     start() {
         const s = settings.store;
 
@@ -768,8 +806,37 @@ export default definePlugin({
             return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
         }
 
-        this.preSend = addPreSendListener((channelId, messageObj, extra) => {
+        function cannotEmbedNotice() {
+            return new Promise<boolean>(resolve => {
+                Alerts.show({
+                    title: "Hold on!",
+                    body: <div>
+                        <Forms.FormText>
+                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                            however you do not have permissions to embed links in the current channel.
+                            Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
+                        </Forms.FormText>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                            You can disable this notice in the plugin settings.
+                        </Forms.FormText>
+                    </div>,
+                    confirmText: "Send Anyway",
+                    cancelText: "Cancel",
+                    secondaryConfirmText: "Do not show again",
+                    onConfirm: () => resolve(true),
+                    onCloseCallback: () => setImmediate(() => resolve(false)),
+                    onConfirmSecondary() {
+                        settings.store.disableEmbedPermissionCheck = true;
+                        resolve(true);
+                    }
+                });
+            });
+        }
+
+        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
+
+            let hasBypass = false;
 
             stickerBypass: {
                 if (!s.enableStickerBypass)
@@ -783,7 +850,7 @@ export default definePlugin({
                 if ("pack_id" in sticker)
                     break stickerBypass;
 
-                const canUseStickers = this.canUseStickers && this.hasPermissionToUseExternalStickers(channelId);
+                const canUseStickers = this.canUseStickers && hasExternalStickerPerms(channelId);
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
@@ -795,57 +862,93 @@ export default definePlugin({
                 if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
                     link = link.replace(".png", ".gif");
                 }
+
                 if (sticker.format_type === StickerType.APNG) {
-                    this.sendAnimatedSticker(link, sticker.id, channelId);
+                    if (!hasAttachmentPerms(channelId)) {
+                        Alerts.show({
+                            title: "Hold on!",
+                            body: <div>
+                                <Forms.FormText>
+                                    You cannot send this message because it contains an animated FakeNitro sticker,
+                                    and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
+                                </Forms.FormText>
+                            </div>
+                        });
+                    } else {
+                        this.sendAnimatedSticker(link, sticker.id, channelId);
+                    }
+
                     return { cancel: true };
                 } else {
+                    hasBypass = true;
+
+                    const url = new URL(link);
+                    url.searchParams.set("name", sticker.name);
+
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
+
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
-                    messageObj.content += ` ${link}&name=${encodeURIComponent(sticker.name)}`;
                 }
             }
 
             if (s.enableEmojiBypass) {
-                const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
-
                 for (const emoji of messageObj.validNonShortcutEmojis) {
-                    if (!emoji.require_colons) continue;
-                    if (emoji.available !== false && canUseEmotes) continue;
-                    if (emoji.guildId === guildId && !emoji.animated) continue;
+                    if (this.canUseEmote(emoji, channelId)) continue;
+
+                    hasBypass = true;
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
-                    const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                        size: Settings.plugins.FakeNitro.emojiSize,
-                        name: encodeURIComponent(emoji.name)
-                    }));
+
+                    const url = new URL(emoji.url);
+                    url.searchParams.set("size", s.emojiSize.toString());
+                    url.searchParams.set("name", emoji.name);
+
+                    const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
+
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
+                }
+            }
+
+            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
+                if (!await cannotEmbedNotice()) {
+                    return { cancel: true };
                 }
             }
 
             return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener((channelId, __, messageObj) => {
+        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
-            const canUseEmotes = this.canUseEmotes && this.hasPermissionToUseExternalEmojis(channelId);
-
-            const { guildId } = this;
+            let hasBypass = false;
 
             messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
                 if (emoji == null) return emojiStr;
-                if (!emoji.require_colons) return emojiStr;
-                if (emoji.available !== false && canUseEmotes) return emojiStr;
-                if (emoji.guildId === guildId && !emoji.animated) return emojiStr;
+                if (this.canUseEmote(emoji, channelId)) return emojiStr;
 
-                const url = emoji.url.replace(/\?size=\d+/, "?" + new URLSearchParams({
-                    size: Settings.plugins.FakeNitro.emojiSize,
-                    name: encodeURIComponent(emoji.name)
-                }));
-                return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                hasBypass = true;
+
+                const url = new URL(emoji.url);
+                url.searchParams.set("size", s.emojiSize.toString());
+                url.searchParams.set("name", emoji.name);
+
+                const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
+
+                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
+
+            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
+                if (!await cannotEmbedNotice()) {
+                    return { cancel: true };
+                }
+            }
+
+            return { cancel: false };
         });
     },
 
