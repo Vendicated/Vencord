@@ -1,9 +1,26 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "discord-types/general";
 import { init, getUserPFP, addUser, removeUser, hasUser } from "./data"
 import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage, ApplicationCommandOptionType, Argument, CommandContext } from "@api/Commands";
-
+import { Devs } from "@utils/constants"
 
 let data = {
     avatars: {} as Record<string, string>,
@@ -28,7 +45,7 @@ export default definePlugin({
     data,
     name: "CustomPFP",
     description: "Allows you to set custom pfp to any user.",
-    authors: [{id: 1207731371884150804n, name: "Luca99"}],
+    authors: [Devs.Luca99],
     patches: [
         // default export patch
         {
@@ -63,6 +80,8 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
+                console.log(option)
+                console.log(option[0].value)
                 pfp("add", option[0].value, option[1].value)
             },
         },
