@@ -62,7 +62,7 @@ function searchFinish(payload: SearchFinishProps) {
 export default definePlugin({
     name: "SearchFix",
     description: "Allows you to scroll further than 200 pages.",
-    settingsAboutComponent: () => <span style={{ color: "white" }}><i><b>This fix isn't perfect, so you will not be able to jump to any page.</b></i> This only works while you open pages sequentually. </span>,
+    settingsAboutComponent: () => <span style={{ color: "white" }}><i><b>This fix isn't perfect, so you will not be able to jump to any page.</b></i> This only works while you open pages sequentially. </span>,
     authors: [Devs.Jaxx],
     patches: [
         {
