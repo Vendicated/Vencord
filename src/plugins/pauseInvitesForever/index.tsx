@@ -45,7 +45,8 @@ export default definePlugin({
     ],
 
     showDisableInvites(guildId: string) {
-        const { enableInvitesDisabled } = InvitesDisabledExperiment.getCurrentConfig({ guildId });
+        // Once the experiment is removed, this should keep working
+        const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
         // @ts-ignore
         return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
     },
