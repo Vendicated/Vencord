@@ -22,7 +22,21 @@ import { Message, User } from "discord-types/general";
 
 const defaultId = "-0";
 
-const CachedInfo = new Array<string | Number>(defaultId, 0);
+class PageInfo {
+    start: string = defaultId;
+    end: string = defaultId;
+    constructor(st: string, en: string) {
+        this.start = st;
+        this.end = en;
+    }
+}
+class Cache {
+    pages: Map<number, PageInfo> = new Map<number, PageInfo>();
+    currentPage: number = 0;
+    isAltered: boolean = false;
+}
+
+const CachedInfo: Cache = new Cache();
 interface SearchFinishProps {
     type?: string,
     searchId?: string,
@@ -38,18 +52,17 @@ interface SearchFinishProps {
 }
 
 function searchFinish(payload: SearchFinishProps) {
-    console.log(payload);
     if (payload.messages && payload.messages.length) {
-        CachedInfo[0] = payload.messages.pop()![0]?.id ?? defaultId;
-        CachedInfo[1] = payload.totalResults;
-        console.log("CHECKS " + CachedInfo[0]);
+        const startMsg = payload.messages[0];
+        const endMsg = payload.messages[payload.messages.length - 1];
+        CachedInfo.pages.set(CachedInfo.currentPage, new PageInfo(startMsg[0].id, endMsg[0].id));
     }
 }
 
 export default definePlugin({
     name: "SearchFix",
-    description: 'Fixes the annoying "We dropped the magnifying glass!" error.',
-    settingsAboutComponent: () => <span style={{ color: "white" }}><i><b>This fix isn't perfect, so you may have to reload the search bar to fix issues.</b></i> Discord only allows a max offset of 5000 (this is what causes the magnifying glass error). This means that you can only see precisely 5000 messages into the past, and 5000 messages into the future (when sorting by old). This plugin just jumps to the opposite sorting method to try get around Discord's restriction, but if there is a large search result, and you try to view a message that is unobtainable with both methods of sorting, the plugin will simply show offset 0 (either newest or oldest message depending on the sorting method).</span>,
+    description: "Allows you to scroll further than 200 pages.",
+    settingsAboutComponent: () => <span style={{ color: "white" }}><i><b>This fix isn't perfect, so you will not be able to jump to any page.</b></i> This only works while you open pages sequentually. </span>,
     authors: [Devs.Jaxx],
     patches: [
         {
@@ -61,26 +74,49 @@ export default definePlugin({
         }
     ],
     main(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
-        console.log("CHECKS");
-        console.log(query);
-        if (query.offset > 5000) {
-            const currentAsc = query.sort_order === "asc"; // 1: old to new | 0: new to old
-
-            if ((CachedInfo[1] as number) - 5000 > 5000) {
-                query.offset = 0;
-                if (CachedInfo[0] !== defaultId) {
-                    if (currentAsc) {
-                        query.min_id = CachedInfo[0] as string;
-                    }
-                    else {
-                        query.max_id = CachedInfo[0] as string;
-                    }
-                }
-            } else {
-                query.sort_order = currentAsc ? "desc" : "asc";
-                query.offset -= 5000;
-            }
+        if (query.offset === 0) {
+            CachedInfo.isAltered = false;
+            return;
         }
+        let currentPage = query.offset ? Math.floor(query.offset / 25) : 0;
+        if (CachedInfo.isAltered) {
+            currentPage = CachedInfo.currentPage + (query.offset === 25 ? -1 : 1);
+        }
+        CachedInfo.currentPage = currentPage;
+        if (CachedInfo.isAltered) {
+            if (query.offset === 25) {
+                if (CachedInfo.currentPage < 200) {
+                    query.offset = CachedInfo.currentPage * 25;
+                    CachedInfo.isAltered = false;
+                    return;
+                }
+            }
+            this.renderCurrentPage(query);
+            return;
+        }
+        if (query.offset === 5000) {
+            this.renderCurrentPage(query);
+        }
+    },
+    renderCurrentPage(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
+        const currentAsc = query.sort_order === "asc"; // 1: old to new | 0: new to old
+        const offsetPage = CachedInfo.currentPage - 3;
+        if (CachedInfo.pages.has(offsetPage)) {
+            CachedInfo.isAltered = true;
+            const limitToId = CachedInfo.pages.get(offsetPage)!.end as string;
+            if (currentAsc) {
+                query.min_id = limitToId;
+            }
+            else {
+                query.max_id = limitToId;
+            }
+            query.offset = 50; // i = 0, i+1 = 25, i+2 = 50
+        }
+        else {
+            query.offset = 199 * 25;
+            CachedInfo.isAltered = false;
+        }
+
     },
     flux: {
         "SEARCH_FINISH": searchFinish,
