@@ -22,6 +22,7 @@ import { findByPropsLazy } from "@webpack";
 import { GuildStore, RestAPI } from "@webpack/common";
 
 const Messages = findByPropsLazy("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION");
+const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
 
 export default definePlugin({
     name: "PauseInvitesForever",
@@ -43,9 +44,10 @@ export default definePlugin({
         }
     ],
 
-    isPermanentlyDisabled(guildId: string) {
+    showDisableInvites(guildId: string) {
+        const { enableInvitesDisabled } = InvitesDisabledExperiment.getCurrentConfig({ guildId });
         // @ts-ignore
-        return GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+        return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
     },
 
     pauseHook(guildId: string) {
@@ -61,7 +63,7 @@ export default definePlugin({
         return (
             <div>
                 {Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
-                {!this.isPermanentlyDisabled(guildId) && <a onClick={() => {
+                {this.showDisableInvites(guildId) && <a onClick={() => {
                     setChecked(true);
                     this.pauseHook(guildId);
                 }}> Pause Indefinitely.</a>}
