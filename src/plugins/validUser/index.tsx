@@ -115,15 +115,24 @@ export default definePlugin({
     authors: [Devs.Ven],
     tags: ["MentionCacheFix"],
 
-    patches: [{
-        find: 'className:"mention"',
-        replacement: {
-            // mention = { react: function (data, parse, props) { if (data.userId == null) return RoleMention() else return UserMention()
-            match: /react(?=\(\i,\i,\i\).{0,50}return null==.{0,70}\?\(0,\i\.jsx\)\((\i\.\i),.+?jsx\)\((\i\.\i),\{className:"mention")/,
-            // react: (...args) => OurWrapper(RoleMention, UserMention, ...args), originalReact: theirFunc
-            replace: "react:(...args)=>$self.renderMention($1,$2,...args),originalReact"
+    patches: [
+        {
+            find: 'className:"mention"',
+            replacement: {
+                // mention = { react: function (data, parse, props) { if (data.userId == null) return RoleMention() else return UserMention()
+                match: /react(?=\(\i,\i,\i\).{0,50}return null==.{0,70}\?\(0,\i\.jsx\)\((\i\.\i),.+?jsx\)\((\i\.\i),\{className:"mention")/,
+                // react: (...args) => OurWrapper(RoleMention, UserMention, ...args), originalReact: theirFunc
+                replace: "react:(...args)=>$self.renderMention($1,$2,...args),originalReact"
+            }
+        },
+        {
+            find: "unknownUserMentionPlaceholder:",
+            replacement: {
+                match: /unknownUserMentionPlaceholder:/,
+                replace: "$&false&&"
+            }
         }
-    }],
+    ],
 
     renderMention(RoleMention, UserMention, data, parse, props) {
         return (
