@@ -51,7 +51,7 @@ export const PronounMapping = {
     ask: "Ask me my pronouns",
     avoid: "Avoid pronouns, use my name",
     unspecified: "No pronouns specified.",
-    // neither avoid nor unspecified can occur when there is any other pronoun set, hence there is no short for needed.
+    // neither avoid nor unspecified can occur when there is any other pronoun set, hence there is no short form needed.
 
     // S for short form, used for when there is multiple different pronouns.
     // pronounDB actually allows you to select any/other/ask as 2nd or 3rd set, so these are included here.
