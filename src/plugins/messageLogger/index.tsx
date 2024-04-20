@@ -89,7 +89,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     ));
 };
 
-const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => () => {
+const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
     const messages: Array<any> = MessageStore.getMessages(channel.id)?._array;
 
     const toDelete: Array<any> = [];
@@ -110,13 +110,11 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             color="danger"
             action={
                 () => {
-                    toDelete.forEach(message => {
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_DELETE",
-                            channelId: channel.id,
-                            id: message.id,
-                            mlDeleted: true
-                        });
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_DELETE_BULK",
+                        channelId: channel.id,
+                        ids: toDelete.map(m => m.id),
+                        mlDeleted: true
                     });
                     toClearEditHistory.forEach(message => {
                         message.editHistory = [];
