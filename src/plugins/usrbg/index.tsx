@@ -24,8 +24,6 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-const BASE_URL = "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json";
-
 let data = {} as Record<string, string>;
 
 const settings = definePluginSettings({
@@ -42,6 +40,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    urlForDB: {
+        type: OptionType.STRING,
+        description: "Which Database url to use to load banners, KNOW WHAT YOUR DOING",
+        default: "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json",
+        placeholder: "Default value: https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json"
     }
 });
 
@@ -118,7 +122,7 @@ export default definePlugin({
     async start() {
         enableStyle(style);
 
-        const res = await fetch(BASE_URL);
+        const res = await fetch(settings.store.urlForDB);
         if (res.ok) {
             data = await res.json();
             this.data = data;

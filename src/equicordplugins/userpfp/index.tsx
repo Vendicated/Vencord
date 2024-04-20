@@ -10,22 +10,25 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "discord-types/general";
 
-const BASE_URL = "https://userpfp.github.io/UserPFP/source/data.json";
-
 let data = {
     avatars: {} as Record<string, string>,
 };
 
 const settings = definePluginSettings({
     preferNitro: {
-        description:
-            "Which avatar to use if both default animated (Nitro) pfp and UserPFP avatars are present",
+        description: "Which avatar to use if both default animated (Nitro) pfp and UserPFP avatars are present",
         type: OptionType.SELECT,
         options: [
             { label: "UserPFP", value: false },
             { label: "Nitro", value: true, default: true },
         ],
     },
+    urlForDB: {
+        type: OptionType.STRING,
+        description: "Which Database url to use to load avatars, KNOW WHAT YOUR DOING",
+        default: "https://userpfp.github.io/UserPFP/source/data.json",
+        placeholder: "Default value: https://userpfp.github.io/UserPFP/source/data.json"
+    }
 });
 
 export default definePlugin({
@@ -67,7 +70,7 @@ export default definePlugin({
         return data.avatars[user.id] ?? original(user, animated, size);
     },
     async start() {
-        const res = await fetch(BASE_URL);
+        const res = await fetch(settings.store.urlForDB);
         if (res.ok) this.data = data = await res.json();
     }
 });
