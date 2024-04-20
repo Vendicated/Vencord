@@ -30,19 +30,18 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     data,
-
     name: "UserPFP",
     description: "Allows you to use an animated avatar without Nitro",
-    authors: [EquicordDevs.nexpid, EquicordDevs.thororen, EquicordDevs.FoxStorm1, EquicordDevs.coolesding],
+    authors: [EquicordDevs.nexpid, EquicordDevs.thororen],
     settings,
     settingsAboutComponent: () => (
         <>
             <Link href="https://userpfp.github.io/UserPFP/#how-to-request-a-profile-picture-pfp">
-                <b>Submit your own pfp here</b>
+                <b>Submit your own PFP here!</b>
             </Link>
             <br></br>
             <Link href="https://ko-fi.com/coolesding">
-                <b>Support UserPFP</b>
+                <b>Support UserPFP here!</b>
             </Link>
         </>
     ),
@@ -62,15 +61,13 @@ export default definePlugin({
             ]
         }
     ],
-
     getAvatarHook: (original: any) => (user: User, animated: boolean, size: number) => {
         if (settings.store.preferNitro && user.avatar?.startsWith("a_")) return original(user, animated, size);
 
         return data.avatars[user.id] ?? original(user, animated, size);
     },
-
     async start() {
         const res = await fetch(BASE_URL);
         if (res.ok) this.data = data = await res.json();
-    },
+    }
 });
