@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -24,7 +24,7 @@ import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@web
 
 const EMBED_SUPPRESSED = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
     if (!isEmbedSuppressed && !embeds.length) return;
 
@@ -56,12 +56,7 @@ export default definePlugin({
     name: "UnsuppressEmbeds",
     authors: [Devs.rad, Devs.HypedDomi],
     description: "Allows you to unsuppress embeds in messages",
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-    },
+    contextMenus: {
+        "message": messageContextMenuPatch
+    }
 });
