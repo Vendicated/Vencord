@@ -41,7 +41,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Check for new sessions in the background, and display notifications when they are detected",
         default: false,
-        restartNeeded: false
+        restartNeeded: true
     },
     checkInterval: {
         description: "How often to check for new sessions in the background (if enabled), in minutes",
@@ -161,8 +161,6 @@ export default definePlugin({
     },
 
     async checkNewSessions() {
-        if (!settings.store.backgroundCheck) return;
-
         const data = await RestAPI.get({
             url: "/auth/sessions"
         });
@@ -212,7 +210,9 @@ export default definePlugin({
         await fetchNamesFromDataStore();
 
         this.checkNewSessions();
-        this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
+        if (settings.store.backgroundCheck) {
+            this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
+        }
     },
 
     stop() {
