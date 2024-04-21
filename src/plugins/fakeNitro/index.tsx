@@ -166,6 +166,16 @@ const settings = definePluginSettings({
         description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
+    },
+    hideEmojiName: {
+        description: "Hide emoji name from url",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    hideStickerName: {
+        description: "Hide sticker name from url",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 }).withPrivateSettings<{
     disableEmbedPermissionCheck: boolean;
@@ -883,7 +893,9 @@ export default definePlugin({
                     hasBypass = true;
 
                     const url = new URL(link);
-                    url.searchParams.set("name", sticker.name);
+                    if (!settings.store.hideStickerName) {
+                        url.searchParams.set("name", sticker.name);
+                    }
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
@@ -902,7 +914,9 @@ export default definePlugin({
 
                     const url = new URL(emoji.url);
                     url.searchParams.set("size", s.emojiSize.toString());
-                    url.searchParams.set("name", emoji.name);
+                    if (!settings.store.hideEmojiName) {
+                        url.searchParams.set("name", emoji.name);
+                    }
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
@@ -935,7 +949,9 @@ export default definePlugin({
 
                 const url = new URL(emoji.url);
                 url.searchParams.set("size", s.emojiSize.toString());
-                url.searchParams.set("name", emoji.name);
+                if (!settings.store.hideEmojiName) {
+                    url.searchParams.set("name", emoji.name);
+                }
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 

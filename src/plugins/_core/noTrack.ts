@@ -32,13 +32,13 @@ export default definePlugin({
                 replace: "()=>{}",
             },
         },
-        {
-            find: "window.DiscordSentry=",
-            replacement: {
-                match: /^.+$/,
-                replace: "()=>{}",
-            }
-        },
+        // {
+        //     find: "window.DiscordSentry=",
+        //     replacement: {
+        //         match: /^.+$/,
+        //         replace: "()=>{}",
+        //     }
+        // },
         {
             find: ".METRICS,",
             replacement: [

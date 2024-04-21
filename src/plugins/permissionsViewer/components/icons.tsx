@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function PermissionDeniedIcon() {
+import { PermissionValue } from "./RolesAndUsersPermissions";
+
+export function PermissionDeniedIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
     return (
-        <svg
+        <svg {...props}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -29,22 +31,9 @@ export function PermissionDeniedIcon() {
     );
 }
 
-export function PermissionAllowedIcon() {
+export function PermissionPassthroughIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
     return (
-        <svg
-            height="24"
-            width="24"
-            viewBox="0 0 24 24"
-        >
-            <title>Allowed</title>
-            <path fill="var(--text-positive)" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17ZZ" />
-        </svg>
-    );
-}
-
-export function PermissionDefaultIcon() {
-    return (
-        <svg
+        <svg {...props}
             height="24"
             width="24"
             viewBox="0 0 16 16"
@@ -55,4 +44,25 @@ export function PermissionDefaultIcon() {
             </g>
         </svg>
     );
+}
+
+export function PermissionAllowedIcon({ ...props }: {} & React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg {...props}
+            height="24"
+            width="24"
+            viewBox="0 0 24 24"
+        >
+            <title>Allowed</title>
+            <path fill="var(--text-positive)" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17ZZ" />
+        </svg>
+    );
+}
+
+export function PermissionIcon({ permissionValue, ...props }: { permissionValue: PermissionValue; } & React.SVGProps<SVGSVGElement>) {
+    switch (permissionValue) {
+        case PermissionValue.Deny: return PermissionDeniedIcon(props);
+        case PermissionValue.Allow: return PermissionAllowedIcon(props);
+        case PermissionValue.Passthrough: return PermissionPassthroughIcon(props);
+    }
 }

@@ -49,11 +49,16 @@ export const settings = definePluginSettings({
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
         ],
     },
-    defaultPermissionsDropdownState: {
+    irrelevantPermissionsHiddenByDefault: {
+        description: "Whether irrelevant permissions should be hidden by default in the viewer",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    permissionsDropdownOpenByDefault: {
         description: "Whether the permissions dropdown on user popouts should be open by default",
         type: OptionType.BOOLEAN,
         default: false,
-    }
+    },
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
@@ -158,7 +163,7 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
 export default definePlugin({
     name: "PermissionsViewer",
     description: "View the permissions a user or channel has, and the roles of a server",
-    authors: [Devs.Nuckyz, Devs.Ven],
+    authors: [Devs.Nuckyz, Devs.Ven, Devs.bb010g],
     settings,
 
     patches: [
@@ -174,9 +179,9 @@ export default definePlugin({
     UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
 
     contextMenus: {
-        "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),
-        "channel-context": makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
-        "guild-context": makeContextMenuPatch("privacy", MenuItemParentType.Guild),
-        "guild-header-popout": makeContextMenuPatch("privacy", MenuItemParentType.Guild)
+        "user-context": makeContextMenuPatch("user-profile", MenuItemParentType.User),
+        "channel-context": makeContextMenuPatch("mark-channel-read", MenuItemParentType.Channel),
+        "guild-context": makeContextMenuPatch("mark-guild-read", MenuItemParentType.Guild),
+        "guild-header-popout": makeContextMenuPatch("mark-guild-read", MenuItemParentType.Guild)
     }
 });

@@ -53,6 +53,8 @@
 }
 
 .vc-permviewer-perms-container {
+    box-sizing: border-box;
+    height: 100%;
     display: grid;
     grid-template-columns: 1fr 2fr;
     grid-template-areas: "list permissions";
@@ -112,40 +114,61 @@
 }
 
 .vc-permviewer-perms-perms {
+    --vc-permviewer-perms-perms-row-gap: 10px;
+    --vc-permviewer-perms-perms-column-gap: 10px;
+    --vc-permviewer-perms-perms-row-border-width: 2px;
+    --vc-permviewer-perm-item-row-gap: var(--vc-permviewer-perms-perms-row-gap);
+    --vc-permviewer-perm-item-column-gap: var(--vc-permviewer-perms-perms-column-gap);
+    --vc-permviewer-perm-item-border-width: var(--vc-permviewer-perms-perms-row-border-width);
+
     grid-area: permissions;
     display: flex;
     flex-direction: column;
     margin-left: 5px;
 }
 
-.vc-permviewer-perms-perms-item {
-    position: relative;
-    display: flex;
+.vc-permviewer-perms-perms-items {
+    display: grid;
+}
+
+.vc-permviewer-perm-item {
+    display: grid;
     align-items: center;
-    padding: 10px;
-    border-bottom: 2px solid var(--background-modifier-active);
+    padding: var(--vc-permviewer-perm-item-row-gap) var(--vc-permviewer-perm-item-column-gap);
+    border-bottom: var(--vc-permviewer-perm-item-border-width) solid var(--background-modifier-active);
+    grid-template: "vc-permviewer-perm-item-icon vc-permviewer-perm-item-title vc-permviewer-perm-item-info" 1fr / auto 1fr auto;
+    column-gap: var(--vc-permviewer-perm-item-column-gap);
 }
 
-.vc-permviewer-perms-perms-item:last-child {
-    border: 0;
+.vc-permviewer-perms-perms-hide-irrelevant-permissions .vc-permviewer-perm-is-irrelevant {
+    display: none;
 }
 
-.vc-permviewer-perms-perms-item-icon {
+.vc-permviewer-perm-item-icon {
+    grid-column: vc-permviewer-perm-item-icon;
+    grid-row: vc-permviewer-perm-item-icon;
     border: 1px solid var(--background-modifier-selected);
     width: 24px;
     height: 24px;
-    margin-right: 5px;
 }
 
-.vc-permviewer-perms-perms-item .vc-info-icon {
+.vc-permviewer-perm-item-title {
+    grid-column: vc-permviewer-perm-item-title;
+    grid-row: vc-permviewer-perm-item-title;
+}
+
+.vc-permviewer-perm-item-info {
+    grid-column: vc-permviewer-perm-item-info;
+    grid-row: vc-permviewer-perm-item-title;
+}
+
+.vc-permviewer-perm-item > .vc-info-icon {
     color: var(--interactive-muted);
     cursor: pointer;
-    position: absolute;
-    right: 0;
     scale: 0.9;
     transition: color ease-in 0.1s;
 }
 
-.vc-permviewer-perms-perms-item .vc-info-icon:hover {
+.vc-permviewer-perm-item > .vc-info-icon:hover {
     color: var(--interactive-active);
 }

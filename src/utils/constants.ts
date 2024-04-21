@@ -402,6 +402,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samwich",
         id: 976176454511509554n,
     },
+    Jaxx: {
+        name: "Jaxx",
+        id: 901016640253227059n,
+    },
     coolelectronics: {
         name: "coolelectronics",
         id: 696392247205298207n,
@@ -437,6 +441,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Byron: {
         name: "byeoon",
         id: 1167275288036655133n
+    },
+    Johannes7k75: {
+        name: "Johannes7k75",
+        id: 587701169103699994n
     },
     CatGirlDShadow: {
         name: "CatGirlDShadow",

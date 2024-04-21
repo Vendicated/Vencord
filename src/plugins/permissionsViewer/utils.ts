@@ -23,7 +23,7 @@ import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from ".";
-import { PermissionType } from "./components/RolesAndUsersPermissions";
+import { PermissionType, PermissionValue } from "./components/RolesAndUsersPermissions";
 
 export const cl = classNameFactory("vc-permviewer-");
 
@@ -65,6 +65,48 @@ export function getPermissionDescription(permission: string): ReactNode {
     if (typeof msg === "string") return msg;
 
     return "";
+}
+
+export function getPermissionValue(permissionBit: bigint, permissions: bigint): PermissionValue;
+export function getPermissionValue(permissionBit: bigint, permissions: undefined): undefined;
+export function getPermissionValue(permissionBit: bigint, permissions?: bigint): PermissionValue | undefined;
+export function getPermissionValue(permissionBit: bigint, permissions?: bigint): PermissionValue | undefined {
+    return permissions !== undefined
+        ? permissions === 0n ? PermissionValue.Passthrough
+            : (permissions & permissionBit) === permissionBit ? PermissionValue.Allow : PermissionValue.Deny
+        : undefined;
+}
+
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: bigint, overwriteDeny: bigint): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: undefined, overwriteDeny: bigint): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: bigint, overwriteDeny: undefined): PermissionValue;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow: undefined, overwriteDeny: undefined): undefined;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow?: bigint, overwriteDeny?: bigint): PermissionValue | undefined;
+export function getOverwriteValue(permissionBit: bigint, overwriteAllow?: bigint, overwriteDeny?: bigint): PermissionValue | undefined {
+    return overwriteAllow !== undefined || overwriteDeny !== undefined
+        ? overwriteAllow !== undefined && (overwriteAllow & permissionBit) === permissionBit ? PermissionValue.Allow
+            : overwriteDeny !== undefined && (overwriteDeny & permissionBit) === permissionBit ? PermissionValue.Deny
+                : PermissionValue.Passthrough
+        : undefined;
+}
+
+export function isPermissionValueRelevant<T extends PermissionValue>(permissionValue?: T): permissionValue is Exclude<T, PermissionValue.Passthrough | PermissionValue.Deny> {
+    return permissionValue !== undefined && permissionValue !== PermissionValue.Passthrough &&
+        permissionValue !== PermissionValue.Deny;
+}
+
+export function isOverwriteValueRelevant<T extends PermissionValue>(overwriteValue?: T): overwriteValue is Exclude<T, PermissionValue.Passthrough> {
+    return overwriteValue !== undefined && overwriteValue !== PermissionValue.Passthrough;
+}
+
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: T, permissionValue: U): Exclude<T, PermissionValue.Passthrough> | U;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: undefined, permissionValue: U): U;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: undefined, permissionValue: undefined): undefined;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: T | undefined, permissionValue: undefined): Exclude<T, PermissionValue.Passthrough> | undefined;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: undefined, permissionValue: U | undefined): U | undefined;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue: T | undefined, permissionValue: U | undefined): Exclude<T, PermissionValue.Passthrough> | U | undefined;
+export function getComputedPermissionValue<T extends PermissionValue, U extends PermissionValue>(overwriteValue?: T, permissionValue?: U): Exclude<T, PermissionValue.Passthrough> | U | undefined {
+    return isOverwriteValueRelevant(overwriteValue) ? overwriteValue : permissionValue;
 }
 
 export function getSortedRoles({ id }: Guild, member: GuildMember) {
