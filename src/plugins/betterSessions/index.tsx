@@ -27,12 +27,11 @@ import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
+const AuthSessionsStore = findByPropsLazy("getSessions");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
-
-let lastFetchedHashes: string[] = [];
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -156,27 +155,27 @@ export default definePlugin({
     },
 
     flux: {
-        // Note: for some reason this is dispatched with a blank array when settings are closed, hence the length check later on
-        FETCH_AUTH_SESSIONS_SUCCESS({ sessions }: { sessions: SessionInfo["session"][]; }) {
-            lastFetchedHashes = sessions.map(session => session.id_hash);
-        },
-
-        // Save all known sessions when settings are closed and dismiss the "NEW" badge
         USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM() {
+            const lastFetchedHashes: string[] = AuthSessionsStore.getSessions().map((session: SessionInfo["session"]) => session.id_hash);
+
+            // Add new sessions to cache
             lastFetchedHashes.forEach(idHash => {
                 if (!savedSessionsCache.has(idHash)) savedSessionsCache.set(idHash, { name: "", isNew: false });
             });
-            savedSessionsCache.forEach(data => {
-                data.isNew = false;
-            });
 
-            // Remove names of sessions that were removed
+            // Delete removed sessions from cache
             if (lastFetchedHashes.length > 0) {
                 savedSessionsCache.forEach((_, idHash) => {
                     if (!lastFetchedHashes.includes(idHash)) savedSessionsCache.delete(idHash);
                 });
-                lastFetchedHashes = [];
             }
+
+            // Dismiss the "NEW" badge of all sessions.
+            // Since the only way for a session to be marked as "NEW" is going to the Devices tab,
+            // closing the settings means they've been viewed and are no longer considered new.
+            savedSessionsCache.forEach(data => {
+                data.isNew = false;
+            });
             saveSessionsToDataStore();
         }
     },
