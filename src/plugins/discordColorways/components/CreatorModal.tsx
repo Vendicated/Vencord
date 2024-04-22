@@ -29,10 +29,10 @@ import { ColorPicker } from "..";
 import { knownThemeVars } from "../constants";
 import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
-import { getHex, hexToString } from "../utils";
-import { ConflictingColorsModal } from "./conflictingColorsModal";
-import { ThemePreviewCategory } from "./themePreview";
-export default function CreatorModal({
+import { getHex, hexToString, hslToHex, rgbToHex } from "../utils";
+import ConflictingColorsModal from "./ConflictingColorsModal";
+import ThemePreviewCategory from "./ThemePreview";
+export default function ({
     modalProps,
     loadUIProps,
     colorwayID
@@ -51,7 +51,7 @@ export default function CreatorModal({
     const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
     const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
-    const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
+    const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
 
     useEffect(() => {
         const parsedID = colorwayID?.split("colorway:")[1];
@@ -344,21 +344,33 @@ export default function CreatorModal({
                                             size={Button.Sizes.MEDIUM}
                                             look={Button.Looks.FILLED}
                                             onClick={() => {
-                                                const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
                                                 if (!colorwayID) {
                                                     throw new Error("Please enter a Colorway ID");
-                                                } else if (colorwayID.length < 62) {
-                                                    throw new Error("Invalid Colorway ID");
                                                 } else if (!hexToString(colorwayID).includes(",")) {
                                                     throw new Error("Invalid Colorway ID");
-                                                } else if (!allEqual(hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)) && hexToString(colorwayID).split(",").map((e: string) => e.match("#")!.length)[0] !== 1) {
-                                                    throw new Error("Invalid Colorway ID");
                                                 } else {
-                                                    const colorArray: string[] = hexToString(colorwayID).split(",");
-                                                    setAccentColor(colorArray[0].split("#")[1]);
-                                                    setPrimaryColor(colorArray[1].split("#")[1]);
-                                                    setSecondaryColor(colorArray[2].split("#")[1]);
-                                                    setTertiaryColor(colorArray[3].split("#")[1]);
+                                                    const setColor = [
+                                                        setAccentColor,
+                                                        setPrimaryColor,
+                                                        setSecondaryColor,
+                                                        setTertiaryColor
+                                                    ];
+                                                    hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => {
+                                                        var colorType = "hex";
+                                                        if (color.includes("hsl")) {
+                                                            colorType = "hsl";
+                                                        } else if (color.includes("rgb")) {
+                                                            colorType = "rgb";
+                                                        }
+                                                        color = color.replaceAll(",", "").replace(/.+?\(/, "").replace(")", "").replaceAll(/[ \t]+\/[ \t]+/g, " ").replaceAll("%", "");
+                                                        if (colorType === "hsl") {
+                                                            color = hslToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
+                                                        }
+                                                        if (colorType === "rgb") {
+                                                            color = rgbToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
+                                                        }
+                                                        setColor[i](color.replace("#", ""));
+                                                    });
                                                     props.onClose();
                                                 }
                                             }}

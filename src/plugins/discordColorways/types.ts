@@ -15,7 +15,9 @@ export interface Colorway {
     author: string,
     authorID: string,
     colors?: string[],
-    isGradient?: boolean;
+    isGradient?: boolean,
+    sourceUrl?: string,
+    sourceName?: string;
 }
 
 export interface ColorPickerProps {

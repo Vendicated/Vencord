@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export default function Spinner({ className }: { className?: string; }) {
+export default function ({ className }: { className?: string; }) {
     return <div className={"colorwaysBtn-spinner" + (className ? " " + className : "")} role="img" aria-label="Loading">
         <div className="colorwaysBtn-spinnerInner">
             <svg className="colorwaysBtn-spinnerCircular" viewBox="25 25 50 50" fill="currentColor">

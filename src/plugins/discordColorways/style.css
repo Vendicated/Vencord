@@ -25,7 +25,6 @@
 .discordColorway {
     height: 60px;
     width: 60px;
-    border-radius: 50%;
     cursor: pointer;
     display: flex;
     flex-flow: wrap;
@@ -33,12 +32,11 @@
     position: relative;
     align-items: center;
     justify-content: center;
-    transition: .1s;
-    box-shadow: inset 0 0 0 1px var(--interactive-normal);
+    transition: 170ms ease;
 }
 
 .discordColorway:hover {
-    box-shadow: inset 0 0 0 1px var(--interactive-active);
+    filter: brightness(.8);
 }
 
 .discordColorwayPreviewColorContainer {
@@ -49,53 +47,99 @@
     border-radius: 50%;
     width: 56px;
     height: 56px;
+    box-shadow: 0 0 0 1px var(--interactive-normal);
+    box-sizing: border-box;
 }
 
-.discordColorway.active {
+.discordColorway::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    pointer-events: none;
+    transition: .15s;
+}
+
+.discordColorway.active::before {
     box-shadow: inset 0 0 0 2px var(--brand-500), inset 0 0 0 4px var(--background-primary);
 }
 
-.discordColorway.active .discordColorwayPreviewColorContainer {
-    width: 52px;
-    height: 52px;
-}
-
 .discordColorwayPreviewColor {
-    width: 50%;
-    height: 50%;
+    width: calc(50% - 2px);
+    height: calc(50% - 2px);
 }
 
-.discordColorway.active>.discordColorwayPreviewColor {
-    width: 30px;
-    height: 30px;
+.discordColorwayPreviewColor:first-child {
+    margin-top: 2px;
+    margin-left: 2px;
+    border-top-left-radius: 52px;
+}
+
+.discordColorwayPreviewColor:nth-child(2) {
+    margin-top: 2px;
+    margin-right: 2px;
+    border-top-right-radius: 52px;
+}
+
+.discordColorwayPreviewColor:nth-child(3) {
+    margin-bottom: 2px;
+    margin-left: 2px;
+    border-bottom-left-radius: 52px;
+}
+
+.discordColorwayPreviewColor:nth-child(4) {
+    margin-bottom: 2px;
+    margin-right: 2px;
+    border-bottom-right-radius: 52px;
 }
 
 .discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
-    height: 100%;
-    width: 100%;
+    height: calc(100% - 4px);
+    width: calc(100% - 4px);
+    margin: 2px;
+    border-radius: 52px;
 }
 
 .discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
-    height: 100%;
+    height: calc(100% - 4px);
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor:nth-child(1) {
+    border-top-left-radius: 52px;
+    border-bottom-left-radius: 52px;
+    margin-left: 2px;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor:nth-child(2) {
+    border-top-right-radius: 52px;
+    border-bottom-right-radius: 52px;
+    margin-right: 2px;
 }
 
 .discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
-    width: 100%;
+    width: calc(100% - 4px);
+    margin-right: 2px;
+    border-bottom-right-radius: 52px;
+    border-bottom-left-radius: 52px;
 }
 
 .ColorwaySelectorWrapper {
     position: relative;
     display: flex;
-    gap: 16px 24px;
+    gap: 16px 23px;
     width: 100%;
     flex-wrap: wrap;
+    padding: 2px;
+    scrollbar-width: none !important;
 }
 
 .colorwaySelectorModal {
     width: 100% !important;
-    border-radius: 12px !important;
-    border: 1px solid var(--background-tertiary) !important;
-    box-shadow: var(--dark-elevation-high) !important;
     min-width: 596px !important;
 }
 
@@ -106,8 +150,7 @@
     width: 100%;
     max-width: 596px;
     overflow: visible !important;
-    padding: 16px !important;
-    padding-right: 16px !important;
+    padding: 0 16px 16px !important;
 }
 
 .ColorwaySelectorBtnContainer {
@@ -216,6 +259,7 @@
     gap: 8px;
     padding: 20px 16px !important;
     overflow: visible !important;
+    min-height: unset;
 }
 
 .colorwayCreator-modal {
@@ -358,6 +402,16 @@
     overflow: hidden overlay;
 }
 
+.colorwaysColorpicker-settingCat {
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.colorwaysColorpicker-search {
+    width: 100%;
+}
+
 .colorwaysCreator-settingItm {
     display: flex;
     flex-direction: row;
@@ -384,8 +438,17 @@
     max-height: 185px;
 }
 
-.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingsList {
-    display: none;
+.colorwaysCreator-settingCat-collapsed>.colorwaysCreator-settingsList,
+.colorwaysColorpicker-collapsed {
+    display: none !important;
+}
+
+.colorwayColorpicker {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px !important;
+    width: 620px !important;
+    min-height: unset;
 }
 
 .colorwaysCreator-noHeader {
@@ -536,9 +599,9 @@
     padding: 0;
 }
 
-.colorwayToolbox-listItem .bi {
-    width: 58px;
-    height: 58px;
+.colorwayToolbox-listItemSVG {
+    padding: 19px;
+    overflow: visible;
     border-radius: 50%;
     background-color: var(--background-tertiary);
     border: 1px solid transparent;
@@ -554,7 +617,7 @@
     color: var(--interactive-normal) !important;
 }
 
-.colorwayToolbox-listItem .bi:hover {
+.colorwayToolbox-listItemSVG:hover {
     border-color: var(--brand-500);
     background-color: var(--brand-experiment-15a);
     color: var(--interactive-hover) !important;
@@ -576,16 +639,6 @@
     flex-direction: column;
     gap: 12px;
     overflow: hidden;
-}
-
-.colorwayToolbox-itemList {
-    flex: 0 0 auto;
-    max-height: calc(720px - 65px);
-    padding: 0;
-    overflow: visible !important;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 0;
 }
 
 .colorwayPreview-chatBox {
@@ -658,25 +711,18 @@
 
 .colorwaySelector-search {
     width: 100%;
-    height: 32px;
 }
 
 .colorwaySelector-searchInput {
-    height: 32px !important;
-    border-radius: 0 50px 50px 0 !important;
-    border: 1px solid transparent !important;
-    transition: .15s ease !important;
-    padding: 0 12px !important;
+    border-radius: 0 3px 3px 0 !important;
     flex: 0 0 auto;
 }
 
 .colorwaySelector-pill.colorwaySelector-pill_select {
-    border-radius: 50px 0 0 50px !important;
+    border-radius: 3px 0 0 3px !important;
     flex: 0 0 auto;
-}
-
-.colorwaySelector-searchInput:hover {
-    border-color: transparent !important;
+    border: none;
+    height: 40px;
 }
 
 .colorwaySelector-headerBtn {
@@ -685,79 +731,12 @@
     right: 20px;
 }
 
-.colorwaySelector-pill {
-    border-radius: 20px !important;
-    background-color: var(--background-tertiary);
-    border: 1px solid transparent;
-    box-sizing: border-box !important;
-    padding: 0 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    height: 32px;
-    overflow: hidden;
-    color: var(--text-normal);
-    cursor: pointer;
-    transition: .15s ease;
-    gap: 12px;
-}
-
-.colorwaySelector-pillPopout {
-    background-color: var(--background-tertiary);
-    border-radius: 8px;
-}
-
-.colorwaySelector-pillWrapper {
-    display: flex;
-    align-items: center;
-    flex: 1 1 auto;
-}
-
-.colorwaySelector-pillWrapper:first-of-type {
-    width: 100%;
-}
-
-.colorwaySelector-pillWrapper:last-of-type {
-    gap: 8px;
-}
-
-.colorwaySelector-pillOption {
-    background-color: var(--background-tertiary) !important;
-    border: 1px solid transparent;
-    box-sizing: border-box;
-    padding: 0 12px;
-    height: 32px;
-    transition: .15s ease;
-}
-
-.colorwaySelector-pillOption:first-child {
-    border-radius: 8px 8px 0 0;
-}
-
-.colorwaySelector-pillOption:nth-last-child(2) {
-    border-radius: 0 0 8px 8px;
-}
-
-.colorwaySelector-doublePillBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-}
-
-.theme-light .colorwaySelector-pill_selected,
-.theme-light .colorwaySelector-pill:hover,
-.theme-light .colorwaySelector-searchInput:focus,
-.theme-light .colorwaySelector-pillOption:hover,
-.theme-light .colorwaySelector-pillOption[aria-selected="true"] {
+.theme-light .colorwaySelector-pill_selected {
     border-color: var(--brand-500) !important;
     background-color: var(--brand-experiment-160) !important;
 }
 
-.theme-dark .colorwaySelector-pill_selected,
-.theme-dark .colorwaySelector-pill:hover,
-.theme-dark .colorwaySelector-searchInput:focus,
-.theme-dark .colorwaySelector-pillOption:hover,
-.theme-dark .colorwaySelector-pillOption[aria-selected="true"] {
+.theme-dark .colorwaySelector-pill_selected {
     border-color: var(--brand-500) !important;
     background-color: var(--brand-experiment-15a) !important;
 }
@@ -1026,7 +1005,6 @@
     justify-content: space-between;
     padding: 0 8px;
     gap: 5px;
-    cursor: pointer;
     border-radius: 4px;
     box-sizing: border-box;
     min-height: 44px;

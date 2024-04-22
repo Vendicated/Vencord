@@ -7,6 +7,7 @@
 import { DataStore } from "@api/index";
 import { Flex } from "@components/Flex";
 import { CloseIcon, CopyIcon } from "@components/Icons";
+import { Link } from "@components/Link";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import {
@@ -28,7 +29,7 @@ import { defaultColorwaySource, fallbackColorways, knownColorwaySources } from "
 import { Colorway } from "../../types";
 import Divider from "../Divider";
 
-export function SettingsPage() {
+export default function () {
     const [colorways, setColorways] = useState<Colorway[]>([]);
     const [customColorways, setCustomColorways] = useState<Colorway[]>([]);
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<string[]>();
@@ -162,7 +163,6 @@ export function SettingsPage() {
                     {colorwaySourceFile !== defaultColorwaySource
                         && <Button
                             innerClassName="colorwaysSettings-iconButtonInner"
-                            className="colorwaysSettings-iconButton"
                             size={Button.Sizes.ICON}
                             color={Button.Colors.TRANSPARENT}
                             onClick={async () => {
@@ -177,7 +177,7 @@ export function SettingsPage() {
                                 setColorwaySourceFiles(sourcesArr);
                             }}
                         >
-                            <CloseIcon />
+                            <CloseIcon width={20} height={20} />
                         </Button>}
                     <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
@@ -226,7 +226,7 @@ export function SettingsPage() {
                     fontSize: "24px",
                     color: "var(--header-primary)",
                     lineHeight: "31px",
-                    marginBottom: "12px"
+                    marginBottom: "0"
                 }}>
                     Discord <span style={{
                         fontFamily: "var(--font-display)",
@@ -236,6 +236,15 @@ export function SettingsPage() {
                         borderRadius: "4px"
                     }}>Colorways</span>
                 </h1>
+                <Text
+                    variant="text-xs/normal"
+                    style={{
+                        color: "var(--text-normal)",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        marginBottom: "12px"
+                    }}
+                >by Project Colorway</Text>
                 <Forms.FormTitle style={{ marginBottom: 0 }}>
                     Plugin Version:
                 </Forms.FormTitle>
@@ -279,6 +288,14 @@ export function SettingsPage() {
                 >
                     {[...colorways, ...customColorways].length}
                 </Text>
+                <Forms.FormTitle style={{ marginBottom: 0 }}>
+                    Project Repositories:
+                </Forms.FormTitle>
+                <Forms.FormText style={{ marginBottom: "8px" }}>
+                    <Link href="https://github.com/DaBluLite/DiscordColorways">DiscordColorways</Link>
+                    <br />
+                    <Link href="https://github.com/DaBluLite/ProjectColorway">Project Colorway</Link>
+                </Forms.FormText>
             </Flex>
         </div>
     </SettingsTab>;

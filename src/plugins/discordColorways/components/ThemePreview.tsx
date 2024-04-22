@@ -13,7 +13,7 @@ import {
 
 import { HexToHSL } from "../utils";
 
-export function ThemePreviewCategory({
+export default function ({
     accent,
     primary,
     secondary,
@@ -81,7 +81,7 @@ export function ThemePreviewCategory({
     );
 }
 
-export function ThemePreview({
+function ThemePreview({
     accent,
     primary,
     secondary,

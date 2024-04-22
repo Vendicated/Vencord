@@ -8,7 +8,7 @@ import { DataStore } from "@api/index";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { Switch, useCallback, useEffect, useState } from "@webpack/common";
 
-export function OnDemandWaysPage() {
+export default function () {
     const [onDemand, setOnDemand] = useState<boolean>(false);
     const [onDemandTinted, setOnDemandTinted] = useState<boolean>(false);
     const [onDemandDiscordSat, setOnDemandDiscordSat] = useState<boolean>(false);
@@ -32,16 +32,16 @@ export function OnDemandWaysPage() {
     useEffect(() => {
         cached_loadUI();
     }, []);
-    return <SettingsTab title="On Demand">
+    return <SettingsTab title="On-Demand">
         <Switch
             value={onDemand}
             onChange={(v: boolean) => {
                 setOnDemand(v);
                 DataStore.set("onDemandWays", v);
             }}
-            note="Always utilise the latest of what Colorways has to offer. CSS is being directly generated on the device and gets applied in the place of the normal import/CSS given by the colorway."
+            note="Always utilise the latest of what DiscordColorways has to offer. CSS is being directly generated on the device and gets applied in the place of the normal import/CSS given by the colorway."
         >
-            Enable OnDemandWays
+            Enable Colorways On Demand
         </Switch>
         <Switch
             value={onDemandTinted}
@@ -49,6 +49,7 @@ export function OnDemandWaysPage() {
                 setOnDemandTinted(v);
                 DataStore.set("onDemandWaysTintedText", v);
             }}
+            disabled={!onDemand}
         >
             Use tinted text
         </Switch>
@@ -59,6 +60,7 @@ export function OnDemandWaysPage() {
                 setOnDemandDiscordSat(v);
                 DataStore.set("onDemandWaysDiscordSaturation", v);
             }}
+            disabled={!onDemand}
         >
             Use Discord's saturation
         </Switch>

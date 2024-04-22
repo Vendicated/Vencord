@@ -10,6 +10,10 @@ export const knownColorwaySources = [
     {
         name: "Project Colorway",
         url: "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json"
+    },
+    {
+        name: "DaBluLite's Personal Colorways",
+        url: "https://raw.githubusercontent.com/DaBluLite/dablulite.github.io/master/colorways/index.json"
     }
 ];
 

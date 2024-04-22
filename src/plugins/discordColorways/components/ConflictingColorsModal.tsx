@@ -10,7 +10,7 @@ import { Button, Forms, ScrollerThin, Text, useState } from "@webpack/common";
 import { knownThemeVars } from "../constants";
 import { getFontOnBg, getHex } from "../utils";
 
-export function ConflictingColorsModal({
+export default function ({
     modalProps,
     onFinished
 }: {

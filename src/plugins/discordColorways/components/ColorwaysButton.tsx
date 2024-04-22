@@ -10,9 +10,9 @@ import { openModal } from "@utils/modal";
 import { FluxDispatcher, Text, Tooltip, useCallback, useEffect, useState } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
-import SelectorModal from "./selectorModal";
+import SelectorModal from "./SelectorModal";
 
-export default function ColorwaysButton({
+export default function ({
     listItemClass = "ColorwaySelectorBtnContainer",
     listItemWrapperClass = "",
     listItemTooltipClass = "colorwaysBtn-tooltipContent"
