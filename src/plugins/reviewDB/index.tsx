@@ -47,6 +47,17 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild:
     );
 };
 
+const userContextPatch: NavContextMenuPatchCallback = (children, props: { user: User, onClose(): void; }) => {
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-user-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(props.user.id, props.user.username)}
+        />
+    );
+};
+
 export default definePlugin({
     name: "ReviewDB",
     description: "Review other users (Adds a new settings to profiles)",
@@ -54,7 +65,10 @@ export default definePlugin({
 
     settings,
     contextMenus: {
-        "guild-header-popout": guildPopoutPatch
+        "guild-header-popout": guildPopoutPatch,
+        "guild-context": guildPopoutPatch,
+        "user-context": userContextPatch,
+        "user-profile-actions": userContextPatch
     },
 
     patches: [
