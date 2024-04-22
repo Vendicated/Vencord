@@ -19,18 +19,15 @@
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, React, RestAPI, Tooltip } from "@webpack/common";
+import { React, RestAPI, Tooltip } from "@webpack/common";
 
-import { RenameModal } from "./components/RenameModal";
+import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
-import { RenameButton } from "./components/RenameButton";
 
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
-const Constants = findByPropsLazy("UserSettingsSections");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
