@@ -20,18 +20,21 @@ import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps, findByPropsLazy } from "@webpack";
 import { React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+import { LazyComponent } from "@utils/lazyReact";
 
 const AuthSessionsStore = findByPropsLazy("getSessions");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
+
+const BlobMask = LazyComponent(() => findByProps("BlobMask").BlobMask);
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -70,10 +73,19 @@ export default definePlugin({
                 },
                 // Replace the icon
                 {
-                    match: /(?<=currentSession:null\),children:\[)/,
-                    replace: "$self.renderIcon(arguments[0]),"
+                    match: /(currentSession:null\),children:\[)\(0,\i\.\i\)\("div",{className:\i\.sessionIcon,children:\(0,\i\.\i\)\((\i),{width:\i,height:\i}\)}\),/,
+                    replace: "$1$self.renderIcon(arguments[0], $2),"
                 }
             ]
+        },
+        {
+            // Add the ability to change BlobMask's lower badge height
+            // (it allows changing width so we can mirror that logic)
+            find: "this.getBadgePositionInterpolation(",
+            replacement: {
+                match: /(\i\.animated\.rect,{id:\i,x:48-\(\i\+8\)\+4,y:)28(,width:\i\+8,height:)24,/,
+                replace: (_, leftPart, rightPart) => `${leftPart} 48 - ((this.props.lowerBadgeHeight ?? 16) + 8) + 4 ${rightPart} (this.props.lowerBadgeHeight ?? 16) + 8,`
+            }
         }
     ],
 
@@ -121,16 +133,42 @@ export default definePlugin({
         );
     },
 
-    renderIcon({ session }: SessionInfo) {
+    renderIcon({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (
-            <div
-                className={SessionIconClasses.sessionIcon}
-                style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+            <BlobMask
+                style={{ cursor: "unset" }}
+                selected={false}
+                lowerBadge={
+                    <div
+                        style={{
+                            width: "20px",
+                            height: "20px",
+
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+
+                            borderRadius: "50%",
+                            backgroundColor: "var(--interactive-normal)",
+                            color: "var(--background-secondary)",
+                        }}
+                    >
+                        <PlatformIcon width={14} height={14} />
+                    </div>
+                }
+                lowerBadgeWidth={20}
+                lowerBadgeHeight={20}
             >
-                <PlatformIcon width={32} height={32} />
-            </div>
+                <div
+                    className={SessionIconClasses.sessionIcon}
+                    style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                >
+                    <DeviceIcon width={28} height={28} />
+                </div>
+            </BlobMask>
         );
     },
 
