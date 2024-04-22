@@ -73,8 +73,8 @@ export default definePlugin({
                 },
                 // Replace the icon
                 {
-                    match: /(currentSession:null\),children:\[)\(0,\i\.\i\)\("div",{className:\i\.sessionIcon,children:\(0,\i\.\i\)\((\i),{width:\i,height:\i}\)}\),/,
-                    replace: "$1$self.renderIcon(arguments[0], $2),"
+                    match: /\.currentSession:null\),children:\[(?<=,icon:(\i)\}.+?)/,
+                    replace: "$& $self.renderIcon(arguments[0],$1), false &&"
                 }
             ]
         },
