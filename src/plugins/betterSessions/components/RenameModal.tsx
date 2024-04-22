@@ -24,17 +24,15 @@ import { SessionInfo } from "../types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
 export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
-    const [name, setName] = state;
-    const ref = React.useRef<HTMLInputElement>(null);
-
-    let newName = savedSessionsCache.get(session.id_hash)?.name ?? "";
+    const [title, setTitle] = state;
+    const [value, setValue] = React.useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 
     function onSaveClick() {
-        savedSessionsCache.set(session.id_hash, { name: newName, isNew: false });
-        if (newName !== "") {
-            setName(`${newName}*`);
+        savedSessionsCache.set(session.id_hash, { name: value, isNew: false });
+        if (value !== "") {
+            setTitle(`${value}*`);
         } else {
-            setName(getDefaultName(session.client_info));
+            setTitle(getDefaultName(session.client_info));
         }
 
         saveSessionsToDataStore();
@@ -50,13 +48,10 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
                 <TextInput
-                    inputRef={ref}
                     style={{ marginBottom: "10px" }}
                     placeholder={getDefaultName(session.client_info)}
-                    defaultValue={newName}
-                    onChange={(e: string) => {
-                        newName = e;
-                    }}
+                    value={value}
+                    onChange={setValue}
                     onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === "Enter") {
                             onSaveClick();
@@ -73,9 +68,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                     look={Button.Looks.LINK}
                     color={Button.Colors.LINK}
                     size={Button.Sizes.NONE}
-                    onClick={() => {
-                        ref.current!.value = newName = "";
-                    }}
+                    onClick={() => setValue("")}
                 >
                     Reset Name
                 </Button>
@@ -91,9 +84,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                 <Button
                     color={Button.Colors.TRANSPARENT}
                     look={Button.Looks.LINK}
-                    onClick={() => {
-                        props.onClose();
-                    }}
+                    onClick={() => props.onClose()}
                 >
                     Cancel
                 </Button>

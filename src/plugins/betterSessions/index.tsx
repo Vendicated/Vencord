@@ -81,12 +81,12 @@ export default definePlugin({
         const savedSession = savedSessionsCache.get(session.id_hash);
 
         const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
-        const [name, setName] = state;
+        const [title, setTitle] = state;
 
         // Show a "NEW" badge if the session is seen for the first time
         return (
             <>
-                <span>{name}</span>
+                <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
                     <div
                         className="vc-plugins-badge"
