@@ -18,11 +18,11 @@
 
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
+import { SVGProps } from "react";
 
-export const DiscordIcon = ({ width, height }: { width: number, height: number; }) => (
+export const DiscordIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 16 16"
     >
@@ -30,10 +30,9 @@ export const DiscordIcon = ({ width, height }: { width: number, height: number; 
     </svg>
 );
 
-export const ChromeIcon = ({ width, height }: { width: number, height: number; }) => (
+export const ChromeIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 512 512"
     >
@@ -44,10 +43,9 @@ export const ChromeIcon = ({ width, height }: { width: number, height: number; }
     </svg>
 );
 
-export const EdgeIcon = ({ width, height }: { width: number, height: number; }) => (
+export const EdgeIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 24 24"
     >
@@ -55,10 +53,9 @@ export const EdgeIcon = ({ width, height }: { width: number, height: number; }) 
     </svg>
 );
 
-export const FirefoxIcon = ({ width, height }: { width: number, height: number; }) => (
+export const FirefoxIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 512 512"
     >
@@ -66,10 +63,9 @@ export const FirefoxIcon = ({ width, height }: { width: number, height: number; 
     </svg>
 );
 
-export const IEIcon = ({ width, height }: { width: number, height: number; }) => (
+export const IEIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 512 512"
     >
@@ -77,10 +73,9 @@ export const IEIcon = ({ width, height }: { width: number, height: number; }) =>
     </svg>
 );
 
-export const OperaIcon = ({ width, height }: { width: number, height: number; }) => (
+export const OperaIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 496 512"
     >
@@ -88,10 +83,9 @@ export const OperaIcon = ({ width, height }: { width: number, height: number; })
     </svg>
 );
 
-export const SafariIcon = ({ width, height }: { width: number, height: number; }) => (
+export const SafariIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 512 512"
     >
@@ -99,10 +93,9 @@ export const SafariIcon = ({ width, height }: { width: number, height: number; }
     </svg>
 );
 
-export const UnknownIcon = ({ width, height }: { width: number, height: number; }) => (
+export const UnknownIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
-        width={width}
-        height={height}
+        {...props}
         fill="currentColor"
         viewBox="0 0 16 16"
     >
