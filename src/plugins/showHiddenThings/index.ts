@@ -16,20 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
+const settings = definePluginSettings({
+    showTimeouts: {
+        type: OptionType.BOOLEAN,
+        description: "Show member timeout icons in chat.",
+        default: true,
+    },
+    showInvitesPaused: {
+        type: OptionType.BOOLEAN,
+        description: "Show the invites paused tooltip in the server list.",
+        default: true,
+    },
+});
+
+migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
-    name: "ShowTimeouts",
-    description: "Display member timeout icons in chat regardless of permissions.",
+    name: "ShowHiddenThings",
+    tags: ["ShowTimeouts", "ShowInvitesPaused"],
+    description: "Displays various moderator-only elements regardless of permissions.",
     authors: [Devs.Dolfies],
     patches: [
         {
             find: "showCommunicationDisabledStyles",
+            predicate: () => settings.store.showTimeouts,
             replacement: {
                 match: /&&\i\.\i\.canManageUser\(\i\.\i\.MODERATE_MEMBERS,\i\.author,\i\)/,
                 replace: "",
             },
         },
+        {
+            find: "useShouldShowInvitesDisabledNotif:",
+            predicate: () => settings.store.showInvitesPaused,
+            replacement: {
+                match: /\i\.\i\.can\(\i\.Permissions.MANAGE_GUILD,\i\)/,
+                replace: "true",
+            },
+        }
     ],
+    settings,
 });
