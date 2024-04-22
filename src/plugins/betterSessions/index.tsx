@@ -19,6 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findByPropsLazy } from "@webpack";
 import { React, RestAPI, Tooltip } from "@webpack/common";
@@ -26,7 +27,6 @@ import { React, RestAPI, Tooltip } from "@webpack/common";
 import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
-import { LazyComponent } from "@utils/lazyReact";
 
 const AuthSessionsStore = findByPropsLazy("getSessions");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
