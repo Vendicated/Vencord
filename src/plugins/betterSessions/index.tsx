@@ -27,6 +27,7 @@ import { Button, React, RestAPI, Tooltip } from "@webpack/common";
 import { RenameModal } from "./components/RenameModal";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+import { RenameButton } from "./components/RenameButton";
 
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 const Constants = findByPropsLazy("UserSettingsSections");
@@ -86,27 +87,24 @@ export default definePlugin({
         const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
         const [name, setName] = state;
 
-        const children = [
-            <span>{name}</span>,
-            this.renderRenameButton({ session }, state)
-        ];
-
         // Show a "NEW" badge if the session is seen for the first time
-        if (savedSession == null || savedSession.isNew) {
-            children.splice(1, 0,
-                <div
-                    className="vc-plugins-badge"
-                    style={{
-                        backgroundColor: "#ED4245",
-                        marginLeft: "2px"
-                    }}
-                >
-                    NEW
-                </div>
-            );
-        }
-
-        return children;
+        return (
+            <>
+                <span>{name}</span>
+                {(savedSession == null || savedSession.isNew) && (
+                    <div
+                        className="vc-plugins-badge"
+                        style={{
+                            backgroundColor: "#ED4245",
+                            marginLeft: "2px"
+                        }}
+                    >
+                        NEW
+                    </div>
+                )}
+                <RenameButton session={session} state={state} />
+            </>
+        );
     },
 
     renderTimestamp({ session }: SessionInfo, timeLabel: string) {
@@ -123,27 +121,7 @@ export default definePlugin({
 
     renderRenameButton({ session }: SessionInfo, state: [string, React.Dispatch<React.SetStateAction<string>>]) {
         return (
-            <Button
-                look={Button.Looks.LINK}
-                color={Button.Colors.LINK}
-                size={Button.Sizes.NONE}
-                style={{
-                    paddingTop: "0px",
-                    paddingBottom: "0px",
-                    top: "-2px"
-                }}
-                onClick={() =>
-                    openModal(props => (
-                        <RenameModal
-                            props={props}
-                            session={session}
-                            state={state}
-                        />
-                    ))
-                }
-            >
-                Rename
-            </Button>
+            <RenameButton session={session} state={state} />
         );
     },
 
