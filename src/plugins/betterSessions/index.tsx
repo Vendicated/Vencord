@@ -139,10 +139,10 @@ export default definePlugin({
             url: "/auth/sessions"
         });
 
-        const newSessions = data.body.user_sessions.filter((session: SessionInfo["session"]) => !savedSessionsCache.has(session.id_hash));
-        for (const session of newSessions) {
-            savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
+        for (const session of data.body.user_sessions) {
+            if (savedSessionsCache.has(session.id_hash)) continue;
 
+            savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
             showNotification({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
