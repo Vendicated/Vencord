@@ -56,8 +56,8 @@ export default definePlugin({
         {
             find: ".FRIENDS_SECTION_ONLINE",
             replacement: {
-                match: /\(0,(\i)\.jsx\)\((\i)\.TabBar\.Item,\{id:(\i)\.(\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
-                replace: "(0,$1.jsx)($2.TabBar.Item,{id:$3.$4.IMPLICIT,className:$5.item,children:\"Implicit\"}),$&"
+                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
+                replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
             },
         },
         // Sections content
