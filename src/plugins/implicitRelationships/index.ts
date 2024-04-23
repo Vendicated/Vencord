@@ -83,7 +83,7 @@ export default definePlugin({
             replacement: {
                 predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
                 match: /\.sortBy\(\i=>\i\.comparator\)/,
-                replace: `.sortBy((function(r) {
+                replace: `$&.sortBy((function(r) {
                         return r.type === 5
                             ? -$self.getAffinity(r.user)
                             : r.comparator
