@@ -20,13 +20,12 @@ import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
 import { React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
-import { SessionInfo } from "./types";
+import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const AuthSessionsStore = findByPropsLazy("getSessions");
@@ -35,7 +34,7 @@ const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
-const BlobMask = LazyComponent(() => findByProps("BlobMask").BlobMask);
+const BlobMask = findExportedComponentLazy("BlobMask");
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -70,12 +69,12 @@ export default definePlugin({
                 },
                 {
                     match: /({variant:"text-sm\/medium",className:\i\.sessionInfoRow,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
-                    replace: "$1$self.renderTimestamp(arguments[0], $2)}"
+                    replace: "$1$self.renderTimestamp({ ...arguments[0], timeLabel: $2 })}"
                 },
                 // Replace the icon
                 {
                     match: /\.currentSession:null\),children:\[(?<=,icon:(\i)\}.+?)/,
-                    replace: "$& $self.renderIcon(arguments[0],$1), false &&"
+                    replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
         },
@@ -90,7 +89,7 @@ export default definePlugin({
         }
     ],
 
-    renderName({ session }: SessionInfo) {
+    renderName: ErrorBoundary.wrap(({ session }: SessionInfo) => {
         const savedSession = savedSessionsCache.get(session.id_hash);
 
         const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
@@ -114,9 +113,9 @@ export default definePlugin({
                 <RenameButton session={session} state={state} />
             </>
         );
-    },
+    }, { noop: true }),
 
-    renderTimestamp({ session }: SessionInfo, timeLabel: string) {
+    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
         return (
             <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
                 {props => (
@@ -126,54 +125,46 @@ export default definePlugin({
                 )}
             </Tooltip>
         );
-    },
+    }, { noop: true }),
 
-    renderRenameButton({ session }: SessionInfo, state: [string, React.Dispatch<React.SetStateAction<string>>]) {
-        return (
-            <RenameButton session={session} state={state} />
-        );
-    },
-
-    renderIcon({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) {
+    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: React.ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (
-            <ErrorBoundary noop>
-                <BlobMask
-                    style={{ cursor: "unset" }}
-                    selected={false}
-                    lowerBadge={
-                        <div
-                            style={{
-                                width: "20px",
-                                height: "20px",
-
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                overflow: "hidden",
-
-                                borderRadius: "50%",
-                                backgroundColor: "var(--interactive-normal)",
-                                color: "var(--background-secondary)",
-                            }}
-                        >
-                            <PlatformIcon width={14} height={14} />
-                        </div>
-                    }
-                    lowerBadgeWidth={20}
-                    lowerBadgeHeight={20}
-                >
+            <BlobMask
+                style={{ cursor: "unset" }}
+                selected={false}
+                lowerBadge={
                     <div
-                        className={SessionIconClasses.sessionIcon}
-                        style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                        style={{
+                            width: "20px",
+                            height: "20px",
+
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+
+                            borderRadius: "50%",
+                            backgroundColor: "var(--interactive-normal)",
+                            color: "var(--background-secondary)",
+                        }}
                     >
-                        <DeviceIcon width={28} height={28} />
+                        <PlatformIcon width={14} height={14} />
                     </div>
-                </BlobMask>
-            </ErrorBoundary>
+                }
+                lowerBadgeWidth={20}
+                lowerBadgeHeight={20}
+            >
+                <div
+                    className={SessionIconClasses.sessionIcon}
+                    style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                >
+                    <DeviceIcon width={28} height={28} />
+                </div>
+            </BlobMask>
         );
-    },
+    }, { noop: true }),
 
     async checkNewSessions() {
         const data = await RestAPI.get({

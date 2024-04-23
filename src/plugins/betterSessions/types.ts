@@ -28,3 +28,5 @@ export interface SessionInfo {
     },
     current?: boolean;
 }
+
+export type Session = SessionInfo["session"];
