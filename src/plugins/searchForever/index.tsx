@@ -60,20 +60,24 @@ function searchFinish(payload: SearchFinishProps) {
 }
 
 export default definePlugin({
-    name: "SearchFix",
-    description: "Allows you to scroll further than 200 pages.",
+    name: "SearchForever",
+    description: "Allows you to scroll search result further than 400 pages.",
     settingsAboutComponent: () => <span style={{ color: "white" }}><i><b>This fix isn't perfect, so you will not be able to jump to any page.</b></i> This only works while you open pages sequentially. </span>,
-    authors: [Devs.Jaxx],
+    authors: [Devs.CatGirlDShadow, Devs.Jaxx],
+    flux: {
+        "SEARCH_FINISH": searchFinish,
+    },
     patches: [
         {
             find: '"SearchStore"',
             replacement: {
                 match: /(\i)\.offset=null!==\((\i)=(\i)\.offset\)&&void 0!==(\i)\?(\i):0/i,
-                replace: (_, v, v1, query, v3, v4) => `$self.main(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
+                replace: (_, v, v1, query, v3, v4) => `$self.processQuery(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
             }
         }
     ],
-    main(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
+    processQuery(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
+        console.log(query);
         if (query.offset === 0) {
             CachedInfo.isAltered = false;
             return;
@@ -94,7 +98,7 @@ export default definePlugin({
             this.renderCurrentPage(query);
             return;
         }
-        if (query.offset === 5000) {
+        if (query.offset === 10000) {
             this.renderCurrentPage(query);
         }
     },
@@ -113,13 +117,9 @@ export default definePlugin({
             query.offset = 50; // i = 0, i+1 = 25, i+2 = 50
         }
         else {
-            query.offset = 199 * 25;
+            query.offset = 399 * 25;
             CachedInfo.isAltered = false;
         }
 
     },
-    flux: {
-        "SEARCH_FINISH": searchFinish,
-    },
-
 });
