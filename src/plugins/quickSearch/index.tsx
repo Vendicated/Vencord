@@ -63,28 +63,28 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     const ELEM_INFO = [
         {
             name: "quick-search-channel",
-            label: "Add within channel",
+            label: "Search within channel",
             present: !!channelId,
             value: channelId,
             queryName: "channel_id",
         },
         {
             name: "quick-search-author",
-            label: "Add from user",
+            label: "Search from user",
             present: !!userId,
             value: userId,
             queryName: "author_id",
         },
         {
             name: "quick-search-mentions",
-            label: "Add mentioning user",
+            label: "Search mentioning user",
             present: !!userId,
             value: [userId],
             queryName: "mentions",
         },
         {
             name: "quick-search-content",
-            label: "Add message content",
+            label: "Search message content",
             present: !!content,
             value: content ?? "",
             queryName: "content",
