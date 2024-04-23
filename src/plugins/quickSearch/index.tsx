@@ -12,7 +12,7 @@ import { filters, findAll } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, React, useState } from "@webpack/common";
 
 export default definePlugin({
-    name: "quickSearch",
+    name: "QuickSearch",
     authors: [Devs.CatGirlDShadow],
     description: "Adds context menu to quickly search stuff",
 
