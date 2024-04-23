@@ -27,6 +27,7 @@ import { React, RestAPI, Tooltip } from "@webpack/common";
 import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+import ErrorBoundary from "@components/ErrorBoundary";
 
 const AuthSessionsStore = findByPropsLazy("getSessions");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
@@ -133,7 +134,7 @@ export default definePlugin({
         );
     },
 
-    renderIcon({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) {
+    renderIcon: ErrorBoundary.wrap(({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (
@@ -170,7 +171,7 @@ export default definePlugin({
                 </div>
             </BlobMask>
         );
-    },
+    }, { noop: true }),
 
     async checkNewSessions() {
         const data = await RestAPI.get({
