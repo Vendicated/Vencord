@@ -159,7 +159,7 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
 
 function getCorrectUsername(userId: string) {
     const user = UserStore.getUser(userId);
-    return user.username + (user.discriminator !== "0" ? `$${user.discriminator}` : "");
+    return user.username + (user.discriminator !== "0" ? `#${user.discriminator}` : "");
 }
 function getChannelName(channelId: string) {
     return ChannelStore.getChannel(channelId ?? "")?.name ?? "";
