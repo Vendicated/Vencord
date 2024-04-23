@@ -310,10 +310,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "outfoxxed",
         id: 837425748435796060n
     },
-    Dolfies: {
-        name: "Dolfies",
-        id: 852892297661906993n,
-    },
     UwUDev: {
         name: "UwU",
         id: 691413039156690994n,
@@ -357,6 +353,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     bb010g: {
         name: "bb010g",
         id: 72791153467990016n,
+    },
+    Dolfies: {
+        name: "Dolfies",
+        id: 852892297661906993n,
     },
     RuukuLada: {
         name: "RuukuLada",
