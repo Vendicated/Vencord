@@ -278,7 +278,7 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                     Loading bookmarks...
                 </Text>}
                 {bookmarks && !bookmarks.length && <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
-                    <p>You have no bookmarks. You can add an open tab or hide this by right clicking it</p>
+                    You have no bookmarks. You can add an open tab or hide this by right clicking it
                 </Text>}
                 {bookmarks?.length &&
                     bookmarks.map((_, i) => (
