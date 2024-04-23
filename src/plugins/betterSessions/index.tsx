@@ -134,44 +134,46 @@ export default definePlugin({
         );
     },
 
-    renderIcon: ErrorBoundary.wrap(({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) => {
+    renderIcon({ session }: SessionInfo, DeviceIcon: React.ComponentType<any>) {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (
-            <BlobMask
-                style={{ cursor: "unset" }}
-                selected={false}
-                lowerBadge={
-                    <div
-                        style={{
-                            width: "20px",
-                            height: "20px",
+            <ErrorBoundary noop>
+                <BlobMask
+                    style={{ cursor: "unset" }}
+                    selected={false}
+                    lowerBadge={
+                        <div
+                            style={{
+                                width: "20px",
+                                height: "20px",
 
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            overflow: "hidden",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                overflow: "hidden",
 
-                            borderRadius: "50%",
-                            backgroundColor: "var(--interactive-normal)",
-                            color: "var(--background-secondary)",
-                        }}
-                    >
-                        <PlatformIcon width={14} height={14} />
-                    </div>
-                }
-                lowerBadgeWidth={20}
-                lowerBadgeHeight={20}
-            >
-                <div
-                    className={SessionIconClasses.sessionIcon}
-                    style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                                borderRadius: "50%",
+                                backgroundColor: "var(--interactive-normal)",
+                                color: "var(--background-secondary)",
+                            }}
+                        >
+                            <PlatformIcon width={14} height={14} />
+                        </div>
+                    }
+                    lowerBadgeWidth={20}
+                    lowerBadgeHeight={20}
                 >
-                    <DeviceIcon width={28} height={28} />
-                </div>
-            </BlobMask>
+                    <div
+                        className={SessionIconClasses.sessionIcon}
+                        style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                    >
+                        <DeviceIcon width={28} height={28} />
+                    </div>
+                </BlobMask>
+            </ErrorBoundary>
         );
-    }, { noop: true }),
+    },
 
     async checkNewSessions() {
         const data = await RestAPI.get({
