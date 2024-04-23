@@ -48,8 +48,8 @@ export default definePlugin({
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /case (\i\.\i)\.ONLINE:return (\i)\.SECTION_ONLINE/,
-                replace: "case $1.ONLINE:case $1.IMPLICIT:return $2.SECTION_ONLINE"
+                match: /case (\i\.\i)\.ONLINE:(?=return (\i)\.SECTION_ONLINE)/,
+                replace: "case $1.ONLINE:case $1.IMPLICIT:"
             },
         },
         // Sections header
