@@ -8,8 +8,13 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { filters, findAll } from "@webpack";
-import { ChannelStore, FluxDispatcher, Menu, React, useState } from "@webpack/common";
+import { filters, findAll, findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, Menu, React, UserStore, useState } from "@webpack/common";
+
+const EDITOR_STATE_STORE = findByPropsLazy("createEmptyEditorState");
+const DECORATORS = findByPropsLazy("generateDecorators");
+const EDITOR_STATE = findByPropsLazy("getFilterAutocompletions");
+const QUERY_STORE = findByPropsLazy("tokenizeQuery");
 
 export default definePlugin({
     name: "QuickSearch",
@@ -41,29 +46,6 @@ interface QueryOptions {
     content?: string;
 }
 
-function FindReact(dom, traverseUp = 0) {
-    const key = Object.keys(dom).find(key => {
-        return key.startsWith("__reactFiber$");
-    });
-    if (!key) return;
-    const domFiber = dom[key];
-    if (domFiber == null) return null;
-    // react 16+
-    const GetCompFiber = fiber => {
-        // return fiber._debugOwner; // this also works, but is __DEV__ only
-        let parentFiber = fiber.return;
-        while (typeof parentFiber.type === "string") {
-            parentFiber = parentFiber.return;
-        }
-        return parentFiber;
-    };
-    let compFiber = GetCompFiber(domFiber);
-    for (let i = 0; i < traverseUp; i++) {
-        compFiber = GetCompFiber(compFiber);
-    }
-    return compFiber.stateNode;
-}
-
 const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     if (!props) return;
 
@@ -81,28 +63,28 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     const ELEM_INFO = [
         {
             name: "quick-search-channel",
-            label: "Add within channel",
+            label: "Search within channel",
             present: !!channelId,
             value: channelId,
             queryName: "channel_id",
         },
         {
             name: "quick-search-author",
-            label: "Add from user",
+            label: "Search from user",
             present: !!userId,
             value: userId,
             queryName: "author_id",
         },
         {
             name: "quick-search-mentions",
-            label: "Add mentioning user",
+            label: "Search mentioning user",
             present: !!userId,
             value: [userId],
             queryName: "mentions",
         },
         {
             name: "quick-search-content",
-            label: "Add message content",
+            label: "Search message content",
             present: !!content,
             value: content ?? "",
             queryName: "content",
@@ -132,9 +114,15 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
                     label="Search"
                     disabled={!Object.values(queryObject).some(Boolean)}
                     action={() => {
+                        const nonTokens = findAll(filters.byProps("NON_TOKEN_TYPE"));
+                        const NON_TOKEN_FILTER = nonTokens[nonTokens.length - 1];
+                        const getEmptyEditorState = () => EDITOR_STATE_STORE.createEmptyEditorState(
+                            DECORATORS.generateDecorators(EDITOR_STATE.default)
+                        );
                         const query: QueryOptions = {
                             include_nsfw: true,
                         };
+
                         ELEM_INFO.forEach(element => {
                             if (queryObject[element.name]) {
                                 if (element.queryName) {
@@ -142,13 +130,18 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
                                 }
                             }
                         });
-                        const searchElem = document.getElementsByClassName("DraftEditor-editorContainer");
-                        if (searchElem.length) {
-                            const component = FindReact(searchElem[0]);
-                            component?.props?.onFocus();
-                            component?.props?.handlePastedText(getQueryString(query));
-                            component?.props?.onBlur();
-                        }
+
+                        let editorState = getEmptyEditorState();
+                        editorState = EDITOR_STATE_STORE.updateContent(getQueryString(query), editorState);
+                        editorState = EDITOR_STATE_STORE.truncateContent(editorState, 512);
+                        const tokenizedQuery = QUERY_STORE.tokenizeQuery(EDITOR_STATE_STORE.getFirstTextBlock(editorState)).filter(e => e.type !== NON_TOKEN_FILTER.NON_TOKEN_TYPE);
+                        editorState = EDITOR_STATE_STORE.applyTokensAsEntities(tokenizedQuery, editorState, getEmptyEditorState());
+
+                        FluxDispatcher.dispatch({
+                            type: "SEARCH_EDITOR_STATE_CHANGE",
+                            searchId: searchId,
+                            editorState: editorState
+                        });
                         FluxDispatcher.dispatch({
                             type: "SEARCH_START",
                             query: query,
@@ -164,16 +157,21 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
-function getQueryString(query: QueryOptions) {
-    const languages = findAll(filters.byProps("SEARCH_FILTER_FROM"));
-    if (!languages.length) return "";
-    const selected = languages[languages.length - 1];
-    const FROM = selected.SEARCH_FILTER_FROM;
-    const IN = selected.SEARCH_FILTER_IN;
-    const MENTIONS = selected.SEARCH_FILTER_MENTIONS;
+function getCorrectUsername(userId: string) {
+    const user = UserStore.getUser(userId);
+    return user.username + (user.discriminator !== "0" ? `$${user.discriminator}` : "");
+}
+function getChannelName(channelId: string) {
+    return ChannelStore.getChannel(channelId ?? "")?.name ?? "";
+}
 
-    return (!query.author_id ? "" : `${FROM}: ${query.author_id} `)
-        + (!query.channel_id ? "" : `${IN}: ${ChannelStore.getChannel(query.channel_id ?? "")?.name ?? ""} `)
-        + (!query.mentions || !query.mentions?.length ? "" : `${MENTIONS}: ${query.mentions[0]} `)
-        + (!query.content ? "" : query.content);
+function getQueryString(query: QueryOptions) {
+    const FROM = EDITOR_STATE.default.FILTER_FROM.key;
+    const IN = EDITOR_STATE.default.FILTER_IN.key;
+    const MENTIONS = EDITOR_STATE.default.FILTER_MENTIONS.key;
+
+    return (!query.author_id ? "" : `${FROM} ${getCorrectUsername(query.author_id)} `)
+        + (!query.channel_id ? "" : `${IN} ${getChannelName(query.channel_id)} `)
+        + (!query.mentions || !query.mentions?.length ? "" : `${MENTIONS} ${getCorrectUsername(query.mentions[0])} `)
+        + (!query.content ? "" : query.content.replace(/\n/g, ""));
 }

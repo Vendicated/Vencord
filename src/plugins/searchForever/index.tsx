@@ -77,7 +77,6 @@ export default definePlugin({
         }
     ],
     processQuery(query: { offset: number; sort_order: string; max_id?: string, min_id?: string; }) {
-        console.log(query);
         if (query.offset === 0) {
             CachedInfo.isAltered = false;
             return;
