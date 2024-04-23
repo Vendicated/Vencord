@@ -78,9 +78,8 @@ export function useFormattedPronouns(id: string, useGlobalProfile: boolean = fal
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
         return [discordPronouns, "Discord"];
 
-    if (result && result !== PronounMapping.unspecified) {
+    if (result && result !== PronounMapping.unspecified)
         return [result, "PronounDB"];
-    }
 
     return [discordPronouns, "Discord"];
 }
