@@ -130,10 +130,6 @@ export default definePlugin({
         return affinities.find(affinity => affinity.user_id === user.id)?.affinity ?? 0;
     },
 
-    hasDM(userId: string): boolean {
-        return Object.values(ChannelStore.getSortedPrivateChannels()).some(channel => channel.recipients.includes(userId));
-    },
-
     async fetchImplicitRelationships() {
         // Implicit relationships are defined as users that you:
         // 1. Have an affinity for
@@ -148,7 +144,10 @@ export default definePlugin({
         // However, users in user cache may just be there because they share a DM or group DM with you
         // So there's no guarantee that a user being in user cache means they have a mutual with you
         // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
-        const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || this.hasDM(id));
+        const dmUserIds = new Set(
+            Object.values(ChannelStore.getSortedPrivateChannels()).flatMap(c => c.recipients)
+        );
+        const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || dmUserIds.has(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
         const sentNonce = SnowflakeUtils.fromTimestamp(Date.now());
         let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
