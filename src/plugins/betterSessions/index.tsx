@@ -18,6 +18,7 @@
 
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { LazyComponent } from "@utils/lazyReact";
 import definePlugin, { OptionType } from "@utils/types";
@@ -27,7 +28,6 @@ import { React, RestAPI, Tooltip } from "@webpack/common";
 import { RenameButton } from "./components/RenameButton";
 import { SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
-import ErrorBoundary from "@components/ErrorBoundary";
 
 const AuthSessionsStore = findByPropsLazy("getSessions");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
