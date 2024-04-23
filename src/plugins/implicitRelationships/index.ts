@@ -21,7 +21,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
@@ -83,7 +82,7 @@ export default definePlugin({
             replacement: {
                 predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
                 match: /\.sortBy\(\i=>\i\.comparator\)/,
-                replace: `$&.sortBy((row) => $self.sortList(row))`
+                replace: "$&.sortBy((row) => $self.sortList(row))"
             }
         },
 
@@ -123,13 +122,8 @@ export default definePlugin({
 
     sortList(row: any) {
         return row.type === 5
-            ? -this.getAffinity(row.user)
+            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
             : row.comparator;
-    }
-
-    getAffinity(user: User): number {
-        const affinities: UserAffinity[] = UserAffinitiesStore.getUserAffinities();
-        return affinities.find(affinity => affinity.user_id === user.id)?.affinity ?? 0;
     },
 
     async fetchImplicitRelationships() {
