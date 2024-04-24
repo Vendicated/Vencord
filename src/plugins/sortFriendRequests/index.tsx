@@ -42,7 +42,7 @@ export default definePlugin({
         find: "getRelationshipCounts(){",
         replacement: {
             match: /\.sortBy\(\i=>\i\.comparator\)/,
-            replace: ".sortBy((row) => $self.sortList(row))"
+            replace: "$&.sortBy((row) => $self.sortList(row))"
         }
     }, {
         find: ".Messages.FRIEND_REQUEST_CANCEL",
