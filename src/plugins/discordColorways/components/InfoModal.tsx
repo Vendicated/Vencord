@@ -140,7 +140,7 @@ export default function ({
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
+                    look={Button.Looks.OUTLINED}
                     onClick={() => {
                         const stringToHex = (str: string) => {
                             let hex = "";
@@ -169,7 +169,7 @@ export default function ({
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
+                    look={Button.Looks.OUTLINED}
                     onClick={() => {
                         Clipboard.copy(colorwayProps["dc-import"]);
                         Toasts.show({
@@ -185,7 +185,7 @@ export default function ({
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
+                    look={Button.Looks.OUTLINED}
                     onClick={async () => {
                         const customColorways = await DataStore.get("customColorways");
                         const customColorwaysArray: Colorway[] = [];
@@ -211,7 +211,7 @@ export default function ({
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
+                    look={Button.Looks.OUTLINED}
                     onClick={async () => {
                         const colorwaySourceFiles = await DataStore.get(
                             "colorwaySourceFiles"
@@ -251,10 +251,8 @@ export default function ({
                     style={{ marginLeft: 8 }}
                     color={Button.Colors.PRIMARY}
                     size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
-                    onClick={() => {
-                        modalProps.onClose();
-                    }}
+                    look={Button.Looks.OUTLINED}
+                    onClick={() => modalProps.onClose()}
                 >
                     Cancel
                 </Button>

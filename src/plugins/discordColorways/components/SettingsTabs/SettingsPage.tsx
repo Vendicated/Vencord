@@ -164,7 +164,8 @@ export default function () {
                         && <Button
                             innerClassName="colorwaysSettings-iconButtonInner"
                             size={Button.Sizes.ICON}
-                            color={Button.Colors.TRANSPARENT}
+                            color={Button.Colors.PRIMARY}
+                            look={Button.Looks.OUTLINED}
                             onClick={async () => {
                                 var sourcesArr: string[] = [];
                                 const colorwaySourceFilesArr = await DataStore.get("colorwaySourceFiles");
@@ -182,7 +183,8 @@ export default function () {
                     <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
-                        color={Button.Colors.TRANSPARENT}
+                        color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
                         onClick={() => { Clipboard.copy(colorwaySourceFile); }}
                     >
                         <CopyIcon width={20} height={20} />

@@ -221,6 +221,7 @@ export default function ({
                                     innerClassName="colorwaysSettings-iconButtonInner"
                                     size={Button.Sizes.ICON}
                                     color={Button.Colors.PRIMARY}
+                                    look={Button.Looks.OUTLINED}
                                     style={{ marginLeft: "8px" }}
                                     id="colorway-refreshcolorway"
                                     onMouseEnter={isShown ? () => { } : onMouseEnter}
@@ -260,6 +261,7 @@ export default function ({
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
                         color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
                         style={{ marginLeft: "8px" }}
                         id="colorway-opensettings"
                         onMouseEnter={onMouseEnter}
@@ -286,6 +288,7 @@ export default function ({
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
                         color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
                         style={{ marginLeft: "8px" }}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
@@ -315,6 +318,7 @@ export default function ({
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
                         color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
                         style={{ marginLeft: "8px" }}
                         id="colorway-opencolorstealer"
                         onMouseEnter={onMouseEnter}
@@ -331,6 +335,7 @@ export default function ({
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
                         color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
                         id="colorwaySelector-pill_closeSelector"
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
@@ -364,95 +369,95 @@ export default function ({
                             ];
                             return (
                                 <Tooltip text={color.name}>
-                                    {({ onMouseEnter, onMouseLeave }) => <div
-                                        className={"discordColorway" + (currentColorway === color.name ? "" : "")}
-                                        id={"colorway-" + color.name}
-                                        data-last-official={ind + 1 === colorways.length}
-                                        onMouseEnter={onMouseEnter}
-                                        onMouseLeave={onMouseLeave}
-                                    >
-                                        <div
-                                            className="colorwayInfoIconContainer"
-                                            onClick={() => openModal((props) => <ColorwayInfoModal
-                                                modalProps={props}
-                                                colorwayProps={color}
-                                                discrimProps={customColorways.includes(color)}
-                                                loadUIProps={cached_loadUI}
-                                            />)}
-                                        >
-                                            <div className="colorwayInfoIcon">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="16"
-                                                    height="16"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 16 16"
-                                                >
-                                                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        <div className="colorwayCheckIconContainer">
-                                            <div className="colorwayCheckIcon">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="20"
-                                                    height="20"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <circle r="8" cx="12" cy="12" fill="var(--white-500)" />
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <path fill="var(--brand-500)" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        <div
-                                            className="discordColorwayPreviewColorContainer"
-                                            onClick={async () => {
-                                                const [
-                                                    onDemandWays,
-                                                    onDemandWaysTintedText,
-                                                    onDemandWaysDiscordSaturation
-                                                ] = await DataStore.getMany([
-                                                    "onDemandWays",
-                                                    "onDemandWaysTintedText",
-                                                    "onDemandWaysDiscordSaturation"
-                                                ]);
-                                                if (currentColorway === color.name) {
-                                                    DataStore.set("actveColorwayID", null);
-                                                    DataStore.set("actveColorway", null);
-                                                    ColorwayCSS.remove();
-                                                } else {
-                                                    DataStore.set("activeColorwayColors", color.colors);
-                                                    DataStore.set("actveColorwayID", color.name);
-                                                    if (onDemandWays) {
-                                                        const demandedColorway = generateCss(
-                                                            colorToHex(color.primary),
-                                                            colorToHex(color.secondary),
-                                                            colorToHex(color.tertiary),
-                                                            colorToHex(color.accent),
-                                                            onDemandWaysTintedText,
-                                                            onDemandWaysDiscordSaturation
-                                                        );
-                                                        DataStore.set("actveColorway", demandedColorway);
-                                                        ColorwayCSS.set(demandedColorway);
-                                                    } else {
-                                                        DataStore.set("actveColorway", color["dc-import"]);
-                                                        ColorwayCSS.set(color["dc-import"]);
-                                                    }
+                                    {({ onMouseEnter, onMouseLeave }) => {
+                                        return (
+                                            <div
+                                                className="discordColorway"
+                                                id={"colorway-" + color.name}
+                                                data-last-official={
+                                                    ind + 1 === colorways.length
                                                 }
-                                                setCurrentColorway(await DataStore.get("actveColorwayID") as string);
-                                            }}
-                                        >
-                                            {colors.map((colorItm) => <div
-                                                className="discordColorwayPreviewColor"
-                                                style={{ backgroundColor: color[colorItm] }}
-                                            />)}
-                                        </div>
-                                        {currentColorway === color.name && <SelectionCircle />}
-                                    </div>}
+                                                onMouseEnter={onMouseEnter}
+                                                onMouseLeave={onMouseLeave}
+                                                onClick={async () => {
+                                                    const [
+                                                        onDemandWays,
+                                                        onDemandWaysTintedText,
+                                                        onDemandWaysDiscordSaturation
+                                                    ] = await DataStore.getMany([
+                                                        "onDemandWays",
+                                                        "onDemandWaysTintedText",
+                                                        "onDemandWaysDiscordSaturation"
+                                                    ]);
+                                                    if (currentColorway === color.name) {
+                                                        DataStore.set("actveColorwayID", null);
+                                                        DataStore.set("actveColorway", null);
+                                                        ColorwayCSS.remove();
+                                                    } else {
+                                                        DataStore.set("activeColorwayColors", color.colors);
+                                                        DataStore.set("actveColorwayID", color.name);
+                                                        if (onDemandWays) {
+                                                            const demandedColorway = generateCss(
+                                                                colorToHex(color.primary),
+                                                                colorToHex(color.secondary),
+                                                                colorToHex(color.tertiary),
+                                                                colorToHex(color.accent),
+                                                                onDemandWaysTintedText,
+                                                                onDemandWaysDiscordSaturation
+                                                            );
+                                                            DataStore.set("actveColorway", demandedColorway);
+                                                            ColorwayCSS.set(demandedColorway);
+                                                        } else {
+                                                            DataStore.set("actveColorway", color["dc-import"]);
+                                                            ColorwayCSS.set(color["dc-import"]);
+                                                        }
+                                                    }
+                                                    setCurrentColorway(await DataStore.get("actveColorwayID") as string);
+                                                }}
+                                            >
+                                                <div
+                                                    className="colorwayInfoIconContainer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openModal((props) => (
+                                                            <ColorwayInfoModal
+                                                                modalProps={
+                                                                    props
+                                                                }
+                                                                colorwayProps={
+                                                                    color
+                                                                }
+                                                                discrimProps={customColorways.includes(
+                                                                    color
+                                                                )}
+                                                                loadUIProps={cached_loadUI}
+                                                            />
+                                                        ));
+                                                    }}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 16 16"
+                                                    >
+                                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div className="discordColorwayPreviewColorContainer">
+                                                    {colors.map((colorItm) => <div
+                                                        className="discordColorwayPreviewColor"
+                                                        style={{
+                                                            backgroundColor: color[colorItm],
+                                                        }}
+                                                    />
+                                                    )}
+                                                </div>
+                                                {currentColorway === color.name && <SelectionCircle />}
+                                            </div>
+                                        );
+                                    }}
                                 </Tooltip>
                             );
                         })

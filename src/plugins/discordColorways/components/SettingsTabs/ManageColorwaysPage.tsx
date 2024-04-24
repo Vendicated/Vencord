@@ -16,6 +16,7 @@ import { Button, Card, Forms, Text } from "@webpack/common";
 import { defaultColorwaySource } from "../../constants";
 import { generateCss } from "../../css";
 import { Colorway } from "../../types";
+import { colorToHex } from "../../utils";
 
 export default function () {
     return <SettingsTab title="Manage Colorways">
@@ -144,11 +145,11 @@ export default function () {
                         ));
                     const colorwaysArr: Colorway[] = data.flatMap(json => json.url === defaultColorwaySource ? json.colorways : []);
 
-                    colorwaysArr.forEach((color: Colorway) => {
+                    colorwaysArr.forEach(async (color: Colorway) => {
                         if (IS_DISCORD_DESKTOP) {
-                            DiscordNative.fileManager.saveWithDialog(generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true), `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`);
+                            await DiscordNative.fileManager.saveWithDialog(generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true), `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`);
                         } else {
-                            saveFile(new File([generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true)], `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`, { type: "text/plain;charset=utf-8" }));
+                            saveFile(new File([generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true)], `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`, { type: "text/plain;charset=utf-8" }));
                         }
                     });
                 }}>

@@ -49,59 +49,47 @@ export default function ({
     });
 
     if (!isThin) {
-        return (<Tooltip text={<>
-            <span>Colorways</span>
+        return (<Tooltip text={[
+            <span>Colorways</span>,
             <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>
-        </>} position="right" tooltipContentClassName={listItemTooltipClass}
+        ]} position="right" tooltipContentClassName={listItemTooltipClass}
         >
-            {({ onMouseEnter, onMouseLeave, onClick }) => {
-                return (
-                    <>
-                        {visibility && <div className={listItemClass}>
-                            <div
-                                className={listItemWrapperClass + " ColorwaySelectorBtn"}
-                                onMouseEnter={async () => {
-                                    onMouseEnter();
-                                    setActiveColorway(await DataStore.get("actveColorwayID") || "None");
-                                }}
-                                onMouseLeave={onMouseLeave}
-                                onClick={() => {
-                                    onClick();
-                                    openModal(props => <SelectorModal modalProps={props} />);
-                                }}
-                            ><PalleteIcon /></div>
-                        </div>}
-                    </>
-                );
-            }}
+            {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className={listItemClass}>
+                <div
+                    className={listItemWrapperClass + " ColorwaySelectorBtn"}
+                    onMouseEnter={async () => {
+                        onMouseEnter();
+                        setActiveColorway(await DataStore.get("actveColorwayID") || "None");
+                    }}
+                    onMouseLeave={onMouseLeave}
+                    onClick={() => {
+                        onClick();
+                        openModal(props => <SelectorModal modalProps={props} />);
+                    }}
+                ><PalleteIcon /></div>
+            </div> : <></>}
         </Tooltip>
         );
     } else {
-        return (<Tooltip text={<>
-            <span>Colorways</span>
+        return (<Tooltip text={[
+            <span>Colorways</span>,
             <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>
-        </>} position="right" tooltipContentClassName={listItemTooltipClass}
+        ]} position="right" tooltipContentClassName={listItemTooltipClass}
         >
-            {({ onMouseEnter, onMouseLeave, onClick }) => {
-                return (
-                    <>
-                        {visibility && <div className={listItemClass}>
-                            <div
-                                className={listItemWrapperClass + " ColorwaySelectorBtn ColorwaySelectorBtn_thin"}
-                                onMouseEnter={async () => {
-                                    onMouseEnter();
-                                    setActiveColorway(await DataStore.get("actveColorwayID") || "None");
-                                }}
-                                onMouseLeave={onMouseLeave}
-                                onClick={() => {
-                                    onClick();
-                                    openModal(props => <SelectorModal modalProps={props} />);
-                                }}
-                            ><Text variant="text-xs/normal" style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</Text></div>
-                        </div>}
-                    </>
-                );
-            }}
+            {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className={listItemClass}>
+                <div
+                    className={listItemWrapperClass + " ColorwaySelectorBtn ColorwaySelectorBtn_thin"}
+                    onMouseEnter={async () => {
+                        onMouseEnter();
+                        setActiveColorway(await DataStore.get("actveColorwayID") || "None");
+                    }}
+                    onMouseLeave={onMouseLeave}
+                    onClick={() => {
+                        onClick();
+                        openModal(props => <SelectorModal modalProps={props} />);
+                    }}
+                ><Text variant="text-xs/normal" style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</Text></div>
+            </div> : <></>}
         </Tooltip>
         );
     }

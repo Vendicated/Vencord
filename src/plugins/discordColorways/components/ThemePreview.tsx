@@ -5,6 +5,7 @@
  */
 
 import { CloseIcon } from "@components/Icons";
+import { ModalProps, ModalRoot, openModal } from "@utils/modal";
 import {
     Forms,
     Text,
@@ -31,77 +32,22 @@ export default function ({
     previewCSS?: string;
 }) {
     const [collapsed, setCollapsed] = useState<boolean>(isCollapsed);
-    return (
-        <div
-            className={
-                `${collapsed === true
-                    ? "colorwaysPreview colorwaysPreview-collapsed"
-                    : "colorwaysPreview"
-                } ${className}`
-            }
-        >
-            <div
-                className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                onClick={() => setCollapsed(!collapsed)}
-            >
-                <Forms.FormTitle
-                    style={{ marginBottom: 0 }}
-                >
-                    Preview
-                </Forms.FormTitle>
-                <svg
-                    className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    role="img"
-                >
-                    <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M7 10L12 15 17 10"
-                        aria-hidden="true"
-                    />
-                </svg>
-            </div>
-            <style>
-                {previewCSS}
-            </style>
-            <ThemePreview
-                accent={accent}
-                primary={primary}
-                secondary={secondary}
-                tertiary={tertiary}
-            />
-        </div>
-    );
-}
-
-function ThemePreview({
-    accent,
-    primary,
-    secondary,
-    tertiary,
-    previewCSS
-}: {
-    accent: string,
-    primary: string,
-    secondary: string,
-    tertiary: string,
-    previewCSS?: string;
-}) {
-    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    return (
-        <div
-            className="colorwaysPreview-container"
-        >
-            <style>
-                {previewCSS}
-            </style>
+    function ThemePreview({
+        accent,
+        primary,
+        secondary,
+        tertiary,
+        isModal,
+        modalProps
+    }: {
+        accent: string,
+        primary: string,
+        secondary: string,
+        tertiary: string,
+        isModal?: boolean,
+        modalProps?: ModalProps;
+    }) {
+        return (
             <div
                 className="colorwaysPreview-wrapper"
                 style={{ backgroundColor: tertiary }}
@@ -115,21 +61,20 @@ function ThemePreview({
                                 style={{ backgroundColor: primary }}
                                 onMouseEnter={e => e.currentTarget.style.backgroundColor = accent}
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = primary}
-                                onClick={e => {
-                                    if (!document.fullscreenElement) {
-                                        e.currentTarget
-                                            .parentElement
-                                            ?.parentElement
-                                            ?.parentElement
-                                            ?.parentElement
-                                            ?.requestFullscreen();
+                                onClick={() => {
+                                    if (isModal) {
+                                        modalProps?.onClose();
                                     } else {
-                                        document.exitFullscreen();
+                                        openModal((props: ModalProps) => <ModalRoot className="colorwaysPreview-modal" {...props}>
+                                            <style>
+                                                {previewCSS}
+                                            </style>
+                                            <ThemePreview accent={accent} primary={primary} secondary={secondary} tertiary={tertiary} isModal modalProps={props} />
+                                        </ModalRoot>);
                                     }
-                                    setIsFullscreen(!isFullscreen);
                                 }}
                             >
-                                {isFullscreen ? <CloseIcon /> : <svg
+                                {isModal ? <CloseIcon style={{ color: "var(--header-secondary)" }} /> : <svg
                                     aria-hidden="true"
                                     role="img"
                                     width="24"
@@ -217,6 +162,48 @@ function ThemePreview({
                     </div>
                 </div>
             </div>
+        );
+    }
+    return (
+        <div className={`${collapsed ? "colorwaysPreview colorwaysPreview-collapsed" : "colorwaysPreview"} ${className || ""}`}>
+            <div
+                className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
+                onClick={() => setCollapsed(!collapsed)}
+            >
+                <Forms.FormTitle
+                    style={{ marginBottom: 0 }}
+                >
+                    Preview
+                </Forms.FormTitle>
+                <svg
+                    className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    role="img"
+                >
+                    <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M7 10L12 15 17 10"
+                        aria-hidden="true"
+                    />
+                </svg>
+            </div>
+            <style>
+                {previewCSS}
+            </style>
+            <ThemePreview
+                accent={accent}
+                primary={primary}
+                secondary={secondary}
+                tertiary={tertiary}
+            />
         </div>
     );
 }
+
