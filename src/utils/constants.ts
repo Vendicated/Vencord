@@ -451,8 +451,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 242305263313485825n
     },
     kvba: {
-       name: "kvba",
-       id: 105170831130234880n
+        name: "kvba",
+        id: 105170831130234880n
     }
 } satisfies Record<string, Dev>);
 
