@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+export interface SessionInfo {
+    session: {
+        id_hash: string;
+        approx_last_used_time: Date;
+        client_info: {
+            os: string;
+            platform: string;
+            location: string;
+        };
+    },
+    current?: boolean;
+}
 
-import StartupTimingPage from "./StartupTimingPage";
-
-export default definePlugin({
-    name: "StartupTimings",
-    description: "Adds Startup Timings to the Settings menu",
-    authors: [Devs.Megu],
-    patches: [{
-        find: "UserSettingsSections.PAYMENT_FLOW_MODAL_TEST_PAGE,",
-        replacement: {
-            match: /{section:\i\.UserSettingsSections\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
-        }
-    }],
-    StartupTimingPage
-});
+export type Session = SessionInfo["session"];
