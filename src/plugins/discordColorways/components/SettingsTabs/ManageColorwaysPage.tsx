@@ -144,11 +144,13 @@ export default function () {
                         ));
                     const colorwaysArr: Colorway[] = data.flatMap(json => json.url === defaultColorwaySource ? json.colorways : []);
 
-                    if (IS_DISCORD_DESKTOP) {
-                        DiscordNative.fileManager.saveWithDialog(JSON.stringify(colorwaysArr.map(({ name: nameOld, "dc-import": oldImport, ...rest }: Colorway) => ({ name: (nameOld + " (Custom)"), "dc-import": generateCss(rest.primary.split("#")[1] || "313338", rest.secondary.split("#")[1] || "2b2d31", rest.tertiary.split("#")[1] || "1e1f22", rest.accent.split("#")[1] || "5865f2", true, true), ...rest }))), "colorways.json");
-                    } else {
-                        saveFile(new File([JSON.stringify(colorwaysArr.map(({ name: nameOld, "dc-import": oldImport, ...rest }: Colorway) => ({ name: (nameOld + " (Custom)"), "dc-import": generateCss(rest.primary.split("#")[1] || "313338", rest.secondary.split("#")[1] || "2b2d31", rest.tertiary.split("#")[1] || "1e1f22", rest.accent.split("#")[1] || "5865f2", true, true), ...rest })))], "colorways.json", { type: "application/json" }));
-                    }
+                    colorwaysArr.forEach((color: Colorway) => {
+                        if (IS_DISCORD_DESKTOP) {
+                            DiscordNative.fileManager.saveWithDialog(generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true), `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`);
+                        } else {
+                            saveFile(new File([generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true)], `import_${color.name.replaceAll(" ", "-").replaceAll("'", "")}.css`, { type: "text/plain;charset=utf-8" }));
+                        }
+                    });
                 }}>
                 Update all official Colorways and export
             </Button>

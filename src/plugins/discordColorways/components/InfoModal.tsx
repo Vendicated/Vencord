@@ -188,7 +188,6 @@ export default function ({
                     look={Button.Looks.FILLED}
                     onClick={async () => {
                         const customColorways = await DataStore.get("customColorways");
-                        const actveColorwayID = await DataStore.get("actveColorwayID");
                         const customColorwaysArray: Colorway[] = [];
                         customColorways.map((color: Colorway, i: number) => {
                             if (customColorways.length > 0) {
@@ -200,11 +199,6 @@ export default function ({
                                 }
                                 if (++i === customColorways.length) {
                                     DataStore.set("customColorways", customColorwaysArray);
-                                }
-                                if (actveColorwayID === colorwayProps.name) {
-                                    DataStore.set("actveColorway", color["dc-import"]);
-                                    DataStore.set("actveColorwayID", color.name);
-                                    ColorwayCSS.set(color["dc-import"]);
                                 }
                                 modalProps.onClose();
                                 loadUIProps();
@@ -234,7 +228,6 @@ export default function ({
                         const colorways = data.flatMap(json => json.colorways);
 
                         const customColorways = await DataStore.get("customColorways");
-                        const actveColorwayID = await DataStore.get("actveColorwayID");
                         const customColorwaysArray: Colorway[] = [];
                         colorways.map((color: Colorway, i: number) => {
                             if (colorways.length > 0) {
@@ -245,11 +238,6 @@ export default function ({
                                 }
                                 if (++i === colorways.length) {
                                     DataStore.set("customColorways", [...customColorways, ...customColorwaysArray]);
-                                }
-                                if (actveColorwayID === colorwayProps.name) {
-                                    DataStore.set("actveColorway", color["dc-import"]);
-                                    DataStore.set("actveColorwayID", color.name);
-                                    ColorwayCSS.set(color["dc-import"]);
                                 }
                                 modalProps.onClose();
                                 loadUIProps();

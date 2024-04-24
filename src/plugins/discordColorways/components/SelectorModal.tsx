@@ -29,7 +29,7 @@ import { ColorwayCSS } from "..";
 import { defaultColorwaySource, fallbackColorways } from "../constants";
 import { generateCss } from "../css";
 import { Colorway } from "../types";
-import { getHex } from "../utils";
+import { colorToHex } from "../utils";
 import ColorPickerModal from "./ColorPicker";
 import CreatorModal from "./CreatorModal";
 import ColorwayInfoModal from "./InfoModal";
@@ -429,10 +429,10 @@ export default function ({
                                                     DataStore.set("actveColorwayID", color.name);
                                                     if (onDemandWays) {
                                                         const demandedColorway = generateCss(
-                                                            getHex(color.primary).split("#")[1],
-                                                            getHex(color.secondary).split("#")[1],
-                                                            getHex(color.tertiary).split("#")[1],
-                                                            getHex(color.accent).split("#")[1],
+                                                            colorToHex(color.primary),
+                                                            colorToHex(color.secondary),
+                                                            colorToHex(color.tertiary),
+                                                            colorToHex(color.accent),
                                                             onDemandWaysTintedText,
                                                             onDemandWaysDiscordSaturation
                                                         );
