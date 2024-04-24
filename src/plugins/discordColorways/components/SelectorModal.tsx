@@ -9,6 +9,7 @@
 import * as DataStore from "@api/DataStore";
 import { CloseIcon } from "@components/Icons";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { findByPropsLazy } from "@webpack";
 import {
     Button,
     Forms,
@@ -32,6 +33,8 @@ import { getHex } from "../utils";
 import ColorPickerModal from "./ColorPicker";
 import CreatorModal from "./CreatorModal";
 import ColorwayInfoModal from "./InfoModal";
+
+const { SelectionCircle } = findByPropsLazy("SelectionCircle");
 
 export default function ({
     modalProps,
@@ -195,7 +198,6 @@ export default function ({
                     label: "Custom"
                 }]} select={value => {
                     setVisibility(value);
-                    DataStore.set("colorwaysBtnPos", value);
                 }} isSelected={value => visibility === value} serialize={String} />
                 <TextInput
                     inputClassName="colorwaySelector-searchInput"
@@ -363,7 +365,7 @@ export default function ({
                             return (
                                 <Tooltip text={color.name}>
                                     {({ onMouseEnter, onMouseLeave }) => <div
-                                        className={"discordColorway" + (currentColorway === color.name ? " active" : "")}
+                                        className={"discordColorway" + (currentColorway === color.name ? "" : "")}
                                         id={"colorway-" + color.name}
                                         data-last-official={ind + 1 === colorways.length}
                                         onMouseEnter={onMouseEnter}
@@ -449,6 +451,7 @@ export default function ({
                                                 style={{ backgroundColor: color[colorItm] }}
                                             />)}
                                         </div>
+                                        {currentColorway === color.name && <SelectionCircle />}
                                     </div>}
                                 </Tooltip>
                             );

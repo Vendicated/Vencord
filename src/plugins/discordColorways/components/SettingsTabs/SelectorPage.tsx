@@ -193,7 +193,6 @@ export default function ({
                         label: "Custom"
                     }]} select={value => {
                         setVisibility(value);
-                        DataStore.set("colorwaysBtnPos", value);
                     }} isSelected={value => visibility === value} serialize={String} />
                     <TextInput
                         inputClassName="colorwaySelector-searchInput"

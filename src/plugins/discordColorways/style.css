@@ -268,16 +268,8 @@
     max-height: unset !important;
 }
 
-.colorwayCreator-colorPreviews:has(>.colorways-creator-module-warning) {
-    background-color: transparent;
-}
-
 .colorways-creator-module-warning {
     color: var(--brand-500);
-}
-
-.colorways-creator-module-warning~.colorways-creator-module-warning {
-    display: none;
 }
 
 .colorwayCreator-colorPreviews>[class^="colorSwatch"],

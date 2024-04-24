@@ -29,7 +29,7 @@ import { ColorPicker } from "..";
 import { knownThemeVars } from "../constants";
 import { generateCss, getPreset } from "../css";
 import { Colorway } from "../types";
-import { getHex, hexToString, hslToHex, rgbToHex } from "../utils";
+import { colorToHex, getHex, hexToString } from "../utils";
 import ConflictingColorsModal from "./ConflictingColorsModal";
 import ThemePreviewCategory from "./ThemePreview";
 export default function ({
@@ -355,22 +355,7 @@ export default function ({
                                                         setSecondaryColor,
                                                         setTertiaryColor
                                                     ];
-                                                    hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => {
-                                                        var colorType = "hex";
-                                                        if (color.includes("hsl")) {
-                                                            colorType = "hsl";
-                                                        } else if (color.includes("rgb")) {
-                                                            colorType = "rgb";
-                                                        }
-                                                        color = color.replaceAll(",", "").replace(/.+?\(/, "").replace(")", "").replaceAll(/[ \t]+\/[ \t]+/g, " ").replaceAll("%", "");
-                                                        if (colorType === "hsl") {
-                                                            color = hslToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
-                                                        }
-                                                        if (colorType === "rgb") {
-                                                            color = rgbToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
-                                                        }
-                                                        setColor[i](color.replace("#", ""));
-                                                    });
+                                                    hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
                                                     props.onClose();
                                                 }
                                             }}

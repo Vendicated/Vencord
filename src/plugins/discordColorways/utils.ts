@@ -131,3 +131,20 @@ export function rgbToHex(r: number, g: number, b: number) {
     };
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+export function colorToHex(color: string) {
+    var colorType = "hex";
+    if (color.includes("hsl")) {
+        colorType = "hsl";
+    } else if (color.includes("rgb")) {
+        colorType = "rgb";
+    }
+    color = color.replaceAll(",", "").replace(/.+?\(/, "").replace(")", "").replaceAll(/[ \t]+\/[ \t]+/g, " ").replaceAll("%", "").replaceAll("/", "");
+    if (colorType === "hsl") {
+        color = hslToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
+    }
+    if (colorType === "rgb") {
+        color = rgbToHex(Number(color.split(" ")[0]), Number(color.split(" ")[1]), Number(color.split(" ")[2]));
+    }
+    return color.replace("#", "");
+}

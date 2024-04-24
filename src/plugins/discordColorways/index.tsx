@@ -100,8 +100,8 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.6.0",
-    creatorVersion: "1.18",
+    pluginVersion: "5.6.1",
+    creatorVersion: "1.18.1",
     toolboxActions: {
         "Change Colorway": () => openModal(props => <SelectorModal modalProps={props} />),
         "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
@@ -114,13 +114,12 @@ export default definePlugin({
         // Credits to Kyuuhachi for the BetterSettings plugin patches
         {
             find: "this.renderArtisanalHack()",
-            replacement: [
-                {
-                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
-                    replace: "$&,_:$1",
-                    predicate: () => true
-                }
-            ]
+            replacement: {
+                match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                replace: "$&,_:$1",
+                predicate: () => true
+            }
+
         },
         {
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
@@ -149,9 +148,8 @@ export default definePlugin({
         ColorPicker = e;
     },
 
-    customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
-
     makeSettingsCategories(SectionTypes: Record<string, unknown>) {
+        console.log(SectionTypes);
         return [
             {
                 section: SectionTypes.HEADER,
@@ -182,7 +180,6 @@ export default definePlugin({
                 element: ManageColorwaysPage,
                 className: "dc-colorway-management"
             },
-            ...this.customSections.map(func => func(SectionTypes)),
             {
                 section: SectionTypes.DIVIDER
             }

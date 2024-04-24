@@ -18,6 +18,7 @@ import { Button, Clipboard, Forms, Text, Toasts } from "@webpack/common";
 import { ColorwayCSS } from "..";
 import { generateCss } from "../css";
 import { Colorway } from "../types";
+import { colorToHex } from "../utils";
 import ThemePreviewCategory from "./ThemePreview";
 
 export default function ({
@@ -192,7 +193,7 @@ export default function ({
                         customColorways.map((color: Colorway, i: number) => {
                             if (customColorways.length > 0) {
                                 if (color.name === colorwayProps.name) {
-                                    color["dc-import"] = generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true);
+                                    color["dc-import"] = generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true);
                                     customColorwaysArray.push(color);
                                 } else {
                                     customColorwaysArray.push(color);
@@ -239,7 +240,7 @@ export default function ({
                             if (colorways.length > 0) {
                                 if (color.name === colorwayProps.name) {
                                     color.name += " (Custom)";
-                                    color["dc-import"] = generateCss(color.primary.split("#")[1] || "313338", color.secondary.split("#")[1] || "2b2d31", color.tertiary.split("#")[1] || "1e1f22", color.accent.split("#")[1] || "5865f2", true, true);
+                                    color["dc-import"] = generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true);
                                     customColorwaysArray.push(color);
                                 }
                                 if (++i === colorways.length) {
