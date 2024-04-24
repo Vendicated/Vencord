@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import { openModalLazy } from "@utils/modal";
 
 import { MicrophoneSettingsModal } from "../components";
-import { PluginInfo } from "../constants";
 import Plugin from "../index";
 import { microphoneStore } from "../stores";
 
@@ -37,7 +37,6 @@ export const openMicrophoneSettingsModal =
                 onDone={onMicrophoneModalDone}
                 showInfo
                 microphoneStore={microphoneStore}
-                author={PluginInfo.AUTHOR}
-                contributors={Object.values(PluginInfo.CONTRIBUTORS)}
+                author={Devs.philhk}
                 {...props} />;
     });

@@ -16,33 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Patch, PluginAuthor, PluginDef } from "@utils/types";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
-import { PluginInfo } from "./constants";
 import { replacedUserPanelComponent } from "./patches";
 
-export default new class Plugin implements PluginDef {
-    readonly name: string;
-    readonly description: string;
-    readonly authors: PluginAuthor[];
-    readonly patches: Omit<Patch, "plugin">[];
-
-    readonly replacedUserPanelComponent: typeof replacedUserPanelComponent;
-
-    constructor() {
-        this.name = PluginInfo.PLUGIN_NAME;
-        this.description = PluginInfo.DESCRIPTION;
-        this.authors = PluginInfo.AUTHORS as PluginAuthor[];
-        this.patches = [{
-            find: "Messages.ACCOUNT_A11Y_LABEL",
-            replacement: {
-                match: /(?<=function)( .{0,8}(?={).)(.{0,1000}isFullscreenInContext\(\).+?\)]}\))(})/,
-                replace: "$1return $self.replacedUserPanelComponent(function(){$2}, this, arguments)$3"
-            }
-        }];
-        this.replacedUserPanelComponent = replacedUserPanelComponent;
-    }
-};
+export default definePlugin({
+    name: "PhilsPluginLibrary",
+    description: "A library for phil's plugins",
+    authors: [Devs.philhk],
+    patches: [{
+        find: "Messages.ACCOUNT_A11Y_LABEL",
+        replacement: {
+            match: /(?<=function)( .{0,8}(?={).)(.{0,1000}isFullscreenInContext\(\).+?\)]}\))(})/,
+            replace: "$1return $self.replacedUserPanelComponent(function(){$2}, this, arguments)$3"
+        }
+    }],
+    replacedUserPanelComponent: replacedUserPanelComponent
+});
 
 export * from "./components";
 export * from "./discordModules";

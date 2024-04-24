@@ -18,7 +18,6 @@
 
 import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
 import { patchConnectionAudioTransportOptions } from "../../philsPluginLibrary/patches/audio";
-import { PluginInfo } from "../constants";
 import { logger } from "../logger";
 import { microphoneStore } from "../stores";
 
@@ -59,7 +58,7 @@ export class MicrophonePatcher extends Patcher {
             "on",
             "connection",
             connectionEventFunction,
-            PluginInfo.PLUGIN_NAME
+            "BetterMicrophone"
         );
 
         return this;

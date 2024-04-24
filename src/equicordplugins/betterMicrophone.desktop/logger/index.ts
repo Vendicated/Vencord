@@ -18,6 +18,4 @@
 
 import { Logger } from "@utils/Logger";
 
-import { PluginInfo } from "../constants";
-
-export const logger = new Logger(PluginInfo.PLUGIN_NAME);
+export const logger = new Logger("BetterMicrophone");

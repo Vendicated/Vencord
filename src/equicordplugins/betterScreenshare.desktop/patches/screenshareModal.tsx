@@ -23,7 +23,6 @@ import { Settings } from "Vencord";
 import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
 import Plugin from "..";
 import { AudioSourceSelect, OpenScreenshareSettingsButton } from "../components";
-import { PluginInfo } from "../constants";
 import { screenshareStore } from "../stores";
 
 const ReplacedStreamSettings = () => {
@@ -59,7 +58,7 @@ const ReplacedStreamSettings = () => {
 };
 
 export function replacedScreenshareModalSettingsContentType(oldType: (...args: any[]) => any, thisContext: any, functionArguments: any) {
-    const { hideDefaultSettings } = Settings.plugins[PluginInfo.PLUGIN_NAME];
+    const { hideDefaultSettings } = Settings.plugins.BetterScreenshare;
     const oldTypeResult = Reflect.apply(oldType, thisContext, functionArguments);
 
     if (hideDefaultSettings)

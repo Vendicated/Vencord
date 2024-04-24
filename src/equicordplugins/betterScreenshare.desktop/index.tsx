@@ -17,70 +17,55 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { DefinedSettings, OptionType, Patch, PluginAuthor, PluginDef, SettingsDefinition } from "@utils/types";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 
 import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
-import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
 import { replacedScreenshareModalComponent } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
-export default new class Plugin implements PluginDef {
-    readonly name: string;
-    readonly description: string;
-    readonly authors: PluginAuthor[];
-    readonly patches: Omit<Patch, "plugin">[];
-    readonly settings: DefinedSettings<SettingsDefinition, {}>;
-    readonly dependencies: string[];
-
-    private readonly replacedScreenshareModalComponent: typeof replacedScreenshareModalComponent;
-    public screensharePatcher?: ScreensharePatcher;
-    public screenshareAudioPatcher?: ScreenshareAudioPatcher;
-
-    constructor() {
-        this.name = PluginInfo.PLUGIN_NAME;
-        this.description = PluginInfo.DESCRIPTION;
-        this.authors = [PluginInfo.AUTHOR, ...Object.values(PluginInfo.CONTRIBUTORS)] as PluginAuthor[];
-        this.patches = [
-            {
-                find: "Messages.SCREENSHARE_RELAUNCH",
-                replacement: {
-                    match: /(function .{1,2}\(.{1,2}\){)(.{1,40}(?=selectGuild).+?(?:]}\)}\)))(})/,
-                    replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"
-                }
-            }
-        ];
-        this.settings = definePluginSettings({
-            hideDefaultSettings: {
-                type: OptionType.BOOLEAN,
-                description: "Hide Discord screen sharing settings",
-                default: true,
-            }
-        });
-        this.dependencies = ["PhilsPluginLibrary"];
-        this.replacedScreenshareModalComponent = replacedScreenshareModalComponent;
+const settings = definePluginSettings({
+    hideDefaultSettings: {
+        type: OptionType.BOOLEAN,
+        description: "Hide Discord screen sharing settings",
+        default: true,
     }
+});
 
+export default definePlugin({
+    name: "BetterScreenshare",
+    description: "This plugin allows you to further customize your screen sharing.",
+    authors: [Devs.philhk],
+    dependencies: ["PhilsPluginLibrary"],
+    settings,
+    patches: [
+        {
+            find: "Messages.SCREENSHARE_RELAUNCH",
+            replacement: {
+                match: /(function .{1,2}\(.{1,2}\){)(.{1,40}(?=selectGuild).+?(?:]}\)}\)))(})/,
+                replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"
+            }
+        }
+    ],
+    replacedScreenshareModalComponent: replacedScreenshareModalComponent,
     start(): void {
         initScreenshareStore();
         initScreenshareAudioStore();
         this.screensharePatcher = new ScreensharePatcher().patch();
         this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
-
         addSettingsPanelButton({
-            name: PluginInfo.PLUGIN_NAME,
+            name: "BetterScreenshare",
             icon: ScreenshareSettingsIcon,
             tooltipText: "Screenshare Settings",
             onClick: openScreenshareModal
         });
-    }
-
-    stop(): void {
+    },
+    stop() {
         this.screensharePatcher?.unpatch();
         this.screenshareAudioPatcher?.unpatch();
-        Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
-
-        removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
+        Emitter.removeAllListeners("BetterScreenshare");
+        removeSettingsPanelButton("BetterScreenshare");
     }
-};
+});

@@ -17,7 +17,6 @@
 */
 
 import { createPluginStore, ProfilableInitializer, ProfilableStore, profileable, ProfileableProfile } from "../../philsPluginLibrary";
-import { PluginInfo } from "../constants";
 
 
 export interface ScreenshareProfile {
@@ -112,7 +111,7 @@ export let screenshareStore: ProfilableStore<ScreenshareStore, ScreenshareProfil
 
 export const initScreenshareStore = () =>
     screenshareStore = createPluginStore(
-        PluginInfo.PLUGIN_NAME,
+        "BetterScreenshare",
         "ScreenshareStore",
         profileable(
             screenshareStoreDefault,

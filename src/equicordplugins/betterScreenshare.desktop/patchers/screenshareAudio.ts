@@ -19,7 +19,6 @@
 import { UserStore } from "@webpack/common";
 
 import { Emitter, MediaEngineStore, patchConnectionAudioTransportOptions, Patcher, types } from "../../philsPluginLibrary";
-import { PluginInfo } from "../constants";
 import { logger } from "../logger";
 import { screenshareAudioStore } from "../stores/screenshareAudioStore";
 
@@ -73,7 +72,7 @@ export class ScreenshareAudioPatcher extends Patcher {
             "on",
             "connection",
             connectionEventFunction,
-            PluginInfo.PLUGIN_NAME
+            "BetterScreenshare"
         );
 
         return this;

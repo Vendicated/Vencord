@@ -20,7 +20,6 @@ import { UserStore } from "@webpack/common";
 
 import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
 import { patchConnectionVideoSetDesktopSourceWithOptions, patchConnectionVideoTransportOptions } from "../../philsPluginLibrary/patches/video";
-import { PluginInfo } from "../constants";
 import { logger } from "../logger";
 import { screenshareStore } from "../stores";
 
@@ -87,7 +86,7 @@ export class ScreensharePatcher extends Patcher {
             "on",
             "connection",
             connectionEventFunction,
-            PluginInfo.PLUGIN_NAME
+            "BetterScreenshare"
         );
 
         return this;

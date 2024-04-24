@@ -19,13 +19,12 @@
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { ModalSize, openModalLazy } from "@utils/modal";
-import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
 import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
 import {
     MediaEngineStore,
-    openURL,
     ProfilableStore,
     SettingsModal,
     SettingsModalCard,
@@ -36,8 +35,6 @@ import {
     validateNumberInput,
     validateTextInputNumber
 } from "../../philsPluginLibrary";
-import { Styles } from "../../philsPluginLibrary/styles";
-import { PluginInfo } from "../constants";
 import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
 
 const simpleResolutions: readonly (SelectOption & { value: types.Resolution; })[] = [
@@ -403,12 +400,6 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                 onChange: status => setHdrEnabled(status)
             }} />;
 
-    const guideCard =
-        <Card style={{ ...Styles.infoCard, flex: 0.4 }}>
-            <Forms.FormTitle tag="h5">How to use?</Forms.FormTitle>
-            <Forms.FormText>If you want to know more about the settings or possible issues, please read <a onClick={() => openURL(PluginInfo.README + "#better-screenshare-plugin")}>this</a>.</Forms.FormText>
-        </Card>;
-
     const settingsCardProfiles =
         <SettingsModalProfilesCard flex={0.5} onSaveStateChanged={state => setIsSaving(state)} profileableStore={screenshareStore} />;
 
@@ -456,7 +447,6 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                         {screenshareAudioStore && settingsCardAudio}
                     </SettingsModalCardRow>
                     <SettingsModalCardRow>
-                        {guideCard}
                         {settingsCardHdr}
                         {settingsCardProfiles}
                     </SettingsModalCardRow>

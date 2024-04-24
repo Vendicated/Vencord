@@ -17,7 +17,6 @@
 */
 
 import { createPluginStore, ProfilableInitializer, ProfilableStore, profileable, ProfileableProfile } from "../../philsPluginLibrary";
-import { PluginInfo } from "../constants";
 
 
 export interface MicrophoneProfile {
@@ -84,7 +83,7 @@ export let microphoneStore: ProfilableStore<MicrophoneStore, MicrophoneProfile>;
 
 export const initMicrophoneStore = () =>
     microphoneStore = createPluginStore(
-        PluginInfo.PLUGIN_NAME,
+        "BetterMicrophone",
         "MicrophoneStore",
         profileable(
             microphoneStoreDefault,
