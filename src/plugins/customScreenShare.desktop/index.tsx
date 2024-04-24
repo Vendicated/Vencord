@@ -18,10 +18,9 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, StartAt } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
 import { cooldown, denormalize, normalize } from "./utils";
-import { goofs } from "./goofs";
 
 const settings = definePluginSettings({
     maxFPS: {
@@ -52,12 +51,6 @@ const settings = definePluginSettings({
         description: "Round Resolution and FPS values to the nearest whole number",
         default: true,
         type: OptionType.BOOLEAN,
-    },
-    goofs: {
-        description: "Goofs and gags :^)",
-        default: false,
-        type: OptionType.BOOLEAN,
-        restartNeeded: true,
     },
     bitrates: {
         description: "ADVANCED: ONLY USE FOR TESTING PURPOSES!",
@@ -211,12 +204,7 @@ export default definePlugin({
     getMaxBitrate() {
         const { maxBitrate } = settings.store;
         return maxBitrate;
-    },
-    start() {
-        if (settings.store.goofs)
-            goofs();
-    },
-    startAt: StartAt.DOMContentLoaded
+    }
 });
 
 
