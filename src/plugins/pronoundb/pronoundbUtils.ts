@@ -24,7 +24,7 @@ import { useAwaiter } from "@utils/react";
 import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
-import { CachePronouns, PronounCode, PronounMapping, PronounsResponse } from "./types";
+import { CachePronouns, PronounCode, PronounMapping, PronounsResponse, ShortPronounMapping } from "./types";
 
 type PronounsWithSource = [string | null, string];
 const EmptyPronouns: PronounsWithSource = [null, ""];
@@ -158,6 +158,6 @@ export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }
             return PronounMapping[pronouns[0]];
         else return PronounMapping[pronouns[0]].toLowerCase();
     }
-    const pronounString = pronouns.map(pronoun => PronounMapping[pronoun + "S"]).join("/");
+    const pronounString = pronouns.map(pronoun => ShortPronounMapping[pronoun]).join("/");
     return pronounsFormat === PronounsFormat.Capitalized ? pronounString : pronounString.toLowerCase();
 }
