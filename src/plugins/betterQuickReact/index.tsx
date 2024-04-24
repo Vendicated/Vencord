@@ -35,6 +35,11 @@ export const settings = definePluginSettings({
         description: "Scales the buttons to 75% of their original scale, whilst increasing the inner emoji to 125% scale. Emojis will be 93.75% of the original size. Recommended to have a minimum of 5 columns",
         type: OptionType.BOOLEAN,
         default: false
+    },
+    scroll: {
+        description: "Enable scrolling the list of emojis",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -58,7 +63,7 @@ export default definePlugin({
             find: "default.Messages.ADD_REACTION_NAMED.format",
             replacement: {
                 match: /(\i)\.length>4&&\((\i)\.length=4\);/,
-                replace: "$1.length>$self.getMaxQuickReactions()&&($2.length=$self.getMaxQuickReactions());"
+                replace: "let [betterQuickReactScrollValue,setBetterQuickReactScrollValue]=Vencord.Webpack.Common.React.useState(0);betterQuickReactScrollValue;"
             }
         },
         // Add a custom class to identify the quick reactions have been modified and a CSS variable for the number of columns to display
@@ -69,16 +74,38 @@ export default definePlugin({
                 replace: "className:\"vc-better-quick-react \"+($self.settings.store.compactMode?\"vc-better-quick-react-compact \":\"\")+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
             }
         },
+        {
+            find: "default.Messages.ADD_REACTION_NAMED.format",
+            replacement: {
+                match: /children:(\i)\.map\(/,
+                replace: "onWheel:$self.onWheelWrapper(betterQuickReactScrollValue,setBetterQuickReactScrollValue,$1.length),children:$self.applyScroll($1,betterQuickReactScrollValue).map("
+            }
+        },
         // MenuGroup doesn't accept styles or anything special by default :/
         {
             find: "{MenuGroup:function()",
             replacement: {
                 match: /role:"group",/,
-                replace: "role:\"group\",style:arguments[0].style,"
+                replace: "role:\"group\",style:arguments[0].style,onWheel:arguments[0].onWheel,"
             }
         }
     ],
     getMaxQuickReactions() {
         return settings.store.rows * settings.store.columns;
+    },
+    applyScroll(emojis: any[], index: number) {
+        return emojis.slice(index, index + this.getMaxQuickReactions());
+    },
+    onWheelWrapper(currentScrollValue: number, setScrollHook: (value: number) => void, emojisLength: number) {
+        if (settings.store.scroll) return (e: WheelEvent) => {
+            if (e.deltaY === 0 || e.shiftKey) return;
+            e.stopPropagation(); // does this do anything?
+            const modifier = e.deltaY < 0 ? -1 : 1;
+            const newValue = currentScrollValue + (modifier * settings.store.columns);
+            setScrollHook(Math.max(0, Math.min(newValue, emojisLength - this.getMaxQuickReactions())));
+        };
+    },
+    AddReactionsButton() {
+
     }
 });
