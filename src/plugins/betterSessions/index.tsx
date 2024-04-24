@@ -21,14 +21,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
+import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
-const AuthSessionsStore = findByPropsLazy("getSessions");
+const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
