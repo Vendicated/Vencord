@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByProps, findByPropsLazy, findLazy } from "@webpack";
 import { Card, ChannelStore, Forms, GuildMemberStore, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Message, User } from "discord-types/general";
@@ -358,18 +358,20 @@ export default definePlugin({
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return strings.APP_TAG;
+        const useAppLabel = findByProps("AppLauncherOnboardingExperiment")?.AppLauncherOnboardingExperiment?.getCurrentConfig()?.enabled ?? false; // Check whether the experiment has rolled out to the user, otherwise just use the original bot text
+        const botLabel = useAppLabel ? strings.APP_TAG : strings.BOT_TAG_BOT;
+        if (!passedTagName) return botLabel;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return strings.APP_TAG;
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;
+        if (!tag) return botLabel;
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return botLabel;
 
         const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
             case "BOT":
-                return `${strings.APP_TAG} • ${tagText}`;
+                return `${botLabel} • ${tagText}`;
             default:
                 return tagText;
         }
