@@ -264,37 +264,37 @@ export default definePlugin({
             joinMessage: {
                 type: OptionType.STRING,
                 description: "Join Message",
-                default: "{{USER}} joined"
+                default: "{{DISPLAY_NAME}} joined"
             },
             leaveMessage: {
                 type: OptionType.STRING,
                 description: "Leave Message",
-                default: "{{USER}} left"
+                default: "{{DISPLAY_NAME}} left"
             },
             moveMessage: {
                 type: OptionType.STRING,
                 description: "Move Message",
-                default: "{{USER}} moved to {{CHANNEL}}"
+                default: "{{DISPLAY_NAME}} moved to {{CHANNEL}}"
             },
             muteMessage: {
                 type: OptionType.STRING,
                 description: "Mute Message (only self for now)",
-                default: "{{USER}} Muted"
+                default: "{{DISPLAY_NAME}} Muted"
             },
             unmuteMessage: {
                 type: OptionType.STRING,
                 description: "Unmute Message (only self for now)",
-                default: "{{USER}} unmuted"
+                default: "{{DISPLAY_NAME}} unmuted"
             },
             deafenMessage: {
                 type: OptionType.STRING,
                 description: "Deafen Message (only self for now)",
-                default: "{{USER}} deafened"
+                default: "{{DISPLAY_NAME}} deafened"
             },
             undeafenMessage: {
                 type: OptionType.STRING,
                 description: "Undeafen Message (only self for now)",
-                default: "{{USER}} undeafened"
+                default: "{{DISPLAY_NAME}} undeafened"
             }
         };
     },
