@@ -16,20 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+export interface SessionInfo {
+    session: {
+        id_hash: string;
+        approx_last_used_time: Date;
+        client_info: {
+            os: string;
+            platform: string;
+            location: string;
+        };
+    },
+    current?: boolean;
+}
 
-export default definePlugin({
-    name: "ShowTimeouts",
-    description: "Display member timeout icons in chat regardless of permissions.",
-    authors: [Devs.Dolfies],
-    patches: [
-        {
-            find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /&&\i\.\i\.canManageUser\(\i\.\i\.MODERATE_MEMBERS,\i\.author,\i\)/,
-                replace: "",
-            },
-        },
-    ],
-});
+export type Session = SessionInfo["session"];
