@@ -18,10 +18,11 @@
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, React } from "@webpack/common";
+import { FluxDispatcher, Menu, React } from "@webpack/common";
 
 const settings = definePluginSettings({
     showIcon: {
@@ -56,13 +57,31 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
+
+const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
+    const { isEnabled } = settings.use(["isEnabled"]);
+    const group = findGroupChildrenByChildId("submit-button", children);
+
+    group?.splice(2, 0,
+        <Menu.MenuCheckboxItem
+            id="vc-silent-typing"
+            label="Slient Typing"
+            checked={isEnabled}
+            action={() => settings.store.isEnabled = !settings.store.isEnabled}
+        />
+    );
+};
+
+
 export default definePlugin({
     name: "SilentTyping",
-    authors: [Devs.Ven, Devs.Rini],
+    authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
     description: "Hide that you are typing",
     dependencies: ["CommandsAPI", "ChatInputButtonAPI"],
     settings,
-
+    contextMenus: {
+        "textarea-context": ChatBarContextCheckbox
+    },
     patches: [
         {
             find: '.dispatch({type:"TYPING_START_LOCAL"',
