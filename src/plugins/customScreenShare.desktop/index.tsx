@@ -47,19 +47,19 @@ const settings = definePluginSettings({
         restartNeeded: false,
     },
     targetBitrate: {
-        description: "Bitrate",
+        description: "Target Bitrate (seemingly no effect)",
         default: 600000,
         type: OptionType.NUMBER,
         hidden: true
     },
     minBitrate: {
-        description: "Bitrate",
+        description: "Minimum Bitrate (forces the bitrate to be at LEAST this)",
         default: 500000,
         type: OptionType.NUMBER,
         hidden: true
     },
     maxBitrate: {
-        description: "Bitrate",
+        description: "Maxmimum Bitrate (seems to not be reached most of the time)",
         default: 8000000,
         type: OptionType.NUMBER,
         hidden: true
@@ -82,57 +82,57 @@ export default definePlugin({
         {
             find: "ApplicationStreamSettingRequirements)",
             replacement: {
-                match: /for\(let . of ..ApplicationStreamSettingRequirements\).+?!1/,
+                match: /for\(let \i of \i\.ApplicationStreamSettingRequirements\).+?!1/,
                 replace: "return !0"
             }
         },
         {
             find: "ApplicationStreamFPSButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(.=)(.{19}FPS.+?(\i).{11}>(\i).\i,(\i),\i,([A-z.]+).+?\}\)),/,
-                replace: "$1[$self.CustomRange($4,$5,$3,$6,'fps'),...$2],"
+                match: /(\i=)(.{19}FPS.+?(\i).{11}>(\i).\i,(\i),\i,([A-z.]+).+?\}\)),/,
+                replace: (_, g1, g2, g3, g4, g5, g6) => `${g1}[$self.CustomRange(${g4},${g5},${g3},${g6},'fps'),...${g2}],`
             }
         },
         {
             find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(.=)(.{19}Resolution.+?(\i).{11}>(\i).\i,\i,(\i),([A-z.]+).+?\}\));/,
-                replace: "$1[$self.CustomRange($4,$3,$5,$6,'resolution'),...$2];"
+                match: /(\i=)(.{19}Resolution.+?(\i).{11}>(\i).\i,\i,(\i),([A-z.]+).+?\}\));/,
+                replace: (_, g1, g2, g3, g4, g5, g6) => `${g1}[$self.CustomRange(${g4},${g3},${g5},${g6},'resolution'),...${g2}];`
             }
         },
         {
             find: "\"remoteSinkWantsPixelCount\",\"remoteSinkWantsMaxFramerate\"",
             replacement: {
                 match: /(max:|\i=)4e6,/,
-                replace: "$18e6,"
+                replace: (_, g1) => `${g1}8e6,`
             }
         },
         {
-            find: "\"Discord_Clip_\".concat",
+            find: "\"remoteSinkWantsPixelCount\",\"remoteSinkWantsMaxFramerate\"",
             replacement: {
-                match: /(=15e)3/, // disable discord idle fps reduction
-                replace: "$18"
+                match: /(\i)=15e3/, // disable discord idle fps reduction
+                replace: (_, g1) => `${g1}=15e8`
             }
         },
         {
             find: "updateRemoteWantsFramerate(){",
             replacement: {
-                match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
-                replace: "$&return;"
+                match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
+                replace: (match) => `${match}return;`
             }
         },
         {
             find: "{getQuality(",
             replacement: {
-                match: /(bitrateMin:).+?(,bitrateMax:).+?(,bitrateTarget:).+?,/,
-                replace: "$1$self.getMinBitrate()$2$self.getMaxBitrate()$3$self.getTargetBitrate(),"
+                match: /bitrateMin:.+?,bitrateMax:.+?,bitrateTarget:.+?,/,
+                replace: "bitrateMin:$self.getMinBitrate(),bitrateMax:$self.getMaxBitrate(),bitrateTarget:$self.getTargetBitrate(),"
             }
         },
         {
             find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(stream-settings-resolution-.+?children:.)/,
-                replace: "$1$self.settings.store.bitrates?$self.BitrateGroup():null,"
+                match: /stream-settings-resolution-.+?children:\[/,
+                replace: (match) => `${match}$self.settings.store.bitrates?$self.BitrateGroup():null,`
             }
         }
     ],
@@ -154,7 +154,9 @@ export default definePlugin({
             <Menu.MenuSliderControl
                 onChange={onChange}
                 renderValue={() => value + (group === "fps" ? " FPS" : "p")}
-                value={normalize((group === "fps" ? fps : res), minValue, maxValue)}>
+                value={normalize((group === "fps" ? fps : res), minValue, maxValue) || 0}
+                minValue={0}
+                maxValue={100}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
     },
@@ -177,7 +179,9 @@ export default definePlugin({
             <Menu.MenuSliderControl
                 onChange={onChange}
                 renderValue={() => Math.round(bitrate / 1000) + "kbps"}
-                value={normalize(bitrate, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate)}>
+                value={normalize(bitrate, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate) || 0}
+                minValue={0}
+                maxValue={100}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
     },
