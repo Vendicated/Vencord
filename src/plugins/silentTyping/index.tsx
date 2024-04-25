@@ -62,7 +62,11 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const { isEnabled } = settings.use(["isEnabled"]);
     const group = findGroupChildrenByChildId("submit-button", children);
 
-    group?.splice(2, 0,
+    if (!group) return;
+
+    const idx = group.findIndex(c => c?.props?.id === "submit-button");
+
+    group.splice(idx + 1, 0,
         <Menu.MenuCheckboxItem
             id="vc-silent-typing"
             label="Slient Typing"
