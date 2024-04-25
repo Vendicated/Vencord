@@ -35,7 +35,7 @@ npm i -g pnpm
 Clone Vencord:
 
 ```shell
-git clone https://github.com/programminglaboratorys/Vencord
+git clone https://github.com/Vendicated/Vencord
 cd Vencord
 ```
 
