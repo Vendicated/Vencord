@@ -36,25 +36,24 @@ export default definePlugin({
     authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
-        // Add next to username (compact mode)
         {
             find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /("span",{id:\i,className:\i,children:\i}\))/,
-                replace: "$1, $self.CompactPronounsChatComponentWrapper(arguments[0])"
-            }
-        },
-        // Patch the chat timestamp element (normal mode)
-        {
-            find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
-            }
+            replacement: [
+                // Add next to username (compact mode)
+                {
+                    match: /("span",{id:\i,className:\i,children:\i}\))/,
+                    replace: "$1, $self.CompactPronounsChatComponentWrapper(arguments[0])"
+                },
+                // Patch the chat timestamp element (normal mode)
+                {
+                    match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
+                    replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
+                }
+            ]
         },
         // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
         {
-            find: ".userTagNoNickname",
+            find: ".pronouns,children",
             replacement: [
                 {
                     match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i;/,
