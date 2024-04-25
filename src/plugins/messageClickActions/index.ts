@@ -85,11 +85,14 @@ export default definePlugin({
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
 
+                    let shouldMention = !Settings.plugins.NoReplyMention.enabled;
+                    if (event.shiftKey && !settings.store.requireModifier) shouldMention = !shouldMention;
+
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
                         channel,
                         message: msg,
-                        shouldMention: !Settings.plugins.NoReplyMention.enabled,
+                        shouldMention,
                         showMentionToggle: channel.guild_id !== null
                     });
                 }
