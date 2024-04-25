@@ -15,37 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
+import "./style.css";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "discord-types/general";
-import { init, getUserPFP, addUser, removeUser, hasUser } from "./data"
+import { init, getUserPFP, addUser, removeUser, hasUser } from "./data";
 import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage, ApplicationCommandOptionType, Argument, CommandContext } from "@api/Commands";
-import { Devs } from "@utils/constants"
-
-let data = {
-    avatars: {} as Record<string, string>,
-};
+import { Devs } from "@utils/constants";
+import { contextMenus } from "./contextMenu.tsx";
+import { openModal } from "./createUserModal.tsx";
 
 
 
-function pfp(cmd: string, id:string, pfp:string) {
-    console.log(cmd+" "+id+" "+pfp)
+function pfp(cmd: string, id: string, pfp: string) {
+    console.log(cmd + " " + id + " " + pfp);
     if (cmd == "add") {
         const user = {
             id: id,
             profilepic: pfp
-        }
-        addUser(user)
+        };
+        addUser(user);
     } else if (cmd == "remove") {
-        removeUser(id)
+        removeUser(id);
     }
 }
 
 export default definePlugin({
-    data,
     name: "CustomPFP",
     description: "Allows you to set custom pfp to any user.",
     authors: [Devs.Luca99],
+    contextMenus,
     patches: [
         // default export patch
         {
@@ -80,9 +78,7 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
-                console.log(option)
-                console.log(option[0].value)
-                pfp("add", option[0].value, option[1].value)
+                pfp("add", option[0].value, option[1].value);
             },
         },
         {
@@ -96,8 +92,8 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
-                    pfp("remove", option[0].value)
-                }
+                pfp("remove", option[0].value);
+            }
         }
     ],
 
@@ -107,8 +103,7 @@ export default definePlugin({
     },
 
     async start() {
-        await init()
-
-
+        await init();
     },
+
 });

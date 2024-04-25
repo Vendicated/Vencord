@@ -1,0 +1,6 @@
+.edit-user-modal-content {
+    display: grid;
+    justify-content: center;
+    padding: 10px;
+    gap: 15px;
+}
