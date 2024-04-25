@@ -1658,27 +1658,13 @@ const inputObserver = new MutationObserver((mutationsList, observer) => {
     boxElement3.style.alignItems = "center";
     boxElement3.style.background = "transparent";
 
-const descriptionElement = document.createElement("div");
-descriptionElement.classList.add("description_vc2");
-descriptionElement.textContent = "Better Themes";
-descriptionElement.style.fontFamily = "Whitney, 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif";
-descriptionElement.style.position = "absolute";
-descriptionElement.style.top = "130px";
-descriptionElement.style.left = "242px";
-descriptionElement.style.fontSize = "18px";
-descriptionElement.style.fontWeight = "600";
-descriptionElement.style.position = "absolute";
-descriptionElement.style.background = "linear-gradient(to right, #3100d1, #33b8ff)";
-descriptionElement.style.webkitBackgroundClip = "text";
-descriptionElement.style.webkitTextFillColor = "transparent";
-
 const descriptionElement3 = document.createElement("div");
 descriptionElement3.classList.add("description_vc3");
 descriptionElement3.innerHTML = "Manage all your Themes here.<br>Put any Theme link into the input field above and <br>a thumbnail to the left to add a theme. You can<br>get themes from\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0or<br>or add them directly from the Online-Themes Tab. ";
 descriptionElement3.style.color = "white";
 descriptionElement3.style.fontSize = "12px";
 descriptionElement3.style.position = "absolute";
-descriptionElement3.style.top = "150px";
+descriptionElement3.style.top = "138px";
 descriptionElement3.style.left = "243px";
 descriptionElement3.style.fontFamily = "Whitney, 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif";
 descriptionElement3.style.fontWeight = "400";
@@ -1702,7 +1688,6 @@ dividerElement2.style.scale = "0.954";
     dividerElementvoid.style.borderTop = "";
 
     targetElement.appendChild(input);
-    targetElement.appendChild(descriptionElement);
     targetElement.appendChild(boxElement3);
     boxElement.appendChild(fileInput);
     targetElement.appendChild(boxElement);
@@ -6577,7 +6562,7 @@ popUpMenu.appendChild(redSquare);
     link1.style.marginRight = '0.5em';
     link1.textContent = 'BetterDiscord Themes';
     link1.style.position = 'absolute';
-    link1.style.top = '196px';
+    link1.style.top = '185px';
     link1.style.left = '332px';
     link1.style.fontSize = "12px";
 
@@ -6588,7 +6573,7 @@ popUpMenu.appendChild(redSquare);
     link2.setAttribute('href', 'https://github.com/search?q=discord+theme');
     link2.textContent = 'GitHub';
     link2.style.position = 'absolute';
-    link2.style.top = '196px';
+    link2.style.top = '185px';
     link2.style.left = '462px';
     link2.style.fontSize = "12px";
 
