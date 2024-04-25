@@ -620,7 +620,7 @@ export default definePlugin({
         {
             find: ".removeMosaicItemHoverButton",
             replacement: {
-                match: /(\i=(\i)=>{)(.{1,6500}isSingleMosaicItem)/,
+                match: /(\i=(\i)=>{)(.{1,3550}isSingleMosaicItem)/,
                 replace: "$1 let forceUpdate=Vencord.Util.useForceUpdater();$self.patchAttachments($2,forceUpdate);$3"
             }
         },
@@ -701,7 +701,7 @@ export default definePlugin({
     attachments: new Map<string, LoggedAttachment>(),
     patchAttachments(props: { attachment: LoggedAttachment, message: LoggedMessage; }, forceUpdate: () => void) {
         const { attachment, message } = props;
-        if (!message.deleted || !LoggedMessageManager.hasMessageInLogs(message.id))
+        if (!message?.deleted || !LoggedMessageManager.hasMessageInLogs(message.id))
             return; // Flogger.log("ignoring", message.id);
 
         if (this.attachments.has(attachment.id))
