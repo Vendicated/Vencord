@@ -28,7 +28,7 @@ let hiddenMessages = new Map<string, {
     channel_id: string;
 }>();
 
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { message }) => () => {
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { message }) => {
     const { deleted, id, channel_id } = message;
     if (deleted || message.state !== "SENT") return;
 
