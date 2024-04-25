@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { get, set } from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
@@ -138,6 +138,10 @@ export default definePlugin({
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI"],
     settings,
 
+    contextMenus: {
+        "message": patchMessageContextMenu
+    },
+
     async start() {
         style = document.createElement("style");
         style.id = "VencordHideMessage";
@@ -152,14 +156,12 @@ export default definePlugin({
             if (hiddenMessages.has(message.id) && settings.store.showNotice) return <HideMessageAccessory id={message.id} />;
             return null;
         });
-        addContextMenuPatch("message", patchMessageContextMenu);
     },
 
     async stop() {
         for (const id of hiddenMessages.keys()) revealMessage(id);
 
         removeAccessory("vc-hide-message");
-        removeContextMenuPatch("message", patchMessageContextMenu);
 
         style.remove();
         hiddenMessages.clear();
