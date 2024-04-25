@@ -135,6 +135,7 @@ export default definePlugin({
     name: "HideMessage",
     description: "Adds a context menu option to hide messages",
     authors: [Devs.Hanzy],
+    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI"],
     settings,
 
     async start() {
