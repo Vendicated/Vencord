@@ -618,15 +618,15 @@ export default definePlugin({
 
         // https://regex101.com/r/TMV1vY/1
         {
-            find: ".removeAttachmentHoverButton",
+            find: ".removeMosaicItemHoverButton",
             replacement: {
-                match: /(\i=(\i)=>{)(.{1,250}isSingleMosaicItem)/,
+                match: /(\i=(\i)=>{)(.{1,6500}isSingleMosaicItem)/,
                 replace: "$1 let forceUpdate=Vencord.Util.useForceUpdater();$self.patchAttachments($2,forceUpdate);$3"
             }
         },
 
         {
-            find: "handleImageLoad=",
+            find: "handleImageLoad)",
             replacement: {
                 match: /(render\(\){)(.{1,100}zoomThumbnailPlaceholder)/,
                 replace: "$1$self.checkImage(this);$2"
