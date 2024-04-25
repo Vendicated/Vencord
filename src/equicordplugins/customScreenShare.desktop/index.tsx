@@ -1,27 +1,14 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType, StartAt } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
 
-import { goofs } from "./goofs";
 import { cooldown, denormalize, normalize } from "./utils";
 
 const settings = definePluginSettings({
@@ -54,12 +41,6 @@ const settings = definePluginSettings({
         default: true,
         type: OptionType.BOOLEAN,
     },
-    goofs: {
-        description: "Goofs and gags :^)",
-        default: false,
-        type: OptionType.BOOLEAN,
-        restartNeeded: true,
-    },
     bitrates: {
         description: "ADVANCED: ONLY USE FOR TESTING PURPOSES!",
         default: false,
@@ -67,19 +48,19 @@ const settings = definePluginSettings({
         restartNeeded: false,
     },
     targetBitrate: {
-        description: "Bitrate",
+        description: "Target Bitrate (seemingly no effect)",
         default: 600000,
         type: OptionType.NUMBER,
         hidden: true
     },
     minBitrate: {
-        description: "Bitrate",
+        description: "Minimum Bitrate (forces the bitrate to be at LEAST this)",
         default: 500000,
         type: OptionType.NUMBER,
         hidden: true
     },
     maxBitrate: {
-        description: "Bitrate",
+        description: "Maxmimum Bitrate (seems to not be reached most of the time)",
         default: 8000000,
         type: OptionType.NUMBER,
         hidden: true
@@ -102,57 +83,57 @@ export default definePlugin({
         {
             find: "ApplicationStreamSettingRequirements)",
             replacement: {
-                match: /for\(let . of ..ApplicationStreamSettingRequirements\).+?!1/,
+                match: /for\(let \i of \i\.ApplicationStreamSettingRequirements\).+?!1/,
                 replace: "return !0"
             }
         },
         {
             find: "ApplicationStreamFPSButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(.=)(.{19}FPS.+?([A-z]{1,2}).{11}>([A-z]{1,2}).[A-z]{1,2},([A-z]{1,2}),[A-z]{1,2},([A-z.]+).+?\}\)),/,
-                replace: "$1[$self.CustomRange($4,$5,$3,$6,'fps'),...$2],"
+                match: /(\i=)(.{19}FPS.+?(\i).{11}>(\i).\i,(\i),\i,([A-z.]+).+?\}\)),/,
+                replace: (_, g1, g2, g3, g4, g5, g6) => `${g1}[$self.CustomRange(${g4},${g5},${g3},${g6},'fps'),...${g2}],`
             }
         },
         {
             find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(.=)(.{19}Resolution.+?([A-z]{1,2}).{11}>([A-z]{1,2}).[A-z]{1,2},[A-z]{1,2},([A-z]{1,2}),([A-z.]+).+?\}\));/,
-                replace: "$1[$self.CustomRange($4,$3,$5,$6,'resolution'),...$2];"
+                match: /(\i=)(.{19}Resolution.+?(\i).{11}>(\i).\i,\i,(\i),([A-z.]+).+?\}\));/,
+                replace: (_, g1, g2, g3, g4, g5, g6) => `${g1}[$self.CustomRange(${g4},${g3},${g5},${g6},'resolution'),...${g2}];`
             }
         },
         {
-            find: "=4e6",
+            find: "\"remoteSinkWantsPixelCount\",\"remoteSinkWantsMaxFramerate\"",
             replacement: {
-                match: /=4e6/,
-                replace: "=8e6"
+                match: /(max:|\i=)4e6,/,
+                replace: (_, g1) => `${g1}8e6,`
             }
         },
         {
-            find: "\"Discord_Clip_\".concat",
+            find: "\"remoteSinkWantsPixelCount\",\"remoteSinkWantsMaxFramerate\"",
             replacement: {
-                match: /(=15e)3/, // disable discord idle fps reduction
-                replace: "$18"
+                match: /(\i)=15e3/, // disable discord idle fps reduction
+                replace: (_, g1) => `${g1}=15e8`
             }
         },
         {
             find: "updateRemoteWantsFramerate(){",
             replacement: {
-                match: /updateRemoteWantsFramerate..\{/, // disable discord mute fps reduction
-                replace: "$&return;"
+                match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
+                replace: match => `${match}return;`
             }
         },
         {
             find: "{getQuality(",
             replacement: {
-                match: /(bitrateMin:).+?(,bitrateMax:).+?(,bitrateTarget:).+?,/,
-                replace: "$1$self.getMinBitrate()$2$self.getMaxBitrate()$3$self.getTargetBitrate(),"
+                match: /bitrateMin:.+?,bitrateMax:.+?,bitrateTarget:.+?,/,
+                replace: "bitrateMin:$self.getMinBitrate(),bitrateMax:$self.getMaxBitrate(),bitrateTarget:$self.getTargetBitrate(),"
             }
         },
         {
             find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
             replacement: {
-                match: /(stream-settings-resolution-.+?children:.)/,
-                replace: "$1$self.settings.store.bitrates?$self.BitrateGroup():null,"
+                match: /stream-settings-resolution-.+?children:\[/,
+                replace: match => `${match}$self.settings.store.bitrates?$self.BitrateGroup():null,`
             }
         }
     ],
@@ -174,7 +155,9 @@ export default definePlugin({
             <Menu.MenuSliderControl
                 onChange={onChange}
                 renderValue={() => value + (group === "fps" ? " FPS" : "p")}
-                value={normalize((group === "fps" ? fps : res), minValue, maxValue)}>
+                value={normalize((group === "fps" ? fps : res), minValue, maxValue) || 0}
+                minValue={0}
+                maxValue={100}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
     },
@@ -197,7 +180,9 @@ export default definePlugin({
             <Menu.MenuSliderControl
                 onChange={onChange}
                 renderValue={() => Math.round(bitrate / 1000) + "kbps"}
-                value={normalize(bitrate, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate)}>
+                value={normalize(bitrate, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate) || 0}
+                minValue={0}
+                maxValue={100}>
             </Menu.MenuSliderControl>
         </Menu.MenuControlItem>);
     },
@@ -212,10 +197,5 @@ export default definePlugin({
     getMaxBitrate() {
         const { maxBitrate } = settings.store;
         return maxBitrate;
-    },
-    start() {
-        if (settings.store.goofs)
-            goofs();
-    },
-    startAt: StartAt.DOMContentLoaded
+    }
 });
