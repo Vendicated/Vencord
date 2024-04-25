@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { filters, findAll, findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Menu, React, UserStore, useState } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, Menu, PermissionsBits, PermissionStore, React, UserStore, useState } from "@webpack/common";
 
 const EDITOR_STATE_STORE = findByPropsLazy("createEmptyEditorState");
 const DECORATORS = findByPropsLazy("generateDecorators");
@@ -48,6 +48,7 @@ interface QueryOptions {
 
 const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     if (!props) return;
+    if (props?.channel && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, props?.channel)) return;
 
     const channelId = props?.message?.channel_id || (props?.channel?.id);
     const currentChannelId = getCurrentChannel()?.guild_id;
