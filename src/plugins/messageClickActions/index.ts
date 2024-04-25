@@ -17,7 +17,7 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -85,7 +85,7 @@ export default definePlugin({
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
 
-                    let shouldMention = !Settings.plugins.NoReplyMention.enabled;
+                    let shouldMention = (Vencord.Plugins.plugins.NoReplyMention as any).shouldMention(msg, event.shiftKey);
                     if (event.shiftKey && !settings.store.requireModifier) shouldMention = !shouldMention;
 
                     FluxDispatcher.dispatch({
