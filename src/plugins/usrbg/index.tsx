@@ -24,7 +24,15 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import style from "./index.css?managed";
 
-let data = {} as Record<string, string>;
+const API_URL = "https://usrbg.is-hardly.online/users";
+const cachebust = Date.now();
+
+interface UsrbgApiReturn {
+    endpoint: string;
+    bucket: string;
+    prefix: string;
+    users: string[];
+}
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -40,19 +48,13 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    },
-    urlForDB: {
-        type: OptionType.STRING,
-        description: "Which Database url to use to load banners, KNOW WHAT YOUR DOING",
-        default: "https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json",
-        placeholder: "Default value: https://raw.githubusercontent.com/AutumnVN/usrbg/main/usrbg.json"
     }
 });
 
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad],
+    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.katlyn],
     settings,
     patches: [
         {
@@ -84,8 +86,7 @@ export default definePlugin({
         }
     ],
 
-
-    data,
+    data: null as UsrbgApiReturn | null,
 
     settingsAboutComponent: () => {
         return (
@@ -95,9 +96,9 @@ export default definePlugin({
 
     voiceBackgroundHook({ className, participantUserId }: any) {
         if (className.includes("tile_")) {
-            if (data[participantUserId]) {
+            if (this.userHasBackground(participantUserId)) {
                 return {
-                    backgroundImage: `url(${data[participantUserId]})`,
+                    backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat"
@@ -108,24 +109,37 @@ export default definePlugin({
 
     useBannerHook({ displayProfile, user }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
-        if (data[user.id]) return data[user.id];
+        if (this.userHasBackground(user.id)) return this.getImageUrl(user.id);
     },
 
     premiumHook({ userId }: any) {
-        if (data[userId]) return 2;
+        if (this.userHasBackground(userId)) return 2;
     },
 
     shouldShowBadge({ displayProfile, user }: any) {
-        return displayProfile?.banner && (!data[user.id] || settings.store.nitroFirst);
+        return displayProfile?.banner && (!this.userHasBackground(user.id) || settings.store.nitroFirst);
+    },
+
+    userHasBackground(userId: string) {
+        if (this.data === null) return false;
+        return this.data.users.includes(userId);
+    },
+
+    getImageUrl(userId: string): string | null {
+        if (this.data == null) {
+            return null;
+        }
+
+        const { endpoint, bucket, prefix } = this.data;
+        return `${endpoint}/${bucket}/${prefix}${userId}?${cachebust}`;
     },
 
     async start() {
         enableStyle(style);
 
-        const res = await fetch(settings.store.urlForDB);
+        const res = await fetch(API_URL);
         if (res.ok) {
-            data = await res.json();
-            this.data = data;
+            this.data = await res.json();
         }
     }
 });
