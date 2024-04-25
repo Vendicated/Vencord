@@ -574,27 +574,27 @@ async function addBox4(targetElement2, startingId) {
             continue;
         }
         createdBoxIds.add(currentId);
-        const boxElement2 = document.createElement("div");
-        boxElement2.classList.add("online-themes");
-        boxElement2.style.backgroundColor = "invisible";
-        boxElement2.style.width = "173px";
-        boxElement2.style.height = "116px";
-        boxElement2.style.position = "absolute";
-        boxElement2.style.marginTop = "-88px";
-        boxElement2.style.marginLeft = "-1px";
-        boxElement2.style.scale= "1.023";
-        boxElement2.style.zIndex = "1";
-        await fetch(`https://raw.githubusercontent.com/MarryisHotter/VCPlugin/main/OnlineTheme${currentId}`)
-        .then(response => response.json())
-        .then((data) => {
-            boxElement2.style.backgroundImage = `url(${data.image})`;
-            boxElement2.dataset.id = `${currentId}`;
-            boxElement2.style.backgroundPosition = "center";
-            boxElement2.style.backgroundSize = "contain";
-            boxElement2.style.backgroundRepeat = "no-repeat";
-            author = data.author;
-            name = data.name;
-        })
+const boxElement2 = document.createElement("div");
+boxElement2.classList.add("online-themes");
+boxElement2.style.backgroundColor = "invisible";
+boxElement2.style.width = "173px";
+boxElement2.style.height = "96px";
+boxElement2.style.position = "absolute";
+boxElement2.style.marginTop = "-88px";
+boxElement2.style.marginLeft = "1px";
+boxElement2.style.scale= "1.023";
+boxElement2.style.zIndex = "1";
+await fetch(`https://raw.githubusercontent.com/MarryisHotter/VCPlugin/main/OnlineTheme${currentId}`)
+.then(response => response.json())
+.then((data) => {
+    boxElement2.style.backgroundImage = `url(${data.image})`;
+    boxElement2.dataset.id = `${currentId}`;
+    boxElement2.style.backgroundPosition = "center";
+    boxElement2.style.backgroundSize = "cover";
+    boxElement2.style.backgroundRepeat = "no-repeat";
+    author = data.author;
+    name = data.name;
+})
         .catch(error => {
             console.error("Error setting background image:", error);
         });
