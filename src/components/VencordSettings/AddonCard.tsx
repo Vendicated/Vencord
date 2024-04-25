@@ -43,7 +43,7 @@ interface Props {
 
 export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     var title = useRef(null);
-    var titleContainer = useRef(null);
+    const titleContainer = useRef<HTMLDivElement>(null);
     return (
         <div
             className={cl("card", { "card-disabled": disabled })}
