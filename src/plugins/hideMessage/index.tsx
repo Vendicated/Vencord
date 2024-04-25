@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { get, set } from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
@@ -32,19 +32,22 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { messag
     const { deleted, id, channel_id } = message;
     if (deleted || message.state !== "SENT") return;
 
+    const group = findGroupChildrenByChildId("tts", children);
+    if (!group) return;
+
     const isHidden = hiddenMessages.has(id);
     if (isHidden) {
-        return children.push(
+        return group.splice(group.findIndex(c => c?.props?.id === "tts") + 1, 0, (
             <Menu.MenuItem
                 id={cl("reveal")}
                 label="Reveal Message"
                 icon={EyeIcon}
                 action={() => revealMessage(id)}
             />
-        );
+        ));
     }
 
-    children.push(<Menu.MenuItem
+    group.splice(group.findIndex(c => c?.props?.id === "tts") + 1, 0, (<Menu.MenuItem
         id={cl("hide")}
         label="Hide Message"
         color="danger"
@@ -55,7 +58,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { messag
 
             buildCss();
         }}
-    />);
+    />));
 };
 
 const buildCss = () => {
