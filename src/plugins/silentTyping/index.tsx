@@ -31,6 +31,11 @@ const settings = definePluginSettings({
         description: "Show an icon for toggling the plugin",
         restartNeeded: true,
     },
+    contextMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Add a context menu option to toggle the functionality",
+        default: true
+    },
     isEnabled: {
         type: OptionType.BOOLEAN,
         description: "Toggle functionality",
@@ -59,7 +64,9 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
 
 
 const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
-    const { isEnabled } = settings.use(["isEnabled"]);
+    const { isEnabled, contextMenu } = settings.use(["isEnabled", "contextMenu"]);
+    if (!contextMenu) return;
+
     const group = findGroupChildrenByChildId("submit-button", children);
 
     if (!group) return;
