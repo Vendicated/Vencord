@@ -682,7 +682,7 @@ await fetch(`https://raw.githubusercontent.com/MarryisHotter/VCPlugin/main/Onlin
             addButton.style.justifyContent = "center";
             addButton.style.marginTop = "0px";
             addButton.style.left = "116px";
-            addButton.style.top = "165px";
+            addButton.style.top = "156px";
 
 function darkenColor3(color, percentage) {
     const hex = color.replace("#", "");
@@ -755,7 +755,7 @@ addButton.addEventListener("mouseout", () => {
            tryButton.style.display = "flex";
            tryButton.style.alignItems = "center";
            tryButton.style.justifyContent = "center";
-           tryButton.style.top = "45px";
+           tryButton.style.top = "36px";
            tryButton.style.left = "-47px";
 
             tryButton.addEventListener("mouseover", () => {
