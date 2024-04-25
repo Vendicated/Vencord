@@ -80,7 +80,7 @@ function addCopyTextButton(children: (ReactElement | null)[], { message }: { mes
     const group = findGroupChildrenByChildId("copy-link", children);
     const copyIndex = group?.findIndex(c => c?.props?.id === "copy-link");
 
-    if (copyIndex !== undefined && copyIndex !== -1) {
+    if (copyIndex !== undefined && copyIndex !== -1 && !group?.some(child => child?.props?.id === "copy-text")) {
         group?.splice(copyIndex + 1, 0, (
             <Menu.MenuItem
                 id="copy-text"
