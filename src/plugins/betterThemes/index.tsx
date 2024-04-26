@@ -17,6 +17,7 @@
 */
 
 import definePlugin from "@utils/types";
+import { Devs } from "@utils/constants";
 
 let isHoveringDelete = false;
 let isHoveringCreate = false;
@@ -41,16 +42,7 @@ request.onsuccess = function(event: Event) {
 export default definePlugin({
     name: "BetterThemes",
     description: "Easily add buttons to switch themes, themes diashow and load themes directly from BD.",
-    authors: [
-        {
-            id: 727416368827334778n,
-            name: "soul_fire_",
-        },
-        {
-        id: 676111787061411880n,
-            name: "MarryHotter",
-        },
-    ],
+    authors: [Devs.Marry, Devs.Soul],
     patches: [],
     start() {
 
@@ -6631,5 +6623,4 @@ styleSheet.insertRule(`
         cursor: default !important;
     }
 `, styleSheet.cssRules.length);
-
 }
