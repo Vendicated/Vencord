@@ -7,7 +7,9 @@
 /* eslint-disable arrow-parens */
 
 import * as DataStore from "@api/DataStore";
+import { Flex } from "@components/Flex";
 import { CloseIcon } from "@components/Icons";
+import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import {
@@ -24,6 +26,7 @@ import {
     useEffect,
     useState,
 } from "@webpack/common";
+import { ReactNode } from "react";
 
 import { ColorwayCSS } from "..";
 import { defaultColorwaySource, fallbackColorways } from "../constants";
@@ -36,10 +39,46 @@ import ColorwayInfoModal from "./InfoModal";
 
 const { SelectionCircle } = findByPropsLazy("SelectionCircle");
 
+function SelectorContainer({ children, isSettings, modalProps }: { children: ReactNode, isSettings?: boolean, modalProps: ModalProps; }) {
+    if (!isSettings) {
+        return <ModalRoot {...modalProps} className="colorwaySelectorModal">
+            {children}
+        </ModalRoot>;
+    } else {
+        return <SettingsTab title="Colors">
+            <div className="colorwaysSettingsSelector-wrapper">
+                {children}
+            </div>
+        </SettingsTab>;
+    }
+}
+
+function SelectorHeader({ children, isSettings }: { children: ReactNode, isSettings?: boolean; }) {
+    if (!isSettings) {
+        return <ModalHeader>
+            {children}
+        </ModalHeader>;
+    } else {
+        return <Flex style={{ gap: "0" }}>
+            {children}
+        </Flex>;
+    }
+}
+
+function SelectorContent({ children, isSettings }: { children: ReactNode, isSettings?: boolean; }) {
+    if (!isSettings) {
+        return <ModalContent className="colorwaySelectorModalContent">{children}</ModalContent>;
+    } else {
+        return <>{children}</>;
+    }
+}
+
 export default function ({
     modalProps,
+    isSettings
 }: {
-    modalProps: ModalProps;
+    modalProps: ModalProps,
+    isSettings?: boolean;
 }): JSX.Element | any {
     const [currentColorway, setCurrentColorway] = useState<string>("");
     const [colorways, setColorways] = useState<Colorway[]>([]);
@@ -179,8 +218,8 @@ export default function ({
     }
 
     return (
-        <ModalRoot {...modalProps} className="colorwaySelectorModal">
-            <ModalHeader>
+        <SelectorContainer modalProps={modalProps} isSettings={isSettings}>
+            <SelectorHeader isSettings={isSettings}>
                 <Select className="colorwaySelector-pill colorwaySelector-pill_select" options={[{
                     value: "all",
                     label: "All"
@@ -238,7 +277,7 @@ export default function ({
                                         y="0px"
                                         width="20"
                                         height="20"
-                                        style={{ padding: "6px" }}
+                                        style={{ padding: "6px", boxSizing: "content-box" }}
                                         viewBox="0 0 24 24"
                                         fill="currentColor"
                                     >
@@ -256,7 +295,7 @@ export default function ({
                         </Popout>;
                     }}
                 </Tooltip>
-                <Tooltip text="Open Settings">
+                {!isSettings ? <Tooltip text="Open Settings">
                     {({ onMouseEnter, onMouseLeave }) => <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
@@ -276,13 +315,13 @@ export default function ({
                             role="img"
                             width="20"
                             height="20"
-                            style={{ padding: "6px" }}
+                            style={{ padding: "6px", boxSizing: "content-box" }}
                             viewBox="0 0 24 24"
                         >
                             <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" />
                         </svg>
                     </Button>}
-                </Tooltip>
+                </Tooltip> : <></>}
                 <Tooltip text="Create Colorway...">
                     {({ onMouseEnter, onMouseLeave }) => <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
@@ -303,7 +342,7 @@ export default function ({
                             role="img"
                             width="20"
                             height="20"
-                            style={{ padding: "6px" }}
+                            style={{ padding: "6px", boxSizing: "content-box" }}
                             viewBox="0 0 24 24"
                         >
                             <path
@@ -325,12 +364,12 @@ export default function ({
                         onMouseLeave={onMouseLeave}
                         onClick={() => openModal((props) => <ColorPickerModal modalProps={props} />)}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style={{ padding: "6px" }} fill="currentColor" viewBox="0 0 16 16">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style={{ padding: "6px", boxSizing: "content-box" }} fill="currentColor" viewBox="0 0 16 16">
                             <path d="M12.433 10.07C14.133 10.585 16 11.15 16 8a8 8 0 1 0-8 8c1.996 0 1.826-1.504 1.649-3.08-.124-1.101-.252-2.237.351-2.92.465-.527 1.42-.237 2.433.07zM8 5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm.5 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                         </svg>
                     </Button>}
                 </Tooltip>
-                <Tooltip text="Close">
+                {!isSettings ? <Tooltip text="Close">
                     {({ onMouseEnter, onMouseLeave }) => <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
                         size={Button.Sizes.ICON}
@@ -341,11 +380,11 @@ export default function ({
                         onMouseLeave={onMouseLeave}
                         onClick={() => modalProps.onClose()}
                     >
-                        <CloseIcon style={{ padding: "6px" }} width={20} height={20} />
+                        <CloseIcon style={{ padding: "6px", boxSizing: "content-box" }} width={20} height={20} />
                     </Button>}
-                </Tooltip>
-            </ModalHeader>
-            <ModalContent className="colorwaySelectorModalContent">
+                </Tooltip> : <></>}
+            </SelectorHeader>
+            <SelectorContent isSettings={isSettings}>
                 <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }} /></div>
                 <ScrollerThin style={{ maxHeight: "450px" }} className="ColorwaySelectorWrapper">
                     {visibleColorwayArray.length === 0 &&
@@ -463,7 +502,7 @@ export default function ({
                         })
                     )}
                 </ScrollerThin>
-            </ModalContent >
-        </ModalRoot >
+            </SelectorContent>
+        </SelectorContainer >
     );
 }

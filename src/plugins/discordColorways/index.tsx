@@ -19,10 +19,9 @@ import {
 import ColorPickerModal from "./components/ColorPicker";
 import ColorwaysButton from "./components/ColorwaysButton";
 import CreatorModal from "./components/CreatorModal";
-import SelectorModal from "./components/SelectorModal";
+import Selector from "./components/Selector";
 import ManageColorwaysPage from "./components/SettingsTabs/ManageColorwaysPage";
 import OnDemandWaysPage from "./components/SettingsTabs/OnDemandPage";
-import SelectorPage from "./components/SettingsTabs/SelectorPage";
 import SettingsPage from "./components/SettingsTabs/SettingsPage";
 import Spinner from "./components/Spinner";
 import { defaultColorwaySource } from "./constants";
@@ -103,7 +102,7 @@ export default definePlugin({
     pluginVersion: "5.6.3",
     creatorVersion: "1.18.1",
     toolboxActions: {
-        "Change Colorway": () => openModal(props => <SelectorModal modalProps={props} />),
+        "Change Colorway": () => openModal(props => <Selector modalProps={props} />),
         "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
         "Open Color Stealer": () => openModal(props => <ColorPickerModal modalProps={props} />),
         "Open Settings": () => SettingsRouter.open("ColorwaysSettings"),
@@ -149,7 +148,6 @@ export default definePlugin({
     },
 
     makeSettingsCategories(SectionTypes: Record<string, unknown>) {
-        console.log(SectionTypes);
         return [
             {
                 section: SectionTypes.HEADER,
@@ -159,7 +157,7 @@ export default definePlugin({
             {
                 section: "ColorwaysSelector",
                 label: "Colorways",
-                element: SelectorPage,
+                element: () => <Selector isSettings modalProps={{ onClose: () => new Promise(() => true), transitionState: 1 }} />,
                 className: "dc-colorway-selector"
             },
             {
