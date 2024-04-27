@@ -50,7 +50,7 @@ export default function ({
         return (
             <div
                 className="colorwaysPreview-wrapper"
-                style={{ backgroundColor: tertiary }}
+                style={{ background: `var(--bg-overlay-app-frame, ${tertiary})` }}
             >
                 <div className="colorwaysPreview-titlebar" />
                 <div className="colorwaysPreview-body">
@@ -58,9 +58,9 @@ export default function ({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = accent}
-                                onMouseLeave={e => e.currentTarget.style.backgroundColor = primary}
+                                style={{ background: `var(--bg-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--bg-guild-button, ${primary})`}
                                 onClick={() => {
                                     if (isModal) {
                                         modalProps?.onClose();
@@ -106,25 +106,25 @@ export default function ({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
+                                style={{ background: `var(--bg-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--bg-guild-button, ${primary})`}
                             />
                         </div>
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
+                                style={{ background: `var(--bg-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--bg-guild-button, ${primary})`}
                             />
                         </div>
                     </div>
-                    <div className="colorwayPreview-channels" style={{ backgroundColor: secondary }}>
+                    <div className="colorwayPreview-channels" style={{ background: `var(--bg-overlay-3, ${secondary})` }}>
                         <div
                             className="colorwayPreview-userArea"
                             style={{
-                                backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)"
+                                background: `var(--bg-secondary-alt, hsl(${HexToHSL(secondary)[0]} ${HexToHSL(secondary)[1]}% ${Math.max(HexToHSL(secondary)[2] - 3.6, 0)}%))`
                             }}
                         />
                         <div className="colorwayPreview-filler" />
@@ -145,19 +145,16 @@ export default function ({
                             </Text>
                         </div>
                     </div>
-                    <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}>
+                    <div className="colorwayPreview-chat" style={{ background: `var(--bg-overlay-chat, ${primary})` }}>
                         <div
                             className="colorwayPreview-chatBox"
                             style={{
-                                backgroundColor: "hsl(" + HexToHSL(primary)[0] + " " + HexToHSL(primary)[1] + "% " + Math.min(HexToHSL(primary)[2] + 3.6, 100) + "%)"
+                                background: `var(--bg-overlay-3, hsl(${HexToHSL(primary)[0]} ${HexToHSL(primary)[1]}% ${Math.min(HexToHSL(primary)[2] + 3.6, 100)}%))`
                             }}
                         />
                         <div className="colorwayPreview-filler" />
                         <div
                             className="colorwayPreview-topShadow"
-                            style={{
-                                "--primary-900-hsl": `${HexToHSL(tertiary)[0]} ${HexToHSL(tertiary)[1]}% ${Math.max(HexToHSL(tertiary)[2] - (3.6 * 6), 0)}%`
-                            } as React.CSSProperties}
                         />
                     </div>
                 </div>

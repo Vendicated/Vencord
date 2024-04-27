@@ -30,7 +30,7 @@ import { ReactNode } from "react";
 
 import { ColorwayCSS } from "..";
 import { defaultColorwaySource, fallbackColorways } from "../constants";
-import { generateCss } from "../css";
+import { generateCss, gradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex } from "../utils";
 import ColorPickerModal from "./ColorPicker";
@@ -436,14 +436,14 @@ export default function ({
                                                         DataStore.set("activeColorwayColors", color.colors);
                                                         DataStore.set("actveColorwayID", color.name);
                                                         if (onDemandWays) {
-                                                            const demandedColorway = generateCss(
+                                                            const demandedColorway = !color.isGradient ? generateCss(
                                                                 colorToHex(color.primary),
                                                                 colorToHex(color.secondary),
                                                                 colorToHex(color.tertiary),
                                                                 colorToHex(color.accent),
                                                                 onDemandWaysTintedText,
                                                                 onDemandWaysDiscordSaturation
-                                                            );
+                                                            ) : gradientBase(colorToHex(color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
                                                             DataStore.set("actveColorway", demandedColorway);
                                                             ColorwayCSS.set(demandedColorway);
                                                         } else {
@@ -485,13 +485,17 @@ export default function ({
                                                     </svg>
                                                 </div>
                                                 <div className="discordColorwayPreviewColorContainer">
-                                                    {colors.map((colorItm) => <div
+                                                    {!color.isGradient ? colors.map((colorItm) => <div
                                                         className="discordColorwayPreviewColor"
                                                         style={{
                                                             backgroundColor: color[colorItm],
                                                         }}
-                                                    />
-                                                    )}
+                                                    />) : <div
+                                                        className="discordColorwayPreviewColor"
+                                                        style={{
+                                                            background: `linear-gradient(${color.linearGradient})`,
+                                                        }}
+                                                    />}
                                                 </div>
                                                 {currentColorway === color.name && <SelectionCircle />}
                                             </div>

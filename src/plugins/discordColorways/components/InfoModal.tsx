@@ -16,7 +16,7 @@ import {
 import { Button, Clipboard, Forms, Text, Toasts } from "@webpack/common";
 
 import { ColorwayCSS } from "..";
-import { generateCss } from "../css";
+import { generateCss, pureGradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex } from "../utils";
 import ThemePreviewCategory from "./ThemePreview";
@@ -102,7 +102,8 @@ export default function ({
                         primary={colorwayProps.primary}
                         secondary={colorwayProps.secondary}
                         tertiary={colorwayProps.tertiary}
-                    ></ThemePreviewCategory>
+                        previewCSS={colorwayProps.isGradient ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview {--gradient-theme-bg: linear-gradient(${colorwayProps.linearGradient})}` : ""}
+                    />
                 </div>
             </ModalContent>
             <ModalFooter>

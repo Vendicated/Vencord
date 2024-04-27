@@ -48,10 +48,9 @@ export default function ({
         setVisibility(isVisible);
     });
 
-    return <Tooltip text={[
-        !isThin ? <span>Colorways</span> : <></>,
-        !isThin ? <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text> : <span>{"Active Colorway: " + activeColorway}</span>
-    ]} position="right" tooltipContentClassName="colorwaysBtn-tooltipContent"
+    return <Tooltip text={
+        !isThin ? <><span>Colorways</span><Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text></> : <span>{"Active Colorway: " + activeColorway}</span>
+    } position="right" tooltipContentClassName="colorwaysBtn-tooltipContent"
     >
         {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className="ColorwaySelectorBtnContainer">
             <div

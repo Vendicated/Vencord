@@ -219,12 +219,18 @@ export default function ({
                                 discordSaturation
                             );
                         } else {
-                            customColorwayCSS = getPreset(
-                                primaryColor,
-                                secondaryColor,
-                                tertiaryColor,
-                                accentColor
-                            )[preset].preset(discordSaturation);
+                            (getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2") ?
+                                customColorwayCSS = getPreset(
+                                    primaryColor,
+                                    secondaryColor,
+                                    tertiaryColor,
+                                    accentColor
+                                )[preset].preset(discordSaturation).full : customColorwayCSS = getPreset(
+                                    primaryColor,
+                                    secondaryColor,
+                                    tertiaryColor,
+                                    accentColor
+                                )[preset].preset(discordSaturation);
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway") + (preset === "default" ? "" : ": Made for " + getPreset()[preset].name),
@@ -236,6 +242,13 @@ export default function ({
                             colors: presetColorArray,
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
+                            isGradient: getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2",
+                            linearGradient: (getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2") ? getPreset(
+                                primaryColor,
+                                secondaryColor,
+                                tertiaryColor,
+                                accentColor
+                            )[preset].preset(discordSaturation).base : null
                         };
                         const customColorwaysArray: Colorway[] = [customColorway];
                         DataStore.get("customColorways").then(
