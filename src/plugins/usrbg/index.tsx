@@ -25,13 +25,12 @@ import definePlugin, { OptionType } from "@utils/types";
 import style from "./index.css?managed";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
-const cachebust = Date.now();
 
 interface UsrbgApiReturn {
     endpoint: string;
     bucket: string;
     prefix: string;
-    users: string[];
+    users: { [id: string]: string; };
 }
 
 const settings = definePluginSettings({
@@ -122,7 +121,7 @@ export default definePlugin({
 
     userHasBackground(userId: string) {
         if (this.data === null) return false;
-        return this.data.users.includes(userId);
+        return this.data.users[userId] !== undefined;
     },
 
     getImageUrl(userId: string): string | null {
@@ -130,8 +129,13 @@ export default definePlugin({
             return null;
         }
 
+        const etag = this.data.users[userId];
+        if (etag === undefined) {
+            return null;
+        }
+
         const { endpoint, bucket, prefix } = this.data;
-        return `${endpoint}/${bucket}/${prefix}${userId}?${cachebust}`;
+        return `${endpoint}/${bucket}/${prefix}${userId}?${etag}`;
     },
 
     async start() {
