@@ -1,34 +1,18 @@
 .vc-uvs-icon {
-    height: 20px;
-    width: 20px;
-    min-width: 20px;
+    height: 14px;
+    width: 14px;
+    min-width: 14px;
     border-radius: 50%;
     background-color: var(--background-floating);
     cursor: pointer;
-}
-
-.vc-uvs-icon:hover {
-    background-color: var(--background-tertiary);
-}
-
-.vc-uvs-icon svg {
     padding: 3px;
+}
+
+.vc-uvs-svg {
     color: var(--interactive-normal);
 }
 
-.vc-uvs-iconCurrentCall {
-    background-color: var(--status-positive);
-}
-
-.vc-uvs-iconCurrentCall:hover {
-    background-color: var(--button-positive-background);
-}
-
-.vc-uvs-iconCurrentCall svg {
-    color: #fff;
-}
-
-.vc-uvs-iconLive {
+.vc-uvs-icon-live {
     height: 16px;
     border-radius: 16px;
     background-color: var(--status-danger);
@@ -40,52 +24,81 @@
     text-transform: uppercase;
 }
 
-.vc-uvs-iconLive:hover {
+
+.vc-uvs-icon:hover {
+    background-color: var(--background-tertiary);
+}
+
+.vc-uvs-icon.vc-uvs-icon-current-call {
+    padding: 3px;
+    background-color: var(--status-positive);
+}
+
+
+.vc-uvs-icon-current-call:hover {
+    background-color: var(--button-positive-background);
+}
+
+.vc-uvs-icon-current-call svg {
+    color: #fff;
+}
+
+
+
+.vc-uvs-icon-live:hover {
     background-color: var(--button-danger-background);
 }
 
-.vc-uvs-iconLive>div {
+.vc-uvs-icon-live>div {
     padding: 0 6px;
 }
 
-.vc-uvs-tooltip .header {
+
+.vc-uvs-tooltip {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-uvs-tooltip-header {
     display: block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.vc-uvs-tooltip .subtext {
+.vc-uvs-tooltip-subtext {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     margin-top: 3px;
 }
 
-.vc-uvs-tooltip .subtext>div {
+.vc-uvs-tooltip-subtext>div {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.vc-uvs-tooltip .tooltipIcon {
+.vc-uvs-tooltip-icon {
     min-width: 16px;
-    margin-right: 3px;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
     color: #fff;
 }
 
-.vc-uvs-iconContainer {
+.vc-uvs-icon-container {
     margin-left: auto;
     margin-right: 8px;
 }
 
-.vc-uvs-iconLocked {
+.vc-uvs-icon-locked {
     background-color: var(--button-danger-background);
 }
 
-.vc-uvs-iconLocked:hover {
+.vc-uvs-icon-locked:hover {
     background-color: var(--button-danger-background-hover);
 }
 
-.vc-uvs-iconLocked svg {
+.vc-uvs-icon-locked svg {
     color: #fff;
 }
