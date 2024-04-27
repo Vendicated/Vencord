@@ -1,4 +1,5 @@
 import { Channel } from "discord-types/general";
+import ErrorBoundary from "@components/ErrorBoundary";
 //import { Logger } from "@utils/Logger";
 
 //const logger = new Logger("Tablist"); useless
@@ -44,24 +45,22 @@ export const addTablistButton = (id: string, tab: string, PanelComponent: Tablis
 export const removeTablistButton = (id: string) => TablistComponents.delete(id);
 
 
-export function* RenderButtons(TablistButtonComponent: TablistButtonComponent, selectedTab: string, expressionMate: ExpressionMate) {
-    for (const tab in TablistComponents) {
+export function* RenderButtons(TablistButtonComponent: TablistButtonComponent, selectedTab: string) {
+    for (const [id, { tab }] of TablistComponents) {
         yield (<TablistButtonComponent
-            id={tab + "-picker-tab"}
-            aria-controls={tab + "-picker-tab-panel"}
-            aria-selected={tab === selectedTab}
-            viewType={tab}
-            isActive={tab === selectedTab}
-            expressionMate={expressionMate}
-        >{TablistComponents[tab].tab}
-        </TablistButtonComponent>);
+            id={id + "-picker-tab"}
+            aria-controls={id + "-picker-tab-panel"}
+            aria-selected={id === selectedTab}
+            viewType={id}
+            isActive={id === selectedTab}
+        >{tab}</TablistButtonComponent>);
     }
 }
 
 export function* TabPanels(selectedTab: string, expressionMate: ExpressionMate, channel: Channel) {
-    for (const tab in TablistComponents) {
-        if (tab !== selectedTab) { continue; }
-        let PanelComponent: TablistPanelComponent = TablistComponents[tab].Component;
-        yield (<PanelComponent selectedTab={selectedTab} channel={channel} expressionMate={expressionMate} />);
+    for (const [id, { Component }] of TablistComponents) {
+        if (id !== selectedTab) { continue; }
+        let PanelComponent: TablistPanelComponent = Component;
+        yield (<ErrorBoundary><PanelComponent selectedTab={selectedTab} channel={channel} expressionMate={expressionMate} /></ErrorBoundary>);
     }
 }

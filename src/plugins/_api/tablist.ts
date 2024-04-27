@@ -11,8 +11,8 @@ export default definePlugin({
             find: ".EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL",
             replacement: [
                 {
-                    match: /\.jsx)\((\i),\{id:\i\.\i,.+?,"aria-selected":(\i)===.+?,viewType:(\i).+?\}\)/,//\]
-                    replace: "$&,...Vencord.Api.Tablist.RenderButtons($1, $2, $3)"
+                    match: /\.jsx\)\((\i),\{id:\i\.E\i,.+?,"aria-selected":(\i)===\i\.\i\.EMOJI.+?,viewType:(\i).+?\}\)/,
+                    replace: "$&,...Vencord.Api.Tablist.RenderButtons($1, $2)"
                 },
                 {
                     match: /null,(\i)===(\i)\.ExpressionPickerViewType\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
