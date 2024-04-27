@@ -27,7 +27,6 @@ import { Plugins } from "Vencord";
 
 import { defaultColorwaySource, fallbackColorways, knownColorwaySources } from "../../constants";
 import { Colorway } from "../../types";
-import Divider from "../Divider";
 
 export default function () {
     const [colorways, setColorways] = useState<Colorway[]>([]);
@@ -192,7 +191,7 @@ export default function () {
                 </div>
                 )}
             </Flex>
-            <Divider />
+            <Forms.FormDivider style={{ margin: "20px 0" }} />
             <Forms.FormTitle tag="h5">Quick Switch</Forms.FormTitle>
             <Switch
                 value={colorsButtonVisibility}

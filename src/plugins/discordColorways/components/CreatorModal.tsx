@@ -52,7 +52,7 @@ export default function ({
     const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
     const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
-    const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
+    const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
 
     const colorProps = {
         accent: {
@@ -80,21 +80,18 @@ export default function ({
     useEffect(() => {
         const parsedID = colorwayID?.split("colorway:")[1];
         if (parsedID) {
-            const allEqual = (arr: any[]) => arr.every(v => v === arr[0]);
             if (!parsedID) {
                 throw new Error("Please enter a Colorway ID");
-            } else if (parsedID.length < 62) {
-                throw new Error("Invalid Colorway ID");
             } else if (!hexToString(parsedID).includes(",")) {
                 throw new Error("Invalid Colorway ID");
-            } else if (!allEqual(hexToString(parsedID).split(",").map((e: string) => e.match("#")!.length)) && hexToString(parsedID).split(",").map((e: string) => e.match("#")!.length)[0] !== 1) {
-                throw new Error("Invalid Colorway ID");
             } else {
-                const colorArray: string[] = hexToString(parsedID).split(",");
-                setAccentColor(colorArray[0].split("#")[1]);
-                setPrimaryColor(colorArray[1].split("#")[1]);
-                setSecondaryColor(colorArray[2].split("#")[1]);
-                setTertiaryColor(colorArray[3].split("#")[1]);
+                const setColor = [
+                    setAccentColor,
+                    setPrimaryColor,
+                    setSecondaryColor,
+                    setTertiaryColor
+                ];
+                hexToString(parsedID).split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
             }
         }
     });
