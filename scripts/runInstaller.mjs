@@ -39,7 +39,7 @@ function getFilename() {
         case "darwin":
             return "VencordInstaller.MacOS.zip";
         case "linux":
-            return "VencordInstaller-" + (process.env.WAYLAND_DISPLAY ? "wayland" : "x11");
+            return "VencordInstaller-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
