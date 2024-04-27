@@ -119,6 +119,24 @@ export function startDependenciesRecursive(p: Plugin) {
     return { restartNeeded, failures };
 }
 
+export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher?: typeof FluxDispatcher) {
+    if (p.flux && !p.fluxEventsSubscribed) {
+        p.fluxEventsSubscribed = true;
+
+        logger.debug("Subscribing to flux events of plugin", p.name);
+        for (const event in p.flux) {
+            (fluxDispatcher ?? FluxDispatcher).subscribe(event as FluxEvents, p.flux[event]);
+        }
+    }
+}
+
+export function subscribeAllPluginsFluxEvents(fluxDispatcher?: typeof FluxDispatcher) {
+    for (const name in Plugins) {
+        if (!isPluginEnabled(name)) continue;
+        subscribePluginFluxEvents(Plugins[name], fluxDispatcher);
+    }
+}
+
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const { name, commands, flux, contextMenus } = p;
 
@@ -149,12 +167,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
-    if (flux) {
-        logger.debug("Subscribing to flux events of plugin", name);
-        for (const event in flux) {
-            FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
-        }
-    }
+    subscribePluginFluxEvents(p);
 
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
