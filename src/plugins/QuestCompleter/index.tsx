@@ -83,6 +83,7 @@ export default definePlugin({
     renderQuestButton() {
         const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
         let shouldDisable = !!interval;
+        const { Divider } = findByProps("Divider", "Icon");
 
         if (!currentStream) {
             shouldDisable = true;
@@ -117,15 +118,20 @@ export default definePlugin({
             </svg>
 
         );
+                
         return (
-            <ToolTipButton
-                disabled={shouldDisable}
-                label="Complete Quest"
-                tooltipPosition="bottom"
-                iconComponent={QuestsIcon()}
-                onClick={this.openCompleteQuestUI}
-            >
-            </ToolTipButton>
+            <>
+                <ToolTipButton
+                    disabled={shouldDisable}
+                    label="Complete Quest"
+                    tooltipPosition="bottom"
+                    iconComponent={QuestsIcon()}
+                    onClick={this.openCompleteQuestUI}
+                >
+                </ToolTipButton>
+                <Divider></Divider>
+
+            </>
         );
     },
     openCompleteQuestUI() {
@@ -155,6 +161,7 @@ export default definePlugin({
             // we check if the stream is by the current user id so we do not clear the interval without any reason.
             if (stream.ownerId === window.currentUserId && interval) {
                 clearInterval(interval);
+                interval = null;
             }
         },
         QUESTS_SEND_HEARTBEAT_FAILURE: (event) => {
@@ -166,6 +173,7 @@ export default definePlugin({
                 }
             );
             clearInterval(interval);
+            interval = null;
         },
         QUESTS_SEND_HEARTBEAT_SUCCESS: (event) => {
 
@@ -184,6 +192,7 @@ export default definePlugin({
                     ...ImagesConfig
                 });
                 clearInterval(interval);
+                interval = null;
             }
         }
 
