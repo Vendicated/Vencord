@@ -51,7 +51,7 @@ export default definePlugin({
         return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
     },
 
-    pauseHook(guildId: string) {
+    disableInvites(guildId: string) {
         const guild = GuildStore.getGuild(guildId);
         const features = [...guild.features, "INVITES_DISABLED"];
         RestAPI.patch({
@@ -66,7 +66,7 @@ export default definePlugin({
                 {Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
                 {this.showDisableInvites(guildId) && <a onClick={() => {
                     setChecked(true);
-                    this.pauseHook(guildId);
+                    this.disableInvites(guildId);
                 }}> Pause Indefinitely.</a>}
             </div>
         );
