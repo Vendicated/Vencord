@@ -84,7 +84,7 @@ const buildCss = () => {
         }
 
         :is(${elements}) [id^='message-accessories'] > *:not(.vc-hide-message-accessory),
-        :is(${elements}) [id^='message-content'] > * {
+        :is(${elements}) [id^='message-content']:not([class^='repliedTextContent']) > * {
             display: none !important;
         }
 
