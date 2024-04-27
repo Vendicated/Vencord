@@ -50,7 +50,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -94,7 +94,7 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,150}"div",{/,
+                    match: /renderName\(\).{0,100}speaking:.+?\.clanTag.+?"div",{/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
