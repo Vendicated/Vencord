@@ -138,7 +138,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
 
     if (commands?.length) {
-        logger.info("Registering commands of plugin", name);
+        logger.debug("Registering commands of plugin", name);
         for (const cmd of commands) {
             try {
                 registerCommand(cmd, name);
@@ -150,14 +150,14 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
 
     if (flux) {
-        logger.info("Subscribing to flux events of plugin", name);
+        logger.debug("Subscribing to flux events of plugin", name);
         for (const event in flux) {
             FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
         }
     }
 
     if (contextMenus) {
-        logger.info("Adding context menus patches of plugin", name);
+        logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
@@ -184,7 +184,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
 
     if (commands?.length) {
-        logger.info("Unregistering commands of plugin", name);
+        logger.debug("Unregistering commands of plugin", name);
         for (const cmd of commands) {
             try {
                 unregisterCommand(cmd.name);
@@ -196,14 +196,14 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
 
     if (flux) {
-        logger.info("Unsubscribing from flux events of plugin", name);
+        logger.debug("Unsubscribing from flux events of plugin", name);
         for (const event in flux) {
             FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
         }
     }
 
     if (contextMenus) {
-        logger.info("Removing context menus patches of plugin", name);
+        logger.debug("Removing context menus patches of plugin", name);
         for (const navId in contextMenus) {
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
