@@ -43,6 +43,7 @@ let interval;
 let quest;
 let questHeroBarUrl;
 let ImagesConfig = {};
+const streamingUtils = findByProps("getCurrentUserActiveStream")
 
 export default definePlugin({
     name: "QuestCompleter",
@@ -81,7 +82,7 @@ export default definePlugin({
         window.currentUserId = currentUserId; // this is here because discord will lag if we get the current user id every time
     },
     renderQuestButton() {
-        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
+        const currentStream: Stream | null = streamingUtils.getCurrentUserActiveStream();
         let shouldDisable = !!interval;
         const { Divider } = findByProps("Divider", "Icon");
 
@@ -137,7 +138,7 @@ export default definePlugin({
     openCompleteQuestUI() {
         // check if user is sharing screen and there is someone that is watching the stream 
 
-        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
+        const currentStream: Stream | null = streamingUtils.getCurrentUserActiveStream();
         const encodedStreamKey = findByProps("encodeStreamKey").encodeStreamKey(currentStream);
         quest = getLeftQuests();
         ImagesConfig = {
