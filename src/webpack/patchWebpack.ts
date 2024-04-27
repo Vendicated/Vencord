@@ -173,7 +173,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             if (wreq == null) {
                 if (!webpackNotInitializedLogged) {
                     webpackNotInitializedLogged = true;
-                    logger.error("Webpack require was not initialized, running modules without patches instead.");
+                    logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                 }
 
                 return void originalMod(module, exports, require);
