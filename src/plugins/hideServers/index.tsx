@@ -10,11 +10,19 @@ import {
     findGroupChildrenByChildId,
     NavContextMenuPatchCallback,
 } from "@api/ContextMenu";
+import {
+    addServerListElement,
+    removeServerListElement,
+    ServerListRenderPosition,
+} from "@api/ServerList";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu, React } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
-import { addHidden, hiddenGuilds, loadHidden, settings } from "./settings";
+import HiddenServersButton from "./components/HiddenServersButton";
+import openHiddenServersModal from "./components/modal";
+import { addHidden, hiddenGuilds, hiddenGuildsDetail, loadHidden, settings } from "./settings";
 
 type guildsNode = {
     type: "guild" | "folder";
@@ -30,7 +38,13 @@ type qsResult = {
     };
 };
 
-export let rerenderRef: undefined | WeakRef<Function>;
+let rerenderRef: undefined | WeakRef<Function>;
+export function rerender() {
+    const ref = rerenderRef?.deref();
+    if (ref) {
+        ref();
+    }
+}
 
 const Patch: NavContextMenuPatchCallback = (
     children,
@@ -47,43 +61,53 @@ const Patch: NavContextMenuPatchCallback = (
     );
 };
 
+function serverListFunction() {
+    return <HiddenServersButton
+        count={hiddenGuilds.size}
+        onClick={() => openHiddenServersModal({ servers: hiddenGuildsDetail() })}
+    ></HiddenServersButton>;
+}
+
+
+export function addIndicator() {
+    addServerListElement(ServerListRenderPosition.Below, serverListFunction);
+}
+
+export function removeIndicator() {
+    removeServerListElement(ServerListRenderPosition.Below, serverListFunction);
+}
+
 export default definePlugin({
     name: "HideServers",
     description:
         "Allows you to hide servers from the guild list and quick switcher by right clicking them",
-    authors: [
-        {
-            name: "bep",
-            id: 0n,
-        },
-    ],
+    authors: [Devs.bep],
     tags: ["guild", "server", "hide"],
+
+    dependencies: ["ServerListAPI"],
     contextMenus: {
         "guild-context": Patch,
         "guild-header-popout": Patch,
     },
     patches: [
-        // i tried a few different things like filtering the getGuildsTree area but all of them end up resetting scroll position sometimes
         {
             find: '("guildsnav")',
-            replacement: {
-                match: /(?<=Messages\.SERVERS.+?)(\i)(\.map.{0,50}?case \i\.GuildsNodeType\.FOLDER)/,
-                replace: "$1.flatMap($self.filterGuilds)$2",
-            },
-        },
-        // force it to rerender
-        {
-            find: '("guildsnav")',
-            replacement: {
-                match: /let{disableAppDownload.{0,10}isPlatformEmbedded/,
-                replace:
-                    "$self.grabRerender(Vencord.Webpack.Common.React.useReducer(x => x+1,0));$&",
-            },
+            replacement: [
+                {
+                    match: /(?<=Messages\.SERVERS.+?)(\i)(\.map.{0,50}?case \i\.GuildsNodeType\.FOLDER)/,
+                    replace: "$1.flatMap($self.filterGuilds)$2",
+                },
+                {
+                    match: /let{disableAppDownload.{0,10}isPlatformEmbedded/,
+                    replace:
+                        "$self.grabRerender(Vencord.Webpack.Common.React.useReducer(x => x+1,0));$&",
+                },
+            ],
         },
         {
             find: "QUICKSWITCHER_PROTIP.format",
             replacement: {
-                match: /(?<=renderResults\(\)\{)let\{query/,
+                match: /(?<=renderResults\(\){)let{query/,
                 replace:
                     "this.props.results = $self.filterResults(this.props.results);$&",
             },
@@ -92,7 +116,15 @@ export default definePlugin({
     settings,
 
     async start() {
+        if (settings.store.showManager) {
+            addIndicator();
+        }
         await loadHidden();
+    },
+
+    async stop() {
+        removeIndicator();
+        hiddenGuilds.clear();
     },
 
     filterGuilds(guild: guildsNode): guildsNode[] {
