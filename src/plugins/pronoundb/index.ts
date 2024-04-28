@@ -56,7 +56,7 @@ export default definePlugin({
             find: ".pronouns,children",
             replacement: [
                 {
-                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i;/,
+                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
                     replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
                 },
                 PRONOUN_TOOLTIP_PATCH
