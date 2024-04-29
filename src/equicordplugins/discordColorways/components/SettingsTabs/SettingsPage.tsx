@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { CopyIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { SettingsTab } from "@components/VencordSettings/shared";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import {
     Button,
     Clipboard,
@@ -24,10 +24,9 @@ import {
 } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
-import { versionData } from "../..";
+import { versionData } from "../../../discordColorways";
 import { defaultColorwaySource, fallbackColorways, knownColorwaySources } from "../../constants";
 import { Colorway } from "../../types";
-import Divider from "../Divider";
 import { CloseIcon } from "../Icons";
 
 export default function () {
@@ -88,18 +87,17 @@ export default function () {
                     onClick={() => {
                         openModal(props => {
                             var colorwaySource = "";
-                            return <ModalRoot {...props}>
+                            return <ModalRoot {...props} className="colorwaySourceModal">
                                 <ModalHeader>
                                     <Text variant="heading-lg/semibold" tag="h1">
                                         Add a source:
                                     </Text>
                                 </ModalHeader>
-                                <ModalContent>
-                                    <TextInput
-                                        placeholder="Enter a valid URL..."
-                                        onChange={e => colorwaySource = e}
-                                    />
-                                </ModalContent>
+                                <TextInput
+                                    placeholder="Enter a valid URL..."
+                                    onChange={e => colorwaySource = e}
+                                    style={{ margin: "8px", width: "calc(100% - 16px)" }}
+                                />
                                 <ModalFooter>
                                     <Button
                                         style={{ marginLeft: 8 }}
@@ -193,7 +191,7 @@ export default function () {
                 </div>
                 )}
             </Flex>
-            <Divider />
+            <Forms.FormDivider style={{ margin: "20px 0" }} />
             <Forms.FormTitle tag="h5">Quick Switch</Forms.FormTitle>
             <Switch
                 value={colorsButtonVisibility}

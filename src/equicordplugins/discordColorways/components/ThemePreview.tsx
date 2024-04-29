@@ -7,8 +7,7 @@
 import { ModalProps, ModalRoot, openModal } from "@utils/modal";
 import {
     Forms,
-    Text,
-    useState
+    Text
 } from "@webpack/common";
 
 import { HexToHSL } from "../utils";
@@ -21,7 +20,8 @@ export default function ({
     tertiary,
     className,
     isCollapsed,
-    previewCSS
+    previewCSS,
+    noContainer
 }: {
     accent: string,
     primary: string,
@@ -29,9 +29,9 @@ export default function ({
     tertiary: string,
     className?: string,
     isCollapsed: boolean,
-    previewCSS?: string;
+    previewCSS?: string,
+    noContainer?: boolean;
 }) {
-    const [collapsed, setCollapsed] = useState<boolean>(isCollapsed);
     function ThemePreview({
         accent,
         primary,
@@ -50,7 +50,7 @@ export default function ({
         return (
             <div
                 className="colorwaysPreview-wrapper"
-                style={{ backgroundColor: tertiary }}
+                style={{ background: `var(--dc-overlay-app-frame, ${tertiary})` }}
             >
                 <div className="colorwaysPreview-titlebar" />
                 <div className="colorwaysPreview-body">
@@ -58,9 +58,9 @@ export default function ({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = accent}
-                                onMouseLeave={e => e.currentTarget.style.backgroundColor = primary}
+                                style={{ background: `var(--dc-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--dc-guild-button, ${primary})`}
                                 onClick={() => {
                                     if (isModal) {
                                         modalProps?.onClose();
@@ -106,25 +106,25 @@ export default function ({
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
+                                style={{ background: `var(--dc-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--dc-guild-button, ${primary})`}
                             />
                         </div>
                         <div className="colorwayPreview-guild">
                             <div
                                 className="colorwayPreview-guildItem"
-                                style={{ backgroundColor: primary }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = accent; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = primary; }}
+                                style={{ background: `var(--dc-guild-button, ${primary})` }}
+                                onMouseEnter={e => e.currentTarget.style.background = accent}
+                                onMouseLeave={e => e.currentTarget.style.background = `var(--dc-guild-button, ${primary})`}
                             />
                         </div>
                     </div>
-                    <div className="colorwayPreview-channels" style={{ backgroundColor: secondary }}>
+                    <div className="colorwayPreview-channels" style={{ background: `var(--dc-overlay-3, ${secondary})` }}>
                         <div
                             className="colorwayPreview-userArea"
                             style={{
-                                backgroundColor: "hsl(" + HexToHSL(secondary)[0] + " " + HexToHSL(secondary)[1] + "% " + Math.max(HexToHSL(secondary)[2] - 3.6, 0) + "%)"
+                                background: `var(--dc-secondary-alt, hsl(${HexToHSL(secondary)[0]} ${HexToHSL(secondary)[1]}% ${Math.max(HexToHSL(secondary)[2] - 3.6, 0)}%))`
                             }}
                         />
                         <div className="colorwayPreview-filler" />
@@ -145,19 +145,16 @@ export default function ({
                             </Text>
                         </div>
                     </div>
-                    <div className="colorwayPreview-chat" style={{ backgroundColor: primary }}>
+                    <div className="colorwayPreview-chat" style={{ background: `var(--dc-overlay-chat, ${primary})` }}>
                         <div
                             className="colorwayPreview-chatBox"
                             style={{
-                                backgroundColor: "hsl(" + HexToHSL(primary)[0] + " " + HexToHSL(primary)[1] + "% " + Math.min(HexToHSL(primary)[2] + 3.6, 100) + "%)"
+                                background: `var(--dc-overlay-3, hsl(${HexToHSL(primary)[0]} ${HexToHSL(primary)[1]}% ${Math.min(HexToHSL(primary)[2] + 3.6, 100)}%))`
                             }}
                         />
                         <div className="colorwayPreview-filler" />
                         <div
                             className="colorwayPreview-topShadow"
-                            style={{
-                                "--primary-900-hsl": `${HexToHSL(tertiary)[0]} ${HexToHSL(tertiary)[1]}% ${Math.max(HexToHSL(tertiary)[2] - (3.6 * 6), 0)}%`
-                            } as React.CSSProperties}
                         />
                     </div>
                 </div>
@@ -165,35 +162,12 @@ export default function ({
         );
     }
     return (
-        <div className={`${collapsed ? "colorwaysPreview colorwaysPreview-collapsed" : "colorwaysPreview"} ${className || ""}`}>
-            <div
-                className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                onClick={() => setCollapsed(!collapsed)}
+        !noContainer ? <div className="colorwaysPreview">
+            <Forms.FormTitle
+                style={{ marginBottom: 0 }}
             >
-                <Forms.FormTitle
-                    style={{ marginBottom: 0 }}
-                >
-                    Preview
-                </Forms.FormTitle>
-                <svg
-                    className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    role="img"
-                >
-                    <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M7 10L12 15 17 10"
-                        aria-hidden="true"
-                    />
-                </svg>
-            </div>
+                Preview
+            </Forms.FormTitle>
             <style>
                 {previewCSS}
             </style>
@@ -203,7 +177,16 @@ export default function ({
                 secondary={secondary}
                 tertiary={tertiary}
             />
-        </div>
+        </div> : <>
+            <style>
+                {".colorwaysPreview-wrapper {color: var(--header-secondary); box-shadow: var(--legacy-elevation-border);}" + previewCSS}
+            </style>
+            <ThemePreview
+                accent={accent}
+                primary={primary}
+                secondary={secondary}
+                tertiary={tertiary}
+            />
+        </>
     );
 }
-

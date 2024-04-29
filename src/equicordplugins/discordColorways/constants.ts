@@ -315,3 +315,10 @@ export const knownThemeVars = {
         }
     }
 };
+
+export const mainColors = [
+    { name: "accent", title: "Accent", var: "--brand-experiment" },
+    { name: "primary", title: "Primary", var: "--background-primary" },
+    { name: "secondary", title: "Secondary", var: "--background-secondary" },
+    { name: "tertiary", title: "Tertiary", var: "--background-tertiary" }
+];
