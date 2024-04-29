@@ -8,12 +8,12 @@
 
 import * as DataStore from "@api/DataStore";
 import { Flex } from "@components/Flex";
-import { CloseIcon } from "@components/Icons";
 import { SettingsTab } from "@components/VencordSettings/shared";
-import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import {
     Button,
+    ButtonLooks,
     Forms,
     Menu,
     Popout,
@@ -220,26 +220,7 @@ export default function ({
     return (
         <SelectorContainer modalProps={modalProps} isSettings={isSettings}>
             <SelectorHeader isSettings={isSettings}>
-                <Select className="colorwaySelector-pill colorwaySelector-pill_select" options={[{
-                    value: "all",
-                    label: "All"
-                },
-                {
-                    value: "official",
-                    label: "Official"
-                },
-                {
-                    value: "3rdparty",
-                    label: "3rd-Party"
-                },
-                {
-                    value: "custom",
-                    label: "Custom"
-                }]} select={value => {
-                    setVisibility(value);
-                }} isSelected={value => visibility === value} serialize={String} />
                 <TextInput
-                    inputClassName="colorwaySelector-searchInput"
                     className="colorwaySelector-search"
                     placeholder="Search for Colorways..."
                     value={searchString}
@@ -295,33 +276,6 @@ export default function ({
                         </Popout>;
                     }}
                 </Tooltip>
-                {!isSettings ? <Tooltip text="Open Settings">
-                    {({ onMouseEnter, onMouseLeave }) => <Button
-                        innerClassName="colorwaysSettings-iconButtonInner"
-                        size={Button.Sizes.ICON}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.OUTLINED}
-                        style={{ marginLeft: "8px" }}
-                        id="colorway-opensettings"
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        onClick={() => {
-                            SettingsRouter.open("ColorwaysSettings");
-                            modalProps.onClose();
-                        }}
-                    >
-                        <svg
-                            aria-hidden="true"
-                            role="img"
-                            width="20"
-                            height="20"
-                            style={{ padding: "6px", boxSizing: "content-box" }}
-                            viewBox="0 0 24 24"
-                        >
-                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" />
-                        </svg>
-                    </Button>}
-                </Tooltip> : <></>}
                 <Tooltip text="Create Colorway...">
                     {({ onMouseEnter, onMouseLeave }) => <Button
                         innerClassName="colorwaysSettings-iconButtonInner"
@@ -369,20 +323,6 @@ export default function ({
                         </svg>
                     </Button>}
                 </Tooltip>
-                {!isSettings ? <Tooltip text="Close">
-                    {({ onMouseEnter, onMouseLeave }) => <Button
-                        innerClassName="colorwaysSettings-iconButtonInner"
-                        size={Button.Sizes.ICON}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.OUTLINED}
-                        id="colorwaySelector-pill_closeSelector"
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        onClick={() => modalProps.onClose()}
-                    >
-                        <CloseIcon style={{ padding: "6px", boxSizing: "content-box" }} width={20} height={20} />
-                    </Button>}
-                </Tooltip> : <></>}
             </SelectorHeader>
             <SelectorContent isSettings={isSettings}>
                 <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }} /></div>
@@ -507,6 +447,46 @@ export default function ({
                     )}
                 </ScrollerThin>
             </SelectorContent>
+            {!isSettings ? <ModalFooter>
+                <Button
+                    size={Button.Sizes.MEDIUM}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.OUTLINED}
+                    style={{ marginLeft: "8px" }}
+                    onClick={() => {
+                        SettingsRouter.open("ColorwaysSettings");
+                        modalProps.onClose();
+                    }}
+                >
+                    Settings
+                </Button>
+                <Button
+                    size={Button.Sizes.MEDIUM}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.OUTLINED}
+                    onClick={() => modalProps.onClose()}
+                >
+                    Close
+                </Button>
+                <Select className={"colorwaySelector-sources " + ButtonLooks.OUTLINED} look={1} popoutClassName="colorwaySelector-sourceSelect" options={[{
+                    value: "all",
+                    label: "All"
+                },
+                {
+                    value: "official",
+                    label: "Official"
+                },
+                {
+                    value: "3rdparty",
+                    label: "3rd-Party"
+                },
+                {
+                    value: "custom",
+                    label: "Custom"
+                }]} select={value => {
+                    setVisibility(value);
+                }} isSelected={value => visibility === value} serialize={String} popoutPosition="top" />
+            </ModalFooter> : <></>}
         </SelectorContainer >
     );
 }

@@ -620,16 +620,17 @@
     width: 100%;
 }
 
-.colorwaySelector-searchInput {
-    border-radius: 0 3px 3px 0 !important;
+.colorwaySelector-sources {
     flex: 0 0 auto;
+    margin-right: auto;
+    color: var(--button-outline-primary-text);
+    border-color: var(--button-outline-primary-border);
 }
 
-.colorwaySelector-pill.colorwaySelector-pill_select {
-    border-radius: 3px 0 0 3px !important;
-    flex: 0 0 auto;
-    border: none;
-    height: 40px;
+.colorwaySelector-sources:hover {
+    background-color: var(--button-outline-primary-background-hover);
+    border-color: var(--button-outline-primary-border-hover);
+    color: var(--button-outline-primary-text-hover);
 }
 
 .colorwaySelector-headerBtn {
@@ -1208,4 +1209,13 @@
 
 .colorwaySourceModal {
     min-height: unset;
+}
+
+.colorwaySelectorModal-header {
+    box-shadow: none !important;
+    padding-bottom: 8px;
+}
+
+.colorwaySelector-sourceSelect {
+    width: fit-content !important;
 }

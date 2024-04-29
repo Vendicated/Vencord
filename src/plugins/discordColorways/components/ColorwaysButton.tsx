@@ -7,37 +7,20 @@
 import * as DataStore from "@api/DataStore";
 import { PalleteIcon } from "@components/Icons";
 import { openModal } from "@utils/modal";
-import { FluxDispatcher, Text, Tooltip, useCallback, useEffect, useState } from "@webpack/common";
+import { FluxDispatcher, Text, Tooltip, useEffect, useState } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
 import Selector from "./Selector";
 
-export default function ({
-    listItemClass = "ColorwaySelectorBtnContainer",
-    listItemWrapperClass = "",
-    listItemTooltipClass = "colorwaysBtn-tooltipContent"
-}: {
-    listItemClass?: string;
-    listItemWrapperClass?: string;
-    listItemTooltipClass?: string;
-}) {
+export default function () {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
     const [isThin, setIsThin] = useState<boolean>(false);
-    async function setButtonVisibility() {
-        const [showColorwaysButton, useThinMenuButton] = await DataStore.getMany([
-            "showColorwaysButton",
-            "useThinMenuButton"
-        ]);
-
-        setVisibility(showColorwaysButton);
-        setIsThin(useThinMenuButton);
-    }
-
-    const cached_setButtonVisibility = useCallback(setButtonVisibility, []);
-
     useEffect(() => {
-        cached_setButtonVisibility();
+        (async function () {
+            setVisibility(await DataStore.get("showColorwaysButton") as boolean);
+            setIsThin(await DataStore.get("useThinMenuButton") as boolean);
+        })();
     });
 
     FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_HEIGHT" as FluxEvents, ({ isTall }) => {
