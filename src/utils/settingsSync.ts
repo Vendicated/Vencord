@@ -113,16 +113,34 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
 const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 
 export async function putCloudSettings(manual?: boolean) {
-    const settings = await exportSettings({ minify: true });
+    const settings = JSON.parse(await exportSettings({ minify: true }));
 
     try {
+
+        let oldSettings = {};
+        try {
+            const existingDataRes = await fetch(new URL("/v1/settings", getCloudUrl()), {
+                method: "GET",
+                headers: {
+                    Authorization: await getCloudAuth(),
+                    Accept: "application/octet-stream"
+                },
+            });
+
+            if (existingDataRes.ok) {
+                const data = await existingDataRes.arrayBuffer();
+                const oldSettingsString = new TextDecoder().decode(inflateSync(new Uint8Array(data)));
+                oldSettings = JSON.parse(oldSettingsString);
+            }
+        } catch (e) { }
+
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
             headers: {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
             },
-            body: deflateSync(new TextEncoder().encode(settings))
+            body: deflateSync(new TextEncoder().encode(JSON.stringify({ ...oldSettings, ...settings })))
         });
 
         if (!res.ok) {
