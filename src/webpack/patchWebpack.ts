@@ -80,6 +80,7 @@ Object.defineProperty(Function.prototype, "O", {
 
                     const originalCallback = callback;
                     callback = function () {
+                        logger.info("Patched app initialize callback invoked, grabbing reference to WebpackRequire and running beforeInitListeners");
                         _initWebpack(wreq);
 
                         for (const beforeInitListener of beforeInitListeners) {
