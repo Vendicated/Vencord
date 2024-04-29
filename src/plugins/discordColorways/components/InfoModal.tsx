@@ -19,7 +19,7 @@ import { Button, Clipboard, Forms, Text, Toasts, useState } from "@webpack/commo
 import { ColorwayCSS } from "..";
 import { generateCss, pureGradientBase } from "../css";
 import { Colorway } from "../types";
-import { colorToHex } from "../utils";
+import { colorToHex, stringToHex } from "../utils";
 import ThemePreviewCategory from "./ThemePreview";
 
 export default function ({
@@ -70,7 +70,7 @@ export default function ({
                             color={Button.Colors.PRIMARY}
                             size={Button.Sizes.MEDIUM}
                             look={Button.Looks.OUTLINED}
-                            style={{ flex: "0 0 auto" }}
+                            style={{ flex: "0 0 auto", maxWidth: "236px" }}
                             onClick={() => {
                                 openUserProfile(colorwayProps.authorID);
                             }}
@@ -83,17 +83,6 @@ export default function ({
                             look={Button.Looks.OUTLINED}
                             style={{ flex: "0 0 auto" }}
                             onClick={() => {
-                                const stringToHex = (str: string) => {
-                                    let hex = "";
-                                    for (let i = 0; i < str.length; i++) {
-                                        const charCode = str.charCodeAt(i);
-                                        const hexValue = charCode.toString(16);
-
-                                        // Pad with zeros to ensure two-digit representation
-                                        hex += hexValue.padStart(2, "0");
-                                    }
-                                    return hex;
-                                };
                                 const colorwayIDArray = `${colorwayProps.accent},${colorwayProps.primary},${colorwayProps.secondary},${colorwayProps.tertiary}`;
                                 const colorwayID = stringToHex(colorwayIDArray);
                                 Clipboard.copy(colorwayID);
