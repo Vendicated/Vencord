@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { CloseIcon, CopyIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { SettingsTab } from "@components/VencordSettings/shared";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import {
     Button,
     Clipboard,
@@ -86,18 +86,17 @@ export default function () {
                     onClick={() => {
                         openModal(props => {
                             var colorwaySource = "";
-                            return <ModalRoot {...props}>
+                            return <ModalRoot {...props} className="colorwaySourceModal">
                                 <ModalHeader>
                                     <Text variant="heading-lg/semibold" tag="h1">
                                         Add a source:
                                     </Text>
                                 </ModalHeader>
-                                <ModalContent>
-                                    <TextInput
-                                        placeholder="Enter a valid URL..."
-                                        onChange={e => colorwaySource = e}
-                                    />
-                                </ModalContent>
+                                <TextInput
+                                    placeholder="Enter a valid URL..."
+                                    onChange={e => colorwaySource = e}
+                                    style={{ margin: "8px", width: "calc(100% - 16px)" }}
+                                />
                                 <ModalFooter>
                                     <Button
                                         style={{ marginLeft: 8 }}

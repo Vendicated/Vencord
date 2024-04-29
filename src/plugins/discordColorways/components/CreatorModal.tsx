@@ -16,8 +16,6 @@ import {
 import {
     Button,
     Forms,
-    ScrollerThin,
-    Switch,
     Text,
     TextInput,
     useEffect,
@@ -27,9 +25,10 @@ import {
 
 import { ColorPicker } from "..";
 import { knownThemeVars } from "../constants";
-import { generateCss, getPreset } from "../css";
+import { generateCss, getPreset, gradientPresetIds, pureGradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex, getHex, hexToString } from "../utils";
+import ColorwayCreatorSettingsModal from "./ColorwayCreatorSettingsModal";
 import ConflictingColorsModal from "./ConflictingColorsModal";
 import InputColorwayIdModal from "./InputColorwayIdModal";
 import ThemePreviewCategory from "./ThemePreview";
@@ -49,10 +48,8 @@ export default function ({
     const [colorwayName, setColorwayName] = useState<string>("");
     const [tintedText, setTintedText] = useState<boolean>(true);
     const [discordSaturation, setDiscordSaturation] = useState<boolean>(true);
-    const [collapsedSettings, setCollapsedSettings] = useState<boolean>(true);
-    const [collapsedPresets, setCollapsedPresets] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
-    const [presetColorArray, setPresetColorArray] = useState<string[]>(["primary", "secondary", "tertiary", "accent"]);
+    const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
 
     const colorProps = {
         accent: {
@@ -122,7 +119,7 @@ export default function ({
                     onChange={setColorwayName}
                 />
                 <div className="colorwaysCreator-settingCat">
-                    <Forms.FormTitle style={{ marginBottom: 0, paddingLeft: "8px" }}>
+                    <Forms.FormTitle style={{ marginBottom: "0" }}>
                         Colors:
                     </Forms.FormTitle>
                     <div className="colorwayCreator-colorPreviews">
@@ -142,61 +139,38 @@ export default function ({
                         })}
                     </div>
                 </div>
-                <div className={`colorwaysCreator-settingCat${collapsedSettings ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
-                    <div
-                        className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                        onClick={() => setCollapsedSettings(!collapsedSettings)}>
-                        <Forms.FormTitle style={{ marginBottom: 0 }}>Settings</Forms.FormTitle>
-                        <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
-                            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
-                        </svg>
-                    </div>
-                    <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList" paddingFix>
-                        <div className="colorwaysCreator-settingItm" onClick={() => setTintedText(!tintedText)}>
-                            <Text variant="eyebrow" tag="h5">Use colored text</Text>
-                            <Switch value={tintedText} onChange={setTintedText} hideBorder={true} style={{ marginBottom: 0 }} />
-                        </div>
-                        <div className="colorwaysCreator-settingItm" onClick={() => setDiscordSaturation(!discordSaturation)}>
-                            <Text variant="eyebrow" tag="h5">Use Discord's saturation</Text>
-                            <Switch value={discordSaturation} onChange={setDiscordSaturation} hideBorder={true} style={{ marginBottom: 0 }} />
-                        </div>
-                    </ScrollerThin>
+                <div
+                    className="colorwaysCreator-setting"
+                    onClick={() => openModal((props: ModalProps) => <ColorwayCreatorSettingsModal
+                        modalProps={props}
+                        hasDiscordSaturation={discordSaturation}
+                        hasTintedText={tintedText}
+                        presetId={preset}
+                        onSettings={({ presetId, tintedText, discordSaturation }) => {
+                            setPreset(presetId);
+                            setPresetColorArray(getPreset()[presetId].colors);
+                            setDiscordSaturation(discordSaturation);
+                            setTintedText(tintedText);
+                        }} />)}>
+                    <Forms.FormTitle style={{ marginBottom: 0 }}>Settings & Presets</Forms.FormTitle>
+                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" style={{ rotate: "-90deg" }}>
+                        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
+                    </svg>
                 </div>
-                <div className={`colorwaysCreator-settingCat${collapsedPresets ? " colorwaysCreator-settingCat-collapsed" : ""}`}>
-                    <div
-                        className="colorwaysCreator-settingItm colorwaysCreator-settingHeader"
-                        onClick={() => setCollapsedPresets(!collapsedPresets)}>
-                        <Forms.FormTitle style={{ marginBottom: 0 }}>Presets</Forms.FormTitle>
-                        <svg className="expand-3Nh1P5 transition-30IQBn directionDown-2w0MZz" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img">
-                            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
-                        </svg>
-                    </div>
-                    <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList">
-                        <div className="colorwaysCreator-settingItm colorwaysCreator-preset" onClick={() => {
-                            setPreset("default");
-                            setPresetColorArray(["primary", "secondary", "tertiary", "accent"]);
-                        }}>
-                            <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                {preset === "default" && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
-                            </svg>
-                            <Text variant="eyebrow" tag="h5">Default</Text>
-                        </div>
-                        {Object.values(getPreset()).map(pre => {
-                            return <div className="colorwaysCreator-settingItm colorwaysCreator-preset" onClick={() => {
-                                setPreset(pre.id);
-                                setPresetColorArray(pre.colors);
-                            }}>
-                                <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                                    {preset === pre.id && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
-                                </svg>
-                                <Text variant="eyebrow" tag="h5">{pre.name}</Text>
-                            </div>;
-                        })}
-                    </ScrollerThin>
-                </div>
-                <ThemePreviewCategory isCollapsed={false} accent={"#" + accentColor} primary={"#" + primaryColor} secondary={"#" + secondaryColor} tertiary={"#" + tertiaryColor} />
+                <ThemePreviewCategory
+                    isCollapsed={false}
+                    accent={"#" + accentColor}
+                    primary={"#" + primaryColor}
+                    secondary={"#" + secondaryColor}
+                    tertiary={"#" + tertiaryColor}
+                    noContainer
+                    previewCSS={gradientPresetIds.includes(getPreset()[preset].id) ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview-wrapper {--gradient-theme-bg: linear-gradient(${(getPreset(
+                        primaryColor,
+                        secondaryColor,
+                        tertiaryColor,
+                        accentColor
+                    )[preset].preset(discordSaturation) as { full: string, base: string; }).base})}` : ""}
+                />
             </ModalContent>
             <ModalFooter>
                 <Button
@@ -216,7 +190,7 @@ export default function ({
                                 discordSaturation
                             );
                         } else {
-                            (getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2") ?
+                            gradientPresetIds.includes(getPreset()[preset].id) ?
                                 customColorwayCSS = getPreset(
                                     primaryColor,
                                     secondaryColor,
@@ -239,8 +213,8 @@ export default function ({
                             colors: presetColorArray,
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
-                            isGradient: getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2",
-                            linearGradient: (getPreset()[preset].id === "gradientType1" || getPreset()[preset].id === "gradientType2") ? getPreset(
+                            isGradient: gradientPresetIds.includes(getPreset()[preset].id),
+                            linearGradient: gradientPresetIds.includes(getPreset()[preset].id) ? getPreset(
                                 primaryColor,
                                 secondaryColor,
                                 tertiaryColor,

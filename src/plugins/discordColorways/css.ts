@@ -291,67 +291,67 @@ const BrandLightDiffs = {
 };
 
 export const pureGradientBase = `
-.theme-dark :is(.colorwaysPreview-modal, .colorwaysPreview) {
-    --bg-overlay-color: 0 0 0;
-    --bg-overlay-color-inverse: 255 255 255;
-    --bg-overlay-opacity-1: 0.85;
-    --bg-overlay-opacity-2: 0.8;
-    --bg-overlay-opacity-3: 0.7;
-    --bg-overlay-opacity-4: 0.5;
-    --bg-overlay-opacity-5: 0.4;
-    --bg-overlay-opacity-6: 0.1;
-    --bg-overlay-opacity-hover: 0.5;
-    --bg-overlay-opacity-hover-inverse: 0.08;
-    --bg-overlay-opacity-active: 0.45;
-    --bg-overlay-opacity-active-inverse: 0.1;
-    --bg-overlay-opacity-selected: 0.4;
-    --bg-overlay-opacity-selected-inverse: 0.15;
-    --bg-overlay-opacity-chat: 0.8;
-    --bg-overlay-opacity-home: 0.85;
-    --bg-overlay-opacity-home-card: 0.8;
-    --bg-overlay-opacity-app-frame: var(--bg-overlay-opacity-4);
-    --bg-guild-button: rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6));
-    --bg-secondary-alt: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-3)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-3))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-chat-header: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-2)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-2))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+.theme-dark :is(.colorwaysPreview-modal, .colorwaysPreview-wrapper) {
+    --dc-overlay-color: 0 0 0;
+    --dc-overlay-color-inverse: 255 255 255;
+    --dc-overlay-opacity-1: 0.85;
+    --dc-overlay-opacity-2: 0.8;
+    --dc-overlay-opacity-3: 0.7;
+    --dc-overlay-opacity-4: 0.5;
+    --dc-overlay-opacity-5: 0.4;
+    --dc-overlay-opacity-6: 0.1;
+    --dc-overlay-opacity-hover: 0.5;
+    --dc-overlay-opacity-hover-inverse: 0.08;
+    --dc-overlay-opacity-active: 0.45;
+    --dc-overlay-opacity-active-inverse: 0.1;
+    --dc-overlay-opacity-selected: 0.4;
+    --dc-overlay-opacity-selected-inverse: 0.15;
+    --dc-overlay-opacity-chat: 0.8;
+    --dc-overlay-opacity-home: 0.85;
+    --dc-overlay-opacity-home-card: 0.8;
+    --dc-overlay-opacity-app-frame: var(--dc-overlay-opacity-4);
+    --dc-guild-button: rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-6));
+    --dc-secondary-alt: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-3)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-3))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-chat-header: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-2)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-2))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
 }
-.theme-light :is(.colorwaysPreview-modal, .colorwaysPreview) {
-    --bg-overlay-color: 255 255 255;
-    --bg-overlay-color-inverse: 0 0 0;
-    --bg-overlay-opacity-1: 0.9;
-    --bg-overlay-opacity-2: 0.8;
-    --bg-overlay-opacity-3: 0.7;
-    --bg-overlay-opacity-4: 0.6;
-    --bg-overlay-opacity-5: 0.3;
-    --bg-overlay-opacity-6: 0.15;
-    --bg-overlay-opacity-hover: 0.7;
-    --bg-overlay-opacity-hover-inverse: 0.02;
-    --bg-overlay-opacity-active: 0.65;
-    --bg-overlay-opacity-active-inverse: 0.03;
-    --bg-overlay-opacity-selected: 0.6;
-    --bg-overlay-opacity-selected-inverse: 0.04;
-    --bg-overlay-opacity-chat: 0.9;
-    --bg-overlay-opacity-home: 0.7;
-    --bg-overlay-opacity-home-card: 0.9;
-    --bg-overlay-opacity-app-frame: var(--bg-overlay-opacity-5);
-    --bg-guild-button: rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-3));
-    --bg-secondary-alt: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-chat-header: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+.theme-light :is(.colorwaysPreview-modal, .colorwaysPreview-wrapper) {
+    --dc-overlay-color: 255 255 255;
+    --dc-overlay-color-inverse: 0 0 0;
+    --dc-overlay-opacity-1: 0.9;
+    --dc-overlay-opacity-2: 0.8;
+    --dc-overlay-opacity-3: 0.7;
+    --dc-overlay-opacity-4: 0.6;
+    --dc-overlay-opacity-5: 0.3;
+    --dc-overlay-opacity-6: 0.15;
+    --dc-overlay-opacity-hover: 0.7;
+    --dc-overlay-opacity-hover-inverse: 0.02;
+    --dc-overlay-opacity-active: 0.65;
+    --dc-overlay-opacity-active-inverse: 0.03;
+    --dc-overlay-opacity-selected: 0.6;
+    --dc-overlay-opacity-selected-inverse: 0.04;
+    --dc-overlay-opacity-chat: 0.9;
+    --dc-overlay-opacity-home: 0.7;
+    --dc-overlay-opacity-home-card: 0.9;
+    --dc-overlay-opacity-app-frame: var(--dc-overlay-opacity-5);
+    --dc-guild-button: rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-3));
+    --dc-secondary-alt: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-chat-header: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
 }
 .colorwaysPreview-modal,
-.colorwaysPreview {
-    --bg-overlay-1: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-2: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-2)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-2))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-3: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-3)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-3))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-4: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-4)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-4))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-5: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-5)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-5))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-6: linear-gradient(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6)),rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-hover: linear-gradient(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-hover-inverse)),rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-hover-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-hover)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-hover))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-active: linear-gradient(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-active-inverse)),rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-active-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-active)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-active))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-selected: linear-gradient(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-selected-inverse)),rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-selected-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-selected)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-selected))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-chat: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-chat)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-chat))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-home: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-home)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-home))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-home-card: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-home-card)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-home-card))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
-    --bg-overlay-app-frame: linear-gradient(rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-app-frame)),rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-app-frame))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+.colorwaysPreview-wrapper {
+    --dc-overlay-1: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-1))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-2: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-2)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-2))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-3: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-3)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-3))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-4: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-4)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-4))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-5: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-5)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-5))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-6: linear-gradient(rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-6)),rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-6))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-hover: linear-gradient(rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-hover-inverse)),rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-hover-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-hover)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-hover))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-active: linear-gradient(rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-active-inverse)),rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-active-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-active)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-active))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-selected: linear-gradient(rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-selected-inverse)),rgb(var(--dc-overlay-color-inverse)/var(--dc-overlay-opacity-selected-inverse))) fixed 0 0/cover,linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-selected)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-selected))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-chat: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-chat)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-chat))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-home: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-home)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-home))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-home-card: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-home-card)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-home-card))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
+    --dc-overlay-app-frame: linear-gradient(rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-app-frame)),rgb(var(--dc-overlay-color)/var(--dc-overlay-opacity-app-frame))) fixed 0 0/cover,var(--gradient-theme-bg) fixed 0 0/cover;
 }`;
 
 
@@ -669,6 +669,14 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
 }`;
     }
 
+    function cyan2(discordSaturation = false) {
+        return `:root:root {
+    --cyan-accent-color: ${"#" + accentColor};
+    --cyan-background-primary: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%/60%);
+    --cyan-second-layer: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%/60%);
+}`;
+    }
+
     function virtualBoy(discordSaturation = false) {
         return `:root:root {
     --VBaccent: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${HexToHSL("#" + accentColor)[2]}%;
@@ -789,17 +797,29 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
     }
 
     return {
+        default: {
+            name: "Default",
+            preset: generateCss,
+            id: "default",
+            colors: ["accent", "primary", "secondary", "tertiary"]
+        },
         cyan: {
             name: "Cyan",
             preset: cyan,
             id: "cyan",
-            colors: ["primary", "secondary", "accent"]
+            colors: ["accent", "primary", "secondary"]
+        },
+        cyan2: {
+            name: "Cyan 2",
+            preset: cyan2,
+            id: "cyan2",
+            colors: ["accent", "primary", "secondary"]
         },
         virtualBoy: {
             name: "Virtual Boy",
             preset: virtualBoy,
             id: "virtualBoy",
-            colors: ["tertiary", "accent"]
+            colors: ["accent", "tertiary"]
         },
         modular: {
             name: "Modular",
@@ -811,19 +831,19 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
             name: "Solana",
             preset: solana,
             id: "solana",
-            colors: ["primary", "accent"]
+            colors: ["accent", "primary"]
         },
         gradientType1: {
             name: "Gradient Type 1",
             preset: gradientType1,
             id: "gradientType1",
-            colors: ["primary", "secondary", "tertiary", "accent"]
+            colors: ["accent", "primary", "secondary", "tertiary"]
         },
         gradientType2: {
             name: "Gradient Type 2",
             preset: gradientType2,
             id: "gradientType2",
-            colors: ["primary", "secondary", "accent"]
+            colors: ["accent", "primary", "secondary"]
         },
         hueRotation: {
             name: "Hue Rotation",
@@ -839,3 +859,8 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
         }
     };
 }
+
+export const gradientPresetIds = [
+    "gradientType1",
+    "gradientType2"
+];
