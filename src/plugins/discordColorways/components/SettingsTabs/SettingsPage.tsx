@@ -10,6 +10,7 @@ import { CloseIcon, CopyIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { findByProps } from "@webpack";
 import {
     Button,
     Clipboard,
@@ -34,6 +35,8 @@ export default function () {
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<string[]>();
     const [colorsButtonVisibility, setColorsButtonVisibility] = useState<boolean>(false);
     const [isButtonThin, setIsButtonThin] = useState<boolean>(false);
+
+    const { item: radioBarItem, itemFilled: radioBarItemFilled } = findByProps("radioBar");
 
     async function loadUI() {
         const colorwaySourceFiles = await DataStore.get(
@@ -145,8 +148,8 @@ export default function () {
                     Add a source...
                 </Button>
             </Flex>
-            <Flex flexDirection="column">
-                {colorwaySourceFiles?.map((colorwaySourceFile: string) => <div className="colorwaysSettings-colorwaySource">
+            <Flex flexDirection="column" style={{ gap: "0" }}>
+                {colorwaySourceFiles?.map((colorwaySourceFile: string) => <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`}>
                     {knownColorwaySources.find(o => o.url === colorwaySourceFile) ? <div className="hoverRoll">
                         <Text className="colorwaysSettings-colorwaySourceLabel hoverRoll_normal">
                             {knownColorwaySources.find(o => o.url === colorwaySourceFile)!.name} {colorwaySourceFile === defaultColorwaySource && <div className="colorways-badge">DEFAULT</div>}

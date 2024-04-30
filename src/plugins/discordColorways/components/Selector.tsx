@@ -335,25 +335,30 @@ export default function ({
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
                             onClick={async () => {
+                                const [
+                                    activeAutoPreset
+                                ] = await DataStore.getMany([
+                                    "activeAutoPreset"
+                                ]);
                                 if (currentColorway === "Auto") {
                                     DataStore.set("actveColorwayID", null);
                                     DataStore.set("actveColorway", null);
                                     setCurrentColorway("");
                                     ColorwayCSS.remove();
                                 } else {
-                                    if (!await DataStore.get("activeAutoPreset")) {
+                                    if (!activeAutoPreset) {
                                         openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId="" modalProps={props} onChange={autoPresetId => {
                                             const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
-                                            DataStore.set("activeColorway", demandedColorway);
-                                            DataStore.set("activeColorwayID", "Auto");
+                                            DataStore.set("actveColorwayID", "Auto");
+                                            DataStore.set("actveColorway", demandedColorway);
                                             ColorwayCSS.set(demandedColorway);
                                             setCurrentColorway("Auto");
                                         }} />);
                                     } else {
-                                        const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[await DataStore.get("activeAutoPreset")].preset();
-                                        DataStore.set("activeColorway", demandedColorway);
-                                        DataStore.set("activeColorwayID", "Auto");
-                                        ColorwayCSS.set(demandedColorway);
+                                        const autoColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[activeAutoPreset].preset();
+                                        DataStore.set("actveColorwayID", "Auto");
+                                        DataStore.set("actveColorway", autoColorway);
+                                        ColorwayCSS.set(autoColorway);
                                         setCurrentColorway("Auto");
                                     }
                                 }
@@ -367,7 +372,7 @@ export default function ({
                                     openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
                                         if (currentColorway === "Auto") {
                                             const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
-                                            DataStore.set("activeColorway", demandedColorway);
+                                            DataStore.set("actveColorway", demandedColorway);
                                             ColorwayCSS.set(demandedColorway);
                                             setCurrentColorway("Auto");
                                         }
