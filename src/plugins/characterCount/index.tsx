@@ -49,8 +49,16 @@ export default definePlugin({
                 match: /(\?\(.{0,30}?jsx\)).{0,100}?,({.{0,100}?showRemainingCharsAfterCount.{0,100}?})/,
                 replace: "$1($self.CharacterCount,$2"
             }
+        },
+        {
+            find: "slateContainer)",
+            replacement: {
+                match: /className:.{0,50}?\(\).{0,50}?\.slateContainer/,
+                replace: "$&,$self.chatInputClass"
+            }
         }
     ],
+    chatInputClass: cl("chat-input"),
     CharacterCount: function ({ textValue, type }: CharacterCountProps) {
         const msgLength = textValue.length;
 

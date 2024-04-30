@@ -1,3 +1,10 @@
 .vc-char-count-text {
-    margin-bottom: -30px;
+    /* Though these are odd measures I think it's the best you can get without it looking either too close to the buttons or too close to the border */
+    margin-right: -4px;
+    margin-bottom: -8px;
+    font-size: 14px;
+}
+
+.vc-char-count-chat-input {
+    min-height: 48px;
 }
