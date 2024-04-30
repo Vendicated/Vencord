@@ -23,7 +23,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Alerts, Menu, Parser, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
@@ -74,13 +73,6 @@ export default definePlugin({
     async start() {
         const s = settings.store;
         const { lastReviewId, notifyReviews } = s;
-
-        const legacy = s as any as { token?: string; };
-        if (legacy.token) {
-            await updateAuth({ token: legacy.token });
-            legacy.token = undefined;
-            new Logger("ReviewDB").info("Migrated legacy settings");
-        }
 
         await initAuth();
 

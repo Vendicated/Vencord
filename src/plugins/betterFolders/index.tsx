@@ -209,7 +209,7 @@ export default definePlugin({
             predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 // Close all folders when clicking the home button
-                match: /(?<=onClick:\(\)=>{)(?=.{0,200}"discodo")/,
+                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
                 replace: "$self.closeFolders();"
             }
         }
