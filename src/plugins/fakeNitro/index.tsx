@@ -933,7 +933,7 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const url = new URL(emoji.url);
+                const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
