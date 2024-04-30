@@ -26,7 +26,7 @@ import { join, relative } from "path";
 import { promisify } from "util";
 
 // wtf is this assert syntax
-import PackageJSON from "../../package.json" assert { type: "json" };
+import PackageJSON from "../../package.json" with { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
 
 export const VERSION = PackageJSON.version;
