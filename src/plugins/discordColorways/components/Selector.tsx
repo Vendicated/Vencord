@@ -30,9 +30,10 @@ import { ReactNode } from "react";
 
 import { ColorwayCSS } from "..";
 import { defaultColorwaySource, fallbackColorways } from "../constants";
-import { generateCss, gradientBase } from "../css";
+import { generateCss, getAutoPresets, gradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex } from "../utils";
+import AutoColorwaySelector from "./AutoColorwaySelector";
 import ColorPickerModal from "./ColorPicker";
 import CreatorModal from "./CreatorModal";
 import ColorwayInfoModal from "./InfoModal";
@@ -327,7 +328,61 @@ export default function ({
             <SelectorContent isSettings={isSettings}>
                 <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }} /></div>
                 <ScrollerThin style={{ maxHeight: "450px" }} className="ColorwaySelectorWrapper">
-                    {visibleColorwayArray.length === 0 &&
+                    {getComputedStyle(document.body).getPropertyValue("--os-accent-color") ? <Tooltip text="Auto">
+                        {({ onMouseEnter, onMouseLeave }) => <div
+                            className="discordColorway"
+                            id="colorway-Auto"
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={async () => {
+                                if (currentColorway === "Auto") {
+                                    DataStore.set("actveColorwayID", null);
+                                    DataStore.set("actveColorway", null);
+                                    setCurrentColorway("");
+                                    ColorwayCSS.remove();
+                                } else {
+                                    if (!await DataStore.get("activeAutoPreset")) {
+                                        openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId="" modalProps={props} onChange={autoPresetId => {
+                                            const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
+                                            DataStore.set("activeColorway", demandedColorway);
+                                            DataStore.set("activeColorwayID", "Auto");
+                                            ColorwayCSS.set(demandedColorway);
+                                            setCurrentColorway("Auto");
+                                        }} />);
+                                    } else {
+                                        const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[await DataStore.get("activeAutoPreset")].preset();
+                                        DataStore.set("activeColorway", demandedColorway);
+                                        DataStore.set("activeColorwayID", "Auto");
+                                        ColorwayCSS.set(demandedColorway);
+                                        setCurrentColorway("Auto");
+                                    }
+                                }
+                            }}
+                        >
+                            <div
+                                className="colorwayInfoIconContainer"
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    const activeAutoPreset = await DataStore.get("activeAutoPreset");
+                                    openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
+                                        if (currentColorway === "Auto") {
+                                            const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
+                                            DataStore.set("activeColorway", demandedColorway);
+                                            ColorwayCSS.set(demandedColorway);
+                                            setCurrentColorway("Auto");
+                                        }
+                                    }} />);
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" style={{ margin: "4px" }} viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M 21.2856,9.6 H 24 v 4.8 H 21.2868 C 20.9976,15.5172 20.52,16.5576 19.878,17.4768 L 21.6,19.2 19.2,21.6 17.478,19.8768 c -0.9216,0.642 -1.9596,1.1208 -3.078,1.4088 V 24 H 9.6 V 21.2856 C 8.4828,20.9976 7.4436,20.5188 6.5232,19.8768 L 4.8,21.6 2.4,19.2 4.1232,17.4768 C 3.4812,16.5588 3.0024,15.5184 2.7144,14.4 H 0 V 9.6 H 2.7144 C 3.0024,8.4816 3.48,7.4424 4.1232,6.5232 L 2.4,4.8 4.8,2.4 6.5232,4.1232 C 7.4424,3.48 8.4816,3.0024 9.6,2.7144 V 0 h 4.8 v 2.7132 c 1.1184,0.2892 2.1564,0.7668 3.078,1.4088 l 1.722,-1.7232 2.4,2.4 -1.7232,1.7244 c 0.642,0.9192 1.1208,1.9596 1.4088,3.0768 z M 12,16.8 c 2.65092,0 4.8,-2.14908 4.8,-4.8 0,-2.650968 -2.14908,-4.8 -4.8,-4.8 -2.650968,0 -4.8,2.149032 -4.8,4.8 0,2.65092 2.149032,4.8 4.8,4.8 z" />
+                                </svg>
+                            </div>
+                            <div className="discordColorwayPreviewColorContainer" style={{ backgroundColor: "var(--os-accent-color)" }} />
+                            {currentColorway === "Auto" && <SelectionCircle />}
+                        </div>}
+                    </Tooltip> : <></>}
+                    {visibleColorwayArray.length === 0 && !getComputedStyle(document.body).getPropertyValue("--os-accent-color") ?
                         <Forms.FormTitle
                             style={{
                                 marginBottom: 0,
@@ -336,7 +391,7 @@ export default function ({
                             }}
                         >
                             No colorways...
-                        </Forms.FormTitle>
+                        </Forms.FormTitle> : <></>
                     }
                     {["all", "official", "3rdparty", "custom"].includes(visibility) && (
                         visibleColorwayArray.map((color, ind) => {
@@ -362,11 +417,13 @@ export default function ({
                                                     const [
                                                         onDemandWays,
                                                         onDemandWaysTintedText,
-                                                        onDemandWaysDiscordSaturation
+                                                        onDemandWaysDiscordSaturation,
+                                                        onDemandWaysOsAccentColor
                                                     ] = await DataStore.getMany([
                                                         "onDemandWays",
                                                         "onDemandWaysTintedText",
-                                                        "onDemandWaysDiscordSaturation"
+                                                        "onDemandWaysDiscordSaturation",
+                                                        "onDemandWaysOsAccentColor"
                                                     ]);
                                                     if (currentColorway === color.name) {
                                                         DataStore.set("actveColorwayID", null);
@@ -380,10 +437,10 @@ export default function ({
                                                                 colorToHex(color.primary),
                                                                 colorToHex(color.secondary),
                                                                 colorToHex(color.tertiary),
-                                                                colorToHex(color.accent),
+                                                                colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent),
                                                                 onDemandWaysTintedText,
                                                                 onDemandWaysDiscordSaturation
-                                                            ) : gradientBase(colorToHex(color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
+                                                            ) : gradientBase(colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
                                                             DataStore.set("actveColorway", demandedColorway);
                                                             ColorwayCSS.set(demandedColorway);
                                                         } else {

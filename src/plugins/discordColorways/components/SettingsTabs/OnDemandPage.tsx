@@ -12,19 +12,25 @@ export default function () {
     const [onDemand, setOnDemand] = useState<boolean>(false);
     const [onDemandTinted, setOnDemandTinted] = useState<boolean>(false);
     const [onDemandDiscordSat, setOnDemandDiscordSat] = useState<boolean>(false);
+    const [onDemandOsAccent, setOnDemandOsAccent] = useState<boolean>(false);
     async function loadUI() {
         const [
             onDemandWays,
             onDemandWaysTintedText,
-            onDemandWaysDiscordSaturation
+            onDemandWaysDiscordSaturation,
+            onDemandWaysOsAccentColor
         ] = await DataStore.getMany([
             "onDemandWays",
             "onDemandWaysTintedText",
-            "onDemandWaysDiscordSaturation"
+            "onDemandWaysDiscordSaturation",
+            "onDemandWaysOsAccentColor"
         ]);
         setOnDemand(onDemandWays);
         setOnDemandTinted(onDemandWaysTintedText);
         setOnDemandDiscordSat(onDemandWaysDiscordSaturation);
+        if (getComputedStyle(document.body).getPropertyValue("--os-accent-color") !== "") {
+            setOnDemandOsAccent(onDemandWaysOsAccentColor);
+        }
     }
 
     const cached_loadUI = useCallback(loadUI, []);
@@ -54,7 +60,6 @@ export default function () {
             Use tinted text
         </Switch>
         <Switch
-            hideBorder
             value={onDemandDiscordSat}
             onChange={(v: boolean) => {
                 setOnDemandDiscordSat(v);
@@ -63,6 +68,17 @@ export default function () {
             disabled={!onDemand}
         >
             Use Discord's saturation
+        </Switch>
+        <Switch
+            hideBorder
+            value={onDemandOsAccent}
+            onChange={(v: boolean) => {
+                setOnDemandOsAccent(v);
+                DataStore.set("onDemandWaysOsAccentColor", v);
+            }}
+            disabled={!onDemand || !getComputedStyle(document.body).getPropertyValue("--os-accent-color")}
+        >
+            Use Operating System's Accent Color
         </Switch>
     </SettingsTab>;
 }

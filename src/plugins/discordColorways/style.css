@@ -919,26 +919,6 @@
     align-items: center;
 }
 
-.theme-dark .colorwaysSettings-colorwaySource {
-    background: var(--bg-overlay-3,var(--background-secondary));
-}
-
-.theme-light .colorwaysSettings-colorwaySource {
-    background: var(--bg-overlay-2,var(--background-secondary));
-}
-
-.colorwaysSettings-colorwaySource:hover {
-    background-color: var(--background-secondary-alt);
-}
-
-.theme-dark .colorwaysSettings-colorwaySource:hover {
-    background: var(--bg-overlay-1,var(--background-secondary-alt));
-}
-
-.theme-light .colorwaysSettings-colorwaySource:hover {
-    background: var(--bg-overlay-3,var(--background-secondary-alt));
-}
-
 .colorwaysSettings-modalRoot {
     min-width: 520px;
 }
@@ -1203,8 +1183,8 @@
 
 .dc-colorway-management::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--dc-settings-svg) center/contain no-repeat !important;
-    mask: var(--dc-settings-svg) center/contain no-repeat !important
+    -webkit-mask: var(--si-developeroptions) center/contain no-repeat !important;
+    mask: var(--si-developeroptions) center/contain no-repeat !important
 }
 
 .colorwaySourceModal {
@@ -1218,4 +1198,22 @@
 
 .colorwaySelector-sourceSelect {
     width: fit-content !important;
+}
+
+.dc-info-card {
+    border-radius: 5px;
+    border: 1px solid var(--blue-345);
+    padding: 1em;
+    margin-bottom: 1em;
+    display: flex;
+    gap: 1em;
+    flex-direction: column;
+}
+
+.theme-dark .dc-info-card {
+    color: var(--white-500);
+}
+
+.theme-light .dc-info-card {
+    color: var(--black-500);
 }
