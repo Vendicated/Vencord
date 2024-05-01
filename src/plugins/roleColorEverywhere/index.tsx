@@ -94,7 +94,7 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.+?\.clanTag.+?"div",{/,
+                    match: /renderName\(\).{0,100}speaking:.+?(?=\[\i\.username\])/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
