@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import { Devs } from "@utils/constants";
-import { findByProps } from "@webpack";
-import definePlugin from "@utils/types";
-import { Text } from "@webpack/common";
 import { showNotification } from "@api/Notifications";
+import { Devs } from "@utils/constants";
 import { localStorage } from "@utils/localStorage";
+import definePlugin from "@utils/types";
+import { findByProps } from "@webpack";
+import { Text } from "@webpack/common";
 
 interface Stream {
     streamType: string;
@@ -41,9 +40,7 @@ function getLeftQuests() {
 
 let interval;
 let quest;
-let questHeroBarUrl;
 let ImagesConfig = {};
-const streamingUtils = findByProps("getCurrentUserActiveStream")
 
 export default definePlugin({
     name: "QuestCompleter",
@@ -51,7 +48,7 @@ export default definePlugin({
     authors: [Devs.HAPPY_ENDERMAN, Devs.SerStars],
     patches: [
         {
-            find: `"invite-button"`,
+            find: "\"invite-button\"",
             replacement: {
                 match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\.usePreventIdle\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
                 replace: "$1[$self.renderQuestButton(),...$2]})}}"
@@ -82,7 +79,7 @@ export default definePlugin({
         window.currentUserId = currentUserId; // this is here because discord will lag if we get the current user id every time
     },
     renderQuestButton() {
-        const currentStream: Stream | null = streamingUtils.getCurrentUserActiveStream();
+        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
         let shouldDisable = !!interval;
         const { Divider } = findByProps("Divider", "Icon");
 
@@ -104,7 +101,7 @@ export default definePlugin({
 
 
         const ToolTipButton = findByProps("CenterControlButton").default;
-        const QuestsIcon = () => (props) => (
+        const QuestsIcon = () => props => (
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -119,7 +116,7 @@ export default definePlugin({
             </svg>
 
         );
-                
+
         return (
             <>
                 <ToolTipButton
@@ -136,9 +133,9 @@ export default definePlugin({
         );
     },
     openCompleteQuestUI() {
-        // check if user is sharing screen and there is someone that is watching the stream 
+        // check if user is sharing screen and there is someone that is watching the stream
 
-        const currentStream: Stream | null = streamingUtils.getCurrentUserActiveStream();
+        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
         const encodedStreamKey = findByProps("encodeStreamKey").encodeStreamKey(currentStream);
         quest = getLeftQuests();
         ImagesConfig = {
@@ -147,17 +144,17 @@ export default definePlugin({
         };
 
         const heartBeat = async () => {
-            const HTTP = findByProps("HTTP", "getAPIBaseURL").HTTP; // rest api module
-            let res = findByProps("sendHeartbeat").sendHeartbeat({ questId: quest.id, streamKey: encodedStreamKey });
+            findByProps("HTTP", "getAPIBaseURL"); // rest api module
+            findByProps("sendHeartbeat").sendHeartbeat({ questId: quest.id, streamKey: encodedStreamKey });
         };
 
         heartBeat();
-        interval = setInterval(heartBeat, 120000); // send the heartbeat each 2 minutes
+        interval = setInterval(heartBeat, 60500); // send the heartbeat each minute
 
         return;
     },
     flux: {
-        STREAM_STOP: (event) => {
+        STREAM_STOP: event => {
             const stream: Stream = findByProps("encodeStreamKey").decodeStreamKey(event.streamKey);
             // we check if the stream is by the current user id so we do not clear the interval without any reason.
             if (stream.ownerId === window.currentUserId && interval) {
@@ -165,7 +162,7 @@ export default definePlugin({
                 interval = null;
             }
         },
-        QUESTS_SEND_HEARTBEAT_FAILURE: (event) => {
+        QUESTS_SEND_HEARTBEAT_FAILURE: () => {
             showNotification(
                 {
                     title: "Couldn't start Completing Quest",
@@ -176,7 +173,7 @@ export default definePlugin({
             clearInterval(interval);
             interval = null;
         },
-        QUESTS_SEND_HEARTBEAT_SUCCESS: (event) => {
+        QUESTS_SEND_HEARTBEAT_SUCCESS: event => {
 
             const a = event.userStatus.streamProgressSeconds * 100;
             const b = quest.config.streamDurationRequirementMinutes * 60;
@@ -186,17 +183,15 @@ export default definePlugin({
                 ...ImagesConfig
             });
 
-            if (event.userStatus.streamProgressSeconds === quest.config.streamDurationRequirementMinutes * 60) {
+            if (event.userStatus.streamProgressSeconds >= quest.config.streamDurationRequirementMinutes * 60) {
                 showNotification({
                     title: `${quest.config.applicationName} - Quests Completer`,
-                    body: `Quest Completed`,
+                    body: "Quest Completed",
                     ...ImagesConfig
                 });
                 clearInterval(interval);
                 interval = null;
             }
         }
-
     }
-
 });
