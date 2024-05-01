@@ -151,20 +151,25 @@ export default definePlugin({
         // OP 8 Request Guild Members allows 100 user IDs at a time
         const ignore = new Set(toRequest);
         const relationships = RelationshipStore.getRelationships();
-        const callback = ({ nonce, members }) => {
-            if (nonce !== sentNonce) return;
-            members.forEach(member => {
-                ignore.delete(member.user.id);
-            });
+        const callback = ({ chunks }) => {
+            for (const chunk of chunks) {
+                const { nonce, members } = chunk;
+                if (nonce !== sentNonce) return;
+                members.forEach(member => {
+                    ignore.delete(member.user.id);
+                });
 
-            nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
-            RelationshipStore.emitChange();
-            if (--count === 0) {
-                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK", callback);
+                nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
+                RelationshipStore.emitChange();
+                if (--count === 0) {
+                    // @ts-ignore
+                    FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                }
             }
         };
 
-        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", callback);
+        // @ts-ignore
+        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
         for (let i = 0; i < toRequest.length; i += 100) {
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
