@@ -217,7 +217,9 @@ export default definePlugin({
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channel
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
 
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
