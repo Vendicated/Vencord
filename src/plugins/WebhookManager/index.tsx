@@ -8,7 +8,6 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { PluginNative } from "@utils/types";
-import { RestAPI } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 const WMLogger = new Logger("WebhookManager");
@@ -32,18 +31,8 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                const res = await RestAPI.delete({ url: "" + findOption(option, "url") });
                 try {
-                    if (res.ok) {
-                        sendBotMessage(ctx.channel.id, {
-                            content: "Webhook deleted successfully."
-                        });
-                    }
-                    else {
-                        sendBotMessage(ctx.channel.id, {
-                            content: "There was an error with deleting the webhook, Error: " + res.status
-                        });
-                    }
+                    await fetch("" + findOption(option, "url"), { method: 'DELETE' }).then(() => sendBotMessage(ctx.channel.id, { content: "The webhook has deleted successfully." }));
                 }
                 catch (error) {
                     sendBotMessage(ctx.channel.id, {
@@ -70,17 +59,21 @@ export default definePlugin({
                     .then(response => {
                         WMLogger.info(JSON.stringify(response));
                         sendBotMessage(ctx.channel.id, {
-                            content: `This webhook was created by <@${response.user.id}>.`,
+                            content: `This webhook was created by ${response.user?.name}.`,
                             embeds: [
                                 {
-                                    // @ts-ignore
                                     title: "Webhook Information",
-                                    color: "#00007d",
+                                    color: "1323",
+                                    //@ts-ignore
                                     author: {
-                                        // @ts-ignore
-                                        icon_url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
                                         name: response.name,
                                         url: ""
+                                    },
+                                    thumbnail: {
+                                        url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                        proxyURL: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
+                                        height: 128,
+                                        width: 128
                                     },
                                     description: `
                                 Webhook ID: ${response.id}

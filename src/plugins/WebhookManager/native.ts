@@ -13,13 +13,7 @@ export function executeWebhook(_, url: string, body: object) {
         throw new Error("This URL is not a valid webhook.");
     }
 
-    const req = https.request(url,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        });
+    const req = https.request(url, { method: "POST", headers: { "Content-Type": "application/json", } });
     req.write(JSON.stringify(body));
     req.end();
 }
