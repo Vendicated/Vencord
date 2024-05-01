@@ -32,7 +32,7 @@ export default definePlugin({
             ],
             execute: async (option, ctx) => {
                 try {
-                    await fetch("" + findOption(option, "url"), { method: 'DELETE' }).then(() => sendBotMessage(ctx.channel.id, { content: "The webhook has deleted successfully." }));
+                    await fetch("" + findOption(option, "url"), { method: "DELETE" }).then(() => sendBotMessage(ctx.channel.id, { content: "The webhook has deleted successfully." }));
                 }
                 catch (error) {
                     sendBotMessage(ctx.channel.id, {
@@ -64,7 +64,7 @@ export default definePlugin({
                                 {
                                     title: "Webhook Information",
                                     color: "1323",
-                                    //@ts-ignore
+                                    // @ts-ignore
                                     author: {
                                         name: response.name,
                                         url: ""
