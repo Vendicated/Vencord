@@ -35,7 +35,7 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "VencordInstaller.exe";
+            return "VencordInstallerCli.exe";
         case "darwin":
             return "VencordInstaller.MacOS.zip";
         case "linux":
