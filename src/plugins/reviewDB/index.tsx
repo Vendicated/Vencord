@@ -47,13 +47,14 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild:
     );
 };
 
-const userContextPatch: NavContextMenuPatchCallback = (children, props: { user: User, onClose(): void; }) => {
+const userContextPatch: NavContextMenuPatchCallback = (children, props: { user?: User, onClose(): void; }) => {
+    if (!props.user) return;
     children.push(
         <Menu.MenuItem
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(props.user.id, props.user.username)}
+            action={() => openReviewsModal(props.user!.id, props.user!.username)}
         />
     );
 };
