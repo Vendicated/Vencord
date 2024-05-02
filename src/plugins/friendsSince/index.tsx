@@ -9,9 +9,8 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, RelationshipStore } from "@webpack/common";
+import { Heading, React, RelationshipStore, Text } from "@webpack/common";
 
-const { Heading, Text } = findByPropsLazy("Heading", "Text");
 const container = findByPropsLazy("memberSinceWrapper");
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
 const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");

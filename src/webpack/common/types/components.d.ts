@@ -20,23 +20,24 @@ import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttribute
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
-export type Heading = `h${1 | 2 | 3 | 4 | 5 | 6}`;
+export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
 export type Margins = Record<"marginTop16" | "marginTop8" | "marginBottom8" | "marginTop20" | "marginBottom20", string>;
 export type ButtonLooks = Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
 
 export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
     variant?: TextVariant;
-    tag?: "div" | "span" | "p" | "strong" | Heading;
+    tag?: "div" | "span" | "p" | "strong" | HeadingTag;
     selectable?: boolean;
     lineClamp?: number;
 }>;
 
 export type Text = ComponentType<TextProps>;
+export type Heading = ComponentType<TextProps>;
 
 export type FormTitle = ComponentType<HTMLProps<HTMLTitleElement> & PropsWithChildren<{
     /** default is h5 */
-    tag?: Heading;
+    tag?: HeadingTag;
     faded?: boolean;
     disabled?: boolean;
     required?: boolean;
@@ -45,7 +46,7 @@ export type FormTitle = ComponentType<HTMLProps<HTMLTitleElement> & PropsWithChi
 
 export type FormSection = ComponentType<PropsWithChildren<{
     /** default is h5 */
-    tag?: Heading;
+    tag?: HeadingTag;
     className?: string;
     titleClassName?: string;
     titleId?: string;
@@ -455,5 +456,5 @@ export type Avatar = ComponentType<PropsWithChildren<{
 }>>;
 
 type FocusLock = ComponentType<PropsWithChildren<{
-    containerRef: RefObject<HTMLElement>
+    containerRef: RefObject<HTMLElement>;
 }>>;
