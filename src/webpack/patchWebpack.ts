@@ -68,8 +68,6 @@ Object.defineProperty(Function.prototype, "O", {
 
             delete (Function.prototype as any).O;
 
-            const wreq = this;
-
             const originalOnChunksLoaded = onChunksLoaded;
             onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
                 if (callback != null && initCallbackRegex.test(callback.toString())) {
@@ -77,6 +75,8 @@ Object.defineProperty(Function.prototype, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
                     });
+
+                    const wreq = this as WebpackInstance;
 
                     const originalCallback = callback;
                     callback = function (this: unknown) {
