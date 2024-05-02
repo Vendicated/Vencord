@@ -64,7 +64,7 @@ export default definePlugin({
         return (
             <div>
                 {Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
-                {this.showDisableInvites(guildId) && <a onClick={() => {
+                {this.showDisableInvites(guildId) && <a role="button" onClick={() => {
                     setChecked(true);
                     this.disableInvites(guildId);
                 }}> Pause Indefinitely.</a>}
