@@ -68,20 +68,16 @@ export const filters = {
     }
 };
 
-export const subscriptions = new Map<FilterFn, CallbackFn>();
-export const listeners = new Set<CallbackFn>();
-
 export type CallbackFn = (mod: any, id: string) => void;
 
-export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
-    if (cache !== void 0) throw "no.";
+export const subscriptions = new Map<FilterFn, CallbackFn>();
+export const moduleListeners = new Set<CallbackFn>();
+export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
+export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
 
-    instance.push([[Symbol("Vencord")], {}, r => wreq = r]);
-    instance.pop();
-    if (!wreq) return false;
-
-    cache = wreq.c;
-    return true;
+export function _initWebpack(webpackRequire: WebpackInstance) {
+    wreq = webpackRequire;
+    cache = webpackRequire.c;
 }
 
 let devToolsOpen = false;
@@ -425,7 +421,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 
     const match = module.toString().match(canonicalizeMatch(matcher));
     if (!match) {
-        const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
+        const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
         // Strict behaviour in DevBuilds to fail early and make sure the issue is found
@@ -489,14 +485,6 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     }
 
     subscriptions.set(filter, callback);
-}
-
-export function addListener(callback: CallbackFn) {
-    listeners.add(callback);
-}
-
-export function removeListener(callback: CallbackFn) {
-    listeners.delete(callback);
 }
 
 /**
