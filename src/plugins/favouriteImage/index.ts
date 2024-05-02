@@ -10,12 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "FavouriteImage",
     description: "Allows you to favourite an image.",
-    authors: [Devs.VeygaX,
-    {
-        id: 457579346282938368n,
-        name: "Davri",
-    },
-    ],
+    authors: [Devs.VeygaX, Devs.Davri],
     start() {
         RegExp._test ??= RegExp.prototype.test;
         RegExp.prototype.test = function (str) { return RegExp._test.call(this.source === "\\.gif($|\\?|#)" ? /\.(gif|png|jpe?g|webp)($|\?|#)/i : this, str); };
