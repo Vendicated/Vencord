@@ -97,6 +97,7 @@ Object.defineProperty(Function.prototype, "O", {
                 originalOnChunksLoaded.apply(this, arguments as any);
             };
 
+            onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
         }
 
         Object.defineProperty(this, "O", {
