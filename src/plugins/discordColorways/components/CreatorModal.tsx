@@ -77,11 +77,8 @@ export default function ({
     };
 
     useEffect(() => {
-        const parsedID = colorwayID?.split("colorway:")[1];
-        if (parsedID) {
-            if (!parsedID) {
-                throw new Error("Please enter a Colorway ID");
-            } else if (!hexToString(parsedID).includes(",")) {
+        if (colorwayID) {
+            if (!hexToString(colorwayID).includes(",")) {
                 throw new Error("Invalid Colorway ID");
             } else {
                 const setColor = [
@@ -90,7 +87,7 @@ export default function ({
                     setSecondaryColor,
                     setTertiaryColor
                 ];
-                hexToString(parsedID).split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
+                hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
             }
         }
         (async function () {

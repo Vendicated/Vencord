@@ -6,7 +6,6 @@
 
 import * as DataStore from "@api/DataStore";
 import { Flex } from "@components/Flex";
-import { openUserProfile } from "@utils/discord";
 import {
     ModalCloseButton,
     ModalContent,
@@ -14,13 +13,16 @@ import {
     ModalProps,
     ModalRoot,
 } from "@utils/modal";
-import { Button, Clipboard, Forms, Text, Toasts, useState } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { Button, Clipboard, Forms, Text, Toasts, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { ColorwayCSS } from "..";
 import { generateCss, pureGradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex, stringToHex } from "../utils";
 import ThemePreviewCategory from "./ThemePreview";
+
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
 export default function ({
     modalProps,
@@ -40,6 +42,7 @@ export default function ({
         "tertiary",
     ];
     const [collapsedCSS, setCollapsedCSS] = useState(true);
+    const profile = useStateFromStores([UserStore], () => UserStore.getUser(colorwayProps.authorID));
     return <ModalRoot {...modalProps} className="colorwayCreator-modal">
         <ModalHeader>
             <Text variant="heading-lg/semibold" tag="h1" style={{ marginRight: "auto" }}>
@@ -66,17 +69,14 @@ export default function ({
                 <div className="colorwayInfo-row colorwayInfo-author">
                     <Flex style={{ gap: "10px", width: "100%", alignItems: "center" }}>
                         <Forms.FormTitle style={{ marginBottom: 0, width: "100%" }}>Properties:</Forms.FormTitle>
-                        <Button
-                            color={Button.Colors.PRIMARY}
-                            size={Button.Sizes.MEDIUM}
-                            look={Button.Looks.OUTLINED}
-                            style={{ flex: "0 0 auto", maxWidth: "236px" }}
-                            onClick={() => {
-                                openUserProfile(colorwayProps.authorID);
-                            }}
-                        >
-                            Author: {colorwayProps.author}
-                        </Button>
+                        <UserSummaryItem
+                            users={[profile]}
+                            guildId={undefined}
+                            renderIcon={false}
+                            showDefaultAvatarsForNullUsers
+                            size={32}
+                            showUserPopout
+                        />
                         <Button
                             color={Button.Colors.PRIMARY}
                             size={Button.Sizes.MEDIUM}
