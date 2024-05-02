@@ -120,21 +120,14 @@ export default definePlugin({
     },
 
     userHasBackground(userId: string) {
-        if (this.data === null) return false;
-        return this.data.users[userId] !== undefined;
+        return !!this.data?.users[userId];
     },
 
     getImageUrl(userId: string): string|null {
-        if (this.data == null) {
-            return null;
-        }
+        if (!this.userHasBackground(userId)) return null;
 
-        const etag = this.data.users[userId];
-        if (etag === undefined) {
-            return null;
-        }
-
-        const { endpoint, bucket, prefix } = this.data;
+        // We can assert that data exists because userHasBackground returned true
+        const { endpoint, bucket, prefix, users: { [userId]: etag } } = this.data!;
         return `${endpoint}/${bucket}/${prefix}${userId}?${etag}`;
     },
 
