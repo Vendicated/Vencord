@@ -9,10 +9,12 @@ import "./contributorModal.css";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
+import { pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { Forms, MaskedLink, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { Forms, MaskedLink, showToast, Tooltip, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
@@ -72,6 +74,8 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
+    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
+
     return (
         <>
             <div className={cl("header")}>
@@ -84,30 +88,48 @@ function ContributorModal({ user }: { user: User; }) {
 
                 <div className={cl("links")}>
                     {website && (
-                        <MaskedLink
-                            href={"https://" + website}
-                        >
-                            <WebsiteIcon />
-                        </MaskedLink>
+                        <Tooltip text={website}>
+                            {props => (
+                                <MaskedLink {...props} href={"https://" + website}>
+                                    <WebsiteIcon />
+                                </MaskedLink>
+                            )}
+                        </Tooltip>
                     )}
                     {githubName && (
-                        <MaskedLink href={`https://github.com/${githubName}`}>
-                            <GithubIcon />
-                        </MaskedLink>
+                        <Tooltip text={githubName}>
+                            {props => (
+                                <MaskedLink {...props} href={`https://github.com/${githubName}`}>
+                                    <GithubIcon />
+                                </MaskedLink>
+                            )}
+                        </Tooltip>
                     )}
                 </div>
             </div>
 
-            <div className={cl("plugins")}>
-                {plugins.map(p =>
-                    <PluginCard
-                        key={p.name}
-                        plugin={p}
-                        disabled={p.required ?? false}
-                        onRestartNeeded={() => showToast("Restart to apply changes!")}
-                    />
-                )}
-            </div>
+            {plugins.length ? (
+                <Forms.FormText>
+                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
+                </Forms.FormText>
+            ) : (
+                <Forms.FormText>
+                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
+                </Forms.FormText>
+            )}
+
+            {!!plugins.length && (
+                <div className={cl("plugins")}>
+                    {plugins.map(p =>
+                        <PluginCard
+                            key={p.name}
+                            plugin={p}
+                            disabled={p.required ?? false}
+                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                        />
+                    )}
+                </div>
+            )}
         </>
     );
 }

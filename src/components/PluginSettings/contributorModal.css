@@ -25,11 +25,13 @@
     display: block;
     position: absolute;
     height: 100%;
-    width: 16px;
+    width: 32px;
     background: var(--background-tertiary);
     z-index: -1;
-    left: -16px;
+    left: -32px;
     top: 0;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
 }
 
 .vc-author-modal-avatar {
@@ -55,4 +57,5 @@
 .vc-author-modal-plugins {
     display: grid;
     gap: 0.5em;
+    margin-top: 0.75em;
 }
