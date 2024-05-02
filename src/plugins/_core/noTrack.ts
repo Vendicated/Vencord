@@ -16,17 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    disableAnalytics: {
+        type: OptionType.BOOLEAN,
+        description: "Disable Discord's tracking (analytics/'science')",
+        default: true,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "NoTrack",
-    description: "Disable Discord's tracking ('science'), metrics and Sentry crash reporting",
+    description: "Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",
     authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
     required: true,
+
+    settings,
+
     patches: [
         {
             find: "AnalyticsActionHandlers.handle",
+            predicate: () => settings.store.disableAnalytics,
             replacement: {
                 match: /^.+$/,
                 replace: "()=>{}",
@@ -44,11 +58,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /this\._intervalId=/,
-                    replace: "this._intervalId=undefined&&"
+                    replace: "this._intervalId=void 0&&"
                 },
                 {
-                    match: /(increment\(\i\){)/,
-                    replace: "$1return;"
+                    match: /(?:increment|distribution)\(\i(?:,\i)?\){/g,
+                    replace: "$&return;"
                 }
             ]
         },
