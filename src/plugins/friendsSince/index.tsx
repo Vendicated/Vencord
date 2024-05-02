@@ -44,7 +44,7 @@ export default definePlugin({
 
         return (
             <div className={lastSection.section}>
-                <Heading variant="eyebrow" className={clydeMoreInfo.title}>
+                <Heading className={clydeMoreInfo.title}>
                     Friends Since
                 </Heading>
 
