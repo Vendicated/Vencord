@@ -11,6 +11,7 @@ export default definePlugin({
     name: "ScreenShareFix",
     authors: [Devs.Kaitlyn],
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients.",
+    required: true,
     patches: [
         {
             find: "x-google-max-bitrate",
