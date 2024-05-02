@@ -155,7 +155,7 @@ export default function ({
                         >
                             Copy
                         </Button>
-                        {discrimProps ? <Button
+                        <Button
                             color={Button.Colors.PRIMARY}
                             size={Button.Sizes.MEDIUM}
                             look={Button.Looks.OUTLINED}
@@ -165,13 +165,16 @@ export default function ({
                                 const customColorwaysArray: Colorway[] = [];
                                 customColorways.map((color: Colorway, i: number) => {
                                     if (customColorways.length > 0) {
-                                        if (color.name === colorwayProps.name) {
-                                            color["dc-import"] = generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true);
-                                            customColorwaysArray.push(color);
-                                        } else {
+                                        if (color.name !== (colorwayProps.name + " (Custom)") && color.name !== colorwayProps.name) {
                                             customColorwaysArray.push(color);
                                         }
                                         if (++i === customColorways.length) {
+                                            const newColorway = {
+                                                ...colorwayProps,
+                                                name: `${colorwayProps.name} (Custom)`,
+                                                "dc-import": generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true)
+                                            };
+                                            customColorwaysArray.push(newColorway);
                                             DataStore.set("customColorways", customColorwaysArray);
                                         }
                                         modalProps.onClose();
@@ -181,46 +184,7 @@ export default function ({
                             }}
                         >
                             Update
-                        </Button> : <Button
-                            color={Button.Colors.PRIMARY}
-                            size={Button.Sizes.MEDIUM}
-                            look={Button.Looks.OUTLINED}
-                            style={{ flex: "0 0 auto" }}
-                            onClick={async () => {
-                                const colorwaySourceFiles = await DataStore.get(
-                                    "colorwaySourceFiles"
-                                );
-                                const responses: Response[] = await Promise.all(
-                                    colorwaySourceFiles.map((url: string) =>
-                                        fetch(url)
-                                    )
-                                );
-                                const data = await Promise.all(
-                                    responses.map((res: Response) =>
-                                        res.json().then(dt => { return { colorways: dt.colorways, url: res.url }; }).catch(() => { return { colorways: [], url: res.url }; })
-                                    ));
-                                const colorways = data.flatMap(json => json.colorways);
-
-                                const customColorways = await DataStore.get("customColorways");
-                                const customColorwaysArray: Colorway[] = [];
-                                colorways.map((color: Colorway, i: number) => {
-                                    if (colorways.length > 0) {
-                                        if (color.name === colorwayProps.name) {
-                                            color.name += " (Custom)";
-                                            color["dc-import"] = generateCss(colorToHex(color.primary) || "313338", colorToHex(color.secondary) || "2b2d31", colorToHex(color.tertiary) || "1e1f22", colorToHex(color.accent) || "5865f2", true, true);
-                                            customColorwaysArray.push(color);
-                                        }
-                                        if (++i === colorways.length) {
-                                            DataStore.set("customColorways", [...customColorways, ...customColorwaysArray]);
-                                        }
-                                        modalProps.onClose();
-                                        loadUIProps();
-                                    }
-                                });
-                            }}
-                        >
-                            Update
-                        </Button>}
+                        </Button>
                     </Flex>
                     <Text
                         variant="code"
@@ -231,13 +195,10 @@ export default function ({
                     </Text>
                 </div>
                 <ThemePreviewCategory
-                    isCollapsed={true}
-                    className="colorwayInfo-lastCat"
                     accent={colorwayProps.accent}
                     primary={colorwayProps.primary}
                     secondary={colorwayProps.secondary}
                     tertiary={colorwayProps.tertiary}
-                    noContainer
                     previewCSS={colorwayProps.isGradient ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview-wrapper {--gradient-theme-bg: linear-gradient(${colorwayProps.linearGradient})}` : ""}
                 />
             </div>

@@ -16,10 +16,10 @@ import {
     Clipboard,
     FluxDispatcher,
     Forms,
+    ScrollerThin,
     Switch,
     Text,
     TextInput,
-    useCallback,
     useEffect,
     useState
 } from "@webpack/common";
@@ -38,42 +38,38 @@ export default function () {
 
     const { item: radioBarItem, itemFilled: radioBarItemFilled } = findByProps("radioBar");
 
-    async function loadUI() {
-        const colorwaySourceFiles = await DataStore.get(
-            "colorwaySourceFiles"
-        );
-        const responses: Response[] = await Promise.all(
-            colorwaySourceFiles.map((url: string) =>
-                fetch(url)
-            )
-        );
-        const data = await Promise.all(
-            responses.map((res: Response) =>
-                res.json().catch(() => { return { colorways: [] }; })
-            ));
-        const colorways = data.flatMap(json => json.colorways);
-        const [
-            customColorways,
-            colorwaySourceFiless,
-            showColorwaysButton,
-            useThinMenuButton
-        ] = await DataStore.getMany([
-            "customColorways",
-            "colorwaySourceFiles",
-            "showColorwaysButton",
-            "useThinMenuButton"
-        ]);
-        setColorways(colorways || fallbackColorways);
-        setCustomColorways(customColorways);
-        setColorwaySourceFiles(colorwaySourceFiless);
-        setColorsButtonVisibility(showColorwaysButton);
-        setIsButtonThin(useThinMenuButton);
-    }
-
-    const cached_loadUI = useCallback(loadUI, []);
-
     useEffect(() => {
-        cached_loadUI();
+        (async function () {
+            const colorwaySourceFiles = await DataStore.get(
+                "colorwaySourceFiles"
+            );
+            const responses: Response[] = await Promise.all(
+                colorwaySourceFiles.map((url: string) =>
+                    fetch(url)
+                )
+            );
+            const data = await Promise.all(
+                responses.map((res: Response) =>
+                    res.json().catch(() => { return { colorways: [] }; })
+                ));
+            const colorways = data.flatMap(json => json.colorways);
+            const [
+                customColorways,
+                colorwaySourceFiless,
+                showColorwaysButton,
+                useThinMenuButton
+            ] = await DataStore.getMany([
+                "customColorways",
+                "colorwaySourceFiles",
+                "showColorwaysButton",
+                "useThinMenuButton"
+            ]);
+            setColorways(colorways || fallbackColorways);
+            setCustomColorways(customColorways);
+            setColorwaySourceFiles(colorwaySourceFiless);
+            setColorsButtonVisibility(showColorwaysButton);
+            setIsButtonThin(useThinMenuButton);
+        })();
     }, []);
 
     return <SettingsTab title="Settings">
@@ -148,7 +144,10 @@ export default function () {
                     Add a source...
                 </Button>
             </Flex>
-            <Flex flexDirection="column" style={{ gap: "0" }}>
+            <ScrollerThin orientation="vertical" style={{ maxHeight: "250px" }} className="colorwaysSettings-sourceScroller">
+                {getComputedStyle(document.body).getPropertyValue("--os-accent-color") ? <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`}>
+                    <Text className="colorwaysSettings-colorwaySourceLabel">OS Accent Color <div className="colorways-badge">Built-In</div></Text>
+                </div> : <></>}
                 {colorwaySourceFiles?.map((colorwaySourceFile: string) => <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`}>
                     {knownColorwaySources.find(o => o.url === colorwaySourceFile) ? <div className="hoverRoll">
                         <Text className="colorwaysSettings-colorwaySourceLabel hoverRoll_normal">
@@ -192,7 +191,7 @@ export default function () {
                     </Button>
                 </div>
                 )}
-            </Flex>
+            </ScrollerThin>
             <Forms.FormDivider style={{ margin: "20px 0" }} />
             <Forms.FormTitle tag="h5">Quick Switch</Forms.FormTitle>
             <Switch

@@ -56,7 +56,7 @@ function SelectorContainer({ children, isSettings, modalProps }: { children: Rea
 
 function SelectorHeader({ children, isSettings }: { children: ReactNode, isSettings?: boolean; }) {
     if (!isSettings) {
-        return <ModalHeader>
+        return <ModalHeader className="colorwaySelectorModal-header">
             {children}
         </ModalHeader>;
     } else {

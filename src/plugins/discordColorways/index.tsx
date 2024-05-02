@@ -8,16 +8,19 @@ import * as DataStore from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
     Button,
+    Clipboard,
     Forms,
     SettingsRouter,
 } from "@webpack/common";
 import { Plugins } from "Vencord";
 
+import AutoColorwaySelector from "./components/AutoColorwaySelector";
 import ColorPickerModal from "./components/ColorPicker";
 import ColorwaysButton from "./components/ColorwaysButton";
 import CreatorModal from "./components/CreatorModal";
@@ -27,8 +30,10 @@ import OnDemandWaysPage from "./components/SettingsTabs/OnDemandPage";
 import SettingsPage from "./components/SettingsTabs/SettingsPage";
 import Spinner from "./components/Spinner";
 import { defaultColorwaySource } from "./constants";
+import { getAutoPresets } from "./css";
 import style from "./style.css?managed";
 import { ColorPickerProps } from "./types";
+import { colorToHex, hexToString } from "./utils";
 
 export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return <Spinner className="colorways-creator-module-warning" />;
@@ -92,8 +97,8 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.6.7.1",
-    creatorVersion: "1.19.5",
+    pluginVersion: "5.6.8",
+    creatorVersion: "1.19.6",
     toolboxActions: {
         "Change Colorway": () => openModal(props => <Selector modalProps={props} />),
         "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
@@ -101,6 +106,22 @@ export default definePlugin({
         "Open Settings": () => SettingsRouter.open("ColorwaysSettings"),
         "Open On-Demand Settings": () => SettingsRouter.open("ColorwaysOnDemand"),
         "Manage Colorways...": () => SettingsRouter.open("ColorwaysManagement"),
+        "Change Auto Colorway Preset": async () => {
+            const [
+                activeAutoPreset,
+                actveColorwayID
+            ] = await DataStore.getMany([
+                "activeAutoPreset",
+                "actveColorwayID"
+            ]);
+            openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
+                if (actveColorwayID === "Auto") {
+                    const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
+                    DataStore.set("actveColorway", demandedColorway);
+                    ColorwayCSS.set(demandedColorway);
+                }
+            }} />);
+        }
     },
     patches: [
         // Credits to Kyuuhachi for the BetterSettings plugin patches
@@ -210,6 +231,52 @@ export default definePlugin({
                     ));
                 }} size={Button.Sizes.SMALL} color={Button.Colors.PRIMARY}>Add this Colorway...</Button>;
             return null;
+        });
+        addAccessory("colorways-btn", props => {
+            if (String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)) {
+                const parsedID = String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)![0].split("colorway:")[1];
+                return <div className="colorwayMessage">
+                    <div className="discordColorwayPreviewColorContainer" style={{ width: "56px", height: "56px", marginRight: "16px" }}>
+                        {(() => {
+                            if (parsedID) {
+                                if (!parsedID) {
+                                    throw new Error("Please enter a Colorway ID");
+                                } else if (!hexToString(parsedID).includes(",")) {
+                                    throw new Error("Invalid Colorway ID");
+                                } else {
+                                    return hexToString(parsedID).split(/,#/).map((color: string) => <div className="discordColorwayPreviewColor" style={{ backgroundColor: `#${colorToHex(color)}` }} />);
+                                }
+                            } else return null;
+                        })()}
+                    </div>
+                    <div className="colorwayMessage-contents">
+                        <Forms.FormTitle>Found Colorway ID</Forms.FormTitle>
+                        <Flex>
+                            <Button
+                                onClick={() => openModal(modalProps => <CreatorModal
+                                    modalProps={modalProps}
+                                    colorwayID={String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)![0]}
+                                />)}
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.FILLED}
+                            >
+                                Add this Colorway...
+                            </Button>
+                            <Button
+                                onClick={() => Clipboard.copy(String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)![0])}
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.FILLED}
+                            >
+                                Copy Colorway ID
+                            </Button>
+                        </Flex>
+                    </div>
+                </div>;
+            } else {
+                return null;
+            }
         });
     },
     stop() {

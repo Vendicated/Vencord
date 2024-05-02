@@ -1217,3 +1217,33 @@
 .theme-light .dc-info-card {
     color: var(--black-500);
 }
+
+.colorwaysSettings-sourceScroller {
+    scrollbar-width: none;
+}
+
+.colorwaysSettings-sourceScroller::-webkit-scrollbar {
+    width: 0;
+}
+
+.colorwayMessage {
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 5px;
+    display: flex;
+}
+
+.colorwayMessage-contents {
+    display: flex;
+    flex-direction: column;
+}
+
+.theme-dark .colorwayMessage {
+    background: hsl(var(--primary-630-hsl)/60%);
+    border-color: hsl(var(--primary-630-hsl)/90%);
+}
+
+.theme-light .colorwayMessage {
+    background: hsl(var(--primary-100-hsl)/60%);
+    border-color: hsl(var(--primary-200-hsl)/30%);
+}

@@ -10,16 +10,19 @@ import { openModal } from "@utils/modal";
 import { FluxDispatcher, Text, Tooltip, useEffect, useState } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
+import { getAutoPresets } from "../css";
 import Selector from "./Selector";
 
 export default function () {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
     const [isThin, setIsThin] = useState<boolean>(false);
+    const [autoPreset, setAutoPreset] = useState<string>("hueRotation");
     useEffect(() => {
         (async function () {
             setVisibility(await DataStore.get("showColorwaysButton") as boolean);
             setIsThin(await DataStore.get("useThinMenuButton") as boolean);
+            setAutoPreset(await DataStore.get("activeAutoPreset") as string);
         })();
     });
 
@@ -32,7 +35,13 @@ export default function () {
     });
 
     return <Tooltip text={
-        !isThin ? <><span>Colorways</span><Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text></> : <span>{"Active Colorway: " + activeColorway}</span>
+        <>
+            {!isThin ? <>
+                <span>Colorways</span>
+                <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>
+            </> : <span>{"Active Colorway: " + activeColorway}</span>}
+            {activeColorway === "Auto" ? <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Auto Preset: " + (getAutoPresets()[autoPreset].name || "None")}</Text> : <></>}
+        </>
     } position="right" tooltipContentClassName="colorwaysBtn-tooltipContent"
     >
         {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className="ColorwaySelectorBtnContainer">
@@ -41,6 +50,7 @@ export default function () {
                 onMouseEnter={async () => {
                     onMouseEnter();
                     setActiveColorway(await DataStore.get("actveColorwayID") || "None");
+                    setAutoPreset(await DataStore.get("activeAutoPreset") as string);
                 }}
                 onMouseLeave={onMouseLeave}
                 onClick={() => {
