@@ -9,7 +9,8 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Heading, React, RelationshipStore, Text } from "@webpack/common";
+import { React, RelationshipStore } from "@webpack/common";
+const { Heading, Text } = findByPropsLazy("Heading", "Text");
 
 const container = findByPropsLazy("memberSinceWrapper");
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
@@ -44,7 +45,7 @@ export default definePlugin({
 
         return (
             <div className={lastSection.section}>
-                <Heading className={clydeMoreInfo.title}>
+                <Heading variant="eyebrow" className={clydeMoreInfo.title}>
                     Friends Since
                 </Heading>
 
