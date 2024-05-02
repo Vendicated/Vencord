@@ -8,10 +8,10 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "ScreenShareFix",
+    name: "WebScreenShareFixes",
     authors: [Devs.Kaitlyn],
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients.",
-    required: true,
+    enabledByDefault: true,
     patches: [
         {
             find: "x-google-max-bitrate",
