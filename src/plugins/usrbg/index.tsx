@@ -30,7 +30,7 @@ interface UsrbgApiReturn {
     endpoint: string
     bucket: string
     prefix: string
-    users: { [id: string]: string }
+    users: Record<string, string>
 }
 
 const settings = definePluginSettings({
@@ -53,7 +53,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.katlyn],
+    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
