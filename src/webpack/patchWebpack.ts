@@ -70,16 +70,16 @@ Object.defineProperty(Function.prototype, "O", {
 
             const wreq = this;
 
-            const originalOnChunksLoaded = onChunksLoaded.bind(this);
-            onChunksLoaded = function (result: any, chunkIds: string[], callback: () => any, priority: number) {
+            const originalOnChunksLoaded = onChunksLoaded;
+            onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
                 if (callback != null && initCallbackRegex.test(callback.toString())) {
-                    Object.defineProperty(wreq, "O", {
+                    Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
                     });
 
                     const originalCallback = callback;
-                    callback = function () {
+                    callback = function (this: unknown) {
                         logger.info("Patched initialize app callback invoked, initializing our internal references to WebpackRequire and running beforeInitListeners");
                         _initWebpack(wreq);
 
@@ -87,13 +87,14 @@ Object.defineProperty(Function.prototype, "O", {
                             beforeInitListener(wreq);
                         }
 
-                        originalCallback();
+                        originalCallback.apply(this, arguments as any);
                     };
 
                     callback.toString = originalCallback.toString.bind(originalCallback);
+                    arguments[2] = callback;
                 }
 
-                originalOnChunksLoaded(result, chunkIds, callback, priority);
+                originalOnChunksLoaded.apply(this, arguments as any);
             };
 
         }
@@ -171,7 +172,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         const patchedBy = new Set();
 
         const factory = factories[id] = function (module: any, exports: any, require: WebpackInstance) {
-            if (wreq == null) {
+            if (wreq == null && IS_DEV) {
                 if (!webpackNotInitializedLogged) {
                     webpackNotInitializedLogged = true;
                     logger.error("WebpackRequire was not initialized, running modules without patches instead.");
@@ -210,7 +211,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                 try {
                     callback(exports, id);
                 } catch (err) {
-                    logger.error("Error in Webpack module listener", err);
+                    logger.error("Error in Webpack module listener:\n", err, callback);
                 }
             }
 
@@ -224,7 +225,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         callback(exports.default, id);
                     }
                 } catch (err) {
-                    logger.error("Error while firing callback for Webpack subscription", err);
+                    logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
                 }
             }
         } as any as { toString: () => string, original: any, (...args: any[]): void; };
@@ -236,7 +237,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             try {
                 factoryListener(originalMod);
             } catch (err) {
-                logger.error("Error in Webpack factory listener", err);
+                logger.error("Error in Webpack factory listener:\n", err, factoryListener);
             }
         }
 
