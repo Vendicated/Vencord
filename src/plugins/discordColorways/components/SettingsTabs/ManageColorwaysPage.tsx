@@ -44,7 +44,7 @@ export default function () {
                             });
                             if (file) {
                                 try {
-                                    await DataStore.set("customColorways", JSON.parse(new TextDecoder().decode(file.data)));
+                                    await DataStore.set("customColorways", JSON.parse(new TextDecoder().decode(file.data)).colorways);
                                 } catch (err) {
                                     new Logger("DiscordColorways").error(err);
                                 }
@@ -56,7 +56,7 @@ export default function () {
                             const reader = new FileReader();
                             reader.onload = async () => {
                                 try {
-                                    await DataStore.set("customColorways", JSON.parse(reader.result as string));
+                                    await DataStore.set("customColorways", JSON.parse(reader.result as string).colorways);
                                 } catch (err) {
                                     new Logger("DiscordColorways").error(err);
                                 }
@@ -70,9 +70,9 @@ export default function () {
                     size={Button.Sizes.SMALL}
                     onClick={async () => {
                         if (IS_DISCORD_DESKTOP) {
-                            DiscordNative.fileManager.saveWithDialog(JSON.stringify(await DataStore.get("customColorways") as string), "colorways.json");
+                            DiscordNative.fileManager.saveWithDialog(JSON.stringify({ "colorways": await DataStore.get("customColorways") as string }), "colorways.json");
                         } else {
-                            saveFile(new File([JSON.stringify(await DataStore.get("customColorways") as string)], "colorways.json", { type: "application/json" }));
+                            saveFile(new File([JSON.stringify({ "colorways": await DataStore.get("customColorways") as string })], "colorways.json", { type: "application/json" }));
                         }
                     }}>
                     Export Colorways
