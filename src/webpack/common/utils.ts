@@ -26,6 +26,9 @@ export let FluxDispatcher: t.FluxDispatcher;
 
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
+    // Non import call to avoid circular dependency
+    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
         _resolveReady();
