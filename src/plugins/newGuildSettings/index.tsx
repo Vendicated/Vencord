@@ -100,7 +100,7 @@ export default definePlugin({
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role,
                 mute_scheduled_events: settings.store.events,
-                notify_highlights: settings.store.highlights ? 1 : 2
+                notify_highlights: settings.store.highlights ? 1 : 0
             });
         if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
             toggleShowAllChannels(guildId);
