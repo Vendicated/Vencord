@@ -37,6 +37,8 @@ export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch",
 
 export const { ComponentDispatch } = findByProps("ComponentDispatch", "ComponentDispatcher");
 
+export const Constants = findByProps("Endpoints");
+
 export const RestAPI = find<t.RestAPI>(filters.byProps("getAPIBaseURL"), m => m.HTTP ?? m);
 export const moment = findByProps<typeof import("moment")>("parseTwoDigitYear");
 
