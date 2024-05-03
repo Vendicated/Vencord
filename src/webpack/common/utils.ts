@@ -22,10 +22,7 @@ import type { Channel, User } from "discord-types/general";
 import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
-export const Constants = findByProps("Endpoints");
-
 export let FluxDispatcher: t.FluxDispatcher;
-
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
     // Non import call to avoid circular dependency
@@ -41,6 +38,8 @@ waitFor(["dispatch", "subscribe"], m => {
 export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
+
+export const Constants = proxyLazyWebpack(() => findByProps("Endpoints"));
 
 export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
     const mod = findByProps("getAPIBaseURL");
