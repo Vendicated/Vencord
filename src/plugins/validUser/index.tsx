@@ -21,9 +21,11 @@ import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
 import type { ComponentType, ReactNode } from "react";
 
+// LYING to the type checker here
+const { UserFlags }: { UserFlags: Record<string, number>; } = Constants;
 const badges: Record<string, ProfileBadge> = {
     "active_developer": { id: "active_developer", description: "Active Developer", icon: "6bdc42827a38498929a4920da12695d9", link: "https://support-dev.discord.com/hc/en-us/articles/10113997751447" },
     "bug_hunter_level_1": { id: "bug_hunter_level_1", description: "Discord Bug Hunter", icon: "2717692c7dca7289b35297368a940dd0", link: "https://support.discord.com/hc/en-us/articles/360046057772-Discord-Bugs" },
@@ -38,21 +40,6 @@ const badges: Record<string, ProfileBadge> = {
     "premium": { id: "premium", description: "Subscriber", icon: "2ba85e8026a8614b640c2837bcdfe21b", link: "https://discord.com/settings/premium" },
     "premium_early_supporter": { id: "early_supporter", description: "Early Supporter", icon: "7060786766c9c840eb3019e725d2b358", link: "https://discord.com/settings/premium" },
     "verified_developer": { id: "verified_developer", description: "Early Verified Bot Developer", icon: "6df5892e0f35b051f8b61eace34f4967" },
-};
-
-const UserFlags = {
-    STAFF: 1 << 0,
-    PARTNER: 1 << 1,
-    HYPESQUAD: 1 << 2,
-    BUG_HUNTER_LEVEL_1: 1 << 3,
-    HYPESQUAD_ONLINE_HOUSE_1: 1 << 6,
-    HYPESQUAD_ONLINE_HOUSE_2: 1 << 7,
-    HYPESQUAD_ONLINE_HOUSE_3: 1 << 8,
-    BUG_HUNTER_LEVEL_2: 1 << 14,
-    VERIFIED_DEVELOPER: 1 << 17,
-    CERTIFIED_MODERATOR: 1 << 18,
-    PREMIUM_EARLY_SUPPORTER: 1 << 19,
-    ACTIVE_DEVELOPER: 1 << 22,
 };
 
 const fetching = new Set<string>();
@@ -104,11 +91,10 @@ async function getUser(id: string) {
     );
 
     userObj = UserStore.getUser(id);
-    const fakeBadges: ProfileBadge[] = [];
-    for (const [key, value] of Object.entries(UserFlags)) {
-        if (userObj.hasFlag(value))
-            fakeBadges.push(badges[key.toLowerCase()]);
-    }
+    const fakeBadges: ProfileBadge[] = Object.entries(UserFlags)
+        .filter(entry => !isNaN(entry[1]))
+        .filter(entry => userObj.hasFlag(entry[1]))
+        .map(entry => badges[entry[0].toLowerCase()]);
     if (user.premium_type)
         fakeBadges.push(badges.premium);
 
