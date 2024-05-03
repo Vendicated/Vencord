@@ -61,7 +61,7 @@ body:
     id: crash-log
     attributes:
         label: Errors
-        description: Open the Developer Console with Ctrl/Cmd + Shift + i. On the top right click "Default levels", uncheck everything but don't uncheck "Errors" and paste them between the "```".
+        description: Open the Developer Console with Ctrl/Cmd + Shift + i. On the top right click "Default levels", uncheck everything but don't uncheck "Errors" and paste all of the errors between the "```".
         value: |
           ```
           Replace this text with your crash-log. Do not remove the backticks.
