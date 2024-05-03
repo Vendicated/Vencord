@@ -30,7 +30,6 @@ jobs:
             - name: Install dependencies
               run: |
                   pnpm install --frozen-lockfile
-                  pnpm add puppeteer
 
             - name: Install Google Chrome
               id: setup-chrome
