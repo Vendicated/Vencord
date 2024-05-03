@@ -14,10 +14,11 @@ export default definePlugin({
     authors: [Devs.AndrewDLO, Devs.FieryFlames],
     patches: [
         {
-            find: "call_ringing_beat\"",
+            find: '"call_ringing_beat"',
             replacement: {
-                match: /500===\i\(\)\.random\(1,1e3\)/,
-                replace: "true"
+                // FIXME Remove === alternative when it hits stable
+                match: /500(!==|===)\i\(\)\.random\(1,1e3\)/,
+                replace: (_, predicate) => predicate === "!==" ? "false" : "true",
             }
         },
     ],
