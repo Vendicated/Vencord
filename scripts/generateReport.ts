@@ -471,9 +471,13 @@ async function runtime(token: string) {
             }
         }
 
-        for (const [searchType, args] of [...Vencord.Webpack.webpackSearchHistory]) {
-            let method = searchType as string;
+        // Must evaluate the len outside of the loop, as the array will be modified by the find methods called inside of it
+        // This will avoid an infinite loop
+        const len = Vencord.Webpack.webpackSearchHistory.length;
+        for (let i = 0; i < len; i++) {
+            const [searchType, args] = Vencord.Webpack.webpackSearchHistory[i];
 
+            let method = searchType as string;
             if (searchType === "waitFor") method = "cacheFind";
 
             try {
