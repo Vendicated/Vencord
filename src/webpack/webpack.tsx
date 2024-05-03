@@ -498,6 +498,86 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
     return LazyComponent<T>(factory, attempts);
 }
 
+/**
+ * @deprecated Use {@link webpackDependantLazy} instead
+ * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
+ *
+ * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the factory is evaluated
+ * @param factory Factory returning the result
+ * @param attempts How many times to try to evaluate the factory before giving up
+ * @returns Result of factory function
+ */
+export const proxyLazyWebpack = webpackDependantLazy;
+
+/**
+ * @deprecated Use {@link webpackDependantLazyComponent} instead
+ * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
+ *
+ * A lazy component. The factory method is called on first render.
+ * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
+ * @returns Result of factory function
+ */
+export const LazyComponentWebpack = webpackDependantLazyComponent;
+
+/**
+ * @deprecated Use {@link find} instead
+ * Find the first module that matches the filter, lazily
+ */
+export const findLazy = find;
+
+/**
+ * @deprecated Use {@link findByProps} instead
+ * Find the first module that has the specified properties, lazily
+ */
+export const findByPropsLazy = findByProps;
+
+
+/**
+ * @deprecated Use {@link findByCode} instead
+ * Find the first function that includes all the given code, lazily
+ */
+export const findByCodeLazy = findByCode;
+
+/**
+ * @deprecated Use {@link findStore} instead
+ * Find a store by its displayName, lazily
+ */
+export const findStoreLazy = findStore;
+
+/**
+ * @deprecated Use {@link findComponent} instead
+ * Finds the first component that matches the filter, lazily.
+ */
+export const findComponentLazy = findComponent;
+
+/**
+ * @deprecated Use {@link findComponentByCode} instead
+ * Finds the first component that includes all the given code, lazily
+ */
+export const findComponentByCodeLazy = findComponentByCode;
+
+/**
+ * @deprecated Use {@link findExportedComponent} instead
+ * Finds the first component that is exported by the first prop name, lazily
+ */
+export const findExportedComponentLazy = findExportedComponent;
+
+/**
+ * @deprecated Use {@link cacheFindAll} instead
+ */
+export const findAll = cacheFindAll;
+
+/**
+ * @deprecated Use {@link cacheFindBulk} instead
+ * Same as {@link cacheFind} but in bulk
+ * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
+ *                  need it afterwards, pass a copy.
+ * @returns Array of results in the same order as the passed filters
+ */
+export const findBulk = cacheFindBulk;
+
 const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
 
 /**
