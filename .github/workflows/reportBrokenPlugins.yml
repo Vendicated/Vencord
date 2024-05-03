@@ -35,6 +35,8 @@ jobs:
             - name: Install Google Chrome
               id: setup-chrome
               uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
+              with:
+                chrome-version: stable
 
             - name: Build web
               run: pnpm buildWeb --standalone --dev
