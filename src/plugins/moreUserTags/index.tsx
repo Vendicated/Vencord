@@ -198,8 +198,7 @@ export default definePlugin({
             replacement: [
                 // make the tag show the right text
                 {
-                    // FIXME: Remove the BOT_TAG_BOT variant when the change arrives in stable
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.(?:APP_TAG|BOT_TAG_BOT)/,
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.APP_TAG/,
                     replace: (_, origSwitch, variant, tags, displayedText, strings) =>
                         `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
                 },
@@ -322,20 +321,19 @@ export default definePlugin({
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
-    // FIXME: Remove the BOT_TAG_BOT variants from strings when the change arrives in stable
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
+        if (!passedTagName) return strings.APP_TAG;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
+        if (!tag) return strings.APP_TAG;
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;
 
         const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
             case "BOT":
-                return `${strings.APP_TAG ?? strings.BOT_TAG_BOT} • ${tagText}`;
+                return `${strings.APP_TAG} • ${tagText}`;
             default:
                 return tagText;
         }
