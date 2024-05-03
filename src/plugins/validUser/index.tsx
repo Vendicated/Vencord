@@ -92,9 +92,9 @@ async function getUser(id: string) {
 
     userObj = UserStore.getUser(id);
     const fakeBadges: ProfileBadge[] = Object.entries(UserFlags)
-        .filter(entry => !isNaN(entry[1]))
-        .filter(entry => userObj.hasFlag(entry[1]))
-        .map(entry => badges[entry[0].toLowerCase()]);
+        .filter(([_, flag]) => !isNaN(flag))
+        .filter(([_, flag]) => userObj.hasFlag(flag))
+        .map(([key]) => badges[key.toLowerCase()]);
     if (user.premium_type || !user.bot && (user.banner || user.avatar?.startsWith?.("a_")))
         fakeBadges.push(badges.premium);
 
