@@ -85,8 +85,8 @@ export default definePlugin({
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
 
-                    let shouldMention = (Vencord.Plugins.plugins.NoReplyMention as any).shouldMention(msg, event.shiftKey);
-                    if (event.shiftKey && !settings.store.requireModifier) shouldMention = !shouldMention;
+                    const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as import("../noReplyMention");
+                    const shouldMention = NoReplyMention.shouldMention(msg, event.shiftKey && !settings.store.requireModifier);
 
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
