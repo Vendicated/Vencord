@@ -95,7 +95,7 @@ async function getUser(id: string) {
         .filter(entry => !isNaN(entry[1]))
         .filter(entry => userObj.hasFlag(entry[1]))
         .map(entry => badges[entry[0].toLowerCase()]);
-    if (user.premium_type)
+    if (user.premium_type || !user.bot && (user.banner || user.avatar?.startsWith?.("a_")))
         fakeBadges.push(badges.premium);
 
     // Fill in what we can deduce
