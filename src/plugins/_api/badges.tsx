@@ -34,14 +34,13 @@ const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    props: {
-        style: {
-            borderRadius: "50%",
-            transform: "scale(0.9)" // The image is a bit too big compared to default badges
-        }
-    },
     shouldShow: ({ user }) => isPluginDev(user.id),
-    link: "https://github.com/Vendicated/Vencord"
+    onClick(_, { user }) {
+        // circular import shenanigans
+        const { openContributorModal } = require("@components/PluginSettings/ContributorModal") as typeof import("@components/PluginSettings/ContributorModal");
+        // setImmediate is needed to run on later tick to workaround limitation in proxyLazy
+        setImmediate(() => openContributorModal(user));
+    }
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
@@ -85,7 +84,7 @@ export default definePlugin({
                 // conditionally override their onClick with badge.onClick if it exists
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: $1.onClick }),$&"
+                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, arguments[0]) }),$&"
                 }
             ]
         }

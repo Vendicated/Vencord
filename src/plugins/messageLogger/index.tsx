@@ -217,7 +217,9 @@ export default definePlugin({
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channel
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
 
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
@@ -253,7 +255,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
-                        "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
+                        "   $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
