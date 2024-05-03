@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings,migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -31,6 +31,15 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    messages: {
+        description: "Message notifications",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All messages", value: 0 },
+            { label: "Only @mentions", value: 1 },
+            { label: "Nothing", value: 2, default: true },
+        ],
+    },
     everyone: {
         description: "Suppress @everyone and @here",
         type: OptionType.BOOLEAN,
@@ -41,11 +50,21 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    highlights: {
+        description: "Suppress Highlights automatically",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    events: {
+        description: "Mute New Events automatically",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     showAllChannels: {
         description: "Show all channels automatically",
         type: OptionType.BOOLEAN,
         default: true
-    }
+    },
 });
 
 migratePluginSettings("NewGuildSettings", "MuteNewGuild");
@@ -77,8 +96,11 @@ export default definePlugin({
         updateGuildNotificationSettings(guildId,
             {
                 muted: settings.store.guild,
+                message_notifications: settings.store.messages,
                 suppress_everyone: settings.store.everyone,
-                suppress_roles: settings.store.role
+                suppress_roles: settings.store.role,
+                mute_scheduled_events: settings.store.events,
+                notify_highlights: settings.store.highlights ? 1 : 2
             });
         if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
             toggleShowAllChannels(guildId);
