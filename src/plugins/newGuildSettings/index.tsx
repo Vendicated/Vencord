@@ -36,8 +36,9 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             { label: "All messages", value: 0 },
-            { label: "Only @mentions", value: 1, default: true },
+            { label: "Only @mentions", value: 1 },
             { label: "Nothing", value: 2 },
+            { label: "Server default", value: 3, default: true }
         ],
     },
     everyone: {
@@ -96,12 +97,17 @@ export default definePlugin({
         updateGuildNotificationSettings(guildId,
             {
                 muted: settings.store.guild,
-                message_notifications: settings.store.messages,
                 suppress_everyone: settings.store.everyone,
                 suppress_roles: settings.store.role,
                 mute_scheduled_events: settings.store.events,
-                notify_highlights: settings.store.highlights ? 1 : 2
+                notify_highlights: settings.store.highlights ? 1 : 0
             });
+        if (settings.store.messages !== 3) {
+            updateGuildNotificationSettings(guildId,
+                {
+                    message_notifications: settings.store.messages,
+                });
+        }
         if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
             toggleShowAllChannels(guildId);
         }
