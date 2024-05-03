@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps,findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import {
     Button,
     ChannelStore,

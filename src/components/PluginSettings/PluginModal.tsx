@@ -25,7 +25,7 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
-import { findByProps,findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";

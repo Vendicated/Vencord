@@ -19,7 +19,7 @@
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { formatDuration } from "@utils/text";
-import { findByProps,findComponent, findComponentByCode } from "@webpack";
+import { findByProps, findComponent, findComponentByCode } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 

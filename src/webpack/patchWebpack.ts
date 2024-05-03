@@ -226,7 +226,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         callback(exports.default);
                     }
                 } catch (err) {
-                    logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
+                    logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
                 }
             }
         } as any as { toString: () => string, original: any, (...args: any[]): void; };

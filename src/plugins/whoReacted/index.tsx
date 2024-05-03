@@ -29,8 +29,8 @@ import { Message, ReactionEmoji, User } from "discord-types/general";
 
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-let Scroll: any = null;
 
+let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
 

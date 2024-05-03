@@ -18,7 +18,7 @@
 
 import "./VoiceChannelSection.css";
 
-import { findByCode,findByProps } from "@webpack";
+import { findByCode, findByProps } from "@webpack";
 import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
 import { Channel } from "discord-types/general";
 

@@ -11,7 +11,7 @@ import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { findByProps,findExportedComponent } from "@webpack";
+import { findByProps, findExportedComponent } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 

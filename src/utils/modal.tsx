@@ -108,6 +108,7 @@ export let ModalCloseButton: Modals["ModalCloseButton"];
 
 export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);
+
     return m;
 });
 
