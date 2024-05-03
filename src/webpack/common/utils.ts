@@ -39,7 +39,7 @@ export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
 
-export const Constants = proxyLazyWebpack(() => findByProps("Endpoints"));
+export const Constants = findByPropsLazy("Endpoints");
 
 export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
     const mod = findByProps("getAPIBaseURL");
