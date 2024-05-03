@@ -32,7 +32,7 @@ const settings = definePluginSettings({
         default: true
     },
     messages: {
-        description: "Message notifications",
+        description: "Server Notification Settings",
         type: OptionType.SELECT,
         options: [
             { label: "All messages", value: 0 },
@@ -64,7 +64,7 @@ const settings = definePluginSettings({
         description: "Show all channels automatically",
         type: OptionType.BOOLEAN,
         default: true
-    },
+    }
 });
 
 migratePluginSettings("NewGuildSettings", "MuteNewGuild");
