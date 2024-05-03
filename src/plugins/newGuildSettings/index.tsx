@@ -36,8 +36,8 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             { label: "All messages", value: 0 },
-            { label: "Only @mentions", value: 1 },
-            { label: "Nothing", value: 2, default: true },
+            { label: "Only @mentions", value: 1, default: true },
+            { label: "Nothing", value: 2 },
         ],
     },
     everyone: {
