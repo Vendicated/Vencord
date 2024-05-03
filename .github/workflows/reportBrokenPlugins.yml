@@ -24,7 +24,7 @@ jobs:
             - name: Use Node.js 19
               uses: actions/setup-node@v4
               with:
-                  node-version: 19
+                  node-version: "19.x"
                   cache: "pnpm"
 
             - name: Install dependencies
@@ -35,8 +35,6 @@ jobs:
             - name: Install Google Chrome
               id: setup-chrome
               uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
-              with:
-                chrome-version: 123
 
             - name: Build web
               run: pnpm buildWeb --standalone --dev
