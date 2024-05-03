@@ -23,10 +23,12 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
+const MessageActions = findByProps("deleteMessage", "startEditMessage");
+const EditStore = findByProps("isEditing", "isEditingAny");
+
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
-
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
@@ -60,9 +62,6 @@ export default definePlugin({
     settings,
 
     start() {
-        const MessageActions = findByProps("deleteMessage", "startEditMessage");
-        const EditStore = findByProps("isEditing", "isEditingAny");
-
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
