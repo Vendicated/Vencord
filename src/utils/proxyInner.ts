@@ -53,8 +53,11 @@ export function proxyInner<T = any>(err = new Error("Proxy inner value is undefi
         [proxyInnerValue]: void 0 as T | undefined
     });
 
+    // Values destructured in the same tick the proxy was created will push their setInnerValue here
     const recursiveSetInnerValues = [] as Array<(innerValue: T) => void>;
 
+    // Once we set the parent inner value, we will call the setInnerValue functions of the destructured values,
+    // for them to get the proper value from the parent and use as their inner instead
     function setInnerValue(innerValue: T) {
         proxyDummy[proxyInnerValue] = innerValue;
         recursiveSetInnerValues.forEach(setInnerValue => setInnerValue(innerValue));
@@ -72,7 +75,9 @@ export function proxyInner<T = any>(err = new Error("Proxy inner value is undefi
             // `const { meow } = findByProps("meow");`
             if (!isChild && isSameTick) {
                 const [recursiveProxy, recursiveSetInnerValue] = proxyInner(err, true);
+
                 recursiveSetInnerValues.push((innerValue: T) => {
+                    // Set the inner value of the destructured value as the prop value p of the parent
                     recursiveSetInnerValue(Reflect.get(innerValue as object, p, receiver));
                 });
 
