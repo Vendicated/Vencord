@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { find, findByProps } from "@webpack";
-
+// eslint-disable-next-line path-alias/no-relative
+import { find, findByProps } from "../webpack";
 import * as t from "./types/classes";
 
-export const ModalImageClasses: t.ImageModalClasses = find(m => m.image && m.modal && !m.applicationIcon);
-export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByProps("buttonWrapper", "buttonContent");
+export const ModalImageClasses = find<t.ImageModalClasses>(m => m.image && m.modal && !m.applicationIcon);
+export const ButtonWrapperClasses = findByProps<t.ButtonWrapperClasses>("buttonWrapper", "buttonContent");

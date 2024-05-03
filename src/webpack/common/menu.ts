@@ -23,4 +23,3 @@ import type * as t from "./types/menu";
 export const Menu = findByProps<t.Menu>("MenuItem", "MenuSliderControl");
 
 export const ContextMenuApi = findByProps<t.ContextMenuApi>("closeContextMenu", "openContextMenu");
-

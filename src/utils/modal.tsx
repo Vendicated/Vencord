@@ -19,7 +19,6 @@
 import { filters, find, findByProps, findExportedComponent } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
-
 export const enum ModalSize {
     SMALL = "small",
     MEDIUM = "medium",

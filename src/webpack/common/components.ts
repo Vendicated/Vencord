@@ -17,16 +17,8 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findComponent, findExportedComponent, waitFor } from "@webpack";
-
+import { filters, find, findComponent, findExportedComponent } from "../webpack";
 import * as t from "./types/components";
-
-export let Forms = {} as {
-    FormTitle: t.FormTitle,
-    FormSection: t.FormSection,
-    FormDivider: t.FormDivider,
-    FormText: t.FormText,
-};
 
 export let Card: t.Card;
 export let Button: t.Button;
@@ -58,8 +50,7 @@ export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
-waitFor(filters.byProps("FormItem", "Button"), m => {
-    Forms = m;
+export const Forms = find(filters.byProps("FormItem", "Button"), m => {
     ({
         useToken,
         Card,
@@ -83,4 +74,11 @@ waitFor(filters.byProps("FormItem", "Button"), m => {
         FocusLock,
         Heading
     } = m);
-});
+
+    return m;
+}) as {
+    FormTitle: t.FormTitle,
+    FormSection: t.FormSection,
+    FormDivider: t.FormDivider,
+    FormText: t.FormText,
+};

@@ -22,7 +22,7 @@ import type * as Stores from "discord-types/stores";
 import { findByProps, findStore } from "../webpack";
 import * as t from "./types/stores";
 
-export const Flux: t.Flux = findByProps("connectStores");
+export const Flux = findByProps<t.Flux>("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
@@ -39,26 +39,26 @@ export const MessageStore = findStore("MessageStore") as Omit<Stores.MessageStor
 
 // this is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
-export const PermissionStore: GenericStore = findStore("PermissionStore");
-export const GuildChannelStore: GenericStore = findStore("GuildChannelStore");
-export const ReadStateStore: GenericStore = findStore("ReadStateStore");
-export const PresenceStore: GenericStore = findStore("PresenceStore");
+export const PermissionStore = findStore<GenericStore>("PermissionStore");
+export const GuildChannelStore = findStore<GenericStore>("GuildChannelStore");
+export const ReadStateStore = findStore<GenericStore>("ReadStateStore");
+export const PresenceStore = findStore<GenericStore>("PresenceStore");
 
-export const GuildStore: t.GuildStore = findStore("GuildStore");
-export const UserStore: Stores.UserStore & t.FluxStore = findStore("UserStore");
-export const UserProfileStore: GenericStore = findStore("UserProfileStore");
-export const SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore = findStore("SelectedChannelStore");
-export const SelectedGuildStore: t.FluxStore & Record<string, any> = findStore("SelectedGuildStore");
-export const ChannelStore: Stores.ChannelStore & t.FluxStore = findStore("ChannelStore");
-export const GuildMemberStore: Stores.GuildMemberStore & t.FluxStore = findStore("GuildMemberStore");
+export const GuildStore = findStore<t.GuildStore>("GuildStore");
+export const UserStore = findStore<Stores.UserStore & t.FluxStore>("UserStore");
+export const UserProfileStore = findStore<GenericStore>("UserProfileStore");
+export const SelectedChannelStore = findStore<Stores.SelectedChannelStore & t.FluxStore>("SelectedChannelStore");
+export const SelectedGuildStore = findStore<GenericStore>("SelectedGuildStore");
+export const ChannelStore = findStore<Stores.ChannelStore & t.FluxStore>("ChannelStore");
+export const GuildMemberStore = findStore<Stores.GuildMemberStore & t.FluxStore>("GuildMemberStore");
 export const RelationshipStore = findStore("RelationshipStore") as Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
 };
 
-export const EmojiStore: t.EmojiStore = findStore("EmojiStore");
-export const WindowStore: t.WindowStore = findStore("WindowStore");
-export const DraftStore: t.DraftStore = findStore("DraftStore");
+export const EmojiStore = findStore<t.EmojiStore>("EmojiStore");
+export const WindowStore = findStore<t.WindowStore>("WindowStore");
+export const DraftStore = findStore<t.DraftStore>("DraftStore");
 
 /**
  * React hook that returns stateful data for one or more stores

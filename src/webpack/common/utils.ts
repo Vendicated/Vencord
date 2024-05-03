@@ -90,7 +90,6 @@ export const Toasts = {
     }
 };
 
-// This is the same module but this is easier
 waitFor(filters.byCode("showToast"), m => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;

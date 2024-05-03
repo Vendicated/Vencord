@@ -17,9 +17,8 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByProps,waitFor } from "../webpack";
+import { filters, find, findByProps } from "../webpack";
 
-export let React: typeof import("react");
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;
 export let useMemo: typeof React.useMemo;
@@ -29,7 +28,8 @@ export let useCallback: typeof React.useCallback;
 
 export const ReactDOM = findByProps<typeof import("react-dom") & typeof import("react-dom/client")>("createPortal", "render");
 
-waitFor(filters.byProps("useState"), m => {
-    React = m;
-    ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = React);
+export const React = find<typeof import("react")>(filters.byProps("useState"), m => {
+    ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = m);
+
+    return m;
 });

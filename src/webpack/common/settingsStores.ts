@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByProps } from "@webpack";
-
+// eslint-disable-next-line path-alias/no-relative
+import { findByProps } from "../webpack";
 import * as t from "./types/settingsStores";
 
-
-export const TextAndImagesSettingsStores = findByProps("MessageDisplayCompact") as Record<string, t.SettingsStore>;
-export const StatusSettingsStores = findByProps("ShowCurrentGame") as Record<string, t.SettingsStore>;
+export const TextAndImagesSettingsStores = findByProps<Record<string, t.SettingsStore>>("MessageDisplayCompact");
+export const StatusSettingsStores = findByProps<Record<string, t.SettingsStore>>("ShowCurrentGame");
 
 export const UserSettingsActionCreators = findByProps("PreloadedUserSettingsActionCreators");
