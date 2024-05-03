@@ -17,7 +17,7 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -84,11 +84,17 @@ export default definePlugin({
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
 
+                    const isShiftPress = event.shiftKey && !settings.store.requireModifier;
+                    const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
+                    const shouldMention = Vencord.Plugins.isPluginEnabled("NoReplyMention")
+                        ? NoReplyMention.shouldMention(msg, isShiftPress)
+                        : !isShiftPress;
+
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
                         channel,
                         message: msg,
-                        shouldMention: !Settings.plugins.NoReplyMention.enabled,
+                        shouldMention,
                         showMentionToggle: channel.guild_id !== null
                     });
                 }
