@@ -81,8 +81,8 @@ export default definePlugin({
             find: "getRelationshipCounts(){",
             replacement: {
                 predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
-                match: /\.sortBy\(\i=>\i\.comparator\)/,
-                replace: "$&.sortBy((row) => $self.sortList(row))"
+                match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+                replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
         },
 
@@ -120,10 +120,10 @@ export default definePlugin({
         }
     ),
 
-    sortList(row: any) {
+    wrapSort(comparator: Function, row: any) {
         return row.type === 5
             ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
-            : row.comparator;
+            : comparator(row);
     },
 
     async fetchImplicitRelationships() {
