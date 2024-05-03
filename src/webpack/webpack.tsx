@@ -500,6 +500,7 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
 
 /**
  * @deprecated Use {@link webpackDependantLazy} instead
+ *
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
@@ -512,6 +513,7 @@ export const proxyLazyWebpack = webpackDependantLazy;
 
 /**
  * @deprecated Use {@link webpackDependantLazyComponent} instead
+ *
  * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
  *
  * A lazy component. The factory method is called on first render.
@@ -523,12 +525,14 @@ export const LazyComponentWebpack = webpackDependantLazyComponent;
 
 /**
  * @deprecated Use {@link find} instead
+ *
  * Find the first module that matches the filter, lazily
  */
 export const findLazy = find;
 
 /**
  * @deprecated Use {@link findByProps} instead
+ *
  * Find the first module that has the specified properties, lazily
  */
 export const findByPropsLazy = findByProps;
@@ -536,30 +540,35 @@ export const findByPropsLazy = findByProps;
 
 /**
  * @deprecated Use {@link findByCode} instead
+ *
  * Find the first function that includes all the given code, lazily
  */
 export const findByCodeLazy = findByCode;
 
 /**
  * @deprecated Use {@link findStore} instead
+ *
  * Find a store by its displayName, lazily
  */
 export const findStoreLazy = findStore;
 
 /**
  * @deprecated Use {@link findComponent} instead
+ *
  * Finds the first component that matches the filter, lazily.
  */
 export const findComponentLazy = findComponent;
 
 /**
  * @deprecated Use {@link findComponentByCode} instead
+ *
  * Finds the first component that includes all the given code, lazily
  */
 export const findComponentByCodeLazy = findComponentByCode;
 
 /**
  * @deprecated Use {@link findExportedComponent} instead
+ *
  * Finds the first component that is exported by the first prop name, lazily
  */
 export const findExportedComponentLazy = findExportedComponent;
@@ -571,6 +580,7 @@ export const findAll = cacheFindAll;
 
 /**
  * @deprecated Use {@link cacheFindBulk} instead
+ *
  * Same as {@link cacheFind} but in bulk
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                  need it afterwards, pass a copy.
