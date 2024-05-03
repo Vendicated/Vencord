@@ -482,21 +482,32 @@ async function runtime(token: string) {
                 if (method === "webpackDependantLazy" || method === "webpackDependantLazyComponent") {
                     const [factory] = args;
                     result = factory();
-                    if (result != null && "$$vencordGetter" in result) result = result.$$vencordGetter();
+
+                    if (result != null && "$$vencordGetter" in result) {
+                        result = result.$$vencordGetter();
+                    }
                 } else if (method === "extractAndLoadChunks") {
                     const [code, matcher] = args;
 
                     const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
+                    if (module) {
+                        result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
+                    }
                 } else {
                     result = Vencord.Webpack[method](...args);
 
                     // If the result is our Proxy or ComponentWrapper, this means the search failed
-                    if (result != null && result[Vencord.Util.proxyInnerGet] != null) result = undefined;
-                    if (result != null && "$$vencordGetter" in result) result = undefined;
+                    if (
+                        result != null &&
+                        (result[Vencord.Util.proxyInnerGet] != null || "$$vencordGetter" in result)
+                    ) {
+                        result = undefined;
+                    }
                 }
 
-                if (result == null) throw "find failed";
+                if (result == null) {
+                    throw "a rock at ben shapiro";
+                }
             } catch (e) {
                 let logMessage = searchType;
 
