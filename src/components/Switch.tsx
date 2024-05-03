@@ -19,7 +19,7 @@
 import "./Switch.css";
 
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
 interface SwitchProps {
     checked: boolean;
@@ -29,7 +29,7 @@ interface SwitchProps {
 
 const SWITCH_ON = "var(--green-360)";
 const SWITCH_OFF = "var(--primary-400)";
-const SwitchClasses = findByPropsLazy("slider", "input", "container");
+const SwitchClasses = findByProps("slider", "input", "container");
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
     return (

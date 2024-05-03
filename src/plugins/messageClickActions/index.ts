@@ -20,7 +20,7 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
 let isDeletePressed = false;
@@ -60,8 +60,8 @@ export default definePlugin({
     settings,
 
     start() {
-        const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-        const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+        const MessageActions = findByProps("deleteMessage", "startEditMessage");
+        const EditStore = findByProps("isEditing", "isEditingAny");
 
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);

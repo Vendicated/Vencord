@@ -4,7 +4,7 @@ import React from "react";
 const handleClick = async () =>
     console.log((await import("@webpack/common")).Clipboard.copy("\u200b"));
 
-export const Example: React.FC<{
+export const Example: React.ComponentType<{
     real: boolean,
     shigged?: number,
 }> = ({ real, shigged }) => <>

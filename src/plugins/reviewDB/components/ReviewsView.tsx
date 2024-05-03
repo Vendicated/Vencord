@@ -17,7 +17,7 @@
 */
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
@@ -28,11 +28,11 @@ import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 
-const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
-const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
+const { Editor, Transforms } = findByProps("Editor", "Transforms");
+const { ChatInputTypes } = findByProps("ChatInputTypes");
 
-const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
-const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
+const InputComponent = findComponentByCode("default.CHANNEL_TEXT_AREA", "input");
+const { createChannelRecordFromServer } = findByProps("createChannelRecordFromServer");
 
 interface UserProps {
     discordId: string;

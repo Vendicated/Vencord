@@ -21,12 +21,12 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
+import { findComponentByCode } from "@webpack";
 import { StatusSettingsStores } from "@webpack/common";
 
 import style from "./style.css?managed";
 
-const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
+const Button = findComponentByCode("Button.Sizes.NONE,disabled:");
 
 function makeIcon(showCurrentGame?: boolean) {
     const { oldIcon } = settings.use(["oldIcon"]);

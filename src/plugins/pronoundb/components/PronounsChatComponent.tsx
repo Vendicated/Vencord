@@ -18,14 +18,14 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { useFormattedPronouns } from "../pronoundbUtils";
 import { settings } from "../settings";
 
-const styles: Record<string, string> = findByPropsLazy("timestampInline");
+const styles: Record<string, string> = findByProps("timestampInline");
 
 const AUTO_MODERATION_ACTION = 24;
 

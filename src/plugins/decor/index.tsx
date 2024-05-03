@@ -9,7 +9,7 @@ import "./ui/styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
@@ -20,7 +20,7 @@ import { settings } from "./settings";
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import DecorSection from "./ui/components/DecorSection";
 
-const { isAnimatedAvatarDecoration } = findByPropsLazy("isAnimatedAvatarDecoration");
+const { isAnimatedAvatarDecoration } = findByProps("isAnimatedAvatarDecoration");
 export interface AvatarDecoration {
     asset: string;
     skuId: string;

@@ -36,7 +36,7 @@ export interface MagnifierProps {
 
 const cl = classNameFactory("vc-imgzoom-");
 
-export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
+export const Magnifier: React.ComponentType<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
     const [ready, setReady] = useState(false);
 
     const [lensPosition, setLensPosition] = useState<Vec2>({ x: 0, y: 0 });

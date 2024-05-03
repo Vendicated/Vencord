@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByProps, findStore } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
@@ -27,9 +27,9 @@ interface ChannelComponentProps {
 }
 
 
-const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
+const headerClasses = findByProps("privateChannelsHeaderContainer");
 
-export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore = findStore("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();

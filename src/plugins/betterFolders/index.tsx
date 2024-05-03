@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByProps, findStore } from "@webpack";
 import { FluxDispatcher, i18n } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
@@ -30,10 +30,10 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
-const { GuildsTree } = findByPropsLazy("GuildsTree");
-const SortedGuildStore = findStoreLazy("SortedGuildStore");
-export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
-const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
+const { GuildsTree } = findByProps("GuildsTree");
+const SortedGuildStore = findStore("SortedGuildStore");
+export const ExpandedGuildFolderStore = findStore("ExpandedGuildFolderStore");
+const FolderUtils = findByProps("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;
 let dispatchingFoldersClose = false;

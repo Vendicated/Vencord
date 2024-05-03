@@ -17,7 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import { findByProps, proxyLazyWebpack } from "@webpack";
+import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 export interface Track {
@@ -64,13 +64,13 @@ interface Device {
 
 type Repeat = "off" | "track" | "context";
 
+const SpotifySocket = findByProps("getActiveSocketAndDevice");
+const SpotifyUtils = findByProps("SpotifyAPI");
+
 // Don't wanna run before Flux and Dispatcher are ready!
-export const SpotifyStore = proxyLazyWebpack(() => {
+export const SpotifyStore = webpackDependantLazy(() => {
     // For some reason ts hates extends Flux.Store
     const { Store } = Flux;
-
-    const SpotifySocket = findByProps("getActiveSocketAndDevice");
-    const SpotifyUtils = findByProps("SpotifyAPI");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 

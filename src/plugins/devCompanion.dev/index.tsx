@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
-import { filters, findAll, search } from "@webpack";
+import { cacheFind, filters, search } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -201,22 +201,22 @@ function initWs(isManual = false) {
                     let results: any[];
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
-                            results = findAll(parsedArgs[0]);
+                            results = cacheFind(parsedArgs[0]);
                             break;
                         case "ByProps":
-                            results = findAll(filters.byProps(...parsedArgs));
+                            results = cacheFind(filters.byProps(...parsedArgs));
                             break;
                         case "Store":
-                            results = findAll(filters.byStoreName(parsedArgs[0]));
+                            results = cacheFind(filters.byStoreName(parsedArgs[0]));
                             break;
                         case "ByCode":
-                            results = findAll(filters.byCode(...parsedArgs));
+                            results = cacheFind(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
-                            results = findAll(filters.componentByCode(...parsedArgs));
+                            results = cacheFind(filters.componentByCode(...parsedArgs));
                             break;
                         default:
                             return reply("Unknown Find Type " + type);

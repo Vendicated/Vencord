@@ -1,20 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let tries = 0;
@@ -22,8 +10,9 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     return () => {
         if (!cache && attempts > tries++) {
             cache = factory();
-            if (!cache && attempts === tries)
-                console.error("Lazy factory failed:", factory);
+            if (!cache && attempts === tries) {
+                console.error(`Lazy factory failed:\n${factory}`);
+            }
         }
         return cache;
     };
@@ -33,94 +22,81 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
 // will always return the function default for them.
 const unconfigurable = ["arguments", "caller", "prototype"];
 
-const handler: ProxyHandler<any> = {};
+const handler: ProxyHandler<any> = {
+    ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
+        [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyLazyGet](), ...args)]
+    )),
+    ownKeys: target => {
+        const keys = Reflect.ownKeys(target[proxyLazyGet]());
+        for (const key of unconfigurable) {
+            if (!keys.includes(key)) keys.push(key);
+        }
+        return keys;
+    },
+    getOwnPropertyDescriptor: (target, p) => {
+        if (typeof p === "string" && unconfigurable.includes(p))
+            return Reflect.getOwnPropertyDescriptor(target, p);
 
-const kGET = Symbol.for("vencord.lazy.get");
-const kCACHE = Symbol.for("vencord.lazy.cached");
-
-for (const method of [
-    "apply",
-    "construct",
-    "defineProperty",
-    "deleteProperty",
-    "getOwnPropertyDescriptor",
-    "getPrototypeOf",
-    "has",
-    "isExtensible",
-    "ownKeys",
-    "preventExtensions",
-    "set",
-    "setPrototypeOf"
-]) {
-    handler[method] =
-        (target: any, ...args: any[]) => Reflect[method](target[kGET](), ...args);
-}
-
-handler.ownKeys = target => {
-    const v = target[kGET]();
-    const keys = Reflect.ownKeys(v);
-    for (const key of unconfigurable) {
-        if (!keys.includes(key)) keys.push(key);
+        const descriptor = Reflect.getOwnPropertyDescriptor(target[proxyLazyGet](), p);
+        if (descriptor) Object.defineProperty(target, p, descriptor);
+        return descriptor;
     }
-    return keys;
 };
 
-handler.getOwnPropertyDescriptor = (target, p) => {
-    if (typeof p === "string" && unconfigurable.includes(p))
-        return Reflect.getOwnPropertyDescriptor(target, p);
-
-    const descriptor = Reflect.getOwnPropertyDescriptor(target[kGET](), p);
-
-    if (descriptor) Object.defineProperty(target, p, descriptor);
-    return descriptor;
-};
+const proxyLazyGet = Symbol.for("vencord.lazy.get");
+const proxyLazyCache = Symbol.for("vencord.lazy.cached");
 
 /**
- * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the lazy is evaluated
- * @param factory lazy factory
- * @param attempts how many times to try to evaluate the lazy before giving up
- * @returns Proxy
- *
- * Note that the example below exists already as an api, see {@link findByPropsLazy}
- * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
+ * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the factory is evaluated
+ * @param factory Factory returning the result
+ * @param attempts How many times to try to evaluate the factory before giving up
+ * @returns Result of factory function
  */
-export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T {
-    let isSameTick = true;
-    if (!isChild)
-        setTimeout(() => isSameTick = false, 0);
+export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = false): T {
+    const get = makeLazy(factory, attempts);
 
-    let tries = 0;
+    let isSameTick = true;
+    if (!isChild) setTimeout(() => isSameTick = false, 0);
+
+    let failed = false;
     const proxyDummy = Object.assign(function () { }, {
-        [kCACHE]: void 0 as T | undefined,
-        [kGET]() {
-            if (!proxyDummy[kCACHE] && attempts > tries++) {
-                proxyDummy[kCACHE] = factory();
-                if (!proxyDummy[kCACHE] && attempts === tries)
-                    console.error("Lazy factory failed:", factory);
+        [proxyLazyGet]() {
+            if (!proxyDummy[proxyLazyCache] && !failed) {
+                proxyDummy[proxyLazyCache] = get();
+
+                if (!proxyDummy[proxyLazyCache]) {
+                    failed = true;
+                    throw new Error(`proxyLazy factory failed:\n${factory}`);
+                }
             }
-            return proxyDummy[kCACHE];
-        }
+
+            return proxyDummy[proxyLazyCache];
+        },
+        [proxyLazyCache]: void 0 as T | undefined
     });
 
     return new Proxy(proxyDummy, {
         ...handler,
         get(target, p, receiver) {
-            // if we're still in the same tick, it means the lazy was immediately used.
+            // If we're still in the same tick, it means the lazy was immediately used.
             // thus, we lazy proxy the get access to make things like destructuring work as expected
             // meow here will also be a lazy
             // `const { meow } = findByPropsLazy("meow");`
-            if (!isChild && isSameTick)
+            if (!isChild && isSameTick) {
                 return proxyLazy(
-                    () => Reflect.get(target[kGET](), p, receiver),
+                    () => Reflect.get(target[proxyLazyGet](), p, receiver),
                     attempts,
                     true
                 );
-            const lazyTarget = target[kGET]();
+            }
+
+            const lazyTarget = target[proxyLazyGet]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
                 return Reflect.get(lazyTarget, p, receiver);
             }
+
             throw new Error("proxyLazy called on a primitive value");
         }
-    }) as any;
+    }) as T;
 }

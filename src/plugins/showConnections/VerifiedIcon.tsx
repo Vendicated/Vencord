@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findComponentByCodeLazy, findLazy } from "@webpack";
+import { find, findComponentByCode } from "@webpack";
 import { i18n, useToken } from "@webpack/common";
 
-const ColorMap = findLazy(m => m.colors?.INTERACTIVE_MUTED?.css);
-const VerifiedIconComponent = findComponentByCodeLazy(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP");
+const ColorMap = find(m => m.colors?.INTERACTIVE_MUTED?.css);
+const VerifiedIconComponent = findComponentByCode(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP");
 
 export function VerifiedIcon() {
     const color = useToken(ColorMap.colors.INTERACTIVE_MUTED).hex();

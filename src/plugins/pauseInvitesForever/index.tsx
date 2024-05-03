@@ -18,11 +18,11 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { GuildStore, RestAPI } from "@webpack/common";
 
-const Messages = findByPropsLazy("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION");
-const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
+const Messages = findByProps("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION");
+const { InvitesDisabledExperiment } = findByProps("InvitesDisabledExperiment");
 
 export default definePlugin({
     name: "PauseInvitesForever",

@@ -400,7 +400,7 @@ async function runtime(token: string) {
         }
 
         Vencord.Webpack.waitFor(
-            "loginToken",
+            Vencord.Webpack.filters.byProps("loginToken"),
             m => {
                 console.log("[PUP_DEBUG]", "Logging in with token...");
                 m.loginToken(token);
@@ -471,39 +471,62 @@ async function runtime(token: string) {
             }
         }
 
-        for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
-            let method = searchType;
+        for (const [searchType, args] of [...Vencord.Webpack.webpackSearchHistory]) {
+            let method = searchType as string;
 
-            if (searchType === "findComponent") method = "find";
-            if (searchType === "findExportedComponent") method = "findByProps";
-            if (searchType === "waitFor" || searchType === "waitForComponent") {
-                if (typeof args[0] === "string") method = "findByProps";
-                else method = "find";
-            }
-            if (searchType === "waitForStore") method = "findStore";
+            if (searchType === "waitFor") method = "cacheFind";
 
             try {
                 let result: any;
 
-                if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
+                if (method === "webpackDependantLazy" || method === "webpackDependantLazyComponent") {
                     const [factory] = args;
                     result = factory();
+                    if (result != null && "$$vencordGetter" in result) result = result.$$vencordGetter();
                 } else if (method === "extractAndLoadChunks") {
                     const [code, matcher] = args;
 
                     const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) result = module.toString().match(canonicalizeMatch(matcher));
+                    if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                 } else {
-                    // @ts-ignore
                     result = Vencord.Webpack[method](...args);
+
+                    // If the result is our Proxy or ComponentWrapper, this means the search failed
+                    if (result != null && result[Vencord.Util.proxyInnerGet] != null) result = undefined;
+                    if (result != null && "$$vencordGetter" in result) result = undefined;
                 }
 
-                if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
+                if (result == null) throw "find failed";
             } catch (e) {
                 let logMessage = searchType;
-                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
-                else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+
+                let filterName = "";
+                let parsedArgs = args;
+                if ("$$vencordProps" in args[0]) {
+                    if (
+                        searchType === "find" ||
+                        searchType === "findComponent" ||
+                        searchType === "waitFor"
+                    ) {
+                        filterName = args[0].$$vencordProps[0];
+                    }
+
+                    parsedArgs = args[0].$$vencordProps.slice(1);
+                }
+
+                if (
+                    parsedArgs === args && searchType === "waitFor" ||
+                    searchType === "find" ||
+                    searchType === "findComponent" ||
+                    searchType === "webpackDependantLazy" ||
+                    searchType === "webpackDependantLazyComponent"
+                ) {
+                    logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                } else if (searchType === "extractAndLoadChunks") {
+                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                } else {
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
+                }
 
                 console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
             }

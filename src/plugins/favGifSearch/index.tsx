@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
@@ -35,7 +35,7 @@ interface SearchBarComponentProps {
 }
 
 type TSearchBarComponent =
-    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+    React.ComponentType<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
 
 interface Gif {
     format: number;
@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
+const containerClasses: { searchBar: string; } = findByProps("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {

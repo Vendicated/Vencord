@@ -18,10 +18,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const SpoilerClasses = findByPropsLazy("spoilerContent");
-const MessagesClasses = findByPropsLazy("messagesWrapper", "messages");
+const SpoilerClasses = findByProps("spoilerContent");
+const MessagesClasses = findByProps("messagesWrapper", "messages");
 
 export default definePlugin({
     name: "RevealAllSpoilers",

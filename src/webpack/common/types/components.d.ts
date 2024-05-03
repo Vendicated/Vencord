@@ -153,7 +153,7 @@ export type Switch = ComponentType<PropsWithChildren<{
     tooltipNote?: ReactNode;
 }>>;
 
-export type Timestamp = ComponentType<PropsWithChildren<{
+export type TimestampProps = PropsWithChildren<{
     timestamp: Date;
     isEdited?: boolean;
 
@@ -164,7 +164,7 @@ export type Timestamp = ComponentType<PropsWithChildren<{
     compact?: boolean;
     isInline?: boolean;
     isVisibleOnlyOnHover?: boolean;
-}>>;
+}>;
 
 export type TextInput = ComponentType<PropsWithChildren<{
     name?: string;
@@ -320,7 +320,7 @@ export type Slider = ComponentType<PropsWithChildren<{
 }>>;
 
 // TODO - type maybe idk probably not that useful other than the constants
-export type Flex = ComponentType<PropsWithChildren<any>> & {
+export type FlexProps = PropsWithChildren<any> & {
     Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
     Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
     Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
@@ -399,7 +399,7 @@ export type Paginator = ComponentType<{
     hideMaxPage?: boolean;
 }>;
 
-export type MaskedLink = ComponentType<PropsWithChildren<{
+export type MaskedLinkProps = PropsWithChildren<{
     href: string;
     rel?: string;
     target?: string;
@@ -410,7 +410,7 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     trusted?: boolean;
     messageId?: string;
     channelId?: string;
-}>>;
+}>;
 
 export type ScrollerThin = ComponentType<PropsWithChildren<{
     className?: string;

@@ -17,15 +17,15 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { findByProps, findComponentByCode, findStore } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
-const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
-const Animations = findByPropsLazy("a", "animated", "useTransition");
-const GuildsBar = findComponentByCodeLazy('("guildsnav")');
+const ChannelRTCStore = findStore("ChannelRTCStore");
+const Animations = findByProps("a", "animated", "useTransition");
+const GuildsBar = findComponentByCode('("guildsnav")');
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());

@@ -21,7 +21,7 @@ import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin from "@utils/types";
 import * as Webpack from "@webpack";
-import { extract, filters, findAll, search } from "@webpack";
+import { cacheFindAll, extract, filters, search } from "@webpack";
 import { React, ReactDOM } from "@webpack/common";
 import type { ComponentType } from "react";
 
@@ -42,7 +42,7 @@ export default definePlugin({
                 const cacheKey = String(filterProps);
                 if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-                const matches = findAll(filterFactory(...filterProps));
+                const matches = cacheFindAll(filterFactory(...filterProps));
 
                 const result = (() => {
                     switch (matches.length) {
@@ -73,13 +73,13 @@ export default definePlugin({
             wpex: extract,
             wpexs: (code: string) => extract(Webpack.findModuleId(code)!),
             find,
-            findAll,
+            findAll: cacheFindAll,
             findByProps,
-            findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
+            findAllByProps: (...props: string[]) => cacheFindAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
-            findAllByCode: (code: string) => findAll(filters.byCode(code)),
+            findAllByCode: (code: string) => cacheFindAll(filters.byCode(code)),
             findComponentByCode: newFindWrapper(filters.componentByCode),
-            findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
+            findAllComponentsByCode: (...code: string[]) => cacheFindAll(filters.componentByCode(...code)),
             findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
             findStore: newFindWrapper(filters.byStoreName),
             PluginsApi: Vencord.Plugins,

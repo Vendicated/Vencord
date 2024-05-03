@@ -19,9 +19,9 @@
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker");
+const { closeExpressionPicker } = findByProps("closeExpressionPicker");
 
 export default definePlugin({
     name: "GifPaste",

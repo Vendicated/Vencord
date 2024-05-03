@@ -29,23 +29,22 @@ import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { find, findComponent } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import type { ComponentType, Ref, SyntheticEvent } from "react";
+import type { Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
 import { SettingsTab, wrapTab } from "./shared";
 
-type FileInput = ComponentType<{
+type FileInputProps = {
     ref: Ref<HTMLInputElement>;
     onChange: (e: SyntheticEvent<HTMLInputElement>) => void;
     multiple?: boolean;
     filters?: { name?: string; extensions: string[]; }[];
-}>;
+};
 
-const InviteActions = findByPropsLazy("resolveInvite");
-const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
+const FileInput = findComponent<FileInputProps>(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
+const TextAreaProps = find(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 

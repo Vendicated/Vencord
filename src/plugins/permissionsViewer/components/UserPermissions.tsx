@@ -18,8 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
+import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { filters, findBulk, proxyLazyWebpack } from "@webpack";
+import { findByProps } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -35,13 +36,11 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const Classes = proxyLazyWebpack(() =>
-    Object.assign({}, ...findBulk(
-        filters.byProps("roles", "rolePill", "rolePillBorder"),
-        filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
-        filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-    ))
-) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>;
+const RoleClasses1 = findByProps("roles", "rolePill", "rolePillBorder");
+const RoleClasses2 = findByProps("roleCircle", "dotBorderBase", "dotBorderColor");
+const RoleClasses3 = findByProps("roleNameOverflow", "root", "roleName", "roleRemoveButton");
+
+const Classes = proxyLazy(() => Object.assign({}, RoleClasses1, RoleClasses2, RoleClasses3));
 
 function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);

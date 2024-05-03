@@ -24,7 +24,7 @@ import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, waitForSubscriptions, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
@@ -216,14 +216,14 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                 }
             }
 
-            for (const [filter, callback] of subscriptions) {
+            for (const [filter, callback] of waitForSubscriptions) {
                 try {
                     if (filter(exports)) {
-                        subscriptions.delete(filter);
-                        callback(exports, id);
+                        waitForSubscriptions.delete(filter);
+                        callback(exports);
                     } else if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, id);
+                        waitForSubscriptions.delete(filter);
+                        callback(exports.default);
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);

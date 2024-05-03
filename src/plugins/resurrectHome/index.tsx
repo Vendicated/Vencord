@@ -21,10 +21,10 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Button, Menu, Tooltip, useEffect, useState } from "@webpack/common";
 
-const ChannelRowClasses = findByPropsLazy("modeConnected", "modeLocked", "icon");
+const ChannelRowClasses = findByProps("modeConnected", "modeLocked", "icon");
 
 let currentShouldViewServerHome = false;
 const shouldViewServerHomeStates = new Set<React.Dispatch<React.SetStateAction<boolean>>>();

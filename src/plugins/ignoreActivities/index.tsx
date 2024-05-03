@@ -11,7 +11,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import { findStore } from "@webpack";
 import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
@@ -25,7 +25,7 @@ interface IgnoredActivity {
     type: ActivitiesTypes;
 }
 
-const RunningGameStore = findStoreLazy("RunningGameStore");
+const RunningGameStore = findStore("RunningGameStore");
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     return (

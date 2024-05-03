@@ -9,14 +9,14 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
 type SettingsEntry = { section: string, label: string; };
 
 const cl = classNameFactory("");
-const Classes = findByPropsLazy("animating", "baseLayer", "bg", "layer", "layers");
+const Classes = findByProps("animating", "baseLayer", "bg", "layer", "layers");
 
 const settings = definePluginSettings({
     disableFade: {

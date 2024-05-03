@@ -23,12 +23,12 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByProps, findStore } from "@webpack";
 import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
-const StickersStore = findStoreLazy("StickersStore");
-const EmojiManager = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
+const StickersStore = findStore("StickersStore");
+const EmojiManager = findByProps("fetchEmoji", "uploadEmoji", "deleteEmoji");
 
 interface Sticker {
     t: "Sticker";

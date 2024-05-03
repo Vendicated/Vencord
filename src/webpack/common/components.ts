@@ -17,9 +17,8 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { filters, findComponent, findExportedComponent, waitFor } from "@webpack";
 
-import { waitForComponent } from "./internal";
 import * as t from "./types/components";
 
 export let Forms = {} as {
@@ -53,13 +52,14 @@ export let FocusLock: t.FocusLock;
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
 
-export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
+export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
+export const Timestamp = findComponent<t.TimestampProps>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align", "Wrap"));
 
-export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
+export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
-waitFor(["FormItem", "Button"], m => {
+waitFor(filters.byProps("FormItem", "Button"), m => {
+    Forms = m;
     ({
         useToken,
         Card,
@@ -83,5 +83,4 @@ waitFor(["FormItem", "Button"], m => {
         FocusLock,
         Heading
     } = m);
-    Forms = m;
 });

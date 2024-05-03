@@ -19,11 +19,11 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const Kangaroo = findByPropsLazy("jumpToMessage");
+const Kangaroo = findByProps("jumpToMessage");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
