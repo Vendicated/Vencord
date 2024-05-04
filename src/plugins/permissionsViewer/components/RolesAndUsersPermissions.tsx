@@ -252,7 +252,7 @@ function UserContextMenu({ userId, onClose }: { userId: string; onClose: () => v
         >
             <Menu.MenuItem
                 id="vc-copy-user-id"
-                label="Copy Id"
+                label="Copy Role ID"
                 action={() => {
                     Clipboard.copy(userId);
                 }}
