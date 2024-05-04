@@ -209,7 +209,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
         >
             <Menu.MenuItem
                 id="vc-copy-role-id"
-                label="Copy Id"
+                label="Copy Role ID"
                 action={() => {
                     Clipboard.copy(roleId);
                 }}
