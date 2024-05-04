@@ -96,7 +96,7 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
                 return Reflect.get(lazyTarget, p, receiver);
             }
 
-            throw new Error("proxyLazy called on a primitive value");
+            throw new Error("proxyLazy called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.");
         }
     }) as T;
 }

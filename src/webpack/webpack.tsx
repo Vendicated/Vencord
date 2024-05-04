@@ -167,7 +167,7 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["find", [filter]]);
 
-    const [proxy, setInnerValue] = proxyInner<T>(new Error(`Webpack find matched no module. Filter: ${printFilter(filter)}`));
+    const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
 
     if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;

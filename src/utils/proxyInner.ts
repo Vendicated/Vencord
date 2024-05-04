@@ -35,17 +35,22 @@ const handler: ProxyHandler<any> = {
 /**
  * A proxy which has an inner value that can be set later.
  * When a property is accessed, the proxy looks for the property value in its inner value, and errors if it's not set.
- * @param err The error to throw when the inner value is not set
+ * @param err The error message to throw when the inner value is not set
+ * @param primitiveErr The error message to throw when the inner value is a primitive
  * @returns A proxy which will act like the inner value when accessed
  */
-export function proxyInner<T = any>(err = new Error("Proxy inner value is undefined, setInnerValue was never called."), isChild = false): [proxy: T, setInnerValue: (innerValue: T) => void] {
+export function proxyInner<T = any>(
+    errMsg = "Proxy inner value is undefined, setInnerValue was never called.",
+    primitiveErrMsg = "proxyInner called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.",
+    isChild = false
+): [proxy: T, setInnerValue: (innerValue: T) => void] {
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     const proxyDummy = Object.assign(function () { }, {
         [proxyInnerGet]: function () {
             if (proxyDummy[proxyInnerValue] == null) {
-                throw err;
+                throw new Error(errMsg);
             }
 
             return proxyDummy[proxyInnerValue];
@@ -74,7 +79,7 @@ export function proxyInner<T = any>(err = new Error("Proxy inner value is undefi
             // meow here will also be a proxy
             // `const { meow } = findByProps("meow");`
             if (!isChild && isSameTick) {
-                const [recursiveProxy, recursiveSetInnerValue] = proxyInner(err, true);
+                const [recursiveProxy, recursiveSetInnerValue] = proxyInner(errMsg, primitiveErrMsg, true);
 
                 recursiveSetInnerValues.push((innerValue: T) => {
                     // Set the inner value of the destructured value as the prop value p of the parent
@@ -89,7 +94,7 @@ export function proxyInner<T = any>(err = new Error("Proxy inner value is undefi
                 return Reflect.get(innerTarget, p, receiver);
             }
 
-            throw new Error("proxyInner called on a primitive value");
+            throw new Error(primitiveErrMsg);
 
         }
     }) as T, setInnerValue];
