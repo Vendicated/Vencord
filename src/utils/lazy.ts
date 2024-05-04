@@ -7,15 +7,20 @@
 export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let tries = 0;
     let cache: T;
-    return () => {
+
+    const getter = () => {
         if (!cache && attempts > tries++) {
             cache = factory();
             if (!cache && attempts === tries) {
-                console.error(`Lazy factory failed:\n${factory}`);
+                console.error(`Lazy factory failed:\n\n${factory}`);
             }
         }
         return cache;
     };
+
+    getter.$$vencordLazyFailed = () => tries >= attempts;
+
+    return getter;
 }
 
 // Proxies demand that these properties be unmodified, so proxyLazy
@@ -54,20 +59,20 @@ const proxyLazyCache = Symbol.for("vencord.lazy.cached");
  * @returns Result of factory function
  */
 export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = false): T {
-    const get = makeLazy(factory, attempts);
+    const get = makeLazy(factory, attempts) as any;
 
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    let failed = false;
     const proxyDummy = Object.assign(function () { }, {
         [proxyLazyGet]() {
-            if (!proxyDummy[proxyLazyCache] && !failed) {
-                proxyDummy[proxyLazyCache] = get();
+            if (!proxyDummy[proxyLazyCache]) {
+                if (!get.$$vencordLazyFailed()) {
+                    proxyDummy[proxyLazyCache] = get();
+                }
 
                 if (!proxyDummy[proxyLazyCache]) {
-                    failed = true;
-                    throw new Error(`proxyLazy factory failed:\n${factory}`);
+                    throw new Error(`proxyLazy factory failed:\n\n${factory}`);
                 }
             }
 
