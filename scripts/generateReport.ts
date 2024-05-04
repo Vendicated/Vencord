@@ -67,7 +67,8 @@ const IGNORED_DISCORD_ERRORS = [
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
     /\[GatewaySocket\].{0,110}Cannot access '/,
-    "search for 'name' in undefined"
+    "search for 'name' in undefined",
+    "Attempting to set fast connect zstd when unsupported"
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {
@@ -350,7 +351,7 @@ function runTime(token: string) {
                 let invalidEntryPoint = false;
 
                 for (const id of chunkIds) {
-                    if (!wreq.u(id)) continue;
+                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
                     const isWasm = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
@@ -376,9 +377,22 @@ function runTime(token: string) {
                 } catch (err) { }
             }
 
-            const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
-            if (!allChunks) throw new Error("Failed to get all chunks");
-            const chunksLeft = Object.keys(allChunks).filter(id => {
+            // Matches "id" or id:
+            const chunkIdRegex = /(?:"(\d+?)")|(?:(\d+?):)/g;
+            const wreqU = wreq.u.toString();
+
+            const allChunks = [] as string[];
+            let currentMatch: RegExpExecArray | null;
+
+            while ((currentMatch = chunkIdRegex.exec(wreqU)) != null) {
+                const id = currentMatch[1] ?? currentMatch[2];
+                if (id == null) continue;
+
+                allChunks.push(id);
+            }
+
+            if (allChunks.length === 0) throw new Error("Failed to get all chunks");
+            const chunksLeft = allChunks.filter(id => {
                 return !(validChunks.has(id) || invalidChunks.has(id));
             });
 
@@ -415,10 +429,11 @@ function runTime(token: string) {
 
                 if (searchType === "findComponent") method = "find";
                 if (searchType === "findExportedComponent") method = "findByProps";
-                if (searchType === "waitFor" || searchType === "waitForComponent" || searchType === "waitForStore") {
+                if (searchType === "waitFor" || searchType === "waitForComponent") {
                     if (typeof args[0] === "string") method = "findByProps";
                     else method = "find";
                 }
+                if (searchType === "waitForStore") method = "findStore";
 
                 try {
                     let result: any;

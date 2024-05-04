@@ -111,19 +111,28 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
 
 export default definePlugin({
     name: "ValidUser",
-    description: "Fix mentions for unknown users showing up as '<@343383572805058560>' (hover over a mention to fix it)",
+    description: "Fix mentions for unknown users showing up as '@unknown-user' (hover over a mention to fix it)",
     authors: [Devs.Ven],
     tags: ["MentionCacheFix"],
 
-    patches: [{
-        find: 'className:"mention"',
-        replacement: {
-            // mention = { react: function (data, parse, props) { if (data.userId == null) return RoleMention() else return UserMention()
-            match: /react(?=\(\i,\i,\i\).{0,50}return null==\i\?\(0,\i\.jsx\)\((\i\.\i),.+?jsx\)\((\i\.\i),\{className:"mention")/,
-            // react: (...args) => OurWrapper(RoleMention, UserMention, ...args), originalReact: theirFunc
-            replace: "react:(...args)=>$self.renderMention($1,$2,...args),originalReact"
+    patches: [
+        {
+            find: 'className:"mention"',
+            replacement: {
+                // mention = { react: function (data, parse, props) { if (data.userId == null) return RoleMention() else return UserMention()
+                match: /react(?=\(\i,\i,\i\).{0,100}return null==.{0,70}\?\(0,\i\.jsx\)\((\i\.\i),.+?jsx\)\((\i\.\i),\{className:"mention")/,
+                // react: (...args) => OurWrapper(RoleMention, UserMention, ...args), originalReact: theirFunc
+                replace: "react:(...args)=>$self.renderMention($1,$2,...args),originalReact"
+            }
+        },
+        {
+            find: "unknownUserMentionPlaceholder:",
+            replacement: {
+                match: /unknownUserMentionPlaceholder:/,
+                replace: "$&false&&"
+            }
         }
-    }],
+    ],
 
     renderMention(RoleMention, UserMention, data, parse, props) {
         return (
