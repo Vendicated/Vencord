@@ -14,10 +14,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "isEmbedInline:function()",
+            find: "unknownUserMentionPlaceholder:",
             replacement: {
-                match: /(?<=isEmbedInline:function\(\)\{return )\i(?=\})/,
-                replace: "()=>false",
+                match: /\(0,\i\.isEmbedInline\)\(\i\)/,
+                replace: "false",
             },
         },
     ],
