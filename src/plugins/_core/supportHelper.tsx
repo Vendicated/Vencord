@@ -17,7 +17,7 @@
 */
 
 import { DataStore } from "@api/index";
-import { Devs, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { Devs, EquicordDevs, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
@@ -41,7 +41,7 @@ export default definePlugin({
     name: "SupportHelper",
     required: true,
     description: "Helps us provide support to you",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, EquicordDevs.thororen],
     dependencies: ["CommandsAPI"],
 
     commands: [{

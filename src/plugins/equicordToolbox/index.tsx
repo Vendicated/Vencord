@@ -19,7 +19,7 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/Settings";
+import { migratePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -130,6 +130,7 @@ function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
     return <>{children}</>;
 }
 
+migratePluginSettings("EquicordToolbox", "VencordToolbox");
 export default definePlugin({
     name: "EquicordToolbox",
     description: "Adds a button next to the inbox button in the channel header that houses Equicord quick actions",
