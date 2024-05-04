@@ -31,6 +31,11 @@ const settings = definePluginSettings({
         description: "Show the invites paused tooltip in the server list.",
         default: true,
     },
+    showModView: {
+        type: OptionType.BOOLEAN,
+        description: "Show the member mod view context menu item in all servers.",
+        default: true,
+    },
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
@@ -55,6 +60,14 @@ export default definePlugin({
                 match: /\i\.\i\.can\(\i\.Permissions.MANAGE_GUILD,\i\)/,
                 replace: "true",
             },
+        },
+        {
+            find: "canAccessGuildMemberModViewWithExperiment:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /return \i\.hasAny\(\i\.computePermissions\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.MemberSafetyPagePermissions\)/,
+                replace: "return true",
+            }
         }
     ],
     settings,
