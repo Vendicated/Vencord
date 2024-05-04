@@ -43,12 +43,6 @@ jobs:
         timeout-minutes: 10
         run: |
           export PATH="$PWD/node_modules/.bin:$PATH"
-          export CHROMIUM_BIN=$(which chromium-browser)
-
-      - name: Create Report
-        timeout-minutes: 10
-        run: |
-          export PATH="$PWD/node_modules/.bin:$PATH"
           export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
 
           esbuild scripts/generateReport.ts > dist/report.mjs
