@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./fixBadgeOverflow.css";
+
 import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -78,7 +80,7 @@ export default definePlugin({
                 },
                 // replace their component with ours if applicable
                 {
-                    match: /(?<=text:(\i)\.description,spacing:12,)children:/,
+                    match: /(?<=text:(\i)\.description,spacing:12,.{0,50})children:/,
                     replace: "children:$1.component ? () => $self.renderBadgeComponent($1) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
