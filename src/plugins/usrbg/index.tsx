@@ -27,10 +27,10 @@ import style from "./index.css?managed";
 const API_URL = "https://usrbg.is-hardly.online/users";
 
 interface UsrbgApiReturn {
-    endpoint: string;
-    bucket: string;
-    prefix: string;
-    users: { [id: string]: string; };
+    endpoint: string
+    bucket: string
+    prefix: string
+    users: Record<string, string>
 }
 
 const settings = definePluginSettings({
@@ -53,7 +53,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.pylix, Devs.TheKodeToad, Devs.katlyn],
+    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
@@ -120,21 +120,14 @@ export default definePlugin({
     },
 
     userHasBackground(userId: string) {
-        if (this.data === null) return false;
-        return this.data.users[userId] !== undefined;
+        return !!this.data?.users[userId];
     },
 
     getImageUrl(userId: string): string | null {
-        if (this.data == null) {
-            return null;
-        }
+        if (!this.userHasBackground(userId)) return null;
 
-        const etag = this.data.users[userId];
-        if (etag === undefined) {
-            return null;
-        }
-
-        const { endpoint, bucket, prefix } = this.data;
+        // We can assert that data exists because userHasBackground returned true
+        const { endpoint, bucket, prefix, users: { [userId]: etag } } = this.data!;
         return `${endpoint}/${bucket}/${prefix}${userId}?${etag}`;
     },
 

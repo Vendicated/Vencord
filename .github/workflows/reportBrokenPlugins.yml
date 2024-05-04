@@ -29,9 +29,12 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-          pnpm add puppeteer
 
-          sudo apt-get install -y chromium-browser
+      - name: Install Google Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
+        with:
+          chrome-version: stable
 
       - name: Build web
         run: pnpm buildWeb --standalone --dev
@@ -41,6 +44,12 @@ jobs:
         run: |
           export PATH="$PWD/node_modules/.bin:$PATH"
           export CHROMIUM_BIN=$(which chromium-browser)
+
+      - name: Create Report
+        timeout-minutes: 10
+        run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
 
           esbuild scripts/generateReport.ts > dist/report.mjs
           node dist/report.mjs >> $GITHUB_STEP_SUMMARY
@@ -53,7 +62,7 @@ jobs:
         if: success() || failure() # even run if previous one failed
         run: |
           export PATH="$PWD/node_modules/.bin:$PATH"
-          export CHROMIUM_BIN=$(which chromium-browser)
+          export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
           export USE_CANARY=true
 
           esbuild scripts/generateReport.ts > dist/report.mjs

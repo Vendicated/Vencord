@@ -62,38 +62,42 @@ Object.defineProperty(Function.prototype, "O", {
     set(onChunksLoaded: any) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
-        if (new Error().stack?.includes("discord.com") && this.e.toString().includes("Promise.all")) {
-            logger.info("Found main Webpack onChunksLoaded");
+        // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
+        if (new Error().stack?.includes("discord.com") && String(this.e).includes("Promise.all")) {
+            logger.info("Found main WebpackRequire.onChunksLoaded");
 
             delete (Function.prototype as any).O;
 
-            const wreq = this;
-
-            const originalOnChunksLoaded = onChunksLoaded.bind(this);
-            onChunksLoaded = function (result: any, chunkIds: string[], callback: () => any, priority: number) {
+            const originalOnChunksLoaded = onChunksLoaded;
+            onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
                 if (callback != null && initCallbackRegex.test(callback.toString())) {
-                    Object.defineProperty(wreq, "O", {
+                    Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
                     });
 
+                    const wreq = this as WebpackInstance;
+
                     const originalCallback = callback;
-                    callback = function () {
+                    callback = function (this: unknown) {
+                        logger.info("Patched initialize app callback invoked, initializing our internal references to WebpackRequire and running beforeInitListeners");
                         _initWebpack(wreq);
 
                         for (const beforeInitListener of beforeInitListeners) {
                             beforeInitListener(wreq);
                         }
 
-                        originalCallback();
+                        originalCallback.apply(this, arguments as any);
                     };
 
                     callback.toString = originalCallback.toString.bind(originalCallback);
+                    arguments[2] = callback;
                 }
 
-                originalOnChunksLoaded(result, chunkIds, callback, priority);
+                originalOnChunksLoaded.apply(this, arguments as any);
             };
 
+            onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
         }
 
         Object.defineProperty(this, "O", {
@@ -141,6 +145,7 @@ function patchPush(webpackGlobal: any) {
     }
 
     handlePush.$$vencordOriginal = webpackGlobal.push;
+    handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
     // Webpack overwrites .push with its own push like so: `d.push = n.bind(null, d.push.bind(d));`
     // it wraps the old push (`d.push.bind(d)`). this old push is in this case our handlePush.
     // If we then repatched the new push, we would end up with recursive patching, which leads to our patches
@@ -169,10 +174,10 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         const patchedBy = new Set();
 
         const factory = factories[id] = function (module: any, exports: any, require: WebpackInstance) {
-            if (wreq == null) {
+            if (wreq == null && IS_DEV) {
                 if (!webpackNotInitializedLogged) {
                     webpackNotInitializedLogged = true;
-                    logger.error("Webpack require was not initialized, running modules without patches instead.");
+                    logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                 }
 
                 return void originalMod(module, exports, require);
@@ -208,7 +213,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                 try {
                     callback(exports, id);
                 } catch (err) {
-                    logger.error("Error in Webpack module listener", err);
+                    logger.error("Error in Webpack module listener:\n", err, callback);
                 }
             }
 
@@ -222,19 +227,19 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         callback(exports.default, id);
                     }
                 } catch (err) {
-                    logger.error("Error while firing callback for Webpack subscription", err);
+                    logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
                 }
             }
         } as any as { toString: () => string, original: any, (...args: any[]): void; };
 
-        factory.toString = mod.toString.bind(mod);
+        factory.toString = originalMod.toString.bind(originalMod);
         factory.original = originalMod;
 
         for (const factoryListener of factoryListeners) {
             try {
-                factoryListener(factory);
+                factoryListener(originalMod);
             } catch (err) {
-                logger.error("Error in Webpack factory listener", err);
+                logger.error("Error in Webpack factory listener:\n", err, factoryListener);
             }
         }
 
@@ -251,19 +256,19 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
-            const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
             if (patch.predicate && !patch.predicate()) continue;
-
             if (!code.includes(patch.find)) continue;
 
             patchedBy.add(patch.plugin);
 
+            const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
             const previousMod = mod;
             const previousCode = code;
 
-            // we change all patch.replacement to array in plugins/index
+            // We change all patch.replacement to array in plugins/index
             for (const replacement of patch.replacement as PatchReplacement[]) {
                 if (replacement.predicate && !replacement.predicate()) continue;
+
                 const lastMod = mod;
                 const lastCode = code;
 
@@ -281,15 +286,17 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
                         if (patch.group) {
                             logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
-                            code = previousCode;
                             mod = previousMod;
+                            code = previousCode;
                             patchedBy.delete(patch.plugin);
                             break;
                         }
-                    } else {
-                        code = newCode;
-                        mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+
+                        continue;
                     }
+
+                    code = newCode;
+                    mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                 } catch (err) {
                     logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
 
@@ -327,15 +334,16 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     }
 
                     patchedBy.delete(patch.plugin);
+
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                        code = previousCode;
                         mod = previousMod;
+                        code = previousCode;
                         break;
                     }
 
-                    code = lastCode;
                     mod = lastMod;
+                    code = lastCode;
                 }
             }
 
