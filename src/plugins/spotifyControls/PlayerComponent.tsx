@@ -18,11 +18,11 @@
 
 import "./spotifyStyles.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
@@ -340,25 +340,6 @@ function Info({ track }: { track: Track; }) {
     );
 }
 
-async function getDominantColor(imageUrl: any) {
-    if (imageUrl) {
-        const ctx = await document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
-        const src = imageUrl;
-        imageUrl = new Image();
-        imageUrl.crossOrigin = "";
-        imageUrl.src = src;
-        ctx.imageSmoothingEnabled = true;
-        ctx.drawImage(imageUrl, 0, 0, 1, 1);
-        return ctx.getImageData(0, 0, 1, 1).data.slice(0, 3);
-    } else {
-        return [0, 0, 0];
-    }
-}
-
-function rgbToHex(r: number, g: number, b: number) {
-    return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
-}
-
 export function Player() {
     const track = useStateFromStores(
         [SpotifyStore],
@@ -390,22 +371,22 @@ export function Player() {
     if (!track || !device?.is_active || shouldHide)
         return null;
 
-
-    const rgbColors = getDominantColor(track?.album?.image?.url);
-    const dominantColor = rgbToHex(rgbColors[0], rgbColors[1], rgbColors[2]);
-    new Logger("SpotifyControls", "#1db954").log(dominantColor);
-    // console.log(typeof rgbColors, rgbColors, rgbColors[0], rgbColors[1], rgbColors[2]);
-
-    const exportTrackVariables = {
+    const exportTrackImageStyle = {
         "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
-        "--vc-spotify-dominant-color": `${(dominantColor !== "#000000") ? dominantColor : "var(--brand-experiment)"}`
     } as React.CSSProperties;
 
     return (
-        <div id={cl("player")} style={exportTrackVariables}>
-            <Info track={track} />
-            <SeekBar />
-            <Controls />
-        </div>
+        <ErrorBoundary fallback={() => (
+            <div className="vc-spotify-fallback">
+                <p>Failed to render Spotify Modal :(</p>
+                <p >Check the console for errors</p>
+            </div>
+        )}>
+            <div id={cl("player")} style={exportTrackImageStyle}>
+                <Info track={track} />
+                <SeekBar />
+                <Controls />
+            </div>
+        </ErrorBoundary>
     );
 }
