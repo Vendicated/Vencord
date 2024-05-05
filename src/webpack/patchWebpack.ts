@@ -121,9 +121,9 @@ Object.defineProperty(Function.prototype, "m", {
     set(v: any) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
-        const error = new Error();
-        if (error.stack?.includes("discord.com")) {
-            logger.info("Found Webpack module factory", error.stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+        const { stack } = new Error();
+        if (stack?.includes("discord.com") || stack?.includes("discordapp.com")) {
+            logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
             patchFactories(v);
         }
 
