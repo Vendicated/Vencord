@@ -34,6 +34,9 @@ export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches = [] as Patch[];
 
+/** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
+let enabledPluginsSubscribedFlux = false;
+
 const settings = Settings.plugins;
 
 export function isPluginEnabled(p: string) {
@@ -119,6 +122,33 @@ export function startDependenciesRecursive(p: Plugin) {
     return { restartNeeded, failures };
 }
 
+export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+    if (p.flux) {
+        logger.debug("Subscribing to flux events of plugin", p.name);
+        for (const [event, handler] of Object.entries(p.flux)) {
+            fluxDispatcher.subscribe(event as FluxEvents, handler);
+        }
+    }
+}
+
+export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+    if (p.flux) {
+        logger.debug("Unsubscribing from flux events of plugin", p.name);
+        for (const [event, handler] of Object.entries(p.flux)) {
+            fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+        }
+    }
+}
+
+export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatcher) {
+    enabledPluginsSubscribedFlux = true;
+
+    for (const name in Plugins) {
+        if (!isPluginEnabled(name)) continue;
+        subscribePluginFluxEvents(Plugins[name], fluxDispatcher);
+    }
+}
+
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const { name, commands, flux, contextMenus } = p;
 
@@ -138,7 +168,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
 
     if (commands?.length) {
-        logger.info("Registering commands of plugin", name);
+        logger.debug("Registering commands of plugin", name);
         for (const cmd of commands) {
             try {
                 registerCommand(cmd, name);
@@ -149,13 +179,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
-    if (flux) {
-        for (const event in flux) {
-            FluxDispatcher.subscribe(event as FluxEvents, flux[event]);
-        }
+    if (enabledPluginsSubscribedFlux) {
+        subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
+
     if (contextMenus) {
+        logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
@@ -182,7 +212,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
 
     if (commands?.length) {
-        logger.info("Unregistering commands of plugin", name);
+        logger.debug("Unregistering commands of plugin", name);
         for (const cmd of commands) {
             try {
                 unregisterCommand(cmd.name);
@@ -193,13 +223,10 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
     }
 
-    if (flux) {
-        for (const event in flux) {
-            FluxDispatcher.unsubscribe(event as FluxEvents, flux[event]);
-        }
-    }
+    unsubscribePluginFluxEvents(p, FluxDispatcher);
 
     if (contextMenus) {
+        logger.debug("Removing context menus patches of plugin", name);
         for (const navId in contextMenus) {
             removeContextMenuPatch(navId, contextMenus[navId]);
         }

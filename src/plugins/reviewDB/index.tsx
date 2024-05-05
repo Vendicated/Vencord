@@ -35,13 +35,25 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => {
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     children.push(
         <Menu.MenuItem
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(props.guild.id, props.guild.name)}
+            action={() => openReviewsModal(guild.id, guild.name)}
+        />
+    );
+};
+
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
+    if (!user) return;
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-user-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(user.id, user.username)}
         />
     );
 };
@@ -53,7 +65,10 @@ export default definePlugin({
 
     settings,
     contextMenus: {
-        "guild-header-popout": guildPopoutPatch
+        "guild-header-popout": guildPopoutPatch,
+        "guild-context": guildPopoutPatch,
+        "user-context": userContextPatch,
+        "user-profile-actions": userContextPatch
     },
 
     patches: [
