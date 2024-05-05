@@ -17,11 +17,11 @@
 */
 
 import { Settings } from "@api/Settings";
+import ThemesTab from "@components/ThemeSettings/ThemesTab";
 import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
 import CloudTab from "@components/VencordSettings/CloudTab";
 import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
 import PluginsTab from "@components/VencordSettings/PluginsTab";
-import ThemesTab from "@components/VencordSettings/ThemesTab";
 import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
