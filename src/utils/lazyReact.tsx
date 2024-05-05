@@ -19,16 +19,20 @@ export const NoopComponent = () => null;
 export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
     const get = makeLazy(factory, attempts);
 
-    let failed = false;
     const LazyComponent = (props: T) => {
-        const Component = get() ?? (() => {
-            if (!failed) {
-                failed = true;
-                console.error(`LazyComponent factory failed:\n${factory}`);
-            }
+        let Component = (() => {
+            console.error(`LazyComponent factory failed:\n\n${factory}`);
 
             return NoopComponent;
-        })();
+        })() as React.ComponentType<T>;
+
+        // @ts-ignore
+        if (!get.$$vencordLazyFailed()) {
+            const result = get();
+            if (result != null) {
+                Component = result;
+            }
+        }
 
         return <Component {...props} />;
     };
