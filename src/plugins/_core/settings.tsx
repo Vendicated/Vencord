@@ -17,7 +17,6 @@
 */
 
 import { Settings } from "@api/Settings";
-import ThemesTab from "@components/ThemeSettings/ThemesTab";
 import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
 import CloudTab from "@components/VencordSettings/CloudTab";
 import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
@@ -96,7 +95,7 @@ export default definePlugin({
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: ThemesTab,
+                element: require("@components/ThemeSettings/ThemesTab").default,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
