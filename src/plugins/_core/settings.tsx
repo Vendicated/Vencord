@@ -17,6 +17,13 @@
 */
 
 import { Settings } from "@api/Settings";
+import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
+import CloudTab from "@components/VencordSettings/CloudTab";
+import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
+import PluginsTab from "@components/VencordSettings/PluginsTab";
+import ThemesTab from "@components/VencordSettings/ThemesTab";
+import UpdaterTab from "@components/VencordSettings/UpdaterTab";
+import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
@@ -36,7 +43,7 @@ export default definePlugin({
                 match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                 replace: (m, component, props) => {
                     props = props.replace(/children:\[.+\]/, "");
-                    return `${m},Vencord.Plugins.plugins.Settings.makeInfoElements(${component}, ${props})`;
+                    return `${m},$self.makeInfoElements(${component}, ${props})`;
                 }
             }
         ]
@@ -77,43 +84,43 @@ export default definePlugin({
             {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: require("@components/VencordSettings/VencordTab").default,
+                element: VencordTab,
                 className: "vc-settings"
             },
             {
                 section: "VencordPlugins",
                 label: "Plugins",
-                element: require("@components/VencordSettings/PluginsTab").default,
+                element: PluginsTab,
                 className: "vc-plugins"
             },
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: require("@components/VencordSettings/ThemesTab").default,
+                element: ThemesTab,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
                 section: "VencordUpdater",
                 label: "Updater",
-                element: require("@components/VencordSettings/UpdaterTab").default,
+                element: UpdaterTab,
                 className: "vc-updater"
             },
             {
                 section: "VencordCloud",
                 label: "Cloud",
-                element: require("@components/VencordSettings/CloudTab").default,
+                element: CloudTab,
                 className: "vc-cloud"
             },
             {
                 section: "VencordSettingsSync",
                 label: "Backup & Restore",
-                element: require("@components/VencordSettings/BackupAndRestoreTab").default,
+                element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
             IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
-                element: require("@components/VencordSettings/PatchHelperTab").default,
+                element: PatchHelperTab,
                 className: "vc-patch-helper"
             },
             ...this.customSections.map(func => func(SectionTypes)),
