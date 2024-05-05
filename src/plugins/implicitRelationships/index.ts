@@ -81,8 +81,8 @@ export default definePlugin({
             find: "getRelationshipCounts(){",
             replacement: {
                 predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
-                match: /\.sortBy\(\i=>\i\.comparator\)/,
-                replace: "$&.sortBy((row) => $self.sortList(row))"
+                match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+                replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
         },
 
@@ -120,10 +120,10 @@ export default definePlugin({
         }
     ),
 
-    sortList(row: any) {
+    wrapSort(comparator: Function, row: any) {
         return row.type === 5
             ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
-            : row.comparator;
+            : comparator(row);
     },
 
     async fetchImplicitRelationships() {
@@ -151,20 +151,25 @@ export default definePlugin({
         // OP 8 Request Guild Members allows 100 user IDs at a time
         const ignore = new Set(toRequest);
         const relationships = RelationshipStore.getRelationships();
-        const callback = ({ nonce, members }) => {
-            if (nonce !== sentNonce) return;
-            members.forEach(member => {
-                ignore.delete(member.user.id);
-            });
+        const callback = ({ chunks }) => {
+            for (const chunk of chunks) {
+                const { nonce, members } = chunk;
+                if (nonce !== sentNonce) return;
+                members.forEach(member => {
+                    ignore.delete(member.user.id);
+                });
 
-            nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
-            RelationshipStore.emitChange();
-            if (--count === 0) {
-                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK", callback);
+                nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
+                RelationshipStore.emitChange();
+                if (--count === 0) {
+                    // @ts-ignore
+                    FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                }
             }
         };
 
-        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", callback);
+        // @ts-ignore
+        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
         for (let i = 0; i < toRequest.length; i += 100) {
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
