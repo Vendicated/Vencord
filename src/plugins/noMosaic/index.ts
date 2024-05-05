@@ -5,11 +5,8 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import style from "./styles.css?managed";
 
 const settings = definePluginSettings({
     inlineVideo: {
@@ -17,15 +14,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    },
-    mediaLayoutType: {
-        description: "Choose media layout type",
-        type: OptionType.SELECT,
-        restartNeeded: true,
-        options: [
-            { label: "STATIC, render loading image but image isn't resposive, no problem unless discord window width is too small", value: "STATIC", default: true },
-            { label: "RESPONSIVE, image is responsive but not render loading image, cause messages shift when loaded", value: "RESPONSIVE" },
-        ]
     }
 });
 
@@ -39,15 +27,11 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".oneByTwoLayoutThreeGrid",
-            replacement: [{
-                match: /mediaLayoutType:\i\.\i\.MOSAIC/,
-                replace: "mediaLayoutType:$self.mediaLayoutType()",
-            },
-            {
-                match: /null!==\(\i=\i\.get\(\i\)\)&&void 0!==\i\?\i:"INVALID"/,
-                replace: '"INVALID"',
-            }]
+            find: "isGroupableMedia:function()",
+            replacement: {
+                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i;/,
+                replace: "=>false;"
+            }
         },
         {
             find: "renderAttachments(",
@@ -57,24 +41,5 @@ export default definePlugin({
                 replace: "$&$1.content_type?.startsWith('image/')&&"
             }
         },
-        {
-            find: "Messages.REMOVE_ATTACHMENT_TOOLTIP_TEXT",
-            replacement: {
-                match: /\i===\i\.\i\.MOSAIC/,
-                replace: "true"
-            }
-        }
-    ],
-
-    mediaLayoutType() {
-        return settings.store.mediaLayoutType;
-    },
-
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    }
+    ]
 });
