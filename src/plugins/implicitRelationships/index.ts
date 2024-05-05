@@ -19,11 +19,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+const { FriendsSections } = findByPropsLazy("FriendsSections");
 
 interface UserAffinity {
     user_id: string;
@@ -181,7 +182,6 @@ export default definePlugin({
     },
 
     start() {
-        const { FriendsSections } = findByProps("FriendsSections");
         FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });
