@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./fixBadgeOverflow.css";
+
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
