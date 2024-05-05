@@ -10,15 +10,15 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ImageLink",
     description: "Never hide image links in messages, even if it's the only content",
-    authors: [Devs.Kyuuhachi],
+    authors: [Devs.Kyuuhachi, Devs.Sqaaakoi],
 
     patches: [
         {
-            find: "isEmbedInline:function()",
+            find: "unknownUserMentionPlaceholder:",
             replacement: {
-                match: /(?<=isEmbedInline:function\(\)\{return )\i(?=\})/,
-                replace: "()=>false",
-            },
-        },
-    ],
+                match: /\(0,\i\.isEmbedInline\)\(\i\)/,
+                replace: "false",
+            }
+        }
+    ]
 });
