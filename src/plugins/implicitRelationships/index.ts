@@ -24,6 +24,7 @@ import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeU
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStore("UserAffinitiesStore");
+const { FriendsSections } = findByProps("FriendsSections");
 
 interface UserAffinity {
     user_id: string;
@@ -181,7 +182,6 @@ export default definePlugin({
     },
 
     start() {
-        const { FriendsSections } = findByProps("FriendsSections");
         FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });
