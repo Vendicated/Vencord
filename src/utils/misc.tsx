@@ -114,3 +114,7 @@ export function identity<T>(value: T): T {
 export const isMobile = navigator.userAgent.includes("Mobi");
 
 export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+
+export function pluralise(amount: number, singular: string, plural = singular + "s") {
+    return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
+}
