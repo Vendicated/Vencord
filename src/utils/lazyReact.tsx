@@ -23,15 +23,13 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         let Component = (() => {
             console.error(`LazyComponent factory failed:\n\n${factory}`);
 
-            return NoopComponent;
-        })() as React.ComponentType<T>;
+            return null;
+        }) as React.ComponentType<T>;
 
         // @ts-ignore
         if (!get.$$vencordLazyFailed()) {
             const result = get();
-            if (result != null) {
-                Component = result;
-            }
+            if (result != null) Component = result;
         }
 
         return <Component {...props} />;

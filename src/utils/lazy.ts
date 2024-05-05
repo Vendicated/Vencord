@@ -9,16 +9,16 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let cache: T;
 
     const getter = () => {
-        if (!cache && attempts > tries++) {
+        if (!cache && attempts > tries) {
             cache = factory();
-            if (!cache && attempts === tries) {
+            if (!cache && attempts === ++tries) {
                 console.error(`Lazy factory failed:\n\n${factory}`);
             }
         }
         return cache;
     };
 
-    getter.$$vencordLazyFailed = () => tries >= attempts;
+    getter.$$vencordLazyFailed = () => tries === attempts;
 
     return getter;
 }
