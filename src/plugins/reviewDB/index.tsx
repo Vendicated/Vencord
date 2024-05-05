@@ -36,6 +36,7 @@ import { settings } from "./settings";
 import { showToast } from "./utils";
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
+    if (!guild) return;
     children.push(
         <Menu.MenuItem
             label="View Reviews"
