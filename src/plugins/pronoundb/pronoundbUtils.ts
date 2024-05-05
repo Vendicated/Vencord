@@ -125,7 +125,7 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     params.append("ids", ids.join(","));
 
     try {
-        const req = await fetch("https://pronoundb.org/api/v1/lookup-bulk?" + params.toString(), {
+        const req = await fetch("https://pronoundb.org/api/v2/lookup?" + params.toString(), {
             method: "GET",
             headers: {
                 "Accept": "application/json",
@@ -134,8 +134,9 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
         });
         return await req.json()
             .then((res: PronounsResponse) => {
-                Object.assign(cache, res);
-                return res;
+                const translatedRes = Object.fromEntries(Object.entries(res).map(([k, v]) => [k, v.sets?.en?.join("/") ?? "unspecified"]));
+                Object.assign(cache, translatedRes);
+                return translatedRes;
             });
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
@@ -147,14 +148,21 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
 }
 
 export function formatPronouns(pronouns: string): string {
+    let formattedPronouns: string;
+    if (pronouns.includes("/")) {
+        formattedPronouns = pronouns.split("/").map(x => PronounMapping[x].split(/[/ ]/)[0]).join("/");
+    } else {
+        formattedPronouns = PronounMapping[pronouns];
+    }
+
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
     // For capitalized pronouns, just return the mapping (it is by default capitalized)
-    if (pronounsFormat === PronounsFormat.Capitalized) return PronounMapping[pronouns];
+    if (pronounsFormat === PronounsFormat.Capitalized) return formattedPronouns;
     // If it is set to lowercase and a special code (any, ask, avoid), then just return the capitalized text
     else if (
         pronounsFormat === PronounsFormat.Lowercase
         && ["any", "ask", "avoid", "other"].includes(pronouns)
-    ) return PronounMapping[pronouns];
+    ) return formattedPronouns;
     // Otherwise (lowercase and not a special code), then convert the mapping to lowercase
-    else return PronounMapping[pronouns].toLowerCase();
+    else return formattedPronouns.toLowerCase();
 }
