@@ -23,6 +23,7 @@ import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
+import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
@@ -38,12 +39,7 @@ const ContributorBadge: ProfileBadge = {
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ user }) => isPluginDev(user.id),
-    onClick(_, { user }) {
-        // circular import shenanigans
-        const { openContributorModal } = require("@components/PluginSettings/ContributorModal") as typeof import("@components/PluginSettings/ContributorModal");
-        // setImmediate is needed to run on later tick to workaround limitation in proxyLazy
-        setImmediate(() => openContributorModal(user));
-    }
+    onClick: (_, { user }) => openContributorModal(user)
 };
 
 const EquicordContributorBadge: ProfileBadge = {

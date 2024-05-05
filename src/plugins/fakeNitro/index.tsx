@@ -415,31 +415,35 @@ export default definePlugin({
     },
 
     handleProtoChange(proto: any, user: any) {
-        if (proto == null || typeof proto === "string" || !UserSettingsProtoStore || !PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators) return;
-        // @ts-ignore
-        const premiumType: number = user?._realPremiumType ?? user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+        try {
+            if (proto == null || typeof proto === "string") return;
 
-        if (premiumType !== 2) {
-            proto.appearance ??= AppearanceSettingsActionCreators.create();
+            const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
-            if (UserSettingsProtoStore.settings.appearance?.theme != null) {
-                const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
-                    theme: UserSettingsProtoStore.settings.appearance.theme
-                });
+            if (premiumType !== 2) {
+                proto.appearance ??= AppearanceSettingsActionCreators.create();
 
-                proto.appearance.theme = appearanceSettingsDummy.theme;
+                if (UserSettingsProtoStore.settings.appearance?.theme != null) {
+                    const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
+                        theme: UserSettingsProtoStore.settings.appearance.theme
+                    });
+
+                    proto.appearance.theme = appearanceSettingsDummy.theme;
+                }
+
+                if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
+                    const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
+                        backgroundGradientPresetId: {
+                            value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
+                        }
+                    });
+
+                    proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
+                    proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
+                }
             }
-
-            if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
-                const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
-                    backgroundGradientPresetId: {
-                        value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
-                    }
-                });
-
-                proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
-                proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
-            }
+        } catch (err) {
+            new Logger("FakeNitro").error(err);
         }
     },
 
