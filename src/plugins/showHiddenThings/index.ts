@@ -36,12 +36,17 @@ const settings = definePluginSettings({
         description: "Show the member mod view context menu item in all servers.",
         default: true,
     },
+    disableDiscoveryFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
+        default: true,
+    },
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
-    tags: ["ShowTimeouts", "ShowInvitesPaused"],
+    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various moderator-only elements regardless of permissions.",
     authors: [Devs.Dolfies],
     patches: [
@@ -67,6 +72,14 @@ export default definePlugin({
             replacement: {
                 match: /return \i\.hasAny\(\i\.computePermissions\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.MemberSafetyPagePermissions\)/,
                 replace: "return true",
+            }
+        },
+        {
+            find: "auto_removed:",
+            predicate: () => settings.store.disableDiscoveryFilters,
+            replacement: {
+                match: /filters:\i\.join\(" AND "\),facets:\[/,
+                replace: "facets:["
             }
         }
     ],
