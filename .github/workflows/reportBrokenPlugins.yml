@@ -11,28 +11,31 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               if: ${{ github.event_name == 'schedule' }}
               with:
                   ref: dev
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               if: ${{ github.event_name == 'workflow_dispatch' }}
 
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-            - name: Use Node.js 19
-              uses: actions/setup-node@v3
+            - name: Use Node.js 18
+              uses: actions/setup-node@v4
               with:
-                  node-version: 19
+                  node-version: 18
                   cache: "pnpm"
 
             - name: Install dependencies
               run: |
                   pnpm install --frozen-lockfile
-                  pnpm add puppeteer
 
-                  sudo apt-get install -y chromium-browser
+            - name: Install Google Chrome
+              id: setup-chrome
+              uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
+              with:
+                chrome-version: stable
 
             - name: Build web
               run: pnpm buildWeb --standalone --dev
@@ -41,7 +44,7 @@ jobs:
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=$(which chromium-browser)
+                  export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
                   node dist/report.mjs >> $GITHUB_STEP_SUMMARY
@@ -54,7 +57,7 @@ jobs:
               if: success() || failure() # even run if previous one failed
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=$(which chromium-browser)
+                  export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
                   export USE_CANARY=true
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
