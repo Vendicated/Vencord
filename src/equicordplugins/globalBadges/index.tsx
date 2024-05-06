@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./fixBadgeOverflow.css";
-
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -62,7 +60,7 @@ const BadgeComponent = ({ name, img }: { name: string, img: string; }) => {
                 <img
                     {...tooltipProps}
                     src={img}
-                    style={{ width: "22px", height: "22px", transform: name.includes("Replugged") ? "scale(0.9)" : null, margin: "0 2px" }}
+                    style={{ width: "22px", height: "22px", transform: name.includes("Replugged") ? null : "scale(0.9)", margin: "0 1px" }}
                 />
             )}
         </Tooltip>
