@@ -91,7 +91,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ResurrectHome",
-    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking the Server Guide.",
+    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking a server.",
     authors: [Devs.Dolfies, Devs.Nuckyz],
     settings,
 
@@ -151,7 +151,7 @@ export default definePlugin({
             find: "487e85_1",
             replacement: {
                 match: /(?<=text:(\i)\?\i\.\i\.Messages\.SERVER_GUIDE:\i\.\i\.Messages\.GUILD_HOME,)/,
-                replace: "badge:$self.ViewServerHomeButton({serverGuide:$1}),"
+                replace: "trailing:$self.ViewServerHomeButton({serverGuide:$1}),"
             }
         },
         // Disable view Server Home override when the Server Home is unmouted
