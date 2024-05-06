@@ -450,6 +450,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Oleh Polisan",
         id: 242305263313485825n
     },
+    GabiRP: {
+        name: "GabiRP",
+        id: 507955112027750401n
+    },
     ImBanana: {
         name: "Im_Banana",
         id: 635250116688871425n
