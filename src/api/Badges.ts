@@ -36,7 +36,7 @@ export interface ProfileBadge {
     image?: string;
     link?: string;
     /** Action to perform when you click the badge */
-    onClick?(): void;
+    onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, props: BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
@@ -87,9 +87,7 @@ export function _getBadges(args: BadgeUserArgs) {
 
 export interface BadgeUserArgs {
     user: User;
-    profile: Profile;
-    premiumSince: Date;
-    premiumGuildSince?: Date;
+    guildId: string;
 }
 
 interface ConnectedAccount {
