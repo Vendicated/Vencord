@@ -154,7 +154,7 @@ async function messageUpdateHandler(payload: MessageUpdatePayload) {
                     ...(cachedMessage.editHistory ?? []),
                     {
                         content: cachedMessage.content,
-                        timestamp: (new Date()).toISOString()
+                        timestamp: new Date().toISOString()
                     }
                 ]
             };
