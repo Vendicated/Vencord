@@ -1,0 +1,31 @@
+.vc-scriptsnippets-settings-script {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    margin-top: .25em;
+    margin-bottom: .5em;
+}
+
+.vc-scriptsnippets-settings-script > div {
+    display: flex;
+    gap: 1em;
+    margin-top: 0.5em;
+    flex-direction: row;
+}
+
+.vc-scriptsnippets-settings-btn {
+    /* even though this is below the previous rule, it will still override it for some reason */
+    gap: .5em !important;
+}
+
+.vc-scriptsnippets-settings-startup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
