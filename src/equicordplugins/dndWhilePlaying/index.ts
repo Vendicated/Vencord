@@ -13,11 +13,10 @@ const updateAsync = findByCodeLazy("updateAsync");
 
 async function runningGamesChange(event) {
     const { games } = event;
-    let status;
     let savedStatus;
     if (games.length > 0) {
         const currentUser = UserStore.getCurrentUser();
-        status = PresenceStore.getStatus(currentUser.id);
+        const status = PresenceStore.getStatus(currentUser.id);
         savedStatus = status;
         if (status === "invisible") return;
         if (status !== "dnd") updateAsync("dnd");
