@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ImgHTMLAttributes } from "react";
+import { CSSProperties, ImgHTMLAttributes } from "react";
 
 export interface Timestamp {
     start?: number;
@@ -75,4 +75,8 @@ export interface ApplicationIcon {
 export interface ActivityListIcon {
     iconElement: JSX.Element;
     tooltip?: JSX.Element | string;
+}
+
+export interface IconCSSProperties extends CSSProperties {
+    "--icon-size": string;
 }
