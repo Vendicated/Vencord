@@ -166,10 +166,13 @@ const settings = definePluginSettings({
         description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
+    },
+    disableEmbedPermissionCheck: {
+        description: "Whether to disable the embed permission check when sending fake emojis and stickers",
+        type: OptionType.BOOLEAN,
+        default: false
     }
-}).withPrivateSettings<{
-    disableEmbedPermissionCheck: boolean;
-}>();
+});
 
 function hasPermission(channelId: string, permission: bigint) {
     const channel = ChannelStore.getChannel(channelId);
