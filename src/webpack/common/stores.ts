@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByPropsLazy } from "../webpack";
+import { findByProps, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -67,20 +68,17 @@ export let DraftStore: t.DraftStore;
  *
  * @param stores The stores to listen to
  * @param mapper A function that returns the data you need
- * @param idk some thing, idk just pass null
+ * @param dependencies An array of reactive values which the hook depends on. Use this if your mapper or equality function depends on the value of another hook
  * @param isEqual A custom comparator for the data returned by mapper
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const { useStateFromStores }: {
-    useStateFromStores: <T>(
-        stores: t.FluxStore[],
-        mapper: () => T,
-        idk?: any,
-        isEqual?: (old: T, newer: T) => boolean
-    ) => T;
-}
-    = findByPropsLazy("useStateFromStores");
+export const useStateFromStores = proxyLazy(() => findByProps("useStateFromStores").useStateFromStores) as <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    dependencies?: any,
+    isEqual?: (old: T, newer: T) => boolean
+) => T;
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
