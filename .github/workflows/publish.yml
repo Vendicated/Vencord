@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: check that tag matches package.json version
               run: |
@@ -20,12 +20,12 @@ jobs:
                       exit 1
                   fi
 
-            - uses: pnpm/action-setup@v2 # Install pnpm using packageManager key in package.json
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 19
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
-                  node-version: 19
+                  node-version: 20
                   cache: "pnpm"
 
             - name: Install dependencies

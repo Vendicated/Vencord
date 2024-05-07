@@ -21,10 +21,10 @@ jobs:
 
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-            - name: Use Node.js 18
+            - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
-                  node-version: 18
+                  node-version: 20
                   cache: "pnpm"
 
             - name: Install dependencies
@@ -35,7 +35,7 @@ jobs:
               id: setup-chrome
               uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
               with:
-                chrome-version: stable
+                  chrome-version: stable
 
             - name: Build web
               run: pnpm buildWeb --standalone --dev
