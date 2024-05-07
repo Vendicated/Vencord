@@ -1,3 +1,9 @@
+.vc-scriptsnippets-chance {
+    text-decoration: underline;
+    font-weight: bolder;
+    font-size: 1.3em !important;
+}
+
 .vc-scriptsnippets-settings-script {
     display: flex;
     flex-direction: row;

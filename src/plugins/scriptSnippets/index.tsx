@@ -21,21 +21,23 @@ import "./styles.css";
 import { ApplicationCommandInputType, ApplicationCommandType, sendBotMessage } from "@api/Commands";
 import { Commands, DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
+import { ErrorCard } from "@components/ErrorCard";
 import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { wordsToKebab as kebab } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import {
-    Button,
+    Button, Forms,
     showToast,
     Text,
     TextArea,
     TextInput,
     Toasts,
     useCallback,
-    useEffect,
+    useEffect, useMemo,
     useState
 } from "@webpack/common";
 
@@ -43,6 +45,7 @@ const snippetLogger = new Logger("ScriptSnippets");
 const wordsToKebab = (words: string) => kebab(words.split(/[\s\-_]+/).map(s => s.replace(/[^\w]/g, "")));
 
 const SNIPPET_KEY = "ScriptSnippets_snippets";
+const UNDERSTOOD_KEY = "ScriptSnippets_understood";
 
 type Snippets = Snippet[];
 interface Snippet {
@@ -86,13 +89,26 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Add snippets to run on certain triggers",
         component: () => {
-            const [loadedSnippets, err, pending] = useAwaiter(() => DataStore.get<Snippets>(SNIPPET_KEY));
+            const [result, err, pending] = useAwaiter(() => DataStore.getMany([SNIPPET_KEY, UNDERSTOOD_KEY]) as Promise<[Snippets, boolean]>);
+            const [loadedSnippets, understood] = useMemo(() => result || [], [result]);
 
+            // TODO: find a better way to do this
             const [realSnippets, setRealSnippets] = useState<Snippets>(loadedSnippets || []);
+            const [realUnderstood, setRealUnderstood] = useState<boolean>(understood ?? false);
+            const [canUnderstand, setCanUnderstand] = useState<boolean>(false);
+
+            useEffect(() => {
+                if (!realUnderstood) {
+                    const timeout = setTimeout(() => setCanUnderstand(true), 15_000);
+
+                    return () => clearTimeout(timeout);
+                }
+            }, [realUnderstood]);
 
             useEffect(() => {
                 if (!pending && !err) {
                     setRealSnippets(loadedSnippets || []);
+                    setRealUnderstood(understood ?? false);
                 }
             }, [pending]);
 
@@ -127,6 +143,27 @@ const settings = definePluginSettings({
             if (pending) return <Text>Loading snippets...</Text>;
 
             if (err) return <Text>There was an error loading snippets: {err}</Text>;
+
+            if (!realUnderstood) return <ErrorCard id="vc-scriptsnippets-warning" className={Margins.bottom16}>
+                <Forms.FormTitle tag="h2">Warning: do not use if you don't understand what you're doing!</Forms.FormTitle>
+
+                <Forms.FormText className={Margins.bottom8}>
+                    This plugin has the capability to completely and irreparably damage your Discord installation, environment and computer; access your Discord account credentials and sensitive data stored on your device; and more.
+                </Forms.FormText>
+
+                <Forms.FormText className={Margins.top8}>
+                    If you were told to paste code in here by someone, there is a <span className="vc-scriptsnippets-chance">11/10 chance you are being scammed</span>. Only enter code that you completely trust and understand.
+                </Forms.FormText>
+
+                <Forms.FormText className={Margins.top8}>
+                    You must wait 15 seconds before you can continue.
+                </Forms.FormText>
+
+                <Button color={Button.Colors.RED} onClick={() => {
+                    DataStore.set(UNDERSTOOD_KEY, true);
+                    setRealUnderstood(true);
+                }} disabled={!canUnderstand} className={Margins.top16}>I understand and accept responsibility for my actions</Button>
+            </ErrorCard>;
 
             return (
                 <>
