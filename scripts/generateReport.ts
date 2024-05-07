@@ -534,9 +534,9 @@ async function runtime(token: string) {
                         searchType === "webpackDependantLazy" ||
                         searchType === "webpackDependantLazyComponent")
                 ) {
-                    logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                    logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
                 } else if (searchType === "extractAndLoadChunks") {
-                    logMessage += `([${args[0].map((arg: any) => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
+                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
                 } else {
                     logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
                 }
