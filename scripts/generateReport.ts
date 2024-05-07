@@ -471,8 +471,6 @@ async function runtime(token: string) {
             }
         }
 
-        const WEBPACK_SEARCH_HISTORY_WITH_FILTER_NAME_PROP = ["find", "findComponent", "waitFor"];
-
         // eslint-disable-next-line prefer-const
         for (let [searchType, args] of Vencord.Webpack.webpackSearchHistory) {
             args = [...args];
@@ -518,7 +516,7 @@ async function runtime(token: string) {
                 let parsedArgs = args;
 
                 if (args[0].$$vencordProps != null) {
-                    if (WEBPACK_SEARCH_HISTORY_WITH_FILTER_NAME_PROP.includes(searchType)) {
+                    if (["find", "findComponent", "waitFor"].includes(searchType)) {
                         filterName = args[0].$$vencordProps.shift();
                     }
 
@@ -528,11 +526,8 @@ async function runtime(token: string) {
                 // if parsedArgs is the same as args, it means vencordProps of the filter was not available (like in normal filter functions),
                 // so log the filter function instead
                 if (
-                    parsedArgs === args && (searchType === "waitFor" ||
-                        searchType === "find" ||
-                        searchType === "findComponent" ||
-                        searchType === "webpackDependantLazy" ||
-                        searchType === "webpackDependantLazyComponent")
+                    parsedArgs === args &&
+                    ["waitFor", "find", "findComponent", "webpackDependantLazy", "webpackDependantLazyComponent"].includes(searchType)
                 ) {
                     logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
                 } else if (searchType === "extractAndLoadChunks") {
