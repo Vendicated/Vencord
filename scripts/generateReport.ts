@@ -517,10 +517,10 @@ async function runtime(token: string) {
 
                 if (args[0].$$vencordProps != null) {
                     if (["find", "findComponent", "waitFor"].includes(searchType)) {
-                        filterName = args[0].$$vencordProps.shift();
+                        filterName = args[0].$$vencordProps[0];
                     }
 
-                    parsedArgs = args[0].$$vencordProps;
+                    parsedArgs = args[0].$$vencordProps.slice(1);
                 }
 
                 // if parsedArgs is the same as args, it means vencordProps of the filter was not available (like in normal filter functions),
