@@ -25,9 +25,10 @@ import { access, readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
-// wtf is this assert syntax
-import PackageJSON from "../../package.json" assert { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
+
+/** @type {import("../../package.json")} */
+const PackageJSON = JSON.parse(readFileSync("package.json"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
