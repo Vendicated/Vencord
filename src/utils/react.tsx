@@ -22,6 +22,8 @@ import { checkIntersecting } from "./misc";
 
 export * from "./lazyReact";
 
+export const NoopComponent = () => null;
+
 /**
  * Check if an element is on screen
  * @param intersectOnly If `true`, will only update the state when the element comes into view

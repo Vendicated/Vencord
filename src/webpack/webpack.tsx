@@ -133,7 +133,22 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
     if (typeof callback !== "function")
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
 
-    if (IS_DEV && !isIndirect) webpackSearchHistory.push(["waitFor", [filter]]);
+    if (IS_DEV && !isIndirect) {
+        const originalCallback = callback;
+
+        let callbackCalled = false;
+        callback = function () {
+            callbackCalled = true;
+
+            // @ts-ignore
+            originalCallback(...arguments);
+        };
+
+        // @ts-ignore
+        callback.$$vencordCallbackCalled = () => callbackCalled;
+
+        webpackSearchHistory.push(["waitFor", [callback, filter]]);
+    }
 
     if (cache != null) {
         const existing = cacheFind(filter);
@@ -165,10 +180,12 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
     if (typeof callback !== "function")
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
 
-    if (IS_DEV && !isIndirect) webpackSearchHistory.push(["find", [filter]]);
-
     const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
+
+    if (IS_DEV && !isIndirect) {
+        webpackSearchHistory.push(["find", [proxy, filter]]);
+    }
 
     if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;
 
@@ -187,9 +204,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
     if (typeof parse !== "function")
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
 
-    if (IS_DEV && !isIndirect) webpackSearchHistory.push(["findComponent", [filter]]);
-
-    let InnerComponent = null as null | React.ComponentType<T>;
+    let InnerComponent = null as React.ComponentType<T> | null;
 
     let findFailedLogged = false;
     const WrapperComponent = (props: T) => {
@@ -201,13 +216,19 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         return InnerComponent && <InnerComponent {...props} />;
     };
 
-    WrapperComponent.$$vencordGetter = () => InnerComponent;
-
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v);
         InnerComponent = parsedComponent;
         Object.assign(InnerComponent, parsedComponent);
     }, { isIndirect: true });
+
+    if (IS_DEV) {
+        WrapperComponent.$$vencordInner = () => InnerComponent;
+
+        if (!isIndirect) {
+            webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
+        }
+    }
 
     if (InnerComponent !== null) return InnerComponent;
 
@@ -230,9 +251,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 
     const filter = filters.byProps(...newProps);
 
-    if (IS_DEV) webpackSearchHistory.push(["findExportedComponent", props]);
-
-    let InnerComponent = null as null | React.ComponentType<T>;
+    let InnerComponent = null as React.ComponentType<T> | null;
 
     let findFailedLogged = false;
     const WrapperComponent = (props: T) => {
@@ -244,13 +263,17 @@ export function findExportedComponent<T extends object = any>(...props: string[]
         return InnerComponent && <InnerComponent {...props} />;
     };
 
-    WrapperComponent.$$vencordGetter = () => InnerComponent;
 
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v[newProps[0]]);
         InnerComponent = parsedComponent;
         Object.assign(InnerComponent, parsedComponent);
     }, { isIndirect: true });
+
+    if (IS_DEV) {
+        WrapperComponent.$$vencordInner = () => InnerComponent;
+        webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...props]]);
+    }
 
     if (InnerComponent !== null) return InnerComponent;
 
@@ -271,9 +294,13 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: any) => React.ComponentType<T>;
     const newCode = code as string[];
 
-    if (IS_DEV) webpackSearchHistory.push(["findComponentByCode", code]);
+    const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
 
-    return findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
+    if (IS_DEV) {
+        webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...code]]);
+    }
+
+    return ComponentResult;
 }
 
 /**
@@ -282,9 +309,13 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
  * @param props A list of props to search the exports for
  */
 export function findByProps<T = any>(...props: string[]) {
-    if (IS_DEV) webpackSearchHistory.push(["findByProps", props]);
+    const result = find<T>(filters.byProps(...props), m => m, { isIndirect: true });
 
-    return find<T>(filters.byProps(...props), m => m, { isIndirect: true });
+    if (IS_DEV) {
+        webpackSearchHistory.push(["findByProps", [result, ...props]]);
+    }
+
+    return result;
 }
 
 /**
@@ -293,9 +324,13 @@ export function findByProps<T = any>(...props: string[]) {
  * @param code A list of code to search each export for
  */
 export function findByCode<T = any>(...code: string[]) {
-    if (IS_DEV) webpackSearchHistory.push(["findByCode", code]);
+    const result = find<T>(filters.byCode(...code), m => m, { isIndirect: true });
 
-    return find<T>(filters.byCode(...code), m => m, { isIndirect: true });
+    if (IS_DEV) {
+        webpackSearchHistory.push(["findByCode", [result, ...code]]);
+    }
+
+    return result;
 }
 
 /**
@@ -304,9 +339,13 @@ export function findByCode<T = any>(...code: string[]) {
  * @param name The store name
  */
 export function findStore<T = any>(name: string) {
-    if (IS_DEV) webpackSearchHistory.push(["findStore", [name]]);
+    const result = find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 
-    return find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
+    if (IS_DEV) {
+        webpackSearchHistory.push(["findStore", [result, name]]);
+    }
+
+    return result;
 }
 
 /**

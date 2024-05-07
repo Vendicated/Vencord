@@ -4,17 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
+export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false }: { isIndirect?: boolean; } = {}): () => T {
     let tries = 0;
     let cache: T;
 
     const getter = () => {
         if (!cache && attempts > tries) {
             cache = factory();
-            if (!cache && attempts === ++tries) {
+            if (!cache && attempts === ++tries && !isIndirect) {
                 console.error(`Lazy factory failed:\n\n${factory}`);
             }
         }
+
         return cache;
     };
 
@@ -48,8 +49,8 @@ const handler: ProxyHandler<any> = {
     }
 };
 
-const proxyLazyGet = Symbol.for("vencord.lazy.get");
-const proxyLazyCache = Symbol.for("vencord.lazy.cached");
+export const proxyLazyGet = Symbol.for("vencord.lazy.get");
+export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
 
 /**
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
@@ -59,7 +60,7 @@ const proxyLazyCache = Symbol.for("vencord.lazy.cached");
  * @returns Result of factory function
  */
 export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = false): T {
-    const get = makeLazy(factory, attempts) as any;
+    const get = makeLazy(factory, attempts, { isIndirect: true }) as any;
 
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
@@ -84,6 +85,9 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
     return new Proxy(proxyDummy, {
         ...handler,
         get(target, p, receiver) {
+            if (p === proxyLazyGet) return target[proxyLazyGet];
+            if (p === proxyLazyCache) return target[proxyLazyCache];
+
             // If we're still in the same tick, it means the lazy was immediately used.
             // thus, we lazy proxy the get access to make things like destructuring work as expected
             // meow here will also be a lazy

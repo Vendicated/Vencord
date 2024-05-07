@@ -471,26 +471,19 @@ async function runtime(token: string) {
             }
         }
 
-        // Must evaluate the len outside of the loop, as the array will be modified by the find methods called inside of it
-        // This will avoid an infinite loop
-        const len = Vencord.Webpack.webpackSearchHistory.length;
-        for (let i = 0; i < len; i++) {
-            const [searchType, args] = Vencord.Webpack.webpackSearchHistory[i];
+        const WEBPACK_SEARCH_HISTORY_WITH_FILTER_NAME_PROP = ["find", "findComponent", "waitFor"];
 
-            let method = searchType as string;
-            if (searchType === "waitFor") method = "cacheFind";
+        // eslint-disable-next-line prefer-const
+        for (let [searchType, args] of Vencord.Webpack.webpackSearchHistory) {
+            args = [...args];
 
             try {
-                let result: any;
+                let result = null as any;
 
-                if (method === "webpackDependantLazy" || method === "webpackDependantLazyComponent") {
+                if (searchType === "webpackDependantLazy" || searchType === "webpackDependantLazyComponent") {
                     const [factory] = args;
                     result = factory();
-
-                    if (result != null && "$$vencordGetter" in result) {
-                        result = result.$$vencordGetter();
-                    }
-                } else if (method === "extractAndLoadChunks") {
+                } else if (searchType === "extractAndLoadChunks") {
                     const [code, matcher] = args;
 
                     const module = Vencord.Webpack.findModuleFactory(...code);
@@ -498,14 +491,20 @@ async function runtime(token: string) {
                         result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     }
                 } else {
-                    result = Vencord.Webpack[method](...args);
+                    result = args.shift();
 
-                    // If the result is our Proxy or ComponentWrapper, this means the search failed
-                    if (
-                        result != null &&
-                        (result[Vencord.Util.proxyInnerGet] != null || "$$vencordGetter" in result)
-                    ) {
-                        result = undefined;
+                    if (result != null) {
+                        if (result.$$vencordCallbackCalled != null && !result.$$vencordCallbackCalled()) {
+                            result = null;
+                        }
+
+                        if (result[Vencord.Util.proxyInnerGet] != null) {
+                            result = result[Vencord.Util.proxyInnerValue];
+                        }
+
+                        if (result.$$vencordInner != null) {
+                            result = result.$$vencordInner();
+                        }
                     }
                 }
 
@@ -517,28 +516,27 @@ async function runtime(token: string) {
 
                 let filterName = "";
                 let parsedArgs = args;
-                if ("$$vencordProps" in args[0]) {
-                    if (
-                        searchType === "find" ||
-                        searchType === "findComponent" ||
-                        searchType === "waitFor"
-                    ) {
-                        filterName = args[0].$$vencordProps[0];
+
+                if (args[0].$$vencordProps != null) {
+                    if (WEBPACK_SEARCH_HISTORY_WITH_FILTER_NAME_PROP.includes(searchType)) {
+                        filterName = args[0].$$vencordProps.shift();
                     }
 
-                    parsedArgs = args[0].$$vencordProps.slice(1);
+                    parsedArgs = args[0].$$vencordProps;
                 }
 
+                // if parsedArgs is the same as args, it means vencordProps of the filter was not available (like in normal filter functions),
+                // so log the filter function instead
                 if (
-                    parsedArgs === args && searchType === "waitFor" ||
-                    searchType === "find" ||
-                    searchType === "findComponent" ||
-                    searchType === "webpackDependantLazy" ||
-                    searchType === "webpackDependantLazyComponent"
+                    parsedArgs === args && (searchType === "waitFor" ||
+                        searchType === "find" ||
+                        searchType === "findComponent" ||
+                        searchType === "webpackDependantLazy" ||
+                        searchType === "webpackDependantLazyComponent")
                 ) {
-                    logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                    logMessage += `(${args[0].toString().slice(0, 147)}...)`;
                 } else if (searchType === "extractAndLoadChunks") {
-                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                    logMessage += `([${args[0].map((arg: any) => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                 } else {
                     logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
                 }
