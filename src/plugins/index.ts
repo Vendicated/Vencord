@@ -36,6 +36,7 @@ export const patches = [] as Patch[];
 
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
+const subscribedFluxEventsPlugins = new Set<string>();
 
 const settings = Settings.plugins;
 
@@ -123,7 +124,9 @@ export function startDependenciesRecursive(p: Plugin) {
 }
 
 export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof FluxDispatcher) {
-    if (p.flux) {
+    if (p.flux && !subscribedFluxEventsPlugins.has(p.name)) {
+        subscribedFluxEventsPlugins.add(p.name);
+
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             fluxDispatcher.subscribe(event as FluxEvents, handler);
@@ -133,6 +136,8 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
 
 export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof FluxDispatcher) {
     if (p.flux) {
+        subscribedFluxEventsPlugins.delete(p.name);
+
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             fluxDispatcher.unsubscribe(event as FluxEvents, handler);
