@@ -281,7 +281,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 }
 
 /**
- * Find the first component that includes all the given code.
+ * Find the first component in a default export that includes all the given code.
  *
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR")
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)", ColorPicker => React.memo(ColorPicker))
@@ -319,7 +319,7 @@ export function findByProps<T = any>(...props: string[]) {
 }
 
 /**
- * Find the first export that includes all the given code.
+ * Find the first default export that includes all the given code.
  *
  * @param code A list of code to search each export for
  */
