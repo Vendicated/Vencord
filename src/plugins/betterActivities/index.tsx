@@ -64,6 +64,21 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: false,
     },
+    allActivitiesStyle: {
+        type: OptionType.SELECT,
+        description: "Style for showing all activities",
+        options: [
+            {
+                default: true,
+                label: "Carousel",
+                value: "carousel",
+            },
+            {
+                label: "List",
+                value: "list",
+            },
+        ]
+    }
 });
 
 const cl = classNameFactory("vc-bactivities-");
@@ -364,69 +379,94 @@ export default definePlugin({
 
         if (!activities.length) return null;
 
-        return (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                <ActivityView
-                    activity={currentActivity}
-                    user={user}
-                    guild={guild}
-                    channelId={channelId}
-                    onClose={onClose}
-                />
+        if (settings.store.allActivitiesStyle === "carousel") {
+            return (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <ActivityView
+                        activity={currentActivity}
+                        user={user}
+                        guild={guild}
+                        channelId={channelId}
+                        onClose={onClose}/>
+                    <div
+                        className={cl("controls")}
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Tooltip text="Left" tooltipClassName={cl("controls-tooltip")}>{({
+                            onMouseEnter,
+                            onMouseLeave
+                        }) => {
+                            return <span
+                                onMouseEnter={onMouseEnter}
+                                onMouseLeave={onMouseLeave}
+                                onClick={() => {
+                                    const index = activities.indexOf(currentActivity!);
+                                    if (index - 1 >= 0)
+                                        setCurrentActivity(activities[index - 1]);
+                                }}
+                            >
+                                <Caret
+                                    disabled={activities.indexOf(currentActivity!) < 1}
+                                    direction="left"/>
+                            </span>;
+                        }}</Tooltip>
+
+                        <div className="carousell">
+                            {activities.map((activity, index) => (
+                                <div
+                                    key={"dot--" + index}
+                                    onClick={() => setCurrentActivity(activity)}
+                                    className={`dot ${currentActivity === activity ? "selected" : ""}`}/>
+                            ))}
+                        </div>
+
+                        <Tooltip text="Right" tooltipClassName={cl("controls-tooltip")}>{({
+                            onMouseEnter,
+                            onMouseLeave
+                        }) => {
+                            return <span
+                                onMouseEnter={onMouseEnter}
+                                onMouseLeave={onMouseLeave}
+                                onClick={() => {
+                                    const index = activities.indexOf(currentActivity!);
+                                    if (index + 1 < activities.length)
+                                        setCurrentActivity(activities[index + 1]);
+                                }}
+                            >
+                                <Caret
+                                    disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
+                                    direction="right"/>
+                            </span>;
+                        }}</Tooltip>
+                    </div>
+                </div>
+            );
+        } else {
+            return (
                 <div
-                    className={cl("controls")}
                     style={{
                         display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
+                        flexDirection: "column",
+                        gap: "5px",
                     }}
                 >
-                    <Tooltip text="Left" tooltipClassName={cl("controls-tooltip")}>{({ onMouseEnter, onMouseLeave }) => {
-                        return <span
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                            onClick={() => {
-                                const index = activities.indexOf(currentActivity!);
-                                if (index - 1 >= 0)
-                                    setCurrentActivity(activities[index - 1]);
-                            }}
-                        >
-                            <Caret
-                                disabled={activities.indexOf(currentActivity!) < 1}
-                                direction="left"
-                            />
-                        </span>;
-                    }}</Tooltip>
-
-                    <div className="carousell">
-                        {activities.map((activity, index) => (
-                            <div
-                                key={"dot--" + index}
-                                onClick={() => setCurrentActivity(activity)}
-                                className={`dot ${currentActivity === activity ? "selected" : ""}`}
-                            />
-                        ))}
-                    </div>
-
-                    <Tooltip text="Right" tooltipClassName={cl("controls-tooltip")}>{({ onMouseEnter, onMouseLeave }) => {
-                        return <span
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                            onClick={() => {
-                                const index = activities.indexOf(currentActivity!);
-                                if (index + 1 < activities.length)
-                                    setCurrentActivity(activities[index + 1]);
-                            }}
-                        >
-                            <Caret
-                                disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
-                                direction="right"
-                            />
-                        </span>;
-                    }}</Tooltip>
+                    {activities.map((activity, index) => (
+                        <ActivityView
+                            key={index}
+                            activity={activity}
+                            user={user}
+                            guild={guild}
+                            channelId={channelId}
+                            onClose={onClose}
+                        />
+                    ))}
                 </div>
-            </div>
-        );
+            );
+        }
     },
 
     patches: [
