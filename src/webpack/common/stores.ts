@@ -63,7 +63,6 @@ export const DraftStore = findStore<t.DraftStore>("DraftStore");
 /**
  * React hook that returns stateful data for one or more stores
  * You might need a custom comparator (4th argument) if your store data is an object
- *
  * @param stores The stores to listen to
  * @param mapper A function that returns the data you need
  * @param dependencies An array of reactive values which the hook depends on. Use this if your mapper or equality function depends on the value of another hook
@@ -71,9 +70,4 @@ export const DraftStore = findStore<t.DraftStore>("DraftStore");
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores = find(filters.byProps("useStateFromStores"), m => m.useStateFromStores) as <T>(
-    stores: t.FluxStore[],
-    mapper: () => T,
-    dependencies?: any[] | null,
-    isEqual?: (old: T, newer: T) => boolean
-) => T;
+export const useStateFromStores = find<t.useStateFromStores>(filters.byProps("useStateFromStores"), m => m.useStateFromStores);
