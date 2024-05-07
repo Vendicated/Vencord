@@ -25,8 +25,8 @@ const tagListJson = require('./tags.json')
 const draft_type = 0;
 
 export default definePlugin({
-    name: "CatPicturesCommand",
-    description: "This plugin uses the Caatas API to send random cat pictures.",
+    name: "CatPictures",
+    description: "This plugin uses the Caatas API to get random cat pictures via a slash command.",
     authors: [
         {
             id: 353145839864250368n,
