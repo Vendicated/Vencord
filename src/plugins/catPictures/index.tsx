@@ -53,11 +53,11 @@ export default definePlugin({
                 }
             ],
             execute: async (opts, ctx) => {
-                const catSays = findOption(opts, "say", "");
-                const catTag = findOption(opts, "tag", "");
+                let catSays = findOption(opts, "say", "");
+                let catTag = findOption(opts, "tag", "");
 
-                const response = await getCatPicture(catSays, catTag);
-                const file = new File([response], "cat.jpeg", { type: "image/jpeg" })
+                let response = await getCatPicture(catSays, catTag);
+                let file = new File([response], "cat.jpeg", { type: "image/jpeg" })
 
                 setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, draft_type), 10);
             }
@@ -67,12 +67,16 @@ export default definePlugin({
 
 async function getCatPicture(catSays, catTag) {
     if (catTag != "") {
-        catTag = "/" + catTag;
+        catTag = catTag.replace("/", "")
+        catTag = "/" + encodeURIComponent(catTag);
     }
     if (catSays != "") {
-        catSays = "/says/" + catSays;
+        catSays = catSays.replace("/", "")
+        catSays = "/says/" + encodeURIComponent(catSays);
     }
-    return await fetch("https://cataas.com/cat" + catTag + catSays + "?font=Impact&fontSize=40&fontColor=%23FFFF&fontBackground=none&?position=center", {
+    let url = "https://cataas.com/cat" + catTag + catSays + "?font=Impact&fontSize=40&fontColor=%23FFFF&fontBackground=none&position=center";
+    console.info(url);
+    return await fetch(url, {
         method: "get",
         headers: {
             "Content-Type": "application/json"
@@ -81,7 +85,7 @@ async function getCatPicture(catSays, catTag) {
 }
 
 function formatCommandTags() {
-    const tags = new Array<ChoicesOption>();
+    let tags = new Array<ChoicesOption>();
     tagListJson.forEach(function (value) {
         tags.push({
             name: value,
