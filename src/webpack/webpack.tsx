@@ -169,9 +169,9 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  *
  * The callback must return a value that will be used as the proxy inner value.
  *
- * If no callback is specified, the default callback will assign the proxy inner value to all the module
+ * If no callback is specified, the default callback will assign the proxy inner value to all the module.
  * @param filter A function that takes a module and returns a boolean
- * @param callback A function that takes the found module as its first argument and returns to use as the proxy inner value
+ * @param callback A function that takes the found module as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the module, instead of all of it. Defaults to the module itself
  * @returns A proxy that has the callback return value as its true value, or the callback return value if the callback was called when the function was called
  */
 export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
@@ -304,7 +304,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
 }
 
 /**
- * Find the first module or default export that includes all the given props
+ * Find the first module or default export that includes all the given props.
  *
  * @param props A list of props to search the exports for
  */
@@ -319,7 +319,7 @@ export function findByProps<T = any>(...props: string[]) {
 }
 
 /**
- * Find the first export that includes all the given code
+ * Find the first export that includes all the given code.
  *
  * @param code A list of code to search each export for
  */
@@ -334,7 +334,7 @@ export function findByCode<T = any>(...code: string[]) {
 }
 
 /**
- * Find a store by its name
+ * Find a store by its name.
  *
  * @param name The store name
  */
@@ -396,7 +396,7 @@ export function cacheFindAll(filter: FilterFn) {
 }
 
 /**
- * Same as {@link cacheFind} but in bulk
+ * Same as {@link cacheFind} but in bulk.
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
@@ -462,7 +462,7 @@ export const cacheFindBulk = traceFunction("findBulk", function findBulk(...filt
 });
 
 /**
- * Find the id of the first module factory that includes all the given code
+ * Find the id of the first module factory that includes all the given code.
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
@@ -490,7 +490,7 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
 });
 
 /**
- * Find the first module factory that includes all the given code
+ * Find the first module factory that includes all the given code.
  * @returns The module factory or null
  */
 export function findModuleFactory(...code: string[]) {
@@ -504,7 +504,7 @@ export function findModuleFactory(...code: string[]) {
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the factory is evaluated
+ * On first property access, the factory is evaluated.
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
@@ -535,7 +535,7 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the factory is evaluated
+ * On first property access, the factory is evaluated.
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
@@ -622,7 +622,7 @@ export const findBulk = cacheFindBulk;
 const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
 
 /**
- * Extract and load chunks using their entry point
+ * Extract and load chunks using their entry point.
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A promise that resolves when the chunks were loaded
@@ -671,7 +671,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 /**
  * This is just a wrapper around {@link extractAndLoadChunks} to make our reporter test for your webpack finds.
  *
- * Extract and load chunks using their entry point
+ * Extract and load chunks using their entry point.
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves when the chunks were loaded, on first call

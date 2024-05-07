@@ -19,7 +19,7 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByProps, findStore } from "../webpack";
+import { filters, find, findByProps, findStore } from "../webpack";
 import * as t from "./types/stores";
 
 export const Flux = findByProps<t.Flux>("connectStores");
@@ -66,17 +66,14 @@ export const DraftStore = findStore<t.DraftStore>("DraftStore");
  *
  * @param stores The stores to listen to
  * @param mapper A function that returns the data you need
- * @param idk some thing, idk just pass null
+ * @param dependencies An array of reactive values which the hook depends on. Use this if your mapper or equality function depends on the value of another hook
  * @param isEqual A custom comparator for the data returned by mapper
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const { useStateFromStores }: {
-    useStateFromStores: <T>(
-        stores: t.FluxStore[],
-        mapper: () => T,
-        idk?: any,
-        isEqual?: (old: T, newer: T) => boolean
-    ) => T;
-}
-    = findByProps("useStateFromStores");
+export const useStateFromStores = find(filters.byProps("useStateFromStores"), m => m.useStateFromStores) as <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    dependencies?: any,
+    isEqual?: (old: T, newer: T) => boolean
+) => T;
