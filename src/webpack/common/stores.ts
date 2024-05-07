@@ -74,6 +74,6 @@ export const DraftStore = findStore<t.DraftStore>("DraftStore");
 export const useStateFromStores = find(filters.byProps("useStateFromStores"), m => m.useStateFromStores) as <T>(
     stores: t.FluxStore[],
     mapper: () => T,
-    dependencies?: any,
+    dependencies?: any[],
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
