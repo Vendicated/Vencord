@@ -47,7 +47,7 @@ export function proxyInner<T = any>(
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    const proxyDummy = Object.assign(function () { }, {
+    const proxyDummy = Object.assign(function ProxyDummy() { }, {
         [proxyInnerGet]: function () {
             if (proxyDummy[proxyInnerValue] == null) {
                 throw new Error(errMsg);

@@ -65,7 +65,7 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    const proxyDummy = Object.assign(function () { }, {
+    const proxyDummy = Object.assign(function ProxyDummy() { }, {
         [proxyLazyGet]() {
             if (!proxyDummy[proxyLazyCache]) {
                 if (!get.$$vencordLazyFailed()) {
