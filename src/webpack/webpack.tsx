@@ -189,20 +189,16 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["findComponent", [filter]]);
 
-    let noMatchLogged = false;
-    const NoopComponent = (() => {
-        if (!noMatchLogged) {
-            noMatchLogged = true;
+    let InnerComponent = null as null | React.ComponentType<T>;
+
+    let findFailedLogged = false;
+    const WrapperComponent = (props: T) => {
+        if (InnerComponent === null && !findFailedLogged) {
+            findFailedLogged = true;
             logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
         }
 
-        return null;
-    }) as React.ComponentType<T>;
-
-    let InnerComponent = NoopComponent;
-
-    const WrapperComponent = (props: T) => {
-        return <InnerComponent {...props} />;
+        return InnerComponent && <InnerComponent {...props} />;
     };
 
     WrapperComponent.$$vencordGetter = () => InnerComponent;
@@ -213,7 +209,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         Object.assign(InnerComponent, parsedComponent);
     }, { isIndirect: true });
 
-    if (InnerComponent !== NoopComponent) return InnerComponent;
+    if (InnerComponent !== null) return InnerComponent;
 
     return WrapperComponent;
 }
@@ -236,20 +232,16 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 
     if (IS_DEV) webpackSearchHistory.push(["findExportedComponent", props]);
 
-    let noMatchLogged = false;
-    const NoopComponent = (() => {
-        if (!noMatchLogged) {
-            noMatchLogged = true;
+    let InnerComponent = null as null | React.ComponentType<T>;
+
+    let findFailedLogged = false;
+    const WrapperComponent = (props: T) => {
+        if (InnerComponent === null && !findFailedLogged) {
+            findFailedLogged = true;
             logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
         }
 
-        return null;
-    }) as React.ComponentType<T>;
-
-    let InnerComponent = NoopComponent;
-
-    const WrapperComponent = (props: T) => {
-        return <InnerComponent {...props} />;
+        return InnerComponent && <InnerComponent {...props} />;
     };
 
     WrapperComponent.$$vencordGetter = () => InnerComponent;
@@ -260,7 +252,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
         Object.assign(InnerComponent, parsedComponent);
     }, { isIndirect: true });
 
-    if (InnerComponent !== NoopComponent) return InnerComponent;
+    if (InnerComponent !== null) return InnerComponent;
 
     return WrapperComponent as React.ComponentType<T>;
 }
