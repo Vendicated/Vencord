@@ -77,7 +77,8 @@ const enum NameFormat {
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
     ArtistOnly = "artist",
-    SongOnly = "song"
+    SongOnly = "song",
+    AlbumName = "album"
 }
 
 const applicationId = "1108588077900898414";
@@ -147,6 +148,10 @@ const settings = definePluginSettings({
             {
                 label: "Use song name only",
                 value: NameFormat.SongOnly
+            },
+            {
+                label: "Use album name (falls back to custom status text if song has no album)",
+                value: NameFormat.AlbumName
             }
         ],
     },
@@ -313,6 +318,8 @@ export default definePlugin({
                     return trackData.artist;
                 case NameFormat.SongOnly:
                     return trackData.name;
+                case NameFormat.AlbumName:
+                    return trackData.album || settings.store.statusName;
                 default:
                     return settings.store.statusName;
             }
