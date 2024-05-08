@@ -150,7 +150,7 @@ const settings = definePluginSettings({
                 value: NameFormat.SongOnly
             },
             {
-                label: "Use album name",
+                label: "Use album name (falls back to custom status text if song has no album)",
                 value: NameFormat.AlbumName
             }
         ],
