@@ -18,7 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, ChoicesOption, findOption } from "@api/Commands";
 import definePlugin from "@utils/types";
-import { UploadHandler } from "@webpack/common";
+import { UploadHandler, showToast, Toasts } from "@webpack/common";
 
 declare function require(name: string);
 const tagListJson = require('./tags.json')
@@ -50,31 +50,167 @@ export default definePlugin({
                     description: "Filter for a specific category of cats.",
                     type: ApplicationCommandOptionType.STRING,
                     choices: formatCommandTags()
+                },
+                {
+                    name: "font-size",
+                    description: "Set the font size of the text that the cat says.",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "filter",
+                    description: "Choose which filter should be applied on the image.",
+                    type: ApplicationCommandOptionType.STRING,
+                    choices: [{
+                        label: "mono",
+                        value: "mono",
+                        name: "mono"
+                    },
+                    {
+                        label: "negate",
+                        value: "negate",
+                        name: "negate"
+                    },
+                    {
+                        label: "custom",
+                        value: "custom",
+                        name: "custom (use custom options)"
+                    }]
+                },
+                {
+                    name: "saturation-multiplier",
+                    description: "Set the saturation multiplier (only positive numbers, needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.NUMBER,
+
+                },
+                {
+                    name: "font-size",
+                    description: "Set the font size of the text that the cat says.",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "blur",
+                    description: "Sets extra blur in the picture (only positive numbers, needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "red",
+                    description: "Sets the red filter value the picture (needs custom filter type and other colors to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "green",
+                    description: "Sets the green filter value the picture (needs custom filter type and other colors to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "blue",
+                    description: "Sets the blue filter value the picture (needs custom filter type and other colors to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "brightness",
+                    description: "Sets the brightness filter value the picture (needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "hue",
+                    description: "Sets the hue rotation in degrees on the picture (needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
+                },
+                {
+                    name: "lightness",
+                    description: "Sets the lightness added in the filter of the picture (needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.INTEGER,
                 }
             ],
             execute: async (opts, ctx) => {
-                let catSays = findOption(opts, "say", "");
-                let catTag = findOption(opts, "tag", "");
-
-                let response = await getCatPicture(catSays, catTag);
+                let response = await getCatPicture(getURL(opts));
                 let file = new File([response], "cat.jpeg", { type: "image/jpeg" })
-
                 setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, draft_type), 10);
             }
         },
     ]
 });
 
-async function getCatPicture(catSays, catTag) {
-    if (catTag != "") {
-        catTag = catTag.replace("/", "")
-        catTag = "/" + encodeURIComponent(catTag);
+function returnFloatWithParameter(number, parameter) {
+    try {
+        let float = parseFloat(number);
+        if (float >= 0) {
+            number = parameter + float;
+        }
+        else {
+            showToast("Please input a brightness and saturation number bigger or equal 0!", Toasts.Type.FAILURE);
+            number = "";
+        }
+        return number;
     }
-    if (catSays != "") {
-        catSays = catSays.replace("/", "")
-        catSays = "/says/" + encodeURIComponent(catSays);
+    catch {
+        showToast("Failed to get saturation multiplier or brightness!", Toasts.Type.FAILURE);
+        return ""
     }
-    let url = "https://cataas.com/cat" + catTag + catSays + "?font=Impact&fontSize=40&fontColor=%23FFFF&fontBackground=none&position=center";
+}
+
+function getURL(opts) : string {
+    let says = findOption(opts, "say", "").toString();
+    let tag = findOption(opts, "tag", "").toString();
+    let fontSize = findOption(opts, "font-size", 40).toString();
+    let filterType = findOption(opts, "filter", "").toString();
+    let blur = findOption(opts, "blur", "").toString();
+    let red = findOption(opts, "red", "").toString();
+    let green = findOption(opts, "green", "").toString();
+    let blue = findOption(opts, "blue", "").toString();
+    let brightness = findOption(opts, "brightness", "").toString();
+    let hueRotation = findOption(opts, "hue", "").toString();
+    let saturationMultiplier = findOption(opts, "saturation-multiplier", "").toString();
+    let lightnessAdded = findOption(opts, "lightness", "").toString();
+
+    if (tag != "") {
+        tag = "/" + encodeURIComponent(tag.replace("/", ""));
+    }
+    if (says != "") {
+        says = "/says/" + encodeURIComponent(says.replace("/", ""));
+    }
+    if (filterType != "") {
+        filterType = "&filter=" + filterType;
+        if (saturationMultiplier != "") {
+            saturationMultiplier = returnFloatWithParameter(saturationMultiplier, "&saturation=");
+        }
+        if (blur != "") {
+            blur = "&blur=" + blur;
+        }
+        if (red != "" && blue != "" && green != "") {
+            red = "&r=" + red;
+            green = "&g=" + green;
+            blue = "&b=" + blue;
+        }
+        else {
+            red = "";
+            blue == "";
+            green == "";
+        }
+        if (brightness != "") {
+            brightness = returnFloatWithParameter(brightness, "&brightness=");
+        }
+        if (hueRotation != "") {
+            hueRotation = "&hue=" + hueRotation;
+        }
+        if (lightnessAdded != "") {
+            lightnessAdded = "&lightness=" + lightnessAdded;
+        }
+    }
+    else {
+        saturationMultiplier = "";
+        blur = "";
+        red = "";
+        blue == "";
+        green == "";
+        brightness = "";
+        hueRotation = "";
+        lightnessAdded = "";
+    }
+    return "https://cataas.com/cat" + tag + says + "?font=Impact&fontSize=" + fontSize + "&fontColor=%23ffff&fontBackground=%230000" + filterType + "&position=center" + blur + red + green + blue + brightness + saturationMultiplier + hueRotation + lightnessAdded;
+}
+async function getCatPicture(url) {
     console.info(url);
     return await fetch(url, {
         method: "get",
