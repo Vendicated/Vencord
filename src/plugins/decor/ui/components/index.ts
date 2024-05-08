@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { NoopComponent } from "@utils/react";
 import { filters, findComponent } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
@@ -15,7 +16,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
     isSelected: boolean,
 }>;
 
-export let DecorationGridItem: DecorationGridItemComponent;
+export let DecorationGridItem: DecorationGridItemComponent = NoopComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
 export const AvatarDecorationModalPreview = findComponent(filters.componentByCode(".shopPreviewBanner"), component => {
@@ -28,5 +29,5 @@ type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivEl
     isSelected: boolean,
 }>;
 
-export let DecorationGridDecoration: DecorationGridDecorationComponent;
+export let DecorationGridDecoration: DecorationGridDecorationComponent = NoopComponent;
 export const setDecorationGridDecoration = v => DecorationGridDecoration = v;

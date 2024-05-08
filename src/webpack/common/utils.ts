@@ -35,7 +35,7 @@ export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch",
     return m;
 });
 
-export const { ComponentDispatch } = findByProps("ComponentDispatch", "ComponentDispatcher");
+export const ComponentDispatch = find(filters.byProps("ComponentDispatch", "ComponentDispatcher"), m => m.ComponentDispatch);
 
 export const Constants = findByProps("Endpoints");
 
@@ -123,12 +123,12 @@ export const NavigationRouter = findByProps<t.NavigationRouter>("transitionTo", 
 
 export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
-export const { Permissions: PermissionsBits } = find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export const PermissionsBits = find<t.PermissionsBits>(m => typeof m.Permissions?.ADMINISTRATOR === "bigint", m => m.Permissions);
 
 export const zustandCreate = findByCode<typeof import("zustand").default>("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = find<typeof import("zustand/middleware")>(m => m.persist && persistFilter(m.persist));
+export const zustandPersist = find<typeof import("zustand/middleware").persist>(m => m.persist && persistFilter(m.persist), m => m.persist);
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
 export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");

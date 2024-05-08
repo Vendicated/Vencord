@@ -18,12 +18,12 @@
 
 import "./VoiceChannelSection.css";
 
-import { findByCode, findByProps } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelActions = findByProps("selectChannel", "selectVoiceChannel");
-const UserPopoutSection = findByCode(".lastSection", "children:");
+const UserPopoutSection = findComponentByCode(".lastSection", "children:");
 
 const CONNECT = 1n << 20n;
 

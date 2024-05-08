@@ -19,6 +19,8 @@
 import { filters, find, findByProps, findExportedComponent } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
+import { NoopComponent } from "./react";
+
 export const enum ModalSize {
     SMALL = "small",
     MEDIUM = "medium",
@@ -100,11 +102,11 @@ type Modals = {
 };
 
 
-export let ModalRoot: Modals["ModalRoot"];
-export let ModalHeader: Modals["ModalHeader"];
-export let ModalContent: Modals["ModalContent"];
-export let ModalFooter: Modals["ModalFooter"];
-export let ModalCloseButton: Modals["ModalCloseButton"];
+export let ModalRoot: Modals["ModalRoot"] = NoopComponent;
+export let ModalHeader: Modals["ModalHeader"] = NoopComponent;
+export let ModalContent: Modals["ModalContent"] = NoopComponent;
+export let ModalFooter: Modals["ModalFooter"] = NoopComponent;
+export let ModalCloseButton: Modals["ModalCloseButton"] = NoopComponent;
 
 export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);

@@ -21,11 +21,9 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByProps } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
+import { findByProps, findComponentByCode } from "@webpack";
+import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState, UtilTypes } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
-
-type PermissionName = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "CREATE_GUILD_EXPRESSIONS" | "VIEW_AUDIT_LOG" | "VIEW_CHANNEL" | "VIEW_GUILD_ANALYTICS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "MODERATE_MEMBERS" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "ADD_REACTIONS" | "USE_APPLICATION_COMMANDS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "PRIORITY_SPEAKER" | "STREAM" | "USE_EMBEDDED_ACTIVITIES" | "USE_SOUNDBOARD" | "USE_EXTERNAL_SOUNDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "CREATE_EVENTS";
 
 interface Tag {
     // name used for identifying, must be alphanumeric + underscores
@@ -33,7 +31,7 @@ interface Tag {
     // name shown on the tag itself, can be anything probably; automatically uppercase'd
     displayName: string;
     description: string;
-    permissions?: PermissionName[];
+    permissions?: UtilTypes.Permissions[];
     condition?(message: Message | null, user: User, channel: Channel): boolean;
 }
 
@@ -57,7 +55,7 @@ const PermissionUtil = findByProps("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Tag = find(m => m.Types?.[0] === "BOT") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 

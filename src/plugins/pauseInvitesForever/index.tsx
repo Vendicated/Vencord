@@ -19,9 +19,8 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
-import { GuildStore, RestAPI } from "@webpack/common";
+import { GuildStore, i18n, RestAPI } from "@webpack/common";
 
-const Messages = findByProps("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION");
 const { InvitesDisabledExperiment } = findByProps("InvitesDisabledExperiment");
 
 export default definePlugin({
@@ -63,7 +62,7 @@ export default definePlugin({
     renderInvitesLabel(guildId: string, setChecked: Function) {
         return (
             <div>
-                {Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
                 {this.showDisableInvites(guildId) && <a role="button" onClick={() => {
                     setChecked(true);
                     this.disableInvites(guildId);

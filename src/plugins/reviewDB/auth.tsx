@@ -7,14 +7,14 @@
 import { DataStore } from "@api/index";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
-import { findByProps } from "@webpack";
+import { findExportedComponent } from "@webpack";
 import { showToast, Toasts, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
 
-const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
+const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
 export let Auth: ReviewDBAuth = {};
 

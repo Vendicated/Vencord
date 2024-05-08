@@ -21,11 +21,11 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByProps } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 
 type AnonUpload = Upload & { anonymise?: boolean; };
 
-const ActionBarIcon = findByCode(".actionBarIcon)");
+const ActionBarIcon = findComponentByCode(".actionBarIcon)");
 const UploadDraft = findByProps("popFirstFile", "update");
 
 const enum Methods {

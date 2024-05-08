@@ -5,7 +5,7 @@
  */
 
 import { Flex } from "@components/Flex";
-import { findByCode } from "@webpack";
+import { findComponentByCode } from "@webpack";
 import { Button, useEffect } from "@webpack/common";
 
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
@@ -13,7 +13,7 @@ import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDeco
 import { cl } from "../";
 import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
 
-const CustomizationSection = findByCode(".customizationSectionBackground");
+const CustomizationSection = findComponentByCode(".customizationSectionBackground");
 
 interface DecorSectionProps {
     hideTitle?: boolean;

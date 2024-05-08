@@ -19,7 +19,7 @@
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { formatDuration } from "@utils/text";
-import { findByProps, findComponent, findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
@@ -81,13 +81,7 @@ const enum ChannelFlags {
 const ChatScrollClasses = findByProps("auto", "content", "scrollerBase");
 const ChatClasses = findByProps("chat", "content", "noChat", "chatContent");
 const ChannelBeginHeader = findComponentByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
-const TagComponent = findComponent(m => {
-    if (typeof m !== "function") return false;
-
-    const code = Function.prototype.toString.call(m);
-    // Get the component which doesn't include increasedActivity
-    return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
-});
+const TagComponent = findComponentByCode(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG");
 
 const EmojiParser = findByProps("convertSurrogateToName");
 const EmojiUtils = findByProps("getURL", "getEmojiColors");

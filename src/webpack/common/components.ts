@@ -16,30 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { NoopComponent } from "@utils/react";
+
 // eslint-disable-next-line path-alias/no-relative
 import { filters, find, findComponent, findExportedComponent } from "../webpack";
 import * as t from "./types/components";
 
-export let Card: t.Card;
-export let Button: t.Button;
-export let Switch: t.Switch;
-export let Tooltip: t.Tooltip;
-export let TextInput: t.TextInput;
-export let TextArea: t.TextArea;
-export let Text: t.Text;
-export let Heading: t.Heading;
-export let Select: t.Select;
-export let SearchableSelect: t.SearchableSelect;
-export let Slider: t.Slider;
+export let Card: t.Card = NoopComponent as any;
+export let Button: t.Button = NoopComponent as any;
+export let Switch: t.Switch = NoopComponent;
+export let Tooltip: t.Tooltip = NoopComponent as any;
+export let TextInput: t.TextInput = NoopComponent as any;
+export let TextArea: t.TextArea = NoopComponent;
+export let Text: t.Text = NoopComponent;
+export let Heading: t.Heading = NoopComponent;
+export let Select: t.Select = NoopComponent;
+export let SearchableSelect: t.SearchableSelect = NoopComponent;
+export let Slider: t.Slider = NoopComponent;
 export let ButtonLooks: t.ButtonLooks;
-export let Popout: t.Popout;
-export let Dialog: t.Dialog;
-export let TabBar: any;
-export let Paginator: t.Paginator;
-export let ScrollerThin: t.ScrollerThin;
-export let Clickable: t.Clickable;
-export let Avatar: t.Avatar;
-export let FocusLock: t.FocusLock;
+export let Popout: t.Popout = NoopComponent as any;
+export let Dialog: t.Dialog = NoopComponent;
+export let TabBar: t.TabBar = NoopComponent as any;
+export let Paginator: t.Paginator = NoopComponent;
+export let ScrollerThin: t.ScrollerThin = NoopComponent;
+export let Clickable: t.Clickable = NoopComponent;
+export let Avatar: t.Avatar = NoopComponent;
+export let FocusLock: t.FocusLock = NoopComponent;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;

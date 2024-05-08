@@ -37,7 +37,7 @@ export const MessageStore = findStore("MessageStore") as Omit<Stores.MessageStor
     getMessages(chanId: string): any;
 };
 
-// this is not actually a FluxStore
+// This is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
 export const PermissionStore = findStore<GenericStore>("PermissionStore");
 export const GuildChannelStore = findStore<GenericStore>("GuildChannelStore");

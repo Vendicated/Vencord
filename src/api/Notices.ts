@@ -18,7 +18,7 @@
 
 import { find } from "@webpack";
 
-const NoticesModule = find(m => m.show && m.dismiss && !m.suppressAll, m => m);
+const NoticesModule = find(m => m.show && m.dismiss && !m.suppressAll);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;

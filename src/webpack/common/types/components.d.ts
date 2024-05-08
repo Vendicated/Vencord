@@ -377,6 +377,13 @@ export type Popout = ComponentType<{
 
 export type Dialog = ComponentType<PropsWithChildren<any>>;
 
+export type TabBar = ComponentType<PropsWithChildren<any>> & {
+    Header: ComponentType<PropsWithChildren<any>>;
+    Item: ComponentType<PropsWithChildren<any>>;
+    Separator: ComponentType<PropsWithChildren<any>>;
+    Panel: ComponentType<PropsWithChildren<any>>;
+};
+
 type Resolve = (data: { theme: "light" | "dark", saturation: number; }) => {
     hex(): string;
     hsl(): string;
