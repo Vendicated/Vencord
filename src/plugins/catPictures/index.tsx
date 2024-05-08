@@ -125,8 +125,10 @@ export default definePlugin({
             ],
             execute: async (opts, ctx) => {
                 let response = await getCatPicture(getURL(opts));
-                let file = new File([response], "cat.jpeg", { type: "image/jpeg" })
-                setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, draft_type), 10);
+                if (response != null) {
+                    let file = new File([response], "cat.jpeg", { type: "image/jpeg" })
+                    setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, draft_type), 10);
+                }
             }
         },
     ]
@@ -217,7 +219,16 @@ async function getCatPicture(url) {
         headers: {
             "Content-Type": "application/json"
         }
-    }).then(r => r.blob())
+    }).then(r => {
+        let contenttype = r.headers.get("content-type");
+        if (contenttype == "image/jpeg") {
+            return r.blob()
+        }
+        else {
+            showToast("Failed to get cat picture please try again.", Toasts.Type.FAILURE);
+            return null;
+        }
+    })
 }
 
 function formatCommandTags() {
