@@ -182,6 +182,14 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
 
 /**
  * Find the first component that matches the filter.
+ *
+ * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = findComponent(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @param filter A function that takes a module and returns a boolean
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
@@ -226,6 +234,13 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
 /**
  * Find the first component that is exported by the first prop name.
  *
+ * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = findExportedComponent(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @example findExportedComponent("FriendRow")
  * @example findExportedComponent("FriendRow", "Friend", FriendRow => React.memo(FriendRow))
  *
@@ -271,6 +286,13 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 /**
  * Find the first component in a default export that includes all the given code.
  *
+ * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = findComponentByCode(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR")
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)", ColorPicker => React.memo(ColorPicker))
  *
@@ -507,6 +529,14 @@ export function webpackDependantLazy<T = any>(factory: () => any, attempts?: num
  * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
  *
  * A lazy component. The factory method is called on first render.
+ *
+ * IMPORTANT: You cannot access properties set on the lazy component using this method.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = webpackDependantLazyComponent(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @param factory Function returning a Component
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
@@ -543,6 +573,14 @@ export const proxyLazyWebpack = deprecatedRedirect("proxyLazyWebpack", "webpackD
  * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
  *
  * A lazy component. The factory method is called on first render.
+ *
+ * IMPORTANT: You cannot access properties set on the lazy component using this method.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = LazyComponentWebpack(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @param factory Function returning a Component
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function

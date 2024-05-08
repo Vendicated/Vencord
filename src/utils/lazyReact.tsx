@@ -8,6 +8,14 @@ import { makeLazy } from "./lazy";
 
 /**
  * A lazy component. The factory method is called on first render.
+ *
+ * IMPORTANT: You cannot access properties set on the lazy component using this method.
+ *
+ * Example of how you cannot access the properties set on the component:
+ * ```
+ * const Component = LazyComponent(...);
+ * console.log(Component.Types); // This will not work
+ * ````
  * @param factory Function returning a component
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
