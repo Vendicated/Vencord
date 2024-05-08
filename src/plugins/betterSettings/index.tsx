@@ -134,7 +134,7 @@ export default definePlugin({
     // not in children
     Layer(props: LayerProps) {
         try {
-            if (FocusLock === NoopComponent || FocusLock[proxyInnerValue] == null || ComponentDispatch[proxyInnerValue] == null)
+            if (FocusLock === NoopComponent || ComponentDispatch[proxyInnerValue] == null)
                 throw new Error("Failed to fetch some webpack modules");
 
             return Layer(props);
