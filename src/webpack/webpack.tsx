@@ -529,6 +529,13 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
     return LazyComponent<T>(factory, attempts);
 }
 
+function deprecatedRedirect<T extends (...args: any[]) => any>(oldMethod: string, newMethod: string, redirect: T): T {
+    return ((...args: Parameters<T>) => {
+        logger.warn(`Method ${oldMethod} is deprecated. Use ${newMethod} instead. For more information read https://github.com/Vendicated/Vencord/pull/2409#issue-2277161516`);
+        return redirect(...args);
+    }) as T;
+}
+
 /**
  * @deprecated Use {@link webpackDependantLazy} instead
  *
@@ -540,7 +547,7 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export const proxyLazyWebpack = webpackDependantLazy;
+export const proxyLazyWebpack = deprecatedRedirect("proxyLazyWebpack", "webpackDependantLazy", webpackDependantLazy);
 
 /**
  * @deprecated Use {@link webpackDependantLazyComponent} instead
@@ -552,21 +559,21 @@ export const proxyLazyWebpack = webpackDependantLazy;
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export const LazyComponentWebpack = webpackDependantLazyComponent;
+export const LazyComponentWebpack = deprecatedRedirect("LazyComponentWebpack", "webpackDependantLazyComponent", webpackDependantLazyComponent);
 
 /**
  * @deprecated Use {@link find} instead
  *
  * Find the first module that matches the filter, lazily
  */
-export const findLazy = find;
+export const findLazy = deprecatedRedirect("findLazy", "find", find);
 
 /**
  * @deprecated Use {@link findByProps} instead
  *
  * Find the first module that has the specified properties, lazily
  */
-export const findByPropsLazy = findByProps;
+export const findByPropsLazy = deprecatedRedirect("findByPropsLazy", "findByProps", findByProps);
 
 
 /**
@@ -574,40 +581,40 @@ export const findByPropsLazy = findByProps;
  *
  * Find the first function that includes all the given code, lazily
  */
-export const findByCodeLazy = findByCode;
+export const findByCodeLazy = deprecatedRedirect("findByCodeLazy", "findByCode", findByCode);
 
 /**
  * @deprecated Use {@link findStore} instead
  *
  * Find a store by its displayName, lazily
  */
-export const findStoreLazy = findStore;
+export const findStoreLazy = deprecatedRedirect("findStoreLazy", "findStore", findStore);
 
 /**
  * @deprecated Use {@link findComponent} instead
  *
  * Finds the first component that matches the filter, lazily.
  */
-export const findComponentLazy = findComponent;
+export const findComponentLazy = deprecatedRedirect("findComponentLazy", "findComponent", findComponent);
 
 /**
  * @deprecated Use {@link findComponentByCode} instead
  *
  * Finds the first component that includes all the given code, lazily
  */
-export const findComponentByCodeLazy = findComponentByCode;
+export const findComponentByCodeLazy = deprecatedRedirect("findComponentByCodeLazy", "findComponentByCode", findComponentByCode);
 
 /**
  * @deprecated Use {@link findExportedComponent} instead
  *
  * Finds the first component that is exported by the first prop name, lazily
  */
-export const findExportedComponentLazy = findExportedComponent;
+export const findExportedComponentLazy = deprecatedRedirect("findExportedComponentLazy", "findExportedComponent", findExportedComponent);
 
 /**
  * @deprecated Use {@link cacheFindAll} instead
  */
-export const findAll = cacheFindAll;
+export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAll);
 
 /**
  * @deprecated Use {@link cacheFindBulk} instead
@@ -617,7 +624,7 @@ export const findAll = cacheFindAll;
  *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
  */
-export const findBulk = cacheFindBulk;
+export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFindBulk);
 
 const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
 
