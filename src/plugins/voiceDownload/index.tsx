@@ -39,7 +39,6 @@ export default definePlugin({
 
     Icon: () => (
         <svg
-            className="icon"
             height="24"
             width="24"
             viewBox="0 0 24 24"
