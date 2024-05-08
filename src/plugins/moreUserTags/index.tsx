@@ -93,6 +93,11 @@ const tags: Tag[] = [
         displayName: "VC Mod",
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
+    }, {
+        name: "TRIAL_MODERATOR",
+        displayName: "T-Mod",
+        description: "Can timeout people",
+        permissions: ["MODERATE_MEMBERS"]
     }
 ];
 const defaultSettings = Object.fromEntries(
