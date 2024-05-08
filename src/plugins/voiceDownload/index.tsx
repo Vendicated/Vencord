@@ -23,14 +23,17 @@ export default definePlugin({
         }
     ],
 
-    renderDownload(src) {
+    renderDownload(src: string) {
         return (
             <a
-                className="voice-download"
+                className="vc-voice-download"
                 href={src}
-                target="_blank"
+                download="voice-message.ogg"
                 onClick={e => e.stopPropagation()}
-            > <this.Icon /> </a>
+                aria-label="Download voice message"
+            >
+                <this.Icon />
+            </a>
         );
     },
 
