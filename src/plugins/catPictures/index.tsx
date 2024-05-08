@@ -109,8 +109,8 @@ export default definePlugin({
                 },
                 {
                     name: "brightness",
-                    description: "Sets the brightness filter value the picture (needs custom filter type to function)",
-                    type: ApplicationCommandOptionType.INTEGER,
+                    description: "Sets the brightness filter value the picture (only positive numbers, needs custom filter type to function)",
+                    type: ApplicationCommandOptionType.NUMBER,
                 },
                 {
                     name: "hue",
