@@ -186,6 +186,6 @@ export class GuildStore extends FluxStore {
 export type useStateFromStores = <T>(
     stores: t.FluxStore[],
     mapper: () => T,
-    dependencies?: any,
+    dependencies?: any[] | null,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
