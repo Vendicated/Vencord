@@ -150,7 +150,7 @@ function returnFloatWithParameter(number, parameter) {
     }
 }
 
-function getURL(opts) : string {
+function getURL(opts): string {
     let says = findOption(opts, "say", "").toString();
     let tag = findOption(opts, "tag", "").toString();
     let fontSize = findOption(opts, "font-size", 40).toString();
