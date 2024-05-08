@@ -529,9 +529,21 @@ async function runtime(token: string) {
                     parsedArgs === args &&
                     ["waitFor", "find", "findComponent", "webpackDependantLazy", "webpackDependantLazyComponent"].includes(searchType)
                 ) {
-                    logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                    let filter = parsedArgs[0].toString();
+                    if (filter.length > 150) {
+                        filter = filter.slice(0, 147) + "...";
+                    }
+
+                    logMessage += `(${filter})`;
                 } else if (searchType === "extractAndLoadChunks") {
-                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                    let regexStr: string;
+                    if (parsedArgs[1] === Vencord.Webpack.DefaultExtractAndLoadChunksRegex) {
+                        regexStr = "DefaultExtractAndLoadChunksRegex";
+                    } else {
+                        regexStr = parsedArgs[1].toString();
+                    }
+
+                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${regexStr})`;
                 } else {
                     logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
                 }

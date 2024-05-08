@@ -614,7 +614,7 @@ export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAl
  */
 export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFindBulk);
 
-const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
+export const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
 
 /**
  * Extract and load chunks using their entry point.
