@@ -19,11 +19,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+const { FriendsSections } = findByPropsLazy("FriendsSections");
 
 interface UserAffinity {
     user_id: string;
@@ -81,8 +82,8 @@ export default definePlugin({
             find: "getRelationshipCounts(){",
             replacement: {
                 predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
-                match: /\.sortBy\(\i=>\i\.comparator\)/,
-                replace: "$&.sortBy((row) => $self.sortList(row))"
+                match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+                replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
         },
 
@@ -120,10 +121,10 @@ export default definePlugin({
         }
     ),
 
-    sortList(row: any) {
+    wrapSort(comparator: Function, row: any) {
         return row.type === 5
             ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
-            : row.comparator;
+            : comparator(row);
     },
 
     async fetchImplicitRelationships() {
@@ -181,7 +182,6 @@ export default definePlugin({
     },
 
     start() {
-        const { FriendsSections } = findByProps("FriendsSections");
         FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });
