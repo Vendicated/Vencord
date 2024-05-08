@@ -255,7 +255,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
-                        "   $2.message.content !== m.content ?" +
+                        "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
