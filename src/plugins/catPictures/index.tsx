@@ -187,8 +187,8 @@ function getURL(opts): string {
         }
         else {
             red = "";
-            blue == "";
-            green == "";
+            blue = "";
+            green = "";
         }
         if (brightness != "") {
             brightness = returnFloatWithParameter(brightness, "&brightness=");
