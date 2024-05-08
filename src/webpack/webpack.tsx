@@ -341,7 +341,7 @@ export function findStore<T = any>(name: string) {
  * @param filter A function that takes a module and returns a boolean
  * @returns The found module or null
  */
-export const cacheFind = traceFunction("find", function find(filter: FilterFn) {
+export const cacheFind = traceFunction("cacheFind", function cacheFind(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -389,7 +389,7 @@ export function cacheFindAll(filter: FilterFn) {
  *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
  */
-export const cacheFindBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBulk(...filterFns: FilterFn[]) {
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 

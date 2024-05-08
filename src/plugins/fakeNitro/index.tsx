@@ -52,7 +52,6 @@ const PreloadedUserSettingsActionCreators = webpackDependantLazy(() => UserSetti
 const AppearanceSettingsActionCreators = webpackDependantLazy(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = webpackDependantLazy(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
-
 const enum EmojiIntentions {
     REACTION = 0,
     STATUS = 1,

@@ -91,7 +91,7 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
             // If we're still in the same tick, it means the lazy was immediately used.
             // thus, we lazy proxy the get access to make things like destructuring work as expected
             // meow here will also be a lazy
-            // `const { meow } = findByPropsLazy("meow");`
+            // `const { meow } = proxyLazy(() => ({ meow: [] }));`
             if (!isChild && isSameTick) {
                 return proxyLazy(
                     () => Reflect.get(target[proxyLazyGet](), p, receiver),
