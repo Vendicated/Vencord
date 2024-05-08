@@ -204,8 +204,8 @@ function getURL(opts): string {
         saturationMultiplier = "";
         blur = "";
         red = "";
-        blue == "";
-        green == "";
+        blue = "";
+        green = "";
         brightness = "";
         hueRotation = "";
         lightnessAdded = "";
