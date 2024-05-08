@@ -139,7 +139,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
-            if (IS_UPDATER_DISABLED) {
+            if (!IS_WEB && IS_UPDATER_DISABLED) {
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
