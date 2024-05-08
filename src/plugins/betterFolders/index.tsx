@@ -279,7 +279,7 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (isBetterFolders) {
-                return "onScroll" in child.props;
+                return child?.props?.onScroll != null;
             }
             return true;
         };
