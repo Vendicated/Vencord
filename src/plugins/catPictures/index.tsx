@@ -213,7 +213,6 @@ function getURL(opts): string {
     return "https://cataas.com/cat" + tag + says + "?font=Impact&fontSize=" + fontSize + "&fontColor=%23ffff&fontBackground=%230000" + filterType + "&position=center" + blur + red + green + blue + brightness + saturationMultiplier + hueRotation + lightnessAdded;
 }
 async function getCatPicture(url) {
-    console.info(url);
     return await fetch(url, {
         method: "get",
         headers: {
