@@ -1,5 +1,5 @@
 > [!WARNING]
-> These instructions are only for advanced users. If you're not a Developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead.
+> These instructions are only for advanced users. If you're not a developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead.
 > No support will be provided for installing in this fashion. If you cannot figure it out, you should just stick to a regular install.
 
 # Installation Guide
@@ -30,7 +30,7 @@ Install `pnpm`:
 npm i -g pnpm
 ```
 
-> :exclamation: **IMPORTANT** Make sure you aren't using an admin/root terminal from here onwards. It **will** mess up your Discord/Vencord instance and you **will** most likely have to reinstall.
+> :exclamation: **IMPORTANT** Make sure you aren't using an admin/root terminal from here on. It **will** mess up your Discord/Vencord instance and you **will** most likely have to reinstall.
 
 Clone Vencord:
 
@@ -65,28 +65,28 @@ If you're using Discord already, go into the `Updater` tab in settings.
 
 Sometimes it may be necessary to manually update if the GUI updater fails.
 
-To pull latest changes:
+To pull the latest changes:
 
 ```shell
 git pull
 ```
 
-If this fails, you likely need to reset your local changes to vencord to resolve merge errors:
+If this fails, you likely need to reset your local changes to Vencord to resolve merge errors:
 
-> :exclamation: This command will remove any local changes you've made to vencord. Make sure you back up if you made any code changes you don't want to lose!
+> :exclamation: This command will remove any local changes you've made to Vencord. Make sure you back up if you made any code changes you don't want to lose!
 
 ```shell
 git reset --hard
 git pull
 ```
 
-and then to build the changes:
+To build the changes, run:
 
 ```shell
 pnpm build
 ```
 
-Then just refresh your client
+All you have to do next is refresh your client.
 
 ## Uninstalling Vencord
 
