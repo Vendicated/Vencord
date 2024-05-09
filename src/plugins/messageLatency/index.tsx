@@ -113,7 +113,7 @@ export default definePlugin({
             if (!isNonNullish(d)) return null;
 
             return <Tooltip
-                text={d.ahead ? `This user's clock is ${d.delta} ahead. ${d.isKotlinDiscord ? "User is suspected to be on old mobile client" : ""}` : `This message was sent with a delay of ${d.delta}.`}
+                text={d.ahead ? `This user's clock is ${d.delta} ahead. ${d.isKotlinDiscord ? "User is suspected to be on an old mobile client" : ""}` : `This message was sent with a delay of ${d.delta}.`}
                 position="top"
             >
                 {
