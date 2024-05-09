@@ -17,6 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
@@ -36,7 +37,7 @@ export interface MagnifierProps {
 
 const cl = classNameFactory("vc-imgzoom-");
 
-export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSize, zoom: initalZoom }) => {
+export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: initialSize, zoom: initalZoom }) => {
     const [ready, setReady] = useState(false);
 
     const [lensPosition, setLensPosition] = useState<Vec2>({ x: 0, y: 0 });
@@ -199,4 +200,4 @@ export const Magnifier: React.FC<MagnifierProps> = ({ instance, size: initialSiz
                 )}
         </div>
     );
-};
+}, { noop: true });
