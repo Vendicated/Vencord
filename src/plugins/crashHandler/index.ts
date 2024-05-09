@@ -104,7 +104,7 @@ export default definePlugin({
 
                 shouldAttemptRecover = false;
                 // This is enough to avoid a crash loop
-                setTimeout(() => shouldAttemptRecover = true, 500);
+                setTimeout(() => shouldAttemptRecover = true, 1000);
             } catch { }
 
             try {
