@@ -269,7 +269,16 @@ export default definePlugin({
     ],
 
     start() {
-        if (settings.store.tagSettings) return;
+        // To prevent existing users from crashing on lines 379-380 due to the settings entry not existing (sry that its kinda sloppy)
+        if (settings.store.tagSettings && !settings.store.tagSettings['TRIAL_MODERATOR']) {
+            settings.store.tagSettings['TRIAL_MODERATOR'] = {
+                'text': 'T Mod', 
+                'showInChat': true, 
+                'showInNotChat': true
+            };
+            return;
+        };
+        else if (settings.store.tagSettings) return;
         // @ts-ignore
         if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
         else {
