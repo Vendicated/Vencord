@@ -499,10 +499,6 @@ export const EquicordDevs = Object.freeze({
         name: "fres",
         id: 843448897737064448n
     },
-    arHSM: {
-        name: "arHSM",
-        id: 841509053422632990n
-    },
     Dams: {
         name: "Dams",
         id: 769939285792653325n
