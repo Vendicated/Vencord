@@ -5,10 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
+import { findExportedComponentLazy } from "@webpack";
 import { SnowflakeUtils, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -23,10 +24,7 @@ interface Diff {
     seconds: number;
 }
 
-let HiddenVisually;
-waitFor("HiddenVisually", mod => {
-    HiddenVisually = mod.HiddenVisually;
-});
+const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
     name: "MessageLatency",
@@ -44,7 +42,7 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /(message:(\i),avatar:\i,username:\(0,\i.jsxs\)\(\i.Fragment,\{children:\[)(\i&&)/,
-                replace: "$1$self.Tooltip($2),$3"
+                replace: "$1$self.Tooltip()({ message: $2 }),$3"
             }
         }
     ],
@@ -57,9 +55,9 @@ export default definePlugin({
         };
 
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${k}` : null;
-        const keys: DiffKey[] = ["days", "hours", "minutes", "seconds"];
+        const keys = Object.keys(diff) as DiffKey[];
 
-        return keys.map(str).filter(isNonNullish).join(" ");
+        return keys.map(str).filter(isNonNullish).join(" ") || "0 seconds";
     },
     latencyTooltipData(message: Message) {
         const { id, nonce } = message;
@@ -86,24 +84,26 @@ export default definePlugin({
 
         return abs >= latency ? { delta: stringDelta, ahead: abs !== delta, fill } : null;
     },
-    Tooltip(message: Message) {
+    Tooltip() {
+        return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
 
-        const d = this.latencyTooltipData(message);
+            const d = this.latencyTooltipData(message);
 
-        if (!isNonNullish(d)) return null;
+            if (!isNonNullish(d)) return null;
 
-        return <Tooltip
-            text={d.ahead ? `This user's clock is ${d.delta} ahead` : `This message was sent with a delay of ${d.delta}.`}
-            position="top"
-        >
-            {
-                props => <>
-                    {<this.Icon delta={d.delta} fill={d.fill} props={props} />}
-                    {/* Time Out indicator uses this, I think this is for a11y */}
-                    <HiddenVisually>Delayed Message</HiddenVisually>
-                </>
-            }
-        </Tooltip>;
+            return <Tooltip
+                text={d.ahead ? `This user's clock is ${d.delta} ahead` : `This message was sent with a delay of ${d.delta}.`}
+                position="top"
+            >
+                {
+                    props => <>
+                        {<this.Icon delta={d.delta} fill={d.fill} props={props} />}
+                        {/* Time Out indicator uses this, I think this is for a11y */}
+                        <HiddenVisually>Delayed Message</HiddenVisually>
+                    </>
+                }
+            </Tooltip>;
+        });
     },
     Icon({ delta, fill, props }: {
         delta: string;
