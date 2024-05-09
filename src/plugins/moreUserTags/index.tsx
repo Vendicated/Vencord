@@ -50,6 +50,7 @@ interface TagSettings {
     MODERATOR_STAFF: TagSetting,
     MODERATOR: TagSetting,
     VOICE_MODERATOR: TagSetting,
+    TRIAL_MODERATOR: TagSetting,
     [k: string]: TagSetting;
 }
 
