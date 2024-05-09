@@ -133,6 +133,7 @@ export default definePlugin({
     Layer(props: LayerProps) {
         if (!FocusLock || !ComponentDispatch) {
             new Logger("BetterSettings").error("Failed to find some components");
+            return props.children;
         }
 
         return <Layer {...props} />;
