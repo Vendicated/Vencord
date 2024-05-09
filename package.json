@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -71,7 +71,7 @@
         "zip-local": "^0.3.5",
         "zustand": "^3.7.2"
     },
-    "packageManager": "pnpm@8.10.2",
+    "packageManager": "pnpm@9.1.0",
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
