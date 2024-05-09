@@ -26,7 +26,7 @@ import { relaunch } from "@utils/native";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { isOutdated, update } from "@utils/updater";
-import { Alerts, Card, ChannelStore, Forms, GuildMemberStore, NavigationRouter, Parser, RelationshipStore, UserStore } from "@webpack/common";
+import { Alerts, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins from "~plugins";
@@ -116,7 +116,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
         async CHANNEL_SELECT({ channelId }) {
             if (!SUPPORT_CHANNEL_IDS.includes(channelId)) return;
 
-            if (channelId === VC_SUPPORT_CHANNEL_ID) return Alerts.show({
+            if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport")) return Alerts.show({
                 title: "You are entering the support channel!",
                 body: <div>
                     <style>
