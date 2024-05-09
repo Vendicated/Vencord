@@ -55,7 +55,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: "Size of the activity icons",
         markers: [10, 15, 20],
-        default: 20,
+        default: 15,
         stickToMarkers: false,
     },
     renderGifs: {
