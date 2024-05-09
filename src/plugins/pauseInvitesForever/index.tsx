@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
@@ -61,13 +62,15 @@ export default definePlugin({
 
     renderInvitesLabel(guildId: string, setChecked: Function) {
         return (
-            <div>
-                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
-                {this.showDisableInvites(guildId) && <a role="button" onClick={() => {
-                    setChecked(true);
-                    this.disableInvites(guildId);
-                }}> Pause Indefinitely.</a>}
-            </div>
+            <ErrorBoundary noop>
+                <div>
+                    {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                    {this.showDisableInvites(guildId) && <a role="button" onClick={() => {
+                        setChecked(true);
+                        this.disableInvites(guildId);
+                    }}> Pause Indefinitely.</a>}
+                </div>
+            </ErrorBoundary>
         );
     }
 });
