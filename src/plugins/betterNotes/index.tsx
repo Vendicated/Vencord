@@ -17,6 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
@@ -83,7 +84,9 @@ export default definePlugin({
     patchPadding(lastSection: any) {
         if (!lastSection) return;
         return (
-            <div className={UserPopoutSectionCssClasses.lastSection}></div>
+            <ErrorBoundary noop>
+                <div className={UserPopoutSectionCssClasses.lastSection}></div>
+            </ErrorBoundary>
         );
     }
 });
