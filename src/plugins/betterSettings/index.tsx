@@ -133,16 +133,12 @@ export default definePlugin({
     // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
     // not in children
     Layer(props: LayerProps) {
-        try {
-            if (FocusLock === NoopComponent || ComponentDispatch[proxyInnerValue] == null)
-                throw new Error("Failed to fetch some webpack modules");
-
-            return Layer(props);
-        } catch (e) {
-            new Logger("BetterSettings").error("Failed to render Layer", e);
+        if (FocusLock === NoopComponent || ComponentDispatch[proxyInnerValue] == null || Classes[proxyInnerValue] == null) {
+            new Logger("BetterSettings").error("Failed to find some components");
+            return props.children;
         }
 
-        return props.children;
+        return <Layer {...props} />;
     },
 
     wrapMenu(list: SettingsEntry[]) {
