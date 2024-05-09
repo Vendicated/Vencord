@@ -57,7 +57,7 @@ export default definePlugin({
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${k}` : null;
         const keys = Object.keys(diff) as DiffKey[];
 
-        return keys.map(str).filter(isNonNullish).join(" ") || "0 seconds";
+        return [keys.map(str).filter(isNonNullish).join(" ") || "0 seconds", diff.days >= 17] as const;
     },
     latencyTooltipData(message: Message) {
         const { id, nonce } = message;
@@ -73,7 +73,7 @@ export default definePlugin({
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
 
-        const stringDelta = this.stringDelta(abs);
+        const [stringDelta, isSuspectedKotlinDiscord] = this.stringDelta(abs);
 
         // Also thanks dziurwa
         // 2 minutes
@@ -82,7 +82,7 @@ export default definePlugin({
 
         const fill: Fill = delta >= TROLL_LIMIT || ahead ? ["text-muted", "text-muted", "text-muted"] : delta >= (latency * 2) ? ["status-danger", "text-muted", "text-muted"] : ["status-warning", "status-warning", "text-muted"];
 
-        return abs >= latency ? { delta: stringDelta, ahead: abs !== delta, fill } : null;
+        return abs >= latency ? { delta: stringDelta, ahead: abs !== delta, fill, isKotlinDiscord: ahead && isSuspectedKotlinDiscord } : null;
     },
     Tooltip() {
         return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
@@ -92,7 +92,7 @@ export default definePlugin({
             if (!isNonNullish(d)) return null;
 
             return <Tooltip
-                text={d.ahead ? `This user's clock is ${d.delta} ahead` : `This message was sent with a delay of ${d.delta}.`}
+                text={d.isKotlinDiscord ? "User is suspected to be on old kotlin client" : d.ahead ? `This user's clock is ${d.delta} ahead` : `This message was sent with a delay of ${d.delta}.`}
                 position="top"
             >
                 {
