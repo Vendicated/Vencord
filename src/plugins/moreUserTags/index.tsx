@@ -277,7 +277,7 @@ export default definePlugin({
                 'showInNotChat': true
             };
             return;
-        };
+        }
         else if (settings.store.tagSettings) return;
         // @ts-ignore
         if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
