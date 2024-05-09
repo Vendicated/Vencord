@@ -170,7 +170,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
             }
 
             const repo = await VencordNative.updater.getRepo();
-            if (repo.ok && !repo.value.includes("Vendicated/Vencord")) {
+            if (repo.ok && !repo.value.includes("Vendicated/Vencord") && Vencord.Plugins.isPluginEnabled("VCSupport")) {
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
