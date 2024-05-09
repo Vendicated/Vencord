@@ -118,6 +118,11 @@ const settings = definePluginSettings({
         description: "Notif duration (secs)",
         default: 1.0,
     },
+    timeoutPerCharacter: {
+        type: OptionType.NUMBER,
+        description: "Duration multiplier per character",
+        default: 0.5
+    },
     opacity: {
         type: OptionType.SLIDER,
         description: "Notif opacity",
@@ -257,11 +262,12 @@ function shouldIgnoreForChannelType(channel: Channel) {
 }
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
+    const timeout = Math.max(settings.store.timeout, content.length * settings.store.timeoutPerCharacter);
     fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
         const msgData = {
             messageType: 1,
             index: 0,
-            timeout: settings.store.timeout,
+            timeout,
             height: calculateHeight(content),
             opacity: settings.store.opacity,
             volume: settings.store.volume,
