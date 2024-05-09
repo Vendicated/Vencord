@@ -18,7 +18,8 @@ lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
 
-src/userplugins
+src/userplugins/*
+!src/userplugins/.gitkeep
 
 ExtensionCache/
 settings/
