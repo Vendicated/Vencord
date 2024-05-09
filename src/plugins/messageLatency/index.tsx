@@ -57,7 +57,21 @@ export default definePlugin({
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
         const keys = Object.keys(diff) as DiffKey[];
 
-        return [keys.map(str).filter(isNonNullish).join(" ") || "0 seconds", diff.days === 17 && diff.hours === 1] as const;
+        const ts = keys.reduce((prev, k) => {
+            const s = str(k);
+
+            return prev + (
+                isNonNullish(s)
+                    ? (prev !== ""
+                        ? k === "seconds"
+                            ? " and "
+                            : " "
+                        : "") + s
+                    : ""
+            );
+        }, "");
+
+        return [ts || "0 seconds", diff.days === 17 && diff.hours === 1] as const;
     },
     latencyTooltipData(message: Message) {
         const { id, nonce } = message;
