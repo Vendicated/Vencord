@@ -16,21 +16,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import Message from "discord-types/general/Message";
 
-const MinSVGWidth = 400;
-const MinSVGHeight = 350;
+const EMBED_SUPPRESSED = 1 << 2;
+
+const MAX_EMBEDS_PER_MESSAGE = 5;
+const MIN_SVG_WIDTH = 400;
+const MIN_SVG_HEIGHT = 350;
 // Limit the size to prevent lag when parsing big files
-const MaxSVGSizeMB = 10;
+const MAX_SVG_SIZE_MB = 10;
+
+const URL_REGEX = new RegExp(
+    /(?<!<)https?:\/\/(?:(?:canary|ptb)?\.?discord\.com|(?:cdn)\.?discordapp\.(?:com))\/[-a-zA-Z0-9:%_+.~/=]+\.svg[-a-zA-Z0-9:%_+.&?#=]*(?!>)/g,
+);
+
+// Cache to avoid excessive requests in component updates
+const FileSizeCache: Map<string, number> = new Map();
+async function getFileSize(url: string) {
+    if (FileSizeCache.has(url)) {
+        return FileSizeCache.get(url);
+    }
+
+    let size = 0;
+    try {
+        const res = await fetch(url, { method: "HEAD" });
+        const contentLength = res.headers.get("Content-Length");
+
+        if (contentLength) {
+            size = parseInt(contentLength);
+        }
+    } catch (ex) { }
+
+    FileSizeCache.set(url, size);
+    return size;
+}
 
 async function getSVGDimensions(svgUrl: string) {
     let width = 0, height = 0;
+    let svgData: string;
 
-    const res = await fetch(svgUrl);
-    const svgData = await res.text();
+    try {
+        const res = await fetch(svgUrl);
+        svgData = await res.text();
+    } catch (ex) {
+        return { width, height };
+    }
 
     const svgElement = new DOMParser().parseFromString(svgData, "image/svg+xml").documentElement as unknown as SVGSVGElement;
 
@@ -50,8 +84,8 @@ async function getSVGDimensions(svgUrl: string) {
 
     // If the dimensions are below the minimum values,
     // scale them up by the smallest integer which makes at least 1 of them exceed it
-    if (width < MinSVGWidth && height < MinSVGHeight) {
-        const multiplier = Math.ceil(Math.min(MinSVGWidth / width, MinSVGHeight / height));
+    if (width < MIN_SVG_WIDTH && height < MIN_SVG_HEIGHT) {
+        const multiplier = Math.ceil(Math.min(MIN_SVG_WIDTH / width, MIN_SVG_HEIGHT / height));
         width *= multiplier;
         height *= multiplier;
     }
@@ -59,10 +93,20 @@ async function getSVGDimensions(svgUrl: string) {
     return { width, height };
 }
 
+const settings = definePluginSettings({
+    embedLinks: {
+        type: OptionType.BOOLEAN,
+        description: "Embed SVG links hosted under discord.com and cdn.discordapp.com",
+        default: true,
+        restartNeeded: true
+    },
+});
+
 export default definePlugin({
     name: "SVGEmbed",
     description: "Makes SVG files embed as images.",
     authors: [Devs.amia, Devs.nakoyasha],
+    settings: settings,
 
     patches: [
         {
@@ -74,10 +118,17 @@ export default definePlugin({
         },
         {
             find: ".Messages.REMOVE_ATTACHMENT_BODY",
-            replacement: {
-                match: /(?<=renderAttachments\(\i\){)/,
-                replace: "$self.processAttachments(arguments[0]);"
-            }
+            replacement: [
+                {
+                    match: /(?<=renderAttachments\(\i\){)/,
+                    replace: "$self.processAttachments(arguments[0]);"
+                },
+                {
+                    match: /(?<=renderEmbeds\(\i\){)/,
+                    predicate: () => settings.store.embedLinks,
+                    replace: "$self.processEmbeds(arguments[0]);"
+                }
+            ]
         }
     ],
 
@@ -86,7 +137,7 @@ export default definePlugin({
 
         const toProcess = message.attachments.filter(x => x.content_type?.startsWith("image/svg+xml") && x.width == null && x.height == null);
         for (const attachment of toProcess) {
-            if (attachment.size / 1024 / 1024 > MaxSVGSizeMB) continue;
+            if (attachment.size / 1024 / 1024 > MAX_SVG_SIZE_MB) continue;
 
             const { width, height } = await getSVGDimensions(attachment.url);
             attachment.width = width;
@@ -96,6 +147,47 @@ export default definePlugin({
             // since the media one will return http 415 for svgs
             attachment.proxy_url = attachment.url;
 
+            updateMessage = true;
+        }
+
+        if (updateMessage) {
+            FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message });
+        }
+    },
+
+    async processEmbeds(message: Message) {
+        if (message.hasFlag(EMBED_SUPPRESSED)) return;
+
+        let updateMessage = false;
+
+        const svgUrls = new Set(message.content.match(URL_REGEX));
+        const existingUrls = new Set(message.embeds.filter(x => x.type === "image").map(x => x.image?.url));
+
+        let imageEmbedsCount = existingUrls.size;
+        for (const url of [...svgUrls.values()]) {
+            if (imageEmbedsCount >= MAX_EMBEDS_PER_MESSAGE) break;
+            if (existingUrls.has(url)) continue;
+
+            // Check size of files on the cdn.
+            // The files under https://discord.com/assets/* don't return Content-Length
+            // but they don't really have to be checked.
+            const domain = new URL(url).hostname;
+            if (domain === "cdn.discordapp.com") {
+                const size = await getFileSize(url);
+                if (!size || size / 1024 / 1024 > MAX_SVG_SIZE_MB) continue;
+            }
+
+            const { width, height } = await getSVGDimensions(url);
+            // @ts-ignore
+            message.embeds.push({
+                id: "embed_1",
+                url,
+                type: "image",
+                image: { url, proxyURL: url, width, height },
+                fields: []
+            });
+
+            imageEmbedsCount++;
             updateMessage = true;
         }
 
