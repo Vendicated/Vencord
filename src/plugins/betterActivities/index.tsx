@@ -331,7 +331,7 @@ export default definePlugin({
             const activityIndex = activities.findIndex(({ name }) => name === activityName);
             if (activityIndex !== -1) {
                 const activity = activities[activityIndex];
-                const iconObject = {
+                const iconObject: ActivityListIcon = {
                     iconElement: <IconComponent />,
                     tooltip: <ActivityTooltip activity={activity} user={user} />
                 };
