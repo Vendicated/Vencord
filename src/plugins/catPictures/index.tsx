@@ -19,6 +19,7 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, ChoicesOption, findOption } from "@api/Commands";
 import definePlugin from "@utils/types";
 import { UploadHandler, showToast, Toasts } from "@webpack/common";
+import { Devs } from "@utils/constants";
 
 declare function require(name: string);
 const tagListJson = require('./tags.json')
@@ -27,12 +28,7 @@ const draft_type = 0;
 export default definePlugin({
     name: "CatPictures",
     description: "This plugin uses the Caatas API to get random cat pictures via a slash command.",
-    authors: [
-        {
-            id: 353145839864250368n,
-            name: "Karfy",
-        },
-    ],
+    authors: [Devs.Karfy],
     dependencies: ["CommandsAPI"],
     commands: [
         {
