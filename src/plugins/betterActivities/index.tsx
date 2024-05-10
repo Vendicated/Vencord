@@ -39,6 +39,38 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true,
     },
+    iconSize: {
+        type: OptionType.SLIDER,
+        description: "Size of the activity icons",
+        markers: [10, 15, 20],
+        default: 15,
+        stickToMarkers: false,
+    },
+    specialFirst: {
+        type: OptionType.BOOLEAN,
+        description: "Show special activities first (Currently Spotify and Twitch)",
+        default: true,
+        restartNeeded: false,
+    },
+    renderGifs: {
+        type: OptionType.BOOLEAN,
+        description: "Allow rendering GIFs",
+        default: true,
+        restartNeeded: false,
+    },
+    divider: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component: () => (
+            <div style={{
+                width: "100%",
+                height: 1,
+                borderTop: "thin solid var(--background-modifier-accent)",
+                paddingTop: 5,
+                paddingBottom: 5
+            }}/>
+        ),
+    },
     profileSidebar: {
         type: OptionType.BOOLEAN,
         description: "Show all activities in the profile sidebar",
@@ -50,19 +82,6 @@ const settings = definePluginSettings({
         description: "Show all activities in the user popout",
         default: true,
         restartNeeded: true,
-    },
-    iconSize: {
-        type: OptionType.SLIDER,
-        description: "Size of the activity icons",
-        markers: [10, 15, 20],
-        default: 15,
-        stickToMarkers: false,
-    },
-    renderGifs: {
-        type: OptionType.BOOLEAN,
-        description: "Allow rendering GIFs",
-        default: true,
-        restartNeeded: false,
     },
     allActivitiesStyle: {
         type: OptionType.SELECT,
@@ -292,21 +311,6 @@ export default definePlugin({
     patchActivityList: ({ activities, user }: { activities: Activity[], user: User; }): JSX.Element | null => {
         const icons: ActivityListIcon[] = [];
 
-        const spotifyActivity = activities.find(({ name }) => name === "Spotify");
-        if (spotifyActivity) {
-            icons.push({
-                iconElement: <SpotifyIcon />,
-                tooltip: <ActivityTooltip activity={spotifyActivity} user={user} />
-            });
-        }
-        const twitchActivity = activities.find(({ name }) => name === "Twitch");
-        if (twitchActivity) {
-            icons.push({
-                iconElement: <TwitchIcon />,
-                tooltip: <ActivityTooltip activity={twitchActivity} user={user} />
-            });
-        }
-
         const applicationIcons = getApplicationIcons(activities);
         if (applicationIcons.length) {
             const compareImageSource = (a: ApplicationIcon, b: ApplicationIcon) => {
@@ -322,6 +326,25 @@ export default definePlugin({
                 });
             }
         }
+
+        const addActivityIcon = (activityName: string, IconComponent: React.ComponentType) => {
+            const activityIndex = activities.findIndex(({ name }) => name === activityName);
+            if (activityIndex !== -1) {
+                const activity = activities[activityIndex];
+                const iconObject = {
+                    iconElement: <IconComponent />,
+                    tooltip: <ActivityTooltip activity={activity} user={user} />
+                };
+
+                if (settings.store.specialFirst) {
+                    icons.unshift(iconObject);
+                } else {
+                    icons.splice(activityIndex, 0, iconObject);
+                }
+            }
+        };
+        addActivityIcon("Twitch", TwitchIcon);
+        addActivityIcon("Spotify", SpotifyIcon);
 
         if (icons.length) {
             const iconStyle: IconCSSProperties = {
