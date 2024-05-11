@@ -21,10 +21,12 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, Text, Toasts, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, UserStore } from "@webpack/common";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
@@ -399,29 +401,24 @@ export default definePlugin({
 
         return (
             <>
-                {
-                    !hideErrorCard &&
-                    <ErrorCard style={{ margin: "20px 0px", padding: "25px 30px" }}>
-                        <Text style={{ fontWeight: "bold", marginBottom: "3px" }}>Notice</Text>
-                        <Text>Game activity isn't enabled, people won't be able to see your custom presence!</Text>
+                {!gameActivityEnabled && (
+                    <ErrorCard
+                        className={classes(Margins.top16, Margins.bottom16)}
+                        style={{ padding: "1em" }}
+                    >
+                        <Forms.FormTitle>Notice</Forms.FormTitle>
+                        <Forms.FormText>Game activity isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
+
                         <Button
                             color={Button.Colors.TRANSPARENT}
-                            style={{ marginTop: "10px" }} onClick={() => {
-                                StatusSettingsStores.ShowCurrentGame.updateSetting(true);
-                                hideErrorCard = true;
-                                Toasts.show({
-                                    id: Toasts.genId(),
-                                    message: "Game activity enabled",
-                                    type: Toasts.Type.SUCCESS,
-                                    options: {
-                                        position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
-                                    },
-                                });
-                            }}>
+                            className={Margins.top8}
+                            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(true)}
+                        >
                             Enable
                         </Button>
                     </ErrorCard>
-                }
+                )}
+
                 <Forms.FormText>
                     Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
@@ -432,7 +429,9 @@ export default definePlugin({
                 <Forms.FormText>
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
-                <Forms.FormDivider />
+
+                <Forms.FormDivider className={Margins.top8} />
+
                 <div style={{ width: "284px", ...profileThemeStyle }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
