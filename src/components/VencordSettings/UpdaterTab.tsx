@@ -22,6 +22,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
@@ -29,7 +30,7 @@ import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@web
 
 import gitHash from "~git-hash";
 
-import { SettingsTab, wrapTab } from "./shared";
+import { handleSettingsTabError, SettingsTab, wrapTab } from "./shared";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -38,21 +39,24 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
             await action();
         } catch (e: any) {
             UpdateLogger.error("Failed to update", e);
+
+            let err: string;
             if (!e) {
-                var err = "An unknown error occurred (error is undefined).\nPlease try again.";
+                err = "An unknown error occurred (error is undefined).\nPlease try again.";
             } else if (e.code && e.cmd) {
                 const { code, path, cmd, stderr } = e;
 
                 if (code === "ENOENT")
-                    var err = `Command \`${path}\` not found.\nPlease install it and try again`;
+                    err = `Command \`${path}\` not found.\nPlease install it and try again`;
                 else {
-                    var err = `An error occurred while running \`${cmd}\`:\n`;
+                    err = `An error occurred while running \`${cmd}\`:\n`;
                     err += stderr || `Code \`${code}\`. See the console for more info`;
                 }
 
             } else {
-                var err = "An unknown error occurred. See the console for more info.";
+                err = "An unknown error occurred. See the console for more info.";
             }
+
             Alerts.show({
                 title: "Oops!",
                 body: (
@@ -81,9 +85,12 @@ function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string
 
 function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
-        <Card style={{ padding: ".5em" }}>
+        <Card style={{ padding: "0 0.5em" }}>
             {updates.map(({ hash, author, message }) => (
-                <div>
+                <div style={{
+                    marginTop: "0.5em",
+                    marginBottom: "0.5em"
+                }}>
                     <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
@@ -113,7 +120,7 @@ function Updatable(props: CommonProps) {
                 </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? `There are ${updates.length} Updates` : "Up to Date!"}
+                    {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
                 </Forms.FormText>
             )}
 
@@ -183,7 +190,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["notifyAboutUpdates", "autoUpdate", "autoUpdateNotification"]);
+    const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -200,14 +207,6 @@ function Updater() {
     return (
         <SettingsTab title="Vencord Updater">
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
-            <Switch
-                value={settings.notifyAboutUpdates}
-                onChange={(v: boolean) => settings.notifyAboutUpdates = v}
-                note="Shows a notification on startup"
-                disabled={settings.autoUpdate}
-            >
-                Get notified about new updates
-            </Switch>
             <Switch
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
@@ -250,3 +249,20 @@ function Updater() {
 }
 
 export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");
+
+export const openUpdaterModal = IS_UPDATER_DISABLED ? null : function () {
+    const UpdaterTab = wrapTab(Updater, "Updater");
+
+    try {
+        openModal(wrapTab((modalProps: ModalProps) => (
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
+                <ModalContent className="vc-updater-modal">
+                    <ModalCloseButton onClick={modalProps.onClose} className="vc-updater-modal-close-button" />
+                    <UpdaterTab />
+                </ModalContent>
+            </ModalRoot>
+        ), "UpdaterModal"));
+    } catch {
+        handleSettingsTabError();
+    }
+};

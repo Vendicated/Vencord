@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -54,9 +54,9 @@ const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
 
-    return `${location.origin}/stickers/${data.id}.${StickerExt[data.format_type]}`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -130,7 +130,8 @@ function getGuildCandidates(data: Data) {
 
         let count = 0;
         for (const emoji of emojis)
-            if (emoji.animated === isAnimated) count++;
+            if (emoji.animated === isAnimated && !emoji.managed)
+                count++;
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -312,7 +313,7 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
     if (!favoriteableId) return;
@@ -341,7 +342,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type } = props?.target?.dataset ?? {};
     if (!id) return;
 
@@ -363,14 +364,8 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-        addContextMenuPatch("expression-picker", expressionPickerPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-        removeContextMenuPatch("expression-picker", expressionPickerPatch);
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "expression-picker": expressionPickerPatch
     }
 });
