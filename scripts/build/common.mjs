@@ -25,14 +25,16 @@ import { access, readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
-// wtf is this assert syntax
-import PackageJSON from "../../package.json" assert { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
+
+/** @type {import("../../package.json")} */
+const PackageJSON = JSON.parse(readFileSync("package.json"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
+export const isDev = watch || process.argv.includes("--dev");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();

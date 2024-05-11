@@ -18,9 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, i18n } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
@@ -31,7 +30,7 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
-const GuildsTree = proxyLazy(() => findByProps("GuildsTree").GuildsTree);
+const { GuildsTree } = findByPropsLazy("GuildsTree");
 const SortedGuildStore = findStoreLazy("SortedGuildStore");
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
@@ -128,7 +127,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
-                    match: /unreadMentionsIndicatorBottom,barClassName.+?}\)\]/,
+                    match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0].isBetterFolders))"
                 },
                 // Export the isBetterFolders variable to the folders component
@@ -210,7 +209,7 @@ export default definePlugin({
             predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 // Close all folders when clicking the home button
-                match: /(?<=onClick:\(\)=>{)(?=.{0,200}"discodo")/,
+                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
                 replace: "$self.closeFolders();"
             }
         }
@@ -280,7 +279,7 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (isBetterFolders) {
-                return "onScroll" in child.props;
+                return child?.props?.onScroll != null;
             }
             return true;
         };

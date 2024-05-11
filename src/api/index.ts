@@ -17,6 +17,7 @@
 */
 
 import * as $Badges from "./Badges";
+import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
@@ -104,3 +105,8 @@ export const Notifications = $Notifications;
  * An api allowing you to patch and add/remove items to/from context menus
  */
 export const ContextMenu = $ContextMenu;
+
+/**
+ * An API allowing you to add buttons to the chat input
+ */
+export const ChatButtons = $ChatButtons;

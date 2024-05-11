@@ -16,11 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
+import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
+import CloudTab from "@components/VencordSettings/CloudTab";
+import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
+import PluginsTab from "@components/VencordSettings/PluginsTab";
+import ThemesTab from "@components/VencordSettings/ThemesTab";
+import UpdaterTab from "@components/VencordSettings/UpdaterTab";
+import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, SettingsRouter } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -30,23 +36,6 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Megu],
     required: true,
 
-    start() {
-        // The settings shortcuts in the user settings cog context menu
-        // read the elements from a hardcoded map which for obvious reason
-        // doesn't contain our sections. This patches the actions of our
-        // sections to manually use SettingsRouter (which only works on desktop
-        // but the context menu is usually not available on mobile anyway)
-        addContextMenuPatch("user-settings-cog", children => () => {
-            const section = children.find(c => Array.isArray(c) && c.some(it => it?.props?.id === "VencordSettings")) as any;
-            section?.forEach(c => {
-                const id = c?.props?.id;
-                if (id?.startsWith("Vencord") || id?.startsWith("Vesktop")) {
-                    c.props.action = () => SettingsRouter.open(id);
-                }
-            });
-        });
-    },
-
     patches: [{
         find: ".versionHash",
         replacement: [
@@ -54,7 +43,7 @@ export default definePlugin({
                 match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                 replace: (m, component, props) => {
                     props = props.replace(/children:\[.+\]/, "");
-                    return `${m},Vencord.Plugins.plugins.Settings.makeInfoElements(${component}, ${props})`;
+                    return `${m},$self.makeInfoElements(${component}, ${props})`;
                 }
             }
         ]
@@ -63,17 +52,23 @@ export default definePlugin({
         replacement: {
             get match() {
                 switch (Settings.plugins.Settings.settingsLocation) {
-                    case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS\}/;
-                    case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS\}/;
-                    case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/;
+                    case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
+                    case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
+                    case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
                     case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
                     case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
                     case "aboveActivity":
                     default:
-                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS\}/;
+                        return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS/;
                 }
             },
             replace: "...$self.makeSettingsCategories($1),$&"
+        }
+    }, {
+        find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
+        replacement: {
+            match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
+            replace: "$2.default.open($1);return;"
         }
     }],
 
@@ -89,43 +84,43 @@ export default definePlugin({
             {
                 section: "VencordSettings",
                 label: "Vencord",
-                element: require("@components/VencordSettings/VencordTab").default,
+                element: VencordTab,
                 className: "vc-settings"
             },
             {
                 section: "VencordPlugins",
                 label: "Plugins",
-                element: require("@components/VencordSettings/PluginsTab").default,
+                element: PluginsTab,
                 className: "vc-plugins"
             },
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: require("@components/VencordSettings/ThemesTab").default,
+                element: ThemesTab,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
                 section: "VencordUpdater",
                 label: "Updater",
-                element: require("@components/VencordSettings/UpdaterTab").default,
+                element: UpdaterTab,
                 className: "vc-updater"
             },
             {
                 section: "VencordCloud",
                 label: "Cloud",
-                element: require("@components/VencordSettings/CloudTab").default,
+                element: CloudTab,
                 className: "vc-cloud"
             },
             {
                 section: "VencordSettingsSync",
                 label: "Backup & Restore",
-                element: require("@components/VencordSettings/BackupAndRestoreTab").default,
+                element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
             IS_DEV && {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
-                element: require("@components/VencordSettings/PatchHelperTab").default,
+                element: PatchHelperTab,
                 className: "vc-patch-helper"
             },
             ...this.customSections.map(func => func(SectionTypes)),

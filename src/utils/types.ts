@@ -17,6 +17,7 @@
 */
 
 import { Command } from "@api/Commands";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
@@ -41,6 +42,8 @@ export interface Patch {
     all?: boolean;
     /** Do not warn if this patch did no changes */
     noWarn?: boolean;
+    /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
+    group?: boolean;
     predicate?(): boolean;
 }
 
@@ -81,6 +84,11 @@ export interface PluginDef {
      */
     enabledByDefault?: boolean;
     /**
+     * When to call the start() method
+     * @default StartAt.WebpackReady
+     */
+    startAt?: StartAt,
+    /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
      */
@@ -109,12 +117,25 @@ export interface PluginDef {
         [E in FluxEvents]?: (event: any) => void;
     };
     /**
+     * Allows you to manipulate context menus
+     */
+    contextMenus?: Record<string, NavContextMenuPatchCallback>;
+    /**
      * Allows you to add custom actions to the Vencord Toolbox.
      * The key will be used as text for the button
      */
     toolboxActions?: Record<string, () => void>;
 
     tags?: string[];
+}
+
+export const enum StartAt {
+    /** Right away, as soon as Vencord initialised */
+    Init = "Init",
+    /** On the DOMContentLoaded event, so once the document is ready */
+    DOMContentLoaded = "DOMContentLoaded",
+    /** Once Discord's core webpack modules have finished loading, so as soon as things like react and flux are available */
+    WebpackReady = "WebpackReady"
 }
 
 export const enum OptionType {
