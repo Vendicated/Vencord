@@ -184,14 +184,14 @@ export class GuildStore extends FluxStore {
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
 
-type MessageStore = t.FluxStore & Omit<Stores.MessageStore, "getMessages"> & {
+export type MessageStore = t.FluxStore & Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(channelId: string): any;
 };
 
-type UserStore = t.FluxStore & Stores.UserStore;
-type SelectedChannelStore = t.FluxStore & Stores.SelectedChannelStore;
-type ChannelStore = t.FluxStore & Stores.ChannelStore;
-type GuildMemberStore = t.FluxStore & Stores.GuildMemberStore;
+export type UserStore = t.FluxStore & Stores.UserStore;
+export type SelectedChannelStore = t.FluxStore & Stores.SelectedChannelStore;
+export type ChannelStore = t.FluxStore & Stores.ChannelStore;
+export type GuildMemberStore = t.FluxStore & Stores.GuildMemberStore;
 
 type RelationshipStore = t.FluxStore & Stores.RelationshipStore & {
     /** Get the date (as a string) that the relationship was created */

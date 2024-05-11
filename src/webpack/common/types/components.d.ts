@@ -68,7 +68,7 @@ export type FormText = ComponentType<PropsWithChildren<{
     type?: string;
 }> & TextProps> & { Types: FormTextTypes; };
 
-type Forms = {
+export type Forms = {
     FormTitle: t.FormTitle,
     FormSection: t.FormSection,
     FormDivider: t.FormDivider,
