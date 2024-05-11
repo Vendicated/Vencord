@@ -68,6 +68,13 @@ export type FormText = ComponentType<PropsWithChildren<{
     type?: string;
 }> & TextProps> & { Types: FormTextTypes; };
 
+type Forms = {
+    FormTitle: t.FormTitle,
+    FormSection: t.FormSection,
+    FormDivider: t.FormDivider,
+    FormText: t.FormText,
+};
+
 export type Tooltip = ComponentType<{
     text: ReactNode;
     children: FunctionComponent<{

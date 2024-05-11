@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Channel, User } from "discord-types/general";
-
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, find, findByCode, findByProps, waitFor } from "../webpack";
 import type * as t from "./types/utils";
@@ -108,14 +106,10 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = findByProps("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
-export const UploadHandler = findByProps("showUploadFileSizeExceededError", "promptToUpload") as {
-    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
-};
+export const UserUtils = findByProps<t.UserUtils>("getUser", "fetchCurrentUser");
+export const UploadHandler = findByProps<t.UploadHandler>("showUploadFileSizeExceededError", "promptToUpload");
 
-export const ApplicationAssetUtils = findByProps("fetchAssetIds", "getAssetImage") as {
-    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
-};
+export const ApplicationAssetUtils = findByProps<t.ApplicationAssetUtils>("fetchAssetIds", "getAssetImage");
 
 export const Clipboard = findByProps<t.Clipboard>("SUPPORTS_COPY", "copy");
 

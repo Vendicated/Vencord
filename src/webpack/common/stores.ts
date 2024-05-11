@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type * as Stores from "discord-types/stores";
-
 // eslint-disable-next-line path-alias/no-relative
 import { filters, find, findByProps, findStore } from "../webpack";
 import * as t from "./types/stores";
@@ -33,28 +31,22 @@ export enum DraftType {
     ApplicationLauncherCommand = 3
 }
 
-export const MessageStore = findStore("MessageStore") as Omit<Stores.MessageStore, "getMessages"> & {
-    getMessages(chanId: string): any;
-};
-
 // This is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
 export const PermissionStore = findStore<GenericStore>("PermissionStore");
 export const GuildChannelStore = findStore<GenericStore>("GuildChannelStore");
 export const ReadStateStore = findStore<GenericStore>("ReadStateStore");
 export const PresenceStore = findStore<GenericStore>("PresenceStore");
+export const MessageStore = findStore<t.MessageStore>("MessageStore");
 
 export const GuildStore = findStore<t.GuildStore>("GuildStore");
-export const UserStore = findStore<Stores.UserStore & t.FluxStore>("UserStore");
+export const UserStore = findStore<t.UserStore>("UserStore");
 export const UserProfileStore = findStore<GenericStore>("UserProfileStore");
-export const SelectedChannelStore = findStore<Stores.SelectedChannelStore & t.FluxStore>("SelectedChannelStore");
+export const SelectedChannelStore = findStore<t.SelectedChannelStore>("SelectedChannelStore");
 export const SelectedGuildStore = findStore<GenericStore>("SelectedGuildStore");
-export const ChannelStore = findStore<Stores.ChannelStore & t.FluxStore>("ChannelStore");
-export const GuildMemberStore = findStore<Stores.GuildMemberStore & t.FluxStore>("GuildMemberStore");
-export const RelationshipStore = findStore("RelationshipStore") as Stores.RelationshipStore & t.FluxStore & {
-    /** Get the date (as a string) that the relationship was created */
-    getSince(userId: string): string;
-};
+export const ChannelStore = findStore<t.ChannelStore>("ChannelStore");
+export const GuildMemberStore = findStore<t.GuildMemberStore>("GuildMemberStore");
+export const RelationshipStore = findStore<t.RelationshipStore>("RelationshipStore");
 
 export const EmojiStore = findStore<t.EmojiStore>("EmojiStore");
 export const WindowStore = findStore<t.WindowStore>("WindowStore");

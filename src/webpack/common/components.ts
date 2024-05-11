@@ -42,8 +42,6 @@ export let ScrollerThin: t.ScrollerThin = NoopComponent;
 export let Clickable: t.Clickable = NoopComponent;
 export let Avatar: t.Avatar = NoopComponent;
 export let FocusLock: t.FocusLock = NoopComponent;
-// token lagger real
-/** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
 
 export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
@@ -52,7 +50,7 @@ export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
-export const Forms = find(filters.byProps("FormItem", "Button"), m => {
+export const Forms = find<t.Forms>(filters.byProps("FormItem", "Button"), m => {
     ({
         useToken,
         Card,
@@ -78,9 +76,4 @@ export const Forms = find(filters.byProps("FormItem", "Button"), m => {
     } = m);
 
     return m;
-}) as {
-    FormTitle: t.FormTitle,
-    FormSection: t.FormSection,
-    FormDivider: t.FormDivider,
-    FormText: t.FormText,
-};
+});

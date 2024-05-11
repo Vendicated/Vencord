@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember } from "discord-types/general";
+import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import type { FluxEvents } from "./fluxEvents";
@@ -227,3 +227,16 @@ export interface IconUtils {
     getApplicationIconSource: any;
     getAnimatableSourceWithFallback: any;
 }
+
+export interface UserUtils {
+    getUser: (id: string) => Promise<User>;
+}
+
+export interface UploadHandler {
+    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
+}
+
+export interface ApplicationAssetUtils {
+    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
+}
+
