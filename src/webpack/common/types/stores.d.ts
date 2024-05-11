@@ -182,3 +182,10 @@ export class GuildStore extends FluxStore {
     getRoles(guildId: string): Record<string, Role>;
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
+
+export type useStateFromStores = <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    dependencies?: any,
+    isEqual?: (old: T, newer: T) => boolean
+) => T;
