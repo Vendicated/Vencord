@@ -13,6 +13,7 @@ import { AnyObject } from "@utils/types";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
+import { GenericStore } from "./common";
 
 const logger = new Logger("Webpack");
 
@@ -349,7 +350,7 @@ export function findByCode<T = AnyObject>(...code: string[]) {
  *
  * @param name The store name
  */
-export function findStore<T = AnyObject>(name: string) {
+export function findStore<T = GenericStore>(name: string) {
     const result = find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 
     if (IS_DEV) {

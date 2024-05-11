@@ -39,7 +39,6 @@ export class FluxStore {
     registerActionHandlers: GenericFunction;
     syncWith: GenericFunction;
     waitFor: GenericFunction;
-    __getLocalVars(): Record<string, any>;
 }
 
 export interface Flux {
@@ -199,7 +198,7 @@ export type RelationshipStore = FluxStore & Stores.RelationshipStore & {
 };
 
 export type useStateFromStores = <T>(
-    stores: any[],
+    stores: FluxStore[],
     mapper: () => T,
     dependencies?: any[] | null,
     isEqual?: (old: T, newer: T) => boolean
