@@ -22,7 +22,7 @@ import type { Channel, User } from "discord-types/general";
 import { _resolveReady, filters, find, findByCode, findByProps, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
-export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
+export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {
     // Non import call to avoid circular dependency
     Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
 

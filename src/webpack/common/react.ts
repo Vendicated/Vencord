@@ -28,7 +28,7 @@ export let useCallback: typeof React.useCallback;
 
 export const ReactDOM = findByProps<typeof import("react-dom") & typeof import("react-dom/client")>("createPortal", "render");
 
-export const React = find<typeof import("react")>(filters.byProps("useState"), m => {
+export const React = find<typeof import("react")>(filters.byProps("useState"), (m: typeof import("react")) => {
     ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = m);
 
     return m;

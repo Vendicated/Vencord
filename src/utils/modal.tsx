@@ -108,7 +108,7 @@ export let ModalContent: Modals["ModalContent"] = NoopComponent;
 export let ModalFooter: Modals["ModalFooter"] = NoopComponent;
 export let ModalCloseButton: Modals["ModalCloseButton"] = NoopComponent;
 
-export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
+export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), (m: Modals) => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);
 
     return m;
