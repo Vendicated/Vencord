@@ -19,10 +19,24 @@
 import "./style.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+
+interface ThreadStoreProps {
+    getThreadsForGuild(guildId: string): GuildThreads;
+}
+interface GuildThreads {
+    parentId: {
+        threadId: {
+            id: string,
+            parentId: string;
+        };
+    };
+}
+
+const ThreadStore: ThreadStoreProps = findByPropsLazy("getThreadsForGuild");
 
 function onClick() {
     const channels: Array<any> = [];
@@ -39,6 +53,18 @@ function onClick() {
                     readStateType: 0
                 });
             });
+        Object.values(ThreadStore.getThreadsForGuild(guild.id)).forEach((parentChannels: { threadId: { id: string, parentId: string; }; }) => {
+            Object.values(parentChannels).forEach((thread: { id: string, parentId: string; }) => {
+                const channel = ChannelStore.getChannel(thread.id);
+                if (!ReadStateStore.hasUnread(channel.id)) return;
+
+                channels.push({
+                    channelId: channel.id,
+                    messageId: ReadStateStore.lastMessageId(channel.id),
+                    readStateType: 0
+                });
+            });
+        });
     });
 
     FluxDispatcher.dispatch({
@@ -65,7 +91,7 @@ export default definePlugin({
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
 
-    renderReadAllButton: ErrorBoundary.wrap(ReadAllButton, { noop: true }),
+    renderReadAllButton: () => <ReadAllButton />,
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
