@@ -537,7 +537,8 @@ export default definePlugin({
                         url = new URL(child.props.href);
                     } catch { }
 
-                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
+                    // Use a tiny character instead of emoji's name
+                    const emojiName = "˞" // EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
                     return Parser.defaultRules.customEmoji.react({
                         jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
