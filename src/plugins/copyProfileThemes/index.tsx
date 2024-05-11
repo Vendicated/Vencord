@@ -17,7 +17,7 @@
 */
 
 import { sendBotMessage } from "@api/Commands";
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -45,7 +45,7 @@ function getProfileColors(id: string, guildId?: string) {
 }
 
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId, channel }: { user: User, guildId: string; channel: Channel; }) => () => {
+const UserContext: NavContextMenuPatchCallback = (children, { user, guildId, channel }: { user: User, guildId: string; channel: Channel; }) => {
     const profileColors = getProfileColors(user.id, guildId);
     if (profileColors)
         children.splice(-1, 0, (
@@ -69,11 +69,7 @@ export default definePlugin({
     authors: [Devs.KannaDev, Devs.kaitlyn],
     description: "Adds a 'Copy Profile Theme' option to the user context menu to copy the hex codes from a user's profile theme",
 
-    start() {
-        addContextMenuPatch("user-context", UserContext);
+    contextMenus: {
+        "user-context": UserContext
     },
-
-    stop() {
-        removeContextMenuPatch("user-context", UserContext);
-    }
 });
