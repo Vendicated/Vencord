@@ -52,15 +52,3 @@ export const PronounMapping = {
     avoid: "Avoid pronouns, use my name",
     unspecified: "No pronouns specified.",
 } as const;
-
-export const ShortPronounMapping = {
-    // We use this whenever a user has multiple pronouns set, so we don't have to split above pronouns at the "/"
-    // pronounDB allows you to select any/other/ask as 2nd or 3rd set, so these are included here.
-    he: "He",
-    it: "It",
-    she: "She",
-    they: "They",
-    any: "Any",
-    other: "Other",
-    ask: "Ask",
-} as const;
