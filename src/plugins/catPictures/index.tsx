@@ -85,8 +85,7 @@ export default definePlugin({
             execute: async (opts, ctx) => {
                 let response = await getCatPicture(getURL(opts));
                 if (response != null) {
-                    let file = new File([response], "cat.jpeg", { type: "image/jpeg" })
-                    setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, draft_type), 10);
+                    setTimeout(() => UploadHandler.promptToUpload([response!], ctx.channel, draft_type), 10);
                 }
             }
         },
@@ -150,16 +149,19 @@ function getURL(opts: Argument[]): string {
     }
     return "https://cataas.com/cat" + tag + says + "?font=Impact&fontSize=" + fontSize + "&fontColor=%23ffff&fontBackground=%230000" + filterType + "&position=center" + blur + brightness + saturationMultiplier + hueRotation;
 }
-async function getCatPicture(url: string): Promise<Blob | null> {
+async function getCatPicture(url: string): Promise<File | null> {
     return await fetch(url, {
         method: "get",
         headers: {
             "Content-Type": "application/json"
         }
-    }).then(r => {
+    }).then(async r => {
         let contenttype = r.headers.get("content-type");
         if (contenttype == "image/jpeg") {
-            return r.blob()
+            return new File([await r.blob()], "cat.jpeg", { type: "image/jpeg" });
+        }
+        else if (contenttype == "image/png") {
+            return new File([await r.blob()], "cat.png", { type: "image/png" });
         }
         else {
             showToast("Failed to get cat picture please try again.", Toasts.Type.FAILURE);
