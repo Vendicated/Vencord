@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Tooltip } from "@webpack/common";
+import { Tooltip } from "@webpack/common";
 
 const settings = definePluginSettings({
     loop: {
@@ -24,15 +24,14 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
-    authors: [Devs.Lumap],
+    authors: [Devs.Nobody],
     settings,
-
     patches: [
         {
-            find: ".onRemoveAttachment,",
+            find: ".nonMediaMosaicItem]",
             replacement: {
-                match: /\.nonMediaAttachment,!(\i).{0,7}children:\[(\i),/,
-                replace: "$&$1&&$2&&$self.renderPiPButton(),"
+                match: /\.nonMediaMosaicItem\]:!(\i).{0,10}children:\[(\S)/,
+                replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
     ],

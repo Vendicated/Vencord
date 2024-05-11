@@ -4,38 +4,42 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { disableStyle, enableStyle } from "@api/Styles";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
-import style from "./styles.css?managed";
+const settings = definePluginSettings({
+    inlineVideo: {
+        description: "Play videos without carousel modal",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "NoMosaic",
     authors: [Devs.AutumnVN],
     description: "Removes Discord new image mosaic",
     tags: ["image", "mosaic", "media"],
-    patches: [{
-        find: "Media Mosaic",
-        replacement: [
-            {
-                match: /mediaLayoutType:\i\.\i\.MOSAIC/,
-                replace: 'mediaLayoutType:"RESPONSIVE"',
-            },
-            {
-                match: /\i===\i\.\i\.MOSAIC/,
-                replace: "true",
-            },
-            {
-                match: /null!==\(\i=\i\.get\(\i\)\)&&void 0!==\i\?\i:"INVALID"/,
-                replace: '"INVALID"',
-            },
-        ],
-    }],
-    start() {
-        enableStyle(style);
-    },
-    stop() {
-        disableStyle(style);
-    }
+
+    settings,
+
+    patches: [
+        {
+            find: "isGroupableMedia:function()",
+            replacement: {
+                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i;/,
+                replace: "=>false;"
+            }
+        },
+        {
+            find: "renderAttachments(",
+            predicate: () => settings.store.inlineVideo,
+            replacement: {
+                match: /url:(\i)\.url\}\);return /,
+                replace: "$&$1.content_type?.startsWith('image/')&&"
+            }
+        },
+    ]
 });

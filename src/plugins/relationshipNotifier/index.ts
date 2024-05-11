@@ -31,23 +31,23 @@ export default definePlugin({
 
     patches: [
         {
-            find: "removeRelationship:function(",
+            find: "removeRelationship:(",
             replacement: {
-                match: /(removeRelationship:function\((\i),\i,\i\){)/,
-                replace: "$1$self.removeFriend($2);"
+                match: /(removeRelationship:\((\i),\i,\i\)=>)/,
+                replace: "$1($self.removeFriend($2),0)||"
             }
         },
         {
-            find: "leaveGuild:function(",
+            find: "async leaveGuild(",
             replacement: {
-                match: /(leaveGuild:function\((\i)\){)/,
+                match: /(leaveGuild\((\i)\){)/,
                 replace: "$1$self.removeGuild($2);"
             }
         },
         {
-            find: "closePrivateChannel:function(",
+            find: "},closePrivateChannel(",
             replacement: {
-                match: /(closePrivateChannel:function\((\i)\){)/,
+                match: /(closePrivateChannel\((\i)\){)/,
                 replace: "$1$self.removeGroup($2);"
             }
         }

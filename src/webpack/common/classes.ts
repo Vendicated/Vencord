@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 
 import * as t from "./types/classes";
 
-export const ModalImageClasses: t.ImageModalClasses = findByPropsLazy("image", "modal", "responsiveWidthMobile");
+export const ModalImageClasses: t.ImageModalClasses = findLazy(m => m.image && m.modal && !m.applicationIcon);
 export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");

@@ -19,7 +19,8 @@
 import { app, protocol, session } from "electron";
 import { join } from "path";
 
-import { ensureSafePath, getSettings } from "./ipcMain";
+import { ensureSafePath } from "./ipcMain";
+import { RendererSettings } from "./settings";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
@@ -55,12 +56,16 @@ if (IS_VESKTOP || !IS_VANILLA) {
         });
 
         try {
-            if (getSettings().enableReactDevtools)
+            if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
         } catch { }
 
+
+        const findHeader = (headers: Record<string, string[]>, headerName: Lowercase<string>) => {
+            return Object.keys(headers).find(h => h.toLowerCase() === headerName);
+        };
 
         // Remove CSP
         type PolicyResult = Record<string, string[]>;
@@ -73,6 +78,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
                     result[directiveKey] = directiveValue;
                 }
             });
+
             return result;
         };
         const stringifyPolicy = (policy: PolicyResult): string =>
@@ -81,31 +87,39 @@ if (IS_VESKTOP || !IS_VANILLA) {
                 .map(directive => directive.flat().join(" "))
                 .join("; ");
 
-        function patchCsp(headers: Record<string, string[]>, header: string) {
-            if (header in headers) {
+        const patchCsp = (headers: Record<string, string[]>) => {
+            const header = findHeader(headers, "content-security-policy");
+
+            if (header) {
                 const csp = parsePolicy(headers[header][0]);
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-                    csp[directive] = ["*", "blob:", "data:", "vencord:", "'unsafe-inline'"];
+                    csp[directive] ??= [];
+                    csp[directive].push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
                 }
+
                 // TODO: Restrict this to only imported packages with fixed version.
                 // Perhaps auto generate with esbuild
                 csp["script-src"] ??= [];
                 csp["script-src"].push("'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com");
                 headers[header] = [stringifyPolicy(csp)];
             }
-        }
+        };
 
         session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
             if (responseHeaders) {
                 if (resourceType === "mainFrame")
-                    patchCsp(responseHeaders, "content-security-policy");
+                    patchCsp(responseHeaders);
 
                 // Fix hosts that don't properly set the css content type, such as
                 // raw.githubusercontent.com
-                if (resourceType === "stylesheet")
-                    responseHeaders["content-type"] = ["text/css"];
+                if (resourceType === "stylesheet") {
+                    const header = findHeader(responseHeaders, "content-type");
+                    if (header)
+                        responseHeaders[header] = ["text/css"];
+                }
             }
+
             cb({ cancel: false, responseHeaders });
         });
 

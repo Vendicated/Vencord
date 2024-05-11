@@ -20,10 +20,12 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { Forms, React, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
 
@@ -52,7 +54,7 @@ export default definePlugin({
         {
             find: "Object.defineProperties(this,{isDeveloper",
             replacement: {
-                match: /(?<={isDeveloper:\{[^}]+?,get:function\(\)\{return )\w/,
+                match: /(?<={isDeveloper:\{[^}]+?,get:\(\)=>)\i/,
                 replace: "true"
             }
         },
@@ -64,27 +66,18 @@ export default definePlugin({
             }
         },
         {
-            find: ".isStaff=function(){",
+            find: '"isStaff",',
             predicate: () => settings.store.enableIsStaff,
             replacement: [
                 {
-                    match: /return\s*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `return Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
+                    match: /(?<=>)(\i)\.hasFlag\((\i\.\i)\.STAFF\)(?=})/,
+                    replace: (_, user, flags) => `$self.isStaff(${user},${flags})`
                 },
                 {
-                    match: /hasFreePremium=function\(\){return this.isStaff\(\)\s*?\|\|/,
-                    replace: "hasFreePremium=function(){return ",
+                    match: /hasFreePremium\(\){return this.isStaff\(\)\s*?\|\|/,
+                    replace: "hasFreePremium(){return ",
                 }
             ]
-        },
-        // Fix search history being disabled / broken with isStaff
-        {
-            find: 'get("disable_new_search")',
-            predicate: () => settings.store.enableIsStaff,
-            replacement: {
-                match: /(?<=showNewSearch"\);return)\s?!/,
-                replace: "!1&&!"
-            }
         },
         {
             find: 'H1,title:"Experiments"',
@@ -94,6 +87,15 @@ export default definePlugin({
             }
         }
     ],
+
+    isStaff(user: User, flags: any) {
+        try {
+            return UserStore.getCurrentUser()?.id === user.id || user.hasFlag(flags.STAFF);
+        } catch (err) {
+            new Logger("Experiments").error(err);
+            return user.hasFlag(flags.STAFF);
+        }
+    },
 
     settingsAboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");

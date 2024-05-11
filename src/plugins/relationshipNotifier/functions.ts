@@ -37,7 +37,7 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
         return;
     }
 
-    const user = await UserUtils.fetchUser(id)
+    const user = await UserUtils.getUser(id)
         .catch(() => null);
     if (!user) return;
 

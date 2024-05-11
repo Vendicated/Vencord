@@ -23,20 +23,20 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const SessionsStore = findStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
-    return ({ color, tooltip }: { color: string; tooltip: string; }) => (
+    return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip} >
             {(tooltipProps: any) => (
                 <svg
                     {...tooltipProps}
-                    height={opts?.height ?? 20}
-                    width={opts?.width ?? 20}
+                    height={(opts?.height ?? 20) - (small ? 3 : 0)}
+                    width={(opts?.width ?? 20) - (small ? 3 : 0)}
                     viewBox={opts?.viewBox ?? "0 0 24 24"}
                     fill={color}
                 >
@@ -55,18 +55,18 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const getStatusColor = findByCodeLazy(".TWITCH", ".STREAMING", ".INVISIBLE");
+const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 
-const PlatformIcon = ({ platform, status }: { platform: Platform, status: string; }) => {
+const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={`var(--${getStatusColor(status)}`} tooltip={tooltip} />;
+    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -99,6 +99,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false }: {
             key={platform}
             platform={platform as Platform}
             status={status}
+            small={small}
         />
     ));
 
@@ -137,7 +138,7 @@ const indicatorLocations = {
         description: "In the member list",
         onEnable: () => addDecorator("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.user} />
+                <PlatformIndicator user={props.user} small={true} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecorator("platform-indicator")
@@ -197,13 +198,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(?<=return \i\.\i\.Masks\.STATUS_TYPING;)(.+?)(\i)\?(\i\.\i\.Masks\.STATUS_ONLINE_MOBILE):/,
-                    replace: (_, rest, isMobile, mobileMask) => `if(${isMobile})return ${mobileMask};${rest}`
+                    match: /\.STATUS_TYPING;switch(?=.+?(if\(\i\)return \i\.\i\.Masks\.STATUS_ONLINE_MOBILE))/,
+                    replace: ".STATUS_TYPING;$1;switch"
                 },
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
-                    match: /(switch\(\i\){case \i\.\i\.ONLINE:return )(\i)\?({.+?}):/,
-                    replace: (_, rest, isMobile, component) => `if(${isMobile})return${component};${rest}`
+                    match: /switch\(\i\)\{case \i\.\i\.ONLINE:(if\(\i\)return\{[^}]+\})/,
+                    replace: "$1;$&"
                 }
             ]
         },
@@ -229,7 +230,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "isMobileOnline=function",
+            find: "}isMobileOnline(",
             predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
             replacement: {
                 // Make isMobileOnline return true no matter what is the user status

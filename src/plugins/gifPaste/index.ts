@@ -19,11 +19,9 @@
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { filters, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 
-const ExpressionPickerState = mapMangledModuleLazy('name:"expression-picker-last-active-view"', {
-    close: filters.byCode("activeView:null", "setState")
-});
+const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker");
 
 export default definePlugin({
     name: "GifPaste",
@@ -31,17 +29,17 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     patches: [{
-        find: ".handleSelectGIF=",
+        find: '"handleSelectGIF",',
         replacement: {
-            match: /\.handleSelectGIF=function.+?\{/,
-            replace: ".handleSelectGIF=function(gif){return $self.handleSelect(gif);"
+            match: /"handleSelectGIF",(\i)=>\{/,
+            replace: '"handleSelectGIF",$1=>{if (!this.props.className) return $self.handleSelect($1);'
         }
     }],
 
     handleSelect(gif?: { url: string; }) {
         if (gif) {
             insertTextIntoChatInputBox(gif.url + " ");
-            ExpressionPickerState.close();
+            closeExpressionPicker();
         }
     }
 });

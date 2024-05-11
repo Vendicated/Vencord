@@ -10,14 +10,13 @@ import { classNameFactory } from "@api/Styles";
 import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { LazyComponent, useAwaiter } from "@utils/react";
-import { findByCode, findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, moment, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { useAwaiter } from "@utils/react";
+import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
-const IconUtils = findByPropsLazy("getGuildBannerURL");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const UserRow = LazyComponent(() => findByCode(".listDiscriminator"));
+const FriendRow = findExportedComponentLazy("FriendRow");
 
 const cl = classNameFactory("vc-gp-");
 
@@ -50,7 +49,7 @@ const fetched = {
 
 function renderTimestamp(timestamp: number) {
     return (
-        <Timestamp timestamp={moment(timestamp)} />
+        <Timestamp timestamp={new Date(timestamp)} />
     );
 }
 
@@ -65,10 +64,7 @@ function GuildProfileModal({ guild }: GuildProps) {
 
     const [currentTab, setCurrentTab] = useState(Tabs.ServerInfo);
 
-    const bannerUrl = guild.banner && IconUtils.getGuildBannerURL({
-        id: guild.id,
-        banner: guild.banner
-    }, true).replace(/\?size=\d+$/, "?size=1024");
+    const bannerUrl = guild.banner && IconUtils.getGuildBannerURL(guild, true)!.replace(/\?size=\d+$/, "?size=1024");
 
     const iconUrl = guild.icon && IconUtils.getGuildIconURL({
         id: guild.id,
@@ -89,7 +85,7 @@ function GuildProfileModal({ guild }: GuildProps) {
             )}
 
             <div className={cl("header")}>
-                {guild.icon
+                {iconUrl
                     ? <img
                         src={iconUrl}
                         alt=""
@@ -150,7 +146,7 @@ function Owner(guildId: string, owner: User) {
                 avatar: guildAvatar,
                 guildId,
                 canAnimate: true
-            }, true)
+            })
             : IconUtils.getUserAvatarURL(owner, true);
 
     return (
@@ -162,7 +158,7 @@ function Owner(guildId: string, owner: User) {
 }
 
 function ServerInfoTab({ guild }: GuildProps) {
-    const [owner] = useAwaiter(() => UserUtils.fetchUser(guild.ownerId), {
+    const [owner] = useAwaiter(() => UserUtils.getUser(guild.ownerId), {
         deps: [guild.ownerId],
         fallbackValue: null
     });
@@ -176,7 +172,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
-        "Roles": Object.keys(guild.roles).length - 1, // - @everyone
+        "Roles": Object.keys(GuildStore.getRoles(guild.id)).length - 1, // - @everyone
     };
 
     return (
@@ -235,7 +231,7 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
     return (
         <ScrollerThin fade className={cl("scroller")}>
             {members.map(id =>
-                <UserRow
+                <FriendRow
                     user={UserStore.getUser(id)}
                     status={PresenceStore.getStatus(id) || "offline"}
                     onSelect={() => openUserProfile(id)}

@@ -21,8 +21,8 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 interface ActivityAssets {
     large_image?: string;
@@ -77,7 +77,8 @@ const enum NameFormat {
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
     ArtistOnly = "artist",
-    SongOnly = "song"
+    SongOnly = "song",
+    AlbumName = "album"
 }
 
 const applicationId = "1108588077900898414";
@@ -86,15 +87,9 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 const logger = new Logger("LastFMRichPresence");
 
 const presenceStore = findByPropsLazy("getLocalPresence");
-const assetManager = mapMangledModuleLazy(
-    "getAssetImage: size must === [number, number] for Twitch",
-    {
-        getAsset: filters.byCode("apply("),
-    }
-);
 
 async function getApplicationAsset(key: string): Promise<string> {
-    return (await assetManager.getAsset(applicationId, [key, undefined]))[0];
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
 }
 
 function setActivity(activity: Activity | null) {
@@ -153,6 +148,10 @@ const settings = definePluginSettings({
             {
                 label: "Use song name only",
                 value: NameFormat.SongOnly
+            },
+            {
+                label: "Use album name (falls back to custom status text if song has no album)",
+                value: NameFormat.AlbumName
             }
         ],
     },
@@ -176,6 +175,11 @@ const settings = definePluginSettings({
             }
         ],
     },
+    showLastFmLogo: {
+        description: "show the Last.fm logo by the album cover",
+        type: OptionType.BOOLEAN,
+        default: true,
+    }
 });
 
 export default definePlugin({
@@ -282,8 +286,10 @@ export default definePlugin({
             {
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
-                small_image: await getApplicationAsset("lastfm-small"),
-                small_text: "Last.fm",
+                ...(settings.store.showLastFmLogo && {
+                    small_image: await getApplicationAsset("lastfm-small"),
+                    small_text: "Last.fm"
+                }),
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
                 large_text: trackData.album || undefined,
@@ -312,6 +318,8 @@ export default definePlugin({
                     return trackData.artist;
                 case NameFormat.SongOnly:
                     return trackData.name;
+                case NameFormat.AlbumName:
+                    return trackData.album || settings.store.statusName;
                 default:
                     return settings.store.statusName;
             }

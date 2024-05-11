@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent, useTimer } from "@utils/react";
-import { findByCode } from "@webpack";
+import { useTimer } from "@utils/react";
+import { findComponentByCodeLazy } from "@webpack";
 
 import { cl } from "./utils";
 
@@ -25,7 +25,7 @@ interface VoiceMessageProps {
     src: string;
     waveform: string;
 }
-const VoiceMessage = LazyComponent<VoiceMessageProps>(() => findByCode('["onVolumeChange","volume","onMute"]'));
+const VoiceMessage = findComponentByCodeLazy<VoiceMessageProps>("waveform:", "onVolumeChange");
 
 export type VoicePreviewOptions = {
     src?: string;

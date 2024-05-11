@@ -27,6 +27,7 @@ import PluginModal from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
@@ -34,12 +35,12 @@ import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-
+// Avoid circular dependency
+const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
@@ -251,7 +252,7 @@ export default function PluginSettings() {
         }
         DataStore.set("Vencord_existingPlugins", existingTimestamps);
 
-        return window._.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
+        return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
     type P = JSX.Element | JSX.Element[];
@@ -315,7 +316,6 @@ export default function PluginSettings() {
                 <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.bottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
-                        className={InputStyles.inputDefault}
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },

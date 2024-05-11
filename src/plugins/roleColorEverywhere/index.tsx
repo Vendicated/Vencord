@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
@@ -49,10 +50,10 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: 'className:"mention"',
+            find: 'location:"UserMention',
             replacement: [
                 {
-                    match: /user:(\i),channel:(\i).{0,300}?"@"\.concat\(.+?\)/,
+                    match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
                     replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],
@@ -60,37 +61,40 @@ export default definePlugin({
         },
         // Slate
         {
-            // taken from CommandsAPI
-            find: ".source,children",
+            find: ".userTooltip,children",
             replacement: [
                 {
-                    match: /function \i\((\i)\).{5,20}id.{5,20}guildId.{5,10}channelId.{100,150}hidePersonalInformation.{5,50}jsx.{5,20},{/,
-                    replace: "$&color:$self.getUserColor($1.id,{guildId:$1?.guildId}),"
+                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
+                    replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
             predicate: () => settings.store.chatMentions,
         },
-        // Member List Role Names
         {
-            find: ".memberGroupsPlaceholder",
+            find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(memo\(\(function\((\i)\).{300,500}CHANNEL_MEMBERS_A11Y_LABEL.{100,200}roleIcon.{5,20}null,).," \u2014 ",.\]/,
-                    replace: "$1$self.roleGroupColor($2)]"
+                    match: /null,\i," — ",\i\]/,
+                    replace: "null,$self.roleGroupColor(arguments[0])]"
                 },
+            ],
+            predicate: () => settings.store.memberList,
+        },
+        {
+            find: ".Messages.THREAD_BROWSER_PRIVATE",
+            replacement: [
                 {
-                    match: /children:\[.," \u2014 ",.\]/,
+                    match: /children:\[\i," — ",\i\]/,
                     replace: "children:[$self.roleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList,
         },
-        // Voice chat users
         {
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName=function\(\).{50,75}speaking.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
@@ -109,16 +113,19 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
+        const role = GuildStore.getRole(guildId, id);
 
-        return <span style={{
-            color: role?.colorString,
-            fontWeight: "unset",
-            letterSpacing: ".05em"
-        }}>{title ?? label} &mdash; {count}</span>;
-    },
+        return (
+            <span style={{
+                color: role?.colorString,
+                fontWeight: "unset",
+                letterSpacing: ".05em"
+            }}>
+                {title ?? label} &mdash; {count}
+            </span>
+        );
+    }, { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {

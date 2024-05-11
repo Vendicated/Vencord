@@ -65,3 +65,11 @@
     /* discord also sets cursor: default which prevents the cursor from showing as text */
     cursor: initial;
 }
+
+.vc-updater-modal {
+    padding: 1.5em !important;
+}
+
+.vc-updater-modal-close-button {
+    float: right;
+}

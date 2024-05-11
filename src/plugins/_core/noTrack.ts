@@ -16,17 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    disableAnalytics: {
+        type: OptionType.BOOLEAN,
+        description: "Disable Discord's tracking (analytics/'science')",
+        default: true,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "NoTrack",
-    description: "Disable Discord's tracking ('science'), metrics and Sentry crash reporting",
+    description: "Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",
     authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
     required: true,
+
+    settings,
+
     patches: [
         {
-            find: "TRACKING_URL:",
+            find: "AnalyticsActionHandlers.handle",
+            predicate: () => settings.store.disableAnalytics,
             replacement: {
                 match: /^.+$/,
                 replace: "()=>{}",
@@ -43,20 +57,21 @@ export default definePlugin({
             find: ".METRICS,",
             replacement: [
                 {
-                    match: /this\._intervalId.+?12e4\)/,
-                    replace: ""
+                    match: /this\._intervalId=/,
+                    replace: "this._intervalId=void 0&&"
                 },
                 {
-                    match: /(?<=increment=function\(\i\){)/,
-                    replace: "return;"
+                    match: /(?:increment|distribution)\(\i(?:,\i)?\){/g,
+                    replace: "$&return;"
                 }
             ]
         },
         {
             find: ".installedLogHooks)",
             replacement: {
-                match: /if\(\i\.getDebugLogging\(\)&&!\i\.installedLogHooks\)/,
-                replace: "if(false)"
+                // if getDebugLogging() returns false, the hooks don't get installed.
+                match: "getDebugLogging(){",
+                replace: "getDebugLogging(){return false;"
             }
         },
     ]

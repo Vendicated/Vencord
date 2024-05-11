@@ -18,8 +18,9 @@
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 
-import { makeLazy } from "./lazy";
 import { checkIntersecting } from "./misc";
+
+export * from "./lazyReact";
 
 export const NoopComponent = () => null;
 
@@ -77,7 +78,6 @@ interface AwaiterOpts<T> {
  * @param fallbackValue The fallback value that will be used until the promise resolved
  * @returns [value, error, isPending]
  */
-
 export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts: AwaiterOpts<T>): AwaiterRes<T>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterOpts<T | null>): AwaiterRes<T | null> {
@@ -113,30 +113,15 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
 
     return [state.value, state.error, state.pending];
 }
+
 /**
  * Returns a function that can be used to force rerender react components
  */
-
 export function useForceUpdater(): () => void;
 export function useForceUpdater(withDep: true): [unknown, () => void];
 export function useForceUpdater(withDep?: true) {
     const r = useReducer(x => x + 1, 0);
     return withDep ? r : r[1];
-}
-/**
- * A lazy component. The factory method is called on first render. For example useful
- * for const Component = LazyComponent(() => findByDisplayName("...").default)
- * @param factory Function returning a Component
- * @param attempts How many times to try to get the component before giving up
- * @returns Result of factory function
- */
-
-export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
-    const get = makeLazy(factory, attempts);
-    return (props: T) => {
-        const Component = get() ?? NoopComponent;
-        return <Component {...props} />;
-    };
 }
 
 interface TimerOpts {

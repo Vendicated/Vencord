@@ -18,6 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -31,7 +32,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -49,19 +50,25 @@ export default definePlugin({
         {
             find: "showTaglessAccountPanel:",
             replacement: {
-                // return React.createElement(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /return ?(.{0,30}\(.{1,3},\{[^}]+?,showTaglessAccountPanel:.+?\}\))/,
-                // return [Player, Panel]
-                replace: "return [$self.renderPlayer(),$1]"
+                // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?showTaglessAccountPanel:)/,
+                // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
+                replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
         },
-        // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
         {
             find: ".PLAYER_DEVICES",
-            replacement: {
-                match: /get:(.{1,3})\.bind\(null,(.{1,6})\.get\)/,
-                replace: "SpotifyAPIMarker:1,post:$1.bind(null,$2.post),$&"
-            }
+            replacement: [{
+                // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
+                match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
+                replace: "post:$1.bind(null,$2.post),$&"
+            },
+            {
+                // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
+                // Discord rejects 202 which causes the request to send twice. This patch prevents this.
+                match: /202===\i\.status/,
+                replace: "false",
+            }]
         },
         // Discord doesn't give you the repeat kind, only a boolean
         {
@@ -72,6 +79,25 @@ export default definePlugin({
             }
         }
     ],
+
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
-    renderPlayer: () => <Player />
+
+    PanelWrapper({ VencordOriginal, ...props }) {
+        return (
+            <>
+                <ErrorBoundary
+                    fallback={() => (
+                        <div className="vc-spotify-fallback">
+                            <p>Failed to render Spotify Modal :(</p>
+                            <p >Check the console for errors</p>
+                        </div>
+                    )}
+                >
+                    <Player />
+                </ErrorBoundary>
+
+                <VencordOriginal {...props} />
+            </>
+        );
+    }
 });

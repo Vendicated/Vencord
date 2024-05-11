@@ -16,43 +16,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findByCode, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
     FluxDispatcher,
     GuildStore,
+    IconUtils,
     MessageStore,
     Parser,
+    PermissionsBits,
     PermissionStore,
     RestAPI,
     Text,
+    TextAndImagesSettingsStores,
     UserStore
 } from "@webpack/common";
-import { Channel, Guild, Message } from "discord-types/general";
+import { Channel, Message } from "discord-types/general";
 
 const messageCache = new Map<string, {
     message?: Message;
     fetched: boolean;
 }>();
 
-const Embed = LazyComponent(() => findByCode(".inlineMediaEmbed"));
-const ChannelMessage = LazyComponent(() => find(m => m.type?.toString()?.includes('["message","compact","className",')));
+const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
+const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
+const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
+const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
-let AutoModEmbed: React.ComponentType<any> = () => null;
-
-const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
+const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
 
 interface Attachment {
@@ -65,7 +66,6 @@ interface Attachment {
 interface MessageEmbedProps {
     message: Message;
     channel: Channel;
-    guildID: string;
 }
 
 const messageFetchQueue = new Queue();
@@ -228,19 +228,19 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     let match = null as RegExpMatchArray | null;
     while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, guildID, channelID, messageID] = match;
+        const [_, channelID, messageID] = match;
         if (embeddedBy.includes(messageID)) {
             continue;
         }
 
         const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel || (guildID !== "@me" && !PermissionStore.can(1024n /* view channel */, linkedChannel))) {
+        if (!linkedChannel || (!linkedChannel.isPrivate() && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, linkedChannel))) {
             continue;
         }
 
         const { listMode, idList } = settings.store;
 
-        const isListed = [guildID, channelID, message.author.id].some(id => id && idList.includes(id));
+        const isListed = [linkedChannel.guild_id, channelID, message.author.id].some(id => id && idList.includes(id));
 
         if (listMode === "blacklist" && isListed) continue;
         if (listMode === "whitelist" && !isListed) continue;
@@ -255,7 +255,7 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
                 delete msg.embeds;
                 delete msg.interaction;
 
-                messageFetchQueue.push(() => fetchMessage(channelID, messageID)
+                messageFetchQueue.unshift(() => fetchMessage(channelID, messageID)
                     .then(m => m && FluxDispatcher.dispatch({
                         type: "MESSAGE_UPDATE",
                         message: msg
@@ -267,8 +267,7 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
         const messageProps: MessageEmbedProps = {
             message: withEmbeddedBy(linkedMessage, [...embeddedBy, message.id]),
-            channel: linkedChannel,
-            guildID
+            channel: linkedChannel
         };
 
         const type = settings.store.automodEmbeds;
@@ -282,63 +281,67 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
     return accessories.length ? <>{accessories}</> : null;
 }
 
-function ChannelMessageEmbedAccessory({ message, channel, guildID }: MessageEmbedProps): JSX.Element | null {
-    const isDM = guildID === "@me";
-
-    const guild = !isDM && GuildStore.getGuild(channel.guild_id);
-    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
-
-
-    return <Embed
-        embed={{
-            rawDescription: "",
-            color: "var(--background-secondary)",
-            author: {
-                name: <Text variant="text-xs/medium" tag="span">
-                    <span>{isDM ? "Direct Message - " : (guild as Guild).name + " - "}</span>
-                    {isDM
-                        ? Parser.parse(`<@${dmReceiver.id}>`)
-                        : Parser.parse(`<#${channel.id}>`)
-                    }
-                </Text>,
-                iconProxyURL: guild
-                    ? `https://${window.GLOBAL_ENV.CDN_HOST}/icons/${guild.id}/${guild.icon}.png`
-                    : `https://${window.GLOBAL_ENV.CDN_HOST}/avatars/${dmReceiver.id}/${dmReceiver.avatar}`
-            }
-        }}
-        renderDescription={() => (
-            <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult)}>
-                <ChannelMessage
-                    id={`message-link-embeds-${message.id}`}
-                    message={message}
-                    channel={channel}
-                    subscribeToComponentDispatch={false}
-                />
-            </div>
-        )}
-    />;
+function getChannelLabelAndIconUrl(channel: Channel) {
+    if (channel.isDM()) return ["Direct Message", IconUtils.getUserAvatarURL(UserStore.getUser(channel.recipients[0]))];
+    if (channel.isGroupDM()) return ["Group DM", IconUtils.getChannelIconURL(channel)];
+    return ["Server", IconUtils.getGuildIconURL(GuildStore.getGuild(channel.guild_id))];
 }
 
-const compactModeEnabled = getSettingStoreLazy<boolean>("textAndImages", "messageDisplayCompact")!;
+function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
+    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
+
+    const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
+
+    return (
+        <Embed
+            embed={{
+                rawDescription: "",
+                color: "var(--background-secondary)",
+                author: {
+                    name: <Text variant="text-xs/medium" tag="span">
+                        <span>{channelLabel} - </span>
+                        {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
+                    </Text>,
+                    iconProxyURL: iconUrl
+                }
+            }}
+            renderDescription={() => (
+                <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult)}>
+                    <ChannelMessage
+                        id={`message-link-embeds-${message.id}`}
+                        message={message}
+                        channel={channel}
+                        subscribeToComponentDispatch={false}
+                    />
+                </div>
+            )}
+        />
+    );
+}
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
-    const { message, channel, guildID } = props;
-    const isDM = guildID === "@me";
+    const { message, channel } = props;
+    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
     const images = getImages(message);
     const { parse } = Parser;
+
+    const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
     return <AutoModEmbed
         channel={channel}
         childrenAccessories={
-            <Text color="text-muted" variant="text-xs/medium" tag="span">
-                {isDM
-                    ? parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
-                    : parse(`<#${channel.id}>`)
-                }
-                <span>{isDM ? " - Direct Message" : " - " + GuildStore.getGuild(channel.guild_id)?.name}</span>
+            <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
+                {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
+                <span>
+                    <span>{channelLabel} - </span>
+                    {channel.isDM()
+                        ? Parser.parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
+                        : Parser.parse(`<#${channel.id}>`)
+                    }
+                </span>
             </Text>
         }
-        compact={compactModeEnabled.getSetting()}
+        compact={compact}
         content={
             <>
                 {message.content || message.attachments.length <= images.length
@@ -365,20 +368,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI", "SettingsStoreAPI"],
-    patches: [
-        {
-            find: ".embedCard",
-            replacement: [{
-                match: /function (\i)\(\i\){var \i=\i\.message,\i=\i\.channel.{0,200}\.hideTimestamp/,
-                replace: "$self.AutoModEmbed=$1;$&"
-            }]
-        }
-    ],
-
-    set AutoModEmbed(e: any) {
-        AutoModEmbed = e;
-    },
+    dependencies: ["MessageAccessoriesAPI"],
 
     settings,
 
@@ -399,4 +389,8 @@ export default definePlugin({
             );
         }, 4 /* just above rich embeds */);
     },
+
+    stop() {
+        removeAccessory("messageLinkEmbed");
+    }
 });
