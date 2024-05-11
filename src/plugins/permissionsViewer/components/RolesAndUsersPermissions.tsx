@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
 import { settings } from "..";
@@ -112,7 +112,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         <div
                                             className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
-                                                if ((settings.store as any).unsafeViewAsRole && permission.type === PermissionType.Role)
+                                                if (permission.type === PermissionType.Role)
                                                     ContextMenuApi.openContextMenu(e, () => (
                                                         <RoleContextMenu
                                                             guild={guild}
@@ -120,6 +120,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                             onClose={modalProps.onClose}
                                                         />
                                                     ));
+                                                else if (permission.type === PermissionType.User) {
+                                                    ContextMenuApi.openContextMenu(e, () => (
+                                                        <UserContextMenu
+                                                            userId={permission.id!}
+                                                            onClose={modalProps.onClose}
+                                                        />
+                                                    ));
+                                                }
                                             }}
                                         >
                                             {(permission.type === PermissionType.Role || permission.type === PermissionType.Owner) && (
@@ -200,24 +208,53 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
             aria-label="Role Options"
         >
             <Menu.MenuItem
-                id="vc-pw-view-as-role"
-                label="View As Role"
+                id="vc-copy-role-id"
+                label={i18n.Messages.COPY_ID_ROLE}
                 action={() => {
-                    const role = GuildStore.getRole(guild.id, roleId);
-                    if (!role) return;
+                    Clipboard.copy(roleId);
+                }}
+            />
 
-                    onClose();
+            {(settings.store as any).unsafeViewAsRole && (
+                <Menu.MenuItem
+                    id="vc-pw-view-as-role"
+                    label={i18n.Messages.VIEW_AS_ROLE}
+                    action={() => {
+                        const role = GuildStore.getRole(guild.id, roleId);
+                        if (!role) return;
 
-                    FluxDispatcher.dispatch({
-                        type: "IMPERSONATE_UPDATE",
-                        guildId: guild.id,
-                        data: {
-                            type: "ROLES",
-                            roles: {
-                                [roleId]: role
+                        onClose();
+
+                        FluxDispatcher.dispatch({
+                            type: "IMPERSONATE_UPDATE",
+                            guildId: guild.id,
+                            data: {
+                                type: "ROLES",
+                                roles: {
+                                    [roleId]: role
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                    }
+                />
+            )}
+        </Menu.Menu>
+    );
+}
+
+function UserContextMenu({ userId, onClose }: { userId: string; onClose: () => void; }) {
+    return (
+        <Menu.Menu
+            navId={cl("user-context-menu")}
+            onClose={ContextMenuApi.closeContextMenu}
+            aria-label="User Options"
+        >
+            <Menu.MenuItem
+                id="vc-copy-user-id"
+                label={i18n.Messages.COPY_ID_USER}
+                action={() => {
+                    Clipboard.copy(userId);
                 }}
             />
         </Menu.Menu>
