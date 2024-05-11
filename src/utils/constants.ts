@@ -16,17 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
-import gitRemote from "~git-remote";
-
-export {
-    gitHash,
-    gitRemote
-};
-
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
@@ -42,6 +33,10 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
+    Nobody: {
+        name: "Nobody",
+        id: 0n,
+    },
     Ven: {
         name: "Vendicated",
         id: 343383572805058560n
@@ -54,6 +49,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cynosphere",
         id: 150745989836308480n
     },
+    Trwy: {
+        name: "trey",
+        id: 354427199023218689n
+    },
     Megu: {
         name: "Megumin",
         id: 545581357812678656n
@@ -62,8 +61,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
-        name: "obscurity",
+    fawn: {
+        name: "fawn",
         id: 336678828233588736n,
     },
     rushii: {
@@ -78,8 +77,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
-    Animal: {
-        name: "Animal",
+    Nyako: {
+        name: "nyako",
         id: 118437263754395652n
     },
     MaiKokain: {
@@ -156,7 +155,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n
+        id: 715746190813298788n
     },
     dzshn: {
         name: "dzshn",
@@ -267,6 +266,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Dziurwa",
         id: 1001086404203389018n
     },
+    arHSM: {
+        name: "arHSM",
+        id: 841509053422632990n
+    },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
+    },
     AutumnVN: {
         name: "AutumnVN",
         id: 393694671383166998n
@@ -282,10 +289,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RyanCaoDev: {
         name: "RyanCaoDev",
         id: 952235800110694471n,
-    },
-    Strencher: {
-        name: "Strencher",
-        id: 415849376598982656n
     },
     FieryFlames: {
         name: "Fiery",
@@ -355,10 +358,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "bb010g",
         id: 72791153467990016n,
     },
-    Lumap: {
-        name: "lumap",
-        id: 635383782576357407n
-    },
     Dolfies: {
         name: "Dolfies",
         id: 852892297661906993n,
@@ -383,6 +382,90 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "UlyssesZhan",
         id: 586808226058862623n
     },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+    philipbry: {
+        name: "philipbry",
+        id: 554994003318276106n
+    },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
+    maisymoe: {
+        name: "maisy",
+        id: 257109471589957632n,
+    },
+    Mopi: {
+        name: "Mopi",
+        id: 1022189106614243350n
+    },
+    Grzesiek11: {
+        name: "Grzesiek11",
+        id: 368475654662127616n,
+    },
+    Samwich: {
+        name: "Samwich",
+        id: 976176454511509554n,
+    },
+    coolelectronics: {
+        name: "coolelectronics",
+        id: 696392247205298207n,
+    },
+    Av32000: {
+        name: "Av32000",
+        id: 593436735380127770n,
+    },
+    Kyuuhachi: {
+        name: "Kyuuhachi",
+        id: 236588665420251137n,
+    },
+    Elvyra: {
+        name: "Elvyra",
+        id: 708275751816003615n,
+    },
+    Inbestigator: {
+        name: "Inbestigator",
+        id: 761777382041714690n
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n
+    },
+    puv: {
+        name: "puv",
+        id: 469441552251355137n
+    },
+    Kodarru: {
+        name: "Kodarru",
+        id: 785227396218748949n
+    },
+    nakoyasha: {
+        name: "nakoyasha",
+        id: 222069018507345921n
+    },
+    Sqaaakoi: {
+        name: "Sqaaakoi",
+        id: 259558259491340288n
+    },
+    Byron: {
+        name: "byeoon",
+        id: 1167275288036655133n
+    },
+    Kaitlyn: {
+        name: "kaitlyn",
+        id: 306158896630988801n
+    },
+    PolisanTheEasyNick: {
+        name: "Oleh Polisan",
+        id: 242305263313485825n
+    },
+    GabiRP: {
+        name: "GabiRP",
+        id: 507955112027750401n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

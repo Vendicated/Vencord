@@ -18,15 +18,17 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
+import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, lodash, Menu, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -36,7 +38,6 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUtils = findByPropsLazy("CloudUpload");
-const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
@@ -47,18 +48,30 @@ export type VoiceRecorder = ComponentType<{
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
+const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
+
+    children.push(
+        <Menu.MenuItem
+            id="vc-send-vmsg"
+            label={
+                <div className={OptionClasses.optionLabel}>
+                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
+                    <div className={OptionClasses.optionName}>Send voice message</div>
+                </div>
+            }
+            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
+        />
+    );
+};
+
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
-
-    start() {
-        addContextMenuPatch("channel-attach", ctxMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("channel-attach", ctxMenuPatch);
+    contextMenus: {
+        "channel-attach": ctxMenuPatch
     }
 });
 
@@ -100,7 +113,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageCreator.getSendMessageOptionsForReply(reply)?.messageReference : null,
+                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });
@@ -165,6 +178,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         fallbackValue: EMPTY_META,
     });
 
+    const isUnsupportedFormat = blob && (
+        !blob.type.startsWith("audio/ogg")
+        || blob.type.includes("codecs") && !blob.type.includes("opus")
+    );
+
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
@@ -201,6 +219,16 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     recording={isRecording}
                 />
 
+                {isUnsupportedFormat && (
+                    <Card className={`vc-plugins-restart-card ${Margins.top16}`}>
+                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+
+                        <Forms.FormText className={Margins.top8}>
+                            To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
+                        </Forms.FormText>
+                    </Card>
+                )}
+
             </ModalContent>
 
             <ModalFooter>
@@ -218,20 +246,3 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         </ModalRoot>
     );
 }
-
-const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
-
-    children.push(
-        <Menu.MenuItem
-            id="vc-send-vmsg"
-            label={
-                <div className={OptionClasses.optionLabel}>
-                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
-                    <div className={OptionClasses.optionName}>Send voice message</div>
-                </div>
-            }
-            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
-        />
-    );
-};

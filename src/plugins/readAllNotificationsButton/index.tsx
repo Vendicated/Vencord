@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -25,16 +27,17 @@ function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE.forEach((c: { channel: { id: string; }; }) => {
-            if (!ReadStateStore.hasUnread(c.channel.id)) return;
+        GuildChannelStore.getChannels(guild.id).SELECTABLE
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+            .forEach((c: { channel: { id: string; }; }) => {
+                if (!ReadStateStore.hasUnread(c.channel.id)) return;
 
-            channels.push({
-                channelId: c.channel.id,
-                // messageId: c.channel?.lastMessageId,
-                messageId: ReadStateStore.lastMessageId(c.channel.id),
-                readStateType: 0
+                channels.push({
+                    channelId: c.channel.id,
+                    messageId: ReadStateStore.lastMessageId(c.channel.id),
+                    readStateType: 0
+                });
             });
-        });
     });
 
     FluxDispatcher.dispatch({
@@ -48,9 +51,11 @@ const ReadAllButton = () => (
     <Button
         onClick={onClick}
         size={Button.Sizes.MIN}
-        color={Button.Colors.BRAND}
-        style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
-    >Read all</Button>
+        color={Button.Colors.CUSTOM}
+        className="vc-ranb-button"
+    >
+        Read All
+    </Button>
 );
 
 export default definePlugin({

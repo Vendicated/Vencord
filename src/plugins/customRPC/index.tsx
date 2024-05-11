@@ -22,12 +22,12 @@ import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
-const ActivityComponent = findByCodeLazy("onOpenGameProfile");
+const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
+const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-const Colors = findByPropsLazy("profileColors");
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -175,7 +175,7 @@ const settings = definePluginSettings({
     },
     startTime: {
         type: OptionType.NUMBER,
-        description: "Start timestamp (only for custom timestamp mode)",
+        description: "Start timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -185,7 +185,7 @@ const settings = definePluginSettings({
     },
     endTime: {
         type: OptionType.NUMBER,
-        description: "End timestamp (only for custom timestamp mode)",
+        description: "End timestamp in milisecond (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -313,12 +313,12 @@ async function createActivity(): Promise<Activity | undefined> {
     switch (settings.store.timestampMode) {
         case TimestampMode.NOW:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000)
+                start: Date.now()
             };
             break;
         case TimestampMode.TIME:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
+                start: Date.now() - (new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()) * 1000
             };
             break;
         case TimestampMode.CUSTOM:
@@ -393,6 +393,8 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
+        const { profileThemeStyle } = useProfileThemeStyle({});
+
         return (
             <>
                 <Forms.FormText>
@@ -406,7 +408,7 @@ export default definePlugin({
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
-                <div style={{ width: "284px" }} className={Colors.profileColors}>
+                <div style={{ width: "284px", ...profileThemeStyle }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}

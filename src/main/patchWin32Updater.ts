@@ -32,6 +32,8 @@ function isNewer($new: string, old: string) {
 }
 
 function patchLatest() {
+    if (process.env.DISABLE_UPDATER_AUTO_PATCHING) return;
+
     try {
         const currentAppPath = dirname(process.execPath);
         const currentVersion = basename(currentAppPath);

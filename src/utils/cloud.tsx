@@ -19,8 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
-import { findByProps } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, UserStore } from "@webpack/common";
 
 import { Logger } from "./Logger";
 import { openModal } from "./modal";
@@ -91,8 +90,6 @@ export async function authorizeCloud() {
         return;
     }
 
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
     openModal((props: any) => <OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
@@ -109,7 +106,7 @@ export async function authorizeCloud() {
 
             try {
                 const res = await fetch(location, {
-                    headers: new Headers({ Accept: "application/json" })
+                    headers: { Accept: "application/json" }
                 });
                 const { secret } = await res.json();
                 if (secret) {
