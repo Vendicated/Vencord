@@ -461,7 +461,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     GabiRP: {
         name: "GabiRP",
         id: 507955112027750401n
-    }
+    },
+    rozbrajaczpoziomow: {
+        name: "rozbrajaczpoziomow",
+        id: 455435762981273630n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
