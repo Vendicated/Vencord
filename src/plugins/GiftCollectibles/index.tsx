@@ -50,6 +50,8 @@ export default definePlugin({
         return (<>
             <Text variant="text-lg/bold">How do I gift old collectibles?</Text>
             <Text variant="text-md/normal">Go to <b>Payment Flow Modals</b> and find <b>COLLECTIBLES PAYMENT MODAL TEST</b> afterwards click on <b>Open Gift Modal for SKU</b></Text>
+            <a href="" onClick={(e) => { e.preventDefault(); window.open("https://da.happyenderman.com/collectibles/","_blank") } }>You can find old collectibles skus id here</a>
+
         </>);
     },
     renderGiftButton(openCollectiblesPaymentModal: ((data: Data) => any), skuId, analyticsLocations: string[]) {
