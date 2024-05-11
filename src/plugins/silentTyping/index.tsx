@@ -33,7 +33,7 @@ const settings = definePluginSettings({
     },
     contextMenu: {
         type: OptionType.BOOLEAN,
-        description: "Add a context menu option to toggle the functionality",
+        description: "Add option to toggle the functionality in the chat input context menu",
         default: true
     },
     isEnabled: {
