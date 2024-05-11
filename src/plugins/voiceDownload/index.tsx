@@ -28,9 +28,12 @@ export default definePlugin({
             <a
                 className="vc-voice-download"
                 href={src}
-                download="voice-message.ogg"
                 onClick={e => e.stopPropagation()}
                 aria-label="Download voice message"
+                {...IS_DISCORD_DESKTOP
+                    ? { target: "_blank" } // open externally
+                    : { download: "voice-message.ogg" } // download directly (not supported on discord desktop)
+                }
             >
                 <this.Icon />
             </a>
