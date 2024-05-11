@@ -20,19 +20,21 @@ import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { constants as FsConstants, readFileSync } from "fs";
+import { access, readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
 import { promisify } from "util";
 
-// wtf is this assert syntax
-import PackageJSON from "../../package.json" assert { type: "json" };
 import { getPluginTarget } from "../utils.mjs";
+
+/** @type {import("../../package.json")} */
+const PackageJSON = JSON.parse(readFileSync("package.json"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 export const watch = process.argv.includes("--watch");
+export const isDev = watch || process.argv.includes("--dev");
 export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
 export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
@@ -46,6 +48,12 @@ export const banner = {
 };
 
 const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
+
+export function existsAsync(path) {
+    return access(path, FsConstants.F_OK)
+        .then(() => true)
+        .catch(() => false);
+}
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 /**
@@ -79,7 +87,7 @@ export const globPlugins = kind => ({
             let plugins = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!existsSync(`./src/${dir}`)) continue;
+                if (!await existsAsync(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
                     if (file.startsWith("_") || file.startsWith(".")) continue;

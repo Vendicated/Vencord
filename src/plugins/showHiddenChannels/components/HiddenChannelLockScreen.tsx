@@ -18,10 +18,9 @@
 
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { LazyComponent } from "@utils/react";
 import { formatDuration } from "@utils/text";
-import { find, findByCode, findByPropsLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, moment, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy, findComponentLazy } from "@webpack";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
@@ -81,17 +80,17 @@ const enum ChannelFlags {
 
 const ChatScrollClasses = findByPropsLazy("auto", "content", "scrollerBase");
 const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
-const ChannelBeginHeader = LazyComponent(() => findByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE"));
-const TagComponent = LazyComponent(() => find(m => {
+const ChannelBeginHeader = findComponentByCodeLazy(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
+const TagComponent = findComponentLazy(m => {
     if (typeof m !== "function") return false;
 
     const code = Function.prototype.toString.call(m);
     // Get the component which doesn't include increasedActivity
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
-}));
+});
 
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
-const EmojiUtils = findByPropsLazy("getURL", "buildEmojiReactionColorsPlatformed");
+const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -121,7 +120,7 @@ const VideoQualityModesToNames = {
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
 function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
-    const [viewAllowedUsersAndRoles, setViewAllowedUsersAndRoles] = useState(settings.store.defaultAllowedUsersAndRolesDropdownState);
+    const { defaultAllowedUsersAndRolesDropdownState } = settings.use(["defaultAllowedUsersAndRolesDropdownState"]);
     const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
 
     const {
@@ -217,12 +216,12 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 {lastMessageId &&
                     <Text variant="text-md/normal">
                         Last {channel.isForumChannel() ? "post" : "message"} created:
-                        <Timestamp timestamp={moment(SnowflakeUtils.extractTimestamp(lastMessageId))} />
+                        <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
                     </Text>
                 }
 
                 {lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={moment(lastPinTimestamp)} /></Text>
+                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
                 }
                 {(rateLimitPerUser ?? 0) > 0 &&
                     <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
@@ -302,19 +301,19 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                             </Tooltip>
                         )}
                         <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                        <Tooltip text={viewAllowedUsersAndRoles ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
+                        <Tooltip text={defaultAllowedUsersAndRolesDropdownState ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <button
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
                                     className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
-                                    onClick={() => setViewAllowedUsersAndRoles(v => !v)}
+                                    onClick={() => settings.store.defaultAllowedUsersAndRolesDropdownState = !defaultAllowedUsersAndRolesDropdownState}
                                 >
                                     <svg
                                         width="24"
                                         height="24"
                                         viewBox="0 0 24 24"
-                                        transform={viewAllowedUsersAndRoles ? "scale(1 -1)" : "scale(1 1)"}
+                                        transform={defaultAllowedUsersAndRolesDropdownState ? "scale(1 -1)" : "scale(1 1)"}
                                     >
                                         <path fill="currentColor" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
                                     </svg>
@@ -322,7 +321,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                             )}
                         </Tooltip>
                     </div>
-                    {viewAllowedUsersAndRoles && <ChannelBeginHeader channel={channel} />}
+                    {defaultAllowedUsersAndRolesDropdownState && <ChannelBeginHeader channel={channel} />}
                 </div>
             </div>
         </div>

@@ -16,30 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { find, findLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = LazyComponent(() => {
-    // This doesn't really need to explicitly find Dots' own module, but it's fine
-    const res = find(m => m.Dots && !m.Menu);
-
-    return res?.Dots;
-});
+const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
 const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
-const Formatters = findLazy(m => m.Messages?.SEVERAL_USERS_TYPING);
+const enum IndicatorMode {
+    Dots = 1 << 0,
+    Avatars = 1 << 1
+}
 
 function getDisplayName(guildId: string, userId: string) {
-    return GuildMemberStore.getNick(guildId, userId) ?? UserStore.getUser(userId).username;
+    const user = UserStore.getUser(userId);
+    return GuildMemberStore.getNick(guildId, userId) ?? (user as any).globalName ?? user.username;
 }
 
 function TypingIndicator({ channelId }: { channelId: string; }) {
@@ -51,15 +52,19 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             const oldKeys = Object.keys(old);
             const currentKeys = Object.keys(current);
 
-            return oldKeys.length === currentKeys.length && JSON.stringify(oldKeys) === JSON.stringify(currentKeys);
+            return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-
+    const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
     const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
+    }
+
+    if (!settings.store.includeCurrentChannel) {
+        if (currentChannelId === channelId) return null;
     }
 
     const myId = UserStore.getCurrentUser()?.id;
@@ -70,21 +75,21 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = Formatters.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
+            tooltipText = i18n.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
             break;
         }
         case 2: {
-            tooltipText = Formatters.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = i18n.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
             break;
         }
         case 3: {
-            tooltipText = Formatters.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
+            tooltipText = i18n.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
             break;
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
                 ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
-                : Formatters.Messages.SEVERAL_USERS_TYPING;
+                : i18n.Messages.SEVERAL_USERS_TYPING;
             break;
         }
     }
@@ -92,13 +97,25 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     if (typingUsersArray.length > 0) {
         return (
             <Tooltip text={tooltipText!}>
-                {({ onMouseLeave, onMouseEnter }) => (
-                    <div
-                        style={{ marginLeft: 6, height: 16, display: "flex", alignItems: "center", zIndex: 0, cursor: "pointer" }}
-                        onMouseLeave={onMouseLeave}
-                        onMouseEnter={onMouseEnter}
-                    >
-                        <ThreeDots dotRadius={3} themed={true} />
+                {props => (
+                    <div className="vc-typing-indicator" {...props}>
+                        {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
+                            <UserSummaryItem
+                                users={typingUsersArray.map(id => UserStore.getUser(id))}
+                                guildId={guildId}
+                                renderIcon={false}
+                                max={3}
+                                showDefaultAvatarsForNullUsers
+                                showUserPopout
+                                size={16}
+                                className="vc-typing-indicator-avatars"
+                            />
+                        )}
+                        {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
+                            <div className="vc-typing-indicator-dots">
+                                <ThreeDots dotRadius={3} themed={true} />
+                            </div>
+                        )}
                     </div>
                 )}
             </Tooltip>
@@ -109,6 +126,11 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
 }
 
 const settings = definePluginSettings({
+    includeCurrentChannel: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for the currently selected channel",
+        default: true
+    },
     includeMutedChannels: {
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for muted channels.",
@@ -118,20 +140,39 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for blocked users.",
         default: false
+    },
+    indicatorMode: {
+        type: OptionType.SELECT,
+        description: "How should the indicator be displayed?",
+        options: [
+            { label: "Avatars and animated dots", value: IndicatorMode.Dots | IndicatorMode.Avatars, default: true },
+            { label: "Animated dots", value: IndicatorMode.Dots },
+            { label: "Avatars", value: IndicatorMode.Avatars },
+        ],
     }
 });
 
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
-    authors: [Devs.Nuckyz, Devs.obscurity],
+    authors: [Devs.Nuckyz, Devs.fawn, Devs.Sqaaakoi],
     settings,
 
     patches: [
+        // Normal channel
         {
-            find: ".UNREAD_HIGHLIGHT",
+            find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /channel:(\i).{0,100}?channelEmoji,.{0,250}?\.children.{0,50}?:null/,
+                match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
+                replace: "$&,$self.TypingIndicator($1.id)"
+            }
+        },
+        // Theads
+        {
+            // This is the thread "spine" that shows in the left
+            find: "M11 9H4C2.89543 9 2 8.10457 2 7V1C2 0.447715 1.55228 0 1 0C0.447715 0 0 0.447715 0 1V7C0 9.20914 1.79086 11 4 11H11C11.5523 11 12 10.5523 12 10C12 9.44771 11.5523 9 11 9Z",
+            replacement: {
+                match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id)"
             }
         }

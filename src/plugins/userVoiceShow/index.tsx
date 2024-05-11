@@ -96,15 +96,15 @@ export default definePlugin({
     patches: [
         // above message box
         {
-            find: ".lastEditedByContainer",
+            find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
-                replace: "$self.patchPopout(arguments[0]),$&",
+                match: /applicationId:\i\.id}\),(?=.{0,50}setNote:\i)/,
+                replace: "$&$self.patchPopout(arguments[0]),",
             }
         },
         // below username
         {
-            find: ".USER_PROFILE_MODAL",
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
