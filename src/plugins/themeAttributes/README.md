@@ -15,6 +15,7 @@ This allows themes to more easily theme those elements or even do things that ot
 ### Chat Messages
 
 - `data-author-id` contains the id of the author
+- `data-author-username` contains the username of the author
 - `data-is-self` is a boolean indicating whether this is the current user's message
 
 ![image](https://github.com/Vendicated/Vencord/assets/45497981/34bd5053-3381-402f-82b2-9c812cc7e122)
