@@ -50,7 +50,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -94,7 +94,7 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
@@ -114,8 +114,7 @@ export default definePlugin({
     },
 
     roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+        const role = GuildStore.getRole(guildId, id);
 
         return (
             <span style={{

@@ -23,12 +23,12 @@ import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, Text, Toasts, UserStore } from "@webpack/common";
 
+const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-const Colors = findByPropsLazy("profileColors");
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -394,7 +394,9 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
-        let gameActivityEnabled = StatusSettingsStores.ShowCurrentGame.useSetting();
+        const gameActivityEnabled = StatusSettingsStores.ShowCurrentGame.useSetting();
+        const { profileThemeStyle } = useProfileThemeStyle({});
+
         return (
             <>
                 {
@@ -431,7 +433,7 @@ export default definePlugin({
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
                 <Forms.FormDivider />
-                <div style={{ width: "284px" }} className={Colors.profileColors}>
+                <div style={{ width: "284px", ...profileThemeStyle }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}
