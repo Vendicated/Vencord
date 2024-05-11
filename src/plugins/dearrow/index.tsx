@@ -37,8 +37,8 @@ interface Props {
 
 const enum ReplaceElements {
     ReplaceAllElements,
-    ReplaceTitles,
-    ReplaceThumbnails
+    ReplaceTitlesOnly,
+    ReplaceThumbnailsOnly
 }
 
 const embedUrlRe = /https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/;
@@ -67,12 +67,12 @@ async function embedDidMount(this: Component<Props>) {
             enabled: true
         };
 
-        if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnails) {
+        if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
             embed.dearrow.oldTitle = embed.rawTitle;
             embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
         }
 
-        if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitles) {
+        if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
             embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
             embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
         }
@@ -150,8 +150,8 @@ const settings = definePluginSettings({
         restartNeeded: true,
         options: [
             { label: "Everything (Titles & Thumbnails)", value: ReplaceElements.ReplaceAllElements, default: true },
-            { label: "Titles", value: ReplaceElements.ReplaceTitles },
-            { label: "Thumbnails", value: ReplaceElements.ReplaceThumbnails },
+            { label: "Titles", value: ReplaceElements.ReplaceTitlesOnly },
+            { label: "Thumbnails", value: ReplaceElements.ReplaceThumbnailsOnly },
         ],
     }
 });
