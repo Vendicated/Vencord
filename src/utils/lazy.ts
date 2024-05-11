@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { AnyObject } from "./types";
+
+export type ProxyLazy<T = AnyObject> = T & {
+    [proxyLazyGet]: () => T;
+    [proxyLazyCache]: T | undefined;
+};
+
+export const proxyLazyGet = Symbol.for("vencord.lazy.get");
+export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
+
 export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false }: { isIndirect?: boolean; } = {}): () => T {
     let tries = 0;
     let cache: T;
@@ -49,9 +59,6 @@ const handler: ProxyHandler<any> = {
     }
 };
 
-export const proxyLazyGet = Symbol.for("vencord.lazy.get");
-export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
-
 /**
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the factory is evaluated
@@ -59,7 +66,7 @@ export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = false): T {
+export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild = false): ProxyLazy<T> {
     const get = makeLazy(factory, attempts, { isIndirect: true }) as any;
 
     let isSameTick = true;
@@ -107,5 +114,5 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
 
             throw new Error("proxyLazy called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.");
         }
-    }) as T;
+    });
 }

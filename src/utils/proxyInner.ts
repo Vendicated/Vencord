@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { AnyObject } from "./types";
+
+export type ProxyInner<T = AnyObject> = T & {
+    [proxyInnerGet]?: () => T;
+    [proxyInnerValue]?: T | undefined;
+};
+
 export const proxyInnerGet = Symbol.for("vencord.proxyInner.get");
 export const proxyInnerValue = Symbol.for("vencord.proxyInner.innerValue");
 
@@ -39,11 +46,11 @@ const handler: ProxyHandler<any> = {
  * @param primitiveErr The error message to throw when the inner value is a primitive
  * @returns A proxy which will act like the inner value when accessed
  */
-export function proxyInner<T = any>(
+export function proxyInner<T = AnyObject>(
     errMsg = "Proxy inner value is undefined, setInnerValue was never called.",
     primitiveErrMsg = "proxyInner called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.",
     isChild = false
-): [proxy: T, setInnerValue: (innerValue: T) => void] {
+): [proxy: ProxyInner<T>, setInnerValue: (innerValue: T) => void] {
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
@@ -97,5 +104,5 @@ export function proxyInner<T = any>(
             throw new Error(primitiveErrMsg);
 
         }
-    }) as T, setInnerValue];
+    }), setInnerValue];
 }

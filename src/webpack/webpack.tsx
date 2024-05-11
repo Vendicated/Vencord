@@ -8,7 +8,8 @@ import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { proxyInner, proxyInnerValue } from "@utils/proxyInner";
+import { ProxyInner, proxyInner, proxyInnerValue } from "@utils/proxyInner";
+import { AnyObject } from "@utils/types";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -162,7 +163,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * @param callback A function that takes the found module as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the module, instead of all of it. Defaults to the module itself
  * @returns A proxy that has the callback return value as its true value, or the callback return value if the callback was called when the function was called
  */
-export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function find<T = AnyObject>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof callback !== "function")
@@ -175,7 +176,7 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
         webpackSearchHistory.push(["find", [proxy, filter]]);
     }
 
-    if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;
+    if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as ProxyInner<T>;
 
     return proxy;
 }
@@ -228,7 +229,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
 
     if (InnerComponent !== null) return InnerComponent;
 
-    return WrapperComponent;
+    return WrapperComponent as React.ComponentType<T>;
 }
 
 /**
@@ -318,7 +319,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
  *
  * @param props A list of props to search the exports for
  */
-export function findByProps<T = any>(...props: string[]) {
+export function findByProps<T = AnyObject>(...props: string[]) {
     const result = find<T>(filters.byProps(...props), m => m, { isIndirect: true });
 
     if (IS_DEV) {
@@ -333,7 +334,7 @@ export function findByProps<T = any>(...props: string[]) {
  *
  * @param code A list of code to search each export for
  */
-export function findByCode<T = any>(...code: string[]) {
+export function findByCode<T = AnyObject>(...code: string[]) {
     const result = find<T>(filters.byCode(...code), m => m, { isIndirect: true });
 
     if (IS_DEV) {
@@ -348,7 +349,7 @@ export function findByCode<T = any>(...code: string[]) {
  *
  * @param name The store name
  */
-export function findStore<T = any>(name: string) {
+export function findStore<T = AnyObject>(name: string) {
     const result = find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 
     if (IS_DEV) {
@@ -425,7 +426,7 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
             throw new Error("bulk called with only one filter. Use find");
         }
 
-        return cacheFind(filterFns[0]);
+        return [cacheFind(filterFns[0])];
     }
 
     let found = 0;
@@ -519,7 +520,7 @@ export function findModuleFactory(...code: string[]) {
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export function webpackDependantLazy<T = any>(factory: () => any, attempts?: number) {
+export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?: number) {
     if (IS_DEV) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
     return proxyLazy<T>(factory, attempts);

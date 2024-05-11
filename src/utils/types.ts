@@ -335,3 +335,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AnyObject = Record<PropertyKey, any> & ((...args: any[]) => any);

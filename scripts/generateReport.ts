@@ -489,19 +489,19 @@ async function runtime(token: string) {
                         result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                     }
                 } else {
-                    result = args.shift();
+                    const findResult = args.shift();
 
-                    if (result != null) {
-                        if (result.$$vencordCallbackCalled != null && !result.$$vencordCallbackCalled()) {
-                            result = null;
+                    if (findResult != null) {
+                        if (findResult.$$vencordCallbackCalled != null && findResult.$$vencordCallbackCalled()) {
+                            result = findResult;
                         }
 
-                        if (result[Vencord.Util.proxyInnerGet] != null) {
-                            result = result[Vencord.Util.proxyInnerValue];
+                        if (findResult[Vencord.Util.proxyInnerGet] != null) {
+                            result = findResult[Vencord.Util.proxyInnerValue];
                         }
 
-                        if (result.$$vencordInner != null) {
-                            result = result.$$vencordInner();
+                        if (findResult.$$vencordInner != null) {
+                            result = findResult.$$vencordInner();
                         }
                     }
                 }
