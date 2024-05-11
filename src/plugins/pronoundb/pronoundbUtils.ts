@@ -154,6 +154,7 @@ export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
 
     if (pronouns.length === 1) {
+        // For capitalized pronouns or special codes (any, ask, avoid), we always return the normal (capitalized) string
         if (pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0]))
             return PronounMapping[pronouns[0]];
         else return PronounMapping[pronouns[0]].toLowerCase();
