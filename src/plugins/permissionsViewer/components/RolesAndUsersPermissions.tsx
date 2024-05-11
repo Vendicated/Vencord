@@ -218,7 +218,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
             {(settings.store as any).unsafeViewAsRole && (
                 <Menu.MenuItem
                     id="vc-pw-view-as-role"
-                    label="View As Role"
+                    label={i18n.Messages.VIEW_AS_ROLE}
                     action={() => {
                         const role = GuildStore.getRole(guild.id, roleId);
                         if (!role) return;
