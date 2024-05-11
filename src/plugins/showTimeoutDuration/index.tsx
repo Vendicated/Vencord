@@ -9,10 +9,9 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, Forms, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
 
@@ -20,7 +19,6 @@ const CountDown = findComponentLazy(m => m.prototype?.render?.toString().include
 
 const enum DisplayStyle {
     Tooltip = "tooltip",
-    SimplifiedTooltip = "simplifiedTooltip",
     Inline = "ssalggnikool"
 }
 
@@ -29,8 +27,7 @@ const settings = definePluginSettings({
         description: "How to display the timeout duration",
         type: OptionType.SELECT,
         options: [
-            { label: "In the Tooltip, under the description text", value: DisplayStyle.Tooltip },
-            { label: "In the Tooltip, replacing icon description text", value: DisplayStyle.SimplifiedTooltip },
+            { label: "In the Tooltip", value: DisplayStyle.Tooltip },
             { label: "Next to the timeout icon", value: DisplayStyle.Inline, default: true },
         ],
     }
@@ -79,18 +76,10 @@ export default definePlugin({
     ],
 
     TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
-        if (settings.store.displayStyle !== DisplayStyle.Inline) {
-            const showText = settings.store.displayStyle as DisplayStyle === DisplayStyle.Tooltip;
-            return <Tooltip
-                children={children}
-                text={<>
-                    {showText && text}
-                    <Forms.FormText className={showText ? Margins.top8 : ""}>
-                        {renderTimeout(message, false)}
-                    </Forms.FormText>
-                </>}
-            />;
-        }
+        if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
+            children={children}
+            text={renderTimeout(message, false)}
+        />;
         return (
             <div className="vc-std-wrapper">
                 <Tooltip text={text} children={children} />
