@@ -123,7 +123,7 @@ export function buildFPTE(primary: number, accent: number, effect: string, legac
                 fpte = encodeColorsLegacy(primary, primary);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
-            if (effect !== "")
+            if (effect)
                 fpte += DELIMITER + encodeEffect(BigInt(effect));
 
             return fpte;
@@ -134,7 +134,7 @@ export function buildFPTE(primary: number, accent: number, effect: string, legac
             fpte = encodeColorsLegacy(accent, accent);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
-            if (effect !== "")
+            if (effect)
                 fpte += DELIMITER + encodeEffect(BigInt(effect));
 
             return fpte;
@@ -150,7 +150,7 @@ export function buildFPTE(primary: number, accent: number, effect: string, legac
             fpte += DELIMITER + encodeColor(accent);
 
             // If the effect ID is set, it will be encoded and added to the string prefixed by one delimiter.
-            if (effect !== "")
+            if (effect)
                 fpte += DELIMITER + encodeEffect(BigInt(effect));
 
             return fpte;
@@ -162,7 +162,7 @@ export function buildFPTE(primary: number, accent: number, effect: string, legac
 
     // Since either the primary/accent colors are the same, both are unset, or just one is set, only one color will be added
     // to the string; therefore, the effect ID, if set, will be encoded and added to the string prefixed by two delimiters.
-    if (effect !== "")
+    if (effect)
         fpte += DELIMITER + DELIMITER + encodeEffect(BigInt(effect));
 
     return fpte;
@@ -175,7 +175,7 @@ export function buildFPTE(primary: number, accent: number, effect: string, legac
  */
 export function extractFPTE(str: string) {
     /** The array of extracted FPTE values to be returned. */
-    const fpte: [string, string, string] = ["", "", ""];
+    const fpte: [maybePrimaryOrLegacy: string, maybeAccentOrEffect: string, maybeEffect: string] = ["", "", ""];
     /** The current index of {@link fpte} getting extracted. */
     let i = 0;
 
@@ -194,7 +194,7 @@ export function extractFPTE(str: string) {
         else if (cp >= STARTING_CODEPOINT && cp <= ENDING_CODEPOINT)
             fpte[i] += String.fromCodePoint(cp - STARTING_CODEPOINT);
         // If an FPTE string has been found and its end has been reached, then the extraction is done.
-        else if (i > 0 || fpte[0] !== "") break;
+        else if (i > 0 || fpte[0]) break;
     }
 
     return fpte;

@@ -14,56 +14,56 @@ export interface UserProfile {
     themeColors: [primaryColor: number, accentColor: number] | undefined;
 }
 
-function updateUserThemeColors(user: UserProfile, primary: number, accent: number) {
+function updateProfileThemeColors(profile: UserProfile, primary: number, accent: number) {
     if (primary > -1) {
-        user.themeColors = [primary, accent > -1 ? accent : primary];
-        user.premiumType = 2;
+        profile.themeColors = [primary, accent > -1 ? accent : primary];
+        profile.premiumType = 2;
     } else if (accent > -1) {
-        user.themeColors = [accent, accent];
-        user.premiumType = 2;
+        profile.themeColors = [accent, accent];
+        profile.premiumType = 2;
     }
 }
 
-function updateUserEffectId(user: UserProfile, id: bigint) {
+function updateProfileEffectId(profile: UserProfile, id: bigint) {
     if (id > -1n) {
-        user.profileEffectId = id.toString();
-        user.premiumType = 2;
+        profile.profileEffectId = id.toString();
+        profile.premiumType = 2;
     }
 }
 
-export function decodeUserBioFPTEHook(user: UserProfile | undefined) {
-    if (user === undefined) return user;
+export function decodeAboutMeFPTEHook(profile: UserProfile | undefined) {
+    if (!profile) return profile;
 
     if (settings.store.prioritizeNitro) {
-        if (user.themeColors !== undefined) {
-            if (user.profileEffectId === undefined) {
-                const fpte = extractFPTE(user.bio);
+        if (profile.themeColors) {
+            if (!profile.profileEffectId) {
+                const fpte = extractFPTE(profile.bio);
                 if (decodeColor(fpte[0]) === -2)
-                    updateUserEffectId(user, decodeEffect(fpte[1]));
+                    updateProfileEffectId(profile, decodeEffect(fpte[1]));
                 else
-                    updateUserEffectId(user, decodeEffect(fpte[2]));
+                    updateProfileEffectId(profile, decodeEffect(fpte[2]));
             }
-            return user;
-        } else if (user.profileEffectId !== undefined) {
-            const fpte = extractFPTE(user.bio);
+            return profile;
+        } else if (profile.profileEffectId) {
+            const fpte = extractFPTE(profile.bio);
             const primaryColor = decodeColor(fpte[0]);
             if (primaryColor === -2)
-                updateUserThemeColors(user, ...decodeColorsLegacy(fpte[0]));
+                updateProfileThemeColors(profile, ...decodeColorsLegacy(fpte[0]));
             else
-                updateUserThemeColors(user, primaryColor, decodeColor(fpte[1]));
-            return user;
+                updateProfileThemeColors(profile, primaryColor, decodeColor(fpte[1]));
+            return profile;
         }
     }
 
-    const fpte = extractFPTE(user.bio);
+    const fpte = extractFPTE(profile.bio);
     const primaryColor = decodeColor(fpte[0]);
     if (primaryColor === -2) {
-        updateUserThemeColors(user, ...decodeColorsLegacy(fpte[0]));
-        updateUserEffectId(user, decodeEffect(fpte[1]));
+        updateProfileThemeColors(profile, ...decodeColorsLegacy(fpte[0]));
+        updateProfileEffectId(profile, decodeEffect(fpte[1]));
     } else {
-        updateUserThemeColors(user, primaryColor, decodeColor(fpte[1]));
-        updateUserEffectId(user, decodeEffect(fpte[2]));
+        updateProfileThemeColors(profile, primaryColor, decodeColor(fpte[1]));
+        updateProfileEffectId(profile, decodeEffect(fpte[2]));
     }
 
-    return user;
+    return profile;
 }

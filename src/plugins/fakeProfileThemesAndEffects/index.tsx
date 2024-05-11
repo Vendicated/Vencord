@@ -13,7 +13,7 @@ import { useMemo } from "@webpack/common";
 import { Builder, type BuilderProps, setCustomColorPicker, setCustomizationSection, setProfileEffectModal, settingsAboutComponent, setUseAvatarColors } from "./components";
 import { ProfileEffectRecord, ProfileEffectStore, setProfileEffectRecord, setProfileEffectStore } from "./lib/profileEffects";
 import { profilePreviewHook } from "./lib/profilePreview";
-import { decodeUserBioFPTEHook } from "./lib/userProfile";
+import { decodeAboutMeFPTEHook } from "./lib/userProfile";
 
 function replaceHelper(string: string, replaceArgs: [searchRegExp: RegExp, replaceString: string][]) {
     let result = string;
@@ -55,7 +55,7 @@ export default definePlugin({
             find: '"UserProfileStore"',
             replacement: {
                 match: /(?<=getUserProfile\(\i\){return )\i\[\i](?=})/,
-                replace: "$self.decodeUserBioFPTEHook($&)"
+                replace: "$self.decodeAboutMeFPTEHook($&)"
             }
         },
         // Patches ProfileCustomizationPreview
@@ -230,6 +230,6 @@ export default definePlugin({
 
     settingsAboutComponent,
     settings,
-    decodeUserBioFPTEHook,
+    decodeAboutMeFPTEHook,
     profilePreviewHook
 });
