@@ -199,7 +199,7 @@ export type RelationshipStore = FluxStore & Stores.RelationshipStore & {
 };
 
 export type useStateFromStores = <T>(
-    stores: FluxStore[],
+    stores: any[],
     mapper: () => T,
     dependencies?: any[] | null,
     isEqual?: (old: T, newer: T) => boolean
