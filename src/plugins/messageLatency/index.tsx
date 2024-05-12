@@ -122,7 +122,6 @@ export default definePlugin({
         return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
 
             const d = this.latencyTooltipData(message);
-            console.log(d);
 
             if (!isNonNullish(d)) return null;
 
