@@ -31,6 +31,7 @@ export default definePlugin({
     name: "MessageLatency",
     description: "Displays an indicator for messages that took ≥n seconds to send",
     authors: [Devs.arHSM],
+
     settings: definePluginSettings({
         latency: {
             type: OptionType.NUMBER,
@@ -43,6 +44,7 @@ export default definePlugin({
             default: true
         }
     }),
+
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -52,6 +54,7 @@ export default definePlugin({
             }
         }
     ],
+
     stringDelta(delta: number) {
         const diff: Diff = {
             days: Math.round(delta / (60 * 60 * 24)),
@@ -79,6 +82,7 @@ export default definePlugin({
 
         return ts || "0 seconds";
     },
+
     latencyTooltipData(message: Message) {
         const { latency, detectDiscordKotlin } = this.settings.store;
         const { id, nonce } = message;
@@ -118,14 +122,14 @@ export default definePlugin({
 
         return (abs >= latency || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
     },
+
     Tooltip() {
         return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-
             const d = this.latencyTooltipData(message);
 
             if (!isNonNullish(d)) return null;
 
-            let text;
+            let text: string;
             if (!d.delta) {
                 text = "User is suspected to be on an old Discord Android client";
             } else {
@@ -146,6 +150,7 @@ export default definePlugin({
             </Tooltip>;
         });
     },
+
     Icon({ delta, fill, props }: {
         delta: string | null;
         fill: Fill,
