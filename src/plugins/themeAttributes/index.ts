@@ -4,15 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
+
+const settings = definePluginSettings({
+    imgSize: {
+        type: OptionType.SELECT,
+        description: "The resolution of the avatar image",
+        options: ["300", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "300" })),
+
+    }
+});
 
 export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Board],
+
+    settings,
 
     patches: [
         // Add data-tab-id to all tab bar items
@@ -31,6 +43,15 @@ export default definePlugin({
             replacement: {
                 match: /\.messageListItem(?=,"aria)/,
                 replace: "$&,...$self.getMessageProps(arguments[0])"
+            }
+        },
+
+        // add large-avatar-url to the img element in the avatarstack component
+        {
+            find: ".LABEL_WITH_ONLINE_STATUS",
+            replacement: {
+                match: /(src:null!=\i\?(\i).{1,50}"aria-hidden":!0)/,
+                replace: "$1,\"large-avatar-url\":$2.replace(/\\d+$/,$self.settings.store.imgSize)"
             }
         }
     ],
