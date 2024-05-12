@@ -1,0 +1,41 @@
+.timezone-profile-item {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 28px 16px 4px;
+    background: var(--profile-body-background-color, var(--background-primary));
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-normal);
+}
+
+[class*="topSection"] .timezone-profile-item {
+    margin: 16px;
+}
+
+.timezone-message-item {
+    margin-left: 4px;
+}
+
+.vc-timezone-modal-header {
+    justify-content: space-between;
+    align-content: center;
+}
+
+.vc-timezone-modal-header h1 {
+    margin: 0;
+}
+
+.vc-timezone-modal-content {
+    padding: 1em;
+}
+
+.vc-timezone-modal-footer {
+    gap: 16px;
+}
+
+.timezone-tooltip {
+    max-width: none!important;
+    white-space: nowrap
+}
