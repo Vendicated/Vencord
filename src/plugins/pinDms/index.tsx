@@ -18,7 +18,7 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -29,7 +29,8 @@ interface ChannelComponentProps {
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
-export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+const PrivateChannelReadStateStore = findStoreLazy("PrivateChannelReadStateStore") as { getUnreadPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
@@ -83,7 +84,7 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
-                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
+                    replace: "$&if(!$self.isVisibleUnpinnedChannel($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
                 },
                 {
                     match: /"renderSection",(\i)=>{/,
@@ -112,7 +113,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
+                    replace: "[...$&,...$self.getAllVisibleChannels()]"
                 },
 
             ]
@@ -135,8 +136,8 @@ export default definePlugin({
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
-                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
-                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)).filter((c, r)) => !isChannelHidden(dms, r)))
+                replace: "$self.getAllVisibleChannels()"
             }
         },
 
@@ -145,7 +146,7 @@ export default definePlugin({
             find: ".getFlattenedGuildIds()],",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
-                replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
+                replace: "$self.getAllVisibleChannels()"
             }
         },
     ],
@@ -165,7 +166,6 @@ export default definePlugin({
     isPinned,
     categoryLen,
     getSections,
-    getAllUncollapsedChannels,
     requireSettingsMenu,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
@@ -210,8 +210,6 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
-            return true;
         const cat = categories[sectionIndex - 1];
         return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
     },
@@ -228,26 +226,35 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
-            return true;
+        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex) {
+            const channelId = PrivateChannelSortStore.getPrivateChannelIds().filter(c => !this.isPinned(c))[channelIndex];
+
+            return this.instance.props.selectedChannelId !== channelId && !PrivateChannelReadStateStore.getUnreadPrivateChannelIds().includes(channelId);
+        }
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
+        if (category.collapsed) {
+            const channelId = this.getCategoryChannels(category)[channelIndex];
+
+            return this.instance.props.selectedChannelId !== channelId && !PrivateChannelReadStateStore.getUnreadPrivateChannelIds().includes(channelId);
+        }
+
+        return false;
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
         if (!isPinned(channelId))
             return (
                 (rowHeight + padding) * 2 // header
-                + rowHeight * this.getAllUncollapsedChannels().length // pins
+                + rowHeight * categories.flatMap(c => c.channels).length // pins
                 + originalOffset // original pin offset minus pins
             );
 
-        return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
+        return rowHeight * (this.getAllVisibleChannels().indexOf(channelId) + preRenderedChildren) + padding;
     },
 
     renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
@@ -322,6 +329,10 @@ export default definePlugin({
         );
     }),
 
+    isVisibleUnpinnedChannel(sectionIndex: number, channelIndex: number) {
+        return !this.isChannelHidden(sectionIndex, channelIndex) && !this.isChannelIndex(sectionIndex, channelIndex);
+    },
+
     renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
         const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
@@ -356,5 +367,19 @@ export default definePlugin({
         }
 
         return category?.channels ?? [];
+    },
+
+    getAllVisibleChannels() {
+        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
+
+        const visiblePinnedChannels = categories.flatMap((c, s) => {
+            if (settings.store.pinOrder === PinOrder.LastMessage)
+                return sortedChannels.filter(channel => c.channels.includes(channel)).filter((ch, r) => !this.isChannelHidden(s + 1, r));
+
+            return c.channels.filter((ch, r) => !this.isChannelHidden(s + 1, r));
+        });
+        const visibleUnpinnedChannels = sortedChannels.filter(c => !this.isPinned(c)).filter((c, r) => !this.isChannelHidden(this.getSections().length + 1, r));
+
+        return visiblePinnedChannels.concat(visibleUnpinnedChannels);
     }
 });
