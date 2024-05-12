@@ -48,6 +48,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
+    },
+    showChatBarButton: {
+        type: OptionType.BOOLEAN,
+        description: "Show translate button in chat bar",
+        default: true
     }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
