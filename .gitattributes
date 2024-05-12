@@ -1,1 +1,2 @@
 * text=auto eol=lf
+src/utils/constants.ts merge=union
