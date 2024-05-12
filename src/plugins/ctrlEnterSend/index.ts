@@ -18,32 +18,32 @@ export default definePlugin({
             type: OptionType.SELECT,
             options: [
                 {
-                    label: "Ctrl+Enter",
+                    label: "Ctrl+Enter (Enter or Shift+Enter for new line)",
                     value: "ctrl+enter"
                 },
                 {
-                    label: "Shift+Enter",
+                    label: "Shift+Enter (Enter for new line)",
                     value: "shift+enter"
                 },
                 {
-                    label: "Enter (Discord default)",
+                    label: "Enter (Shift+Enter for new line; Discord default)",
                     value: "enter"
                 }
             ],
             default: "ctrl+enter"
         },
         sendMessageInTheMiddleOfACodeBlock: {
-            description: "Whether to send a message in the middle of a code block (otherwise insert a newline)",
+            description: "Whether to send a message in the middle of a code block",
             type: OptionType.BOOLEAN,
             default: true,
         }
     }),
     patches: [
         {
-            find: "KeyboardKeys.ENTER){if",
+            find: "KeyboardKeys.ENTER&&(!",
             replacement: {
-                match: /if\(!(\i).shiftKey&&!(\i.hasOpenCodeBlock\(\))&&\(!(\i.props).disableEnterToSubmit\|\|\i.ctrlKey\)\).{0,150}?\}/,
-                replace: "$self.handleEnter($1, $2, $3)}"
+                match: /((\i)\.which.+?KeyboardKeys.ENTER)&&.+?(\(0,\i\.hasOpenPlainTextCodeBlock\)\(\i\)).+?&&(\(\i\.preventDefault)/,
+                replace: "$1 && $self.shouldSubmit($2, $3) && $4"
             }
         }
     ],
@@ -57,22 +57,12 @@ export default definePlugin({
                 result = event.ctrlKey;
                 break;
             case "enter":
-                result = true;
+                result = !event.shiftKey && !event.ctrlKey;
                 break;
         }
         if (!this.settings.store.sendMessageInTheMiddleOfACodeBlock) {
             result &&= !codeblock;
         }
         return result;
-    },
-    handleEnter(event: KeyboardEvent, codeblock: boolean, props: any): void {
-        event.preventDefault();
-        if (this.shouldSubmit(event, codeblock)) {
-            props.onSubmit(props.value);
-        } else {
-            const textArea = event.target as HTMLTextAreaElement;
-            textArea.value += "\r\n";
-            textArea.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        }
     }
 });
