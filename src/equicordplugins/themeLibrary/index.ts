@@ -4,13 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
+import { SettingsRouter } from "@webpack/common";
+
+const settings = definePluginSettings({
+    domain: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Use Github instead of the default domain for themes",
+        restartNeeded: false
+    },
+});
 
 export default definePlugin({
-    name: "Theme Library",
+    name: "ThemeLibrary",
     description: "A library of themes for Vencord.",
-    authors: [EquicordDevs.Fafa],
+    authors: [{
+        name: "Fafa",
+        id: 428188716641812481n,
+    }],
+    settings,
+    toolboxActions: {
+        "Open Theme Library": () => {
+            SettingsRouter.open("ThemeLibrary");
+        }
+    },
 
     start() {
         const customSettingsSections = (
@@ -35,5 +54,5 @@ export default definePlugin({
         const i = customSettingsSections.findIndex(section => section({}).id === "ThemeSection");
 
         if (i !== -1) customSettingsSections.splice(i, 1);
-    }
+    },
 });

@@ -33,6 +33,7 @@ export interface Theme {
         invite_link: string;
         avatar_hash: string;
     };
+    source?: string;
 }
 
 export interface ThemeInfoModalProps extends ModalProps {
