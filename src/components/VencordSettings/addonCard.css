@@ -81,9 +81,11 @@
     0% {
         transform: translateX(0);
     }
+
     50% {
         transform: translateX(var(--offset));
     }
+
     100% {
         transform: translateX(0);
     }
