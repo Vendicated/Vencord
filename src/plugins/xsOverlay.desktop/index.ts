@@ -68,7 +68,6 @@ interface Call {
     ringing: string[];
 }
 
-const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
 const Notifs = findByPropsLazy("makeTextChatNotification");
 const XSLog = new Logger("XSOverlay");
 
@@ -115,13 +114,13 @@ const settings = definePluginSettings({
     },
     timeout: {
         type: OptionType.NUMBER,
-        description: "Notif duration (secs)",
-        default: 1.0,
+        description: "Notification duration (secs)",
+        default: 3,
     },
-    timeoutPerCharacter: {
-        type: OptionType.NUMBER,
-        description: "Duration multiplier per character",
-        default: 0.5
+    lengthBasedTimeout: {
+        type: OptionType.BOOLEAN,
+        description: "Extend duration with message length",
+        default: true
     },
     opacity: {
         type: OptionType.SLIDER,
@@ -262,12 +261,11 @@ function shouldIgnoreForChannelType(channel: Channel) {
 }
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
-    const timeout = Math.max(settings.store.timeout, content.length * settings.store.timeoutPerCharacter);
     fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
         const msgData = {
             messageType: 1,
             index: 0,
-            timeout,
+            timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
             height: calculateHeight(content),
             opacity: settings.store.opacity,
             volume: settings.store.volume,
@@ -286,7 +284,7 @@ function sendOtherNotif(content: string, titleString: string) {
     const msgData = {
         messageType: 1,
         index: 0,
-        timeout: settings.store.timeout,
+        timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
         height: calculateHeight(content),
         opacity: settings.store.opacity,
         volume: settings.store.volume,
@@ -312,4 +310,11 @@ function calculateHeight(content: string) {
     if (content.length <= 200) return 150;
     if (content.length <= 300) return 200;
     return 250;
+}
+
+function calculateTimeout(content: string) {
+    if (content.length <= 100) return 3;
+    if (content.length <= 200) return 4;
+    if (content.length <= 300) return 5;
+    return 6;
 }
