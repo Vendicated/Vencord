@@ -19,9 +19,8 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { getGuildRoles } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -51,7 +50,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -95,7 +94,7 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
@@ -115,7 +114,7 @@ export default definePlugin({
     },
 
     roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = getGuildRoles(guildId)[id];
+        const role = GuildStore.getRole(guildId, id);
 
         return (
             <span style={{

@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
@@ -49,9 +52,11 @@ const ReadAllButton = () => (
     <Button
         onClick={onClick}
         size={Button.Sizes.MIN}
-        color={Button.Colors.BRAND}
-        style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
-    >Read all</Button>
+        color={Button.Colors.CUSTOM}
+        className="vc-ranb-button"
+    >
+        Read All
+    </Button>
 );
 
 export default definePlugin({
@@ -60,7 +65,7 @@ export default definePlugin({
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
 
-    renderReadAllButton: () => <ReadAllButton />,
+    renderReadAllButton: ErrorBoundary.wrap(ReadAllButton, { noop: true }),
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);

@@ -18,7 +18,7 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Guild, Message, Role, User } from "discord-types/general";
+import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
@@ -184,12 +184,4 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
  */
 export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
-}
-
-// FIXME: remove this once discord merges the role change into stable
-export function getGuildRoles(guildId: string): Record<string, Role> {
-    if ("getRoles" in GuildStore)
-        return (GuildStore as any).getRoles(guildId);
-
-    return GuildStore.getGuild(guildId)?.roles ?? {};
 }
