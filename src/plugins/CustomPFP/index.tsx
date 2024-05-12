@@ -21,14 +21,15 @@ import { User } from "discord-types/general";
 import { init, getUserPFP, addUser, removeUser, hasUser } from "./data";
 import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage, ApplicationCommandOptionType, Argument, CommandContext } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { contextMenus } from "./contextMenu.tsx";
-import { openModal } from "./createUserModal.tsx";
+import { contextMenus } from "./contextMenu";
+import { openModal } from "./createUserModal";
 
 
 
-function pfp(cmd: string, id: string, pfp: string) {
+function pfp(cmd: string, id: string, pfp: string|undefined) {
     console.log(cmd + " " + id + " " + pfp);
     if (cmd == "add") {
+        if (pfp == undefined) return;
         const user = {
             id: id,
             profilepic: pfp
@@ -92,7 +93,7 @@ export default definePlugin({
                 required: true
             }],
             execute: async (option, ctx) => {
-                pfp("remove", option[0].value);
+                pfp("remove", option[0].value, undefined);
             }
         }
     ],

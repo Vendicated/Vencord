@@ -23,6 +23,8 @@ import { ChannelStore, GuildChannelStore, GuildMemberStore, GuildStore, UserStor
 import { GuildMember } from "discord-types/general";
 import React from "react";
 
+var registered: ProfileBadge[] = [];
+
 function badge(key: string, badge: Badge) {
     const b: ProfileBadge = new class implements ProfileBadge {
         component: React.ComponentType<ProfileBadge & BadgeUserArgs> | undefined;
@@ -51,6 +53,7 @@ function badge(key: string, badge: Badge) {
     if (b.position===undefined)
         b.position=BadgePosition.START;
     Badges.addBadge(badge);
+    registered.push(badge);
 }
 
 class Badge {
@@ -73,15 +76,15 @@ export default definePlugin({
         addScyyeBadges();
     },
     stop() {
+        removeScyyeBadges();
     }
 });
 
-function getDmChannel(member: GuildMember) {
-    var guild = GuildStore.getGuild("1116093904266211358");
-    GuildChannelStore.getChannels(guild.id).forEach(c => {
-        console.log(c.toString());
+function removeScyyeBadges() {
+    registered.forEach(b => {
+        Badges.removeBadge(b);
     });
-    console.log(ChannelStore.getMutableGuildChannelsByGuild());
+    registered = [];
 }
 
 function addScyyeBadges() {
@@ -94,19 +97,6 @@ function addScyyeBadges() {
             return userInfo.user.id==="553652308295155723";
         }
     });
-    GuildMemberStore.getMemberIds("1116093904266211358").forEach(m => {
-        badge("scyye_dms_"+m, {
-            key: undefined, position: undefined, onClick(): void {
-            },
-            description: "In my DM server",
-            image: GuildStore.getGuild("1116093904266211358").getIconURL(500, true),
-            shouldShow(userInfo: BadgeUserArgs): boolean {
-                return userInfo.user.id===m;
-            },
-            link: "https://youtube.com"
-        });
-    });
-    /*
     badge("scyye_dms", {
         key: undefined, link: undefined, position: undefined, onClick(): void {
         },
@@ -115,7 +105,7 @@ function addScyyeBadges() {
         shouldShow(userInfo: BadgeUserArgs): boolean {
             return GuildMemberStore.isMember("1116093904266211358", userInfo.user.id);
         }
-    });*/
+    });
     badge("root", {
         key: undefined, link: undefined, position: undefined, onClick(): void {
         },
@@ -123,9 +113,7 @@ function addScyyeBadges() {
         image: UserStore.getUser("318902553024659456").getAvatarURL(),
         shouldShow(userInfo: BadgeUserArgs): boolean {
             // UserStore.getUser(userInfo.user.id);
-            return false;
-
-            // return userInfo.user.global_name.includes("』");
+            return userInfo.user.username.includes("』");
         }
     });
     badge("cc", {
