@@ -7,14 +7,14 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMemberStore, RelationshipStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
     author: { nick: string; };
-    message?: Message;
+    message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
     userOverride?: User;
@@ -40,11 +40,6 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
-    whenTyping: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Also apply functionality to when someone is typing",
-    },
 });
 
 export default definePlugin({
@@ -59,27 +54,12 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])}"
             }
         },
-        {
-            find: "getCooldownTextStyle",
-            predicate: () => settings.store.whenTyping,
-            replacement: [
-                {
-                    match: /\.map\(\i=>\i\.\i\.getName\(\i,this\.props\.channel\.id,\i\)\)/,
-                    replace: ""
-                },
-                {
-                    match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i/,
-                    replace: "$self.renderTypingNames(this.props, $1, $&)"
-                }
-            ]
-        },
     ],
     settings,
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            const user = userOverride ?? message?.author;
-            if (!user) return author?.nick;
+            const user = userOverride ?? message.author;
             let { username } = user;
             if (settings.store.displayNames)
                 username = (user as any).globalName || username;
@@ -87,42 +67,14 @@ export default definePlugin({
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
             if (username === nick || isRepliedMessage && !settings.store.inReplies)
-                return prefix + nick;
+                return <>{prefix}{nick}</>;
             if (settings.store.mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
             if (settings.store.mode === "nick-user")
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-            return prefix + username;
+            return <>{prefix}{username}</>;
         } catch {
-            return author?.nick;
+            return <>{author?.nick}</>;
         }
-    },
-
-    renderTypingNames(props: any, users: User[], children: any) {
-        if (!Array.isArray(children)) return children;
-
-        let index = 0;
-
-        return children.map(c => {
-            if (c.type === "strong") {
-                const user = users[index++];
-                if (!user) return c;
-
-                const nick = GuildMemberStore.getNick(props.guildId!, user.id)
-                    || (!props.guildId && RelationshipStore.getNickname(user.id))
-                    || (user as any).globalName
-                    || user.username;
-                if (!nick) return c;
-
-                return <><strong>{this.renderUsername({
-                    author: { nick },
-                    message: undefined,
-                    isRepliedMessage: false,
-                    withMentionPrefix: false,
-                    userOverride: user
-                })}</strong></>;
-            }
-            return c;
-        });
-    },
+    }, { noop: true }),
 });

@@ -78,9 +78,8 @@ export function useFormattedPronouns(id: string, useGlobalProfile: boolean = fal
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
         return [discordPronouns, "Discord"];
 
-    if (result && result !== PronounMapping.unspecified) {
+    if (result && result !== PronounMapping.unspecified)
         return [result, "PronounDB"];
-    }
 
     return [discordPronouns, "Discord"];
 }
@@ -142,34 +141,25 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
         console.error("PronounDB fetching failed: ", e);
-        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: { en: ["unspecified"] } }] as const));
+        const dummyPronouns = Object.fromEntries(ids.map(id => [id, { sets: {} }] as const));
         Object.assign(cache, dummyPronouns);
         // @ts-ignore
         return dummyPronouns;
     }
 }
 
-export function extractPronouns(pronounSet: { [locale: string]: PronounCode[]; }): string {
-    if (!pronounSet || !pronounSet?.en) return PronounMapping.unspecified;
-    // for some reason pronounDB returns empty sets sometimes instead of nothing?
+export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
+    if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
+    // PronounDB returns an empty set instead of {sets: {en: ["unspecified"]}}.
     const pronouns = pronounSet.en;
     const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
-    const shouldCapitalise = (pronoun: string) => {
-        // if a pronoun is a sentence we keep the capitalisation.
-        return pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronoun);
-    };
 
     if (pronouns.length === 1) {
-        if (shouldCapitalise(pronouns[0]))
+        // For capitalized pronouns or special codes (any, ask, avoid), we always return the normal (capitalized) string
+        if (pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0]))
             return PronounMapping[pronouns[0]];
-        else if (
-            pronounsFormat === PronounsFormat.Lowercase
-            && ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0])
-        ) return PronounMapping[pronouns[0]];
         else return PronounMapping[pronouns[0]].toLowerCase();
     }
-    return pronouns.map(pronoun => {
-        const mappedPronoun = PronounMapping[pronoun + "S"];
-        return shouldCapitalise(mappedPronoun) ? mappedPronoun : mappedPronoun.toLowerCase();
-    }).join("/");
+    const pronounString = pronouns.map(p => p[0].toUpperCase() + p.slice(1)).join("/");
+    return pronounsFormat === PronounsFormat.Capitalized ? pronounString : pronounString.toLowerCase();
 }
