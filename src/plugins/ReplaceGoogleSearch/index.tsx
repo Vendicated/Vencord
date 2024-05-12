@@ -68,7 +68,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
-    description: "Replaces the Google search with difrent Engines",
+    description: "Replaces the Google search with different Engines",
     authors: [
         Devs.Moxxie,
         Devs.Ethan
@@ -76,7 +76,7 @@ export default definePlugin({
 
     getUrl: (): Engine => {
         if (settings.store.engine) {
-            if(settings.store.useCustomEngine) {
+            if (settings.store.useCustomEngine) {
                 return { name: settings.store.engineName, url: settings.store.engineUrl };
             }
 
