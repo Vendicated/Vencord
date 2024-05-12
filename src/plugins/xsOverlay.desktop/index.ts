@@ -260,14 +260,12 @@ function shouldIgnoreForChannelType(channel: Channel) {
     else return !settings.store.serverNotifications;
 }
 
-const useLengthTimeout = settings.store.lengthBasedTimeout;
-
 function sendMsgNotif(titleString: string, content: string, message: Message) {
     fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
         const msgData = {
             messageType: 1,
             index: 0,
-            timeout: useLengthTimeout ? settings.store.timeout : calculateTimeout(content),
+            timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
             height: calculateHeight(content),
             opacity: settings.store.opacity,
             volume: settings.store.volume,
@@ -286,7 +284,7 @@ function sendOtherNotif(content: string, titleString: string) {
     const msgData = {
         messageType: 1,
         index: 0,
-        timeout: useLengthTimeout ? settings.store.timeout : calculateTimeout(content),
+        timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
         height: calculateHeight(content),
         opacity: settings.store.opacity,
         volume: settings.store.volume,
