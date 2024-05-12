@@ -20,23 +20,44 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
-import { Button, ChannelStore, Forms, Text, Toasts } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { Button, ChannelStore, FluxDispatcher, Forms, Text, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { EdgeIcon } from "../../plugins/betterSessions/components/icons";
+import { definePluginSettings } from "@api/Settings";
+
+const settings = definePluginSettings({
+    modal: {
+        type: OptionType.BOOLEAN,
+        description: "Use modal to edit messages",
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "Plural Kit Edit",
     description: "Allows easier editing of pluralkit messages",
     authors: [{ id: 553652308295155723n, name: "Scyye" }],
+    settings: settings,
     start() {
         addButton("EditPluralkit", msg => {
             const handleClick = () => {
                 const pk = msg.author.bot && msg.author.discriminator === "0000";
                 if (pk) {
-                    openViewRawModal(msg);
+                    if (settings.store.modal)
+                        openViewRawModal(msg);
+                    else {
+                        FluxDispatcher.dispatch({
+                            type: "CREATE_PENDING_REPLY",
+                            channel: ChannelStore.getChannel(msg.channel_id),
+                            message: msg,
+                            shouldMention: false,
+                            showMentionToggle: false,
+                        });
+                        insertTextIntoChatInputBox("pk;edit " + msg.content)
+                    }
                 } else {
                     Toasts.show({
                         message: "This message was not sent by PluralKit",
