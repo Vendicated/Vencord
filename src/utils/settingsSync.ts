@@ -17,7 +17,7 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { PlainSettings, Settings } from "@api/Settings";
+import { PlainSettings, Settings, SettingsStore } from "@api/Settings";
 import { moment, Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
