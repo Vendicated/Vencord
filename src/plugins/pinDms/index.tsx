@@ -320,24 +320,25 @@ export default definePlugin({
                 </svg>
             </h2>
         );
-    }),
+    }, { noop: true }),
 
     renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
-        const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
+        return ErrorBoundary.wrap(() => {
+            const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
-        if (!channel || !category) return null;
-        if (this.isChannelHidden(sectionIndex, index)) return null;
+            if (!channel || !category) return null;
+            if (this.isChannelHidden(sectionIndex, index)) return null;
 
-        return (
-            <ChannelComponent
-                channel={channel}
-                selected={this.instance.props.selectedChannelId === channel.id}
-            >
-                {channel.id}
-            </ChannelComponent>
-        );
+            return (
+                <ChannelComponent
+                    channel={channel}
+                    selected={this.instance.props.selectedChannelId === channel.id}
+                >
+                    {channel.id}
+                </ChannelComponent>
+            );
+        }, { noop: true });
     },
-
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
         const category = categories[sectionIndex - 1];
