@@ -13,7 +13,7 @@ import { findExportedComponentLazy } from "@webpack";
 import { SnowflakeUtils, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-type FillValue = ("status-danger" | "status-warning" | "text-muted");
+type FillValue = ("status-danger" | "status-warning" | "status-positive" | "text-muted");
 type Fill = [FillValue, FillValue, FillValue];
 type DiffKey = keyof Diff;
 
@@ -54,10 +54,24 @@ export default definePlugin({
             seconds: Math.round(delta % 60),
         };
 
-        const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${k}` : null;
+        const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
         const keys = Object.keys(diff) as DiffKey[];
 
-        return keys.map(str).filter(isNonNullish).join(" ") || "0 seconds";
+        const ts = keys.reduce((prev, k) => {
+            const s = str(k);
+
+            return prev + (
+                isNonNullish(s)
+                    ? (prev !== ""
+                        ? k === "seconds"
+                            ? " and "
+                            : " "
+                        : "") + s
+                    : ""
+            );
+        }, "");
+
+        return [ts || "0 seconds", diff.days === 17 && diff.hours === 1] as const;
     },
     latencyTooltipData(message: Message) {
         const { id, nonce } = message;
@@ -73,16 +87,23 @@ export default definePlugin({
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
 
-        const stringDelta = this.stringDelta(abs);
+        const [stringDelta, isSuspectedKotlinDiscord] = this.stringDelta(abs);
+        const isKotlinDiscord = ahead && isSuspectedKotlinDiscord;
 
         // Also thanks dziurwa
         // 2 minutes
         const TROLL_LIMIT = 2 * 60;
         const { latency } = this.settings.store;
 
-        const fill: Fill = delta >= TROLL_LIMIT || ahead ? ["text-muted", "text-muted", "text-muted"] : delta >= (latency * 2) ? ["status-danger", "text-muted", "text-muted"] : ["status-warning", "status-warning", "text-muted"];
+        const fill: Fill = isKotlinDiscord
+            ? ["status-positive", "status-positive", "text-muted"]
+            : delta >= TROLL_LIMIT || ahead
+                ? ["text-muted", "text-muted", "text-muted"]
+                : delta >= (latency * 2)
+                    ? ["status-danger", "text-muted", "text-muted"]
+                    : ["status-warning", "status-warning", "text-muted"];
 
-        return abs >= latency ? { delta: stringDelta, ahead: abs !== delta, fill } : null;
+        return abs >= latency ? { delta: stringDelta, ahead, fill, isKotlinDiscord } : null;
     },
     Tooltip() {
         return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
@@ -92,7 +113,7 @@ export default definePlugin({
             if (!isNonNullish(d)) return null;
 
             return <Tooltip
-                text={d.ahead ? `This user's clock is ${d.delta} ahead` : `This message was sent with a delay of ${d.delta}.`}
+                text={d.ahead ? `This user's clock is ${d.delta} ahead. ${d.isKotlinDiscord ? "User is suspected to be on an old mobile client" : ""}` : `This message was sent with a delay of ${d.delta}.`}
                 position="top"
             >
                 {
