@@ -13,7 +13,7 @@ import { Message } from "discord-types/general";
 const settings = definePluginSettings({
     imgSize: {
         type: OptionType.SELECT,
-        description: "The resolution of the avatar image",
+        description: "The resolution of the image in the --large-avatar-url CSS variable",
         options: ["300", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "300" })),
 
     }
@@ -46,12 +46,21 @@ export default definePlugin({
             }
         },
 
-        // add large-avatar-url to the img element in the avatarstack component
+        // add --large-avatar-url css variable to avatar img elements
+        // popout profiles
         {
             find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
                 match: /(src:null!=\i\?(\i).{1,50}"aria-hidden":!0)/,
-                replace: "$1,\"style\":{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+                replace: "$1,style:{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+            }
+        },
+        // chat avatars
+        {
+            find: "showCommunicationDisabledStyles",
+            replacement: {
+                match: /(src:(\i),"aria-hidden":!0)/,
+                replace: "$1,style:{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
             }
         }
     ],
