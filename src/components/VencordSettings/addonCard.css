@@ -81,16 +81,10 @@
     0% {
         transform: translateX(0);
     }
-
-    40% {
-        transform: translateX(var(--offset));
-    }
-
     50% {
         transform: translateX(var(--offset));
     }
-
-    90% {
+    100% {
         transform: translateX(0);
     }
 }

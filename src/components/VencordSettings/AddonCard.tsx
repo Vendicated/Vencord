@@ -42,8 +42,8 @@ interface Props {
 }
 
 export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
-    const title = useRef<HTMLDivElement>(null);
-    const titleContainer = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLDivElement>(null);
+    const titleContainerRef = useRef<HTMLDivElement>(null);
     return (
         <div
             className={cl("card", { "card-disabled": disabled })}
@@ -53,13 +53,20 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
             <div className={cl("header")}>
                 <div className={cl("name-author")}>
                     <Text variant="text-md/bold" className={cl("name")}>
-                        <div className={cl("title-container")} ref={titleContainer}>
-                            <div className={cl("title")} onMouseOver={() => {
-                                // @ts-ignore
-                                title.current.style.setProperty("--offset", `${titleContainer.current.clientWidth - title.current.scrollWidth}px`);
-                                // @ts-ignore
-                                title.current.style.setProperty("--duration", `${(title.current.scrollWidth - titleContainer.current.clientWidth) / 15}s`);
-                            }} ref={title}>{name}</div>
+                        <div ref={titleContainerRef} className={cl("title-container")}>
+                            <div
+                                ref={titleRef}
+                                className={cl("title")}
+                                onMouseOver={() => {
+                                    const title = titleRef.current!;
+                                    const titleContainer = titleContainerRef.current!;
+
+                                    title.style.setProperty("--offset", `${titleContainer.clientWidth - title.scrollWidth}px`);
+                                    title.style.setProperty("--duration", `${Math.max(0.5, (title.scrollWidth - titleContainer.clientWidth) / 7)}s`);
+                                }}
+                            >
+                                {name}
+                            </div>
                         </div>{isNew && <Badge text="NEW" color="#ED4245" />}
                     </Text>
                     {!!author && (
