@@ -40,6 +40,14 @@ export default definePlugin({
                 match: /(searchWithoutFetchingLatest.+?=(\i);)(.+?reduce\(\((\i),(\i)\)=>\{)/,
                 replace: "$1 let includeGuilds = $2.includeGuilds ?? true; $3 if ($5.type === 'GUILD_EMOJI' && !includeGuilds) { return $4; }"
             }
+        },
+        // to be compatible with "Enable Emoji Bypass" in FakeNitro
+        {
+            find: "isExternalEmojiAllowedForIntention:function",
+            replacement: {
+                match: /(\i)\[.{5,30}?\]=.{20,60}?return!\i.has\((\i)\)/,
+                replace: "$& && ($2 !== $1.CHAT || $self.settings.store.shownEmojis !== 'currentServer')"
+            }
         }
     ],
     getExtraProps() {
