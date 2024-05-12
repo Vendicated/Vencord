@@ -24,6 +24,7 @@ interface Diff {
     seconds: number;
 }
 
+const DISCORD_KT_DELAY = 1471228.928;
 const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
@@ -65,7 +66,12 @@ export default definePlugin({
         // Message wasn't received through gateway
         if (!isNonNullish(nonce)) return null;
 
-        const delta = Math.round((SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce)) / 1000);
+        let delta = Math.round((SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce)) / 1000);
+
+        // Old Discord Android clients have a delay of 1471228928 milliseconds
+        // This is a workaround for that
+        if (delta >= DISCORD_KT_DELAY - 86400) // One day of padding for good measure
+            delta -= DISCORD_KT_DELAY;
 
         // Thanks dziurwa (I hate you)
         // This is when the user's clock is ahead
