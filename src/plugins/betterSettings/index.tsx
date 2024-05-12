@@ -6,17 +6,18 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitFor } from "@webpack";
 import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
 type SettingsEntry = { section: string, label: string; };
 
 const cl = classNameFactory("");
-const Classes = findByPropsLazy("animating", "baseLayer", "bg", "layer", "layers");
+let Classes: Record<string, string>;
+waitFor(["animating", "baseLayer", "bg", "layer", "layers"], m => Classes = m);
 
 const settings = definePluginSettings({
     disableFade: {
@@ -124,12 +125,19 @@ export default definePlugin({
         }
     ],
 
+    // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
+    // without possibly also catching unrelated errors of children.
+    //
+    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
+    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
+    // not in children
     Layer(props: LayerProps) {
-        return (
-            <ErrorBoundary fallback={() => props.children as any}>
-                <Layer {...props} />
-            </ErrorBoundary>
-        );
+        if (!FocusLock || !ComponentDispatch || !Classes) {
+            new Logger("BetterSettings").error("Failed to find some components");
+            return props.children;
+        }
+
+        return <Layer {...props} />;
     },
 
     wrapMenu(list: SettingsEntry[]) {
