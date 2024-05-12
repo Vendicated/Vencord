@@ -111,7 +111,7 @@ const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
-        description: "Allow sending fake emojis",
+        description: "Allows sending fake emojis (also bypasses missing permission to use custom emojis)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -129,7 +129,7 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     enableStickerBypass: {
-        description: "Allow sending fake stickers",
+        description: "Allows sending fake stickers (also bypasses missing permission to use stickers)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
