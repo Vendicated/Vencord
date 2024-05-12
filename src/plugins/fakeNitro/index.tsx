@@ -111,7 +111,7 @@ const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
-        description: "Allow sending fake emojis",
+        description: "Allows sending fake emojis (also bypasses missing permission to use custom emojis)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -129,7 +129,7 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     enableStickerBypass: {
-        description: "Allow sending fake stickers",
+        description: "Allows sending fake stickers (also bypasses missing permission to use stickers)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -166,10 +166,13 @@ const settings = definePluginSettings({
         description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
+    },
+    disableEmbedPermissionCheck: {
+        description: "Whether to disable the embed permission check when sending fake emojis and stickers",
+        type: OptionType.BOOLEAN,
+        default: false
     }
-}).withPrivateSettings<{
-    disableEmbedPermissionCheck: boolean;
-}>();
+});
 
 function hasPermission(channelId: string, permission: bigint) {
     const channel = ChannelStore.getChannel(channelId);
@@ -187,7 +190,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
-    description: "Allows you to stream in nitro quality, send fake emojis/stickers and use client themes.",
+    description: "Allows you to stream in nitro quality, send fake emojis/stickers, use client themes and custom Discord notifications.",
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -396,6 +399,14 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
+            }
+        },
+        // Allow using custom notification sounds
+        {
+            find: "canUseCustomNotificationSounds:function",
+            replacement: {
+                match: /canUseCustomNotificationSounds:function\(\i\){/,
+                replace: "$&return true;"
             }
         }
     ],
