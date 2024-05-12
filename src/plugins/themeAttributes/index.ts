@@ -51,7 +51,7 @@ export default definePlugin({
             find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
                 match: /(src:null!=\i\?(\i).{1,50}"aria-hidden":!0)/,
-                replace: "$1,\"large-avatar-url\":$2.replace(/\\d+$/,$self.settings.store.imgSize)"
+                replace: "$1,\"style\":{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
             }
         }
     ],
