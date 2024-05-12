@@ -93,7 +93,7 @@ export default definePlugin({
         // This is a workaround for that
         if (-delta >= DISCORD_KT_DELAY - 86400) { // One day of padding for good measure
             isDiscordKotlin = detectDiscordKotlin;
-            delta -= DISCORD_KT_DELAY;
+            delta += DISCORD_KT_DELAY;
         }
 
         // Thanks dziurwa (I hate you)
