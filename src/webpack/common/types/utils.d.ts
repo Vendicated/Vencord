@@ -16,22 +16,182 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember } from "discord-types/general";
+import type { EventEmitter } from "events"; // Discord uses a polyfill for node's EventEmitter
+import type { Guild, GuildMember } from "discord-types/general";
 import type { ReactNode } from "react";
 
-import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
+import type { FluxActionType } from "./fluxActionType";
+import type { i18nMessages } from "./i18nMessages";
 
-export { FluxEvents };
+export { FluxActionType };
 
-export interface FluxDispatcher {
-    _actionHandlers: any;
-    _subscriptions: any;
-    dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
+type Nullish = null | undefined;
+
+export interface FluxPayload<ActionType extends FluxActionType = FluxActionType> extends Record<PropertyKey, any> {
+    type: ActionType;
+}
+
+export type FluxActionHandlers<T extends FluxActionType = FluxActionType> = {
+    [K in T]?: (payload: FluxPayload<K>) => void;
+};
+
+class DepGraph<Data = any> {
+    constructor(options?: { circular?: boolean | undefined; } | undefined);
+
+    addDependency(from: string, to: string): void;
+    addNode(name: string, data?: Data | undefined): void;
+    clone(): DepGraph<Data>;
+    dependantsOf(name: string, leavesOnly?: boolean | undefined): string[];
+    dependenciesOf(name: string, leavesOnly?: boolean | undefined): string[];
+    getNodeData(name: string): Data;
+    hasNode(name: string): Data;
+    overallOrder(leavesOnly?: boolean | undefined): string[];
+    removeDependency(from: string, to: string): void;
+    removeNode(name: string): void;
+    setNodeData(name: string, data?: Data | undefined): void;
+    size(): number;
+
+    circular: boolean | undefined;
+    nodes: Record<string, Data | string>;
+    outgoingEdges: Record<string, string[]>;
+    incomingEdges: Record<string, string[]>;
+}
+
+interface FluxActionHandlersGraphNode<
+    Payload extends FluxPayload = FluxPayload
+> {
+    name: string;
+    band: number;
+    actionHandler: (payload: Payload) => void;
+    storeDidChange: (payload: Payload) => void;
+}
+
+type FluxOrderedActionHandlers<Payload extends FluxPayload = FluxPaylod> = Omit<FluxActionHandlersGraphNode<Payload>, "band">[];
+
+class FluxActionHandlersGraph<
+    Payload extends FluxPayload<infer A> = FluxPayload,
+    ActionType = A
+> {
+    _addToBand(token: string, band: number): void;
+    _bandToken(band: number): string;
+    _computeOrderedActionHandlers(actionType: ActionType): FluxOrderedActionHandlers<Payload>;
+    _computeOrderedCallbackTokens(): string[];
+    _invalidateCaches(): void;
+    _validateDependencies(fromToken: string, toToken: string): void;
+    addDependencies(fromToken: string, toTokens: string[]): void;
+    createToken(): string;
+    getOrderedActionHandlers(payload: Payload): FluxOrderedActionHandlers<Payload>;
+    register(
+        name: string,
+        actionHandlers: FluxActionHandlers<ActionType>,
+        storeDidChange: (payload: Payload) => void,
+        band: number,
+        token?: string | undefined
+    ): string;
+
+    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode<Payload>>;
+    _lastID: number;
+    _orderedActionHandlers: Record<ActionType, FluxOrderedActionHandlers<Payload> | null>;
+    _orderedCallbackTokens: string[] | null;
+}
+
+interface SentryUtils {
+    addBreadcrumb: (breadcrumb: {
+        category?: string | undefined;
+        data?: any;
+        level?: string | undefined;
+        message?: string | undefined;
+        type?: string | undefined;
+    }) => void;
+}
+
+class FluxActionLog<
+    Payload extends FluxPayload<infer A> = FluxPayload,
+    ActionType = A
+> {
+    constructor(actionType: Payload);
+
+    get name(): ActionType;
+    toJSON(): Pick<FluxActionLog<ActionType>, "action" | "createdAt" | "traces"> & {
+        created_at: FluxActionLog["createdAt"];
+    };
+
+    action: Payload;
+    createdAt: Date;
+    error: Error | undefined;
+    id: number;
+    startTime: number;
+    totalTime: number;
+    traces: {
+        name: string;
+        time: number;
+    }[];
+}
+
+class FluxActionLogger<
+    Payload extends FluxPayload<infer A> = FluxPayload,
+    ActionType = A
+> extends EventEmitter {
+    constructor(options?: { persist?: boolean | undefined; } | undefined);
+
+    getLastActionMetrics(title: string, quantity?: number | undefined /* = 20 */): [
+        storeName: string,
+        actionType: ActionType,
+        totalTime: number
+    ];
+    getSlowestActions(actionType?: ActionType | Nullish, quantity?: number | undefined /* = 20 */): [];
+    log<T extends ActionType>(
+        actionType: T,
+        callback: (func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>) => void
+    ): FluxActionLog<T>;
+
+    logs: FluxActionLog<ActionType>[];
+    persist: boolean;
+}
+
+export class FluxDispatcher<
+    Payload extends FluxPayload<infer A> = FluxPayload,
+    ActionType = A
+> {
+    constructor(
+        defaultBand?: number | undefined /* = 0 */,
+        actionLogger?: FluxActionLogger<Payload> | Nullish,
+        sentryUtils?: SentryUtils | Nullish
+    );
+
+    _dispatch(
+        payload: Payload,
+        func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>
+    ): false | void;
+    _dispatchWithDevtools(payload: Payload): void;
+    _dispatchWithLogging(payload: Payload): void;
+    addDependencies(fromToken: string, toTokens: string[]): void;
+    addInterceptor(interceptor: (payload: Payload) => boolean): void;
+    createToken(): string;
+    dispatch(payload: Payload): Promise<void>;
+    flushWaitQueue(): void;
     isDispatching(): boolean;
-    subscribe(event: FluxEvents, callback: (data: any) => void): void;
-    unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    register(
+        name: string,
+        actionHandlers: FluxActionHandlers<ActionType>,
+        storeDidChange: (payload: Payload) => void,
+        band?: number | Nullish,
+        token?: string | undefined
+    ): string;
+    subscribe(actionType: ActionType, listener: (payload: Payload) => void): void;
+    unsubscribe(actionType: ActionType, listener: (payload: Payload) => void): void;
     wait(callback: () => void): void;
+
+    _actionHandlers: FluxActionHandlersGraph<Payload>;
+    _currentDispatchActionType: ActionType | Nullish;
+    _defaultBand: number;
+    _interceptors: ((payload: Payload) => boolean)[];
+    _processingWaitQueue: boolean;
+    _sentryUtils: SentryUtils | Nullish;
+    _subscriptions: Record<ActionType, Set<(payload: Payload) => void> | Nullish>;
+    _waitQueue: (() => void)[];
+    actionLogger: FluxActionLogger<Payload>;
+    functionCache: Record<ActionType, (payload: Payload) => void>;
 }
 
 export type Parser = Record<
