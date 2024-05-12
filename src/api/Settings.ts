@@ -20,7 +20,7 @@ import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
-import { mergeDefaults } from "@utils/misc";
+import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";

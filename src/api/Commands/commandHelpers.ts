@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { mergeDefaults } from "@utils/misc";
+import { mergeDefaults } from "@utils/mergeDefaults";
 import { findByPropsLazy } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
