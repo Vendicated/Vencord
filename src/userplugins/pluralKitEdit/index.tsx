@@ -16,20 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
-import { definePluginSettings } from "@api/Settings";
-import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, i18n, Menu, Text } from "@webpack/common";
+import definePlugin from "@utils/types";
+import { Button, ChannelStore, Forms, Text, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { CopyIcon } from "@components/Icons";
+import { insertTextIntoChatInputBox } from "@utils/discord";
+import { CheckedTextInput } from "@components/CheckedTextInput";
+import { EdgeIcon } from "../../plugins/betterSessions/components/icons";
 
 export default definePlugin({
     name: "Plural Kit Edit",
@@ -39,9 +35,14 @@ export default definePlugin({
         addButton("EditPluralkit", msg => {
             const handleClick = () => {
                 const pk = msg.author.bot && msg.author.discriminator === "0000";
-                const pkData = pk ? msg.content : "";
                 if (pk) {
-                    openViewRawModal(pkData, "PluralKit", msg.content);
+                    openViewRawModal(msg);
+                } else {
+                    Toasts.show({
+                        message: "This message was not sent by PluralKit",
+                        id: Toasts.genId(),
+                        type: Toasts.Type.FAILURE
+                    });
                 }
             };
 
@@ -50,14 +51,10 @@ export default definePlugin({
                 e.stopPropagation();
             };
 
-            const label = "Edit PluralKit"
-
             return {
-                label,
-                icon: (props, context) => {
-                    return <svg viewBox={
-                        "0 0 20 20"
-                    } fill="currentColor" aria-hidden="true" width="18" height="18" {...props}></svg>
+                label: "Edit PluralKit",
+                icon: () => {
+                    return <EdgeIcon/>;
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
@@ -71,35 +68,46 @@ export default definePlugin({
     },
 });
 
-function openViewRawModal(json: string, type: string, msgContent?: string) {
+function openViewRawModal(msg?: Message) {
+    if (!msg) return;
+    const message = msg;
+    var result: string = message.content;
     const key = openModal(props => (
         <ErrorBoundary>
-            <ModalRoot {...props} size={ModalSize.LARGE}>
-    <ModalHeader>
-        <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
-    <ModalCloseButton onClick={() => closeModal(key)} />
-    </ModalHeader>
-    <ModalContent>
-    <div style={{ padding: "16px 0" }}>
-    {!!msgContent && (
-        <>
-            <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
-            <CodeBlock content={msgContent} lang="" />
-    <Forms.FormDivider className={Margins.bottom20} />
-    </>
-    )}
+            <ModalRoot {...props} size={ModalSize.MEDIUM}>
+                <ModalHeader>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>EDIT MESSAGE</Text>
+                    <ModalCloseButton onClick={() => closeModal(key)}/>
+                </ModalHeader>
+                <ModalContent>
+                    <div style={{ padding: "16px 0" }}>
+                        {!!message.content && (
+                            <>
+                                <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                                <CheckedTextInput value={message.content} onChange={newValue => result = newValue}
+                                                  validate={() => true}></CheckedTextInput>
+                            </>
+                        )}
+                    </div>
+                </ModalContent>
+                <ModalFooter>
+                    <Button onClick={() => copyWithToast(message.content, `Content copied to clipboard!`)}>
+                        Copy
+                    </Button>
+                    <Button onClick={() => {
+                        closeModal(key)
+                        insertTextIntoChatInputBox("pk;edit " + getMessageLink(message) + " " + result)
+                    }}>
+                        Submit
+                    </Button>
+                </ModalFooter>
+            </ModalRoot>
+        </ErrorBoundary>
+    ));
+}
 
-    <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
-    </div>
-    </ModalContent >
-    <ModalFooter>
-    <Flex cellSpacing={10}>
-    <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
-    Copy {type} JSON
-    </Button>
-    </Flex>
-    </ModalFooter>
-    </ModalRoot >
-    </ErrorBoundary >
-));
+function getMessageLink(msg: Message) {
+    var guildId = ChannelStore.getChannel(msg.channel_id).getGuildId();
+
+    return `https://discord.com/channels/${guildId}/${msg.channel_id}/${msg.id}`;
 }
