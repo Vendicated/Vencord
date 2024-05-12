@@ -42,11 +42,11 @@ export function SettingsTab({ title, children }: PropsWithChildren<{ title: stri
     );
 }
 
-const onError = onlyOnce(handleComponentFailed);
+export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
-export function wrapTab(component: ComponentType, tab: string) {
+export function wrapTab(component: ComponentType<any>, tab: string) {
     return ErrorBoundary.wrap(component, {
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
-        onError,
+        onError: handleSettingsTabError,
     });
 }
