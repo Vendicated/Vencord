@@ -83,7 +83,7 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
-                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
+                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
                     match: /"renderSection",(\i)=>{/,
