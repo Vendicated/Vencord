@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { CustomEmoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -407,6 +407,14 @@ export default definePlugin({
             replacement: {
                 match: /canUseCustomNotificationSounds:function\(\i\){/,
                 replace: "$&return true;"
+            }
+        },
+        // Allows the usage of subscription-locked emojis
+        {
+            find: "isUnusableRoleSubscriptionEmoji:function",
+            replacement: {
+                match: /isUnusableRoleSubscriptionEmoji:function\(\){/,
+                replace: "$&return () => false;"
             }
         }
     ],
@@ -801,7 +809,20 @@ export default definePlugin({
     },
 
     canUseEmote(e: CustomEmoji, channelId: string) {
+        // @ts-ignore outdated type
+        const userRoles = GuildMemberStore.getSelfMember(e.guildId).roles;
         if (e.require_colons === false) return true;
+        // check if we have any of the required roles
+        // if we don't do a nested check, then ts will complain about the below code being unreachable
+        if (e.roles.length > 0) {
+            if (e.roles.some(role => userRoles.includes(role))) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
         if (e.available === false) return false;
 
         if (this.canUseEmotes)
