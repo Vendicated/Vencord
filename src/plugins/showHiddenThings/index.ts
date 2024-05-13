@@ -41,6 +41,11 @@ const settings = definePluginSettings({
         description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
         default: true,
     },
+    disableDisallowedDiscoveryFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
+        default: true,
+    },
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
@@ -80,6 +85,23 @@ export default definePlugin({
             replacement: {
                 match: /filters:\i\.join\(" AND "\),facets:\[/,
                 replace: "facets:["
+            }
+        },
+        {
+            find: "DiscoveryBannedSearchWords.includes",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            replacement: {
+                match: /searchQueryContainsBannedWord:function\(\){return \i}/,
+                replace: "searchQueryContainsBannedWord:function(){return () => false}"
+            }
+        },
+        {
+            find: "Endpoints.GUILD_DISCOVERY_VALID_TERM",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            all: true,
+            replacement: {
+                match: /\i\.HTTP\.get\(\{url:\i\.Endpoints\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
+                replace: "{ body: { valid: true } };"
             }
         }
     ],
