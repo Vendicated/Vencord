@@ -17,23 +17,15 @@
 */
 
 import type { EventEmitter } from "events"; // Discord uses a polyfill for node's EventEmitter
-import type { Guild, GuildMember } from "discord-types/general";
+import { Guild, GuildMember } from "discord-types/general"; // TODO
 import type { ReactNode } from "react";
 
-import type { FluxActionType } from "./fluxActionType";
+import type { FluxAction, FluxActionType } from "./fluxActions";
 import type { i18nMessages } from "./i18nMessages";
 
-export { FluxActionType };
+export { FluxAction, FluxActionType };
 
 type Nullish = null | undefined;
-
-export interface FluxPayload<ActionType extends FluxActionType = FluxActionType> extends Record<PropertyKey, any> {
-    type: ActionType;
-}
-
-export type FluxActionHandlers<T extends FluxActionType = FluxActionType> = {
-    [K in T]?: (payload: FluxPayload<K>) => void;
-};
 
 class DepGraph<Data = any> {
     constructor(options?: { circular?: boolean | undefined; } | undefined);
@@ -57,41 +49,54 @@ class DepGraph<Data = any> {
     incomingEdges: Record<string, string[]>;
 }
 
+export type FluxActionHandler<Action extends FluxAction = FluxAction> = (action: Action) => void;
+
+export type FluxActionHandlers<
+    Action extends FluxAction<infer T> = FluxAction,
+    ActionType = T
+> = { [Type in ActionType]?: FluxActionHandler<Action<Type>>; };
+
 interface FluxActionHandlersGraphNode<
-    Payload extends FluxPayload = FluxPayload
+    Payload extends FluxAction = FluxAction
 > {
     name: string;
     band: number;
-    actionHandler: (payload: Payload) => void;
-    storeDidChange: (payload: Payload) => void;
+    actionHandler: FluxActionHandler<Payload>;
+    storeDidChange: FluxActionHandler<Payload>;
 }
 
-type FluxOrderedActionHandlers<Payload extends FluxPayload = FluxPaylod> = Omit<FluxActionHandlersGraphNode<Payload>, "band">[];
+type FluxOrderedActionHandlers<Payload extends FluxAction = FluxAction> = Omit<FluxActionHandlersGraphNode<Payload>, "band">[];
+
+export enum FluxDispatchBand {
+    Early,
+    Database,
+    Default
+}
 
 class FluxActionHandlersGraph<
-    Payload extends FluxPayload<infer A> = FluxPayload,
-    ActionType = A
+    Action extends FluxAction<infer T> = FluxAction,
+    ActionType = T
 > {
-    _addToBand(token: string, band: number): void;
-    _bandToken(band: number): string;
-    _computeOrderedActionHandlers(actionType: ActionType): FluxOrderedActionHandlers<Payload>;
+    _addToBand(token: string, band: FluxDispatchBand): void;
+    _bandToken(band: DispatcherBand): string;
+    _computeOrderedActionHandlers(actionType: ActionType): FluxOrderedActionHandlers<Action>;
     _computeOrderedCallbackTokens(): string[];
     _invalidateCaches(): void;
     _validateDependencies(fromToken: string, toToken: string): void;
     addDependencies(fromToken: string, toTokens: string[]): void;
     createToken(): string;
-    getOrderedActionHandlers(payload: Payload): FluxOrderedActionHandlers<Payload>;
+    getOrderedActionHandlers(action: Action): FluxOrderedActionHandlers<Action>;
     register(
         name: string,
         actionHandlers: FluxActionHandlers<ActionType>,
-        storeDidChange: (payload: Payload) => void,
-        band: number,
+        storeDidChange: FluxActionHandler<Action>,
+        band: FluxDispatchBand,
         token?: string | undefined
     ): string;
 
-    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode<Payload>>;
+    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode<Action>>;
     _lastID: number;
-    _orderedActionHandlers: Record<ActionType, FluxOrderedActionHandlers<Payload> | null>;
+    _orderedActionHandlers: Record<ActionType, FluxOrderedActionHandlers<Action> | null>;
     _orderedCallbackTokens: string[] | null;
 }
 
@@ -105,18 +110,21 @@ interface SentryUtils {
     }) => void;
 }
 
+type ActionMetric<ActionType extends FluxActionType = FluxActionType>
+    = [storeName: string, actionType: ActionType, totalTime: number];
+
 class FluxActionLog<
-    Payload extends FluxPayload<infer A> = FluxPayload,
-    ActionType = A
+    Action extends FluxAction<infer T> = FluxAction,
+    ActionType = T
 > {
-    constructor(actionType: Payload);
+    constructor(actionType: ActionType);
 
     get name(): ActionType;
     toJSON(): Pick<FluxActionLog<ActionType>, "action" | "createdAt" | "traces"> & {
         created_at: FluxActionLog["createdAt"];
     };
 
-    action: Payload;
+    action: Action;
     createdAt: Date;
     error: Error | undefined;
     id: number;
@@ -129,69 +137,77 @@ class FluxActionLog<
 }
 
 class FluxActionLogger<
-    Payload extends FluxPayload<infer A> = FluxPayload,
-    ActionType = A
+    Action extends FluxAction<infer T> = FluxAction,
+    ActionType = T
 > extends EventEmitter {
     constructor(options?: { persist?: boolean | undefined; } | undefined);
 
-    getLastActionMetrics(title: string, quantity?: number | undefined /* = 20 */): [
-        storeName: string,
-        actionType: ActionType,
-        totalTime: number
-    ];
-    getSlowestActions(actionType?: ActionType | Nullish, quantity?: number | undefined /* = 20 */): [];
-    log<T extends ActionType>(
-        actionType: T,
+    getLastActionMetrics(
+        title: string,
+        limit?: number | undefined /* = 20 */
+    ): ActionMetric<ActionType>[];
+    getSlowestActions(
+        actionType?: ActionType | Nullish,
+        limit?: number | undefined /* = 20 */
+    ): ActionMetric<ActionType>[];
+    log<A extends Action>(
+        action: A,
         callback: (func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>) => void
-    ): FluxActionLog<T>;
+    ): FluxActionLog<A>;
 
-    logs: FluxActionLog<ActionType>[];
+    logs: FluxActionLog<Action>[];
     persist: boolean;
 }
 
 export class FluxDispatcher<
-    Payload extends FluxPayload<infer A> = FluxPayload,
-    ActionType = A
+    Action extends FluxAction<infer T> = FluxAction,
+    ActionType = T
 > {
     constructor(
         defaultBand?: number | undefined /* = 0 */,
-        actionLogger?: FluxActionLogger<Payload> | Nullish,
+        actionLogger?: FluxActionLogger<Action> | Nullish,
         sentryUtils?: SentryUtils | Nullish
     );
 
     _dispatch(
-        payload: Payload,
+        action: Action,
         func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>
     ): false | void;
-    _dispatchWithDevtools(payload: Payload): void;
-    _dispatchWithLogging(payload: Payload): void;
+    _dispatchWithDevtools(action: Action): void;
+    _dispatchWithLogging(action: Action): void;
     addDependencies(fromToken: string, toTokens: string[]): void;
-    addInterceptor(interceptor: (payload: Payload) => boolean): void;
+    addInterceptor(interceptor: FluxActionHandler<Action>): void;
     createToken(): string;
-    dispatch(payload: Payload): Promise<void>;
+    dispatch(action: Action): Promise<void>;
     flushWaitQueue(): void;
     isDispatching(): boolean;
     register(
         name: string,
         actionHandlers: FluxActionHandlers<ActionType>,
-        storeDidChange: (payload: Payload) => void,
+        storeDidChange: FluxActionHandler<Action>,
         band?: number | Nullish,
         token?: string | undefined
     ): string;
-    subscribe(actionType: ActionType, listener: (payload: Payload) => void): void;
-    unsubscribe(actionType: ActionType, listener: (payload: Payload) => void): void;
+    subscribe<A extends Action<infer U>, AT = U>(
+        actionType: AT,
+        listener: FluxActionHandler<A>
+    ): void;
+    unsubscribe<A extends Action<infer U>, AT = U>(
+        actionType: AT,
+        listener: FluxActionHandler<A>
+    ): void;
     wait(callback: () => void): void;
 
-    _actionHandlers: FluxActionHandlersGraph<Payload>;
+    _actionHandlers: FluxActionHandlersGraph<Action>;
     _currentDispatchActionType: ActionType | Nullish;
     _defaultBand: number;
-    _interceptors: ((payload: Payload) => boolean)[];
+    _interceptors: ((action: Action) => boolean)[];
     _processingWaitQueue: boolean;
     _sentryUtils: SentryUtils | Nullish;
-    _subscriptions: Record<ActionType, Set<(payload: Payload) => void> | Nullish>;
+    _subscriptions: Record<ActionType, Set<FluxActionHandler<Action>> | Nullish>;
     _waitQueue: (() => void)[];
-    actionLogger: FluxActionLogger<Payload>;
-    functionCache: Record<ActionType, (payload: Payload) => void>;
+    actionLogger: FluxActionLogger<Action>;
+    functionCache: Record<ActionType, FluxActionHandler<Action>>;
 }
 
 export type Parser = Record<

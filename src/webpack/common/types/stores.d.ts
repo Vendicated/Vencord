@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DraftType } from "@webpack/common";
-import { Channel, Guild, Role } from "discord-types/general";
+import type { DraftType } from "@webpack/common";
+import type { APIUser, ApplicationFlags, OAuth2Scopes, UserFlags, UserPremiumType } from "discord-api-types/v9";
+import { Channel, Guild, Role } from "discord-types/general"; // TODO
 
-import type { FluxActionHandlers, FluxActionType, FluxDispatcher, FluxPayload } from "./utils";
+import type { FluxAction, FluxActionType, FluxActionHandlers, FluxDispatchBand, FluxDispatcher } from "./utils";
 
 type Nullish = null | undefined;
 
@@ -36,11 +37,10 @@ class FluxChangeListeners {
     remove: (listener: FluxChangeListener) => void;
 }
 
-
 export class FluxStore<
-    Dispatcher extends FluxDispatcher<infer P> = FluxDispatcher,
-    Payload = P<infer A>,
-    ActionType = A
+    Dispatcher extends FluxDispatcher<infer A> = FluxDispatcher,
+    Action = A<infer T>,
+    ActionType = T
 > {
     constructor(
         dispatcher: Dispatcher,
@@ -59,9 +59,9 @@ export class FluxStore<
     getName(): string;
     initialize(): void;
     initializeIfNeeded(): void;
-    mustEmitChanges(mustEmitChanges?: ((payload: Payload) => boolean) | Nullish /* = () => true */): void;
-    registerActionHandlers(actionHandlers: FluxActionHandlers<ActionType>, band?: number | Nullish): void;
-    syncWith(stores: FluxStore<Dispatcher>[], func: () => boolean | void, delay?: number | Nullish);
+    mustEmitChanges(mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */): void;
+    registerActionHandlers(actionHandlers: FluxActionHandlers<ActionType>, band?: FluxDispatchBand | Nullish): void;
+    syncWith(stores: FluxStore<Dispatcher>[], func: () => boolean | void, timeout?: number | Nullish): void;
     waitFor(...stores: FluxStore<Dispatcher>[]): void;
 
     __getLocalVars: undefined;
@@ -69,7 +69,7 @@ export class FluxStore<
     _dispatcher: Dispatcher;
     _dispatchToken: string;
     _isInitialized: boolean;
-    _mustEmitChanges: ((payload: Payload) => boolean) | Nullish;
+    _mustEmitChanges: ((action: Action) => boolean) | Nullish;
     _reactChangeCallbacks: FluxChangeListeners;
     _syncWiths: {
         func: () => boolean | void;
@@ -82,6 +82,30 @@ export class FluxStore<
     removeReactChangeListener: FluxChangeListeners["remove"];
 }
 
+type FluxSnapshotStoreActionType = Exclude<FluxActionType, "CLEAR_CACHES" | "WRITE_CACHES">;
+
+interface FluxSnapshot<Data = any> {
+    data: Data;
+    version: number;
+}
+
+export class FluxSnapshotStore<
+    Constructor extends typeof FluxSnapshotStore,
+    SnapshotData = any,
+    Action extends FluxAction<FluxSnapshotStoreActionType> = FluxAction<FluxSnapshotStoreActionType>
+> extends FluxStore<FluxDispatcher<Action>> {
+    constructor(actionHandlers: FluxActionHandlers<Action>);
+
+    static allStores: FluxSnapshotStore[];
+    static clearAll(): void;
+
+    clear(): void;
+    getClass(): Constructor;
+    get persistKey(): string;
+    readSnapshot(version: number): SnapshotData | null;
+    save(): void;
+}
+
 export interface Flux {
     Store: typeof FluxStore;
 }
@@ -89,9 +113,25 @@ export interface Flux {
 export type useStateFromStores = <T>(
     stores: FluxStore[],
     getStateFromStores: () => T,
-    dependencies?: any[] | null | undefined,
+    dependencies?: any[] | Nullish,
     areStatesEqual?: ((prevState: T, currState: T) => boolean) | undefined
 ) => T;
+
+// Original name: Record, renamed to avoid conflict with the Record util type
+export class ImmutableRecord<OwnProperties extends object = Record<PropertyKey, any>> {
+    merge(collection: Partial<OwnProperties>): this;
+    set<K extends keyof OwnProperties>(key: K, value: OwnProperties[K]): this;
+    toJS(): OwnProperties;
+    update<K extends keyof OwnProperties>(
+        key: K,
+        updater: (value: OwnProperties[K]) => OwnProperties[K]
+    ): this;
+    update<K extends keyof OwnProperties>(
+        key: K,
+        notSetValue: OwnProperties[K],
+        updater: (value: OwnProperties[K]) => OwnProperties[K]
+    ): this;
+}
 
 export interface DraftObject {
     channelId: string;
@@ -106,7 +146,6 @@ interface DraftState {
         } | undefined;
     } | undefined;
 }
-
 
 export class DraftStore extends FluxStore {
     getDraft(channelId: string, type: DraftType): string;
@@ -226,20 +265,117 @@ export class GuildStore extends FluxStore {
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
 
-export class User {
-    constructor(user: object); // TEMP
+enum ApplicationIntegrationType {
+    GUILD_INSTALL,
+    USER_INSTALL
+}
 
-    addGuildAvatarHash(guildId: string, avatarHash: string): User;
-    get avatarDecoration(): {
-        asset: string;
-        skuId: string;
+interface UserProfileFetchFailed {
+    accentColor: null;
+    application: null;
+    applicationRoleConnections: [];
+    banner: null;
+    bio: "";
+    connectedAccounts: [];
+    lastFetched: number;
+    legacyUsername: null;
+    premiumGuildSince: null;
+    premiumSince: null;
+    profileFetchFailed: true;
+    pronouns: "";
+    userId: string;
+}
+
+interface UserProfileFetchSucceeded {
+    application: {
+        customInstallUrl: string | Nullish;
+        flags: ApplicationFlags;
+        id: string;
+        installParams: {
+            scopes: OAuth2Scopes[] | Nullish;
+            permissions: string | Nullish;
+        } | Nullish;
+        integrationTypesConfig: Partial<Record<ApplicationIntegrationType, any /* | Nullish */>> | Nullish; // TEMP
+        popularApplicationCommandIds: string[] | undefined;
+        primarySkuId: string | Nullish;
+        storefront_available: boolean;
     } | null;
-    set avatarDecoration(avatarDecoration: {
+    accentColor: number | Nullish;
+    applicationRoleConnections: any[]; // TEMP
+    badges: {
+        description: string;
+        icon: string;
+        id: string;
+        link?: string;
+    }[];
+    banner: string | Nullish;
+    bio: string;
+    connectedAccounts: {
+        id: string;
+        metadata?: Record<string, any>;
+        name: string;
+        type: string;
+        verified: boolean;
+    }[];
+    lastFetched: number;
+    legacyUsername: string | Nullish;
+    popoutAnimationParticleType: Nullish; // TEMP
+    premiumGuildSince: Date | null;
+    premiumSince: Date | null;
+    premiumType: UserPremiumType | Nullish;
+    profileEffectId: string | undefined;
+    profileFetchFailed: false;
+    pronouns: string;
+    themeColors: [primaryColor: number, accentColor: number] | Nullish;
+    userId: string;
+}
+
+export type UserProfile<FetchFailed extends boolean = boolean> = FetchFailed extends true
+    ? UserProfileFetchFailed
+    : UserProfileFetchSucceeded;
+
+interface UserProfileStoreSnapshotData {
+    userId: string;
+    profile: UserProfile | undefined;
+}
+
+export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore, UserProfileStoreSnapshotData> {
+    static displayName: "UserProfileStore";
+    static LATEST_SNAPSHOT_VERSION: number;
+
+    getUserProfile<FetchFailed extends boolean = boolean>(userId: string): UserProfile<FetchFailed> | undefined;
+    getGuildMemberProfile<T extends string | Nullish>(userId: string, guildId: T): T extends Nullish ? null : any | undefined; // TEMP
+    getIsAccessibilityTooltipViewed(): boolean;
+    getMutualFriends(userId: string): any; // TEMP
+    getMutualFriendsCount(userId: string): number;
+    getMutualGuilds(userId: string): any; // TEMP
+    isFetchingFriends(userId: string): boolean;
+    isFetchingProfile(userId: string): boolean;
+    get isSubmitting(): boolean;
+    takeSnapshot(): FluxSnapshot<UserProfileStoreSnapshotData>;
+
+    loadCache: () => void;
+}
+
+interface AvatarDecorationData {
+    asset: string;
+    skuId: string;
+}
+
+type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
+
+export class UserRecord extends ImmutableRecord<UserRecordOwnProperties> {
+    constructor(userFromServer: APIUser);
+
+    addGuildAvatarHash(guildId: string, avatarHash: string): this;
+    get avatarDecoration(): AvatarDecorationData | null;
+    set avatarDecoration(avatarDecorationData: {
         asset: string;
-        skuId: string;
+        skuId?: string;
+        sku_id?: string;
     } | null): void;
     get createdAt(): Date;
-    getAvatarSource(guildId?: string | Nullish, canAnimate?: boolean | undefined): { uri: string; };
+    getAvatarSource(guildId?: string | Nullish, canAnimate?: boolean | undefined, avatarSize?: number | undefined): { uri: string; };
     getAvatarURL(guildId?: string | Nullish, avatarSize?: number | undefined, canAnimate?: boolean | undefined): string;
     hasAvatarForGuild(guildId?: string | Nullish): boolean;
     hasDisabledPremium(): boolean;
@@ -258,23 +394,25 @@ export class User {
     isPomelo(): boolean;
     isSystemUser(): boolean;
     isVerifiedBot(): boolean;
-    removeGuildAvatarHash(guildId: string): User;
+    removeGuildAvatarHash(guildId: string): UserRecord;
     get tag(): string;
-    toString(): string;
 
-    avatar: string;
-    avatarDecorationData: {
-        asset: string;
-        skuId: string;
-    } | null;
+    avatar: string | null;
+    avatarDecorationData: AvatarDecorationData | null;
+    banner: string | Nullish;
     bot: boolean;
-    clan: null; // TEMP
+    clan: {
+        badge: string | Nullish;
+        identityEnabled: boolean | undefined;
+        identityGuildId: string | Nullish;
+        tag: string | Nullish;
+    } | null;
     desktop: boolean;
     discriminator: string;
     email: string | null;
-    flags: number;
-    globalName: string | null;
-    guildMemberAvatars: Record<string, string>;
+    flags: UserFlags;
+    globalName: string | Nullish;
+    guildMemberAvatars: Record</* guildId: */string, /* avatarHash: */string>;
     hasAnyStaffLevel: () => boolean;
     hasBouncedEmail: boolean;
     hasFlag: (flag: number) => boolean;
@@ -283,90 +421,37 @@ export class User {
     isStaffPersonal: () => boolean;
     mfaEnabled: boolean;
     mobile: boolean;
-    nsfwAllowed: boolean | null;
+    nsfwAllowed: boolean;
     personalConnectionId: string | null;
     phone: string | null;
-    premiumType: number | null | undefined;
+    premiumType: UserPremiumType | Nullish; // discord seems to have recently made it so that premiumType is nullish for every UserRecord
     premiumUsageFlags: number;
-    publicFlags: number;
+    publicFlags: UserFlags;
     purchasedFlags: number;
     system: boolean;
     username: string;
     verified: boolean;
 }
 
-export class UserStore extends FluxStore {
+interface UserStoreSnapshotData { users: [UserRecord] | []; };
+
+export class UserStore extends FluxSnapshotStore<typeof UserStore, UserStoreSnapshotData> {
     static displayName: "UserStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
-    filter(predicate: (user: User) => any): User[];
-    findByTag(username: string, discriminator?: string | Nullish): User | undefined;
-    forEach(callback: (user: User) => void): void;
-    getCurrentUser(): User /* | undefined */;
-    getUser(userId: string): User | undefined;
-    getUsers(): Record<string, User>;
+    filter(predicate: (user: UserRecord) => any, sort?: boolean | undefined): UserRecord[];
+    findByTag(username: string, discriminator?: string | Nullish): UserRecord | undefined;
+    forEach(callback: (user: UserRecord) => void): void;
+    getCurrentUser(): UserRecord | Nullish; // returns undefined if called before the first USER_UPDATE action for the current user. discord seems to always check != null too
+    getUser(userId: string): UserRecord | Nullish;
+    getUsers(): Record<string, UserRecord>;
     getUserStoreVersion(): number;
-    handleLoadCache(arg: object): void; // TEMP
-    takeSnapshot(): {
-        data: { users: [User] | []; };
-        version: number;
-    };
-}
-
-export interface UserProfile {
-    application: null; // TEMP
-    accentColor: number | null;
-    applicationRoleConnections: []; // TEMP
-    badges: {
-        description: string;
-        icon: string;
-        id: string;
-        link?: string;
-    }[];
-    banner: string | null | undefined;
-    bio: string;
-    connectedAccounts: {
-        id: string;
-        metadata?: Record<string, any>;
-        name: string;
-        type: string;
-        verified: boolean;
-    }[];
-    lastFetched: number;
-    legacyUsername: string | null;
-    popoutAnimationParticleType?: null | undefined; // TEMP
-    premiumGuildSince: Date | null;
-    premiumSince: Date | null;
-    premiumType: number | null | undefined;
-    profileEffectId: string | undefined;
-    profileFetchFailed: boolean;
-    pronouns: string;
-    themeColors?: [primaryColor: number, accentColor: number] | undefined;
-    userId: string;
-}
-
-export class UserProfileStore extends FluxStore {
-    static displayName: "UserProfileStore";
-    static LATEST_SNAPSHOT_VERSION: number;
-
-    getUserProfile(userId: string): UserProfile | undefined;
-    getGuildMemberProfile<T extends string | Nullish>(userId: string, guildId: T): T extends Nullish ? null : object | undefined; // TEMP
-    getIsAccessibilityTooltipViewed(): boolean;
-    getMutualFriends(userId: string): object; // TEMP
-    getMutualFriendsCount(userId: string): number;
-    getMutualGuilds(userId: string): object; // TEMP
-    isFetchingFriends(userId: string): boolean;
-    isFetchingProfile(userId: string): boolean;
-    get isSubmitting(): boolean;
-    takeSnapshot(): {
-        data: {
-            userId: string;
-            profile: UserProfile | undefined;
-        };
-        version: number;
-    };
-
-    loadCache: () => void;
+    handleLoadCache(cache: {
+        initialGuildChannels: any[]; // TEMP
+        privateChannels: any[]; // TEMP
+        users: any[] | Nullish; // TEMP
+    }): void;
+    takeSnapshot(): FluxSnapshot<UserStoreSnapshotData>;
 }
 
 export class WindowStore extends FluxStore {
