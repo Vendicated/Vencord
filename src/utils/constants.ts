@@ -383,7 +383,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 145224646868860928n
     },
     Board: {
-        name: "Board",
+        name: "BoardTM",
         id: 285475344817848320n,
     },
     philipbry: {

@@ -51,16 +51,16 @@ export default definePlugin({
         {
             find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
-                match: /(src:null!=\i\?(\i).{1,50}"aria-hidden":!0)/,
-                replace: "$1,style:{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+                match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
+                replace: "$&,style:{\"--large-avatar-url\":\"url(\"+$1.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
             }
         },
         // chat avatars
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(src:(\i),"aria-hidden":!0)/,
-                replace: "$1,style:{\"--large-avatar-url\":\"url(\"+$2.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+                match: /src:(\i),"aria-hidden":!0/,
+                replace: "$&,style:{\"--large-avatar-url\":\"url(\"+$1.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
             }
         }
     ],
