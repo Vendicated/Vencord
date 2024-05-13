@@ -19,13 +19,14 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Flex, Menu } from "@webpack/common";
 
 interface Engine {
     name: string;
     url: string;
 }
 
-const Engines = {
+const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
     DuckDuckGo: "https://duckduckgo.com/",
     Bing: "https://www.bing.com/search?q=",
@@ -39,32 +40,68 @@ const Engines = {
 } as const;
 
 const settings = definePluginSettings({
-    engine: {
-        description: "Choose one of the default search engines to replace Google with",
-        type: OptionType.SELECT,
-        options: Object.keys(Engines).map((engine => ({
-            label: engine,
-            value: engine
-        })))
-    },
-    useCustomEngine: {
-        description: "Use a custom search engine",
-        type: OptionType.BOOLEAN,
-        default: false
-    },
-    engineName: {
-        description: "",
+    customEngineName: {
+        description: "Name of the custom search engine",
         type: OptionType.STRING,
-        default: "",
-        placeholder: "Enter the name of the custom search engine",
+        placeholder: "Google"
     },
-    engineUrl: {
-        description: "",
+    customEngineURL: {
+        description: "The URL of your Engine",
         type: OptionType.STRING,
-        default: "https://",
-        placeholder: "Enter the URL of the custom search engine",
+        placeholder: "https://google.com/search?q="
     }
 });
+
+function search(src: string, engine: string) {
+    open(engine + encodeURIComponent(src), "_blank");
+}
+
+export function makeSearchItem() {
+    const src = document.getSelection()?.toString();
+    if (!src) return;
+
+    const Engines = { ...DefaultEngines };
+
+    if(settings.store.customEngineName && settings.store.customEngineURL) {
+        Engines[settings.store.customEngineName] = settings.store.customEngineURL;
+    }
+
+    return (
+        <Menu.MenuItem
+            label="Search Text with..."
+            key="search-text"
+            id="search-text"
+        >
+            {Object.keys(Engines).map((engine, i) => {
+                const key = "search-content-" + engine;
+                if (!key) return;
+                return (
+                    <Menu.MenuItem
+                        key={key}
+                        id={key}
+                        label={
+                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                                <img
+                                    style={{
+                                        borderRadius: i >= 3
+                                            ? "50%"
+                                            : void 0
+                                    }}
+                                    aria-hidden="true"
+                                    height={16}
+                                    width={16}
+                                    src={`https://www.google.com/s2/favicons?domain=${new URL(Engines[engine])}`}
+                                />
+                                {engine}
+                            </Flex>
+                        }
+                        action={() => search(src, Engines[engine])}
+                    />
+                );
+            })}
+        </Menu.MenuItem>
+    );
+}
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
@@ -74,34 +111,15 @@ export default definePlugin({
         Devs.Ethan
     ],
 
-    getUrl: (): Engine => {
-        if (settings.store.engine) {
-            if (settings.store.useCustomEngine) {
-                return { name: settings.store.engineName, url: settings.store.engineUrl };
-            }
-
-            const engine = settings.store.engine as keyof typeof Engines;
-            return { name: engine, url: Engines[engine] };
-        }
-
-        return { name: "Google", url: Engines.Google };
-    },
-
     settings,
+    makeSearchItem,
 
     patches: [
         {
             find: "\"text cannot be null\"",
             replacement: {
-                match: /label:\i.default.Messages.SEARCH_WITH_GOOGLE,/,
-                replace: "label:\"Search with \"+$self.getUrl().name,"
-            }
-        },
-        {
-            find: "\"text cannot be null\"",
-            replacement: {
-                match: /window.open\("https:\/\/www.google.com\/search\?q="/,
-                replace: "window.open($self.getUrl().url"
+                match: /\[\(0,\i.jsx\)\(\i.MenuItem,\{id:"search-google",label:\i.default.Messages.SEARCH_WITH_GOOGLE,action:t},"search-google"\)\]/,
+                replace: "$self.makeSearchItem()"
             }
         }
     ],
