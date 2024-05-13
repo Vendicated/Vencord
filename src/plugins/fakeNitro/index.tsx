@@ -813,16 +813,7 @@ export default definePlugin({
         const userRoles = GuildMemberStore.getSelfMember(e.guildId).roles;
         if (e.require_colons === false) return true;
         // check if we have any of the required roles
-        // if we don't do a nested check, then ts will complain about the below code being unreachable
-        if (e.roles.length > 0) {
-            if (e.roles.some(role => userRoles.includes(role))) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-
+        if (e.roles.some(role => userRoles.includes(role)) !== true) return false;
         if (e.available === false) return false;
 
         if (this.canUseEmotes)
