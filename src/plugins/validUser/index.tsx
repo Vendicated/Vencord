@@ -23,7 +23,7 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
-import type { ComponentType, ReactNode } from "react";
+import { type ComponentType, type ReactNode } from "react";
 
 // LYING to the type checker here
 const UserFlags = Constants.UserFlags as Record<string, number>;
@@ -205,6 +205,7 @@ export default definePlugin({
         return (
             <ErrorBoundary noop>
                 <MentionWrapper
+                    key={"mention" + data.userId}
                     RoleMention={RoleMention}
                     UserMention={UserMention}
                     data={data}
