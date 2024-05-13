@@ -18,9 +18,9 @@
 
 import type { DraftType } from "@webpack/common";
 import type { APIUser, ApplicationFlags, OAuth2Scopes, UserFlags, UserPremiumType } from "discord-api-types/v9";
-import { Channel, Guild, Role } from "discord-types/general"; // TODO
+import type { Channel, Guild, Role } from "discord-types/general"; // TODO
 
-import type { FluxAction, FluxActionType, FluxActionHandlers, FluxDispatchBand, FluxDispatcher } from "./utils";
+import type { FluxAction, FluxActionHandlers, FluxActionType, FluxDispatchBand, FluxDispatcher } from "./utils";
 
 type Nullish = null | undefined;
 
@@ -433,7 +433,7 @@ export class UserRecord extends ImmutableRecord<UserRecordOwnProperties> {
     verified: boolean;
 }
 
-interface UserStoreSnapshotData { users: [UserRecord] | []; };
+interface UserStoreSnapshotData { users: [UserRecord] | []; }
 
 export class UserStore extends FluxSnapshotStore<typeof UserStore, UserStoreSnapshotData> {
     static displayName: "UserStore";

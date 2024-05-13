@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { Guild, GuildMember } from "discord-types/general"; // TODO
 import type { EventEmitter } from "events"; // Discord uses a polyfill for node's EventEmitter
-import { Guild, GuildMember } from "discord-types/general"; // TODO
 import type { ReactNode } from "react";
 
 import type { FluxAction, FluxActionType } from "./fluxActions";
