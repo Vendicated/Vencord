@@ -91,8 +91,8 @@ export default definePlugin({
             find: "DiscoveryBannedSearchWords.includes",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             replacement: {
-                match: /searchQueryContainsBannedWord:function\(\){return \i}/,
-                replace: "searchQueryContainsBannedWord:function(){return () => false}"
+                match: /(?<=function\(\){)(?=.{0,130}DiscoveryBannedSearchWords\.includes)/,
+                replace: "return false;"
             }
         },
         {
@@ -101,7 +101,7 @@ export default definePlugin({
             all: true,
             replacement: {
                 match: /\i\.HTTP\.get\(\{url:\i\.Endpoints\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "{ body: { valid: true } };"
+                replace: "Promise.resolve({ body: { valid: true } });"
             }
         }
     ],
