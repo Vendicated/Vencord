@@ -6,10 +6,11 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Tooltip } from "@webpack/common";
 import type { Component } from "react";
 
@@ -34,11 +35,19 @@ interface Props {
     };
 }
 
+const enum ReplaceElements {
+    ReplaceAllElements,
+    ReplaceTitlesOnly,
+    ReplaceThumbnailsOnly
+}
+
 const embedUrlRe = /https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/;
 
 async function embedDidMount(this: Component<Props>) {
     try {
         const { embed } = this.props;
+        const { replaceElements } = settings.store;
+
         if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
 
         const videoId = embedUrlRe.exec(embed.video.url)?.[1];
@@ -58,12 +67,12 @@ async function embedDidMount(this: Component<Props>) {
             enabled: true
         };
 
-        if (hasTitle) {
+        if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
             embed.dearrow.oldTitle = embed.rawTitle;
             embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
         }
 
-        if (hasThumb) {
+        if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
             embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
             embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
         }
@@ -128,10 +137,30 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
     );
 }
 
+const settings = definePluginSettings({
+    hideButton: {
+        description: "Hides the Dearrow button from YouTube embeds",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
+    replaceElements: {
+        description: "Choose which elements of the embed will be replaced",
+        type: OptionType.SELECT,
+        restartNeeded: true,
+        options: [
+            { label: "Everything (Titles & Thumbnails)", value: ReplaceElements.ReplaceAllElements, default: true },
+            { label: "Titles", value: ReplaceElements.ReplaceTitlesOnly },
+            { label: "Thumbnails", value: ReplaceElements.ReplaceThumbnailsOnly },
+        ],
+    }
+});
+
 export default definePlugin({
     name: "Dearrow",
     description: "Makes YouTube embed titles and thumbnails less sensationalist, powered by Dearrow",
     authors: [Devs.Ven],
+    settings,
 
     embedDidMount,
     renderButton(component: Component<Props>) {
@@ -154,7 +183,8 @@ export default definePlugin({
             // add dearrow button
             {
                 match: /children:\[(?=null!=\i\?\i\.renderSuppressButton)/,
-                replace: "children:[$self.renderButton(this),"
+                replace: "children:[$self.renderButton(this),",
+                predicate: () => !settings.store.hideButton
             }
         ]
     }],

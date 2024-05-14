@@ -17,16 +17,18 @@
 */
 
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
+const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
+const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
-
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
@@ -60,9 +62,6 @@ export default definePlugin({
     settings,
 
     start() {
-        const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-        const EditStore = findByPropsLazy("isEditing", "isEditingAny");
-
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
@@ -85,11 +84,17 @@ export default definePlugin({
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
 
+                    const isShiftPress = event.shiftKey && !settings.store.requireModifier;
+                    const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
+                    const shouldMention = Vencord.Plugins.isPluginEnabled("NoReplyMention")
+                        ? NoReplyMention.shouldMention(msg, isShiftPress)
+                        : !isShiftPress;
+
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
                         channel,
                         message: msg,
-                        shouldMention: !Settings.plugins.NoReplyMention.enabled,
+                        shouldMention,
                         showMentionToggle: channel.guild_id !== null
                     });
                 }
