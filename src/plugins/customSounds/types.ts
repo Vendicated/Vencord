@@ -24,6 +24,7 @@ export interface SoundPlayer {
 
 export const soundTypes: readonly SoundType[] = [
     { name: "Message", id: "message1" },
+    { name: "Message (Focused Channel)", id: "message3" },
     { name: "Defean", id: "deafen" },
     { name: "Undefean", id: "undeafen" },
     { name: "Mute", id: "mute" },
