@@ -6,7 +6,7 @@
 
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
-import { Alerts, Button, ContextMenu, FluxDispatcher, Menu, Text } from "@webpack/common";
+import { Alerts, Button, ContextMenuApi, FluxDispatcher, Menu, Text } from "@webpack/common";
 
 import { classFactory, settings, SoundTrigger } from "..";
 import { openTriggerModal } from "./SoundTriggerModal";
@@ -100,7 +100,7 @@ export function SoundTriggerEntry(props: SoundTriggerEntryProps) {
                     look={Button.Looks.BLANK}
                     className={classFactory("rounded-button", "more-button")}
                     onClick={e =>
-                        ContextMenu.open(e, () =>
+                        ContextMenuApi.openContextMenu(e, () =>
                             <SoundTriggerEntryMenu
                                 index={index}
                                 trigger={trigger}

@@ -5,17 +5,16 @@
  */
 
 import { Flex } from "@components/Flex";
-import { LazyComponent } from "@utils/react";
-import { find, findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, useRef } from "@webpack/common";
 import React from "react";
 
 import { classFactory } from "..";
 
-const Editor = findByPropsLazy("start", "end", "addMark");
-const Transform = findByPropsLazy("unwrapNodes");
-const InputTypes = findByPropsLazy("VOICE_CHANNEL_STATUS", "SIDEBAR");
-const InputComponent = LazyComponent(() => find(m => m?.type?.render?.toString().includes("CHANNEL_TEXT_AREA).AnalyticsLocationProvider")));
+const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
+const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
+const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
+const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
 
 interface EmojiTextInputProps {
     value: string;
@@ -25,7 +24,7 @@ interface EmojiTextInputProps {
 
 export const clearEmojiTextInput = (ref: React.MutableRefObject<any>) => {
     const slateEditor = ref.current.ref.current.getSlateEditor();
-    Transform.delete(slateEditor, {
+    Transforms.delete(slateEditor, {
         at: {
             anchor: Editor.start(slateEditor, []),
             focus: Editor.end(slateEditor, []),
@@ -36,25 +35,16 @@ export const clearEmojiTextInput = (ref: React.MutableRefObject<any>) => {
 // ripped from reviewdb
 export function EmojiTextInput(props: EmojiTextInputProps) {
     const editorRef = useRef<any>(null);
+    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
+    const inputType = ChatInputTypes.FORM;
+    inputType.disableAutoFocus = true;
     return (
         <Flex flexDirection="row" style={{ alignItems: "center", gap: "10px" }}>
             <InputComponent
                 className={classFactory("emoji-picker")}
-                style={{ margin: "10px" }}
-                type={InputTypes.FORM}
-                channel={{
-                    flags_: 256,
-                    guild_id_: null,
-                    id: "0",
-                    getGuildId: () => null,
-                    isPrivate: () => true,
-                    isActiveThread: () => false,
-                    isArchivedLockedThread: () => false,
-                    isDM: () => true,
-                    roles: { "0": { permissions: 0n } },
-                    getRecipientId: () => "0",
-                    hasFlag: () => false,
-                }}
+                channel={channel}
+                type={inputType}
+                disableThemedBackground={true}
                 textValue={props.value}
                 setEditorRef={ref => editorRef.current = ref}
                 placeholder="Add pattern"
