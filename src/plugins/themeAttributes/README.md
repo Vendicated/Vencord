@@ -24,6 +24,6 @@ This allows themes to more easily theme those elements or even do things that ot
 
 ### Avatars
 
-`--large-avatar-url` contains a URL for the users avatar with the size attribute adjusted.
+`--avatar-url-<resolution>` contains a URL for the users avatar with the size attribute adjusted for the resolutions `128, 256, 512, 1024, 2048, 4096`.
 
-![image](https://github.com/Vendicated/Vencord/assets/26598490/b86d05ea-3a49-4cfa-8d2f-6c4ed390cf4c)
+![image](https://github.com/Vendicated/Vencord/assets/26598490/192ddac0-c827-472f-9933-fa99ff36f723)

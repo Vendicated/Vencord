@@ -4,27 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const settings = definePluginSettings({
-    imgSize: {
-        type: OptionType.SELECT,
-        description: "The resolution of the image in the --large-avatar-url CSS variable",
-        options: ["300", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "300" })),
-
-    }
-});
 
 export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
     authors: [Devs.Ven, Devs.Board],
-
-    settings,
 
     patches: [
         // Add data-tab-id to all tab bar items
@@ -52,7 +41,7 @@ export default definePlugin({
             find: ".LABEL_WITH_ONLINE_STATUS",
             replacement: {
                 match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
-                replace: "$&,style:{\"--large-avatar-url\":\"url(\"+$1.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+                replace: "$&,style:$self.getAvatarStyles($1)"
             }
         },
         // chat avatars
@@ -60,10 +49,16 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 match: /src:(\i),"aria-hidden":!0/,
-                replace: "$&,style:{\"--large-avatar-url\":\"url(\"+$1.replace(/\\d+$/,$self.settings.store.imgSize)+\")\"}"
+                replace: "$&,style:$self.getAvatarStyles($1)"
             }
         }
     ],
+
+    getAvatarStyles(src: string) {
+        return Object.fromEntries([128, 256, 512, 1024, 2048, 4096]
+            .map(size => [`--avatar-url-${size}`, `url(${src.replace(/\d+$/, size.toString())})`])
+        );
+    },
 
     getMessageProps(props: { message: Message; }) {
         const author = props.message?.author;
