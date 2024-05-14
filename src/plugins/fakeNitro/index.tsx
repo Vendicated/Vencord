@@ -39,6 +39,7 @@ const StickerStore = findStore("StickersStore") as {
 
 const UserSettingsProtoStore = findStore("UserSettingsProtoStore");
 const ProtoUtils = findByProps("BINARY_READ_OPTIONS");
+const RoleSubscriptionEmojiUtils = findByProps("isUnusableRoleSubscriptionEmoji");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -406,6 +407,15 @@ export default definePlugin({
             replacement: {
                 match: /canUseCustomNotificationSounds:function\(\i\){/,
                 replace: "$&return true;"
+            }
+        },
+        // Allows the usage of subscription-locked emojis
+        {
+            find: "isUnusableRoleSubscriptionEmoji:function",
+            replacement: {
+                match: /isUnusableRoleSubscriptionEmoji:function/,
+                // replace the original export with a func that always returns false and alias the original
+                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
             }
         }
     ],
@@ -802,6 +812,9 @@ export default definePlugin({
     canUseEmote(e: CustomEmoji, channelId: string) {
         if (e.require_colons === false) return true;
         if (e.available === false) return false;
+
+        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
+        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);

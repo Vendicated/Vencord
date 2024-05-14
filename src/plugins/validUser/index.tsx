@@ -75,7 +75,7 @@ async function getUser(id: string) {
     if (userObj)
         return userObj;
 
-    const user: any = await RestAPI.get({ url: `/users/${id}` }).then(response => {
+    const user: any = await RestAPI.get({ url: Constants.Endpoints.USER(id) }).then(response => {
         FluxDispatcher.dispatch({
             type: "USER_UPDATE",
             user: response.body,
