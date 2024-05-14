@@ -24,6 +24,22 @@ import { GuildStore, i18n, RestAPI } from "@webpack/common";
 
 const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
 
+function showDisableInvites(guildId: string) {
+    // Once the experiment is removed, this should keep working
+    const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
+    // @ts-ignore
+    return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+}
+
+function disableInvites(guildId: string) {
+    const guild = GuildStore.getGuild(guildId);
+    const features = [...guild.features, "INVITES_DISABLED"];
+    RestAPI.patch({
+        url: `/guilds/${guild.id}`,
+        body: { features },
+    });
+}
+
 export default definePlugin({
     name: "PauseInvitesForever",
     tags: ["DisableInvitesForever"],
@@ -33,44 +49,29 @@ export default definePlugin({
     patches: [
         {
             find: "Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION",
-            replacement: [{
-                match: /children:\i\.\i\.\i\.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION/,
-                replace: "children: $self.renderInvitesLabel(arguments[0].guildId, setChecked)",
-            },
-            {
-                match: /(\i\.hasDMsDisabled\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
-                replace: "$1,setChecked=$2"
-            }]
+            group: true,
+            replacement: [
+                {
+                    match: /children:\i\.\i\.\i\.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION/,
+                    replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
+                },
+                {
+                    match: /(\i\.hasDMsDisabled\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
+                    replace: "$1,setChecked=$2"
+                }
+            ]
         }
     ],
 
-    showDisableInvites(guildId: string) {
-        // Once the experiment is removed, this should keep working
-        const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
-        // @ts-ignore
-        return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
-    },
-
-    disableInvites(guildId: string) {
-        const guild = GuildStore.getGuild(guildId);
-        const features = [...guild.features, "INVITES_DISABLED"];
-        RestAPI.patch({
-            url: `/guilds/${guild.id}`,
-            body: { features },
-        });
-    },
-
-    renderInvitesLabel(guildId: string, setChecked: Function) {
+    renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => {
         return (
-            <ErrorBoundary noop>
-                <div>
-                    {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
-                    {this.showDisableInvites(guildId) && <a role="button" onClick={() => {
-                        setChecked(true);
-                        this.disableInvites(guildId);
-                    }}> Pause Indefinitely.</a>}
-                </div>
-            </ErrorBoundary>
+            <div>
+                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                {showDisableInvites(guildId) && <a role="button" onClick={() => {
+                    setChecked(true);
+                    disableInvites(guildId);
+                }}> Pause Indefinitely.</a>}
+            </div>
         );
-    }
+    })
 });
