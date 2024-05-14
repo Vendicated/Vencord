@@ -61,7 +61,7 @@ export default definePlugin({
             find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /lastSection:(!?\i)}\),/,
-                replace: "$&$self.patchPadding($1),"
+                replace: "$&$self.patchPadding({lastSection:$1}),"
             }
         }
     ],
@@ -81,12 +81,10 @@ export default definePlugin({
         }
     },
 
-    patchPadding(lastSection: any) {
-        if (!lastSection) return;
+    patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
+        if (!lastSection) return null;
         return (
-            <ErrorBoundary noop>
-                <div className={UserPopoutSectionCssClasses.lastSection}></div>
-            </ErrorBoundary>
+            <div className={UserPopoutSectionCssClasses.lastSection} ></div>
         );
-    }
+    })
 });
