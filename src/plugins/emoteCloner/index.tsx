@@ -322,8 +322,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         switch (favoriteableType) {
             case "emoji":
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                if (!match) return;
-                const name = match[1] ?? "FakeNitroEmoji";
+                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+                if (!match && !reaction) return;
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
