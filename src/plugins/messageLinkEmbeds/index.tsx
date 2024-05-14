@@ -27,6 +27,7 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
+    Constants,
     FluxDispatcher,
     GuildStore,
     IconUtils,
@@ -132,7 +133,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     messageCache.set(messageID, { fetched: false });
 
     const res = await RestAPI.get({
-        url: `/channels/${channelID}/messages`,
+        url: Constants.Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
