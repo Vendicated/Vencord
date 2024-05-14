@@ -154,6 +154,8 @@ export default definePlugin({
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
 
+        if (!header) return;
+
         const names = {
             top: i18n.Messages.USER_SETTINGS,
             aboveNitro: i18n.Messages.BILLING_SETTINGS,
@@ -163,8 +165,12 @@ export default definePlugin({
         return header === names[settingsLocation];
     },
 
+    patchedSettings: new WeakSet(),
+
     addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: Record<string, unknown>) {
-        if (!this.isRightSpot(element)) return;
+        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
+
+        this.patchedSettings.add(elements);
 
         elements.push(...this.makeSettingsCategories(sectionTypes));
     },
