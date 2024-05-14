@@ -31,19 +31,20 @@ export default definePlugin({
             find: "}searchWithoutFetchingLatest(",
             replacement: {
                 match: /searchWithoutFetchingLatest.{20,300}get\((\i).{10,40}?reduce\(\((\i),(\i)\)=>\{/,
-                replace: `
-                    $&
-                    let shownEmojis = $self.settings.store.shownEmojis;
-                    if ($3.type === 'GUILD_EMOJI') {
-                        if (shownEmojis === 'onlyUnicode') {
-                            return $2;
-                        }
-                        if (shownEmojis === 'currentServer' && $3.guildId !== $1) {
-                            return $2;
-                        }
-                    }
-                `
+                replace: "$& if ($self.shouldSkip($1, $3)) return $2;"
             }
         }
-    ]
+    ],
+    shouldSkip(guildId: string, emoji: any) {
+        if (emoji.type !== "GUILD_EMOJI") {
+            return false;
+        }
+        if (settings.store.shownEmojis === "onlyUnicode") {
+            return true;
+        }
+        if (settings.store.shownEmojis === "currentServer") {
+            return emoji.guildId !== guildId;
+        }
+        return false;
+    }
 });
