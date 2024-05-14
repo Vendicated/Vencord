@@ -127,7 +127,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
-                    match: /unreadMentionsIndicatorBottom,barClassName.+?}\)\]/,
+                    match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0].isBetterFolders))"
                 },
                 // Export the isBetterFolders variable to the folders component
@@ -279,7 +279,7 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (isBetterFolders) {
-                return "onScroll" in child.props;
+                return child?.props?.onScroll != null;
             }
             return true;
         };
