@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -13,10 +13,7 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
-const enum ChannelTypes {
-    DM = 1,
-    GROUP_DM = 3
-}
+const { ChannelTypes } = findByPropsLazy("ChannelTypes");
 
 interface Message {
     guild_id: string,
@@ -71,14 +68,34 @@ interface Call {
     ringing: string[];
 }
 
-const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
+const Notifs = findByPropsLazy("makeTextChatNotification");
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
-    ignoreBots: {
+    botNotifications: {
         type: OptionType.BOOLEAN,
-        description: "Ignore messages from bots",
+        description: "Allow bot notifications",
         default: false
+    },
+    serverNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow server notifications",
+        default: true
+    },
+    dmNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow Direct Message notifications",
+        default: true
+    },
+    groupDmNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow Group DM notifications",
+        default: true
+    },
+    callNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow call notifications",
+        default: true
     },
     pingColor: {
         type: OptionType.STRING,
@@ -97,8 +114,13 @@ const settings = definePluginSettings({
     },
     timeout: {
         type: OptionType.NUMBER,
-        description: "Notif duration (secs)",
-        default: 1.0,
+        description: "Notification duration (secs)",
+        default: 3,
+    },
+    lengthBasedTimeout: {
+        type: OptionType.BOOLEAN,
+        description: "Extend duration with message length",
+        default: true
     },
     opacity: {
         type: OptionType.SLIDER,
@@ -124,7 +146,7 @@ export default definePlugin({
     settings,
     flux: {
         CALL_UPDATE({ call }: { call: Call; }) {
-            if (call?.ringing?.includes(UserStore.getCurrentUser().id)) {
+            if (call?.ringing?.includes(UserStore.getCurrentUser().id) && settings.store.callNotifications) {
                 const channel = ChannelStore.getChannel(call.channel_id);
                 sendOtherNotif("Incoming call", `${channel.name} is calling you...`);
             }
@@ -134,7 +156,7 @@ export default definePlugin({
             try {
                 if (optimistic) return;
                 const channel = ChannelStore.getChannel(message.channel_id);
-                if (!shouldNotify(message, channel)) return;
+                if (!shouldNotify(message, message.channel_id)) return;
 
                 const pingColor = settings.store.pingColor.replaceAll("#", "").trim();
                 const channelPingColor = settings.store.channelPingColor.replaceAll("#", "").trim();
@@ -194,6 +216,7 @@ export default definePlugin({
                     finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
                 }
 
+                // color role mentions (unity styling btw lol)
                 if (message.mention_roles.length > 0) {
                     for (const roleId of message.mention_roles) {
                         const role = GuildStore.getRole(channel.guild_id, roleId);
@@ -213,6 +236,7 @@ export default definePlugin({
                     }
                 }
 
+                // color channel mentions
                 if (channelMatches) {
                     for (const cMatch of channelMatches) {
                         let channelId = cMatch.split("<#")[1];
@@ -221,6 +245,7 @@ export default definePlugin({
                     }
                 }
 
+                if (shouldIgnoreForChannelType(channel)) return;
                 sendMsgNotif(titleString, finalMsg, message);
             } catch (err) {
                 XSLog.error(`Failed to catch MESSAGE_CREATE: ${err}`);
@@ -229,13 +254,19 @@ export default definePlugin({
     }
 });
 
+function shouldIgnoreForChannelType(channel: Channel) {
+    if (channel.type === ChannelTypes.DM && settings.store.dmNotifications) return false;
+    if (channel.type === ChannelTypes.GROUP_DM && settings.store.groupDmNotifications) return false;
+    else return !settings.store.serverNotifications;
+}
+
 function sendMsgNotif(titleString: string, content: string, message: Message) {
     fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
         const msgData = {
             messageType: 1,
             index: 0,
-            timeout: settings.store.timeout,
-            height: calculateHeight(cleanMessage(content)),
+            timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
+            height: calculateHeight(content),
             opacity: settings.store.opacity,
             volume: settings.store.volume,
             audioPath: settings.store.soundPath,
@@ -253,8 +284,8 @@ function sendOtherNotif(content: string, titleString: string) {
     const msgData = {
         messageType: 1,
         index: 0,
-        timeout: settings.store.timeout,
-        height: calculateHeight(cleanMessage(content)),
+        timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
+        height: calculateHeight(content),
         opacity: settings.store.opacity,
         volume: settings.store.volume,
         audioPath: settings.store.soundPath,
@@ -267,13 +298,11 @@ function sendOtherNotif(content: string, titleString: string) {
     Native.sendToOverlay(msgData);
 }
 
-function shouldNotify(message: Message, channel: Channel) {
+function shouldNotify(message: Message, channel: string) {
     const currentUser = UserStore.getCurrentUser();
     if (message.author.id === currentUser.id) return false;
-    if (message.author.bot && settings.store.ignoreBots) return false;
-    if (MuteStore.allowAllMessages(channel) || message.mention_everyone && !MuteStore.isSuppressEveryoneEnabled(message.guild_id)) return true;
-
-    return message.mentions.some(m => m.id === currentUser.id);
+    if (message.author.bot && !settings.store.botNotifications) return false;
+    return Notifs.shouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {
@@ -283,6 +312,9 @@ function calculateHeight(content: string) {
     return 250;
 }
 
-function cleanMessage(content: string) {
-    return content.replace(new RegExp("<[^>]*>", "g"), "");
+function calculateTimeout(content: string) {
+    if (content.length <= 100) return 3;
+    if (content.length <= 200) return 4;
+    if (content.length <= 300) return 5;
+    return 6;
 }
