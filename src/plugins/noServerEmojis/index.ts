@@ -28,32 +28,22 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ",queryEmojiResults(",
-            replacement: {
-                match: /searchWithoutFetchingLatest\(\{/,
-                replace: "$&...$self.getExtraProps(),"
-            }
-        },
-        {
             find: "}searchWithoutFetchingLatest(",
             replacement: {
-                match: /(searchWithoutFetchingLatest.+?=(\i);)(.+?reduce\(\((\i),(\i)\)=>\{)/,
-                replace: "$1 let includeGuilds = $2.includeGuilds ?? true; $3 if ($5.type === 'GUILD_EMOJI' && !includeGuilds) { return $4; }"
-            }
-        },
-        // to be compatible with "Enable Emoji Bypass" in FakeNitro
-        {
-            find: "isExternalEmojiAllowedForIntention:function",
-            replacement: {
-                match: /(\i)\[.{5,30}?\]=.{20,60}?return!\i.has\((\i)\)/,
-                replace: "$& && ($2 !== $1.CHAT || $self.settings.store.shownEmojis !== 'currentServer')"
+                match: /searchWithoutFetchingLatest.{20,300}get\((\i).{10,40}?reduce\(\((\i),(\i)\)=>\{/,
+                replace: `
+                    $&
+                    let shownEmojis = $self.settings.store.shownEmojis;
+                    if ($3.type === 'GUILD_EMOJI') {
+                        if (shownEmojis === 'onlyUnicode') {
+                            return $2;
+                        }
+                        if (shownEmojis === 'currentServer' && $3.guildId !== $1) {
+                            return $2;
+                        }
+                    }
+                `
             }
         }
-    ],
-    getExtraProps() {
-        return {
-            includeExternalGuilds: this.settings.store.shownEmojis === "all",
-            includeGuilds: this.settings.store.shownEmojis === "currentServer" || this.settings.store.shownEmojis === "all"
-        };
-    }
+    ]
 });
