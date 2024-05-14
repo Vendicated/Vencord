@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { CustomEmoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -39,6 +39,7 @@ const StickerStore = findStoreLazy("StickersStore") as {
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
+const RoleSubscriptionEmojiUtils = findByPropsLazy("isUnusableRoleSubscriptionEmoji");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -413,8 +414,9 @@ export default definePlugin({
         {
             find: "isUnusableRoleSubscriptionEmoji:function",
             replacement: {
-                match: /isUnusableRoleSubscriptionEmoji:function\(\){/,
-                replace: "$&return () => false;"
+                match: /isUnusableRoleSubscriptionEmoji:function/,
+                // replace the original export with a func that always returns false and alias the original
+                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
             }
         }
     ],
@@ -809,12 +811,11 @@ export default definePlugin({
     },
 
     canUseEmote(e: CustomEmoji, channelId: string) {
-        // @ts-ignore outdated type
-        const userRoles = GuildMemberStore.getSelfMember(e.guildId).roles;
         if (e.require_colons === false) return true;
-        // check if we have any of the required roles
-        if (e.roles.some(role => userRoles.includes(role)) !== true) return false;
         if (e.available === false) return false;
+
+        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
+        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
