@@ -42,8 +42,8 @@ export default definePlugin({
         {
             find: "KeyboardKeys.ENTER&&(!",
             replacement: {
-                match: /((\i)\.which.+?KeyboardKeys.ENTER)&&.+?(\(0,\i\.hasOpenPlainTextCodeBlock\)\(\i\)).+?&&(\(\i\.preventDefault)/,
-                replace: "$1 && $self.shouldSubmit($2, $3) && $4"
+                match: /(?<=(\i)\.which===\i\.KeyboardKeys.ENTER&&).{0,100}(\(0,\i\.hasOpenPlainTextCodeBlock\)\(\i\)).{0,100}(?=&&\(\i\.preventDefault)/,
+                replace: "$self.shouldSubmit($1, $2)"
             }
         }
     ],
