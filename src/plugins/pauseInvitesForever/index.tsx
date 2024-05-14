@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { GuildStore, i18n, RestAPI } from "@webpack/common";
+import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
 
 const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
 
@@ -35,7 +35,7 @@ function disableInvites(guildId: string) {
     const guild = GuildStore.getGuild(guildId);
     const features = [...guild.features, "INVITES_DISABLED"];
     RestAPI.patch({
-        url: `/guilds/${guild.id}`,
+        url: Constants.Endpoints.GUILD(guildId),
         body: { features },
     });
 }

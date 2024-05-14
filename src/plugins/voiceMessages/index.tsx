@@ -28,7 +28,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -98,7 +98,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
 
     upload.on("complete", () => {
         RestAPI.post({
-            url: `/channels/${channelId}/messages`,
+            url: Constants.Endpoints.MESSAGES(channelId),
             body: {
                 flags: 1 << 13,
                 channel_id: channelId,

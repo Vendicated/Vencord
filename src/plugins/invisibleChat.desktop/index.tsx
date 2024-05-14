@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
@@ -153,7 +153,7 @@ export default definePlugin({
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
         const { body } = await RestAPI.post({
-            url: "/unfurler/embed-urls",
+            url: Constants.Endpoints.UNFURL_EMBED_URLS,
             body: {
                 urls: [url]
             }

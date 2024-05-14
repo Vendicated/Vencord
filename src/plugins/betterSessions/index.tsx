@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { React, RestAPI, Tooltip } from "@webpack/common";
+import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
@@ -168,7 +168,7 @@ export default definePlugin({
 
     async checkNewSessions() {
         const data = await RestAPI.get({
-            url: "/auth/sessions"
+            url: Constants.Endpoints.AUTH_SESSIONS
         });
 
         for (const session of data.body.user_sessions) {
