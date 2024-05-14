@@ -35,7 +35,7 @@ export default definePlugin({
             }
         },
 
-        // add --large-avatar-url css variable to avatar img elements
+        // add --avatar-url-<resolution> css variable to avatar img elements
         // popout profiles
         {
             find: ".LABEL_WITH_ONLINE_STATUS",
