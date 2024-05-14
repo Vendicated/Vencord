@@ -24,6 +24,9 @@ import type { FluxAction, FluxActionHandlers, FluxActionType, FluxDispatchBand, 
 
 type Nullish = null | undefined;
 
+type DispatcherAction<Dispatcher extends FluxDispatcher<FluxAction<string>>>
+    = Dispatcher extends FluxDispatcher<infer Action> ? Action : never;
+
 type FluxChangeListener = () => boolean;
 
 class FluxChangeListeners {
@@ -32,36 +35,45 @@ class FluxChangeListeners {
     invokeAll(): void;
 
     add: (listener: FluxChangeListener) => void;
-    addConditional: (listener: FluxChangeListener, immediatelyCall?: boolean | undefined /* = true */) => void;
+    addConditional: (
+        listener: FluxChangeListener,
+        immediatelyCall?: boolean | undefined /* = true */
+    ) => void;
     listeners: Set<FluxChangeListener>;
     remove: (listener: FluxChangeListener) => void;
 }
 
 export class FluxStore<
-    Dispatcher extends FluxDispatcher<infer A> = FluxDispatcher,
-    Action = A<infer T>,
-    ActionType = T
+    Dispatcher extends FluxDispatcher<FluxAction<string>> = FluxDispatcher,
+    Action extends DispatcherAction<Dispatcher> = DispatcherAction<Dispatcher>
 > {
     constructor(
         dispatcher: Dispatcher,
-        actionHandlers: FluxActionHandlers<ActionType>,
-        band?: number | Nullish
+        actionHandlers: FluxActionHandlers<Action>,
+        band?: FluxDispatchBand | Nullish
     );
 
     static displayName: undefined;
-    static initialized: Promise<undefined>;
     static destroy(): void;
-    static getAll(): FluxStore[];
+    static getAll(): FluxStore<FluxDispatcher<FluxAction<string>>, FluxAction<string>>[];
     static initialize(): void;
+    static initialized: Promise<undefined>;
 
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
     initialize(): void;
     initializeIfNeeded(): void;
-    mustEmitChanges(mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */): void;
-    registerActionHandlers(actionHandlers: FluxActionHandlers<ActionType>, band?: FluxDispatchBand | Nullish): void;
-    syncWith(stores: FluxStore<Dispatcher>[], func: () => boolean | void, timeout?: number | Nullish): void;
+    mustEmitChanges: (mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */) => void;
+    registerActionHandlers(
+        actionHandlers: FluxActionHandlers<Action>,
+        band?: FluxDispatchBand | Nullish
+    ): void;
+    syncWith(
+        stores: FluxStore<Dispatcher>[],
+        func: () => boolean | void,
+        timeout?: number | Nullish
+    ): void;
     waitFor(...stores: FluxStore<Dispatcher>[]): void;
 
     __getLocalVars: undefined;
@@ -90,10 +102,10 @@ interface FluxSnapshot<Data = any> {
 }
 
 export class FluxSnapshotStore<
-    Constructor extends typeof FluxSnapshotStore,
+    Constructor extends typeof FluxSnapshotStore = typeof FluxSnapshotStore,
     SnapshotData = any,
-    Action extends FluxAction<FluxSnapshotStoreActionType> = FluxAction<FluxSnapshotStoreActionType>
-> extends FluxStore<FluxDispatcher<Action>> {
+    Action extends FluxSnapshotStoreActionType = FluxSnapshotStoreActionType
+> extends FluxStore<FluxDispatcher, Action> {
     constructor(actionHandlers: FluxActionHandlers<Action>);
 
     static allStores: FluxSnapshotStore[];
@@ -110,26 +122,26 @@ export interface Flux {
     Store: typeof FluxStore;
 }
 
-export type useStateFromStores = <T>(
-    stores: FluxStore[],
-    getStateFromStores: () => T,
+export type useStateFromStores = <State>(
+    stores: FluxStore<FluxDispatcher<FluxAction<string>>, FluxAction<string>>[],
+    getStateFromStores: () => State,
     dependencies?: any[] | Nullish,
-    areStatesEqual?: ((prevState: T, currState: T) => boolean) | undefined
-) => T;
+    areStatesEqual?: ((prevState: State, currState: State) => boolean) | undefined
+) => State;
 
 // Original name: Record, renamed to avoid conflict with the Record util type
 export class ImmutableRecord<OwnProperties extends object = Record<PropertyKey, any>> {
     merge(collection: Partial<OwnProperties>): this;
-    set<K extends keyof OwnProperties>(key: K, value: OwnProperties[K]): this;
+    set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
     toJS(): OwnProperties;
-    update<K extends keyof OwnProperties>(
-        key: K,
-        updater: (value: OwnProperties[K]) => OwnProperties[K]
+    update<Key extends keyof OwnProperties>(
+        key: Key,
+        updater: (value: OwnProperties[Key]) => OwnProperties[Key]
     ): this;
-    update<K extends keyof OwnProperties>(
-        key: K,
-        notSetValue: OwnProperties[K],
-        updater: (value: OwnProperties[K]) => OwnProperties[K]
+    update<Key extends keyof OwnProperties>(
+        key: Key,
+        notSetValue: OwnProperties[Key],
+        updater: (value: OwnProperties[Key]) => OwnProperties[Key]
     ): this;
 }
 
@@ -254,6 +266,31 @@ export class EmojiStore extends FluxStore {
         get favoriteEmojisWithoutFetchingLatest(): Emoji[];
     };
 }
+
+/*
+export class GuildMemberStore extends FluxStore {
+    static displayName: "GuildMemberStore";
+
+    getCommunicationDisabledUserMap(): ;
+    getCommunicationDisabledVersion(): ;
+    getMember(e: , t: ): ;
+    getMemberIds(e: ): ;
+    getMemberRoleWithPendingUpdates(e: , t: ): ;
+    getMembers(e: ): ;
+    getMemberVersion(): ;
+    getMutableAllGuildsAndMembers(): ;
+    getNick(e: , t: ): ;
+    getNicknameGuildsMapping(e: ): ;
+    getNicknames(e: ): ;: ;
+    getPendingRoleUpdates(e: ): ;
+    getSelfMember(e: ): ;
+    getTrueMember(e: , t: ): ;
+    isCurrentUserGuest(e: ): ;
+    isGuestOrLurker(e: , t: ): ;
+    isMember(e: , t: ): ;
+    memberOf(e: ): ;
+}
+*/
 
 export class GuildStore extends FluxStore {
     getGuild(guildId: string): Guild;
