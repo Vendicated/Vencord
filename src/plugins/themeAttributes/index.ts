@@ -36,10 +36,12 @@ export default definePlugin({
     ],
 
     getMessageProps(props: { message: Message; }) {
-        const authorId = props.message?.author?.id;
+        const author = props.message?.author;
+        const authorId = author?.id;
         return {
             "data-author-id": authorId,
-            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id
+            "data-author-username": author?.username,
+            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
         };
     }
 });
