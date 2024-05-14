@@ -135,6 +135,7 @@ function CloudTab() {
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
+                    disabled={!settings.cloud.authenticated}
                     value={settings.cloud.url}
                     onChange={v => { settings.cloud.url = v; settings.cloud.authenticated = false; deauthorizeCloud(); }}
                     validate={validateUrl}

@@ -21,6 +21,10 @@ import { React, TextInput } from "@webpack/common";
 // TODO: Refactor settings to use this as well
 interface TextInputProps {
     /**
+     * Whether or not the input is disabled
+     */
+    disabled?: boolean;
+    /**
      * WARNING: Changing this between renders will have no effect!
      */
     value: string;
@@ -40,7 +44,7 @@ interface TextInputProps {
  * A very simple wrapper around Discord's TextInput that validates input and shows
  * the user an error message and only calls your onChange when the input is valid
  */
-export function CheckedTextInput({ value: initialValue, onChange, validate }: TextInputProps) {
+export function CheckedTextInput({ disabled, value: initialValue, onChange, validate }: TextInputProps) {
     const [value, setValue] = React.useState(initialValue);
     const [error, setError] = React.useState<string>();
 
@@ -59,6 +63,7 @@ export function CheckedTextInput({ value: initialValue, onChange, validate }: Te
         <>
             <TextInput
                 type="text"
+                disabled={disabled}
                 value={value}
                 onChange={handleChange}
                 error={error}
