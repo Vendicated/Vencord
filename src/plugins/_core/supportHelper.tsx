@@ -57,7 +57,7 @@ export default definePlugin({
     patches: [{
         find: ".BEGINNING_DM.format",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,100}userId:(\i\.getRecipientId\(\)))/,
+            match: /BEGINNING_DM\.format\(\{.+?}\),(?=.{0,100}userId:(i\.getRecipientId\(\)))/,
             replace: "$& $self.ContributorDmWarningCard({ userId: $1 }),"
         }
     }],
@@ -164,7 +164,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
                             contact your package maintainer for support instead.
                         </Forms.FormText>
                     </div>,
-                    onCloseCallback: () => setTimeout(() => NavigationRouter.back(), 50)
+                    onCloseCallback: () => {} /* setTimeout(() => NavigationRouter.back(), 50)*/
                 });
             }
         }
