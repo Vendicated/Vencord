@@ -100,19 +100,18 @@ export default definePlugin({
     patches: [
         {
             find: ".LOADING_DID_YOU_KNOW",
-            replacement: {
-                match: /return (\i)(\[\i\.random)/,
-                replace: "$1 = $self.quotes($1); return $1$2"
-            }
+            replacement: [
+                {
+                    match: /return (.{0,200}?),?((\i)\[.{1,10}?\.random)/,
+                    replace: "$1; $3 = $self.quotes($3); return $2"
+                },
+                {
+                    match: /(?<="eventLoadingText",function.{10,200}?)return ((\i)\[.{1,20}?\.random)/,
+                    replace: "$2 = $self.quotes($2); return $1",
+                    predicate: () => settings.store.replaceEvents
+                }
+            ]
         },
-        { // Halloween
-            find: "getLoadingTips:",
-            replacement: {
-                match: /return(\[.+?\])\}/,
-                replace: "return $self.quotes($1) }",
-                predicate: () => settings.store.replaceEvents
-            }
-        }
     ],
 
     xor(quote: string) {

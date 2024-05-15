@@ -16,39 +16,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
-import { Settings } from "Vencord";
+
+const settings = definePluginSettings({
+    showDates: {
+        type: OptionType.BOOLEAN,
+        description: "Show dates on friend requests",
+        default: false,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "SortFriendRequests",
     authors: [Devs.Megu],
     description: "Sorts friend requests by date of receipt",
+    settings,
 
     patches: [{
         find: "getRelationshipCounts(){",
         replacement: {
-            match: /\.sortBy\(\i=>\i\.comparator\)/,
-            replace: ".sortBy((row) => $self.sortList(row))"
+            match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+            replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
         }
     }, {
-        find: "RelationshipTypes.PENDING_INCOMING?",
+        find: ".Messages.FRIEND_REQUEST_CANCEL",
         replacement: {
-            predicate: () => Settings.plugins.SortFriendRequests.showDates,
-            match: /(user:(\i),.{10,50}),subText:(\i),(className:\i\.userInfo}\))/,
-            replace: (_, pre, user, subtext, post) => `${pre},
-                    subText: $self.makeSubtext(${subtext}, ${user}),
-                    ${post}`
+            predicate: () => settings.store.showDates,
+            match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
+            replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
         }
     }],
 
-    sortList(row: any) {
+    wrapSort(comparator: Function, row: any) {
         return row.type === 3 || row.type === 4
             ? -this.getSince(row.user)
-            : row.comparator;
+            : comparator(row);
     },
 
     getSince(user: User) {
@@ -63,14 +71,5 @@ export default definePlugin({
                 {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
             </Flex>
         );
-    },
-
-    options: {
-        showDates: {
-            type: OptionType.BOOLEAN,
-            description: "Show dates on friend requests",
-            default: false,
-            restartNeeded: true
-        }
     }
 });

@@ -20,7 +20,7 @@ import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, MessageActions } from "@webpack/common";
 
 interface Album {
     id: string;
@@ -53,7 +53,6 @@ interface Track {
 }
 
 const Spotify = findByPropsLazy("getPlayerState");
-const MessageCreator = findByPropsLazy("getSendMessageOptionsForReply", "sendMessage");
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 
 function sendMessage(channelId, message) {
@@ -65,7 +64,7 @@ function sendMessage(channelId, message) {
         ...message
     };
     const reply = PendingReplyStore.getPendingReply(channelId);
-    MessageCreator.sendMessage(channelId, message, void 0, MessageCreator.getSendMessageOptionsForReply(reply))
+    MessageActions.sendMessage(channelId, message, void 0, MessageActions.getSendMessageOptionsForReply(reply))
         .then(() => {
             if (reply) {
                 FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });

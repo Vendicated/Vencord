@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcEvents } from "@utils/IpcEvents";
+import { PluginIpcMappings } from "@main/ipcPlugins";
+import type { UserThemeHeader } from "@main/themes";
+import { IpcEvents } from "@shared/IpcEvents";
 import { IpcRes } from "@utils/types";
+import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
-import type { UserThemeHeader } from "main/themes";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
@@ -15,6 +17,16 @@ function invoke<T = any>(event: IpcEvents, ...args: any[]) {
 
 export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
+}
+
+const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
+
+for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
+    const map = PluginHelpers[plugin] = {};
+    for (const [methodName, method] of Object.entries(methods)) {
+        map[methodName] = (...args: any[]) => invoke(method as IpcEvents, ...args);
+    }
 }
 
 export default {
@@ -35,8 +47,8 @@ export default {
     },
 
     settings: {
-        get: () => sendSync<string>(IpcEvents.GET_SETTINGS),
-        set: (settings: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings),
+        get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
+        set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
         getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
     },
 
@@ -61,12 +73,5 @@ export default {
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
 
-    pluginHelpers: {
-        OpenInApp: {
-            resolveRedirect: (url: string) => invoke<string>(IpcEvents.OPEN_IN_APP__RESOLVE_REDIRECT, url),
-        },
-        VoiceMessages: {
-            readRecording: (path: string) => invoke<Uint8Array | null>(IpcEvents.VOICE_MESSAGES_READ_RECORDING, path),
-        }
-    }
+    pluginHelpers: PluginHelpers
 };
