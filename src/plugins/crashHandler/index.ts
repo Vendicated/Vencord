@@ -24,22 +24,20 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { DraftType, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
-const { ModalStack, DraftManager, DraftType, closeExpressionPicker } = proxyLazyWebpack(() => {
-    const modules = findBulk(
+
+const { ModalStack, DraftManager, closeExpressionPicker } = proxyLazyWebpack(() => {
+    const [ModalStack, DraftManager, ExpressionManager] = findBulk(
         filters.byProps("pushLazy", "popAll"),
         filters.byProps("clearDraft", "saveDraft"),
-        filters.byProps("DraftType"),
-        filters.byProps("closeExpressionPicker", "openExpressionPicker"),
-    );
+        filters.byProps("closeExpressionPicker", "openExpressionPicker"),);
 
     return {
-        ModalStack: modules[0],
-        DraftManager: modules[1],
-        DraftType: modules[2]?.DraftType,
-        closeExpressionPicker: modules[3]?.closeExpressionPicker,
+        ModalStack,
+        DraftManager,
+        closeExpressionPicker: ExpressionManager?.closeExpressionPicker,
     };
 });
 
@@ -137,8 +135,11 @@ export default definePlugin({
         try {
             const channelId = SelectedChannelStore.getChannelId();
 
-            DraftManager.clearDraft(channelId, DraftType.ChannelMessage);
-            DraftManager.clearDraft(channelId, DraftType.FirstThreadMessage);
+            for (const key in DraftType) {
+                if (!Number.isNaN(Number(key))) continue;
+
+                DraftManager.clearDraft(channelId, DraftType[key]);
+            }
         } catch (err) {
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }
