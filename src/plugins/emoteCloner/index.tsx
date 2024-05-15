@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
@@ -64,7 +64,7 @@ async function fetchSticker(id: string) {
     if (cached) return cached;
 
     const { body } = await RestAPI.get({
-        url: `/stickers/${id}`
+        url: Constants.Endpoints.STICKER(id)
     });
 
     FluxDispatcher.dispatch({
@@ -83,7 +83,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
     data.append("file", await fetchBlob(getUrl(sticker)));
 
     const { body } = await RestAPI.post({
-        url: `/guilds/${guildId}/stickers`,
+        url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
         body: data,
     });
 
@@ -322,8 +322,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         switch (favoriteableType) {
             case "emoji":
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                if (!match) return;
-                const name = match[1] ?? "FakeNitroEmoji";
+                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+                if (!match && !reaction) return;
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,

@@ -50,6 +50,7 @@ interface TagSettings {
     MODERATOR_STAFF: TagSetting,
     MODERATOR: TagSetting,
     VOICE_MODERATOR: TagSetting,
+    TRIAL_MODERATOR: TagSetting,
     [k: string]: TagSetting;
 }
 
@@ -93,6 +94,11 @@ const tags: Tag[] = [
         displayName: "VC Mod",
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
+    }, {
+        name: "CHAT_MODERATOR",
+        displayName: "Chat Mod",
+        description: "Can timeout people",
+        permissions: ["MODERATE_MEMBERS"]
     }
 ];
 const defaultSettings = Object.fromEntries(
@@ -263,34 +269,14 @@ export default definePlugin({
     ],
 
     start() {
-        if (settings.store.tagSettings) return;
-        // @ts-ignore
-        if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
-        else {
-            const newSettings = { ...defaultSettings };
-            Object.entries(Vencord.PlainSettings.plugins.MoreUserTags).forEach(([name, value]) => {
-                const [setting, tag] = name.split("_");
-                if (setting === "visibility") {
-                    switch (value) {
-                        case "always":
-                            // its the default
-                            break;
-                        case "chat":
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                        case "not-chat":
-                            newSettings[tag].showInChat = false;
-                            break;
-                        case "never":
-                            newSettings[tag].showInChat = false;
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                    }
-                }
-                settings.store.tagSettings = newSettings;
-                delete Vencord.Settings.plugins.MoreUserTags[name];
-            });
-        }
+        settings.store.tagSettings ??= defaultSettings;
+
+        // newly added field might be missing from old users
+        settings.store.tagSettings.CHAT_MODERATOR ??= {
+            text: "Chat Mod",
+            showInChat: true,
+            showInNotChat: true
+        };
     },
 
     getPermissions(user: User, channel: Channel): string[] {

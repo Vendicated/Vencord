@@ -28,12 +28,7 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export enum DraftType {
-    ChannelMessage = 0,
-    ThreadSettings = 1,
-    FirstThreadMessage = 2,
-    ApplicationLauncherCommand = 3
-}
+export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
 
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
@@ -65,7 +60,6 @@ export let DraftStore: t.DraftStore;
 /**
  * React hook that returns stateful data for one or more stores
  * You might need a custom comparator (4th argument) if your store data is an object
- *
  * @param stores The stores to listen to
  * @param mapper A function that returns the data you need
  * @param dependencies An array of reactive values which the hook depends on. Use this if your mapper or equality function depends on the value of another hook
@@ -73,13 +67,13 @@ export let DraftStore: t.DraftStore;
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
+
 export const useStateFromStores = proxyLazy(() => findByProps("useStateFromStores").useStateFromStores) as <T>(
     stores: t.FluxStore[],
     mapper: () => T,
     dependencies?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
-// why the fuck cant i get rid of this stupid fucking conflict
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
