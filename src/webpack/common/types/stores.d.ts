@@ -173,7 +173,7 @@ export class DraftStore extends FluxStore {
     getThreadSettings(channelId: string): any | null;
 }
 
-export declare enum DraftType {
+export enum DraftType {
     ChannelMessage,
     ThreadSettings,
     FirstThreadMessage,

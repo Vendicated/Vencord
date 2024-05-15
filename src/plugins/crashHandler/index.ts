@@ -135,8 +135,11 @@ export default definePlugin({
         try {
             const channelId = SelectedChannelStore.getChannelId();
 
-            DraftManager.clearDraft(channelId, DraftType.ChannelMessage);
-            DraftManager.clearDraft(channelId, DraftType.FirstThreadMessage);
+            for (const key in DraftType) {
+                if (!Number.isNaN(Number(key))) continue;
+
+                DraftManager.clearDraft(channelId, DraftType[key]);
+            }
         } catch (err) {
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }

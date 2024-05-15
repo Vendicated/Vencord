@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { DraftType, UploadHandler, UploadModule, UserUtils } from "@webpack/common";
+import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
@@ -61,7 +61,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
                 const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
                 if (upload) {
                     if (!upload.isImage) {
-                        UploadModule.clearAll(ctx.channel.id, DraftType.SlashCommand);
+                        UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
                         throw "Upload is not an image";
                     }
                     return upload.item.file;
@@ -75,12 +75,12 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
                     return user.getAvatarURL(noServerPfp ? void 0 : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
                 } catch (err) {
                     console.error("[petpet] Failed to fetch user\n", err);
-                    UploadModule.clearAll(ctx.channel.id, DraftType.SlashCommand);
+                    UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
                     throw "Failed to fetch user. Check the console for more info.";
                 }
         }
     }
-    UploadModule.clearAll(ctx.channel.id, DraftType.SlashCommand);
+    UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
     return null;
 }
 
@@ -134,7 +134,7 @@ export default definePlugin({
                     var url = await resolveImage(opts, cmdCtx, noServerPfp);
                     if (!url) throw "No Image specified!";
                 } catch (err) {
-                    UploadModule.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+                    UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
                     sendBotMessage(cmdCtx.channel.id, {
                         content: String(err),
                     });
@@ -152,7 +152,7 @@ export default definePlugin({
                 canvas.width = canvas.height = resolution;
                 const ctx = canvas.getContext("2d")!;
 
-                UploadModule.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+                UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
