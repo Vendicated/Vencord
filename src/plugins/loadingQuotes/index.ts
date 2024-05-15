@@ -20,51 +20,11 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-// These are Xor encrypted to prevent you from spoiling yourself when you read the source code.
-// don't worry about it :P
-const quotes = [
-    "Eyrokac",
-    "Rdcg$l`'k|~n",
-    'H`tf$d&iajo+d`{"',
-    "Sucqplh`(Eclhualva()&",
-    "Lncgmka'8KNMDC,shpanf'`x./,",
-    "Ioqweijnfn*IeuvfvAotkfxo./,",
-    'Hd{#cp\x7Ft$)nbd!{lq%mig~*\x7Fh`v#mk&sm{gx nd#idjb(a\x7Ffao"bja&amdkge!Rloìkhf)hyedfjjb*\'^hzdrdmm$lu\'|ao+mnqw$fijxh~bbmg#Tjmîefd+fnp#lpkffz5',
-    "h",
-    "sijklm&cam*rot\"hjjq'|ak\x7F xmv#wc'ep*mawmvvlrb(|ynr>\"Aqq&cgg-\x7F ugoh%rom)e\x7Fhdpp%$",
-    'Tnfb}"u\'~`nno!kp$vvhfzeyee"a}%Tfam*Xh`fls%Jboldos-"lj`&hn)~ce!`jcbct|)gdbhnf$wikm$zgaxkmc%afely+og"144?\'ign+iu%p$qisiefr gpfa$',
-    "Ndtfv%ahfgk+ghtf$|ir(|z' Oguaw&`ggdj mgw$|ir(me|n",
-    "(!ͣ³$͙ʐ'ͩ¹#",
-    "(ﾈ◗ロ◑,ﾏ-2ｬﾕ✬",
-    "Ynw#hjil(ze+psgwp|&sgmkr!",
-    "Tikmolh`(fl+a!dvjk\x7F'y|e\x7Fe/,-",
-    "3/3750?5><9>885:7",
-    "mdmt",
-    "Wdn`khc+(oxbeof",
-    'Ig"zkp*\'g{*xolglj`&~g|*gowg/$mgt(Eclm`.#ticf{l*xed"wl`&Kangj igbhqn\'d`dn `v#lqrw{3%$bhv-h|)kangj_imwhlhb',
-    "Tscmw%Tnoa~x",
-    "I‘f#npus(ec`e!vl$lhsm{`ncu\"ekw&f(defeov-$Rnf|)sdu‘pf$wcam{ceg!vl$du'D`d~x-\"jw%oi(okht-\"DJP)Kags,!mq$du'A‐|n sg`akrkq)~jkdl#pj&diefbnf\"jp)&@F\\*{ltq#Hlhrp'",
-    "Ynw$v`&cg`dl fml`%rhlhs*",
-    "Dnl$p%qhz{s' hv$w%hh|aceg!;#gpvt(fl+cndea`&dg|fon&v#wjjqm(",
-    "\ud83d)pft`gs(ec`e!13$qojmz#",
-    "a!njcmr'ide~nu\"lb%rheoedldpz$lu'gbkr",
-    "dn\"zkp&kgo4",
-    "hnpqkw",
-    "sn\"fau",
-    "Sn\"tmqnh}}*musvkaw&flf&+ldv$w%lr{}*aulr#vlao|)cetn\"jp$",
-    "Dxkmc%ot(hhxomwwai'{hln",
-    "hd{#}js&(pe~'sg#gprb(3#\"",
-    "hd{b${",
-    "<;vqkijbq33271:56<3799?24944:",
-    "Thof$lu'ofdn,!qsefc'az*bnrcma+&Om{o+iu\"`khct$)bnrd\"bcdoi&",
-    "snofplkb{)c'r\"lod'|f*aurv#cpno`abchijklmno",
-    "Wdn`khc'|f*eghl{%"
-];
-
+import { noQuotesQuote, presetQuotes } from "./quotes";
 
 const settings = definePluginSettings({
     replaceEvents: {
-        description: "Replace Event Quotes too",
+        description: "This plugin affects events (e.g. Halloween)",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -74,7 +34,7 @@ const settings = definePluginSettings({
         default: true
     },
     enableDiscordPresetQuotes: {
-        description: "Enable the quotes preset by Discord",
+        description: "Enable Discord's preset quotes (including event quotes, during events)",
         type: OptionType.BOOLEAN,
         default: false
     },
@@ -106,26 +66,20 @@ export default definePlugin({
                     replace: "$1; $3 = $self.quotes($3); return $2"
                 },
                 {
-                    match: /(?<="eventLoadingText",function.{10,200}?)return ((\i)\[.{1,20}?\.random)/,
-                    replace: "$2 = $self.quotes($2); return $1",
+                    match: /(?<="_eventLoadingText",function.{10,200}?)return ((\i)\[.{1,30}?\])/,
+                    replace: "{ $2 = $self.quotes($2); return $1 }",
                     predicate: () => settings.store.replaceEvents
                 }
             ]
         },
     ],
 
-    xor(quote: string) {
-        const key = "read if cute";
-        const codes = Array.from(quote, (s, i) => s.charCodeAt(0) ^ (i % key.length));
-        return String.fromCharCode(...codes);
-    },
-
     quotes(preset: string[]) {
         const result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
         if (settings.store.enablePluginPresetQuotes) {
-            result.push(...quotes.map(this.xor));
+            result.push(...presetQuotes);
         }
-        result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter));
-        return result.length > 0 ? result : ["Loading"];
+        result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter).filter(Boolean));
+        return result.length > 0 ? result : [noQuotesQuote];
     }
 });
