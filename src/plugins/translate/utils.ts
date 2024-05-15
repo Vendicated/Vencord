@@ -59,7 +59,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
     const res = await fetch(url);
     if (!res.ok)
         throw new Error(
-            `Failed to translate "${text}" (${sourceLang} -> ${targetLang}`
+            `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
             + `\n${res.status} ${res.statusText}`
         );
 

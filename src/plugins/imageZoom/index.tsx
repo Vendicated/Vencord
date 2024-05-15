@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
+import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
-import { debounce } from "@utils/debounce";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, React, ReactDOM } from "@webpack/common";
+import { Menu, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -37,17 +37,22 @@ export const settings = definePluginSettings({
         default: true,
     },
 
-    preventCarouselFromClosingOnClick: {
-        type: OptionType.BOOLEAN,
-        // Thanks chat gpt
-        description: "Allow the image modal in the image slideshow thing / carousel to remain open when clicking on the image",
-        default: true,
-    },
-
     invertScroll: {
         type: OptionType.BOOLEAN,
         description: "Invert scroll",
         default: true,
+    },
+
+    nearestNeighbour: {
+        type: OptionType.BOOLEAN,
+        description: "Use Nearest Neighbour Interpolation when scaling images",
+        default: false,
+    },
+
+    square: {
+        type: OptionType.BOOLEAN,
+        description: "Make the lens square",
+        default: false,
     },
 
     zoom: {
@@ -75,12 +80,29 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+    const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
+
     children.push(
         <Menu.MenuGroup id="image-zoom">
-            {/* thanks SpotifyControls */}
+            <Menu.MenuCheckboxItem
+                id="vc-square"
+                label="Square Lens"
+                checked={square}
+                action={() => {
+                    settings.store.square = !square;
+                }}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-nearest-neighbour"
+                label="Nearest Neighbour"
+                checked={nearestNeighbour}
+                action={() => {
+                    settings.store.nearestNeighbour = !nearestNeighbour;
+                }}
+            />
             <Menu.MenuControlItem
-                id="zoom"
+                id="vc-zoom"
                 label="Zoom"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -94,7 +116,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="size"
+                id="vc-size"
                 label="Lens Size"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -108,7 +130,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => () => {
                 )}
             />
             <Menu.MenuControlItem
-                id="zoom-speed"
+                id="vc-zoom-speed"
                 label="Zoom Speed"
                 control={(props, ref) => (
                     <Menu.MenuSliderControl
@@ -130,45 +152,53 @@ export default definePlugin({
     name: "ImageZoom",
     description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
     authors: [Devs.Aria],
+    tags: ["ImageUtilities"],
+
     patches: [
         {
-            find: '"renderLinkComponent","maxWidth"',
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
-                match: /(return\(.{1,100}\(\)\.wrapper.{1,100})(src)/,
-                replace: `$1id: '${ELEMENT_ID}',$2`
+                // there are 2 image thingies. one for carosuel and one for the single image.
+                // so thats why i added global flag.
+                // also idk if this patch is good, should it be more specific?
+                // https://regex101.com/r/xfvNvV/1
+                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
         {
-            find: "handleImageLoad=",
+            find: ".handleImageLoad)",
             replacement: [
                 {
-                    match: /(render=function\(\){.{1,500}limitResponsiveWidth.{1,600})onMouseEnter:/,
-                    replace: "$1...$self.makeProps(this),onMouseEnter:"
+                    match: /placeholderVersion:\i,/,
+                    replace: "...$self.makeProps(this),$&"
                 },
 
                 {
-                    match: /componentDidMount=function\(\){/,
+                    match: /componentDidMount\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
 
                 {
-                    match: /componentWillUnmount=function\(\){/,
+                    match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
         },
-
         {
-            find: ".carouselModal,",
+            find: ".carouselModal",
             replacement: {
-                match: /onClick:(\i),/,
-                replace: "onClick:$self.settings.store.preventCarouselFromClosingOnClick ? () => {} : $1,"
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
             }
         }
     ],
 
     settings,
+    contextMenus: {
+        "image-context": imageContextMenuPatch
+    },
 
     // to stop from rendering twice /shrug
     currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
@@ -218,7 +248,6 @@ export default definePlugin({
 
     start() {
         enableStyle(styles);
-        addContextMenuPatch("image-context", imageContextMenuPatch);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
@@ -229,6 +258,5 @@ export default definePlugin({
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
-        removeContextMenuPatch("image-context", imageContextMenuPatch);
     }
 });

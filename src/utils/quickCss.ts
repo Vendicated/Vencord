@@ -16,19 +16,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addSettingsListener, Settings } from "@api/Settings";
+import { Settings, SettingsStore } from "@api/Settings";
 
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
 
+function createStyle(id: string) {
+    const style = document.createElement("style");
+    style.id = id;
+    document.documentElement.append(style);
+    return style;
+}
+
+async function initSystemValues() {
+    const values = await VencordNative.themes.getSystemValues();
+    const variables = Object.entries(values)
+        .filter(([, v]) => v !== "#")
+        .map(([k, v]) => `--${k}: ${v};`)
+        .join("");
+
+    createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
+}
+
 export async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
-            style = document.createElement("style");
-            style.id = "vencord-custom-css";
-            document.head.appendChild(style);
-            VencordNative.quickCss.addChangeListener(css => style.textContent = css);
+            style = createStyle("vencord-custom-css");
+            VencordNative.quickCss.addChangeListener(css => {
+                style.textContent = css;
+                // At the time of writing this, changing textContent resets the disabled state
+                style.disabled = !Settings.useQuickCss;
+            });
             style.textContent = await VencordNative.quickCss.get();
         }
     } else
@@ -36,21 +55,37 @@ export async function toggle(isEnabled: boolean) {
 }
 
 async function initThemes() {
-    if (!themesStyle) {
-        themesStyle = document.createElement("style");
-        themesStyle.id = "vencord-themes";
-        document.head.appendChild(themesStyle);
+    themesStyle ??= createStyle("vencord-themes");
+
+    const { themeLinks, enabledThemes } = Settings;
+
+    const links: string[] = [...themeLinks];
+
+    if (IS_WEB) {
+        for (const theme of enabledThemes) {
+            const themeData = await VencordNative.themes.getThemeData(theme);
+            if (!themeData) continue;
+            const blob = new Blob([themeData], { type: "text/css" });
+            links.push(URL.createObjectURL(blob));
+        }
+    } else {
+        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
+        links.push(...localThemes);
     }
 
-    const { themeLinks } = Settings;
-    const links = themeLinks.map(link => `@import url("${link.trim()}");`).join("\n");
-    themesStyle.textContent = links;
+    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    toggle(Settings.useQuickCss);
-    addSettingsListener("useQuickCss", toggle);
-
+    initSystemValues();
     initThemes();
-    addSettingsListener("themeLinks", initThemes);
+
+    toggle(Settings.useQuickCss);
+    SettingsStore.addChangeListener("useQuickCss", toggle);
+
+    SettingsStore.addChangeListener("themeLinks", initThemes);
+    SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    if (!IS_WEB)
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
 });

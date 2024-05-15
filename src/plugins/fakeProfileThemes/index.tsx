@@ -202,8 +202,8 @@ export default definePlugin({
                         <ProfileModal
                             user={UserStore.getCurrentUser()}
                             pendingThemeColors={[c1, c2]}
-                            onAvatarChange={() => {}}
-                            onBannerChange={() => {}}
+                            onAvatarChange={() => { }}
+                            onBannerChange={() => { }}
                             canUsePremiumCustomization={true}
                             hideExampleButton={true}
                             hideFakeActivity={true}

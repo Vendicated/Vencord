@@ -19,12 +19,13 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 function validateUrl(url: string) {
     try {
@@ -38,9 +39,7 @@ function validateUrl(url: string) {
 async function eraseAllData() {
     const res = await fetch(new URL("/v1/", getCloudUrl()), {
         method: "DELETE",
-        headers: new Headers({
-            Authorization: await getCloudAuth()
-        })
+        headers: { Authorization: await getCloudAuth() }
     });
 
     if (!res.ok) {
@@ -85,7 +84,7 @@ function SettingsSyncSection() {
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
-                    onClick={() => putCloudSettings()}
+                    onClick={() => putCloudSettings(true)}
                 >Sync to Cloud</Button>
                 <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
                     {({ onMouseLeave, onMouseEnter }) => (
@@ -114,7 +113,7 @@ function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
 
     return (
-        <>
+        <SettingsTab title="Vencord Cloud">
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
@@ -157,8 +156,8 @@ function CloudTab() {
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />
-        </>
+        </SettingsTab>
     );
 }
 
-export default ErrorBoundary.wrap(CloudTab);
+export default wrapTab(CloudTab, "Cloud");

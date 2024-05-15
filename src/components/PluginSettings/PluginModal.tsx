@@ -22,12 +22,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { LazyComponent } from "@utils/react";
 import { OptionType, Plugin } from "@utils/types";
-import { findByCode, findByPropsLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
@@ -40,8 +39,9 @@ import {
     SettingSliderComponent,
     SettingTextComponent
 } from "./components";
+import { openContributorModal } from "./ContributorModal";
 
-const UserSummaryItem = LazyComponent(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
@@ -50,11 +50,12 @@ interface PluginModalProps extends ModalProps {
     onRestartNeeded(): void;
 }
 
-/** To stop discord making unwanted requests... */
-function makeDummyUser(user: { name: string, id: BigInt; }) {
+function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
     const newUser = new UserRecord({
-        username: user.name,
-        id: generateId(),
+        username: user.username,
+        id: user.id ?? generateId(),
+        avatar: user.avatar,
+        /** To stop discord making unwanted requests... */
         bot: true,
     });
     FluxDispatcher.dispatch({
@@ -86,14 +87,16 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
-    const hasSettings = Boolean(pluginSettings && plugin.options);
+    const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id
-                    ? await UserUtils.fetchUser(`${user.id}`).catch(() => makeDummyUser(user))
-                    : makeDummyUser(user);
+                    ? await UserUtils.getUser(`${user.id}`)
+                        .catch(() => makeDummyUser({ username: user.name }))
+                    : makeDummyUser({ username: user.name });
+
                 setAuthors(a => [...a, author]);
             }
         })();
@@ -198,6 +201,19 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             showDefaultAvatarsForNullUsers
                             showUserPopout
                             renderMoreUsers={renderMoreUsers}
+                            renderUser={(user: User) => (
+                                <Clickable
+                                    className={AvatarStyles.clickableAvatar}
+                                    onClick={() => openContributorModal(user)}
+                                >
+                                    <img
+                                        className={AvatarStyles.avatar}
+                                        src={user.getAvatarURL(void 0, 80, true)}
+                                        alt={user.username}
+                                        title={user.username}
+                                    />
+                                </Clickable>
+                            )}
                         />
                     </div>
                 </Forms.FormSection>
@@ -210,7 +226,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         </Forms.FormSection>
                     </div>
                 )}
-                <Forms.FormSection>
+                <Forms.FormSection className={Margins.bottom16}>
                     <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
@@ -221,7 +237,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Button
                             onClick={onClose}
                             size={Button.Sizes.SMALL}
-                            color={Button.Colors.WHITE}
+                            color={Button.Colors.PRIMARY}
                             look={Button.Looks.LINK}
                         >
                             Cancel

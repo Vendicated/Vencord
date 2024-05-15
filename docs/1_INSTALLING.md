@@ -1,5 +1,6 @@
-> **Warning**
+> [!WARNING]
 > These instructions are only for advanced users. If you're not a Developer, you should use our [graphical installer](https://github.com/Vendicated/VencordInstaller#usage) instead.
+> No support will be provided for installing in this fashion. If you cannot figure it out, you should just stick to a regular install.
 
 # Installation Guide
 
@@ -62,7 +63,7 @@ Then fully close Discord from your taskbar or task manager, and restart it. Venc
 
 If you're using Discord already, go into the `Updater` tab in settings.
 
-Sometimes it may be neccessary to manually update if the GUI updater fails.
+Sometimes it may be necessary to manually update if the GUI updater fails.
 
 To pull latest changes:
 
@@ -94,5 +95,3 @@ Simply run:
 ```shell
 pnpm uninject
 ```
-
-If you need more help, ask in the support channel in our [Discord Server](https://discord.gg/D9uwnFnqmd).

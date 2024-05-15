@@ -33,11 +33,10 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
-            setState(newValue);
-            onChange(newValue);
-        }
+        else setError(null);
+
+        setState(newValue);
+        onChange(newValue);
     }
 
     return (

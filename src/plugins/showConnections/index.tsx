@@ -24,19 +24,18 @@ import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
-import { LazyComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Text, Tooltip } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { Text, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = LazyComponent(() => findByCode("().lastSection"));
-const UserProfileStore = findStoreLazy("UserProfileStore");
+const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
+const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
-const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
+const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const enum Spacing {
     COMPACT,
@@ -75,12 +74,12 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap(e =>
-    <ConnectionsComponent id={e.user.id} theme={getTheme(e.user, e.displayProfile).profileTheme} />
+const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
+    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(e =>
-    <ConnectionsComponent id={e.channel.recipients[0]} theme={ThemeStore.theme} />
+const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
+    <ConnectionsComponent id={id} theme={ThemeStore.theme} />
 );
 
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
@@ -113,7 +112,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
-    const platform = platforms.get(connection.type);
+    const platform = platforms.get(platformHooks.useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
@@ -147,6 +146,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         className="vc-user-connection"
                         href={url}
                         target="_blank"
+                        onClick={e => {
+                            if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
+                                const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
+                                // handleLink will .preventDefault() if applicable
+                                OpenInApp.handleLink(e.currentTarget, e);
+                            }
+                        }}
                     >
                         {img}
                     </a>
@@ -169,18 +175,18 @@ export default definePlugin({
     authors: [Devs.TheKodeToad],
     patches: [
         {
-            find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
+            find: "{isUsingGuildBio:null!==(",
             replacement: {
-                match: /,theme:\i\}\)(?=,.{0,100}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent(arguments[0])"
+                match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
             }
         },
         {
             find: "\"Profile Panel: user cannot be undefined\"",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
-                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:/,
-                replace: "$self.profilePanelComponent(arguments[0]),$&"
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
+                replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
             }
         }
     ],

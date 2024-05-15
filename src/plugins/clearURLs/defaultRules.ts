@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 export const defaultRules = [
     "action_object_map",
     "action_type_map",
@@ -122,12 +121,30 @@ export const defaultRules = [
     "t@*.twitter.com",
     "s@*.twitter.com",
     "ref_*@*.twitter.com",
+    "t@*.x.com",
+    "s@*.x.com",
+    "ref_*@*.x.com",
+    "t@*.fixupx.com",
+    "s@*.fixupx.com",
+    "ref_*@*.fixupx.com",
+    "t@*.fxtwitter.com",
+    "s@*.fxtwitter.com",
+    "ref_*@*.fxtwitter.com",
+    "t@*.twittpr.com",
+    "s@*.twittpr.com",
+    "ref_*@*.twittpr.com",
+    "t@*.fixvx.com",
+    "s@*.fixvx.com",
+    "ref_*@*.fixvx.com",
     "tt_medium",
     "tt_content",
     "lr@yandex.*",
     "redircnt@yandex.*",
-    "feature@youtube.com",
-    "kw@youtube.com",
+    "feature@*.youtube.com",
+    "kw@*.youtube.com",
+    "si@*.youtube.com",
+    "pp@*.youtube.com",
+    "si@*.youtu.be",
     "wt_zmc",
     "utm_source",
     "utm_content",
@@ -135,4 +152,7 @@ export const defaultRules = [
     "utm_campaign",
     "utm_term",
     "si@open.spotify.com",
+    "igshid",
+    "igsh",
+    "share_id@reddit.com",
 ];

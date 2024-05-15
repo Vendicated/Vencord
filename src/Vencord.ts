@@ -27,6 +27,10 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
+import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
+import { StartAt } from "@utils/types";
+
+import { get as dsGet } from "./api/DataStore";
 import { showNotification } from "./api/Notifications";
 import { PlainSettings, Settings } from "./api/Settings";
 import { patches, PMLogger, startAllPlugins } from "./plugins";
@@ -37,9 +41,23 @@ import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
-export let Components: any;
-
 async function syncSettings() {
+    // pre-check for local shared settings
+    if (
+        Settings.cloud.authenticated &&
+        !await dsGet("Vencord_cloudSecret") // this has been enabled due to local settings share or some other bug
+    ) {
+        // show a notification letting them know and tell them how to fix it
+        showNotification({
+            title: "Cloud Integrations",
+            body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
+                "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
+            color: "var(--yellow-360)",
+            onClick: () => SettingsRouter.open("VencordCloud")
+        });
+        return;
+    }
+
     if (
         Settings.cloud.settingsSync && // if it's enabled
         Settings.cloud.authenticated // if cloud integrations are enabled
@@ -64,12 +82,11 @@ async function syncSettings() {
 
 async function init() {
     await onceReady;
-    startAllPlugins();
-    Components = await import("./components");
+    startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
 
-    if (!IS_WEB) {
+    if (!IS_WEB && !IS_UPDATER_DISABLED) {
         try {
             const isOutdated = await checkForUpdates();
             if (!isOutdated) return;
@@ -87,16 +104,13 @@ async function init() {
                 return;
             }
 
-            if (Settings.notifyAboutUpdates)
-                setTimeout(() => showNotification({
-                    title: "A Vencord update is available!",
-                    body: "Click here to view the update",
-                    permanent: true,
-                    noPersist: true,
-                    onClick() {
-                        SettingsRouter.open("VencordUpdater");
-                    }
-                }), 10_000);
+            setTimeout(() => showNotification({
+                title: "A Vencord update is available!",
+                body: "Click here to view the update",
+                permanent: true,
+                noPersist: true,
+                onClick: openUpdaterModal!
+            }), 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
@@ -116,13 +130,16 @@ async function init() {
     }
 }
 
+startAllPlugins(StartAt.Init);
 init();
 
-if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+    startAllPlugins(StartAt.DOMContentLoaded);
+
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar-]{display: none!important}"
+            textContent: "[class*=titleBar]{display: none!important}"
         }));
-    }, { once: true });
-}
+    }
+}, { once: true });

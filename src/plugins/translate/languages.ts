@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 /*
 To generate:
 - Visit https://translate.google.com/?sl=auto&tl=en&op=translate

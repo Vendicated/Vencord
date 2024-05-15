@@ -26,42 +26,52 @@ import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } fro
 import { useProfilePronouns } from "./pronoundbUtils";
 import { settings } from "./settings";
 
+const PRONOUN_TOOLTIP_PATCH = {
+    match: /text:(.{0,10}.Messages\.USER_PROFILE_PRONOUNS)(?=,)/,
+    replace: '$& + (typeof vcPronounSource !== "undefined" ? ` (${vcPronounSource})` : "")'
+};
+
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven],
+    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
-        // Add next to username (compact mode)
         {
             find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /("span",{id:\i,className:\i,children:\i}\))/,
-                replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
-            }
-        },
-        // Patch the chat timestamp element (normal mode)
-        {
-            find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, $self.PronounsChatComponentWrapper(e)]"
-            }
+            replacement: [
+                // Add next to username (compact mode)
+                {
+                    match: /("span",{id:\i,className:\i,children:\i}\))/,
+                    replace: "$1, $self.CompactPronounsChatComponentWrapper(arguments[0])"
+                },
+                // Patch the chat timestamp element (normal mode)
+                {
+                    match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
+                    replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
+                }
+            ]
         },
         // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
         {
-            find: ".userTagNoNickname",
-            replacement: {
-                match: /=(\i)\.pronouns/,
-                replace: "=$self.useProfilePronouns($1.user.id)"
-            }
+            find: ".pronouns,children",
+            replacement: [
+                {
+                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
+                    replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
+                },
+                PRONOUN_TOOLTIP_PATCH
+            ]
         },
         // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
         {
-            find: ".USER_PROFILE_ACTIVITY",
-            replacement: {
-                match: /\).showPronouns/,
-                replace: ").showPronouns||true;const vcPronounce=$self.useProfilePronouns(arguments[0].user.id);if(arguments[0].displayProfile)arguments[0].displayProfile.pronouns=vcPronounce"
-            }
+            find: ".nameTagSmall)",
+            replacement: [
+                {
+                    match: /\.getName\(\i\);(?<=displayProfile.{0,200})/,
+                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
+                },
+                PRONOUN_TOOLTIP_PATCH
+            ]
         }
     ],
 

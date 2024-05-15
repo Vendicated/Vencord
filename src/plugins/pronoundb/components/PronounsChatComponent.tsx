@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
@@ -26,10 +27,12 @@ import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
+const AUTO_MODERATION_ACTION = 24;
+
 function shouldShow(message: Message): boolean {
     if (!settings.store.showInMessages)
         return false;
-    if (message.author.bot || message.author.system)
+    if (message.author.bot || message.author.system || message.type === AUTO_MODERATION_ACTION)
         return false;
     if (!settings.store.showSelf && message.author.id === UserStore.getCurrentUser().id)
         return false;
@@ -37,20 +40,20 @@ function shouldShow(message: Message): boolean {
     return true;
 }
 
-export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
+export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
     return shouldShow(message)
         ? <PronounsChatComponent message={message} />
         : null;
-}
+}, { noop: true });
 
-export function CompactPronounsChatComponentWrapper({ message }: { message: Message; }) {
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
     return shouldShow(message)
         ? <CompactPronounsChatComponent message={message} />
         : null;
-}
+}, { noop: true });
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (
@@ -61,8 +64,8 @@ function PronounsChatComponent({ message }: { message: Message; }) {
         : null;
 }
 
-export function CompactPronounsChatComponent({ message }: { message: Message; }) {
-    const result = useFormattedPronouns(message.author.id);
+export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
+    const [result] = useFormattedPronouns(message.author.id);
 
     return result
         ? (
@@ -71,4 +74,4 @@ export function CompactPronounsChatComponent({ message }: { message: Message; })
             >• {result}</span>
         )
         : null;
-}
+}, { noop: true });

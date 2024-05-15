@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, UIEvent } from "react";
+import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
 
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
@@ -35,14 +35,16 @@ export interface Menu {
     }>;
     MenuItem: RC<{
         id: string;
-        label: string;
+        label: ReactNode;
         action?(e: MouseEvent): void;
+        icon?: ComponentType<any>;
 
         color?: string;
-        render?: ComponentType;
+        render?: ComponentType<any>;
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
+        disabled?: boolean;
     }>;
     MenuCheckboxItem: RC<{
         id: string;
@@ -63,19 +65,24 @@ export interface Menu {
         id: string;
         interactive?: boolean;
     }>;
-    // TODO: Type me
-    MenuSliderControl: RC<any>;
+    MenuSliderControl: RC<{
+        minValue: number,
+        maxValue: number,
+        value: number,
+        onChange(value: number): void,
+        renderValue?(value: number): string,
+    }>;
 }
 
 export interface ContextMenuApi {
-    close(): void;
-    open(
+    closeContextMenu(): void;
+    openContextMenu(
         event: UIEvent,
         render?: Menu["Menu"],
         options?: { enableSpellCheck?: boolean; },
         renderLazy?: () => Promise<Menu["Menu"]>
     ): void;
-    openLazy(
+    openContextMenuLazy(
         event: UIEvent,
         renderLazy?: () => Promise<Menu["Menu"]>,
         options?: { enableSpellCheck?: boolean; }
