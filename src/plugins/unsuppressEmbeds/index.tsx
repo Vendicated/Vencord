@@ -20,7 +20,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
 const EMBED_SUPPRESSED = 1 << 2;
 
@@ -44,7 +44,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channe
             icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
             action={() =>
                 RestAPI.patch({
-                    url: `/channels/${channel.id}/messages/${messageId}`,
+                    url: Constants.Endpoints.MESSAGE(channel.id, messageId),
                     body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
                 })
             }

@@ -17,6 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
@@ -60,7 +61,7 @@ export default definePlugin({
             find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /lastSection:(!?\i)}\),/,
-                replace: "$&$self.patchPadding($1),"
+                replace: "$&$self.patchPadding({lastSection:$1}),"
             }
         }
     ],
@@ -80,10 +81,10 @@ export default definePlugin({
         }
     },
 
-    patchPadding(lastSection: any) {
-        if (!lastSection) return;
+    patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
+        if (!lastSection) return null;
         return (
-            <div className={UserPopoutSectionCssClasses.lastSection}></div>
+            <div className={UserPopoutSectionCssClasses.lastSection} ></div>
         );
-    }
+    })
 });
