@@ -7,8 +7,7 @@
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[typescriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features",
-        "editor.linkedEditing": true
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
