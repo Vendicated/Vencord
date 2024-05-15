@@ -56,7 +56,7 @@ export default function ReplyNavigator({ replies }: { replies: Message[]; }) {
                     totalCount={replies.length}
                     onPageChange={processPageChange}
                 />
-                <ModalCloseButton className={"vc-findreply-close"} onClick={() => setVisible(false)}/>
+                <ModalCloseButton className={"vc-findreply-close"} onClick={() => setVisible(false)} />
             </div>
         </ErrorBoundary>
     );

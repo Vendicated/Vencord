@@ -33,7 +33,7 @@ export const jumper: any = findByPropsLazy("jumpToMessage");
 const FindReplyIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
         <path
-            d="M 7 3 L 7 11 C 7 11 7 12 6 12 L 5 12 C 4 12 4 12 4.983 13.115 L 8.164 17.036 C 9 18 9 18 9.844 17.018 L 12.991 13.277 C 14 12 14 12 13.006 11.985 L 12 12 C 12 12 11 12 11 11 L 11 3 C 11 2 11 2 10 2 L 8 2 C 7 2 7 2 7 3"/>
+            d="M 7 3 L 7 11 C 7 11 7 12 6 12 L 5 12 C 4 12 4 12 4.983 13.115 L 8.164 17.036 C 9 18 9 18 9.844 17.018 L 12.991 13.277 C 14 12 14 12 13.006 11.985 L 12 12 C 12 12 11 12 11 11 L 11 3 C 11 2 11 2 10 2 L 8 2 C 7 2 7 2 7 3" />
     </svg>;
 };
 let root: Root | null = null;
@@ -103,7 +103,7 @@ export default definePlugin({
                                 document.querySelector("[class^=base_]")!.appendChild(element);
                                 root = ReactDOM.createRoot(element);
                             }
-                            root!.render(<ReplyNavigator replies={replies}/>);
+                            root!.render(<ReplyNavigator replies={replies} />);
                         }
                     } else {
                         Toasts.show({
