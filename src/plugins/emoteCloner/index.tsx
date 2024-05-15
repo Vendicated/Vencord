@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
@@ -54,9 +54,9 @@ const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -64,7 +64,7 @@ async function fetchSticker(id: string) {
     if (cached) return cached;
 
     const { body } = await RestAPI.get({
-        url: `/stickers/${id}`
+        url: Constants.Endpoints.STICKER(id)
     });
 
     FluxDispatcher.dispatch({
@@ -83,7 +83,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
     data.append("file", await fetchBlob(getUrl(sticker)));
 
     const { body } = await RestAPI.post({
-        url: `/guilds/${guildId}/stickers`,
+        url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
         body: data,
     });
 
@@ -130,7 +130,8 @@ function getGuildCandidates(data: Data) {
 
         let count = 0;
         for (const emoji of emojis)
-            if (emoji.animated === isAnimated) count++;
+            if (emoji.animated === isAnimated && !emoji.managed)
+                count++;
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -321,8 +322,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         switch (favoriteableType) {
             case "emoji":
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                if (!match) return;
-                const name = match[1] ?? "FakeNitroEmoji";
+                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+                if (!match && !reaction) return;
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
