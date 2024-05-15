@@ -79,6 +79,7 @@ export const useStateFromStores = proxyLazy(() => findByProps("useStateFromStore
     dependencies?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
+// why the fuck cant i get rid of this stupid fucking conflict
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
