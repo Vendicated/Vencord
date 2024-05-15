@@ -17,6 +17,7 @@
 */
 
 import { Command } from "@api/Commands";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
@@ -28,14 +29,19 @@ export default function definePlugin<P extends PluginDef>(p: P & Record<string, 
 export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {
+    /** The match for the patch replacement. If you use a string it will be implicitly converted to a RegExp */
     match: string | RegExp;
+    /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
+    /** A function which returns whether this patch replacement should be applied */
     predicate?(): boolean;
 }
 
 export interface Patch {
     plugin: string;
-    find: string;
+    /** A string or RegExp which is only include/matched in the module code you wish to patch. Prefer only using a RegExp if a simple string test is not enough */
+    find: string | RegExp;
+    /** The replacement(s) for the module being patched */
     replacement: PatchReplacement | PatchReplacement[];
     /** Whether this patch should apply to multiple modules */
     all?: boolean;
@@ -43,6 +49,7 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
+    /** A function which returns whether this patch should be applied */
     predicate?(): boolean;
 }
 
@@ -115,6 +122,10 @@ export interface PluginDef {
     flux?: {
         [E in FluxEvents]?: (event: any) => void;
     };
+    /**
+     * Allows you to manipulate context menus
+     */
+    contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
      * The key will be used as text for the button

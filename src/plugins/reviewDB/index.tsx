@@ -18,12 +18,11 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Alerts, Menu, Parser, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
@@ -36,13 +35,26 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
+    if (!guild) return;
     children.push(
         <Menu.MenuItem
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(props.guild.id, props.guild.name)}
+            action={() => openReviewsModal(guild.id, guild.name)}
+        />
+    );
+};
+
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
+    if (!user) return;
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-user-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(user.id, user.username)}
         />
     );
 };
@@ -53,6 +65,12 @@ export default definePlugin({
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
+    contextMenus: {
+        "guild-header-popout": guildPopoutPatch,
+        "guild-context": guildPopoutPatch,
+        "user-context": userContextPatch,
+        "user-profile-actions": userContextPatch
+    },
 
     patches: [
         {
@@ -69,17 +87,8 @@ export default definePlugin({
     },
 
     async start() {
-        addContextMenuPatch("guild-header-popout", guildPopoutPatch);
-
         const s = settings.store;
         const { lastReviewId, notifyReviews } = s;
-
-        const legacy = s as any as { token?: string; };
-        if (legacy.token) {
-            await updateAuth({ token: legacy.token });
-            legacy.token = undefined;
-            new Logger("ReviewDB").info("Migrated legacy settings");
-        }
 
         await initAuth();
 
@@ -125,10 +134,6 @@ export default definePlugin({
                 readNotification(user.notification.id);
             }
         }, 4000);
-    },
-
-    stop() {
-        removeContextMenuPatch("guild-header-popout", guildPopoutPatch);
     },
 
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {
