@@ -36,6 +36,10 @@ interface GuildContextProps {
     guild?: Guild;
 }
 
+interface GroupDMContextProps {
+    channel: Channel;
+}
+
 const settings = definePluginSettings({
     format: {
         type: OptionType.SELECT,
@@ -145,10 +149,30 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
     ));
 };
 
+const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: GroupDMContextProps) => {
+    if (!channel) return;
+
+    const { icon } = channel;
+    if (!icon) return;
+
+    children.splice(-1, 0, (
+        <Menu.MenuGroup>
+            <Menu.MenuItem
+                id="view-icon"
+                label="View Icon"
+                action={() =>
+                    openImage(IconUtils.getChannelIconURL(channel)!)
+                }
+                icon={ImageIcon}
+            />
+        </Menu.MenuGroup>
+    ));
+};
+
 export default definePlugin({
     name: "ViewIcons",
-    authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz],
-    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
+    authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz, Devs.nyx],
+    description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user and server context menu, and adds View Icon entry in the group channel context menu.",
     tags: ["ImageUtilities"],
 
     settings,
@@ -157,7 +181,8 @@ export default definePlugin({
 
     contextMenus: {
         "user-context": UserContext,
-        "guild-context": GuildContext
+        "guild-context": GuildContext,
+        "gdm-context": GroupDMContext
     },
 
     patches: [
