@@ -23,7 +23,7 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
 
@@ -36,7 +36,7 @@ let reactions: Record<string, ReactionCacheEntry>;
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
     return RestAPI.get({
-        url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${key}`,
+        url: Constants.Endpoints.REACTIONS(msg.channel_id, msg.id, key),
         query: {
             limit: 100,
             type
@@ -93,28 +93,30 @@ export default definePlugin({
     description: "Renders the avatars of users who reacted to a message",
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
-    patches: [{
-        find: ",reactionRef:",
-        replacement: {
-            match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
-            replace: "$&$1?null:$self.renderUsers(this.props),"
-        }
-    }, {
-        find: '.displayName="MessageReactionsStore";',
-        replacement: {
-            match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
-            replace: "$&;$self.reactions=$1"
-        }
-    },
-    {
+    patches: [
+        {
+            find: ",reactionRef:",
+            replacement: {
+                match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
+                replace: "$&$1?null:$self.renderUsers(this.props),"
+            }
+        }, {
+            find: '"MessageReactionsStore"',
+            replacement: {
+                match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
+                replace: "$&;$self.reactions=$1"
+            }
+        },
+        {
 
-        find: "cleanAutomaticAnchor(){",
-        replacement: {
-            match: /this\.automaticAnchor=null,this\.messageFetchAnchor=null,/,
-            replace: "$&$self.setScrollObj(this),"
+            find: "cleanAutomaticAnchor(){",
+            replacement: {
+                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                replace: "$&$self.setScrollObj(this);"
+            }
         }
-    }
     ],
+
     setScrollObj(scroll: any) {
         Scroll = scroll;
     },

@@ -13,10 +13,10 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     patches: [{
-        find: 'location:"ChannelTextAreaButtons"',
+        find: '"sticker")',
         replacement: {
-            match: /if\(!\i\.isMobile\)\{(?=.+?&&(\i)\.push\(.{0,50}"gift")/,
-            replace: "$&Vencord.Api.ChatButtons._injectButtons($1,arguments[0]);"
+            match: /!\i\.isMobile(?=.+?(\i)\.push\(.{0,50}"gift")/,
+            replace: "$& &&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),true)"
         }
     }]
 });
