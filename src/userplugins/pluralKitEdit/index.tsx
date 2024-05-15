@@ -32,7 +32,7 @@ const settings = definePluginSettings({
     modal: {
         type: OptionType.BOOLEAN,
         description: "Use modal to edit messages",
-        default: true
+        default: false
     }
 });
 
