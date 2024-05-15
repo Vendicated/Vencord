@@ -26,10 +26,12 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     patches: [{
-        find: "UserSettingsSections.PAYMENT_FLOW_MODAL_TEST_PAGE,",
+        find: "Messages.ACTIVITY_SETTINGS",
         replacement: {
-            match: /{section:\i\.UserSettingsSections\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
+            match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+}\))/,
+            replace: (_, commaOrSemi, settings, elements) => "" +
+                `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
+                `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`
         }
     }],
     StartupTimingPage
