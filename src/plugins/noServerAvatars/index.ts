@@ -21,14 +21,14 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "NoServerAvatars",
-    description: "Disables server avatars.",
+    description: "Disables server avatars",
     authors: [Devs.crwn],
     patches: [
         // for chat messages
         {
             find: ".default.getGuildMemberAvatarURLSimple",
             replacement: {
-                match: /this\.guildMemberAvatars\[\w+\]/,
+                match: /this\.guildMemberAvatars\[\i]/,
                 replace: "null",
             },
         },
@@ -36,7 +36,7 @@ export default definePlugin({
         {
             find: "renderSingleLineMessage:",
             replacement: {
-                match: /t\.guildMemberAvatar/,
+                match: /\i\.guildMemberAvatar/,
                 replace: "null",
             },
         }],
