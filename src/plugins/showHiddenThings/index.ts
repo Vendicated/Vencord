@@ -41,13 +41,18 @@ const settings = definePluginSettings({
         description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
         default: true,
     },
+    disableDisallowedDiscoveryFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
+        default: true,
+    },
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
-    description: "Displays various moderator-only elements regardless of permissions.",
+    description: "Displays various hidden & moderator-only things regardless of permissions.",
     authors: [Devs.Dolfies],
     patches: [
         {
@@ -80,6 +85,23 @@ export default definePlugin({
             replacement: {
                 match: /filters:\i\.join\(" AND "\),facets:\[/,
                 replace: "facets:["
+            }
+        },
+        {
+            find: "DiscoveryBannedSearchWords.includes",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            replacement: {
+                match: /(?<=function\(\){)(?=.{0,130}DiscoveryBannedSearchWords\.includes)/,
+                replace: "return false;"
+            }
+        },
+        {
+            find: "Endpoints.GUILD_DISCOVERY_VALID_TERM",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            all: true,
+            replacement: {
+                match: /\i\.HTTP\.get\(\{url:\i\.Endpoints\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
+                replace: "Promise.resolve({ body: { valid: true } });"
             }
         }
     ],
