@@ -16,29 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 // This plugin is a port from Alyxia's Vendetta plugin
 import "./index.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, Flex, Forms, React, Text, UserStore } from "@webpack/common";
+import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
-
-const UserProfileStore = findStoreLazy("UserProfileStore");
 
 interface UserProfile extends User {
     themeColors?: Array<number>;
 }
 
+interface Colors {
+    primary: number;
+    accent: number;
+}
+
 function encode(primary: number, accent: number): string {
-    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent
-        .toString(16)
-        .padStart(6, "0")}]`;
+    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
     const padding = "";
     const encoded = Array.from(message)
         .map(x => x.codePointAt(0))
@@ -54,7 +56,7 @@ function decode(bio: string): Array<number> | null {
     if (bio == null) return null;
 
     const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u
+        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
     );
     if (colorString != null) {
         const parsed = [...colorString[0]]
@@ -78,53 +80,60 @@ const settings = definePluginSettings({
         options: [
             { label: "Nitro colors", value: true, default: true },
             { label: "Fake colors", value: false },
-        ],
-    },
+        ]
+    }
 });
 
-let ColorPicker: React.ComponentType = () => (
-    <Forms.FormText>
-        Enable the plugin & restart to show the color picker!
-    </Forms.FormText>
-);
-let ProfileModal: React.ComponentType = () => (
-    <Forms.FormText>
-        Enable the plugin & restart to show the profile modal!
-    </Forms.FormText>
-);
+interface ColorPickerProps {
+    color: number | null;
+    label: React.ReactElement;
+    showEyeDropper?: boolean;
+    suggestedColors?: string[];
+    onChange(value: number | null): void;
+}
+
+// I can't be bothered to figure out the semantics of this component. The
+// functions surely get some event argument sent to them and they likely aren't
+// all required. If anyone who wants to use this component stumbles across this
+// code, you'll have to do the research yourself.
+interface ProfileModalProps {
+    user: User;
+    pendingThemeColors: [number, number];
+    onAvatarChange: () => void;
+    onBannerChange: () => void;
+    canUsePremiumCustomization: boolean;
+    hideExampleButton: boolean;
+    hideFakeActivity: boolean;
+    isTryItOutFlow: boolean;
+}
+
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ProfileModal = findComponentByCodeLazy<ProfileModalProps>('"ProfileCustomizationPreview"');
+
+const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i\("(.+?)"\).then\(\i\.bind\(\i,"(.+?)"\)\)/);
+
 export default definePlugin({
     name: "FakeProfileThemes",
-    description:
-        "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding.",
+    description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding",
     authors: [Devs.Alyxia, Devs.Remty],
     patches: [
         {
-            find: "getUserProfile=",
+            find: "UserProfileStore",
             replacement: {
-                match: /(?<=getUserProfile=function\(\i\){return )(\i\[\i\])/,
-                replace: "$self.colorDecodeHook($1)",
-            },
+                match: /(?<=getUserProfile\(\i\){return )(\i\[\i\])/,
+                replace: "$self.colorDecodeHook($1)"
+            }
         },
         {
-            find: ".colorPickerFooter",
+            find: ".USER_SETTINGS_RESET_PROFILE_THEME",
             replacement: {
-                match: /function (\i).{0,200}\.colorPickerFooter/,
-                replace: "$self.ColorPicker=$1;$&",
-            },
-        },
-        {
-            find: ".onAvatarChange",
-            replacement: {
-                match: /function (\i).{0,200}\.onAvatarChange/,
-                replace: "$self.ProfileModal=$1;$&",
-            },
-        },
+                match: /RESET_PROFILE_THEME}\)(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
+                replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
+            }
+        }
     ],
-    set ColorPicker(colorPicker: React.ComponentType) {
-        ColorPicker = colorPicker;
-    },
-    set ProfileModal(profileModal: React.ComponentType) {
-        ProfileModal = profileModal;
+    start: async () => {
+        await requireColorPicker();
     },
     settingsAboutComponent: () => {
         const existingColors = decode(
@@ -132,6 +141,7 @@ export default definePlugin({
         ) ?? [0, 0];
         const [c1, setc1] = React.useState(existingColors[0]);
         const [c2, setc2] = React.useState(existingColors[1]);
+
         return (
             <Forms.FormSection>
                 <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
@@ -146,7 +156,8 @@ export default definePlugin({
                         </li>
                         <li>• click the "Copy 3y3" button</li>
                         <li>• paste the invisible text anywhere in your bio</li>
-                    </ul>
+                    </ul><br />
+                    <b>Please note:</b> if you are using a theme which hides nitro ads, you should disable it temporarily to set colors.
                     <Forms.FormDivider
                         style={{ marginTop: "8px", marginBottom: "8px" }}
                     />
@@ -211,8 +222,7 @@ export default definePlugin({
                         />
                     </div>
                 </Forms.FormText>
-            </Forms.FormSection>
-        );
+            </Forms.FormSection>);
     },
     settings,
     colorDecodeHook(user: UserProfile) {
@@ -223,10 +233,22 @@ export default definePlugin({
             if (colors) {
                 return virtualMerge(user, {
                     premiumType: 2,
-                    themeColors: colors,
+                    themeColors: colors
                 });
             }
         }
         return user;
     },
+    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
+        return <Button
+            onClick={() => {
+                const colorString = encode(primary, accent);
+                copyWithToast(colorString);
+            }}
+            color={Button.Colors.PRIMARY}
+            size={Button.Sizes.XLARGE}
+            className={Margins.left16}
+        >Copy 3y3
+        </Button >;
+    }, { noop: true }),
 });
