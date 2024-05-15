@@ -30,6 +30,9 @@ import { i18n, React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
+type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
+type SectionTypes = Record<SectionType, SectionType>;
+
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -41,33 +44,17 @@ export default definePlugin({
             find: ".versionHash",
             replacement: [
                 {
-                    match: /\[\(0,.{1,3}\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
+                    match: /\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component}, ${props})`;
                     }
+                },
+                {
+                    match: /copyValue:\i\.join\(" "\)/,
+                    replace: "$& + $self.getInfoString()"
                 }
             ]
-        },
-        // Discord Stable
-        // FIXME: remove once change merged to stable
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                get match() {
-                    switch (Settings.plugins.Settings.settingsLocation) {
-                        case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
-                        case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
-                        case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
-                        case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
-                        case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
-                        case "aboveActivity":
-                        default:
-                            return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS/;
-                    }
-                },
-                replace: "...$self.makeSettingsCategories($1),$&"
-            }
         },
         // Discord Canary
         {
@@ -75,6 +62,13 @@ export default definePlugin({
             replacement: {
                 match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
                 replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
+            }
+        },
+        {
+            find: "useDefaultUserSettingsSections:function",
+            replacement: {
+                match: /(?<=useDefaultUserSettingsSections:function\(\){return )(\i)\}/,
+                replace: "$self.wrapSettingsHook($1)}"
             }
         },
         {
@@ -86,9 +80,9 @@ export default definePlugin({
         }
     ],
 
-    customSections: [] as ((SectionTypes: Record<string, unknown>) => any)[],
+    customSections: [] as ((SectionTypes: SectionTypes) => any)[],
 
-    makeSettingsCategories(SectionTypes: Record<string, unknown>) {
+    makeSettingsCategories(SectionTypes: SectionTypes) {
         return [
             {
                 section: SectionTypes.HEADER,
@@ -154,6 +148,8 @@ export default definePlugin({
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
 
+        if (!header) return;
+
         const names = {
             top: i18n.Messages.USER_SETTINGS,
             aboveNitro: i18n.Messages.BILLING_SETTINGS,
@@ -163,10 +159,28 @@ export default definePlugin({
         return header === names[settingsLocation];
     },
 
-    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: Record<string, unknown>) {
-        if (!this.isRightSpot(element)) return;
+    patchedSettings: new WeakSet(),
+
+    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: SectionTypes) {
+        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
+
+        this.patchedSettings.add(elements);
 
         elements.push(...this.makeSettingsCategories(sectionTypes));
+    },
+
+    wrapSettingsHook(originalHook: (...args: any[]) => Record<string, unknown>[]) {
+        return (...args: any[]) => {
+            const elements = originalHook(...args);
+            if (!this.patchedSettings.has(elements))
+                elements.unshift(...this.makeSettingsCategories({
+                    HEADER: "HEADER",
+                    DIVIDER: "DIVIDER",
+                    CUSTOM: "CUSTOM"
+                }));
+
+            return elements;
+        };
     },
 
     options: {
@@ -207,15 +221,24 @@ export default definePlugin({
         return "";
     },
 
-    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+    getInfoRows() {
         const { electronVersion, chromiumVersion, additionalInfo } = this;
 
-        return (
-            <>
-                <Component {...props}>Vencord {gitHash}{additionalInfo}</Component>
-                {electronVersion && <Component {...props}>Electron {electronVersion}</Component>}
-                {chromiumVersion && <Component {...props}>Chromium {chromiumVersion}</Component>}
-            </>
+        const rows = [`Vencord ${gitHash}${additionalInfo}`];
+
+        if (electronVersion) rows.push(`Electron ${electronVersion}`);
+        if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);
+
+        return rows;
+    },
+
+    getInfoString() {
+        return "\n" + this.getInfoRows().join("\n");
+    },
+
+    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+        return this.getInfoRows().map((text, i) =>
+            <Component key={i} {...props}>{text}</Component>
         );
     }
 });
