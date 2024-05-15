@@ -24,12 +24,11 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { findByProps } from "@webpack";
-import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { DraftType, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 const ModalStack = findByProps("pushLazy", "popAll");
 const DraftManager = findByProps("clearDraft", "saveDraft");
-const { DraftType } = findByProps("DraftType");
 const { closeExpressionPicker } = findByProps("closeExpressionPicker", "openExpressionPicker");
 
 const settings = definePluginSettings({
@@ -126,8 +125,11 @@ export default definePlugin({
         try {
             const channelId = SelectedChannelStore.getChannelId();
 
-            DraftManager.clearDraft(channelId, DraftType.ChannelMessage);
-            DraftManager.clearDraft(channelId, DraftType.FirstThreadMessage);
+            for (const key in DraftType) {
+                if (!Number.isNaN(Number(key))) continue;
+
+                DraftManager.clearDraft(channelId, DraftType[key]);
+            }
         } catch (err) {
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }

@@ -107,6 +107,8 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
 }
 
 export const UserUtils = findByProps<t.UserUtils>("getUser", "fetchCurrentUser");
+
+export const UploadManager = findByProps("clearAll", "addFile");
 export const UploadHandler = findByProps<t.UploadHandler>("showUploadFileSizeExceededError", "promptToUpload");
 
 export const ApplicationAssetUtils = findByProps<t.ApplicationAssetUtils>("fetchAssetIds", "getAssetImage");

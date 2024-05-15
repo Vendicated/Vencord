@@ -24,12 +24,7 @@ export const Flux = findByProps<t.Flux>("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export enum DraftType {
-    ChannelMessage = 0,
-    ThreadSettings = 1,
-    FirstThreadMessage = 2,
-    ApplicationLauncherCommand = 3
-}
+export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
 
 // This is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
