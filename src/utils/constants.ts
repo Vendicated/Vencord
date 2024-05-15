@@ -155,7 +155,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n
+        id: 715746190813298788n
     },
     dzshn: {
         name: "dzshn",
@@ -265,6 +265,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Dziurwa: {
         name: "Dziurwa",
         id: 1001086404203389018n
+    },
+    arHSM: {
+        name: "arHSM",
+        id: 841509053422632990n
     },
     F53: {
         name: "F53",
@@ -414,6 +418,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Kyuuhachi",
         id: 236588665420251137n,
     },
+    nin0dev: {
+        name: "nin0dev",
+        id: 886685857560539176n
+    },
     Elvyra: {
         name: "Elvyra",
         id: 708275751816003615n,
@@ -425,6 +433,50 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     newwares: {
         name: "newwares",
         id: 421405303951851520n
+    },
+    puv: {
+        name: "puv",
+        id: 469441552251355137n
+    },
+    Kodarru: {
+        name: "Kodarru",
+        id: 785227396218748949n
+    },
+    nakoyasha: {
+        name: "nakoyasha",
+        id: 222069018507345921n
+    },
+    Sqaaakoi: {
+        name: "Sqaaakoi",
+        id: 259558259491340288n
+    },
+    Byron: {
+        name: "byeoon",
+        id: 1167275288036655133n
+    },
+    Kaitlyn: {
+        name: "kaitlyn",
+        id: 306158896630988801n
+    },
+    PolisanTheEasyNick: {
+        name: "Oleh Polisan",
+        id: 242305263313485825n
+    },
+    HAHALOSAH: {
+        name: "HAHALOSAH",
+        id: 903418691268513883n
+    },
+    GabiRP: {
+        name: "GabiRP",
+        id: 507955112027750401n
+    },
+    ImBanana: {
+        name: "Im_Banana",
+        id: 635250116688871425n
+    },
+    xocherry: {
+        name: "xocherry",
+        id: 221288171013406720n
     }
 } satisfies Record<string, Dev>);
 
