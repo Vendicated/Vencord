@@ -11,11 +11,17 @@ import { FluxDispatcher, RestAPI } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 import { Channel } from "discord-types/general/index.js";
 
+const enum ReferencedMessageState {
+    Loaded,
+    NotLoaded,
+    Deleted
+}
+
 interface Reply {
     baseAuthor: User,
     baseMessage: Message;
     channel: Channel;
-    referencedMessage: { state: number; }; // 0 = normal, 1 = couldn't load, 2 = deleted
+    referencedMessage: { state: ReferencedMessageState; };
     compact: boolean;
     isReplyAuthorBlocked: boolean;
 }
@@ -72,7 +78,7 @@ export default definePlugin({
 
                 if (reply.id !== messageId) {
                     ReplyStore.set(channelId, messageId, {
-                        state: 2
+                        state: ReferencedMessageState.Deleted
                     });
 
                     FluxDispatcher.dispatch({
@@ -82,7 +88,7 @@ export default definePlugin({
                     });
                 } else {
                     ReplyStore.set(reply.channel_id, reply.id, {
-                        state: 0,
+                        state: ReferencedMessageState.Loaded,
                         message: createMessageRecord(reply)
                     });
 
