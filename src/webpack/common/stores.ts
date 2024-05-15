@@ -24,7 +24,7 @@ export const Flux = findByProps<t.Flux>("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
+export const DraftType = find<typeof t.DraftType>(filters.byProps("DraftType"), m => m.DraftType);
 
 // This is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
