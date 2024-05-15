@@ -27,6 +27,7 @@ const settings = definePluginSettings({
 });
 
 let sentNotif = false;
+
 export default definePlugin({
     name: "CustomIdle",
     description: "Allows you to set the time before Discord goes idle (or disable auto-idle)",
@@ -76,9 +77,9 @@ export default definePlugin({
     },
     getIdleTimeout() { // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
-        return idleTimeout===0?Number.MAX_SAFE_INTEGER:idleTimeout*60000;
+        return idleTimeout === 0 ? Number.MAX_SAFE_INTEGER : idleTimeout * 60000;
     },
     start() {
-        sentNotif=false;
+        sentNotif = false;
     }
 });
