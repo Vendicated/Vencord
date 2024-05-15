@@ -269,43 +269,14 @@ export default definePlugin({
     ],
 
     start() {
-        // To prevent existing users from crashing on lines 379-380 due to the settings entry not existing (sry that its kinda sloppy)
-        if (settings.store.tagSettings && !settings.store.tagSettings.CHAT_MODERATOR) {
-            settings.store.tagSettings.CHAT_MODERATOR = {
-                "text": "Chat Mod",
-                "showInChat": true,
-                "showInNotChat": true
-            };
-            return;
-        }
-        else if (settings.store.tagSettings) return;
-        // @ts-ignore
-        if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
-        else {
-            const newSettings = { ...defaultSettings };
-            Object.entries(Vencord.PlainSettings.plugins.MoreUserTags).forEach(([name, value]) => {
-                const [setting, tag] = name.split("_");
-                if (setting === "visibility") {
-                    switch (value) {
-                        case "always":
-                            // its the default
-                            break;
-                        case "chat":
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                        case "not-chat":
-                            newSettings[tag].showInChat = false;
-                            break;
-                        case "never":
-                            newSettings[tag].showInChat = false;
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                    }
-                }
-                settings.store.tagSettings = newSettings;
-                delete Vencord.Settings.plugins.MoreUserTags[name];
-            });
-        }
+        settings.store.tagSettings ??= defaultSettings;
+
+        // newly added field might be missing from old users
+        settings.store.tagSettings.CHAT_MODERATOR ??= {
+            text: "Chat Mod",
+            showInChat: true,
+            showInNotChat: true
+        };
     },
 
     getPermissions(user: User, channel: Channel): string[] {
