@@ -474,6 +474,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Im_Banana",
         id: 635250116688871425n
     },
+    xocherry: {
+        name: "xocherry",
+        id: 221288171013406720n
+    },
+    ScattrdBlade: {
+        name: "ScattrdBlade",
+        id: 678007540608532491n
+    },
     Moxxie: {
         name: "Moxxie",
         id: 712653921692155965n,
