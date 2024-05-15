@@ -115,7 +115,7 @@ const settings = definePluginSettings({
         default: false,
     },
     shareSong: {
-        description: "show link to song on Last.fm",
+        description: "show link to song on last.fm",
         type: OptionType.BOOLEAN,
         default: true,
     },
