@@ -173,6 +173,15 @@ export class DraftStore extends FluxStore {
     getThreadSettings(channelId: string): any | null;
 }
 
+export enum DraftType {
+    ChannelMessage,
+    ThreadSettings,
+    FirstThreadMessage,
+    ApplicationLauncherCommand,
+    Poll,
+    SlashCommand,
+}
+
 export class GuildStore extends FluxStore {
     getGuild(guildId: string): Guild;
     getGuildCount(): number;
