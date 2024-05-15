@@ -95,8 +95,8 @@ const tags: Tag[] = [
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     }, {
-        name: "TRIAL_MODERATOR",
-        displayName: "T-Mod",
+        name: "CHAT_MODERATOR",
+        displayName: "Chat Mod",
         description: "Can timeout people",
         permissions: ["MODERATE_MEMBERS"]
     }
@@ -270,9 +270,9 @@ export default definePlugin({
 
     start() {
         // To prevent existing users from crashing on lines 379-380 due to the settings entry not existing (sry that its kinda sloppy)
-        if (settings.store.tagSettings && !settings.store.tagSettings.TRIAL_MODERATOR) {
-            settings.store.tagSettings.TRIAL_MODERATOR = {
-                "text": "T Mod",
+        if (settings.store.tagSettings && !settings.store.tagSettings.CHAT_MODERATOR) {
+            settings.store.tagSettings.CHAT_MODERATOR = {
+                "text": "Chat Mod",
                 "showInChat": true,
                 "showInNotChat": true
             };
