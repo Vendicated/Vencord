@@ -26,6 +26,7 @@ const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
 const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/;
 const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
 const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
+const TidalMatcher = /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/;
 
 const settings = definePluginSettings({
     spotify: {
@@ -42,6 +43,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Open Epic Games links in the Epic Games Launcher",
         default: true,
+    },
+    tidal: {
+        type: OptionType.BOOLEAN,
+        description: "Open Tidal links in the Tidal app",
+        default: true,
     }
 });
 
@@ -49,7 +55,7 @@ const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof impo
 
 export default definePlugin({
     name: "OpenInApp",
-    description: "Open Spotify, Steam and Epic Games URLs in their respective apps instead of your browser",
+    description: "Open Spotify, Tidal, Steam and Epic Games URLs in their respective apps instead of your browser",
     authors: [Devs.Ven],
     settings,
 
@@ -124,6 +130,19 @@ export default definePlugin({
             VencordNative.native.openExternal(`com.epicgames.launcher://store/${match[1]}`);
             event?.preventDefault();
 
+            return true;
+        }
+
+        tidal: {
+            if (!settings.store.tidal) break tidal;
+
+            const match = TidalMatcher.exec(url);
+            if (!match) break tidal;
+
+            const [, type, id] = match;
+            VencordNative.native.openExternal(`tidal://${type}/${id}`);
+
+            event?.preventDefault();
             return true;
         }
 
