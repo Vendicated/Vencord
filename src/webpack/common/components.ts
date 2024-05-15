@@ -36,6 +36,7 @@ export let Tooltip: t.Tooltip;
 export let TextInput: t.TextInput;
 export let TextArea: t.TextArea;
 export let Text: t.Text;
+export let Heading: t.Heading;
 export let Select: t.Select;
 export let SearchableSelect: t.SearchableSelect;
 export let Slider: t.Slider;
@@ -59,6 +60,28 @@ export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"
 export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 waitFor(["FormItem", "Button"], m => {
-    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar, FocusLock } = m);
+    ({
+        useToken,
+        Card,
+        Button,
+        FormSwitch: Switch,
+        Tooltip,
+        TextInput,
+        TextArea,
+        Text,
+        Select,
+        SearchableSelect,
+        Slider,
+        ButtonLooks,
+        TabBar,
+        Popout,
+        Dialog,
+        Paginator,
+        ScrollerThin,
+        Clickable,
+        Avatar,
+        FocusLock,
+        Heading
+    } = m);
     Forms = m;
 });
