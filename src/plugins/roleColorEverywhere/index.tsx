@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
@@ -49,7 +50,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -93,7 +94,7 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
@@ -112,9 +113,8 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
+        const role = GuildStore.getRole(guildId, id);
 
         return (
             <span style={{
@@ -125,7 +125,7 @@ export default definePlugin({
                 {title ?? label} &mdash; {count}
             </span>
         );
-    },
+    }, { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {
