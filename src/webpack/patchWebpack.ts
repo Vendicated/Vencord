@@ -258,7 +258,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
             if (patch.predicate && !patch.predicate()) continue;
-            if (!code.includes(patch.find)) continue;
+
+            const moduleMatches = typeof patch.find === "string"
+                ? code.includes(patch.find)
+                : patch.find.test(code);
+
+            if (!moduleMatches) continue;
 
             patchedBy.add(patch.plugin);
 

@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.8.3",
+    "version": "1.8.4",
     "description": "The other cutest Discord client mod",
     "homepage": "https://github.com/Equicord/Equicord#readme",
     "bugs": {
