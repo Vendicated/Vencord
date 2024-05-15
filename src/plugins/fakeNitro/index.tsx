@@ -24,13 +24,12 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { CustomEmoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
-const DRAFT_TYPE = 0;
 const StickerStore = findStoreLazy("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
@@ -39,6 +38,7 @@ const StickerStore = findStoreLazy("StickersStore") as {
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
+const RoleSubscriptionEmojiUtils = findByPropsLazy("isUnusableRoleSubscriptionEmoji");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -407,6 +407,15 @@ export default definePlugin({
             replacement: {
                 match: /canUseCustomNotificationSounds:function\(\i\){/,
                 replace: "$&return true;"
+            }
+        },
+        // Allows the usage of subscription-locked emojis
+        {
+            find: "isUnusableRoleSubscriptionEmoji:function",
+            replacement: {
+                match: /isUnusableRoleSubscriptionEmoji:function/,
+                // replace the original export with a func that always returns false and alias the original
+                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
             }
         }
     ],
@@ -797,12 +806,15 @@ export default definePlugin({
         gif.finish();
 
         const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
-        UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DRAFT_TYPE);
+        UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DraftType.ChannelMessage);
     },
 
     canUseEmote(e: CustomEmoji, channelId: string) {
         if (e.require_colons === false) return true;
         if (e.available === false) return false;
+
+        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
+        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);

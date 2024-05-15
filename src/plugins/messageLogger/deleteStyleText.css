@@ -1,19 +1,19 @@
 /* Message content highlighting */
 .messagelogger-deleted [class*="contents"] > :is(div, h1, h2, h3, p) {
-    color: #f04747 !important;
+    color: var(--status-danger, #f04747) !important;
 }
 
 /* Bot "thinking" text highlighting */
 .messagelogger-deleted [class*="colorStandard"] {
-    color: #f04747 !important;
+    color: var(--status-danger, #f04747) !important;
 }
 
 /* Embed highlighting */
 .messagelogger-deleted article :is(div, span, h1, h2, h3, p) {
-    color: #f04747 !important;
+    color: var(--status-danger, #f04747) !important;
 }
 
 .messagelogger-deleted a {
-    color: #be3535 !important;
+    color: var(--red-460, #be3535) !important;
     text-decoration: underline;
 }
