@@ -77,7 +77,8 @@ const enum NameFormat {
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
     ArtistOnly = "artist",
-    SongOnly = "song"
+    SongOnly = "song",
+    AlbumName = "album"
 }
 
 const applicationId = "1108588077900898414";
@@ -101,30 +102,30 @@ function setActivity(activity: Activity | null) {
 
 const settings = definePluginSettings({
     username: {
-        description: "Last.fm username",
+        description: "last.fm username",
         type: OptionType.STRING,
     },
     apiKey: {
-        description: "Last.fm API key",
+        description: "last.fm api key",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "Show link to Last.fm profile",
+        description: "show link to last.fm profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
     shareSong: {
-        description: "Show link to song on Last.fm",
+        description: "show link to song on Last.fm",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithSpotify: {
-        description: "Hide Last.fm presence if spotify is running",
+        description: "hide last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
     statusName: {
-        description: "Custom status text",
+        description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -152,11 +153,15 @@ const settings = definePluginSettings({
             {
                 label: "Use song name only",
                 value: NameFormat.SongOnly
+            },
+            {
+                label: "Use album name (falls back to custom status text if song has no album)",
+                value: NameFormat.AlbumName
             }
         ],
     },
     useListeningStatus: {
-        description: 'Show "Listening to" status instead of "Playing"',
+        description: 'show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -176,7 +181,7 @@ const settings = definePluginSettings({
         ],
     },
     showLastFmLogo: {
-        description: "Show the Last.fm logo by the album cover",
+        description: "show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     }
@@ -184,7 +189,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "LastFMRichPresence",
-    description: "Adds support for Last.fm rich presence.",
+    description: "Little plugin for Last.fm rich presence",
     authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settingsAboutComponent: () => (
@@ -319,6 +324,8 @@ export default definePlugin({
                     return trackData.artist;
                 case NameFormat.SongOnly:
                     return trackData.name;
+                case NameFormat.AlbumName:
+                    return trackData.album || settings.store.statusName;
                 default:
                     return settings.store.statusName;
             }
