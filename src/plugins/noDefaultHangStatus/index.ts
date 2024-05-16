@@ -16,8 +16,8 @@ export default definePlugin({
         {
             find: "updateHangStatus:function",
             replacement: {
-                match: /(?<=function \i\((\i),(\i)\)\{var \i;)if\(null==\i\)/,
-                replace: "if(null==$1||$2===undefined)"
+                match: /(?<=function \i\(\i,(\i)\)\{var \i;if\(null==\i)\)/,
+                replace: "||$1===undefined)"
             }
         }
     ]
