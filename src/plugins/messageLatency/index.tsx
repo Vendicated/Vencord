@@ -25,7 +25,7 @@ interface Diff {
     milliseconds: number;
 }
 
-const DISCORD_KT_DELAY = 14712289280;
+const DISCORD_KT_DELAY = 1471228928;
 const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
