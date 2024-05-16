@@ -53,6 +53,7 @@ export interface Settings {
     | "window"
     | undefined;
     disableMinSize: boolean;
+    hideOnQuit: boolean;
     winNativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
@@ -88,6 +89,7 @@ const DefaultSettings: Settings = {
     winCtrlQ: false,
     macosVibrancyStyle: undefined,
     disableMinSize: false,
+    hideOnQuit: false,
     winNativeTitleBar: false,
     plugins: {},
 

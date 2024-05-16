@@ -90,6 +90,11 @@ function VencordSettings() {
                 title: "Disable minimum window size",
                 note: "Requires a full restart"
             },
+            IS_DISCORD_DESKTOP && {
+                key: "hideOnQuit",
+                title: "Hide on quit",
+                note: "Hide Discord on quit instead of closing it"
+            }
         ];
 
     return (

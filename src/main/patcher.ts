@@ -42,6 +42,13 @@ require.main!.filename = join(asarPath, discordPkg.main);
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
+    // Prevent quitting
+    app.on("before-quit", evt => {
+        if (!RendererSettings.store.hideOnQuit) return;
+        evt.preventDefault();
+        app.hide();
+    });
+
     const settings = RendererSettings.store;
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
