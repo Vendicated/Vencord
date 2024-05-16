@@ -68,7 +68,7 @@ const handler: ProxyHandler<any> = {
  * @returns Result of factory function
  */
 export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild = false): ProxyLazy<T> {
-    const get = makeLazy(factory, attempts, { isIndirect: true }) as any;
+    const get = makeLazy(factory, attempts, { isIndirect: true });
 
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
@@ -76,6 +76,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     const proxyDummy = Object.assign(function ProxyDummy() { }, {
         [proxyLazyGet]() {
             if (!proxyDummy[proxyLazyCache]) {
+                // @ts-ignore
                 if (!get.$$vencordLazyFailed()) {
                     proxyDummy[proxyLazyCache] = get();
                 }
