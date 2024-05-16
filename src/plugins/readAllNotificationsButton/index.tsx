@@ -19,31 +19,38 @@
 import "./style.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
-interface ThreadStoreProps {
-    getThreadsForGuild(guildId: string): GuildThreads;
-}
-interface GuildThreads {
-    parentId: {
-        threadId: {
-            id: string,
-            parentId: string;
-        };
-    };
+interface ThreadJoined {
+    channel: Channel;
+    joinTimestamp: number;
 }
 
-const ThreadStore: ThreadStoreProps = findByPropsLazy("getThreadsForGuild");
+type ThreadsJoined = Record<string, ThreadJoined>;
+type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
+
+interface ActiveJoinedThreadsStore {
+    getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
+
+}
+
+const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
 
 function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+        GuildChannelStore.getChannels(guild.id).SELECTABLE // Array<{ channel, comparator }>
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL) // Array<{ channel, comparator }>
+            .concat(
+                Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
+                    .flatMap(threadChannels => Object.values(threadChannels))
+            )
             .forEach((c: { channel: { id: string; }; }) => {
                 if (!ReadStateStore.hasUnread(c.channel.id)) return;
 
@@ -53,18 +60,6 @@ function onClick() {
                     readStateType: 0
                 });
             });
-        Object.values(ThreadStore.getThreadsForGuild(guild.id)).forEach((parentChannels: { threadId: { id: string, parentId: string; }; }) => {
-            Object.values(parentChannels).forEach((thread: { id: string, parentId: string; }) => {
-                const channel = ChannelStore.getChannel(thread.id);
-                if (!ReadStateStore.hasUnread(channel.id)) return;
-
-                channels.push({
-                    channelId: channel.id,
-                    messageId: ReadStateStore.lastMessageId(channel.id),
-                    readStateType: 0
-                });
-            });
-        });
     });
 
     FluxDispatcher.dispatch({
@@ -91,7 +86,7 @@ export default definePlugin({
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
 
-    renderReadAllButton: () => <ReadAllButton />,
+    renderReadAllButton: ErrorBoundary.wrap(ReadAllButton, { noop: true }),
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);
