@@ -20,9 +20,10 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
 
     const getter = () => {
         if (!cache && attempts > tries) {
+            tries++;
             cache = factory();
-            if (!cache && attempts === ++tries && !isIndirect) {
-                console.error(`Lazy factory failed:\n\n${factory}`);
+            if (!cache && attempts === tries && !isIndirect) {
+                console.error(`makeLazy factory failed:\n\n${factory}`);
             }
         }
 
