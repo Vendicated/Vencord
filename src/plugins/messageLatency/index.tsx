@@ -25,7 +25,7 @@ interface Diff {
     milliseconds: number;
 }
 
-const DISCORD_KT_DELAY = 14712289280;
+const DISCORD_KT_DELAY = 1471228928;
 const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
@@ -115,8 +115,9 @@ export default definePlugin({
         // Can't do anything if the clock is behind
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
+        const latencyMillis = latency * 1000;
 
-        const stringDelta = abs >= latency * 1000 ? this.stringDelta(abs, showMillis) : null;
+        const stringDelta = abs >= latencyMillis ? this.stringDelta(abs, showMillis) : null;
 
         // Also thanks dziurwa
         // 2 minutes
@@ -126,11 +127,11 @@ export default definePlugin({
             ? ["status-positive", "status-positive", "text-muted"]
             : delta >= TROLL_LIMIT || ahead
                 ? ["text-muted", "text-muted", "text-muted"]
-                : delta >= (latency * 2000)
+                : delta >= (latencyMillis * 2)
                     ? ["status-danger", "text-muted", "text-muted"]
                     : ["status-warning", "status-warning", "text-muted"];
 
-        return (abs >= latency || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
+        return (abs >= latencyMillis || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
     },
 
     Tooltip() {
