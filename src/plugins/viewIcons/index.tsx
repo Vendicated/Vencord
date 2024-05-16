@@ -158,7 +158,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
                 id="view-group-channel-icon"
                 label="View Icon"
                 action={() =>
-                    openImage(IconUtils.getChannelIconURL(channel)!)
+                    openImage(IconUtils.getChannelIconURL(channel))
                 }
                 icon={ImageIcon}
             />
