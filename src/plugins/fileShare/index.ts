@@ -28,7 +28,6 @@ export default definePlugin({
     description: "Upload your files to gofile.io and share the link in chat via /fileshare slash command.",
     authors: [Devs.ScattrdBlade],
     dependencies: ["CommandsAPI"],
-    target: "DESKTOP",
     commands: [
         {
             inputType: ApplicationCommandInputType.BUILT_IN,
