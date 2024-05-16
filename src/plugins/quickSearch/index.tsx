@@ -18,7 +18,7 @@ const QUERY_STORE = findByPropsLazy("tokenizeQuery");
 
 export default definePlugin({
     name: "QuickSearch",
-    authors: [Devs.CatGirlDShadow],
+    authors: [Devs.PonyGirlDShadow],
     description: "Adds context menu to quickly search stuff",
 
     async start() {
