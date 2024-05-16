@@ -16,6 +16,7 @@ import {
     Button,
     Clipboard,
     Forms,
+    i18n,
     SettingsRouter,
     Toasts,
 } from "@webpack/common";
@@ -98,7 +99,7 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.6.9.1",
+    pluginVersion: "5.6.9.2",
     creatorVersion: "1.19.6",
     toolboxActions: {
         "Change Colorway": () => openModal(props => <Selector modalProps={props} />),
@@ -156,10 +157,52 @@ export default definePlugin({
                 match: /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS\}/,
                 replace: "...$self.makeSettingsCategories($1),$&"
             }
+        },
+        {
+            find: "Messages.ACTIVITY_SETTINGS",
+            replacement: {
+                match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
+                replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
+            }
+        },
+        {
+            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
+            replacement: {
+                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
+                replace: "$2.default.open($1);return;"
+            }
         }
     ],
     set ColorPicker(e) {
         ColorPicker = e;
+    },
+
+    isRightSpot({ header, settings }: { header?: string; settings?: string[]; }) {
+        const firstChild = settings?.[0];
+        // lowest two elements... sanity backup
+        if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
+
+        const settingsLocation = "belowNitro";
+
+        if (!header) return;
+
+        const names = {
+            top: i18n.Messages.USER_SETTINGS,
+            aboveNitro: i18n.Messages.BILLING_SETTINGS,
+            belowNitro: i18n.Messages.APP_SETTINGS,
+            aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
+        };
+        return header === names[settingsLocation];
+    },
+
+    patchedSettings: new WeakSet(),
+
+    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: Record<string, unknown>) {
+        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
+
+        this.patchedSettings.add(elements);
+
+        elements.push(...this.makeSettingsCategories(sectionTypes));
     },
 
     makeSettingsCategories(SectionTypes: Record<string, unknown>) {
