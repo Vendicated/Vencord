@@ -36,7 +36,6 @@ type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
 
 interface ActiveJoinedThreadsStore {
     getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
-
 }
 
 const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
