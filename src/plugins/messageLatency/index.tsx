@@ -22,6 +22,7 @@ interface Diff {
     hours: number,
     minutes: number,
     seconds: number;
+    milliseconds: number;
 }
 
 const DISCORD_KT_DELAY = 14712289280;
@@ -60,7 +61,7 @@ export default definePlugin({
         }
     ],
 
-    stringDelta(delta: number) {
+    stringDelta(delta: number, showMillis: boolean) {
         const diff: Diff = {
             days: Math.round(delta / (60 * 60 * 24 * 1000)),
             hours: Math.round((delta / (60 * 60 * 1000)) % 24),
@@ -78,7 +79,7 @@ export default definePlugin({
             return prev + (
                 isNonNullish(s)
                     ? (prev !== ""
-                        ? k === "seconds"
+                        ? (showMillis ? k === "milliseconds" : k === "seconds")
                             ? " and "
                             : " "
                         : "") + s
@@ -98,8 +99,9 @@ export default definePlugin({
 
         let isDiscordKotlin = false;
         let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
-        if(!showMillis)
+        if (!showMillis) {
             delta = Math.round(delta / 1000) * 1000;
+        }
 
         // Old Discord Android clients have a delay of around 17 days
         // This is a workaround for that
@@ -114,7 +116,7 @@ export default definePlugin({
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
 
-        const stringDelta = abs >= latency * 1000 ? this.stringDelta(abs) : null;
+        const stringDelta = abs >= latency * 1000 ? this.stringDelta(abs, showMillis) : null;
 
         // Also thanks dziurwa
         // 2 minutes
