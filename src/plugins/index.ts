@@ -170,12 +170,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
         try {
             p.start();
-            p.started = true;
         } catch (e) {
             logger.error(`Failed to start ${name}\n`, e);
             return false;
         }
     }
+
+    p.started = true;
 
     if (commands?.length) {
         logger.debug("Registering commands of plugin", name);
@@ -206,6 +207,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const { name, commands, flux, contextMenus } = p;
+
     if (p.stop) {
         logger.info("Stopping plugin", name);
         if (!p.started) {
@@ -214,12 +216,13 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
         try {
             p.stop();
-            p.started = false;
         } catch (e) {
             logger.error(`Failed to stop ${name}\n`, e);
             return false;
         }
     }
+
+    p.started = false;
 
     if (commands?.length) {
         logger.debug("Unregistering commands of plugin", name);

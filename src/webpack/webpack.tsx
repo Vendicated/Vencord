@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { proxyLazy } from "@utils/lazy";
+import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -714,7 +714,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
     if (IS_DEV) webpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
-    return () => extractAndLoadChunks(code, matcher);
+    return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
 
 /**
