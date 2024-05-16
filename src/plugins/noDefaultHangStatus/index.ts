@@ -10,7 +10,7 @@ import { FluxDispatcher } from "@webpack/common";
 
 export default definePlugin({
     name: "NoDefaultHangStatus",
-    description: "Disable the default hang status",
+    description: "Disable the default hang status when joining voice channels",
     authors: [Devs.D3SOX],
 
     flux: {
