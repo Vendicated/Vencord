@@ -20,7 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { RestAPI, UserStore } from "@webpack/common";
+import { Constants, RestAPI, UserStore } from "@webpack/common";
 
 const FriendInvites = findByPropsLazy("createFriendInvite");
 const { uuid4 } = findByPropsLazy("uuid4");
@@ -58,7 +58,7 @@ export default definePlugin({
                 if (uses === 1) {
                     const random = uuid4();
                     const { body: { invite_suggestions } } = await RestAPI.post({
-                        url: "/friend-finder/find-friends",
+                        url: Constants.Endpoints.FRIEND_FINDER,
                         body: {
                             modified_contacts: {
                                 [random]: [1, "", ""]
