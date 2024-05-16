@@ -83,6 +83,6 @@ export default definePlugin({
             if (!aIsFavorite && bIsFavorite) return 1;
 
             return 0;
-        }).slice(0, query.results.emojis.sliceTo ?? 10);
+        }).slice(0, query.results.emojis.sliceTo ?? Infinity);
     }
 });
