@@ -170,7 +170,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
             return false;
         }
     }
+
     p.started = true;
+
     if (commands?.length) {
         logger.debug("Registering commands of plugin", name);
         for (const cmd of commands) {
@@ -200,6 +202,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const { name, commands, flux, contextMenus } = p;
+
     if (p.stop) {
         logger.info("Stopping plugin", name);
         if (!p.started) {
@@ -213,6 +216,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
             return false;
         }
     }
+
     p.started = false;
 
     if (commands?.length) {
