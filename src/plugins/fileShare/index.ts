@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { DraftType } from "@webpack/common";
+import { DraftType, UploadManager } from "@webpack/common";
 
 const UploadStore = findByPropsLazy("getUploads");
 
@@ -62,13 +62,16 @@ export default definePlugin({
 
                     if (uploadResult.status === "ok") {
                         const { downloadPage } = uploadResult.data;
+                        UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
                         setTimeout(() => insertTextIntoChatInputBox(`${downloadPage} `), 10);
                     } else {
                         console.error("Error uploading file:", uploadResult);
+                        UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
                         sendBotMessage(cmdCtx.channel.id, { content: "Error uploading file. Check the console for more info." });
                     }
                 } catch (error) {
                     console.error("Error uploading file:", error);
+                    UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
                     sendBotMessage(cmdCtx.channel.id, { content: "Error uploading file. Check the console for more info." });
                 }
             },
