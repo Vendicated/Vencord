@@ -1,21 +1,10 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -56,25 +45,23 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-export function makeSearchItem() {
-    const src = document.getSelection()?.toString();
-    if (!src) return;
+function makeSearchItem(src: string) {
+    let Engines = {};
 
-    const Engines = { ...DefaultEngines };
-
-    if(settings.store.customEngineName && settings.store.customEngineURL) {
+    if (settings.store.customEngineName && settings.store.customEngineURL) {
         Engines[settings.store.customEngineName] = settings.store.customEngineURL;
     }
 
+    Engines = { ...Engines, ...DefaultEngines };
+
     return (
         <Menu.MenuItem
-            label="Search Text with..."
+            label="Search Text"
             key="search-text"
-            id="search-text"
+            id="vc-search-text"
         >
             {Object.keys(Engines).map((engine, i) => {
-                const key = "search-content-" + engine;
-                if (!key) return;
+                const key = "vc-search-content-" + engine;
                 return (
                     <Menu.MenuItem
                         key={key}
@@ -83,14 +70,12 @@ export function makeSearchItem() {
                             <Flex style={{ alignItems: "center", gap: "0.5em" }}>
                                 <img
                                     style={{
-                                        borderRadius: i >= 3
-                                            ? "50%"
-                                            : void 0
+                                        borderRadius: "50%"
                                     }}
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://www.google.com/s2/favicons?domain=${new URL(Engines[engine])}`}
+                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}`}
                                 />
                                 {engine}
                             </Flex>
@@ -103,24 +88,35 @@ export function makeSearchItem() {
     );
 }
 
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) => {
+    const selection = document.getSelection()?.toString();
+    if (!selection) return;
+
+    const group = findGroupChildrenByChildId("copy", children);
+    group?.push(makeSearchItem(selection));
+};
+
+
 export default definePlugin({
     name: "ReplaceGoogleSearch",
     description: "Replaces the Google search with different Engines",
-    authors: [
-        Devs.Moxxie,
-        Devs.Ethan
-    ],
+    authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,
-    makeSearchItem,
+
 
     patches: [
         {
             find: "\"text cannot be null\"",
             replacement: {
                 match: /\[\(0,\i.jsx\)\(\i.MenuItem,\{id:"search-google",label:\i.default.Messages.SEARCH_WITH_GOOGLE,action:t},"search-google"\)\]/,
-                replace: "$self.makeSearchItem()"
+                replace: "null"
             }
         }
     ],
+
+    contextMenus: {
+        "message": messageContextMenuPatch
+    }
 });
