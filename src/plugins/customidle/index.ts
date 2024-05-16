@@ -26,8 +26,6 @@ const settings = definePluginSettings({
     }
 });
 
-let sentNotif = false;
-
 export default definePlugin({
     name: "CustomIdle",
     description: "Allows you to set the time before Discord goes idle (or disable auto-idle)",
@@ -42,11 +40,11 @@ export default definePlugin({
             }
         },
         {
-            find: "type:\"IDLE\",idle:",
+            find: 'type:"IDLE",idle:',
             replacement: [
                 {
                     match: /Math\.min\((\i\.AfkTimeout\.getSetting\(\)\*\i\.default\.Millis\.SECOND),\i\.IDLE_DURATION\)/,
-                    replace: "$1" // decouple idle from afk (phone notifs will remain at 10 mins)
+                    replace: "$1" // Decouple idle from afk (phone notifications will remain at 10 mins)
                 },
                 {
                     match: /\i\.default\.dispatch\({type:"IDLE",idle:!1}\)/,
@@ -55,7 +53,8 @@ export default definePlugin({
             ]
         }
     ],
-    handleOnline() { // might be called in quick succession
+
+    handleOnline() {
         if (!settings.store.remainInIdle) {
             FluxDispatcher.dispatch({
                 type: "IDLE",
@@ -63,23 +62,24 @@ export default definePlugin({
             });
             return;
         }
-        if (!sentNotif) {
-            sentNotif = true;
-            Notices.showNotice("Welcome back! Click the button to go online. Click the X to stay idle until reload.", "Exit idle", () => {
-                Notices.popNotice();
-                FluxDispatcher.dispatch({
-                    type: "IDLE",
-                    idle: false
-                });
-                sentNotif = false;
+
+        const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
+        if (
+            Notices.currentNotice[1] === backOnlineMessage ||
+            Notices.noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+        ) return;
+
+        Notices.showNotice(backOnlineMessage, "Exit idle", () => {
+            Notices.popNotice();
+            FluxDispatcher.dispatch({
+                type: "IDLE",
+                idle: false
             });
-        }
+        });
     },
+
     getIdleTimeout() { // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
         return idleTimeout === 0 ? Number.MAX_SAFE_INTEGER : idleTimeout * 60000;
-    },
-    start() {
-        sentNotif = false;
     }
 });
