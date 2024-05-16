@@ -63,7 +63,8 @@ Object.defineProperty(Function.prototype, "O", {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
         // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
-        if (new Error().stack?.includes("discord.com") && String(this.e).includes("Promise.all")) {
+        const { stack } = new Error();
+        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && String(this.e).includes("Promise.all")) {
             logger.info("Found main WebpackRequire.onChunksLoaded");
 
             delete (Function.prototype as any).O;
@@ -120,9 +121,9 @@ Object.defineProperty(Function.prototype, "m", {
     set(v: any) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
-        const error = new Error();
-        if (error.stack?.includes("discord.com")) {
-            logger.info("Found Webpack module factory", error.stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+        const { stack } = new Error();
+        if (stack?.includes("discord.com") || stack?.includes("discordapp.com")) {
+            logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
             patchFactories(v);
         }
 
@@ -256,7 +257,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
             if (patch.predicate && !patch.predicate()) continue;
-            if (!code.includes(patch.find)) continue;
+
+            const moduleMatches = typeof patch.find === "string"
+                ? code.includes(patch.find)
+                : patch.find.test(code);
+
+            if (!moduleMatches) continue;
 
             patchedBy.add(patch.plugin);
 

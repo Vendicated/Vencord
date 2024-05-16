@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "discord-types/general";
@@ -56,7 +57,7 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
             let { username } = user;
@@ -66,14 +67,14 @@ export default definePlugin({
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
             if (username === nick || isRepliedMessage && !settings.store.inReplies)
-                return prefix + nick;
+                return <>{prefix}{nick}</>;
             if (settings.store.mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
             if (settings.store.mode === "nick-user")
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-            return prefix + username;
+            return <>{prefix}{username}</>;
         } catch {
-            return author?.nick;
+            return <>{author?.nick}</>;
         }
-    },
+    }, { noop: true }),
 });
