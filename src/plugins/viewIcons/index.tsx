@@ -221,7 +221,7 @@ export default definePlugin({
         },
         // User DMs top small icon
         {
-            find: /HiddenVisually,{children:\i\.\i\.Messages\.DIRECT_MESSAGE/,
+            find: ".cursorPointer:null,children",
             replacement: {
                 match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
                 replace: (m, avatarUrl) => `${m},onClick:()=>$self.openImage(${avatarUrl})`
