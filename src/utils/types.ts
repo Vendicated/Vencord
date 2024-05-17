@@ -244,7 +244,7 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-interface IPluginOptionComponentProps {
+export interface IPluginOptionComponentProps {
     /**
      * Run this when the value changes.
      *

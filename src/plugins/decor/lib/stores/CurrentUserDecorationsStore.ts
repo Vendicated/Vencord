@@ -21,7 +21,7 @@ interface UserDecorationsState {
     clear: () => void;
 }
 
-export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate<UserDecorationsState>((set, get) => ({
+export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate((set: any, get: any) => ({
     decorations: [],
     selectedDecoration: null,
     async fetch() {
@@ -53,4 +53,4 @@ export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate<User
         useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToAsset(decoration) : null);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })
-})));
+} as UserDecorationsState)));

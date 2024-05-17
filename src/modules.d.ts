@@ -20,7 +20,7 @@
 /// <reference types="standalone-electron-types"/>
 
 declare module "~plugins" {
-    const plugins: Record<string, import("@utils/types").Plugin>;
+    const plugins: Record<string, import("./utils/types").Plugin>;
     export default plugins;
 }
 
