@@ -24,7 +24,7 @@ async function resolveFile(options: Argument[], ctx: CommandContext): Promise<Fi
 }
 
 export default definePlugin({
-    name: "File Share",
+    name: "FileShare",
     description: "Upload your files to gofile.io and share the link in chat via /fileshare slash command.",
     authors: [Devs.ScattrdBlade],
     dependencies: ["CommandsAPI"],
