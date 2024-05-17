@@ -10,11 +10,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Flex, Menu } from "@webpack/common";
 
-interface Engine {
-    name: string;
-    url: string;
-}
-
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
     DuckDuckGo: "https://duckduckgo.com/",
@@ -88,15 +83,16 @@ function makeSearchItem(src: string) {
     );
 }
 
-
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) => {
     const selection = document.getSelection()?.toString();
     if (!selection) return;
 
-    const group = findGroupChildrenByChildId("copy", children);
-    group?.push(makeSearchItem(selection));
+    const group = findGroupChildrenByChildId("search-google", children);
+    if (group) {
+        const idx = group.findIndex(c => c?.props?.id === "search-google");
+        if (idx !== -1) group[idx] = makeSearchItem(selection);
+    }
 };
-
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
@@ -104,17 +100,6 @@ export default definePlugin({
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,
-
-
-    patches: [
-        {
-            find: "\"text cannot be null\"",
-            replacement: {
-                match: /\[\(0,\i.jsx\)\(\i.MenuItem,\{id:"search-google",label:\i.default.Messages.SEARCH_WITH_GOOGLE,action:t},"search-google"\)\]/,
-                replace: "null"
-            }
-        }
-    ],
 
     contextMenus: {
         "message": messageContextMenuPatch
