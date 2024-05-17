@@ -138,10 +138,10 @@ waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
 
-export const zustandCreate: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
+export const zustandCreate = findByCodeLazy("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
+export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");

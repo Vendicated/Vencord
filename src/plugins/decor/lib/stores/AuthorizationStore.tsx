@@ -9,7 +9,6 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, showToast, Toasts, UserStore, zustandCreate, zustandPersist } from "@webpack/common";
-import type { StateStorage } from "zustand/middleware";
 
 import { AUTHORIZE_URL, CLIENT_ID } from "../constants";
 
@@ -23,7 +22,7 @@ interface AuthorizationState {
     isAuthorized: () => boolean;
 }
 
-const indexedDBStorage: StateStorage = {
+const indexedDBStorage = {
     async getItem(name: string): Promise<string | null> {
         return DataStore.get(name).then(v => v ?? null);
     },
@@ -36,9 +35,9 @@ const indexedDBStorage: StateStorage = {
 };
 
 // TODO: Move switching accounts subscription inside the store?
-export const useAuthorizationStore = proxyLazy(() => zustandCreate<AuthorizationState>(
+export const useAuthorizationStore = proxyLazy(() => zustandCreate(
     zustandPersist(
-        (set, get) => ({
+        (set: any, get: any) => ({
             token: null,
             tokens: {},
             init: () => { set({ token: get().tokens[UserStore.getCurrentUser().id] ?? null }); },
@@ -91,7 +90,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate<Authorization
                 ));
             },
             isAuthorized: () => !!get().token,
-        }),
+        } as AuthorizationState),
         {
             name: "decor-auth",
             getStorage: () => indexedDBStorage,
