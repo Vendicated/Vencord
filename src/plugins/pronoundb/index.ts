@@ -33,7 +33,7 @@ const PRONOUN_TOOLTIP_PATCH = {
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven],
+    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
         {
@@ -56,7 +56,7 @@ export default definePlugin({
             find: ".pronouns,children",
             replacement: [
                 {
-                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i;/,
+                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
                     replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
                 },
                 PRONOUN_TOOLTIP_PATCH
