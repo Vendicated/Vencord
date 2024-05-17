@@ -16,13 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export { default as ErrorBoundary } from "./ErrorBoundary";
-export * from "./ErrorCard";
-export * from "./Flex";
-export * from "./Heart";
-export * from "./Link";
 export { default as PatchHelper } from "./PatchHelper";
 export { default as PluginSettings } from "./PluginSettings";
-export * from "./Switch";
 export { default as VencordSettings } from "./VencordSettings";
-
