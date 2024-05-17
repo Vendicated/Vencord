@@ -26,13 +26,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show special activities first (Currently Spotify and Twitch)",
         default: true,
-        restartNeeded: false,
     },
     renderGifs: {
         type: OptionType.BOOLEAN,
         description: "Allow rendering GIFs",
         default: true,
-        restartNeeded: false,
     },
     divider: {
         type: OptionType.COMPONENT,
