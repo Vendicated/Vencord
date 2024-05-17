@@ -212,8 +212,7 @@ export default definePlugin({
         },
         // Group DMs top small & large icon
         {
-            find: ".recipients.length>=2",
-            all: true,
+            find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.getChannelIconURL\).+?\))(?=[,}])/,
                 replace: (m, iconUrl) => `${m},onClick:()=>$self.openImage(${iconUrl})`
