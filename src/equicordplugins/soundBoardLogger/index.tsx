@@ -20,7 +20,7 @@ import { getListeners } from "./utils";
 export default definePlugin({
     name: "SoundBoardLogger",
     authors: [
-        EquicordDevs.Moxxie,
+        Devs.Moxxie,
         EquicordDevs.fres,
         Devs.echo,
         EquicordDevs.thororen

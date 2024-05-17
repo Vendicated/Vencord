@@ -5,7 +5,7 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Alerts, Menu } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -56,7 +56,7 @@ async function verify(link) {
 export default definePlugin({
     name: "DoubleCounterBypass",
     description: "Bypass Double Counter verifications easily.",
-    authors: [EquicordDevs.nyx],
+    authors: [Devs.nyx],
 
     contextMenus: {
         "message": patchMessageContextMenu,
