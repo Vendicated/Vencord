@@ -114,6 +114,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
+    shareSong: {
+        description: "show link to song on last.fm",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
     hideWithSpotify: {
         description: "hide last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
@@ -295,17 +300,18 @@ export default definePlugin({
                 large_text: trackData.album || undefined,
             };
 
-        const buttons: ActivityButton[] = [
-            {
-                label: "View Song",
-                url: trackData.url,
-            },
-        ];
+        const buttons: ActivityButton[] = [];
 
         if (settings.store.shareUsername)
             buttons.push({
                 label: "Last.fm Profile",
                 url: `https://www.last.fm/user/${settings.store.username}`,
+            });
+
+        if (settings.store.shareSong)
+            buttons.push({
+                label: "View Song",
+                url: trackData.url,
             });
 
         const statusName = (() => {
@@ -333,7 +339,7 @@ export default definePlugin({
             state: trackData.artist,
             assets,
 
-            buttons: buttons.map(v => v.label),
+            buttons: buttons.length ? buttons.map(v => v.label) : undefined,
             metadata: {
                 button_urls: buttons.map(v => v.url),
             },
