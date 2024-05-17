@@ -31,7 +31,7 @@ export interface ExpandableHeaderProps {
     buttons?: React.ReactNode[];
 }
 
-export default function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
+export function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
     const [showContent, setShowContent] = useState(defaultState);
 
     return (
