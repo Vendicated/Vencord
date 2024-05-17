@@ -22,7 +22,7 @@ import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { Patch, Plugin, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
-import { FluxEvents } from "@webpack/types";
+import type { FluxActionType } from "@webpack/types";
 
 import Plugins from "~plugins";
 
@@ -129,7 +129,7 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
 
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.subscribe(event as FluxEvents, handler);
+            fluxDispatcher.subscribe(event as FluxActionType, handler);
         }
     }
 }
@@ -140,7 +140,7 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
 
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+            fluxDispatcher.unsubscribe(event as FluxActionType, handler);
         }
     }
 }

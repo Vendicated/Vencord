@@ -19,20 +19,20 @@
 import type { Guild, GuildMember } from "discord-types/general"; // TODO
 import type { EventEmitter } from "events"; // Discord uses a polyfill for Node's EventEmitter
 import type { ReactNode } from "react";
-import type { OmitIndexSignature } from "type-fest";
 
-import type { ExtractAction, FluxAction, FluxActionType } from "./fluxActions";
+// import type { OmitIndexSignature } from "type-fest";
+import type { ExcludeAction, ExtractAction, FluxAction, FluxActionType } from "./fluxActions";
 import type { i18nMessages } from "./i18nMessages";
 
-export { ExtractAction, FluxAction, FluxActionType };
+export { ExcludeAction, ExtractAction, FluxAction, FluxActionType };
 
 type Nullish = null | undefined;
 
-class DepGraph<Data = any> {
+declare class DepGraph<Data = any> {
     constructor(options?: { circular?: boolean | undefined; } | undefined);
 
     addDependency(from: string, to: string): void;
-    addNode(name: string, data?: Data | undefined): void;
+    addNode(name: string, data/* ?*/: Data/* | undefined*/): void;
     clone(): DepGraph<Data>;
     dependantsOf(name: string, leavesOnly?: boolean | undefined): string[];
     dependenciesOf(name: string, leavesOnly?: boolean | undefined): string[];
@@ -41,62 +41,73 @@ class DepGraph<Data = any> {
     overallOrder(leavesOnly?: boolean | undefined): string[];
     removeDependency(from: string, to: string): void;
     removeNode(name: string): void;
-    setNodeData(name: string, data?: Data | undefined): void;
+    setNodeData(name: string, data/* ?*/: Data/* | undefined*/): void;
     size(): number;
 
     circular: boolean | undefined;
-    nodes: Record<string, Data | string>;
+    nodes: Record<string, Data/* | string*/>;
     outgoingEdges: Record<string, string[]>;
     incomingEdges: Record<string, string[]>;
 }
 
-export enum FluxDispatchBand {
-    Early,
-    Database,
-    Default
+export const enum FluxDispatchBand {
+    Early = 0,
+    Database = 1,
+    Default = 2
 }
 
-export type FluxActionHandler<Action = FluxAction, Return = void> = Action extends FluxAction<string>
+/*
+export type FluxActionHandler<Action = FluxAction, Return = void> = Action extends FluxAction
     ? Exclude<keyof OmitIndexSignature<Action>, "type"> extends never
         ? (action: any) => Return
         : (action: Action) => Return
     : never;
+*/
 
-export type FluxActionHandlers<Action extends FluxAction<string> = FluxAction>
+export type FluxActionHandler<Action extends FluxAction = FluxAction> = (action: Action) => void;
+
+export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
     = { [ActionType in Action["type"]]: FluxActionHandler<ExtractAction<Action, ActionType>>; };
 
-interface FluxActionHandlersGraphNode<Action extends FluxAction<string> = FluxAction> {
-    name: string;
-    band: number;
-    actionHandler: FluxActionHandler<Action>;
-    storeDidChange: FluxActionHandler<Action>;
+interface FluxActionHandlersGraphNode {
+    name: string; // storeName
+    band: FluxDispatchBand;
+    actionHandler: FluxActionHandlerMap<FluxAction>;
+    storeDidChange: FluxActionHandler<FluxAction>;
 }
 
-type FluxOrderedActionHandlers<Action extends FluxAction<string> = FluxAction>
-    = Omit<FluxActionHandlersGraphNode<Action>, "band">[];
+type FluxOrderedActionHandlers<Action extends FluxAction = FluxAction> = {
+    name: string; // storeName
+    actionHandler: FluxActionHandler<Action>;
+    storeDidChange: FluxActionHandler<Action>;
+}[];
 
-class FluxActionHandlersGraph<Action extends FluxAction<string> = FluxAction> {
-    _addToBand(token: string, band: FluxDispatchBand): void;
-    _bandToken(band: DispatcherBand): string;
-    _computeOrderedActionHandlers(actionType: Action["type"]): FluxOrderedActionHandlers<Action>;
+declare class FluxActionHandlersGraph {
+    _addToBand(dispatchToken: string, dispatchBand: FluxDispatchBand): void;
+    _bandToken(dispatchBand: FluxDispatchBand): string;
+    _computeOrderedActionHandlers<ActionType extends FluxActionType>(
+        actionType: ActionType
+    ): FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>>[];
     _computeOrderedCallbackTokens(): string[];
     _invalidateCaches(): void;
-    _validateDependencies(fromToken: string, toToken: string): void;
-    addDependencies(fromToken: string, toTokens: string[]): void;
+    _validateDependencies(fromDispatchToken: string, toDispatchToken: string): void;
+    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
     createToken(): string;
-    getOrderedActionHandlers(action: Action): FluxOrderedActionHandlers<Action>;
-    register(
-        name: string,
-        actionHandlers: Partial<FluxActionHandlers<Action>>,
+    getOrderedActionHandlers<ActionType extends FluxActionType>({ type }: {
+        type: ActionType;
+    }): FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>>;
+    register<Action extends FluxAction>(
+        storeName: string,
+        actionHandlers: FluxActionHandlerMap<Action>,
         storeDidChange: FluxActionHandler<Action>,
-        band: FluxDispatchBand,
-        token?: string | undefined
+        dispatchBand: FluxDispatchBand,
+        dispatchToken?: string | undefined
     ): string;
 
-    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode<Action>>;
+    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode>;
     _lastID: number;
     _orderedActionHandlers: {
-        [ActionType in Action["type"]]?: FluxOrderedActionHandlers<ExtractAction<Action, ActionType>> | Nullish;
+        [ActionType in FluxActionType]?: FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>> | Nullish;
     };
     _orderedCallbackTokens: string[] | Nullish;
 }
@@ -111,14 +122,14 @@ interface SentryUtils {
     }) => void;
 }
 
-type ActionMetric<ActionType extends string = FluxActionType>
+type FluxActionMetric<ActionType extends FluxActionType = FluxActionType>
     = [storeName: string, actionType: ActionType, totalTime: number];
 
-class FluxActionLog<Action extends FluxAction<string> = FluxAction> {
+declare class FluxActionLog<Action extends FluxAction = FluxAction> {
     constructor(actionType: Action["type"]);
 
     get name(): Action["type"];
-    toJSON(): Pick<FluxActionLog<Action["type"]>, "action" | "createdAt" | "traces"> & {
+    toJSON(): Pick<FluxActionLog<Action>, "action" | "createdAt" | "traces"> & {
         created_at: FluxActionLog["createdAt"];
     };
 
@@ -134,74 +145,84 @@ class FluxActionLog<Action extends FluxAction<string> = FluxAction> {
     }[];
 }
 
-class FluxActionLogger<Action extends FluxAction<string> = FluxAction> extends EventEmitter {
+declare class FluxActionLogger extends EventEmitter {
     constructor(options?: { persist?: boolean | undefined; } | undefined);
 
     getLastActionMetrics(
         title: string,
         limit?: number | undefined /* = 20 */
-    ): ActionMetric<Action["type"]>[];
-    getSlowestActions(
-        actionType?: Action["type"] | Nullish,
+    ): FluxActionMetric[];
+    getSlowestActions<ActionType extends FluxActionType = FluxActionType>(
+        actionType?: ActionType | Nullish,
         limit?: number | undefined /* = 20 */
-    ): ActionMetric<ActionType>[];
-    log<A extends Action>(
-        action: A,
-        callback: (func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>) => void
-    ): FluxActionLog<A>;
+    ): FluxActionMetric<ActionType>[];
+    log<Action extends FluxAction>(
+        action: Action,
+        callback: (func: <T extends () => any>(storeName: string, func: T) => ReturnType<T>) => void
+    ): FluxActionLog<Action>;
 
-    logs: FluxActionLog<Action>[];
+    logs: FluxActionLog[];
     persist: boolean;
 }
 
-export class FluxDispatcher<Action extends FluxAction<string> = FluxAction> {
+/*
+ * The only reason to make Dispatcher generic with a type parameter for the actions it handles would be to allow plugins
+ * to create their own Flux stores with their own actions. However, this would require removing all contravariant properties
+ * from Dispatcher so that plugins could create stores with their own Dispatcher instances. This would be required, since
+ * the alternative option, allowing plugins to use the main Dispatcher instance, would require removing type information for
+ * Discord's actions from Dispatcher, and would introduce the potential for action type name conflicts. Both of these
+ * options would harm the main use case of these types. Furthermore, there are other state management libraries bundled with
+ * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~388
+ * stores use the same instance), implying that their type for Dispatcher is also not generic.
+ */
+export class FluxDispatcher {
     constructor(
-        defaultBand?: FluxDispatchBand | undefined /* = 0 */,
-        actionLogger?: FluxActionLogger<Action> | Nullish,
+        defaultBand?: FluxDispatchBand | undefined /* = FluxDispatchBand.Early */,
+        actionLogger?: FluxActionLogger | Nullish,
         sentryUtils?: SentryUtils | Nullish
     );
 
     _dispatch(
-        action: Action,
+        action: FluxAction,
         func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>
     ): false | void;
-    _dispatchWithDevtools(action: Action): void;
-    _dispatchWithLogging(action: Action): void;
-    addDependencies(fromToken: string, toTokens: string[]): void;
-    addInterceptor(interceptor: FluxActionHandler<Action>): void;
+    _dispatchWithDevtools(action: FluxAction): void;
+    _dispatchWithLogging(action: FluxAction): void;
+    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
+    addInterceptor(interceptor: FluxActionHandler): void;
     createToken(): string;
-    dispatch(action: Action): Promise<void>;
+    dispatch(action: FluxAction): Promise<void>;
     flushWaitQueue(): void;
     isDispatching(): boolean;
-    register(
-        name: string,
-        actionHandlers: Partial<FluxActionHandlers<Action>>,
+    register<Action extends FluxAction>(
+        storeName: string,
+        actionHandlers: FluxActionHandlerMap<Action>,
         storeDidChange: FluxActionHandler<Action>,
-        band?: FluxDispatchBand | Nullish,
-        token?: string | undefined
+        dispatchBand?: FluxDispatchBand | Nullish,
+        dispatchToken?: string | undefined
     ): string;
-    subscribe<ActionType extends Action["type"]>(
+    subscribe<ActionType extends FluxActionType>(
         actionType: ActionType,
-        listener: FluxActionHandler<ExtractAction<Action, ActionType>>
+        listener: FluxActionHandler<ExtractAction<FluxAction, ActionType>>
     ): void;
-    unsubscribe<ActionType extends Action["type"]>(
+    unsubscribe<ActionType extends FluxActionType>(
         actionType: ActionType,
-        listener: FluxActionHandler<ExtractAction<Action, ActionType>>
+        listener: FluxActionHandler<ExtractAction<FluxAction, ActionType>>
     ): void;
     wait(callback: () => void): void;
 
-    _actionHandlers: FluxActionHandlersGraph<Action>;
-    _currentDispatchActionType: Action["type"] | Nullish;
+    _actionHandlers: FluxActionHandlersGraph;
+    _currentDispatchActionType: FluxActionType | Nullish;
     _defaultBand: FluxDispatchBand;
-    _interceptors: ((action: Action) => boolean)[];
+    _interceptors: ((action: FluxAction) => boolean)[];
     _processingWaitQueue: boolean;
     _sentryUtils: SentryUtils | Nullish;
     _subscriptions: {
-        [ActionType in Action["type"]]?: Set<FluxActionHandler<ExtractAction<Action, ActionType>>> | Nullish;
+        [ActionType in FluxActionType]?: Set<FluxActionHandler<ExtractAction<FluxAction, ActionType>>> | Nullish;
     };
     _waitQueue: (() => void)[];
-    actionLogger: FluxActionLogger<Action>;
-    functionCache: FluxActionHandlers<Action>;
+    actionLogger: FluxActionLogger;
+    functionCache: FluxActionHandlerMap<FluxAction>;
 }
 
 export type Parser = Record<
@@ -352,6 +373,7 @@ export interface NavigationRouter {
 }
 
 export interface IconUtils {
+    // @ts-expect-error: TODO
     getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
     getDefaultAvatarURL(id: string, discriminator?: string): string;
     getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;

@@ -46,12 +46,12 @@ export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
-export let UserStore: Stores.UserStore & t.FluxStore;
-export let UserProfileStore: GenericStore;
+export let UserStore: t.UserStore;
+export let UserProfileStore: t.UserProfileStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
-export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
+export let GuildMemberStore: t.GuildMemberStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
@@ -65,28 +65,28 @@ export let DraftStore: t.DraftStore;
  * React hook that returns stateful data for one or more stores
  * You might need a custom comparator (4th argument) if your store data is an object
  * @param stores The stores to listen to
- * @param mapper A function that returns the data you need
+ * @param getStateFromStores A function that returns the data you need
  * @param dependencies An array of reactive values which the hook depends on. Use this if your mapper or equality function depends on the value of another hook
- * @param isEqual A custom comparator for the data returned by mapper
+ * @param areStatesEqual A custom comparator for the data returned by mapper
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
 // eslint-disable-next-line prefer-destructuring
 export const useStateFromStores: t.useStateFromStores = findByPropsLazy("useStateFromStores").useStateFromStores;
 
-waitForStore("DraftStore", s => DraftStore = s);
-waitForStore("UserStore", s => UserStore = s);
-waitForStore("UserProfileStore", m => UserProfileStore = m);
 waitForStore("ChannelStore", m => ChannelStore = m);
-waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
-waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
-waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("DraftStore", s => DraftStore = s);
+waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
-waitForStore("RelationshipStore", m => RelationshipStore = m);
+waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
-waitForStore("GuildChannelStore", m => GuildChannelStore = m);
-waitForStore("MessageStore", m => MessageStore = m);
+waitForStore("RelationshipStore", m => RelationshipStore = m);
+waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
+waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
+waitForStore("UserProfileStore", m => UserProfileStore = m);
+waitForStore("UserStore", s => UserStore = s);
 waitForStore("WindowStore", m => WindowStore = m);
-waitForStore("EmojiStore", m => EmojiStore = m);

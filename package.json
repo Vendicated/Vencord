@@ -68,7 +68,7 @@
         "stylelint-config-standard": "^33.0.0",
         "tsx": "^3.12.7",
         "type-fest": "^3.9.0",
-        "typescript": "^5.0.4",
+        "typescript": "^5.4.5",
         "zip-local": "^0.3.5",
         "zustand": "^3.7.2"
     },
