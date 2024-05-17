@@ -14,10 +14,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "updateHangStatus:function",
+            find: "HangStatusTypes.CHILLING)",
             replacement: {
-                match: /(?<=function \i\(\i,(\i)\)\{var \i;if\(null==\i)\)/,
-                replace: "||$1===undefined)"
+                match: /{enableHangStatus:(\i),/,
+                replace: "{_enableHangStatus:$1=false,"
             }
         }
     ]
