@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { DraftType } from "@webpack/common";
 import type { APIGuild, APIRoleTags, APIUser } from "discord-api-types/v9";
 import type { Channel } from "discord-types/general"; // TODO
 
@@ -150,6 +149,15 @@ export interface DraftObject {
     draft: string;
 }
 
+export enum DraftType {
+    ChannelMessage,
+    ThreadSettings,
+    FirstThreadMessage,
+    ApplicationLauncherCommand,
+    Poll,
+    SlashCommand,
+}
+
 interface DraftState {
     [userId: string]: {
         [channelId: string]: {
@@ -180,6 +188,7 @@ export interface CustomEmoji {
     require_colons: boolean;
     roles: string[];
     url: string;
+    type: "GUILD_EMOJI";
 }
 
 export interface UnicodeEmoji {
@@ -191,6 +200,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
+    type: "UNICODE";
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
