@@ -83,7 +83,7 @@ export interface IconCSSProperties extends CSSProperties {
 }
 
 export interface ActivityViewProps {
-    activity: Activity;
+    activity: Activity | null;
     user: User;
     guild: Guild;
     channelId: string;
