@@ -20,6 +20,7 @@ import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
+import { canonicalizeFind } from "@utils/patches";
 import { Patch, Plugin, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
@@ -83,8 +84,12 @@ for (const p of pluginsValues) {
     if (p.patches && isPluginEnabled(p.name)) {
         for (const patch of p.patches) {
             patch.plugin = p.name;
-            if (!Array.isArray(patch.replacement))
+
+            canonicalizeFind(patch);
+            if (!Array.isArray(patch.replacement)) {
                 patch.replacement = [patch.replacement];
+            }
+
             patches.push(patch);
         }
     }
@@ -165,12 +170,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
         try {
             p.start();
-            p.started = true;
         } catch (e) {
             logger.error(`Failed to start ${name}\n`, e);
             return false;
         }
     }
+
+    p.started = true;
 
     if (commands?.length) {
         logger.debug("Registering commands of plugin", name);
@@ -201,6 +207,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const { name, commands, flux, contextMenus } = p;
+
     if (p.stop) {
         logger.info("Stopping plugin", name);
         if (!p.started) {
@@ -209,12 +216,13 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
         try {
             p.stop();
-            p.started = false;
         } catch (e) {
             logger.error(`Failed to stop ${name}\n`, e);
             return false;
         }
     }
+
+    p.started = false;
 
     if (commands?.length) {
         logger.debug("Unregistering commands of plugin", name);

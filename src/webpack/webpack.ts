@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
+import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -462,7 +462,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
-    return () => extractAndLoadChunks(code, matcher);
+    return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
 
 /**
