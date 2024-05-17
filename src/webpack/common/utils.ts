@@ -121,7 +121,7 @@ export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
 export const PermissionsBits = find<t.PermissionsBits>(m => typeof m.Permissions?.ADMINISTRATOR === "bigint", m => m.Permissions);
 
-export const zustandCreate = findByCode<typeof import("zustand").default>("will be removed in v4");
+export const zustandCreate = findByCode("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
 export const zustandPersist = find(m => m.persist && persistFilter(m.persist), m => m.persist);
