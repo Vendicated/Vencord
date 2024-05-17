@@ -76,7 +76,7 @@ await Promise.all([
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "Vencord.Plugins.loadExternalPlugins();\n//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
@@ -110,7 +110,7 @@ await Promise.all([
         outfile: "dist/vencordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "Vencord.Plugins.loadExternalPlugins();\n//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
+        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
