@@ -587,6 +587,10 @@ export const EquicordDevs = Object.freeze({
         name: "SerStars",
         id: 861631850681729045n
     },
+    nyx: {
+        name: "verticalsync",
+        id: 328165170536775680n,
+    },
     MaxHerbold: {
         name: "MaxHerbold",
         id: 1189527130611138663n,
