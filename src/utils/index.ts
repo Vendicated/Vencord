@@ -16,27 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
+export * from "../shared/debounce";
+export * from "../shared/onceDefined";
 export * from "./ChangeList";
-export * as Constants from "./constants";
-export * from "./debounce";
+export * from "./constants";
 export * from "./discord";
 export * from "./guards";
-export { default as IpcEvents } from "./IpcEvents";
-export { default as Logger } from "./Logger";
+export * from "./lazy";
+export * from "./localStorage";
+export * from "./Logger";
 export * from "./margins";
 export * from "./misc";
 export * from "./modal";
-export * from "./onceDefined";
-export * from "./proxyLazy";
+export * from "./onlyOnce";
+export * from "./patches";
 export * from "./Queue";
 export * from "./react";
 export * from "./text";
-
-import * as t from "./types";
-
-export const types = {
-    // necessary so plugin repo's esbuild doesn't explode
-    __esModule: true,
-    ...t
-};
