@@ -22,13 +22,13 @@ import { debounce } from "@utils/debounce";
 import IpcEvents from "@utils/IpcEvents";
 import { Queue } from "@utils/Queue";
 import { BrowserWindow, ipcMain, shell } from "electron";
-import { mkdirSync, readdirSync, readFileSync, watch } from "fs";
+import { mkdirSync, readFileSync, watch } from "fs";
 import { open, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 
 import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
 
-import { ALLOWED_PROTOCOLS, PLUGINS_DIR, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
 
@@ -104,16 +104,4 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         }
     });
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
-});
-
-ipcMain.on(IpcEvents.GET_PLUGINS, e => {
-    try {
-        const files = readdirSync(PLUGINS_DIR).filter(f => f.endsWith(".js"));
-        console.log(files);
-
-        e.returnValue = files.map(f => [f, readFileSync(join(PLUGINS_DIR, f), "utf-8")]);
-    } catch (err) {
-        console.error(err);
-        e.returnValue = [];
-    }
 });
