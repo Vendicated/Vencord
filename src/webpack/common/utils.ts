@@ -125,7 +125,6 @@ export const zustandCreate = findByCode<typeof import("zustand").default>("will 
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
 export const zustandPersist = find(m => m.persist && persistFilter(m.persist), m => m.persist);
-export const zustandCreate = findByCodeLazy("will be removed in v4");
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
 export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");
