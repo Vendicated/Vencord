@@ -16,20 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-function fetchOptions(url) {
-    return new Promise((resolve, reject) => {
-        const opt = {
-            method: "OPTIONS",
-            url: url,
-        };
-        opt.onload = resp => resolve(resp.responseHeaders);
-        opt.ontimeout = () => reject("fetch timeout");
-        opt.onerror = () => reject("fetch error");
-        opt.onabort = () => reject("fetch abort");
-        GM_xmlhttpRequest(opt);
-    });
-}
-
 function parseHeaders(headers) {
     if (!headers)
         return {};
@@ -52,19 +38,6 @@ function parseHeaders(headers) {
     return result;
 }
 
-// returns true if CORS permits request
-async function checkCors(url, method) {
-    const headers = parseHeaders(await fetchOptions(url));
-
-    const origin = headers["access-control-allow-origin"];
-    if (origin !== "*" && origin !== window.location.origin) return false;
-
-    const methods = headers["access-control-allow-methods"]?.toLowerCase().split(/,\s/g);
-    if (methods && !methods.includes(method.toLowerCase())) return false;
-
-    return true;
-}
-
 function blobTo(to, blob) {
     if (to === "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
     return new Promise((resolve, reject) => {
@@ -78,31 +51,25 @@ function blobTo(to, blob) {
 
 function GM_fetch(url, opt) {
     return new Promise((resolve, reject) => {
-        checkCors(url, opt?.method || "GET")
-            .then(can => {
-                if (can) {
-                    // https://www.tampermonkey.net/documentation.php?ext=dhdg#GM_xmlhttpRequest
-                    const options = opt || {};
-                    options.url = url;
-                    options.data = options.body;
-                    options.responseType = "blob";
-                    options.onload = resp => {
-                        var blob = resp.response;
-                        resp.blob = () => Promise.resolve(blob);
-                        resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
-                        resp.text = () => blobTo("text", blob);
-                        resp.json = async () => JSON.parse(await blobTo("text", blob));
-                        resp.headers = new Headers(parseHeaders(resp.responseHeaders));
-                        resolve(resp);
-                    };
-                    options.ontimeout = () => reject("fetch timeout");
-                    options.onerror = () => reject("fetch error");
-                    options.onabort = () => reject("fetch abort");
-                    GM_xmlhttpRequest(options);
-                } else {
-                    reject("CORS issue");
-                }
-            });
+        // https://www.tampermonkey.net/documentation.php?ext=dhdg#GM_xmlhttpRequest
+        const options = opt || {};
+        options.url = url;
+        options.data = options.body;
+        options.responseType = "blob";
+        options.onload = resp => {
+            var blob = resp.response;
+            resp.blob = () => Promise.resolve(blob);
+            resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
+            resp.text = () => blobTo("text", blob);
+            resp.json = async () => JSON.parse(await blobTo("text", blob));
+            resp.headers = parseHeaders(resp.responseHeaders);
+            resp.ok = resp.status >= 200 && resp.status < 300;
+            resolve(resp);
+        };
+        options.ontimeout = () => reject("fetch timeout");
+        options.onerror = () => reject("fetch error");
+        options.onabort = () => reject("fetch abort");
+        GM_xmlhttpRequest(options);
     });
 }
 export const fetch = GM_fetch;

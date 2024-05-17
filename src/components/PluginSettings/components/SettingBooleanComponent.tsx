@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionBoolean } from "@utils/types";
-import { Forms, React, Select } from "@webpack/common";
+import { Forms, React, Switch } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
 
@@ -30,11 +31,6 @@ export function SettingBooleanComponent({ option, pluginSettings, definedSetting
     React.useEffect(() => {
         onError(error !== null);
     }, [error]);
-
-    const options = [
-        { label: "Enabled", value: true, default: def === true },
-        { label: "Disabled", value: false, default: typeof def === "undefined" || def === false },
-    ];
 
     function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
@@ -49,18 +45,17 @@ export function SettingBooleanComponent({ option, pluginSettings, definedSetting
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>{option.description}</Forms.FormTitle>
-            <Select
-                isDisabled={option.disabled?.call(definedSettings) ?? false}
-                options={options}
-                placeholder={option.placeholder ?? "Select an option"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                select={handleChange}
-                isSelected={v => v === state}
-                serialize={v => String(v)}
+            <Switch
+                value={state}
+                onChange={handleChange}
+                note={option.description}
+                disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
-            />
+                hideBorder
+                style={{ marginBottom: "0.5em" }}
+            >
+                {wordsToTitle(wordsFromCamel(id))}
+            </Switch>
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
     );

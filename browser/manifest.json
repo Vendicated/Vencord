@@ -28,7 +28,7 @@
 
     "web_accessible_resources": [
         {
-            "resources": ["dist/Vencord.js", "dist/Vencord.css"],
+            "resources": ["dist/*", "third-party/*"],
             "matches": ["*://*.discord.com/*"]
         }
     ],
@@ -41,12 +41,5 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
-    },
-
-    "browser_specific_settings": {
-        "gecko": {
-            "id": "vencord-firefox@vendicated.dev",
-            "strict_min_version": "109.0"
-        }
     }
 }

@@ -1,4 +1,4 @@
-/* eslint-disable header/header */
+/* eslint-disable simple-header/header */
 
 /*!
  * idb-keyval v6.2.0

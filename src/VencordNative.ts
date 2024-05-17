@@ -1,49 +1,77 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import IPC_EVENTS from "@utils/IpcEvents";
-import { IpcRenderer, ipcRenderer } from "electron";
+import { PluginIpcMappings } from "@main/ipcPlugins";
+import type { UserThemeHeader } from "@main/themes";
+import { IpcEvents } from "@shared/IpcEvents";
+import { IpcRes } from "@utils/types";
+import type { Settings } from "api/Settings";
+import { ipcRenderer } from "electron";
 
-function assertEventAllowed(event: string) {
-    if (!(event in IPC_EVENTS)) throw new Error(`Event ${event} not allowed.`);
+function invoke<T = any>(event: IpcEvents, ...args: any[]) {
+    return ipcRenderer.invoke(event, ...args) as Promise<T>;
 }
-export default {
-    getVersions: () => process.versions,
-    ipc: {
-        send(event: string, ...args: any[]) {
-            assertEventAllowed(event);
-            ipcRenderer.send(event, ...args);
-        },
-        sendSync<T = any>(event: string, ...args: any[]): T {
-            assertEventAllowed(event);
-            return ipcRenderer.sendSync(event, ...args);
-        },
-        on(event: string, listener: Parameters<IpcRenderer["on"]>[1]) {
-            assertEventAllowed(event);
-            ipcRenderer.on(event, listener);
-        },
-        off(event: string, listener: Parameters<IpcRenderer["off"]>[1]) {
-            assertEventAllowed(event);
-            ipcRenderer.off(event, listener);
-        },
-        invoke<T = any>(event: string, ...args: any[]): Promise<T> {
-            assertEventAllowed(event);
-            return ipcRenderer.invoke(event, ...args);
-        }
+
+export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
+    return ipcRenderer.sendSync(event, ...args) as T;
+}
+
+const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
+
+for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
+    const map = PluginHelpers[plugin] = {};
+    for (const [methodName, method] of Object.entries(methods)) {
+        map[methodName] = (...args: any[]) => invoke(method as IpcEvents, ...args);
     }
+}
+
+export default {
+    themes: {
+        uploadTheme: (fileName: string, fileData: string) => invoke<void>(IpcEvents.UPLOAD_THEME, fileName, fileData),
+        deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
+        getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
+        getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
+        getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
+        getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
+    },
+
+    updater: {
+        getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
+        update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
+        rebuild: () => invoke<IpcRes<boolean>>(IpcEvents.BUILD),
+        getRepo: () => invoke<IpcRes<string>>(IpcEvents.GET_REPO),
+    },
+
+    settings: {
+        get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
+        set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
+        getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
+    },
+
+    quickCss: {
+        get: () => invoke<string>(IpcEvents.GET_QUICK_CSS),
+        set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
+
+        addChangeListener(cb: (newCss: string) => void) {
+            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => cb(css));
+        },
+
+        addThemeChangeListener(cb: () => void) {
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
+        },
+
+        openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
+        openEditor: () => invoke<void>(IpcEvents.OPEN_MONACO_EDITOR),
+    },
+
+    native: {
+        getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
+        openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    },
+
+    pluginHelpers: PluginHelpers
 };

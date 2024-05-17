@@ -22,7 +22,7 @@ import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
 
-export enum BadgePosition {
+export const enum BadgePosition {
     START,
     END
 }
@@ -36,7 +36,7 @@ export interface ProfileBadge {
     image?: string;
     link?: string;
     /** Action to perform when you click the badge */
-    onClick?(): void;
+    onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, props: BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
@@ -79,17 +79,15 @@ export function _getBadges(args: BadgeUserArgs) {
                 : badges.push({ ...badge, ...args });
         }
     }
-    const donorBadge = (Plugins.BadgeAPI as any).getDonorBadge(args.user.id);
-    if (donorBadge) badges.unshift(donorBadge);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.user.id);
+    if (donorBadges) badges.unshift(...donorBadges);
 
     return badges;
 }
 
 export interface BadgeUserArgs {
     user: User;
-    profile: Profile;
-    premiumSince: Date;
-    premiumGuildSince?: Date;
+    guildId: string;
 }
 
 interface ConnectedAccount {

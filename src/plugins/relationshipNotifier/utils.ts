@@ -18,7 +18,8 @@
 
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
-import { ChannelStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
+import { getUniqueUsername, openUserProfile } from "@utils/discord";
+import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
@@ -67,32 +68,44 @@ export async function syncAndRunChecks() {
             for (const id of oldFriends.friends) {
                 if (friends.friends.includes(id)) continue;
 
-                const user = await UserUtils.fetchUser(id).catch(() => void 0);
+                const user = await UserUtils.getUser(id).catch(() => void 0);
                 if (user)
-                    notify(`You are no longer friends with ${user.tag}.`, user.getAvatarURL(undefined, undefined, false));
+                    notify(
+                        `You are no longer friends with ${getUniqueUsername(user)}.`,
+                        user.getAvatarURL(undefined, undefined, false),
+                        () => openUserProfile(user.id)
+                    );
             }
         }
 
         if (settings.store.friendRequestCancels && oldFriends?.requests?.length) {
             for (const id of oldFriends.requests) {
-                if (friends.requests.includes(id)) continue;
+                if (
+                    friends.requests.includes(id) ||
+                    [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.OUTGOING_REQUEST].includes(RelationshipStore.getRelationshipType(id))
+                ) continue;
 
-                const user = await UserUtils.fetchUser(id).catch(() => void 0);
+                const user = await UserUtils.getUser(id).catch(() => void 0);
                 if (user)
-                    notify(`Friend request from ${user.tag} has been revoked.`, user.getAvatarURL(undefined, undefined, false));
+                    notify(
+                        `Friend request from ${getUniqueUsername(user)} has been revoked.`,
+                        user.getAvatarURL(undefined, undefined, false),
+                        () => openUserProfile(user.id)
+                    );
             }
         }
     }
 }
 
-export function notify(text: string, icon?: string) {
+export function notify(text: string, icon?: string, onClick?: () => void) {
     if (settings.store.notices)
         Notices.showNotice(text, "OK", () => Notices.popNotice());
 
     showNotification({
         title: "Relationship Notifier",
         body: text,
-        icon
+        icon,
+        onClick
     });
 }
 
@@ -106,12 +119,16 @@ export function deleteGuild(id: string) {
 }
 
 export async function syncGuilds() {
+    guilds.clear();
+
+    const me = UserStore.getCurrentUser().id;
     for (const [id, { name, icon }] of Object.entries(GuildStore.getGuilds())) {
-        guilds.set(id, {
-            id,
-            name,
-            iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
-        });
+        if (GuildMemberStore.isMember(id, me))
+            guilds.set(id, {
+                id,
+                name,
+                iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
+            });
     }
     await DataStore.set(guildsKey(), guilds);
 }
@@ -126,6 +143,8 @@ export function deleteGroup(id: string) {
 }
 
 export async function syncGroups() {
+    groups.clear();
+
     for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
         if (type === ChannelType.GROUP_DM)
             groups.set(id, {
@@ -148,7 +167,7 @@ export async function syncFriends() {
             case RelationshipType.FRIEND:
                 friends.friends.push(id);
                 break;
-            case RelationshipType.FRIEND_REQUEST:
+            case RelationshipType.INCOMING_REQUEST:
                 friends.requests.push(id);
                 break;
         }

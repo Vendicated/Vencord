@@ -16,66 +16,62 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { awaitAndFormatPronouns } from "../pronoundbUtils";
+import { useFormattedPronouns } from "../pronoundbUtils";
+import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
 
+const AUTO_MODERATION_ACTION = 24;
+
 function shouldShow(message: Message): boolean {
-    // Respect showInMessages
-    if (!Settings.plugins.PronounDB.showInMessages)
+    if (!settings.store.showInMessages)
         return false;
-    // Don't bother fetching bot or system users
-    if (message.author.bot || message.author.system)
+    if (message.author.bot || message.author.system || message.type === AUTO_MODERATION_ACTION)
         return false;
-    // Respect showSelf options
-    if (!Settings.plugins.PronounDB.showSelf && message.author.id === UserStore.getCurrentUser().id)
+    if (!settings.store.showSelf && message.author.id === UserStore.getCurrentUser().id)
         return false;
 
     return true;
 }
 
-export function PronounsChatComponentWrapper({ message }: { message: Message; }) {
-    if (!shouldShow(message))
-        return null;
+export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
+    return shouldShow(message)
+        ? <PronounsChatComponent message={message} />
+        : null;
+}, { noop: true });
 
-    return <PronounsChatComponent message={message} />;
-}
-
-export function CompactPronounsChatComponentWrapper({ message }: { message: Message; }) {
-    if (!shouldShow(message))
-        return null;
-
-    return <CompactPronounsChatComponent message={message} />;
-}
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
+    return shouldShow(message)
+        ? <CompactPronounsChatComponent message={message} />
+        : null;
+}, { noop: true });
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const result = awaitAndFormatPronouns(message.author.id);
-    if (result != null) {
-        return (
+    const [result] = useFormattedPronouns(message.author.id);
+
+    return result
+        ? (
             <span
                 className={classes(styles.timestampInline, styles.timestamp)}
             >• {result}</span>
-        );
-    }
-
-    return null;
+        )
+        : null;
 }
 
-export function CompactPronounsChatComponent({ message }: { message: Message; }) {
-    const result = awaitAndFormatPronouns(message.author.id);
-    if (result != null) {
-        return (
+export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
+    const [result] = useFormattedPronouns(message.author.id);
+
+    return result
+        ? (
             <span
                 className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
             >• {result}</span>
-        );
-    }
-
-    return null;
-}
+        )
+        : null;
+}, { noop: true });

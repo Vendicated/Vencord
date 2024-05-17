@@ -17,39 +17,57 @@
 */
 
 import "./updater";
+import "./ipcPlugins";
+import "./settings";
 
-import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
-import { Queue } from "@utils/Queue";
-import { BrowserWindow, ipcMain, shell } from "electron";
-import { mkdirSync, readFileSync, watch } from "fs";
-import { open, readFile, writeFile } from "fs/promises";
-import { join } from "path";
+import { debounce } from "@shared/debounce";
+import { IpcEvents } from "@shared/IpcEvents";
+import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
+import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
+import { open, readdir, readFile } from "fs/promises";
+import { join, normalize } from "path";
 
-import monacoHtml from "~fileContent/../components/monacoWin.html;base64";
+import monacoHtml from "~fileContent/monacoWin.html;base64";
 
-import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
+import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, THEMES_DIR } from "./utils/constants";
+import { makeLinksOpenExternally } from "./utils/externalLinks";
 
-mkdirSync(SETTINGS_DIR, { recursive: true });
+mkdirSync(THEMES_DIR, { recursive: true });
+
+export function ensureSafePath(basePath: string, path: string) {
+    const normalizedBasePath = normalize(basePath);
+    const newPath = join(basePath, path);
+    const normalizedPath = normalize(newPath);
+    return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
+}
 
 function readCss() {
     return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
 }
 
-export function readSettings() {
-    try {
-        return readFileSync(SETTINGS_FILE, "utf-8");
-    } catch {
-        return "{}";
+async function listThemes(): Promise<UserThemeHeader[]> {
+    const files = await readdir(THEMES_DIR).catch(() => []);
+
+    const themeInfo: UserThemeHeader[] = [];
+
+    for (const fileName of files) {
+        if (!fileName.endsWith(".css")) continue;
+
+        const data = await getThemeData(fileName).then(stripBOM).catch(() => null);
+        if (data == null) continue;
+
+        themeInfo.push(getThemeInfo(data, fileName));
     }
+
+    return themeInfo;
 }
 
-export function getSettings(): typeof import("@api/settings").Settings {
-    try {
-        return JSON.parse(readSettings());
-    } catch {
-        return {} as any;
-    }
+function getThemeData(fileName: string) {
+    fileName = fileName.replace(/\?v=\d+$/, "");
+    const safePath = ensureSafePath(THEMES_DIR, fileName);
+    if (!safePath) return Promise.reject(`Unsafe path ${fileName}`);
+    return readFile(safePath, "utf-8");
 }
 
 ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
@@ -66,42 +84,62 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     shell.openExternal(url);
 });
 
-const cssWriteQueue = new Queue();
-const settingsWriteQueue = new Queue();
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    cssWriteQueue.push(() => writeFile(QUICKCSS_PATH, css))
+    writeFileSync(QUICKCSS_PATH, css)
 );
 
-ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
-ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = readSettings());
-
-ipcMain.handle(IpcEvents.SET_SETTINGS, (_, s) => {
-    settingsWriteQueue.push(() => writeFile(SETTINGS_FILE, s));
-});
+ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
+ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
+ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
+ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
+    // win & mac only
+    "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
+}));
 
 
 export function initIpc(mainWindow: BrowserWindow) {
+    let quickCssWatcher: FSWatcher | undefined;
+
     open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
-        watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
+        quickCssWatcher = watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
             mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
+    }).catch(() => { });
+
+    const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
+        mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
+    }));
+
+    mainWindow.once("closed", () => {
+        quickCssWatcher?.close();
+        themesWatcher.close();
     });
 }
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
+    const title = "Vencord QuickCSS Editor";
+    const existingWindow = BrowserWindow.getAllWindows().find(w => w.title === title);
+    if (existingWindow && !existingWindow.isDestroyed()) {
+        existingWindow.focus();
+        return;
+    }
+
     const win = new BrowserWindow({
-        title: "Vencord QuickCSS Editor",
+        title,
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {
-            preload: join(__dirname, "preload.js"),
+            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: false
         }
     });
+
+    makeLinksOpenExternally(win);
+
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
 });

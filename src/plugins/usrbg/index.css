@@ -1,31 +1,12 @@
 :is([class*="userProfile"], [class*="userPopout"]) [class*="bannerPremium"] {
     background: center / cover no-repeat;
-    position: relative;
-    z-index: -1;
-}
-
-[class*="userPopout"] [class*="NonPremium"] [class*="bannerPremium"] {
-    top: -30px;
-}
-
-[class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] {
-    min-height: 120px !important;
-}
-
-[class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] foreignObject {
-    height: 360px;
-}
-
-[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] rect {
-    height: 120px;
-    y: -30;
-}
-
-[class*="userPopout"] [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="bannerSVGWrapper"] circle {
-    cy: 86;
 }
 
 [class*="NonPremium"]:has([class*="bannerPremium"]) [class*="avatarPositionNormal"],
 [class*="PremiumWithoutBanner"]:has([class*="bannerPremium"]) [class*="avatarPositionPremiumNoBanner"] {
     top: 76px;
+}
+
+[style*="background-image"] [class*="background_"] {
+    background-color: transparent !important;
 }

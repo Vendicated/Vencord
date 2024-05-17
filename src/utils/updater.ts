@@ -18,8 +18,7 @@
 
 import gitHash from "~git-hash";
 
-import IpcEvents from "./IpcEvents";
-import Logger from "./Logger";
+import { Logger } from "./Logger";
 import { relaunch } from "./native";
 import { IpcRes } from "./types";
 
@@ -39,7 +38,7 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.ipc.invoke<IpcRes<typeof changes>>(IpcEvents.GET_UPDATES));
+    changes = await Unwrap(VencordNative.updater.getUpdates());
     if (changes.some(c => c.hash === gitHash)) {
         isNewer = true;
         return (isOutdated = false);
@@ -50,25 +49,21 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.UPDATE));
+    const res = await Unwrap(VencordNative.updater.update());
 
-    if (res)
+    if (res) {
         isOutdated = false;
+        if (!await Unwrap(VencordNative.updater.rebuild()))
+            throw new Error("The Build failed. Please try manually building the new update");
+    }
 
     return res;
 }
 
-export function getRepo() {
-    return Unwrap(VencordNative.ipc.invoke<IpcRes<string>>(IpcEvents.GET_REPO));
-}
-
-export async function rebuild() {
-    if (!await Unwrap(VencordNative.ipc.invoke<IpcRes<boolean>>(IpcEvents.BUILD)))
-        throw new Error("The Build failed. Please try manually building the new update");
-}
+export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
-    if (IS_WEB) return;
+    if (IS_WEB || IS_UPDATER_DISABLED) return;
     if (checkForDev && IS_DEV) return;
 
     try {
@@ -78,7 +73,6 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
             if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
             if (wantsUpdate) {
                 await update();
-                await rebuild();
                 relaunch();
             }
         }

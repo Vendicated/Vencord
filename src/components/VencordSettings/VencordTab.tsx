@@ -16,18 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import IpcEvents from "@utils/IpcEvents";
 import { Margins } from "@utils/margins";
-import { identity, useAwaiter } from "@utils/misc";
+import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
+import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
+
+import { SettingsTab, wrapTab } from "./shared";
 
 const cl = classNameFactory("vc-settings-");
 
@@ -39,7 +39,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function VencordSettings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(() => VencordNative.ipc.invoke<string>(IpcEvents.GET_SETTINGS_DIR), {
+    const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
         fallbackValue: "Loading..."
     });
     const settings = useSettings();
@@ -48,6 +48,7 @@ function VencordSettings() {
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -74,10 +75,10 @@ function VencordSettings() {
                 title: "Use Windows' native title bar instead of Discord's custom one",
                 note: "Requires a full restart"
             }),
-            !IS_WEB && false /* This causes electron to freeze / white screen for some people */ && {
+            !IS_WEB && {
                 key: "transparent",
-                title: "Enable window transparency",
-                note: "Requires a full restart"
+                title: "Enable window transparency.",
+                note: "You need a theme that supports transparency or this will do nothing. Will stop the window from being resizable. Requires a full restart"
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
@@ -89,52 +90,42 @@ function VencordSettings() {
                 title: "Disable minimum window size",
                 note: "Requires a full restart"
             },
-            IS_DISCORD_DESKTOP && isMac && {
-                key: "macosTranslucency",
-                title: "Enable translucent window",
-                note: "Requires a full restart"
-            }
         ];
 
     return (
-        <React.Fragment>
+        <SettingsTab title="Vencord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
-                    {IS_WEB ? (
-                        <Button
-                            onClick={() => require("../Monaco").launchMonacoEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
-                        </Button>
-                    ) : (
-                        <React.Fragment>
+                    <React.Fragment>
+                        {!IS_WEB && (
                             <Button
                                 onClick={relaunch}
                                 size={Button.Sizes.SMALL}>
                                 Restart Client
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_MONACO_EDITOR)}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDir === "Loading..."}>
-                                Open QuickCSS File
-                            </Button>
+                        )}
+                        <Button
+                            onClick={() => VencordNative.quickCss.openEditor()}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDir === "Loading..."}>
+                            Open QuickCSS File
+                        </Button>
+                        {!IS_WEB && (
                             <Button
                                 onClick={() => showItemInFolder(settingsDir)}
                                 size={Button.Sizes.SMALL}
                                 disabled={settingsDirPending}>
                                 Open Settings Folder
                             </Button>
-                            <Button
-                                onClick={() => VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, "https://github.com/Vendicated/Vencord")}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDirPending}>
-                                Open in GitHub
-                            </Button>
-                        </React.Fragment>
-                    )}
+                        )}
+                        <Button
+                            onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                            size={Button.Sizes.SMALL}
+                            disabled={settingsDirPending}>
+                            Open in GitHub
+                        </Button>
+                    </React.Fragment>
                 </Card>
             </Forms.FormSection>
 
@@ -157,8 +148,72 @@ function VencordSettings() {
             </Forms.FormSection>
 
 
+            {needsVibrancySettings && <>
+                <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+                <Select
+                    className={Margins.bottom20}
+                    placeholder="Window vibrancy style"
+                    options={[
+                        // Sorted from most opaque to most transparent
+                        {
+                            label: "No vibrancy", value: undefined
+                        },
+                        {
+                            label: "Under Page (window tinting)",
+                            value: "under-page"
+                        },
+                        {
+                            label: "Content",
+                            value: "content"
+                        },
+                        {
+                            label: "Window",
+                            value: "window"
+                        },
+                        {
+                            label: "Selection",
+                            value: "selection"
+                        },
+                        {
+                            label: "Titlebar",
+                            value: "titlebar"
+                        },
+                        {
+                            label: "Header",
+                            value: "header"
+                        },
+                        {
+                            label: "Sidebar",
+                            value: "sidebar"
+                        },
+                        {
+                            label: "Tooltip",
+                            value: "tooltip"
+                        },
+                        {
+                            label: "Menu",
+                            value: "menu"
+                        },
+                        {
+                            label: "Popover",
+                            value: "popover"
+                        },
+                        {
+                            label: "Fullscreen UI (transparent but slightly muted)",
+                            value: "fullscreen-ui"
+                        },
+                        {
+                            label: "HUD (Most transparent)",
+                            value: "hud"
+                        },
+                    ]}
+                    select={v => settings.macosVibrancyStyle = v}
+                    isSelected={v => settings.macosVibrancyStyle === v}
+                    serialize={identity} />
+            </>}
+
             {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
-        </React.Fragment>
+        </SettingsTab>
     );
 }
 
@@ -262,10 +317,14 @@ function DonateCard({ image }: DonateCardProps) {
                 src={image}
                 alt=""
                 height={128}
-                style={{ marginLeft: "auto", transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : "" }}
+                style={{
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    marginLeft: "auto",
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                }}
             />
         </Card>
     );
 }
 
-export default ErrorBoundary.wrap(VencordSettings);
+export default wrapTab(VencordSettings, "Vencord Settings");

@@ -1,6 +1,6 @@
 .vc-settings-tab-bar {
     margin-top: 20px;
-    margin-bottom: -2px;
+    margin-bottom: 10px;
     border-bottom: 2px solid var(--background-modifier-accent);
 }
 
@@ -15,7 +15,7 @@
     display: flex;
     gap: 1em;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     flex-grow: 1;
     flex-flow: row wrap;
     margin-bottom: 1em;
@@ -29,14 +29,12 @@
 .vc-settings-card {
     padding: 1em;
     margin-bottom: 1em;
-    margin-top: 1em;
 }
 
 .vc-backup-restore-card {
     background-color: var(--info-warning-background);
     border-color: var(--info-warning-foreground);
     color: var(--info-warning-text);
-    margin-top: 0;
 }
 
 .vc-settings-theme-links {
@@ -45,6 +43,7 @@
     color: var(--text-normal) !important;
     padding: 0.5em;
     border: 1px solid var(--background-modifier-accent);
+    max-height: unset;
 }
 
 .vc-cloud-settings-sync-grid {
@@ -59,10 +58,18 @@
 }
 
 .vc-text-selectable,
-.vc-text-selectable :not(a, button) {
+.vc-text-selectable :where([class*="text" i], [class*="title" i]) {
     /* make text selectable, silly discord makes the entirety of settings not selectable */
     user-select: text;
 
     /* discord also sets cursor: default which prevents the cursor from showing as text */
     cursor: initial;
+}
+
+.vc-updater-modal {
+    padding: 1.5em !important;
+}
+
+.vc-updater-modal-close-button {
+    float: right;
 }

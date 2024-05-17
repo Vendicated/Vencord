@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
@@ -50,6 +50,8 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     if (!channelId) return null;
 
     const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return null;
+
     const guild = GuildStore.getGuild(channel.guild_id);
 
     if (!guild) return null; // When in DM call
@@ -57,13 +59,11 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
     const result = `${guild.name} | ${channel.name}`;
 
     return (
-        <div style={{ marginBottom: 14 }}>
-            <VoiceChannelSection
-                channel={channel}
-                label={result}
-                showHeader={settings.store.showVoiceChannelSectionHeader}
-            />
-        </div>
+        <VoiceChannelSection
+            channel={channel}
+            label={result}
+            showHeader={settings.store.showVoiceChannelSectionHeader}
+        />
     );
 });
 
@@ -84,23 +84,30 @@ export default definePlugin({
         );
     },
 
-    patchPopout: ({ user }: UserProps) => <VoiceChannelField user={user} />,
+    patchPopout: ({ user }: UserProps) => {
+        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+        return (
+            <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
+                <VoiceChannelField user={user} />
+            </div>
+        );
+    },
 
     patches: [
+        // above message box
         {
-            find: ".showCopiableUsername",
+            find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /\(0,\w\.jsx\)\(\w{2},{user:\w,setNote/,
-                // paste my fancy custom button above the message field
-                replace: "$self.patchPopout(arguments[0]),$&",
+                match: /applicationId:\i\.id}\),(?=.{0,50}setNote:\i)/,
+                replace: "$&$self.patchPopout(arguments[0]),",
             }
         },
+        // below username
         {
-            find: ".USER_PROFILE_MODAL",
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
-                match: /,{user:\w{1,2}}\)(?!;case)/,
-                // paste my fancy custom button below the username
-                replace: "$&,$self.patchModal(arguments[0])",
+                match: /\.body.+?displayProfile:\i}\),/,
+                replace: "$&$self.patchModal(arguments[0]),",
             }
         }
     ],

@@ -20,7 +20,6 @@ import { Channel, User } from "discord-types/general/index.js";
 
 interface DecoratorProps {
     activities: any[];
-    canUseAvatarDecorations: boolean;
     channel: Channel;
     /**
      * Only for DM members
@@ -52,9 +51,9 @@ export function removeDecorator(identifier: string) {
     decorators.delete(identifier);
 }
 
-export function __addDecoratorsToList(props: DecoratorProps): (JSX.Element | null)[] {
+export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
     const isInGuild = !!(props.guildId);
-    return [...decorators.values()].map(decoratorObj => {
+    return Array.from(decorators.values(), decoratorObj => {
         const { decorator, onlyIn } = decoratorObj;
         // this can most likely be done cleaner
         if (!onlyIn || (onlyIn === "guilds" && isInGuild) || (onlyIn === "dms" && !isInGuild)) {

@@ -17,11 +17,11 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { useAwaiter } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Alerts, Button, Forms, moment, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { useAwaiter } from "@utils/react";
+import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -129,7 +129,7 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                 richBody={
                     <div className={cl("body")}>
                         {data.body}
-                        <Timestamp timestamp={moment(data.timestamp)} className={cl("timestamp")} />
+                        <Timestamp timestamp={new Date(data.timestamp)} className={cl("timestamp")} />
                     </div>
                 }
             />

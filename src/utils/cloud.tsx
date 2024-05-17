@@ -18,25 +18,48 @@
 
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
-import { Settings } from "@api/settings";
-import { findByProps } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { Settings } from "@api/Settings";
+import { OAuth2AuthorizeModal, UserStore } from "@webpack/common";
 
-import Logger from "./Logger";
+import { Logger } from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
 export const getCloudUrl = () => new URL(Settings.cloud.url);
 
+const cloudUrlOrigin = () => getCloudUrl().origin;
+const getUserId = () => {
+    const id = UserStore.getCurrentUser()?.id;
+    if (!id) throw new Error("User not yet logged in");
+    return id;
+};
+
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
-    return secrets[getCloudUrl().origin];
+
+    const origin = cloudUrlOrigin();
+
+    // we need to migrate from the old format here
+    if (secrets[origin]) {
+        await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+            secrets ??= {};
+            // use the current user ID
+            secrets[`${origin}:${getUserId()}`] = secrets[origin];
+            delete secrets[origin];
+            return secrets;
+        });
+
+        // since this doesn't update the original object, we'll early return the existing authorization
+        return secrets[origin];
+    }
+
+    return secrets[`${origin}:${getUserId()}`];
 }
 
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[getCloudUrl().origin] = secret;
+        secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -44,7 +67,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[getCloudUrl().origin];
+        delete secrets[`${cloudUrlOrigin()}:${getUserId()}`];
         return secrets;
     });
 }
@@ -67,8 +90,6 @@ export async function authorizeCloud() {
         return;
     }
 
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-
     openModal((props: any) => <OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
@@ -77,15 +98,15 @@ export async function authorizeCloud() {
         permissions={0n}
         clientId={clientId}
         cancelCompletesFlow={false}
-        callback={async (callbackUrl: string) => {
-            if (!callbackUrl) {
+        callback={async ({ location }: any) => {
+            if (!location) {
                 Settings.cloud.authenticated = false;
                 return;
             }
 
             try {
-                const res = await fetch(callbackUrl, {
-                    headers: new Headers({ Accept: "application/json" })
+                const res = await fetch(location, {
+                    headers: { Accept: "application/json" }
                 });
                 const { secret } = await res.json();
                 if (secret) {
@@ -117,8 +138,7 @@ export async function authorizeCloud() {
 }
 
 export async function getCloudAuth() {
-    const userId = UserStore.getCurrentUser().id;
     const secret = await getAuthorization();
 
-    return window.btoa(`${secret}:${userId}`);
+    return window.btoa(`${secret}:${getUserId()}`);
 }

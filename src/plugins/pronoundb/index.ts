@@ -19,91 +19,68 @@
 import "./styles.css";
 
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 import PronounsAboutComponent from "./components/PronounsAboutComponent";
 import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./components/PronounsChatComponent";
-import PronounsProfileWrapper from "./components/PronounsProfileWrapper";
+import { useProfilePronouns } from "./pronoundbUtils";
+import { settings } from "./settings";
 
-export enum PronounsFormat {
-    Lowercase = "LOWERCASE",
-    Capitalized = "CAPITALIZED"
-}
+const PRONOUN_TOOLTIP_PATCH = {
+    match: /text:(.{0,10}.Messages\.USER_PROFILE_PRONOUNS)(?=,)/,
+    replace: '$& + (typeof vcPronounSource !== "undefined" ? ` (${vcPronounSource})` : "")'
+};
 
 export default definePlugin({
     name: "PronounDB",
-    authors: [Devs.Tyman, Devs.TheKodeToad],
+    authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
     description: "Adds pronouns to user messages using pronoundb",
     patches: [
-        // Add next to username (compact mode)
         {
             find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /("span",{id:\i,className:\i,children:\i}\))/,
-                replace: "$1, $self.CompactPronounsChatComponentWrapper(e)"
-            }
-        },
-        // Patch the chat timestamp element (normal mode)
-        {
-            find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
-                replace: "[$1, $self.PronounsChatComponentWrapper(e)]"
-            }
-        },
-        // Hijack the discord pronouns section and add a wrapper around the text section
-        {
-            find: ".Messages.BOT_PROFILE_SLASH_COMMANDS",
-            replacement: {
-                match: /\(0,.\.jsx\)\((?<PronounComponent>\i\..),(?<pronounProps>{currentPronouns.+?:(?<fullProps>\i)\.pronouns.+?})\)/,
-                replace: "$<fullProps>&&$self.PronounsProfileWrapper($<PronounComponent>,$<pronounProps>,$<fullProps>)"
-            }
-        },
-        // Force enable pronouns component ignoring the experiment value
-        {
-            find: ".Messages.USER_POPOUT_PRONOUNS",
-            replacement: {
-                match: /\.showPronouns/,
-                replace: ".showPronouns||true"
-            }
-        }
-    ],
-
-    options: {
-        pronounsFormat: {
-            type: OptionType.SELECT,
-            description: "The format for pronouns to appear in chat",
-            options: [
+            replacement: [
+                // Add next to username (compact mode)
                 {
-                    label: "Lowercase",
-                    value: PronounsFormat.Lowercase,
-                    default: true
+                    match: /("span",{id:\i,className:\i,children:\i}\))/,
+                    replace: "$1, $self.CompactPronounsChatComponentWrapper(arguments[0])"
                 },
+                // Patch the chat timestamp element (normal mode)
                 {
-                    label: "Capitalized",
-                    value: PronounsFormat.Capitalized
+                    match: /(?<=return\s*\(0,\i\.jsxs?\)\(.+!\i&&)(\(0,\i.jsxs?\)\(.+?\{.+?\}\))/,
+                    replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
                 }
             ]
         },
-        showSelf: {
-            type: OptionType.BOOLEAN,
-            description: "Enable or disable showing pronouns for the current user",
-            default: true
+        // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
+        {
+            find: ".pronouns,children",
+            replacement: [
+                {
+                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
+                    replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
+                },
+                PRONOUN_TOOLTIP_PATCH
+            ]
         },
-        showInMessages: {
-            type: OptionType.BOOLEAN,
-            description: "Show in messages",
-            default: true
-        },
-        showInProfile: {
-            type: OptionType.BOOLEAN,
-            description: "Show in profile",
-            default: true
+        // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
+        {
+            find: ".nameTagSmall)",
+            replacement: [
+                {
+                    match: /\.getName\(\i\);(?<=displayProfile.{0,200})/,
+                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
+                },
+                PRONOUN_TOOLTIP_PATCH
+            ]
         }
-    },
+    ],
+
+    settings,
+
     settingsAboutComponent: PronounsAboutComponent,
+
     // Re-export the components on the plugin object so it is easily accessible in patches
     PronounsChatComponentWrapper,
     CompactPronounsChatComponentWrapper,
-    PronounsProfileWrapper
+    useProfilePronouns
 });

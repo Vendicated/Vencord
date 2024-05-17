@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Logger from "@utils/Logger";
+import { Logger } from "@utils/Logger";
 
 const logger = new Logger("ServerListAPI");
 
-export enum ServerListRenderPosition {
+export const enum ServerListRenderPosition {
     Above,
     In,
 }

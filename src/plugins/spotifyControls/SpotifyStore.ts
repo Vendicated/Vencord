@@ -16,10 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/settings";
-import IpcEvents from "@utils/IpcEvents";
-import { proxyLazy } from "@utils/proxyLazy";
-import { findByPropsLazy } from "@webpack";
+import { Settings } from "@api/Settings";
+import { findByProps, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 export interface Track {
@@ -67,12 +65,12 @@ interface Device {
 type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
-export const SpotifyStore = proxyLazy(() => {
+export const SpotifyStore = proxyLazyWebpack(() => {
     // For some reason ts hates extends Flux.Store
     const { Store } = Flux;
 
-    const SpotifySocket = findByPropsLazy("getActiveSocketAndDevice");
-    const SpotifyAPI = findByPropsLazy("SpotifyAPIMarker");
+    const SpotifySocket = findByProps("getActiveSocketAndDevice");
+    const SpotifyUtils = findByProps("SpotifyAPI");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
@@ -90,11 +88,11 @@ export const SpotifyStore = proxyLazy(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris
+            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
-            VencordNative.ipc.invoke(IpcEvents.OPEN_EXTERNAL, url);
+            VencordNative.native.openExternal(url);
         }
 
         // Need to keep track of this manually
@@ -170,7 +168,7 @@ export const SpotifyStore = proxyLazy(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            return SpotifyUtils.SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });

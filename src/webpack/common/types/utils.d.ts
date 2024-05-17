@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Guild, GuildMember } from "discord-types/general";
 import type { ReactNode } from "react";
 
 import type { FluxEvents } from "./fluxEvents";
@@ -58,6 +59,7 @@ export interface Alerts {
         onCancel?(): void;
         onConfirm?(): void;
         onConfirmSecondary?(): void;
+        onCloseCallback?(): void;
     }): void;
     /** This is a noop, it does nothing. */
     close(): void;
@@ -79,11 +81,57 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>> & {
-    V6OrEarlierAPIError: Error;
-    V8APIError: Error;
-    getAPIBaseURL(withVersion?: boolean): string;
-};
+export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+
+export type Permissions = "CREATE_INSTANT_INVITE"
+    | "KICK_MEMBERS"
+    | "BAN_MEMBERS"
+    | "ADMINISTRATOR"
+    | "MANAGE_CHANNELS"
+    | "MANAGE_GUILD"
+    | "CHANGE_NICKNAME"
+    | "MANAGE_NICKNAMES"
+    | "MANAGE_ROLES"
+    | "MANAGE_WEBHOOKS"
+    | "MANAGE_GUILD_EXPRESSIONS"
+    | "CREATE_GUILD_EXPRESSIONS"
+    | "VIEW_AUDIT_LOG"
+    | "VIEW_CHANNEL"
+    | "VIEW_GUILD_ANALYTICS"
+    | "VIEW_CREATOR_MONETIZATION_ANALYTICS"
+    | "MODERATE_MEMBERS"
+    | "SEND_MESSAGES"
+    | "SEND_TTS_MESSAGES"
+    | "MANAGE_MESSAGES"
+    | "EMBED_LINKS"
+    | "ATTACH_FILES"
+    | "READ_MESSAGE_HISTORY"
+    | "MENTION_EVERYONE"
+    | "USE_EXTERNAL_EMOJIS"
+    | "ADD_REACTIONS"
+    | "USE_APPLICATION_COMMANDS"
+    | "MANAGE_THREADS"
+    | "CREATE_PUBLIC_THREADS"
+    | "CREATE_PRIVATE_THREADS"
+    | "USE_EXTERNAL_STICKERS"
+    | "SEND_MESSAGES_IN_THREADS"
+    | "SEND_VOICE_MESSAGES"
+    | "CONNECT"
+    | "SPEAK"
+    | "MUTE_MEMBERS"
+    | "DEAFEN_MEMBERS"
+    | "MOVE_MEMBERS"
+    | "USE_VAD"
+    | "PRIORITY_SPEAKER"
+    | "STREAM"
+    | "USE_EMBEDDED_ACTIVITIES"
+    | "USE_SOUNDBOARD"
+    | "USE_EXTERNAL_SOUNDS"
+    | "REQUEST_TO_SPEAK"
+    | "MANAGE_EVENTS"
+    | "CREATE_EVENTS";
+
+export type PermissionsBits = Record<Permissions, bigint>;
 
 export interface Locale {
     name: string;
@@ -109,5 +157,70 @@ export interface i18n {
 
     loadPromise: Promise<void>;
 
-    Messages: Record<i18nMessages, string>;
+    Messages: Record<i18nMessages, any>;
+}
+
+export interface Clipboard {
+    copy(text: string): void;
+    SUPPORTS_COPY: boolean;
+}
+
+export interface NavigationRouter {
+    back(): void;
+    forward(): void;
+    hasNavigated(): boolean;
+    getHistory(): {
+        action: string;
+        length: 50;
+        [key: string]: any;
+    };
+    transitionTo(path: string, ...args: unknown[]): void;
+    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    replaceWith(...args: unknown[]): void;
+    getLastRouteChangeSource(): any;
+    getLastRouteChangeSourceLocationStack(): any;
+}
+
+export interface IconUtils {
+    getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
+    getDefaultAvatarURL(id: string, discriminator?: string): string;
+    getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+    getAvatarDecorationURL(dara: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+
+    getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
+    getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
+    getGuildMemberBannerURL(data: { id: string, guildId: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+
+    getGuildIconURL(data: { id: string, icon?: string, size?: number, canAnimate?: boolean; }): string | undefined;
+    getGuildBannerURL(guild: Guild, canAnimate?: boolean): string | null;
+
+    getChannelIconURL(data: { id: string; icon?: string; applicationId?: string; size?: number; }): string | undefined;
+    getEmojiURL(data: { id: string, animated: boolean, size: number, forcePNG?: boolean; }): string;
+
+    hasAnimatedGuildIcon(guild: Guild): boolean;
+    isAnimatedIconHash(hash: string): boolean;
+
+    getGuildSplashURL: any;
+    getGuildDiscoverySplashURL: any;
+    getGuildHomeHeaderURL: any;
+    getResourceChannelIconURL: any;
+    getNewMemberActionIconURL: any;
+    getGuildTemplateIconURL: any;
+    getApplicationIconURL: any;
+    getGameAssetURL: any;
+    getVideoFilterAssetURL: any;
+
+    getGuildMemberAvatarSource: any;
+    getUserAvatarSource: any;
+    getGuildSplashSource: any;
+    getGuildDiscoverySplashSource: any;
+    makeSource: any;
+    getGameAssetSource: any;
+    getGuildIconSource: any;
+    getGuildTemplateIconSource: any;
+    getGuildBannerSource: any;
+    getGuildHomeHeaderSource: any;
+    getChannelIconSource: any;
+    getApplicationIconSource: any;
+    getAnimatableSourceWithFallback: any;
 }

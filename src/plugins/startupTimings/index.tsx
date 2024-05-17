@@ -16,21 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Devs } from "@utils/constants";
-import { LazyComponent } from "@utils/misc";
 import definePlugin from "@utils/types";
+
+import StartupTimingPage from "./StartupTimingPage";
 
 export default definePlugin({
     name: "StartupTimings",
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     patches: [{
-        find: "PAYMENT_FLOW_MODAL_TEST_PAGE,",
+        find: "Messages.ACTIVITY_SETTINGS",
         replacement: {
-            match: /{section:.{1,2}\..{1,3}\.PAYMENT_FLOW_MODAL_TEST_PAGE/,
-            replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
+            match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+}\))/,
+            replace: (_, commaOrSemi, settings, elements) => "" +
+                `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
+                `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`
         }
     }],
-    StartupTimingPage: LazyComponent(() => require("./StartupTimingPage").default)
+    StartupTimingPage
 });

@@ -2,7 +2,7 @@
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--background-modifier-accent);
 
-    --vc-spotify-green: #1db954; /* so cusotm themes can easily change it */
+    --vc-spotify-green: #1db954; /* so custom themes can easily change it */
 }
 
 .theme-light #vc-spotify-player {
@@ -131,8 +131,8 @@
     color: var(--header-secondary);
 }
 
-.vc-spotify-artist:hover,
-#vc-spotify-album-title:hover,
+.vc-spotify-artist[role="link"]:hover,
+#vc-spotify-album-title[role="link"]:hover,
 #vc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
     cursor: pointer;
@@ -167,12 +167,19 @@
 }
 
 #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
-    /* these importants are neccessary, it applies a width and height through inline styles */
+    /* these importants are necessary, it applies a width and height through inline styles */
     height: 10px !important;
     width: 10px !important;
+    margin-top: 4px;
     background-color: var(--interactive-normal);
     border-color: var(--interactive-normal);
     color: var(--interactive-normal);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+#vc-spotify-progress-bar:hover > [class^="slider"] [class^="grabber"] {
+    opacity: 1;
 }
 
 #vc-spotify-progress-text {

@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@utils/debounce";
-import IpcEvents from "@utils/IpcEvents";
+import { debounce } from "@shared/debounce";
 import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
 import { join } from "path";
@@ -29,7 +28,7 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 // Discord
 if (location.protocol !== "data:") {
     // #region cssInsert
-    const rendererCss = join(__dirname, "renderer.css");
+    const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
     const style = document.createElement("style");
     style.id = "vencord-css-core";
@@ -52,14 +51,14 @@ if (location.protocol !== "data:") {
     }
     // #endregion
 
-    if (process.env.DISCORD_PRELOAD) {
+    if (IS_DISCORD_DESKTOP) {
         webFrame.executeJavaScript(readFileSync(join(__dirname, "renderer.js"), "utf-8"));
-        require(process.env.DISCORD_PRELOAD);
+        require(process.env.DISCORD_PRELOAD!);
     }
 } // Monaco popout
 else {
-    contextBridge.exposeInMainWorld("setCss", debounce(s => VencordNative.ipc.invoke(IpcEvents.SET_QUICK_CSS, s)));
-    contextBridge.exposeInMainWorld("getCurrentCss", () => VencordNative.ipc.invoke(IpcEvents.GET_QUICK_CSS));
+    contextBridge.exposeInMainWorld("setCss", debounce(VencordNative.quickCss.set));
+    contextBridge.exposeInMainWorld("getCurrentCss", VencordNative.quickCss.get);
     // shrug
     contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
 }
