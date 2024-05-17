@@ -121,6 +121,8 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
 }
 
 export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+
+export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
     promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
 };
