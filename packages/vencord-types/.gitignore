@@ -1,7 +1,7 @@
 *
 !.*ignore
 !package.json
-!README.md
+!*.md
 !prepare.ts
 !index.d.ts
 !globals.d.ts
