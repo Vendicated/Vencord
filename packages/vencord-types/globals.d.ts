@@ -1,4 +1,4 @@
-/*!
+/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -16,23 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "../shared/debounce";
-export * from "../shared/onceDefined";
-export * from "./ChangeList";
-export * from "./constants";
-export * from "./discord";
-export * from "./guards";
-export * from "./lazy";
-export * from "./lazyReact";
-export * from "./localStorage";
-export * from "./Logger";
-export * from "./margins";
-export * from "./mergeDefaults";
-export * from "./misc";
-export * from "./modal";
-export * from "./onlyOnce";
-export * from "./patches";
-export * from "./proxyInner";
-export * from "./Queue";
-export * from "./react";
-export * from "./text";
+declare global {
+    export var VencordNative: typeof import("./VencordNative").default;
+    export var Vencord: typeof import("./Vencord");
+}
+
+export { };

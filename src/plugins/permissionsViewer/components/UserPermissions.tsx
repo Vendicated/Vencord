@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import ExpandableHeader from "@components/ExpandableHeader";
+import { ExpandableHeader } from "@components/ExpandableHeader";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { findByProps } from "@webpack";

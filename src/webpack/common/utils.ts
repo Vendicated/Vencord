@@ -124,7 +124,8 @@ export const PermissionsBits = find<t.PermissionsBits>(m => typeof m.Permissions
 export const zustandCreate = findByCode<typeof import("zustand").default>("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const zustandPersist = find<typeof import("zustand/middleware").persist>(m => m.persist && persistFilter(m.persist), m => m.persist);
+export const zustandPersist = find(m => m.persist && persistFilter(m.persist), m => m.persist);
+export const zustandCreate = findByCodeLazy("will be removed in v4");
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
 export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");

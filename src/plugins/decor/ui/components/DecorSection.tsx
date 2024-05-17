@@ -15,7 +15,7 @@ import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
 
 const CustomizationSection = findComponentByCode(".customizationSectionBackground");
 
-interface DecorSectionProps {
+export interface DecorSectionProps {
     hideTitle?: boolean;
     hideDivider?: boolean;
     noMargin?: boolean;
