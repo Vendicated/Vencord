@@ -26,7 +26,14 @@ const TimeBar = findComponentByCodeLazy<{
     className: string;
 }>("isSingleLine");
 
-const ActivityTooltip = ({ activity, application, user, cl }: Readonly<{ activity: Activity, application?: Application, user: User; cl: ReturnType<typeof classNameFactory> }>) => {
+interface ActivityTooltipProps {
+    activity: Activity;
+    application?: Application;
+    user: User;
+    cl: ReturnType<typeof classNameFactory>;
+}
+
+export default function ActivityTooltip({ activity, application, user, cl }: Readonly<ActivityTooltipProps>) {
     const image = useMemo(() => {
         const activityImage = getActivityImage(activity, application);
         if (activityImage) {
@@ -64,6 +71,4 @@ const ActivityTooltip = ({ activity, application, user, cl }: Readonly<{ activit
             </div>
         </ErrorBoundary>
     );
-};
-
-export default ActivityTooltip;
+}
