@@ -18,7 +18,6 @@
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { Settings } from "@api/settings";
-import IpcEvents from "@utils/IpcEvents";
 import Logger from "@utils/Logger";
 import { Patch, Plugin } from "@utils/types";
 
@@ -64,7 +63,7 @@ for (const p of pluginsValues) if (settings[p.name]?.enabled) {
     });
 }
 
-function initPlugin(p: Plugin) {
+for (const p of pluginsValues) {
     if (p.settings) {
         p.settings.pluginName = p.name;
         p.options ??= {};
@@ -82,9 +81,6 @@ function initPlugin(p: Plugin) {
             patches.push(patch);
         }
     }
-}
-for (const p of pluginsValues) {
-    initPlugin(p);
 }
 
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins() {
@@ -176,18 +172,3 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     return true;
 }, p => `stopPlugin ${p.name}`);
-
-export function loadExternalPlugins() {
-    for (const [name, src] of VencordNative.ipc.sendSync(IpcEvents.GET_PLUGINS)) {
-        try {
-            const p = Function(src)().default;
-            if (!p.name || Object.prototype.hasOwnProperty.call(Plugins, p.name))
-                throw new Error("Invalid plugin or name conflicts with existing plugin");
-
-            Plugins[p.name] = p;
-            initPlugin(p);
-        } catch (err) {
-            logger.error(`Failed to load plugin ${name}`, err);
-        }
-    }
-}
