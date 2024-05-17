@@ -16,19 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cpSync, readdirSync, rmSync } from "fs";
+import { cpSync, moveSync, readdirSync, rmSync } from "fs-extra";
 import { join } from "path";
 
-const SRC = join(__dirname, "..", "..", "src");
+readdirSync(join(__dirname, "src"))
+    .forEach(child => moveSync(join(__dirname, "src", child), join(__dirname, child), { overwrite: true }));
 
-for (const file of ["preload.d.ts", "userplugins", "main", "debug"]) {
+const VencordSrc = join(__dirname, "..", "..", "src");
+
+for (const file of ["preload.d.ts", "userplugins", "main", "debug", "src", "browser", "scripts"]) {
     rmSync(join(__dirname, file), { recursive: true, force: true });
 }
 
 function copyDtsFiles(from: string, to: string) {
     for (const file of readdirSync(from, { withFileTypes: true })) {
         // bad
-        if (from === SRC && file.name === "globals.d.ts") continue;
+        if (from === VencordSrc && file.name === "globals.d.ts") continue;
 
         const fullFrom = join(from, file.name);
         const fullTo = join(to, file.name);
@@ -41,4 +44,4 @@ function copyDtsFiles(from: string, to: string) {
     }
 }
 
-copyDtsFiles(SRC, __dirname);
+copyDtsFiles(VencordSrc, __dirname);
