@@ -180,7 +180,8 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 
     return (
         <>
-            <Forms.FormTitle>replacement</Forms.FormTitle>
+            {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
+            <Forms.FormTitle className="">replacement</Forms.FormTitle>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -188,7 +189,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
             />
             {!isFunc && (
                 <div className="vc-text-selectable">
-                    <Forms.FormTitle>Cheat Sheet</Forms.FormTitle>
+                    <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
                         "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
                         "$$": "Insert a $",
@@ -220,11 +221,12 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 
 interface FullPatchInputProps {
     setFind(v: string): void;
+    setParsedFind(v: string | RegExp): void;
     setMatch(v: string): void;
     setReplacement(v: string | ReplaceFn): void;
 }
 
-function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputProps) {
+function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: FullPatchInputProps) {
     const [fullPatch, setFullPatch] = React.useState<string>("");
     const [fullPatchError, setFullPatchError] = React.useState<string>("");
 
@@ -233,6 +235,7 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
             setFullPatchError("");
 
             setFind("");
+            setParsedFind("");
             setMatch("");
             setReplacement("");
             return;
@@ -256,7 +259,8 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
             if (!parsed.replacement.match) throw new Error("No 'replacement.match' field");
             if (!parsed.replacement.replace) throw new Error("No 'replacement.replace' field");
 
-            setFind(parsed.find);
+            setFind(parsed.find instanceof RegExp ? parsed.find.toString() : parsed.find);
+            setParsedFind(parsed.find);
             setMatch(parsed.replacement.match instanceof RegExp ? parsed.replacement.match.source : parsed.replacement.match);
             setReplacement(parsed.replacement.replace);
             setFullPatchError("");
@@ -266,7 +270,7 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
     }
 
     return <>
-        <Forms.FormText>Paste your full JSON patch here to fill out the fields</Forms.FormText>
+        <Forms.FormText className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Forms.FormText>
         <TextArea value={fullPatch} onChange={setFullPatch} onBlur={update} />
         {fullPatchError !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{fullPatchError}</Forms.FormText>}
     </>;
@@ -274,6 +278,7 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
 
 function PatchHelper() {
     const [find, setFind] = React.useState<string>("");
+    const [parsedFind, setParsedFind] = React.useState<string | RegExp>("");
     const [match, setMatch] = React.useState<string>("");
     const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
 
@@ -285,20 +290,34 @@ function PatchHelper() {
     const code = React.useMemo(() => {
         return `
 {
-    find: ${JSON.stringify(find)},
+    find: ${parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind)},
     replacement: {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 }
         `.trim();
-    }, [find, match, replacement]);
+    }, [parsedFind, match, replacement]);
 
     function onFindChange(v: string) {
         setFindError(void 0);
         setFind(v);
-        if (v.length) {
-            findCandidates({ find: v, setModule, setError: setFindError });
+    }
+
+    function onFindBlur() {
+        try {
+            let parsedFind = find as string | RegExp;
+            if (/^\/.+?\/$/.test(find)) parsedFind = new RegExp(find.slice(1, -1));
+
+            setFindError(void 0);
+            setFind(find);
+            setParsedFind(parsedFind);
+
+            if (find.length) {
+                findCandidates({ find: parsedFind, setModule, setError: setFindError });
+            }
+        } catch (e: any) {
+            setFindError((e as Error).message);
         }
     }
 
@@ -317,19 +336,21 @@ function PatchHelper() {
             <Forms.FormTitle>full patch</Forms.FormTitle>
             <FullPatchInput
                 setFind={onFindChange}
+                setParsedFind={setParsedFind}
                 setMatch={onMatchChange}
                 setReplacement={setReplacement}
             />
 
-            <Forms.FormTitle>find</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>find</Forms.FormTitle>
             <TextInput
                 type="text"
                 value={find}
                 onChange={onFindChange}
+                onBlur={onFindBlur}
                 error={findError}
             />
 
-            <Forms.FormTitle>match</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>match</Forms.FormTitle>
             <CheckedTextInput
                 value={match}
                 onChange={onMatchChange}
@@ -342,6 +363,7 @@ function PatchHelper() {
                 }}
             />
 
+            <div className={Margins.top8} />
             <ReplacementInput
                 replacement={replacement}
                 setReplacement={setReplacement}
