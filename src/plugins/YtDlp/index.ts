@@ -44,8 +44,27 @@ const parseAdditionalArgs = (args: string): string[] => {
     }
 
 };
+function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
+    switch (extension) {
+        case "mp4":
+            return "video/mp4";
+        case "webm":
+            return "video/webm";
+        case "gif":
+            return "image/gif";
+        case "mp3":
+            return "audio/mp3";
+        default:
+            return "application/octet-stream";
+    }
+}
 
-async function sendProgress(channelId: string, promise: Promise<any>) {
+async function sendProgress(channelId: string, promise: Promise<{
+    buffer: Buffer;
+    title: string;
+} | {
+    error: string;
+}>) {
     if (!settings.store.showProgress) return await promise;
     // Hacky way to send info from native to renderer for progress updates
     const clydeMessage = sendBotMessage(channelId, { content: "Downloading video..." });
@@ -154,7 +173,7 @@ export default definePlugin({
 
             const { buffer, title } = data;
             UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
-            const file = new File([buffer], title, { type: "video/mp4" });
+            const file = new File([buffer], title, { type: mimetype(title.split(".")[1]) });
             // See petpet
             setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, DraftType.ChannelMessage), 10);
         }
