@@ -7,6 +7,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
@@ -43,11 +44,20 @@ export default definePlugin({
         {
             find: ".userInfoSectionHeader,",
             replacement: {
-                match: /(\.Messages\.USER_PROFILE_MEMBER_SINCE.+?userId:(.+?)),textClassName:(\i\.userInfoText)}\)/,
-                replace: (_, rest, userId, textClassName) => `${rest}}),$self.friendsSince({ userId: ${userId}, textClassName: ${textClassName} })`
+                match: /(\.Messages\.USER_PROFILE_MEMBER_SINCE.+?userId:(.+?),textClassName:)(\i\.userInfoText)}\)/,
+                replace: (_, rest, userId, textClassName) => `${rest}!$self.getFriendSince(${userId}) ? ${textClassName} : void 0 }), $self.friendsSince({ userId: ${userId}, textClassName: ${textClassName} })`
             }
         }
     ],
+
+    getFriendSince(userId: string) {
+        try {
+            return RelationshipStore.getSince(userId);
+        } catch (err) {
+            new Logger("FriendsSince").error(err);
+            return null;
+        }
+    },
 
     friendsSince: ErrorBoundary.wrap(({ userId, textClassName }: { userId: string; textClassName?: string; }) => {
         const friendsSince = RelationshipStore.getSince(userId);
@@ -80,4 +90,3 @@ export default definePlugin({
         );
     }, { noop: true })
 });
-
