@@ -23,15 +23,12 @@
 }
 
 .discordColorway {
-    height: 60px;
-    width: 60px;
+    width: 56px;
     cursor: pointer;
     display: flex;
-    flex-flow: wrap;
-    flex-direction: row;
+    flex-direction: column;
     position: relative;
     align-items: center;
-    justify-content: center;
     transition: 170ms ease;
 }
 
@@ -72,7 +69,7 @@
 .ColorwaySelectorWrapper {
     position: relative;
     display: flex;
-    gap: 16px 23px;
+    gap: 16px 28px;
     width: 100%;
     flex-wrap: wrap;
     padding: 2px;
@@ -91,11 +88,10 @@
 .colorwaySelectorModalContent {
     display: flex;
     flex-direction: column;
-    gap: 8px;
     width: 100%;
     max-width: 596px;
     overflow: visible !important;
-    padding: 0 16px 16px !important;
+    padding: 0 16px !important;
 }
 
 .ColorwaySelectorBtnContainer {
@@ -226,6 +222,8 @@
     height: 46px;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
     margin: 12px 0;
     gap: 8px;
 }
@@ -233,10 +231,15 @@
 .colorwayInfo-colorSwatch {
     display: flex;
     width: 100%;
-    height: 46px;
-    border-radius: 4px;
+    height: 38px;
+    border-radius: 3px;
     cursor: pointer;
     position: relative;
+    transition: .15s;
+}
+
+.colorwayInfo-colorSwatch:hover {
+    filter: brightness(.8);
 }
 
 .colorwayInfo-row {
@@ -620,16 +623,17 @@
     width: 100%;
 }
 
-.colorwaySelector-searchInput {
-    border-radius: 0 3px 3px 0 !important;
+.colorwaySelector-sources {
     flex: 0 0 auto;
+    margin-right: auto;
+    color: var(--button-outline-primary-text);
+    border-color: var(--button-outline-primary-border);
 }
 
-.colorwaySelector-pill.colorwaySelector-pill_select {
-    border-radius: 3px 0 0 3px !important;
-    flex: 0 0 auto;
-    border: none;
-    height: 40px;
+.colorwaySelector-sources:hover {
+    background-color: var(--button-outline-primary-background-hover);
+    border-color: var(--button-outline-primary-border-hover);
+    color: var(--button-outline-primary-text-hover);
 }
 
 .colorwaySelector-headerBtn {
@@ -910,32 +914,23 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    padding: 8px;
+    gap: 5px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    align-items: start;
+}
+
+.discordColorway-listItem {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
     padding: 0 8px;
     gap: 5px;
     border-radius: 4px;
     box-sizing: border-box;
     min-height: 44px;
     align-items: center;
-}
-
-.theme-dark .colorwaysSettings-colorwaySource {
-    background: var(--bg-overlay-3,var(--background-secondary));
-}
-
-.theme-light .colorwaysSettings-colorwaySource {
-    background: var(--bg-overlay-2,var(--background-secondary));
-}
-
-.colorwaysSettings-colorwaySource:hover {
-    background-color: var(--background-secondary-alt);
-}
-
-.theme-dark .colorwaysSettings-colorwaySource:hover {
-    background: var(--bg-overlay-1,var(--background-secondary-alt));
-}
-
-.theme-light .colorwaysSettings-colorwaySource:hover {
-    background: var(--bg-overlay-3,var(--background-secondary-alt));
 }
 
 .colorwaysSettings-modalRoot {
@@ -946,6 +941,24 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex-grow: 1;
+    line-height: 30px;
+}
+
+.colorwaysSettings-colorwaySourceLabelHeader {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-grow: 1;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.colorwaysSettings-colorwaySourceDesc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-grow: 1;
 }
 
 .colorwaysSettings-iconButton {
@@ -1078,7 +1091,7 @@
     flex: 0 0 auto;
     height: 15px;
     padding: 0 4px;
-    margin-top: 1px;
+    margin-top: 7.5px;
     border-radius: 4px;
 }
 
@@ -1176,36 +1189,191 @@
     background-color: var(--background-modifier-hover);
 }
 
-:root {
-    --dc-picker-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='vc-pallete-icon vc-icon' role='img' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M 12 7.5 C 13.242188 7.5 14.25 6.492188 14.25 5.25 C 14.25 4.007812 13.242188 3 12 3 C 10.757812 3 9.75 4.007812 9.75 5.25 C 9.75 6.492188 10.757812 7.5 12 7.5 Z M 18 12 C 19.242188 12 20.25 10.992188 20.25 9.75 C 20.25 8.507812 19.242188 7.5 18 7.5 C 16.757812 7.5 15.75 8.507812 15.75 9.75 C 15.75 10.992188 16.757812 12 18 12 Z M 8.25 10.5 C 8.25 11.742188 7.242188 12.75 6 12.75 C 4.757812 12.75 3.75 11.742188 3.75 10.5 C 3.75 9.257812 4.757812 8.25 6 8.25 C 7.242188 8.25 8.25 9.257812 8.25 10.5 Z M 9 19.5 C 10.242188 19.5 11.25 18.492188 11.25 17.25 C 11.25 16.007812 10.242188 15 9 15 C 7.757812 15 6.75 16.007812 6.75 17.25 C 6.75 18.492188 7.757812 19.5 9 19.5 Z M 9 19.5 M 24 12 C 24 16.726562 21.199219 15.878906 18.648438 15.105469 C 17.128906 14.644531 15.699219 14.210938 15 15 C 14.09375 16.023438 14.289062 17.726562 14.472656 19.378906 C 14.738281 21.742188 14.992188 24 12 24 C 5.371094 24 0 18.628906 0 12 C 0 5.371094 5.371094 0 12 0 C 18.628906 0 24 5.371094 24 12 Z M 12 22.5 C 12.917969 22.5 12.980469 22.242188 12.984375 22.234375 C 13.097656 22.015625 13.167969 21.539062 13.085938 20.558594 C 13.066406 20.304688 13.03125 20.003906 12.996094 19.671875 C 12.917969 18.976562 12.828125 18.164062 12.820312 17.476562 C 12.804688 16.417969 12.945312 15.0625 13.875 14.007812 C 14.429688 13.382812 15.140625 13.140625 15.78125 13.078125 C 16.390625 13.023438 17 13.117188 17.523438 13.234375 C 18.039062 13.351562 18.574219 13.515625 19.058594 13.660156 L 19.101562 13.675781 C 19.621094 13.832031 20.089844 13.972656 20.53125 14.074219 C 21.511719 14.296875 21.886719 14.199219 22.019531 14.109375 C 22.074219 14.070312 22.5 13.742188 22.5 12 C 22.5 6.199219 17.800781 1.5 12 1.5 C 6.199219 1.5 1.5 6.199219 1.5 12 C 1.5 17.800781 6.199219 22.5 12 22.5 Z M 12 22.5'%3E%3C/path%3E%3C/svg%3E");
-    --dc-settings-svg : url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 24 24' width='24' height='24' preserveAspectRatio='xMidYMid meet' style='width: 100%25; height: 100%25; transform: translate3d(0px, 0px, 0px); content-visibility: visible;'%3E%3Cdefs%3E%3CclipPath id='__lottie_element_97'%3E%3Crect width='24' height='24' x='0' y='0'%3E%3C/rect%3E%3C/clipPath%3E%3CclipPath id='__lottie_element_99'%3E%3Cpath d='M0,0 L600,0 L600,600 L0,600z'%3E%3C/path%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23__lottie_element_97)'%3E%3Cg clip-path='url(%23__lottie_element_99)' transform='matrix(0.03999999910593033,0,0,0.03999999910593033,0,0)' opacity='1' style='display: block;'%3E%3Cg transform='matrix(25,0,0,25,300,300)' opacity='1' style='display: block;'%3E%3Cg opacity='1' transform='matrix(1,0,0,1,0,0)'%3E%3Cpath fill='rgb(88,101,242)' fill-opacity='1' d=' M-1.4420000314712524,-10.906000137329102 C-1.8949999809265137,-10.847000122070312 -2.1470000743865967,-10.375 -2.078000068664551,-9.92300033569336 C-1.899999976158142,-8.756999969482422 -2.265000104904175,-7.7210001945495605 -3.061000108718872,-7.390999794006348 C-3.8570001125335693,-7.060999870300293 -4.8480000495910645,-7.534999847412109 -5.546000003814697,-8.484999656677246 C-5.816999912261963,-8.852999687194824 -6.329999923706055,-9.008999824523926 -6.691999912261963,-8.730999946594238 C-7.458000183105469,-8.142999649047852 -8.142999649047852,-7.458000183105469 -8.730999946594238,-6.691999912261963 C-9.008999824523926,-6.329999923706055 -8.852999687194824,-5.816999912261963 -8.484999656677246,-5.546000003814697 C-7.534999847412109,-4.8480000495910645 -7.060999870300293,-3.8570001125335693 -7.390999794006348,-3.061000108718872 C-7.7210001945495605,-2.265000104904175 -8.756999969482422,-1.899999976158142 -9.92300033569336,-2.078000068664551 C-10.375,-2.1470000743865967 -10.847000122070312,-1.8949999809265137 -10.906000137329102,-1.4420000314712524 C-10.968000411987305,-0.9700000286102295 -11,-0.48899999260902405 -11,0 C-11,0.48899999260902405 -10.968000411987305,0.9700000286102295 -10.906000137329102,1.4420000314712524 C-10.847000122070312,1.8949999809265137 -10.375,2.1470000743865967 -9.92300033569336,2.078000068664551 C-8.756999969482422,1.899999976158142 -7.7210001945495605,2.265000104904175 -7.390999794006348,3.061000108718872 C-7.060999870300293,3.8570001125335693 -7.534999847412109,4.8470001220703125 -8.484999656677246,5.546000003814697 C-8.852999687194824,5.816999912261963 -9.008999824523926,6.328999996185303 -8.730999946594238,6.691999912261963 C-8.142999649047852,7.458000183105469 -7.458000183105469,8.142999649047852 -6.691999912261963,8.730999946594238 C-6.329999923706055,9.008999824523926 -5.816999912261963,8.852999687194824 -5.546000003814697,8.484999656677246 C-4.8480000495910645,7.534999847412109 -3.8570001125335693,7.060999870300293 -3.061000108718872,7.390999794006348 C-2.265000104904175,7.7210001945495605 -1.899999976158142,8.756999969482422 -2.078000068664551,9.92300033569336 C-2.1470000743865967,10.375 -1.8949999809265137,10.847000122070312 -1.4420000314712524,10.906000137329102 C-0.9700000286102295,10.968000411987305 -0.48899999260902405,11 0,11 C0.48899999260902405,11 0.9700000286102295,10.968000411987305 1.4420000314712524,10.906000137329102 C1.8949999809265137,10.847000122070312 2.1470000743865967,10.375 2.078000068664551,9.92300033569336 C1.899999976158142,8.756999969482422 2.2660000324249268,7.7210001945495605 3.062000036239624,7.390999794006348 C3.8580000400543213,7.060999870300293 4.8480000495910645,7.534999847412109 5.546000003814697,8.484999656677246 C5.816999912261963,8.852999687194824 6.328999996185303,9.008999824523926 6.691999912261963,8.730999946594238 C7.458000183105469,8.142999649047852 8.142999649047852,7.458000183105469 8.730999946594238,6.691999912261963 C9.008999824523926,6.328999996185303 8.852999687194824,5.816999912261963 8.484999656677246,5.546000003814697 C7.534999847412109,4.8480000495910645 7.060999870300293,3.8570001125335693 7.390999794006348,3.061000108718872 C7.7210001945495605,2.265000104904175 8.756999969482422,1.899999976158142 9.92300033569336,2.078000068664551 C10.375,2.1470000743865967 10.847000122070312,1.8949999809265137 10.906000137329102,1.4420000314712524 C10.968000411987305,0.9700000286102295 11,0.48899999260902405 11,0 C11,-0.48899999260902405 10.968000411987305,-0.9700000286102295 10.906000137329102,-1.4420000314712524 C10.847000122070312,-1.8949999809265137 10.375,-2.1470000743865967 9.92300033569336,-2.078000068664551 C8.756999969482422,-1.899999976158142 7.7210001945495605,-2.265000104904175 7.390999794006348,-3.061000108718872 C7.060999870300293,-3.8570001125335693 7.534999847412109,-4.8480000495910645 8.484999656677246,-5.546000003814697 C8.852999687194824,-5.816999912261963 9.008999824523926,-6.329999923706055 8.730999946594238,-6.691999912261963 C8.142999649047852,-7.458000183105469 7.458000183105469,-8.142999649047852 6.691999912261963,-8.730999946594238 C6.328999996185303,-9.008999824523926 5.817999839782715,-8.852999687194824 5.546999931335449,-8.484999656677246 C4.848999977111816,-7.534999847412109 3.8580000400543213,-7.060999870300293 3.062000036239624,-7.390999794006348 C2.2660000324249268,-7.7210001945495605 1.9010000228881836,-8.756999969482422 2.0789999961853027,-9.92300033569336 C2.1480000019073486,-10.375 1.8949999809265137,-10.847000122070312 1.4420000314712524,-10.906000137329102 C0.9700000286102295,-10.968000411987305 0.48899999260902405,-11 0,-11 C-0.48899999260902405,-11 -0.9700000286102295,-10.968000411987305 -1.4420000314712524,-10.906000137329102z M4,0 C4,2.2090001106262207 2.2090001106262207,4 0,4 C-2.2090001106262207,4 -4,2.2090001106262207 -4,0 C-4,-2.2090001106262207 -2.2090001106262207,-4 0,-4 C2.2090001106262207,-4 4,-2.2090001106262207 4,0z'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    --dc-ondemand-svg: url("https://icons.getbootstrap.com/assets/icons/check-circle.svg");
-}
-
 .dc-colorway-selector::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--dc-picker-svg) center/contain no-repeat !important;
-    mask: var(--dc-picker-svg) center/contain no-repeat !important
+    -webkit-mask: var(--si-appearance) center/contain no-repeat !important;
+    mask: var(--si-appearance) center/contain no-repeat !important
 }
 
 .dc-colorway-settings::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--dc-settings-svg) center/contain no-repeat !important;
-    mask: var(--dc-settings-svg) center/contain no-repeat !important
+    -webkit-mask: var(--si-vencordsettings) center/contain no-repeat !important;
+    mask: var(--si-vencordsettings) center/contain no-repeat !important
 }
 
 .dc-colorway-ondemand::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--dc-ondemand-svg) center/contain no-repeat !important;
-    mask: var(--dc-ondemand-svg) center/contain no-repeat !important
+    -webkit-mask: var(--si-vencordupdater) center/contain no-repeat !important;
+    mask: var(--si-vencordupdater) center/contain no-repeat !important
 }
 
-.dc-colorway-management::before {
+.dc-colorway-sources-manager::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--dc-settings-svg) center/contain no-repeat !important;
-    mask: var(--dc-settings-svg) center/contain no-repeat !important
+    -webkit-mask: var(--si-instantinvites) center/contain no-repeat !important;
+    mask: var(--si-instantinvites) center/contain no-repeat !important
 }
 
 .colorwaySourceModal {
     min-height: unset;
+}
+
+.colorwaySelector-sourceSelect {
+    width: fit-content !important;
+}
+
+.dc-info-card {
+    border-radius: 5px;
+    border: 1px solid var(--blue-345);
+    padding: 1em;
+    margin-bottom: 1em;
+    display: flex;
+    gap: 1em;
+    flex-direction: column;
+}
+
+.theme-dark .dc-info-card {
+    color: var(--white-500);
+}
+
+.theme-light .dc-info-card {
+    color: var(--black-500);
+}
+
+.colorwaysSettings-sourceScroller {
+    scrollbar-width: none;
+}
+
+.colorwaysSettings-sourceScroller::-webkit-scrollbar {
+    width: 0;
+}
+
+.colorwayMessage {
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 5px;
+    display: flex;
+}
+
+.colorwayMessage-contents {
+    display: flex;
+    flex-direction: column;
+}
+
+.theme-dark .colorwayMessage {
+    background: hsl(var(--primary-630-hsl)/60%);
+    border-color: hsl(var(--primary-630-hsl)/90%);
+}
+
+.theme-light .colorwayMessage {
+    background: hsl(var(--primary-100-hsl)/60%);
+    border-color: hsl(var(--primary-200-hsl)/30%);
+}
+
+.colorwaySelector-sources_settings {
+    margin-left: 8px;
+}
+
+.colorwaysLoadingModal,
+.colorwayInfo-cssModal {
+    width: fit-content;
+    height: fit-content;
+    min-width: unset;
+    min-height: unset;
+    background: none;
+    box-shadow: none !important;
+    border: none;
+}
+
+.ColorwaySelectorWrapper-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+}
+
+.discordColorway-listItem .discordColorwayPreviewColorContainer {
+    width: 30px;
+    height: 30px;
+}
+
+.colorwayLabel.labelInGrid {
+    max-height: 2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+    text-align: center;
+}
+
+.discordColorway-listItem .colorwayInfoIconContainer {
+    height: 28px;
+    width: 28px;
+    border-radius: 3px;
+    position: static;
+    opacity: 1;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--button-outline-primary-border);
+    color: var(--button-outline-primary-text);
+    transition: .15s;
+}
+
+.discordColorway-listItem .colorwayInfoIconContainer:hover {
+    background-color: var(--button-outline-primary-background-hover);
+    border-color: var(--button-outline-primary-border-hover);
+    color: var(--button-outline-primary-text-hover);
+}
+
+.colorwayLabel:not(.labelInGrid) {
+    margin-right: auto;
+    margin-top: 0 !important;
+    margin-left: .5rem;
+}
+
+.colorwaySelectionCircle {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    top: 0;
+    left: 0;
+}
+
+.ColorwaySelectorWrapper-grid {
+    margin-bottom: 16px;
+}
+
+.colorwaySelector-sorter {
+    height: 50px;
+    width: 100%;
+    box-shadow: var(--elevation-low);
+    margin-bottom: 8px;
+    display: flex;
+}
+
+.colorwaySelector-sorter_selectedSpacer {
+    width: 80px;
+    height: 50px;
+}
+
+.colorwaySelector-sorter_text {
+    line-height: 50px;
+    margin: 0;
+}
+
+.colorwaySelector-sorter_name {
+    margin-right: auto;
+    cursor: pointer;
+}
+
+.colorwayPresetLabel {
+    margin-right: 1rem;
+}
+
+.colorwayPreview-channel {
+    margin: 10px;
+    width: calc(100% - 20px);
+    height: 8px;
+    border-radius: 16px;
 }
