@@ -135,7 +135,7 @@ export default definePlugin({
             find: '"MessageActionCreators"',
             replacement: {
                 match: /(?<=focusMessage\(\i\){.+?)(?=focus:{messageId:(\i)})/,
-                replace: "before:$1,"
+                replace: "after:$1,"
             }
         },
         // Force Server Home instead of Server Guide
