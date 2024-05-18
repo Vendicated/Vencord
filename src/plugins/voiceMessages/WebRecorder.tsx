@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { opusRecorderWorkerSrc } from "@utils/dependencies";
 import { Button, useState } from "@webpack/common";
 import Recorder from "opus-recorder";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-let url:string|null = null;
+let url: string | null = null;
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
@@ -49,13 +50,13 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                 setStream(stream);
                 const audioCtx = new AudioContext();
                 const source = audioCtx.createMediaStreamSource(stream);
-                if (!url){
-                    const blob = await (await fetch("https://www.unpkg.com/opus-recorder@8.0.5/dist/encoderWorker.min.js")).blob();
+                if (!url) {
+                    const blob = await (await fetch(opusRecorderWorkerSrc)).blob();
                     url = URL.createObjectURL(blob);
                 }
                 const recorder = new Recorder({ sourceNode: source, encoderPath: url, streamPages: true });
                 setRecorder(recorder);
-                recorder.ondataavailable=e => {
+                recorder.ondataavailable = e => {
                     chunks.push(new Blob([e], { type: "audio/ogg; codecs=opus" }));
                 };
                 recorder.start();
@@ -63,7 +64,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
             });
         } else {
             if (recorder) {
-                recorder.onstop=() => {
+                recorder.onstop = () => {
                     setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
                     changeRecording(false);
                 };
