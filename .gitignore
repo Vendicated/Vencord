@@ -18,7 +18,6 @@ lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
 
-src/userplugins
-
 ExtensionCache/
-settings/
+/settings
+/MessageLoggerData

@@ -102,7 +102,7 @@ export default definePlugin({
     name: "ReactionEmojiManager",
     authors: [{
         name: "luckycanucky",
-        id: 0n
+        id: 995923917594173440n
     }],
     description: "Manage custom emoji reactions for messages and automate their setup",
     settings,

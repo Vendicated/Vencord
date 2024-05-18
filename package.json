@@ -41,7 +41,8 @@
         "monaco-editor": "^0.43.0",
         "nanoid": "^4.0.2",
         "typed-emitter": "^2.1.0",
-        "virtual-merge": "^1.0.1"
+        "virtual-merge": "^1.0.1",
+        "zustand": "^4.5.2"
     },
     "devDependencies": {
         "@types/chrome": "^0.0.246",
