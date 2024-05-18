@@ -45,7 +45,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /Math\.min\((\i\.AfkTimeout\.getSetting\(\)\*\i\.default\.Millis\.SECOND),\i\.IDLE_DURATION\)/,
-                    replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting)
+                    replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
                 },
                 {
                     match: /\i\.default\.dispatch\({type:"IDLE",idle:!1}\)/,
