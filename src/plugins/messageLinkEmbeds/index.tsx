@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
@@ -27,6 +27,7 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
+    Constants,
     FluxDispatcher,
     GuildStore,
     IconUtils,
@@ -132,7 +133,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     messageCache.set(messageID, { fetched: false });
 
     const res = await RestAPI.get({
-        url: `/channels/${channelID}/messages`,
+        url: Constants.Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
@@ -389,4 +390,8 @@ export default definePlugin({
             );
         }, 4 /* just above rich embeds */);
     },
+
+    stop() {
+        removeAccessory("messageLinkEmbed");
+    }
 });

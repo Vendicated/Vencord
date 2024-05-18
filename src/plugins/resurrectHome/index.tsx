@@ -18,9 +18,68 @@
 
 import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Button, Menu, Tooltip, useEffect, useState } from "@webpack/common";
+
+const ChannelRowClasses = findByPropsLazy("modeConnected", "modeLocked", "icon");
+
+let currentShouldViewServerHome = false;
+const shouldViewServerHomeStates = new Set<React.Dispatch<React.SetStateAction<boolean>>>();
+
+function ViewServerHomeButton() {
+    return (
+        <Tooltip text="View Server Home">
+            {tooltipProps => (
+                <Button
+                    {...tooltipProps}
+                    look={Button.Looks.BLANK}
+                    size={Button.Sizes.NONE}
+                    innerClassName={ChannelRowClasses.icon}
+                    onClick={e => {
+                        e.preventDefault();
+
+                        currentShouldViewServerHome = true;
+                        for (const setState of shouldViewServerHomeStates) {
+                            setState(true);
+                        }
+                    }}
+
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="m2.4 8.4 8.38-6.46a2 2 0 0 1 2.44 0l8.39 6.45a2 2 0 0 1-.79 3.54l-.32.07-.82 8.2a2 2 0 0 1-1.99 1.8H16a1 1 0 0 1-1-1v-5a3 3 0 0 0-6 0v5a1 1 0 0 1-1 1H6.31a2 2 0 0 1-1.99-1.8L3.5 12l-.32-.07a2 2 0 0 1-.79-3.54Z" />
+                    </svg>
+                </Button>
+            )}
+        </Tooltip>
+    );
+}
+
+function useForceServerHome() {
+    const { forceServerHome } = settings.use(["forceServerHome"]);
+    const [shouldViewServerHome, setShouldViewServerHome] = useState(currentShouldViewServerHome);
+
+    useEffect(() => {
+        shouldViewServerHomeStates.add(setShouldViewServerHome);
+
+        return () => {
+            shouldViewServerHomeStates.delete(setShouldViewServerHome);
+        };
+    }, []);
+
+    return shouldViewServerHome || forceServerHome;
+}
+
+function useDisableViewServerHome() {
+    useEffect(() => () => {
+        currentShouldViewServerHome = false;
+        for (const setState of shouldViewServerHomeStates) {
+            setState(false);
+        }
+    }, []);
+}
 
 const settings = definePluginSettings({
     forceServerHome: {
@@ -30,15 +89,9 @@ const settings = definePluginSettings({
     }
 });
 
-function useForceServerHome() {
-    const { forceServerHome } = settings.use(["forceServerHome"]);
-
-    return forceServerHome;
-}
-
 export default definePlugin({
     name: "ResurrectHome",
-    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking the Server Guide.",
+    description: "Re-enables the Server Home tab when there isn't a Server Guide. Also has an option to force the Server Home over the Server Guide, which is accessible through right-clicking a server.",
     authors: [Devs.Dolfies, Devs.Nuckyz],
     settings,
 
@@ -82,24 +135,47 @@ export default definePlugin({
             find: '"MessageActionCreators"',
             replacement: {
                 match: /(?<=focusMessage\(\i\){.+?)(?=focus:{messageId:(\i)})/,
-                replace: "before:$1,"
+                replace: "after:$1,"
             }
         },
         // Force Server Home instead of Server Guide
         {
             find: "61eef9_2",
             replacement: {
-                match: /(?<=getMutableGuildChannelsForGuild\(\i\)\);)(?=if\(null==\i\|\|)/,
-                replace: "if($self.useForceServerHome())return false;"
+                match: /getMutableGuildChannelsForGuild\(\i\);return\(0,\i\.useStateFromStores\).+?\]\)(?=}function)/,
+                replace: m => `${m}&&!$self.useForceServerHome()`
+            }
+        },
+        // Add View Server Home Button to Server Guide
+        {
+            find: "487e85_1",
+            replacement: {
+                match: /(?<=text:(\i)\?\i\.\i\.Messages\.SERVER_GUIDE:\i\.\i\.Messages\.GUILD_HOME,)/,
+                replace: "trailing:$self.ViewServerHomeButton({serverGuide:$1}),"
+            }
+        },
+        // Disable view Server Home override when the Server Home is unmouted
+        {
+            find: "69386d_5",
+            replacement: {
+                match: /location:"69386d_5".+?;/,
+                replace: "$&$self.useDisableViewServerHome();"
             }
         }
     ],
 
+    ViewServerHomeButton: ErrorBoundary.wrap(({ serverGuide }: { serverGuide?: boolean; }) => {
+        if (serverGuide !== true) return null;
+
+        return <ViewServerHomeButton />;
+    }),
+
     useForceServerHome,
+    useDisableViewServerHome,
 
     contextMenus: {
         "guild-context"(children, props) {
-            const forceServerHome = useForceServerHome();
+            const { forceServerHome } = settings.use(["forceServerHome"]);
 
             if (!props?.guild) return;
 
