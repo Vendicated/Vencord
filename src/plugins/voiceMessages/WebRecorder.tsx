@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { opusRecorderWorkerSrc } from "@utils/dependencies";
 import { Button, useState } from "@webpack/common";
+import Recorder from "opus-recorder";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-
+let url: string | null = null;
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
-    const [recorder, setRecorder] = useState<MediaRecorder>();
+    const [recorder, setRecorder] = useState<Recorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+    const [stream, setStream] = useState<MediaStream>();
 
     const changeRecording = (recording: boolean) => {
         setRecording(recording);
@@ -41,27 +44,32 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                     echoCancellation: settings.store.echoCancellation,
                     noiseSuppression: settings.store.noiseSuppression,
                 }
-            }).then(stream => {
+            }).then(async stream => {
                 const chunks = [] as Blob[];
                 setChunks(chunks);
-
-                const recorder = new MediaRecorder(stream);
+                setStream(stream);
+                const audioCtx = new AudioContext();
+                const source = audioCtx.createMediaStreamSource(stream);
+                if (!url) {
+                    const blob = await (await fetch(opusRecorderWorkerSrc)).blob();
+                    url = URL.createObjectURL(blob);
+                }
+                const recorder = new Recorder({ sourceNode: source, encoderPath: url, streamPages: true });
                 setRecorder(recorder);
-                recorder.addEventListener("dataavailable", e => {
-                    chunks.push(e.data);
-                });
+                recorder.ondataavailable = e => {
+                    chunks.push(new Blob([e], { type: "audio/ogg; codecs=opus" }));
+                };
                 recorder.start();
-
                 changeRecording(true);
             });
         } else {
             if (recorder) {
-                recorder.addEventListener("stop", () => {
+                recorder.onstop = () => {
                     setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
-
                     changeRecording(false);
-                });
+                };
                 recorder.stop();
+                stream?.getAudioTracks().forEach(track => track.stop());
             }
         }
     }
