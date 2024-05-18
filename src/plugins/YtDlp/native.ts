@@ -180,7 +180,7 @@ export async function start(_: IpcMainInvokeEvent, ytDlp: ArrayBuffer | null) {
                 throw new Error("Unsupported platform.");
         }
 
-        const blob = await (await fetch(WIN)).blob();
+        const blob = await (await fetch(url)).blob();
         const buffer = await blob.arrayBuffer();
 
         setup(buffer);
