@@ -9,10 +9,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
-
-const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
 const settings = definePluginSettings({
     idleTimeout: {
