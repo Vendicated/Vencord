@@ -16,9 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { APIGuild, APIRoleTags, APIUser } from "discord-api-types/v9";
-import type { Channel } from "discord-types/general"; // TODO
-
 import type { ExcludeAction, ExtractAction, FluxAction, FluxActionHandlerMap, FluxDispatchBand, FluxDispatcher } from "./utils";
 
 type Nullish = null | undefined;
@@ -143,6 +140,241 @@ export class ImmutableRecord<OwnProperties extends object = Record<PropertyKey, 
     ): this;
 }
 
+/*
+// bigint enums are not yet possible: https://github.com/microsoft/TypeScript/issues/37783
+export const enum Permissions {
+    CREATE_INSTANT_INVITE = 1n << 0n,
+    KICK_MEMBERS = 1n << 1n,
+    BAN_MEMBERS = 1n << 2n,
+    ADMINISTRATOR = 1n << 3n,
+    MANAGE_CHANNELS = 1n << 4n,
+    MANAGE_GUILD = 1n << 5n,
+    ADD_REACTIONS = 1n << 6n,
+    VIEW_AUDIT_LOG = 1n << 7n,
+    PRIORITY_SPEAKER = 1n << 8n,
+    STREAM = 1n << 9n,
+    VIEW_CHANNEL = 1n << 10n,
+    SEND_MESSAGES = 1n << 11n,
+    SEND_TTS_MESSAGES = 1n << 12n,
+    MANAGE_MESSAGES = 1n << 13n,
+    EMBED_LINKS = 1n << 14n,
+    ATTACH_FILES = 1n << 15n,
+    READ_MESSAGE_HISTORY = 1n << 16n,
+    MENTION_EVERYONE = 1n << 17n,
+    USE_EXTERNAL_EMOJIS = 1n << 18n,
+    VIEW_GUILD_ANALYTICS = 1n << 19n,
+    CONNECT = 1n << 20n,
+    SPEAK = 1n << 21n,
+    MUTE_MEMBERS = 1n << 22n,
+    DEAFEN_MEMBERS = 1n << 23n,
+    MOVE_MEMBERS = 1n << 24n,
+    USE_VAD = 1n << 25n,
+    CHANGE_NICKNAME = 1n << 26n,
+    MANAGE_NICKNAMES = 1n << 27n,
+    MANAGE_ROLES = 1n << 28n,
+    MANAGE_WEBHOOKS = 1n << 29n,
+    MANAGE_GUILD_EXPRESSIONS = 1n << 30n,
+    USE_APPLICATION_COMMANDS = 1n << 31n,
+    REQUEST_TO_SPEAK = 1n << 32n,
+    MANAGE_EVENTS = 1n << 33n,
+    MANAGE_THREADS = 1n << 34n,
+    CREATE_PUBLIC_THREADS = 1n << 35n,
+    CREATE_PRIVATE_THREADS = 1n << 36n,
+    USE_EXTERNAL_STICKERS = 1n << 37n,
+    SEND_MESSAGES_IN_THREADS = 1n << 38n,
+    USE_EMBEDDED_ACTIVITIES = 1n << 39n,
+    MODERATE_MEMBERS = 1n << 40n,
+    VIEW_CREATOR_MONETIZATION_ANALYTICS = 1n << 41n,
+    USE_SOUNDBOARD = 1n << 42n,
+    CREATE_GUILD_EXPRESSIONS = 1n << 43n,
+    CREATE_EVENTS = 1n << 44n,
+    USE_EXTERNAL_SOUNDS = 1n << 45n,
+    SEND_VOICE_MESSAGES = 1n << 46n,
+    USE_CLYDE_AI = 1n << 47n,
+    SET_VOICE_CHANNEL_STATUS = 1n << 48n,
+    SEND_POLLS = 1n << 49n,
+}
+*/
+
+export const enum ChannelFlags {
+    GUILD_FEED_REMOVED = 1 << 0,
+    PINNED = 1 << 1,
+    ACTIVE_CHANNELS_REMOVED = 1 << 2,
+    REQUIRE_TAG = 1 << 4,
+    IS_SPAM = 1 << 5,
+    IS_GUILD_RESOURCE_CHANNEL = 1 << 7,
+    CLYDE_AI = 1 << 8,
+    IS_SCHEDULED_FOR_DELETION = 1 << 9,
+    IS_MEDIA_CHANNEL = 1 << 10,
+    SUMMARIES_DISABLED = 1 << 11,
+    IS_ROLE_SUBSCRIPTION_TEMPLATE_PREVIEW_CHANNEL = 1 << 13,
+    IS_BROADCASTING = 1 << 14,
+    HIDE_MEDIA_DOWNLOAD_OPTIONS = 1 << 15,
+    IS_JOIN_REQUEST_INTERVIEW_CHANNEL = 1 << 16,
+}
+
+export const enum ChannelTypes {
+    GUILD_TEXT = 0,
+    DM = 1,
+    GUILD_VOICE = 2,
+    GROUP_DM = 3,
+    GUILD_CATEGORY = 4,
+    GUILD_ANNOUNCEMENT = 5,
+    GUILD_STORE = 6,
+    ANNOUNCEMENT_THREAD = 10,
+    PUBLIC_THREAD = 11,
+    PRIVATE_THREAD = 12,
+    GUILD_STAGE_VOICE = 13,
+    GUILD_DIRECTORY = 14,
+    GUILD_FORUM = 15,
+    GUILD_MEDIA = 16,
+    UNKNOWN = 10_000,
+}
+
+export const enum FormLayout {
+    DEFAULT = 0,
+    LIST = 1,
+    GRID = 2,
+}
+
+export const enum ThreadSortOrder {
+    LATEST_ACTIVITY = 0,
+    CREATION_DATE = 1,
+}
+
+type ChannelRecordBaseOwnProperties = Pick<ChannelRecordBase, "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode">;
+
+// does not extend ImmutableRecord
+export class ChannelRecordBase<OwnProperties extends ChannelRecordBaseOwnProperties = ChannelRecordBaseOwnProperties> {
+    constructor(channelFromServer: Record<string, any>); // TEMP
+
+    get accessPermissions(): /* Permissions */ bigint;
+    get bitrate(): number;
+    computeLurkerPermissionsAllowList(): /* Permissions */ bigint | undefined;
+    get flags(): ChannelFlags;
+    getApplicationId(): this["application_id"];
+    getDefaultLayout(): FormLayout;
+    getDefaultSortOrder(): ThreadSortOrder;
+    getGuildId(): string | null;
+    hasFlag(flag: number): boolean;
+    isActiveThread(): boolean;
+    isAnnouncementThread(): boolean;
+    isArchivedLockedThread(): boolean;
+    isArchivedThread(): boolean;
+    isBroadcastChannel(): boolean;
+    isCategory(): boolean;
+    isDM(): boolean;
+    isDirectory(): boolean;
+    isForumChannel(): boolean;
+    isForumLikeChannel(): boolean;
+    isForumPost(): boolean;
+    isGroupDM(): boolean;
+    isGuildStageVoice(): boolean;
+    isGuildVocal(): boolean;
+    isGuildVocalOrThread(): boolean;
+    isGuildVoice(): boolean;
+    isListenModeCapable(): boolean;
+    isLockedThread(): boolean;
+    isManaged(): boolean;
+    isMediaChannel(): boolean;
+    isMediaPost(): boolean;
+    isMultiUserDM(): boolean;
+    isNSFW(): boolean;
+    isOwner(userId: string): boolean;
+    isPrivate(): boolean;
+    isRoleSubscriptionTemplatePreviewChannel(): boolean;
+    isScheduledForDeletion(): boolean;
+    isSystemDM(): boolean;
+    isThread(): boolean;
+    isVocal(): boolean;
+    isVocalThread(): boolean;
+    merge(collection: Partial<OwnProperties>): this;
+    get nsfw(): boolean;
+    get permissionOverwrites(): Record<string, any>; // TEMP
+    get position(): number;
+    get rateLimitPerUser(): number;
+    set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
+    toJS(): OwnProperties;
+    get topic(): string;
+    get userLimit(): number;
+
+    application_id: undefined; // TEMP
+    appliedTags: undefined; // TEMP
+    availableTags: undefined; // TEMP
+    bitrate_: undefined; // TEMP
+    defaultAutoArchiveDuration: undefined; // TEMP
+    defaultForumLayout: undefined; // TEMP
+    defaultReactionEmoji: undefined; // TEMP
+    defaultSortOrder: undefined; // TEMP
+    defaultThreadRateLimitPerUser: undefined; // TEMP
+    flags_: undefined; // TEMP
+    guild_id: string | null;
+    icon: undefined; // TEMP
+    iconEmoji: undefined; // TEMP
+    id: string;
+    isMessageRequest: undefined; // TEMP
+    isMessageRequestTimestamp: undefined; // TEMP
+    isSpam: undefined; // TEMP
+    lastMessageId: undefined; // TEMP
+    lastPinTimestamp: undefined; // TEMP
+    member: undefined; // TEMP
+    memberCount: undefined; // TEMP
+    memberIdsPreview: undefined; // TEMP
+    memberListId: undefined; // TEMP
+    messageCount: undefined; // TEMP
+    name: string;
+    nicks: undefined; // TEMP
+    nsfw_: undefined; // TEMP
+    originChannelId: undefined; // TEMP
+    ownerId: undefined; // TEMP
+    parentChannelThreadType: undefined; // TEMP
+    parent_id: undefined; // TEMP
+    permissionOverwrites_: undefined; // TEMP
+    position_: undefined; // TEMP
+    rateLimitPerUser_: undefined; // TEMP
+    rawRecipients: undefined; // TEMP
+    recipients: undefined; // TEMP
+    rtcRegion: undefined; // TEMP
+    safetyWarnings: undefined; // TEMP
+    template: undefined; // TEMP
+    themeColor: undefined; // TEMP
+    threadMetadata: undefined; // TEMP
+    topic_: undefined; // TEMP
+    totalMessageSent: undefined; // TEMP
+    type: ChannelTypes;
+    userLimit_: undefined; // TEMP
+    version: undefined; // TEMP
+    videoQualityMode: undefined; // TEMP
+}
+
+type ChannelStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_FEED_FETCH_SUCCESS" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_CHANNELS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOGOUT" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "SEARCH_FINISH" | "THREAD_CREATE" | "THREAD_DELETE" | "THREAD_LIST_SYNC" | "THREAD_UPDATE">;
+
+export class ChannelStore<Action extends FluxAction = ChannelStoreAction> extends FluxStore<Action> {
+    static displayName: "ChannelStore";
+
+    getAllThreadsForParent(channelId: string): ; // TEMP
+    getBasicChannel(channelId?: string | Nullish): ; // TEMP
+    getChannel(channelId?: string | Nullish): ;  // TEMP
+    getChannelIds(guildId?: string | Nullish): string[];
+    getDebugInfo(): {
+        loadedGuildIds: any[]; // TEMP
+        pendingGuildLoads: any[]; // TEMP
+        guildSizes: string[];
+    };
+    getDMFromUserId(userId?: string | Nullish): ; // TEMP
+    getDMUserIds(): string[];
+    getGuildChannelsVersion(guildId: string): number; // TEMP
+    getInitialOverlayState(): ; // TEMP
+    getMutableBasicGuildChannelsForGuild(guildId: string): ; // TEMP
+    getMutableDMsByUserIds(): ; // TEMP
+    getMutableGuildChannelsForGuild(guildId: string): ; // TEMP
+    getMutablePrivateChannels(): ; // TEMP
+    getPrivateChannelsVersion(): number;
+    getSortedPrivateChannels(): ; // TEMP
+    hasChannel(channelId: string): boolean;
+    loadAllGuildAndPrivateChannelsFromDisk(): ; // TEMP
+}
+
 export interface DraftObject {
     channelId: string;
     timestamp: number;
@@ -247,6 +479,7 @@ export class EmojiStore extends FluxStore {
         pendingUsages: { key: string, timestamp: number; }[];
     };
     searchWithoutFetchingLatest(data: {
+        // @ts-expect-error: TODO
         channel: Channel,
         query: string;
         count?: number;
@@ -292,7 +525,7 @@ export const enum GuildMemberFlags {
     AUTOMOD_QUARANTINED_USERNAME_OR_GUILD_NICKNAME = 1 << 7,
     AUTOMOD_QUARANTINED_BIO = 1 << 8,
     DM_SETTINGS_UPSELL_ACKNOWLEDGED = 1 << 9,
-    AUTOMOD_QUARANTINED_CLAN_TAG = 1 << 10
+    AUTOMOD_QUARANTINED_CLAN_TAG = 1 << 10,
 }
 
 export interface GuildMember {
@@ -321,23 +554,23 @@ type GuildMemberStoreAction = ExtractAction<FluxAction, "CACHE_LOADED" | "CLEAR_
 export class GuildMemberStore<Action extends FluxAction = GuildMemberStoreAction> extends FluxStore<Action> {
     static displayName: "GuildMemberStore";
 
-    getCommunicationDisabledUserMap(): Record</* userId: */string, /* communicationDisabledUntil: */string>;
+    getCommunicationDisabledUserMap(): { [userId: string]: string; };
     getCommunicationDisabledVersion(): number;
     getMember(guildId: string, userId: string): GuildMember | null; // TEMP
     getMemberIds(guildId?: string | Nullish): string[];
     getMemberRoleWithPendingUpdates(guildId: string, userId: string): string[];
     getMembers(guildId?: string | Nullish): GuildMember[];
     getMemberVersion(): number;
-    getMutableAllGuildsAndMembers(): Record</* guildId: */string, Record</* userId: */string, GuildMember>>;
+    getMutableAllGuildsAndMembers(): { [guildId: string]: { [userId: string]: GuildMember; }; };
     getNick(guildId?: string | Nullish, userId?: string | Nullish): string | null;
-    getNicknameGuildsMapping(userId: string): Record</* nickname: */string, /* guildIds: */string[]>;
+    getNicknameGuildsMapping(userId: string): { [nickname: string]: string[]; };
     getNicknames(userId: string): string[];
     getPendingRoleUpdates(guildId: string): {
         added: string[]
         removed: string[]
     };
-    getSelfMember(guildId: string): GuildMember | null;
-    getTrueMember(guildId: string, userId: string): GuildMember | null;
+    getSelfMember(guildId: string): GuildMember | Nullish;
+    getTrueMember(guildId: string, userId: string): GuildMember | Nullish;
     isCurrentUserGuest(guildId?: string | Nullish): boolean;
     isGuestOrLurker(guildId?: string | Nullish, userId?: string | Nullish): boolean;
     isMember(guildId?: string | Nullish, userId?: string | Nullish): boolean;
@@ -347,62 +580,6 @@ export class GuildMemberStore<Action extends FluxAction = GuildMemberStoreAction
 export const enum RoleFlags {
     IN_PROMPT = 1
 }
-
-/*
-// bigint enums are not yet possible: https://github.com/microsoft/TypeScript/issues/37783
-export const enum Permissions {
-    CREATE_INSTANT_INVITE = 1n << 0n,
-    KICK_MEMBERS = 1n << 1n,
-    BAN_MEMBERS = 1n << 2n,
-    ADMINISTRATOR = 1n << 3n,
-    MANAGE_CHANNELS = 1n << 4n,
-    MANAGE_GUILD = 1n << 5n,
-    ADD_REACTIONS = 1n << 6n,
-    VIEW_AUDIT_LOG = 1n << 7n,
-    PRIORITY_SPEAKER = 1n << 8n,
-    STREAM = 1n << 9n,
-    VIEW_CHANNEL = 1n << 10n,
-    SEND_MESSAGES = 1n << 11n,
-    SEND_TTS_MESSAGES = 1n << 12n,
-    MANAGE_MESSAGES = 1n << 13n,
-    EMBED_LINKS = 1n << 14n,
-    ATTACH_FILES = 1n << 15n,
-    READ_MESSAGE_HISTORY = 1n << 16n,
-    MENTION_EVERYONE = 1n << 17n,
-    USE_EXTERNAL_EMOJIS = 1n << 18n,
-    VIEW_GUILD_ANALYTICS = 1n << 19n,
-    CONNECT = 1n << 20n,
-    SPEAK = 1n << 21n,
-    MUTE_MEMBERS = 1n << 22n,
-    DEAFEN_MEMBERS = 1n << 23n,
-    MOVE_MEMBERS = 1n << 24n,
-    USE_VAD = 1n << 25n,
-    CHANGE_NICKNAME = 1n << 26n,
-    MANAGE_NICKNAMES = 1n << 27n,
-    MANAGE_ROLES = 1n << 28n,
-    MANAGE_WEBHOOKS = 1n << 29n,
-    MANAGE_GUILD_EXPRESSIONS = 1n << 30n,
-    USE_APPLICATION_COMMANDS = 1n << 31n,
-    REQUEST_TO_SPEAK = 1n << 32n,
-    MANAGE_EVENTS = 1n << 33n,
-    MANAGE_THREADS = 1n << 34n,
-    CREATE_PUBLIC_THREADS = 1n << 35n,
-    CREATE_PRIVATE_THREADS = 1n << 36n,
-    USE_EXTERNAL_STICKERS = 1n << 37n,
-    SEND_MESSAGES_IN_THREADS = 1n << 38n,
-    USE_EMBEDDED_ACTIVITIES = 1n << 39n,
-    MODERATE_MEMBERS = 1n << 40n,
-    VIEW_CREATOR_MONETIZATION_ANALYTICS = 1n << 41n,
-    USE_SOUNDBOARD = 1n << 42n,
-    CREATE_GUILD_EXPRESSIONS = 1n << 43n,
-    CREATE_EVENTS = 1n << 44n,
-    USE_EXTERNAL_SOUNDS = 1n << 45n,
-    SEND_VOICE_MESSAGES = 1n << 46n,
-    USE_CLYDE_AI = 1n << 47n,
-    SET_VOICE_CHANNEL_STATUS = 1n << 48n,
-    SEND_POLLS = 1n << 49n
-}
-*/
 
 export interface Role {
     color: number;
@@ -415,10 +592,156 @@ export interface Role {
     mentionable: boolean;
     name: string;
     originalPosition: number;
-    permissions: bigint /* Permissions */;
+    permissions: /* Permissions */ bigint;
     position: number;
-    tags: APIRoleTags;
+    tags: {
+        available_for_purchase?: null;
+        bot_id?: string;
+        guild_connections?: null;
+        integration_id?: string;
+        premium_subscriber?: null;
+        subscription_listing_id?: string;
+    };
     unicodeEmoji: string | null;
+}
+
+interface IconSource {
+    uri: string;
+}
+
+export interface Clan {
+    badge: string | Nullish;
+    identityEnabled: boolean | undefined;
+    identityGuildId: string | Nullish;
+    tag: string | Nullish;
+}
+
+export const enum UserNotificationSettings {
+    ALL_MESSAGES = 0,
+    ONLY_MENTIONS = 1,
+    NO_MESSAGES = 2,
+    NULL = 3,
+}
+
+export const enum GuildExplicitContentFilterTypes {
+    DISABLED = 0,
+    MEMBERS_WITHOUT_ROLES = 1,
+    ALL_MEMBERS = 2,
+}
+
+export const enum GuildFeatures {
+    ANIMATED_BANNER = "ANIMATED_BANNER",
+    ANIMATED_ICON = "ANIMATED_ICON",
+    AUTOMOD_TRIGGER_USER_PROFILE = "AUTOMOD_TRIGGER_USER_PROFILE",
+    AUTO_MODERATION = "AUTO_MODERATION",
+    BANNER = "BANNER",
+    BURST_REACTIONS = "BURST_REACTIONS",
+    CHANNEL_ICON_EMOJIS_GENERATED = "CHANNEL_ICON_EMOJIS_GENERATED",
+    CLAN = "CLAN",
+    CLAN_PILOT_GENSHIN = "CLAN_PILOT_GENSHIN",
+    CLAN_PILOT_VALORANT = "CLAN_PILOT_VALORANT",
+    CLYDE_DISABLED = "CLYDE_DISABLED",
+    CLYDE_ENABLED = "CLYDE_ENABLED",
+    COMMERCE = "COMMERCE",
+    COMMUNITY = "COMMUNITY",
+    CREATOR_MONETIZABLE = "CREATOR_MONETIZABLE",
+    CREATOR_MONETIZABLE_DISABLED = "CREATOR_MONETIZABLE_DISABLED",
+    CREATOR_MONETIZABLE_PENDING_NEW_OWNER_ONBOARDING = "CREATOR_MONETIZABLE_PENDING_NEW_OWNER_ONBOARDING",
+    CREATOR_MONETIZABLE_PROVISIONAL = "CREATOR_MONETIZABLE_PROVISIONAL",
+    CREATOR_MONETIZABLE_RESTRICTED = "CREATOR_MONETIZABLE_RESTRICTED",
+    CREATOR_MONETIZABLE_WHITEGLOVE = "CREATOR_MONETIZABLE_WHITEGLOVE",
+    CREATOR_STORE_PAGE = "CREATOR_STORE_PAGE",
+    DISCOVERABLE = "DISCOVERABLE",
+    ENABLED_DISCOVERABLE_BEFORE = "ENABLED_DISCOVERABLE_BEFORE",
+    ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY = "ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY",
+    EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT = "EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT",
+    FEATURABLE = "FEATURABLE",
+    GENSHIN_L30 = "GENSHIN_L30",
+    GUILD_HOME_DEPRECATION_OVERRIDE = "GUILD_HOME_DEPRECATION_OVERRIDE",
+    GUILD_HOME_OVERRIDE = "GUILD_HOME_OVERRIDE",
+    GUILD_HOME_TEST = "GUILD_HOME_TEST",
+    GUILD_ONBOARDING = "GUILD_ONBOARDING",
+    GUILD_ONBOARDING_EVER_ENABLED = "GUILD_ONBOARDING_EVER_ENABLED",
+    GUILD_ONBOARDING_HAS_PROMPTS = "GUILD_ONBOARDING_HAS_PROMPTS",
+    GUILD_PRODUCTS_ALLOW_ARCHIVED_FILE = "GUILD_PRODUCTS_ALLOW_ARCHIVED_FILE",
+    GUILD_SERVER_GUIDE = "GUILD_SERVER_GUIDE",
+    GUILD_WEB_PAGE_VANITY_URL = "GUILD_WEB_PAGE_VANITY_URL",
+    HAS_DIRECTORY_ENTRY = "HAS_DIRECTORY_ENTRY",
+    HUB = "HUB",
+    INTERNAL_EMPLOYEE_ONLY = "INTERNAL_EMPLOYEE_ONLY",
+    INVITES_DISABLED = "INVITES_DISABLED",
+    INVITE_SPLASH = "INVITE_SPLASH",
+    LINKED_TO_HUB = "LINKED_TO_HUB",
+    MEMBER_VERIFICATION_GATE_ENABLED = "MEMBER_VERIFICATION_GATE_ENABLED",
+    MORE_EMOJI = "MORE_EMOJI",
+    MORE_STICKERS = "MORE_STICKERS",
+    NEWS = "NEWS",
+    NEW_THREAD_PERMISSIONS = "NEW_THREAD_PERMISSIONS",
+    NON_COMMUNITY_RAID_ALERTS = "NON_COMMUNITY_RAID_ALERTS",
+    PARTNERED = "PARTNERED",
+    PREVIEW_ENABLED = "PREVIEW_ENABLED",
+    PRODUCTS_AVAILABLE_FOR_PURCHASE = "PRODUCTS_AVAILABLE_FOR_PURCHASE",
+    RAID_ALERTS_DISABLED = "RAID_ALERTS_DISABLED",
+    ROLE_ICONS = "ROLE_ICONS",
+    ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE = "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
+    ROLE_SUBSCRIPTIONS_ENABLED = "ROLE_SUBSCRIPTIONS_ENABLED",
+    SHARD = "SHARD",
+    SOUNDBOARD = "SOUNDBOARD",
+    SUMMARIES_ENABLED_BY_USER = "SUMMARIES_ENABLED_BY_USER",
+    SUMMARIES_ENABLED_GA = "SUMMARIES_ENABLED_GA",
+    SUMMARIES_OPT_OUT_EXPERIENCE = "SUMMARIES_OPT_OUT_EXPERIENCE",
+    TEXT_IN_STAGE_ENABLED = "TEXT_IN_STAGE_ENABLED",
+    TEXT_IN_VOICE_ENABLED = "TEXT_IN_VOICE_ENABLED",
+    THREADS_ENABLED = "THREADS_ENABLED",
+    THREADS_ENABLED_TESTING = "THREADS_ENABLED_TESTING",
+    VALORANT_L30 = "VALORANT_L30",
+    VANITY_URL = "VANITY_URL",
+    VERIFIED = "VERIFIED",
+    VIP_REGIONS = "VIP_REGIONS",
+    WELCOME_SCREEN_ENABLED = "WELCOME_SCREEN_ENABLED",
+}
+
+export const enum GuildHubTypes {
+    DEFAULT = 0,
+    HIGH_SCHOOL = 1,
+    COLLEGE = 2,
+}
+
+export const enum MFALevels {
+    NONE = 0,
+    ELEVATED = 1,
+}
+
+export const enum GuildNSFWContentLevel {
+    DEFAULT = 0,
+    EXPLICIT = 1,
+    SAFE = 2,
+    AGE_RESTRICTED = 3,
+}
+
+export const enum BoostedGuildTiers {
+    NONE = 0,
+    TIER_1 = 1,
+    TIER_2 = 2,
+    TIER_3 = 3,
+}
+
+export const enum SystemChannelFlags {
+    SUPPRESS_JOIN_NOTIFICATIONS = 1 << 0,
+    SUPPRESS_PREMIUM_SUBSCRIPTIONS = 1 << 1,
+    SUPPRESS_GUILD_REMINDER_NOTIFICATIONS = 1 << 2,
+    SUPPRESS_JOIN_NOTIFICATION_REPLIES = 1 << 3,
+    SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATIONS = 1 << 4,
+    SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATION_REPLIES = 1 << 5,
+    SUPPRESS_CHANNEL_PROMPT_DEADCHAT = 1 << 7,
+}
+
+export const enum VerificationLevels {
+    NONE = 0,
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
+    VERY_HIGH = 4,
 }
 
 type GuildRecordOwnProperties = Pick<GuildRecord, "afkChannelId" | "afkTimeout" | "application_id" | "banner" | "clan" | "defaultMessageNotifications" | "description" | "discoverySplash" | "explicitContentFilter" | "features" | "homeHeader" | "hubType" | "icon" | "id" | "joinedAt" | "latestOnboardingQuestionId" | "maxMembers" | "maxStageVideoChannelUsers" | "maxVideoChannelUsers" | "mfaLevel" | "name" | "nsfwLevel" | "ownerId" | "preferredLocale" | "premiumProgressBarEnabled" | "premiumSubscriberCount" | "premiumTier" | "publicUpdatesChannelId" | "rulesChannelId" | "safetyAlertsChannelId" | "splash" | "systemChannelFlags" | "systemChannelId" | "vanityURLCode" | "verificationLevel">;
@@ -426,64 +749,63 @@ type GuildRecordOwnProperties = Pick<GuildRecord, "afkChannelId" | "afkTimeout" 
 export class GuildRecord<
     OwnProperties extends GuildRecordOwnProperties = GuildRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(guildFromServer: APIGuild);
+    constructor(guildFromServer: Record<string, any>); // TEMP
 
-    get acronym(): ; // TEMP
-    canHaveRaidActivityAlerts(): ; // TEMP
-    getApplicationId(): ; // TEMP
-    getEveryoneRoleId(): ; // TEMP
-    getIconSource(e: ): ; // TEMP
-    getIconURL(e: ): ; // TEMP
-    getMaxEmojiSlots(): ; // TEMP
-    getMaxRoleSubscriptionEmojiSlots(): ; // TEMP
-    getMaxSoundboardSlots(): ; // TEMP
-    getSafetyAlertsChannelId(): ; // TEMP
-    isCommunity(): ; // TEMP
-    isLurker(): ; // TEMP
-    isNew(): ; // TEMP
-    isOwner(e: ): ; // TEMP
-    isOwnerWithRequiredMfaLevel(e: ): ; // TEMP
-    hasCommunityInfoSubheader(): ; // TEMP
-    hasFeature(e: ): ; // TEMP
-    hasVerificationGate(): ; // TEMP
-    merge(e: ): ; // TEMP
-    updateJoinedAt(e: ): ; // TEMP
+    get acronym(): string;
+    canHaveRaidActivityAlerts(): boolean;
+    getApplicationId(): string | null;
+    getEveryoneRoleId(): string;
+    getIconSource(iconSize?: number | undefined, canAnimate?: boolean | undefined): IconSource;
+    getIconURL(iconSize?: number | undefined, canAnimate?: boolean | undefined): string;
+    getMaxEmojiSlots(): number;
+    getMaxRoleSubscriptionEmojiSlots(): number;
+    getMaxSoundboardSlots(): number;
+    getSafetyAlertsChannelId(): string | null;
+    isCommunity(): boolean;
+    isLurker(): boolean;
+    isNew(): boolean;
+    isOwner(userOrUserId?: UserRecord | string | Nullish): boolean;
+    isOwnerWithRequiredMfaLevel(userOrUserId?: UserRecord | string | Nullish): boolean;
+    hasCommunityInfoSubheader(): boolean;
+    hasFeature(guildFeature: GuildFeatures): boolean;
+    hasVerificationGate(): boolean;
+    updateJoinedAt(joinedAt: Date | string): this;
 
-    afkChannelId: ; // TEMP
-    afkTimeout: ; // TEMP
-    application_id: ; // TEMP
-    banner: ; // TEMP
-    clan: ; // TEMP
-    defaultMessageNotifications: ; // TEMP
-    description: ; // TEMP
-    discoverySplash: ; // TEMP
-    explicitContentFilter: ; // TEMP
-    features: ; // TEMP
-    homeHeader: ; // TEMP
-    hubType: ; // TEMP
-    icon: ; // TEMP
-    id: ; // TEMP
-    joinedAt: ; // TEMP
-    latestOnboardingQuestionId: ; // TEMP
-    maxMembers: ; // TEMP
-    maxStageVideoChannelUsers: ; // TEMP
-    maxVideoChannelUsers: ; // TEMP
-    mfaLevel: ; // TEMP
-    name: ; // TEMP
-    nsfwLevel: ; // TEMP
-    ownerId: ; // TEMP
-    preferredLocale: ; // TEMP
-    premiumProgressBarEnabled: ; // TEMP
-    premiumSubscriberCount: ; // TEMP
-    premiumTier: ; // TEMP
-    publicUpdatesChannelId: ; // TEMP
-    rulesChannelId: ; // TEMP
-    safetyAlertsChannelId: ; // TEMP
-    splash: ; // TEMP
-    systemChannelFlags: ; // TEMP
-    systemChannelId: ; // TEMP
-    vanityURLCode: ; // TEMP
-    verificationLevel: ; // TEMP
+    afkChannelId: string | null;
+    afkTimeout: number;
+    application_id: string | null;
+    banner: string | null;
+    clan: Clan | null; // TEMP
+    defaultMessageNotifications: UserNotificationSettings;
+    description: string | null;
+    discoverySplash: string | null;
+    explicitContentFilter: GuildExplicitContentFilterTypes;
+    features: Set<GuildFeatures>;
+    homeHeader: string | null;
+    hubType: GuildHubTypes | null;
+    icon: string | null;
+    id: string;
+    joinedAt: Date;
+    latestOnboardingQuestionId: string | null;
+    maxMembers: number;
+    maxStageVideoChannelUsers: number;
+    maxVideoChannelUsers: number;
+    mfaLevel: MFALevels;
+    name: string;
+    nsfwLevel: GuildNSFWContentLevel;
+    ownerId: string | null;
+    preferredLocale: string;
+    premiumProgressBarEnabled: boolean;
+    premiumSubscriberCount: number;
+    premiumTier: BoostedGuildTiers;
+    publicUpdatesChannelId: string | null;
+    rulesChannelId: string | null;
+    safetyAlertsChannelId: string | null;
+    splash: string | null;
+    systemChannelFlags: SystemChannelFlags;
+    systemChannelId: string | null;
+    vanityURLCode: string | null;
+    verificationLevel: VerificationLevels;
 }
 
 type GuildStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CONNECTION_OPEN" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_GEO_RESTRICTED" | "GUILD_MEMBER_ADD" | "GUILD_ROLE_CREATE" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_UPDATE" | "GUILD_SETTINGS_SUBMIT_SUCCESS" | "GUILD_UPDATE" | "OVERLAY_INITIALIZE">;
@@ -491,14 +813,14 @@ type GuildStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOA
 export class GuildStore<Action extends FluxAction = GuildStoreAction> extends FluxStore<Action> {
     static displayName: "GuildStore";
 
-    getAllGuildsRoles(): Record</* guildId: */string, Record</* roleId: */string, Role>>;
-    getGeoRestrictedGuilds(): Record</* guildId: */string, GuildRecord>;
-    getGuild(guildId?: string | Nullish): GuildRecord;
+    getAllGuildsRoles(): { [guildId: string]: { [roleId: string]: Role; }; };
+    getGeoRestrictedGuilds(): { [guildId: string]: GuildRecord; };
+    getGuild(guildId?: string | Nullish): GuildRecord | undefined;
     getGuildCount(): number;
     getGuildIds(): string[];
-    getGuilds(): Record</* guildId: */string, GuildRecord>;
-    getRole(guildId: string, roleId: string): Role;
-    getRoles(guildId: string): Record</* roleId: */string, Role>;
+    getGuilds(): { [guildId: string]: GuildRecord; };
+    getRole(guildId: string, roleId: string): Role | undefined;
+    getRoles(guildId: string): { [roleId: string]: Role; };
     isLoaded(): boolean;
 }
 
@@ -515,7 +837,7 @@ export const enum ApplicationFlags {
     GATEWAY_MESSAGE_CONTENT_LIMITED = 1 << 19,
     EMBEDDED_FIRST_PARTY = 1 << 20,
     APPLICATION_COMMAND_BADGE = 1 << 23,
-    SOCIAL_LAYER_INTEGRATION = 1 << 27
+    SOCIAL_LAYER_INTEGRATION = 1 << 27,
 }
 
 export const enum OAuth2Scopes {
@@ -556,13 +878,22 @@ export const enum OAuth2Scopes {
     RPC_VOICE_READ = "rpc.voice.read",
     RPC_VOICE_WRITE = "rpc.voice.write",
     VOICE = "voice",
-    WEBHOOK_INCOMING = "webhook.incoming"
+    WEBHOOK_INCOMING = "webhook.incoming",
 }
 
 export const enum ApplicationIntegrationType {
     GUILD_INSTALL = 0,
-    USER_INSTALL = 1
+    USER_INSTALL = 1,
 }
+
+interface ProfileBadge {
+    description: string;
+    icon: string;
+    id: string;
+    link?: string;
+}
+
+type ProfileThemeColors = [primaryColor: number, accentColor: number];
 
 interface UserProfileFetchFailed {
     accentColor: null;
@@ -596,12 +927,7 @@ interface UserProfileFetchSucceeded {
     } | null;
     accentColor: number | Nullish;
     applicationRoleConnections: any[]; // TEMP
-    badges: {
-        description: string;
-        icon: string;
-        id: string;
-        link?: string;
-    }[];
+    badges: ProfileBadge[];
     banner: string | Nullish;
     bio: string;
     connectedAccounts: {
@@ -620,7 +946,7 @@ interface UserProfileFetchSucceeded {
     profileEffectId: string | undefined;
     profileFetchFailed: false;
     pronouns: string;
-    themeColors: [primaryColor: number, accentColor: number] | Nullish;
+    themeColors: ProfileThemeColors | Nullish;
     userId: string;
 }
 
@@ -629,6 +955,19 @@ export type UserProfile<FetchFailed extends boolean = boolean> = FetchFailed ext
     : UserProfileFetchSucceeded;
 
 
+export interface GuildMemberProfile {
+    accentColor: number | Nullish;
+    badges: ProfileBadge[];
+    banner: string | Nullish;
+    bio: string | undefined;
+    guildId: string;
+    popoutAnimationParticleType: Nullish; // TEMP
+    profileEffectId: string | undefined;
+    pronouns: string;
+    themeColors: ProfileThemeColors | Nullish;
+    userId: string;
+}
+
 export const enum StatusTypes {
     DND = "dnd",
     IDLE = "idle",
@@ -636,7 +975,7 @@ export const enum StatusTypes {
     OFFLINE = "offline",
     ONLINE = "online",
     STREAMING = "streaming",
-    UNKNOWN = "unknown"
+    UNKNOWN = "unknown",
 }
 
 interface UserProfileStoreSnapshotData {
@@ -651,18 +990,18 @@ export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore,
     static LATEST_SNAPSHOT_VERSION: number;
 
     getUserProfile<FetchFailed extends boolean = boolean>(userId: string): UserProfile<FetchFailed> | undefined;
-    getGuildMemberProfile(userId: string, guildId?: string | Nullish): Record<string, any> /* | Nullish */; // TEMP
+    getGuildMemberProfile(userId: string, guildId?: string | Nullish): GuildMemberProfile | Nullish;
     getIsAccessibilityTooltipViewed(): boolean;
     getMutualFriends(userId: string): {
         key: string; // userId
         status: StatusTypes;
         user: UserRecord;
-    }[];
-    getMutualFriendsCount(userId: string): number;
+    }[] | undefined;
+    getMutualFriendsCount(userId: string): number | undefined;
     getMutualGuilds(userId: string): {
-        guild: Record<string, any>; // TEMP
+        guild: GuildRecord;
         nick: string | null;
-    }[];
+    }[] | undefined;
     isFetchingFriends(userId: string): boolean;
     isFetchingProfile(userId: string): boolean;
     get isSubmitting(): boolean;
@@ -698,9 +1037,9 @@ export const enum UserFlags {
 }
 
 export const enum PremiumTypes {
-    TIER_1 = 1,
-    TIER_2 = 2,
-    TIER_0 = 3
+    TIER_1 = 1, // Nitro Classic
+    TIER_2 = 2, // Nitro
+    TIER_0 = 3, // Nitro Basic
 }
 
 type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
@@ -708,7 +1047,7 @@ type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData
 export class UserRecord<
     OwnProperties extends UserRecordOwnProperties = UserRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(userFromServer: APIUser);
+    constructor(userFromServer: Record<string, any>); // TEMP
 
     addGuildAvatarHash(guildId: string, avatarHash: string): this;
     get avatarDecoration(): AvatarDecorationData | null;
@@ -722,7 +1061,7 @@ export class UserRecord<
         guildId?: string | Nullish,
         canAnimate?: boolean | undefined,
         avatarSize?: number | undefined
-    ): { uri: string; };
+    ): IconSource;
     getAvatarURL(
         guildId?: string | Nullish,
         avatarSize?: number | undefined,
@@ -745,25 +1084,20 @@ export class UserRecord<
     isPomelo(): boolean;
     isSystemUser(): boolean;
     isVerifiedBot(): boolean;
-    removeGuildAvatarHash(guildId: string): UserRecord;
+    removeGuildAvatarHash(guildId: string): this;
     get tag(): string;
 
     avatar: string | null;
     avatarDecorationData: AvatarDecorationData | null;
     banner: string | Nullish;
     bot: boolean;
-    clan: {
-        badge: string | Nullish;
-        identityEnabled: boolean | undefined;
-        identityGuildId: string | Nullish;
-        tag: string | Nullish;
-    } | null;
+    clan: Clan | null;
     desktop: boolean;
     discriminator: string;
     email: string | null;
     flags: UserFlags;
     globalName: string | Nullish;
-    guildMemberAvatars: Record</* guildId: */string, /* avatarHash: */string>;
+    guildMemberAvatars: { [guildId: string]: string; };
     hasAnyStaffLevel: () => boolean;
     hasBouncedEmail: boolean;
     hasFlag: (flag: number) => boolean;
@@ -775,7 +1109,7 @@ export class UserRecord<
     nsfwAllowed: boolean;
     personalConnectionId: string | null;
     phone: string | null;
-    premiumType: PremiumTypes | Nullish; // discord seems to have recently made it so that premiumType is nullish for every UserRecord
+    premiumType: PremiumTypes | Nullish; // discord seems to have recently made it so that premiumType is undefined for every UserRecord except for that of the current user
     premiumUsageFlags: number;
     publicFlags: UserFlags;
     purchasedFlags: number;
@@ -794,12 +1128,13 @@ export class UserStore extends FluxSnapshotStore<typeof UserStore, UserStoreSnap
     static displayName: "UserStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
-    filter(predicate: (user: UserRecord) => any, sort?: boolean | undefined): UserRecord[];
+    filter<T extends UserRecord>(predicate: (user: UserRecord) => user is T, sort?: boolean | undefined): T[];
+    filter(predicate: (user: UserRecord) => unknown, sort?: boolean | undefined): UserRecord[];
     findByTag(username: string, discriminator?: string | Nullish): UserRecord | undefined;
-    forEach(callback: (user: UserRecord) => void): void;
-    getCurrentUser(): UserRecord | Nullish; // returns undefined if called before the first USER_UPDATE action for the current user. discord seems to always check != null too
-    getUser(userId: string): UserRecord | Nullish;
-    getUsers(): Record<string, UserRecord>;
+    forEach(callback: (user: UserRecord) => boolean | void): void;
+    getCurrentUser(): UserRecord | undefined; // returns undefined if called before the first USER_UPDATE action for the current user. discord seems to always check != null too
+    getUser(userId?: string | Nullish): UserRecord | undefined;
+    getUsers(): { [userId: string]: UserRecord; };
     getUserStoreVersion(): number;
     handleLoadCache(cache: {
         initialGuildChannels: any[]; // TEMP

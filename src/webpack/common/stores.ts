@@ -45,7 +45,7 @@ export let UserStore: t.UserStore;
 export let UserProfileStore: t.UserProfileStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
-export let ChannelStore: Stores.ChannelStore & t.FluxStore;
+export let ChannelStore: t.ChannelStore;
 export let GuildMemberStore: t.GuildMemberStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
