@@ -1,0 +1,62 @@
+.vc-betterblockedmessages-main {
+    margin: -2.6px -2px 0 -56px;
+    height: 0;
+    border-top: thin solid var(--background-modifier-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+
+    --divider-color: rgb(63 65 71);
+
+    border-color: var(--divider-color);
+}
+
+.vc-betterblockedmessages-divider {
+    background-color: var(--divider-color);
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -7px;
+    height: 13px;
+    right: 0;
+    font-size: 10px;
+    line-height: 9px;
+    font-weight: 700;
+    padding: 0 4px 0 1px;
+    border-radius: 0 4px 4px 0;
+    text-transform: uppercase;
+    color: var(--white-500);
+    box-sizing: border-box;
+    border-left: none;
+}
+
+.vc-betterblockedmessages-svg {
+    display: block;
+    position: absolute;
+    left: -8px;
+    top: 0;
+    height: 13px;
+}
+
+.vc-betterblockedmessages-color {
+    color: var(--divider-color);
+    fill: var(--divider-color);
+}
+
+.vc-betterblockedmessages-button {
+    all: unset;
+    cursor: pointer;
+    user-select: none;
+}
+
+.vc-betterblockedmessages-span {
+    user-select: none;
+}
+
+[class*="wrapper"]:has(.vc-betterblockedmessages-main) {
+    min-height: unset;
+}

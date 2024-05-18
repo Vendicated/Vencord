@@ -1,0 +1,1211 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable declaration-block-no-redundant-longhand-properties */
+/* stylelint-disable selector-id-pattern */
+/* stylelint-disable selector-class-pattern */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+
+.ColorwaySelectorBtn {
+    height: 48px;
+    width: 48px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .15s ease-out;
+    background-color: var(--background-primary);
+    cursor: pointer;
+    color: var(--text-normal);
+}
+
+.ColorwaySelectorBtn:hover {
+    background-color: var(--brand-experiment);
+    border-radius: 16px;
+}
+
+.discordColorway {
+    height: 60px;
+    width: 60px;
+    cursor: pointer;
+    display: flex;
+    flex-flow: wrap;
+    flex-direction: row;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    transition: 170ms ease;
+}
+
+.discordColorway:hover {
+    filter: brightness(.8);
+}
+
+.discordColorwayPreviewColorContainer {
+    display: flex;
+    flex-flow: wrap;
+    flex-direction: row;
+    overflow: hidden;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 0 0 1.5px var(--interactive-normal);
+    box-sizing: border-box;
+}
+
+.discordColorwayPreviewColor {
+    width: 50%;
+    height: 50%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
+    height: 100%;
+    width: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
+    height: 100%;
+}
+
+.discordColorwayPreviewColorContainer:not(:has(>.discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
+    width: 100%;
+}
+
+.ColorwaySelectorWrapper {
+    position: relative;
+    display: flex;
+    gap: 16px 23px;
+    width: 100%;
+    flex-wrap: wrap;
+    padding: 2px;
+    scrollbar-width: none !important;
+}
+
+.ColorwaySelectorWrapper::-webkit-scrollbar {
+    width: 0;
+}
+
+.colorwaySelectorModal {
+    width: 100% !important;
+    min-width: 596px !important;
+}
+
+.colorwaySelectorModalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 596px;
+    overflow: visible !important;
+    padding: 0 16px 16px !important;
+}
+
+.ColorwaySelectorBtnContainer {
+    position: relative;
+    margin: 0 0 8px;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 72px;
+}
+
+.colorwayInfoIconContainer {
+    height: 22px;
+    width: 22px;
+    background-color: var(--brand-500);
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    border-radius: 50%;
+    opacity: 0;
+    z-index: +1;
+    color: var(--white-500);
+    padding: 1px;
+    box-sizing: border-box;
+}
+
+.colorwayInfoIconContainer:hover {
+    background-color: var(--brand-experiment-560);
+}
+
+.discordColorway:hover .colorwayInfoIconContainer {
+    opacity: 1;
+    transition: .15s;
+}
+
+.colorwayCreator-swatch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    position: relative;
+    color: #fff;
+}
+
+.colorwayCreator-swatchName {
+    color: currentcolor;
+    pointer-events: none;
+}
+
+.colorwayCreator-colorPreviews {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.colorwayCreator-colorInput {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.colorwayCreator-menuWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 16px !important;
+    overflow: visible !important;
+    min-height: unset;
+}
+
+.colorwayCreator-modal {
+    width: 620px !important;
+    max-width: 620px;
+    max-height: unset !important;
+}
+
+.colorways-creator-module-warning {
+    color: var(--brand-500);
+}
+
+.colorwayCreator-colorPreviews>[class^="colorSwatch"],
+.colorwayCreator-colorPreviews>[class^="colorSwatch"]>[class^="swatch"] {
+    width: 100%;
+    border: none;
+    position: relative;
+}
+
+.colorwaysPicker-colorLabel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has([fill="var(--primary-530)"])>.colorwaysPicker-colorLabel {
+    color: var(--primary-530);
+}
+
+.colorwaySelector-noDisplay {
+    display: none;
+}
+
+.colorwayInfo-wrapper {
+    display: flex;
+    flex-direction: column;
+    color: var(--header-primary);
+}
+
+.colorwayInfo-colorSwatches {
+    width: 100%;
+    height: 46px;
+    display: flex;
+    flex-direction: row;
+    margin: 12px 0;
+    gap: 8px;
+}
+
+.colorwayInfo-colorSwatch {
+    display: flex;
+    width: 100%;
+    height: 46px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.colorwayInfo-row {
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--header-secondary);
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    padding: 8px 12px;
+}
+
+.colorwayInfo-css {
+    flex-direction: column;
+    align-items: start;
+}
+
+.colorwayInfo-cssCodeblock {
+    border-radius: 4px;
+    border: 1px solid var(--background-accent);
+    padding: 3px 6px;
+    white-space: pre;
+    max-height: 400px;
+    overflow: auto;
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-auto-thumb);
+    min-height: 40px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-thumb,
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 8px;
+}
+
+.colorwayInfo-cssCodeblock::-webkit-scrollbar-track {
+    margin-bottom: 8px;
+}
+
+.colorwaysCreator-settingCat {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    max-height: 250px;
+    overflow: hidden overlay;
+}
+
+.colorwaysColorpicker-settingCat {
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.colorwaysColorpicker-search {
+    width: 100%;
+}
+
+.colorwaysCreator-settingItm {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 8px;
+    justify-content: space-between;
+}
+
+.colorwaysCreator-settingItm:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.colorwaysCreator-settingsList .colorwaysCreator-preset {
+    justify-content: start;
+    gap: 8px;
+}
+
+.colorwaysCreator-settingsList {
+    overflow: auto;
+    max-height: 185px;
+}
+
+.colorwaysCreator-settingCat-collapsed>:is(.colorwaysCreator-settingsList, .colorwayInfo-cssCodeblock),
+.colorwaysColorpicker-collapsed {
+    display: none !important;
+}
+
+.colorwayColorpicker {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px !important;
+    width: 620px !important;
+    min-height: unset;
+}
+
+.colorwaysCreator-noHeader {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.colorwaysCreator-noMinHeight {
+    min-height: unset;
+    height: fit-content;
+}
+
+.colorwaysPreview-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 270px;
+    flex: 1 0 auto;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.colorwaysPreview-modal {
+    max-width: unset !important;
+    max-height: unset !important;
+    width: fit-content;
+    height: fit-content;
+}
+
+.colorwaysPreview-titlebar {
+    height: 22px;
+    width: 100%;
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.colorwaysPreview-body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.colorwayPreview-guilds {
+    width: 72px;
+    height: 100%;
+    display: flex;
+    flex: 1 0 auto;
+    padding-top: 4px;
+    flex-direction: column;
+}
+
+.colorwayPreview-channels {
+    width: 140px;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    border-top-left-radius: 8px;
+    flex: 1 0 auto;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-channels {
+    width: 240px;
+}
+
+.colorwayPreview-chat {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+    flex-direction: column-reverse;
+}
+
+.colorwayPreview-userArea {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-userArea {
+    height: 52px;
+}
+
+.colorwaysPreview {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 5px;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    overflow: hidden overlay;
+    margin-bottom: 4px;
+}
+
+.colorwaysPreview-collapsed .colorwaysPreview-wrapper {
+    display: none;
+}
+
+.colorwayInfo-lastCat,
+.colorwaysCreator-lastCat {
+    margin-bottom: 12px;
+}
+
+.colorwayPreview-guild {
+    width: 100%;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.colorwayPreview-guildItem {
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50px;
+    transition: .2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.colorwayPreview-guildItem:hover {
+    border-radius: 16px;
+}
+
+.colorwayPreview-guildSeparator {
+    width: 32px;
+    height: 2px;
+    opacity: .48;
+    border-radius: 1px;
+}
+
+.colorwayToolbox-listItem {
+    align-items: center;
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: transparent !important;
+    width: calc(564px / 4);
+    cursor: default;
+    float: left;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.colorwayToolbox-listItemSVG {
+    padding: 19px;
+    overflow: visible;
+    border-radius: 50%;
+    background-color: var(--background-tertiary);
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .15s ease;
+    cursor: pointer;
+    color: var(--interactive-normal);
+}
+
+.colorwayToolbox-listItem:hover {
+    color: var(--interactive-normal) !important;
+}
+
+.colorwayToolbox-listItemSVG:hover {
+    border-color: var(--brand-500);
+    background-color: var(--brand-experiment-15a);
+    color: var(--interactive-hover) !important;
+}
+
+.colorwayToolbox-title {
+    align-items: center;
+    display: flex;
+    text-transform: uppercase;
+    margin-top: 2px;
+    padding-bottom: 8px;
+    margin-bottom: 0;
+}
+
+.colorwayToolbox-list {
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.colorwayPreview-chatBox {
+    height: 32px;
+    border-radius: 6px;
+    margin: 8px;
+    margin-bottom: 12px;
+    margin-top: 0;
+    flex: 1 1 auto;
+}
+
+.colorwayPreview-filler {
+    width: 100%;
+    height: 100%;
+    flex: 0 1 auto;
+}
+
+.colorwayPreview-topShadow {
+    box-shadow: 0 1px 0 hsl(var(--primary-900-hsl)/20%), 0 1.5px 0 hsl(var(--primary-860-hsl)/5%), 0 2px 0 hsl(var(--primary-900-hsl)/5%);
+    width: 100%;
+    height: 32px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    align-items: center;
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow {
+    border-top-left-radius: 8px;
+}
+
+.colorwayPreview-channels>.colorwayPreview-topShadow:hover {
+    background-color: hsl(var(--primary-500-hsl)/30%);
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-topShadow {
+    height: 48px;
+}
+
+.colorwaysPreview-wrapper:fullscreen .colorwayPreview-chatBox {
+    height: 44px;
+    border-radius: 8px;
+    margin: 16px;
+    margin-bottom: 24px;
+}
+
+.colorwaysBtn-tooltipContent {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.colorwaySelector-headerIcon {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    transition: transform .1s ease-out, opacity .1s ease-out;
+    color: var(--interactive-normal);
+}
+
+.colorwaySelector-header {
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 0;
+    box-shadow: none !important;
+}
+
+.colorwaySelector-search {
+    width: 100%;
+}
+
+.colorwaySelector-searchInput {
+    border-radius: 0 3px 3px 0 !important;
+    flex: 0 0 auto;
+}
+
+.colorwaySelector-pill.colorwaySelector-pill_select {
+    border-radius: 3px 0 0 3px !important;
+    flex: 0 0 auto;
+    border: none;
+    height: 40px;
+}
+
+.colorwaySelector-headerBtn {
+    position: absolute;
+    top: 64px;
+    right: 20px;
+}
+
+.theme-light .colorwaySelector-pill_selected {
+    border-color: var(--brand-500) !important;
+    background-color: var(--brand-experiment-160) !important;
+}
+
+.theme-dark .colorwaySelector-pill_selected {
+    border-color: var(--brand-500) !important;
+    background-color: var(--brand-experiment-15a) !important;
+}
+
+.colorwaysTooltip-tooltipPreviewRow {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.colorwayCreator-colorPreview {
+    width: 100%;
+    border-radius: 4px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.colorwaysCreator-colorPreviewItm .colorwayCreator-colorPreviews {
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.colorwaysCreator-colorPreviewItm {
+    flex-direction: column;
+    align-items: start;
+}
+
+.colorwaysTooltip-header {
+    background-color: var(--background-primary);
+    padding: 2px 8px;
+    border-radius: 16px;
+    height: min-content;
+    color: var(--header-primary);
+    margin-bottom: 2px;
+    display: inline-flex;
+    margin-left: -4px;
+}
+
+.colorwaySelector-pillSeparator {
+    height: 24px;
+    width: 1px;
+    background-color: var(--primary-400);
+}
+
+.colorwaysSelector-changelog {
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--header-secondary);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    padding: 8px 12px;
+}
+
+.colorwaysChangelog-li {
+    position: relative;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.colorwaysChangelog-li::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -15px;
+    width: 6px;
+    height: 6px;
+    margin-top: -4px;
+    margin-left: -3px;
+    border-radius: 50%;
+    opacity: .3;
+}
+
+.theme-dark .colorwaysChangelog-li::before {
+    background-color: hsl(216deg calc(var(--saturation-factor, 1)*9.8%) 90%);
+}
+
+.theme-light .colorwaysChangelog-li::before {
+    background-color: hsl(223deg calc(var(--saturation-factor, 1)*5.8%) 52.9%);
+}
+
+.ColorwaySelectorWrapper .colorwayToolbox-list {
+    width: 100%;
+}
+
+.colorwaysToolbox-label {
+    border-radius: 20px;
+    box-sizing: border-box;
+    color: var(--text-normal);
+    transition: .15s ease;
+    width: 100%;
+    margin-left: 0;
+    height: fit-content;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: wrap;
+    cursor: default;
+    max-height: 2rem;
+    padding: 0 8px;
+}
+
+.colorwaysSelector-changelogHeader {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 20px;
+    text-transform: uppercase;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.colorwaysSelector-changelogHeader::after {
+    content: "";
+    height: 1px;
+    flex: 1 1 auto;
+    margin-left: 4px;
+    opacity: .6;
+    background-color: currentcolor;
+}
+
+.colorwaysSelector-changelogHeader_added {
+    color: var(--text-positive);
+}
+
+.colorwaysSelector-changelogHeader_fixed {
+    color: hsl(359deg calc(var(--saturation-factor, 1)*87.3%) 59.8%);
+}
+
+.colorwaysSelector-changelogHeader_changed {
+    color: var(--text-warning);
+}
+
+.is-mobile .colorwaySelectorModal,
+.is-mobile .colorwayCreator-modal {
+    width: 100vw !important;
+    box-sizing: border-box;
+    min-width: unset;
+    border-radius: 0;
+    height: 100vh;
+    max-height: unset;
+    border: none;
+}
+
+.is-mobile .colorwaySelectorModalContent {
+    box-sizing: border-box;
+    width: 100vw;
+}
+
+.is-mobile .colorwaySelector-doublePillBar {
+    flex-direction: column-reverse;
+    align-items: end;
+}
+
+.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child {
+    width: 100%;
+    gap: 4px;
+    overflow-x: auto;
+    justify-content: space-between;
+}
+
+.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child>.colorwaySelector-pill {
+    border-radius: 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background-color: transparent;
+    width: 100%;
+    justify-content: center;
+    flex: 0 0 min-content;
+}
+
+.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child>.colorwaySelector-pillSeparator {
+    display: none;
+}
+
+.is-mobile .layer-fP3xEz:has(.colorwaySelectorModal, .colorwayCreator-modal) {
+    padding: 0;
+}
+
+.is-mobile .ColorwaySelectorWrapper {
+    justify-content: space-around;
+    gap: 10px;
+}
+
+#colorwaySelector-pill_closeSelector {
+    display: none !important;
+}
+
+.is-mobile #colorwaySelector-pill_closeSelector {
+    display: flex !important;
+}
+
+.colorwaysBtn-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.colorwaysBtn-spinnerInner {
+    transform: rotate(280deg);
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    contain: paint;
+}
+
+@keyframes spinner-spinning-circle-rotate {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes spinner-spinning-circle-dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 130, 200;
+    }
+
+    100% {
+        stroke-dasharray: 130, 200;
+        stroke-dashoffset: -124;
+    }
+}
+
+.colorwaysBtn-spinnerCircular {
+    animation: spinner-spinning-circle-rotate 2s linear infinite;
+    height: 100%;
+    width: 100%;
+}
+
+.colorwaysBtn-spinnerBeam {
+    animation: spinner-spinning-circle-dash 2s ease-in-out infinite;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    fill: none;
+    stroke-width: 6;
+    stroke-miterlimit: 10;
+    stroke-linecap: round;
+    stroke: currentcolor;
+}
+
+.colorwaysBtn-spinnerBeam2 {
+    stroke: currentcolor;
+    opacity: 0.6;
+    animation-delay: .15s;
+}
+
+.colorwaysBtn-spinnerBeam3 {
+    stroke: currentcolor;
+    opacity: 0.3;
+    animation-delay: .23s;
+}
+
+.colorwaysSettings-colorwaySource {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 8px;
+    gap: 5px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    min-height: 44px;
+    align-items: center;
+}
+
+.theme-dark .colorwaysSettings-colorwaySource {
+    background: var(--bg-overlay-3,var(--background-secondary));
+}
+
+.theme-light .colorwaysSettings-colorwaySource {
+    background: var(--bg-overlay-2,var(--background-secondary));
+}
+
+.colorwaysSettings-colorwaySource:hover {
+    background-color: var(--background-secondary-alt);
+}
+
+.theme-dark .colorwaysSettings-colorwaySource:hover {
+    background: var(--bg-overlay-1,var(--background-secondary-alt));
+}
+
+.theme-light .colorwaysSettings-colorwaySource:hover {
+    background: var(--bg-overlay-3,var(--background-secondary-alt));
+}
+
+.colorwaysSettings-modalRoot {
+    min-width: 520px;
+}
+
+.colorwaysSettings-colorwaySourceLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.colorwaysSettings-iconButton {
+    background-color: transparent !important;
+    border-radius: 0;
+}
+
+.colorwaysSettings-iconButtonInner {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.colorwaysSettings-modalContent {
+    margin: 8px 0;
+}
+
+@keyframes loading-bar {
+    0% {
+        left: 0;
+        right: 100%;
+        width: 0;
+    }
+
+    10% {
+        left: 0;
+        right: 75%;
+        width: 25%;
+    }
+
+    90% {
+        right: 0;
+        left: 75%;
+        width: 25%;
+    }
+
+    100% {
+        left: 100%;
+        right: 0;
+        width: 0;
+    }
+}
+
+.colorwaysLoader-barContainer {
+    width: 100%;
+    border-radius: var(--radius-round);
+    border: 0;
+    position: relative;
+    padding: 0;
+}
+
+.colorwaysLoader-bar {
+    position: absolute;
+    border-radius: var(--radius-round);
+    top: 0;
+    right: 100%;
+    bottom: 0;
+    left: 0;
+    background: var(--brand-500);
+    width: 0;
+    animation: loading-bar 2s linear infinite;
+    transition: .2s ease;
+}
+
+.colorwaysSettingsSelector-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.colorwaysSettingsPage-wrapper .colorwayToolbox-listItem {
+    gap: 8px;
+    border-radius: 50px;
+    padding: 12px 16px;
+    background-color: var(--background-tertiary);
+    transition: .15s ease;
+    border: 1px solid transparent;
+    color: var(--interactive-normal);
+}
+
+.colorwaysSettingsPage-wrapper .colorwayToolbox-listItem:hover {
+    border-color: var(--brand-500);
+    background-color: var(--brand-experiment-15a);
+    color: var(--interactive-hover);
+}
+
+.colorwaysSettingsSelector-wrapper .colorwaySelector-doublePillBar {
+    justify-content: start;
+}
+
+.colorwaysCreator-toolboxItm:hover {
+    background-color: var(--brand-experiment) !important;
+}
+
+.colorwayCreator-colorPreview_primary+.colorwayCreator-colorPreview_primary,
+.colorwayCreator-colorPreview_secondary+.colorwayCreator-colorPreview_secondary,
+.colorwayCreator-colorPreview_tertiary+.colorwayCreator-colorPreview_tertiary,
+.colorwayCreator-colorPreview_accent+.colorwayCreator-colorPreview_accent {
+    display: none;
+}
+
+.colorwaysConflictingColors-warning {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+.ColorwaySelectorBtn_thin {
+    height: 21px !important;
+    width: 56px !important;
+}
+
+.ColorwaySelectorBtn_thin:hover {
+    border-radius: 8px;
+}
+
+.colorwaySelector-searchPopout {
+    display: none !important;
+}
+
+.colorways-badge {
+    font-size: .625rem;
+    text-transform: uppercase;
+    vertical-align: top;
+    display: inline-flex;
+    align-items: center;
+    text-indent: 0;
+    background: var(--brand-experiment);
+    color: var(--white-500);
+    flex: 0 0 auto;
+    height: 15px;
+    padding: 0 4px;
+    margin-top: 1px;
+    border-radius: 4px;
+}
+
+.hoverRoll {
+    display: inline-block;
+    vertical-align: top;
+    cursor: default;
+    text-align: left;
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    contain: paint;
+}
+
+.hoverRoll_hovered {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    transition: all.22s ease;
+    transform-style: preserve-3d;
+    pointer-events: none;
+    width: 100%;
+    opacity: 0;
+    transform: translate3d(0, 107%, 0);
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.hoverRoll:hover .hoverRoll_hovered,
+.colorwaysSettings-colorwaySource:hover .hoverRoll_hovered {
+    transform: translateZ(0);
+    opacity: 1;
+}
+
+.hoverRoll_normal {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    transition: all .22s ease;
+    transform-style: preserve-3d;
+    pointer-events: none;
+    width: 100%;
+}
+
+.hoverRoll:hover .hoverRoll_normal,
+.colorwaysSettings-colorwaySource:hover .hoverRoll_normal {
+    transform: translate3d(0,-107%,0);
+    opacity: 0;
+    user-select: none;
+}
+
+.dc-warning-card {
+    padding: 1em;
+    margin-bottom: 1em;
+    background-color: var(--info-warning-background);
+    border-color: var(--info-warning-foreground);
+    color: var(--info-warning-text);
+}
+
+/* stylelint-disable-next-line no-duplicate-selectors */
+.colorwaysPreview-modal {
+    width: 90vw !important;
+    height: 90vh !important;
+    max-height: unset !important;
+}
+
+.colorwaysPresetPicker-content {
+    padding: 16px;
+}
+
+.colorwaysPresetPicker {
+    width: 600px;
+}
+
+.colorwaysCreator-setting {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    color: var(--header-secondary);
+    padding: 10px 18px;
+    padding-right: 10px;
+    cursor: pointer;
+    align-items: center;
+}
+
+.colorwaysCreator-setting:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+:root {
+    --dc-picker-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='vc-pallete-icon vc-icon' role='img' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M 12 7.5 C 13.242188 7.5 14.25 6.492188 14.25 5.25 C 14.25 4.007812 13.242188 3 12 3 C 10.757812 3 9.75 4.007812 9.75 5.25 C 9.75 6.492188 10.757812 7.5 12 7.5 Z M 18 12 C 19.242188 12 20.25 10.992188 20.25 9.75 C 20.25 8.507812 19.242188 7.5 18 7.5 C 16.757812 7.5 15.75 8.507812 15.75 9.75 C 15.75 10.992188 16.757812 12 18 12 Z M 8.25 10.5 C 8.25 11.742188 7.242188 12.75 6 12.75 C 4.757812 12.75 3.75 11.742188 3.75 10.5 C 3.75 9.257812 4.757812 8.25 6 8.25 C 7.242188 8.25 8.25 9.257812 8.25 10.5 Z M 9 19.5 C 10.242188 19.5 11.25 18.492188 11.25 17.25 C 11.25 16.007812 10.242188 15 9 15 C 7.757812 15 6.75 16.007812 6.75 17.25 C 6.75 18.492188 7.757812 19.5 9 19.5 Z M 9 19.5 M 24 12 C 24 16.726562 21.199219 15.878906 18.648438 15.105469 C 17.128906 14.644531 15.699219 14.210938 15 15 C 14.09375 16.023438 14.289062 17.726562 14.472656 19.378906 C 14.738281 21.742188 14.992188 24 12 24 C 5.371094 24 0 18.628906 0 12 C 0 5.371094 5.371094 0 12 0 C 18.628906 0 24 5.371094 24 12 Z M 12 22.5 C 12.917969 22.5 12.980469 22.242188 12.984375 22.234375 C 13.097656 22.015625 13.167969 21.539062 13.085938 20.558594 C 13.066406 20.304688 13.03125 20.003906 12.996094 19.671875 C 12.917969 18.976562 12.828125 18.164062 12.820312 17.476562 C 12.804688 16.417969 12.945312 15.0625 13.875 14.007812 C 14.429688 13.382812 15.140625 13.140625 15.78125 13.078125 C 16.390625 13.023438 17 13.117188 17.523438 13.234375 C 18.039062 13.351562 18.574219 13.515625 19.058594 13.660156 L 19.101562 13.675781 C 19.621094 13.832031 20.089844 13.972656 20.53125 14.074219 C 21.511719 14.296875 21.886719 14.199219 22.019531 14.109375 C 22.074219 14.070312 22.5 13.742188 22.5 12 C 22.5 6.199219 17.800781 1.5 12 1.5 C 6.199219 1.5 1.5 6.199219 1.5 12 C 1.5 17.800781 6.199219 22.5 12 22.5 Z M 12 22.5'%3E%3C/path%3E%3C/svg%3E");
+    --dc-settings-svg : url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 24 24' width='24' height='24' preserveAspectRatio='xMidYMid meet' style='width: 100%25; height: 100%25; transform: translate3d(0px, 0px, 0px); content-visibility: visible;'%3E%3Cdefs%3E%3CclipPath id='__lottie_element_97'%3E%3Crect width='24' height='24' x='0' y='0'%3E%3C/rect%3E%3C/clipPath%3E%3CclipPath id='__lottie_element_99'%3E%3Cpath d='M0,0 L600,0 L600,600 L0,600z'%3E%3C/path%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23__lottie_element_97)'%3E%3Cg clip-path='url(%23__lottie_element_99)' transform='matrix(0.03999999910593033,0,0,0.03999999910593033,0,0)' opacity='1' style='display: block;'%3E%3Cg transform='matrix(25,0,0,25,300,300)' opacity='1' style='display: block;'%3E%3Cg opacity='1' transform='matrix(1,0,0,1,0,0)'%3E%3Cpath fill='rgb(88,101,242)' fill-opacity='1' d=' M-1.4420000314712524,-10.906000137329102 C-1.8949999809265137,-10.847000122070312 -2.1470000743865967,-10.375 -2.078000068664551,-9.92300033569336 C-1.899999976158142,-8.756999969482422 -2.265000104904175,-7.7210001945495605 -3.061000108718872,-7.390999794006348 C-3.8570001125335693,-7.060999870300293 -4.8480000495910645,-7.534999847412109 -5.546000003814697,-8.484999656677246 C-5.816999912261963,-8.852999687194824 -6.329999923706055,-9.008999824523926 -6.691999912261963,-8.730999946594238 C-7.458000183105469,-8.142999649047852 -8.142999649047852,-7.458000183105469 -8.730999946594238,-6.691999912261963 C-9.008999824523926,-6.329999923706055 -8.852999687194824,-5.816999912261963 -8.484999656677246,-5.546000003814697 C-7.534999847412109,-4.8480000495910645 -7.060999870300293,-3.8570001125335693 -7.390999794006348,-3.061000108718872 C-7.7210001945495605,-2.265000104904175 -8.756999969482422,-1.899999976158142 -9.92300033569336,-2.078000068664551 C-10.375,-2.1470000743865967 -10.847000122070312,-1.8949999809265137 -10.906000137329102,-1.4420000314712524 C-10.968000411987305,-0.9700000286102295 -11,-0.48899999260902405 -11,0 C-11,0.48899999260902405 -10.968000411987305,0.9700000286102295 -10.906000137329102,1.4420000314712524 C-10.847000122070312,1.8949999809265137 -10.375,2.1470000743865967 -9.92300033569336,2.078000068664551 C-8.756999969482422,1.899999976158142 -7.7210001945495605,2.265000104904175 -7.390999794006348,3.061000108718872 C-7.060999870300293,3.8570001125335693 -7.534999847412109,4.8470001220703125 -8.484999656677246,5.546000003814697 C-8.852999687194824,5.816999912261963 -9.008999824523926,6.328999996185303 -8.730999946594238,6.691999912261963 C-8.142999649047852,7.458000183105469 -7.458000183105469,8.142999649047852 -6.691999912261963,8.730999946594238 C-6.329999923706055,9.008999824523926 -5.816999912261963,8.852999687194824 -5.546000003814697,8.484999656677246 C-4.8480000495910645,7.534999847412109 -3.8570001125335693,7.060999870300293 -3.061000108718872,7.390999794006348 C-2.265000104904175,7.7210001945495605 -1.899999976158142,8.756999969482422 -2.078000068664551,9.92300033569336 C-2.1470000743865967,10.375 -1.8949999809265137,10.847000122070312 -1.4420000314712524,10.906000137329102 C-0.9700000286102295,10.968000411987305 -0.48899999260902405,11 0,11 C0.48899999260902405,11 0.9700000286102295,10.968000411987305 1.4420000314712524,10.906000137329102 C1.8949999809265137,10.847000122070312 2.1470000743865967,10.375 2.078000068664551,9.92300033569336 C1.899999976158142,8.756999969482422 2.2660000324249268,7.7210001945495605 3.062000036239624,7.390999794006348 C3.8580000400543213,7.060999870300293 4.8480000495910645,7.534999847412109 5.546000003814697,8.484999656677246 C5.816999912261963,8.852999687194824 6.328999996185303,9.008999824523926 6.691999912261963,8.730999946594238 C7.458000183105469,8.142999649047852 8.142999649047852,7.458000183105469 8.730999946594238,6.691999912261963 C9.008999824523926,6.328999996185303 8.852999687194824,5.816999912261963 8.484999656677246,5.546000003814697 C7.534999847412109,4.8480000495910645 7.060999870300293,3.8570001125335693 7.390999794006348,3.061000108718872 C7.7210001945495605,2.265000104904175 8.756999969482422,1.899999976158142 9.92300033569336,2.078000068664551 C10.375,2.1470000743865967 10.847000122070312,1.8949999809265137 10.906000137329102,1.4420000314712524 C10.968000411987305,0.9700000286102295 11,0.48899999260902405 11,0 C11,-0.48899999260902405 10.968000411987305,-0.9700000286102295 10.906000137329102,-1.4420000314712524 C10.847000122070312,-1.8949999809265137 10.375,-2.1470000743865967 9.92300033569336,-2.078000068664551 C8.756999969482422,-1.899999976158142 7.7210001945495605,-2.265000104904175 7.390999794006348,-3.061000108718872 C7.060999870300293,-3.8570001125335693 7.534999847412109,-4.8480000495910645 8.484999656677246,-5.546000003814697 C8.852999687194824,-5.816999912261963 9.008999824523926,-6.329999923706055 8.730999946594238,-6.691999912261963 C8.142999649047852,-7.458000183105469 7.458000183105469,-8.142999649047852 6.691999912261963,-8.730999946594238 C6.328999996185303,-9.008999824523926 5.817999839782715,-8.852999687194824 5.546999931335449,-8.484999656677246 C4.848999977111816,-7.534999847412109 3.8580000400543213,-7.060999870300293 3.062000036239624,-7.390999794006348 C2.2660000324249268,-7.7210001945495605 1.9010000228881836,-8.756999969482422 2.0789999961853027,-9.92300033569336 C2.1480000019073486,-10.375 1.8949999809265137,-10.847000122070312 1.4420000314712524,-10.906000137329102 C0.9700000286102295,-10.968000411987305 0.48899999260902405,-11 0,-11 C-0.48899999260902405,-11 -0.9700000286102295,-10.968000411987305 -1.4420000314712524,-10.906000137329102z M4,0 C4,2.2090001106262207 2.2090001106262207,4 0,4 C-2.2090001106262207,4 -4,2.2090001106262207 -4,0 C-4,-2.2090001106262207 -2.2090001106262207,-4 0,-4 C2.2090001106262207,-4 4,-2.2090001106262207 4,0z'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    --dc-ondemand-svg: url("https://icons.getbootstrap.com/assets/icons/check-circle.svg");
+}
+
+.dc-colorway-selector::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--dc-picker-svg) center/contain no-repeat !important;
+    mask: var(--dc-picker-svg) center/contain no-repeat !important
+}
+
+.dc-colorway-settings::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--dc-settings-svg) center/contain no-repeat !important;
+    mask: var(--dc-settings-svg) center/contain no-repeat !important
+}
+
+.dc-colorway-ondemand::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--dc-ondemand-svg) center/contain no-repeat !important;
+    mask: var(--dc-ondemand-svg) center/contain no-repeat !important
+}
+
+.dc-colorway-management::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--dc-settings-svg) center/contain no-repeat !important;
+    mask: var(--dc-settings-svg) center/contain no-repeat !important
+}
+
+.colorwaySourceModal {
+    min-height: unset;
+}

@@ -1,0 +1,45 @@
+.vc-addon-card.betterdiscordthemes {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-betterdiscordthemes-grid {
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-betterdiscordthemes-image {
+    width: 100%;
+    border-radius: 0.5em;
+    margin: auto;
+    margin-bottom: 0.5em;
+}
+
+.vc-betterdiscordthemes-bottombar {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0;
+    margin-top: auto;
+    align-items: center;
+}
+
+.vc-betterdiscordthemes-bottombar .vc-betterdiscordthemes-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: auto;
+    gap: 0.5em;
+}
+
+.vc-betterdiscordthemes-bottombar .vc-betterdiscordthemes-rigth {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+    align-items: center;
+}
+
+.vc-betterdiscordthemes-bottombar .vc-betterdiscordthemes-text {
+    font-size: 1em;
+    margin-right: 0.15em;
+}
