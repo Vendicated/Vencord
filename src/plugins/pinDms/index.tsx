@@ -29,7 +29,7 @@ interface ChannelComponentProps {
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
 export const forceUpdate = () => instance?.props?._forceUpdate?.();
@@ -83,7 +83,7 @@ export default definePlugin({
                 // Rendering
                 {
                     match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
-                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2);"
+                    replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
                     match: /"renderSection",(\i)=>{/,
@@ -236,7 +236,7 @@ export default definePlugin({
         const category = categories[categoryIndex - 1];
         if (!category) return false;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== category.channels[channelIndex];
+        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
@@ -320,24 +320,25 @@ export default definePlugin({
                 </svg>
             </h2>
         );
-    }),
+    }, { noop: true }),
 
     renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
-        const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
+        return ErrorBoundary.wrap(() => {
+            const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
-        if (!channel || !category) return null;
-        if (this.isChannelHidden(sectionIndex, index)) return null;
+            if (!channel || !category) return null;
+            if (this.isChannelHidden(sectionIndex, index)) return null;
 
-        return (
-            <ChannelComponent
-                channel={channel}
-                selected={this.instance.props.selectedChannelId === channel.id}
-            >
-                {channel.id}
-            </ChannelComponent>
-        );
+            return (
+                <ChannelComponent
+                    channel={channel}
+                    selected={this.instance.props.selectedChannelId === channel.id}
+                >
+                    {channel.id}
+                </ChannelComponent>
+            );
+        }, { noop: true });
     },
-
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
         const category = categories[sectionIndex - 1];
