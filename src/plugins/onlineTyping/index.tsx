@@ -124,7 +124,7 @@ export default definePlugin({
         {
             find: 'this,"handleTextareaChange",',
             replacement: {
-                match: /\((\w+),(\w+),(\w+)\)=>\{let{keyboardModeEnabled:(\w+),channel:{id:(\w+)}}=([^;]+);/,
+                match: /\((\i),(\i),(\i)\)=>\{let{keyboardModeEnabled:(\i),channel:{id:(\i)}}=([^;]+);/,
                 replace: "($1,$2,$3)=>{let{keyboardModeEnabled:$4,channel:{id:$5}}=$6;$self.changeStatus($5,$2);",
             }
         },
