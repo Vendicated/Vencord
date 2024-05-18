@@ -20,11 +20,8 @@ import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatB
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
+import { DraftStore, DraftType, SelectedChannelStore, UploadStore, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
-
-const UploadStore = findByPropsLazy("getUploads");
 
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
 
