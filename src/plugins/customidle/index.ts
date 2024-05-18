@@ -53,13 +53,13 @@ export default definePlugin({
                 },
                 {
                     match: /(setInterval\(\i,\.25\*)\i\.IDLE_DURATION/,
-                    replace: "$1$self.getAfkTimeout()" // For web installs
+                    replace: "$1$self.getIntervalDelay()" // For web installs
                 }
             ]
         }
     ],
 
-    getAfkTimeout() {
+    getIntervalDelay() {
         return Math.min(6e5, this.getIdleTimeout());
     },
 
