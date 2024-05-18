@@ -9,7 +9,10 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
+
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
 const settings = definePluginSettings({
     idleTimeout: {
@@ -44,15 +47,23 @@ export default definePlugin({
             replacement: [
                 {
                     match: /Math\.min\((\i\.AfkTimeout\.getSetting\(\)\*\i\.default\.Millis\.SECOND),\i\.IDLE_DURATION\)/,
-                    replace: "$1" // Decouple idle from afk (phone notifications will remain at 10 mins)
+                    replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting)
                 },
                 {
                     match: /\i\.default\.dispatch\({type:"IDLE",idle:!1}\)/,
                     replace: "$self.handleOnline()"
+                },
+                {
+                    match: /(setInterval\(\i,\.25\*)\i\.IDLE_DURATION/,
+                    replace: "$1$self.getAfkTimeout()" // For web installs
                 }
             ]
         }
     ],
+
+    getAfkTimeout() {
+        return Math.min(6e5, this.getIdleTimeout());
+    },
 
     handleOnline() {
         if (!settings.store.remainInIdle) {
@@ -80,6 +91,6 @@ export default definePlugin({
 
     getIdleTimeout() { // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
-        return idleTimeout === 0 ? Number.MAX_SAFE_INTEGER : idleTimeout * 60000;
+        return idleTimeout === 0 ? Math.pow(2, 30) : idleTimeout * 60000;
     }
 });
