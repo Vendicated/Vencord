@@ -62,3 +62,36 @@
 .vc-addon-author::before {
     content: "by ";
 }
+
+.vc-addon-title-container {
+    width: 100%;
+    overflow: hidden;
+    height: 1.25em;
+    position: relative;
+}
+
+.vc-addon-title {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@keyframes vc-addon-title {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(var(--offset));
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.vc-addon-title:hover {
+    overflow: visible;
+    animation: vc-addon-title var(--duration) linear infinite;
+}
