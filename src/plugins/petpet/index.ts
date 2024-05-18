@@ -20,8 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, Co
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
+import { DraftType, UploadHandler, UploadManager, UploadStore, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
@@ -34,8 +33,6 @@ const getFrames = makeLazy(() => Promise.all(
         (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)
     ))
 );
-
-const UploadStore = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
