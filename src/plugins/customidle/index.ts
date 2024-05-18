@@ -20,7 +20,8 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         markers: makeRange(0, 60, 5),
         default: 10,
-        stickToMarkers: false
+        stickToMarkers: false,
+        restartNeeded: true // Because of the setInterval patch
     },
     remainInIdle: {
         description: "When you come back to Discord, remain idle until you confirm you want to go online",
@@ -91,6 +92,6 @@ export default definePlugin({
 
     getIdleTimeout() { // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
-        return idleTimeout === 0 ? Math.pow(2, 30) : idleTimeout * 60000;
+        return idleTimeout === 0 ? Number.MAX_SAFE_INTEGER : idleTimeout * 60000;
     }
 });
