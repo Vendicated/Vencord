@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,18 +18,28 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { FluxDispatcher, UserStore } from "@webpack/common";
+
+interface StreamEvent {
+    streamKey: string;
+}
+
+function toggleStreamerMode({ streamKey }: StreamEvent, value: boolean) {
+    if (!streamKey.endsWith(UserStore.getCurrentUser().id)) return;
+
+    FluxDispatcher.dispatch({
+        type: "STREAMER_MODE_UPDATE",
+        key: "enabled",
+        value
+    });
+}
 
 export default definePlugin({
-    name: "ShowTimeouts",
-    description: "Display member timeout icons in chat regardless of permissions.",
-    authors: [Devs.Dolfies],
-    patches: [
-        {
-            find: "showCommunicationDisabledStyles",
-            replacement: {
-                match: /&&\i\.\i\.canManageUser\(\i\.\i\.MODERATE_MEMBERS,\i\.author,\i\)/,
-                replace: "",
-            },
-        },
-    ],
+    name: "StreamerModeOnStream",
+    description: "Automatically enables streamer mode when you start streaming in Discord",
+    authors: [Devs.Kodarru],
+    flux: {
+        STREAM_CREATE: d => toggleStreamerMode(d, true),
+        STREAM_DELETE: d => toggleStreamerMode(d, false)
+    }
 });

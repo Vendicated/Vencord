@@ -17,7 +17,7 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
@@ -162,7 +162,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
 
     const { body } = await RestAPI.get({
-        url: `/users/${id}/profile`,
+        url: Constants.Endpoints.USER_PROFILE(id),
         query: {
             with_mutual_guilds: false,
             with_mutual_friends_count: false,
