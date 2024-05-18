@@ -8,6 +8,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
 
@@ -99,7 +100,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "yt-dlp",
     description: "Download and send videos with yt-dlp",
-    authors: [{ name: "colorman", id: 298842558610800650n }],
+    authors: [Devs.Colorman],
     dependencies: ["CommandsAPI"],
     settings,
     commands: [{
