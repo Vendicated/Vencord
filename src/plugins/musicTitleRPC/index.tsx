@@ -79,7 +79,7 @@ interface SpotifyElement {
     duration?: number;
     album?: SpotifyElement;
     artists?: Array<SpotifyElement>;
-    isLocal: boolean;
+    isLocal?: boolean;
     // only on album
     image?: SpotifyImage;
     // only on artist
