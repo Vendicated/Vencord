@@ -39,14 +39,16 @@ export default definePlugin({
 
     async start() {
         DataStore.update("summaries-data", summaries => {
-            for (const summary of summaries) {
-                FluxDispatcher.dispatch(summary);
+            for (let i = summaries.length - 1; i >= 0; i--) {
+                FluxDispatcher.dispatch(summaries[i]);
 
                 // Remove summaries older than 3 days
-                if (summary.time < new Date().getTime() - 1000 * 60 * 60 * 24 * 3) {
-                    summaries.splice(summaries.indexOf(summary), 1);
+                if (summaries[i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * 3) {
+                    summaries.splice(i, 1);
+                    i--;
                 }
             }
+
             return summaries;
         });
     }
