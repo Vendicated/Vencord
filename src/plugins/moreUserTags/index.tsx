@@ -359,8 +359,8 @@ export default definePlugin({
             if (
                 tag.name !== "OWNER" &&
                 GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id &&
-                !settings.tagSettings.OWNER.showInChat &&
-                !settings.tagSettings.OWNER.showInNotChat
+                (location === "chat" && !settings.tagSettings.OWNER.showInChat) ||
+                (location === "not-chat" && !settings.tagSettings.OWNER.showInNotChat)
             ) continue;
 
             if (
