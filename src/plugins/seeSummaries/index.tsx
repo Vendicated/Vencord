@@ -83,6 +83,6 @@ export default definePlugin({
         const channel = ChannelStore.getChannel(channelId);
         // SUMMARIES_ENABLED feature is not in discord-types
         // @ts-ignore
-        return (!channel.hasFlag(1 << 11) && GuildStore.getGuild(channel.guild_id).hasFeature("SUMMARIES_ENABLED"));
+        return GuildStore.getGuild(channel.guild_id).hasFeature("SUMMARIES_ENABLED");
     }
 });
