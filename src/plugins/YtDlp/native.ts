@@ -46,7 +46,7 @@ function ytdlp(args: string[]): Promise<string> {
             console.error(`stderr: ${data}`);
         });
         yt.on("exit", code => {
-            resolve(stdout_global);
+            code === 0 ? resolve(stdout_global) : reject(new Error(`yt-dlp exited with code ${code}`));
         });
     });
 }
