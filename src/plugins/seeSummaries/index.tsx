@@ -42,18 +42,21 @@ export default definePlugin({
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
 
-            const summaries: any[] = [];
+            const incomingSummaries: any[] = [];
 
             for (let i = data.summaries.length - 1; i >= 0; i--) {
                 const summary = createSummaryFromServer(data.summaries[i]);
                 summary.time = new Date().getTime();
-                summaries.push(summary);
+                incomingSummaries.push(summary);
             }
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
-                summaries[data.channel_id] ? summaries[data.channel_id].push(...summaries) : (summaries[data.channel_id] = summaries);
+                summaries[data.channel_id] ? summaries[data.channel_id].push(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
+                if (summaries.length > 50)
+                    summaries.shift();
+
                 return summaries;
             });
         }
