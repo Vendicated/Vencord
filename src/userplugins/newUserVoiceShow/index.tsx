@@ -24,6 +24,7 @@ import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
@@ -38,6 +39,18 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
+    },
+    showVoiceActivityIcons: {
+        type: OptionType.BOOLEAN,
+        description: "Show a user's voice activity in dm list and member list",
+        default: true,
+        restartNeeded: true,
+    },
+    showUsersInVoiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show a list of users connected to a channel",
+        default: true,
+        disabled: () => !settings.store.showVoiceActivityIcons
     },
 });
 
@@ -104,6 +117,17 @@ export default definePlugin({
         </div>;
     }, { noop: true }),
 
+    patchUserList: ({ user }: UserProps, dmList: boolean) => {
+        if (!settings.store.showVoiceActivityIcons) return null;
+
+        return (
+            <ErrorBoundary noop>
+                <VoiceActivityIcon user={user} dmChannel={dmList} />
+            </ErrorBoundary>
+
+        );
+    },
+
     patches: [
         // User Profile Modal - below user info
         {
@@ -130,6 +154,24 @@ export default definePlugin({
             replacement: {
                 match: /user:(\i){1,2}.+?voiceGuild,voiceChannel.+?:null,/,
                 replace: "$&$self.patchPrivateChannelProfile({user:$1}),"
+            }
+        },
+
+        // Member List User
+        {
+            find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
+            replacement: {
+                match: /avatar:(\i){1,2}/,
+                replace: "children:[$self.patchUserList(arguments[0], false)],$&",
+            }
+        },
+
+        // Dm List User
+        {
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
+                replace: "$&$self.patchUserList(arguments[0], true),",
             }
         }
     ],
