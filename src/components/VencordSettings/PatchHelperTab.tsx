@@ -46,7 +46,7 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
 
 interface ReplacementComponentProps {
     module: [id: number, factory: Function];
-    match: string | RegExp;
+    match: string;
     replacement: string | ReplaceFn;
     setReplacementError(error: any): void;
 }
@@ -57,7 +57,13 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
-        const canonicalMatch = canonicalizeMatch(match);
+
+        try {
+            new RegExp(match);
+        } catch (e) {
+            return ["", [], []];
+        }
+        const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
@@ -375,7 +381,7 @@ function PatchHelper() {
             {module && (
                 <ReplacementComponent
                     module={module}
-                    match={new RegExp(match)}
+                    match={match}
                     replacement={replacement}
                     setReplacementError={setReplacementError}
                 />
