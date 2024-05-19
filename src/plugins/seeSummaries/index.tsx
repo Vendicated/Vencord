@@ -25,13 +25,6 @@ export default definePlugin({
             }
         },
         {
-            find: "type:\"REQUEST_CHANNEL_SUMMARIES",
-            replacement: {
-                match: /type:"REQUEST_CHANNEL_SUMMARIES"/g,
-                replace: "type:\"REQUEST_CHANNEL_SUMMARIES\",channel_id:channelId"
-            }
-        },
-        {
             find: "RECEIVE_CHANNEL_SUMMARY(",
             replacement: {
                 match: /shouldFetch\((.{3,5})\){/,
