@@ -20,6 +20,9 @@ import { React, TextInput } from "@webpack/common";
 
 // TODO: Refactor settings to use this as well
 interface TextInputProps {
+    /**
+     * WARNING: Changing this between renders will have no effect!
+     */
     value: string;
     /**
      * This will only be called if the new value passed validate()
@@ -37,24 +40,16 @@ interface TextInputProps {
  * A very simple wrapper around Discord's TextInput that validates input and shows
  * the user an error message and only calls your onChange when the input is valid
  */
-export function CheckedTextInput({ value: externalValue, onChange, validate }: TextInputProps) {
-    const [value, setValue] = React.useState(externalValue);
+export function CheckedTextInput({ value: initialValue, onChange, validate }: TextInputProps) {
+    const [value, setValue] = React.useState(initialValue);
     const [error, setError] = React.useState<string>();
-    React.useEffect(() => {
-        handleExternalChange(externalValue);
-    }, [externalValue]);
-    function handleInputChange(v: string) {
-        handleChange(v,true);
-    }
-    function handleExternalChange(v:string) {
-        handleChange(v,false);
-    }
-    function handleChange(v: string, triggerOnChange:boolean) {
+
+    function handleChange(v: string) {
         setValue(v);
         const res = validate(v);
         if (res === true) {
             setError(void 0);
-            if (triggerOnChange) onChange(v);
+            onChange(v);
         } else {
             setError(res);
         }
@@ -65,7 +60,7 @@ export function CheckedTextInput({ value: externalValue, onChange, validate }: T
             <TextInput
                 type="text"
                 value={value}
-                onChange={handleInputChange}
+                onChange={handleChange}
                 error={error}
             />
         </>
