@@ -80,7 +80,22 @@ function argsFromFormat(format?: "video" | "audio" | "gif", max_file_size?: numb
     }
 }
 
-async function _download(url: string, { format, additional_arguments, max_file_size }: DownloadOptions): Promise<{
+export async function start(_: IpcMainInvokeEvent) {
+    workdir = fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
+    console.log("[Plugin:yt-dlp] Using workdir: ", workdir);
+}
+export async function stop(_: IpcMainInvokeEvent) {
+    if (workdir) {
+        fs.rmSync(workdir, { recursive: true });
+        workdir = null;
+    }
+}
+
+export async function download(
+    _: IpcMainInvokeEvent,
+    url: string,
+    { format, additional_arguments, max_file_size }: DownloadOptions
+): Promise<{
     buffer: Buffer;
     title: string;
 } | {
@@ -88,7 +103,7 @@ async function _download(url: string, { format, additional_arguments, max_file_s
 }> {
     let title = "video";
 
-    const baseArgs = [...argsFromFormat(format), "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
+    const baseArgs = [...argsFromFormat(format, max_file_size), "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
 
     cleanVideoFiles();
 
@@ -130,30 +145,6 @@ async function _download(url: string, { format, additional_arguments, max_file_s
                 `\`\`\`\n${e?.stderr?.toString() || e?.toString()}\n\`\`\``
         };
     }
-}
-
-export async function start(_: IpcMainInvokeEvent) {
-    workdir = fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
-    console.log("[Plugin:yt-dlp] Using workdir: ", workdir);
-}
-export async function stop(_: IpcMainInvokeEvent) {
-    if (workdir) {
-        fs.rmSync(workdir, { recursive: true });
-        workdir = null;
-    }
-}
-
-export async function download(
-    _: IpcMainInvokeEvent,
-    url: string,
-    options: DownloadOptions
-): Promise<{
-    buffer: Buffer;
-    title: string;
-} | {
-    error: string;
-}> {
-    return await _download(url, options);
 }
 
 export function getStdout() {
