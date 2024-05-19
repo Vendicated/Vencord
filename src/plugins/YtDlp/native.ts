@@ -10,6 +10,8 @@ import * as fs from "fs";
 import os from "os";
 import path from "path";
 
+import { Extensions } from "./constants";
+
 type DownloadOptions = {
     format?: "video" | "audio" | "gif";
     additional_arguments?: string[];
@@ -17,7 +19,6 @@ type DownloadOptions = {
 };
 
 let workdir: string | null = null;
-
 let stdout_global: string = "";
 
 const getdir = () => workdir ?? process.cwd();
@@ -32,7 +33,7 @@ function ytdlp(args: string[]): Promise<string> {
     stdout_global = "";
 
     return new Promise<string>((resolve, reject) => {
-        const yt = spawn(p("yt-dlp.exe"), args, {
+        const yt = spawn("yt-dlp", args, {
             cwd: getdir(),
         });
 
