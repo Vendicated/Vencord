@@ -8,6 +8,7 @@ import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
 const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
@@ -21,6 +22,20 @@ export default definePlugin({
             replacement: {
                 match: /\i\.hasFeature\(\i\.GuildFeatures\.SUMMARIES_ENABLED\w+?\)/g,
                 replace: "true"
+            }
+        },
+        {
+            find: "type:\"REQUEST_CHANNEL_SUMMARIES",
+            replacement: {
+                match: /type:"REQUEST_CHANNEL_SUMMARIES"/g,
+                replace: "type:\"REQUEST_CHANNEL_SUMMARIES\",channel_id:channelId"
+            }
+        },
+        {
+            find: "RECEIVE_CHANNEL_SUMMARY(",
+            replacement: {
+                match: /shouldFetch\((.{3,5})\){/,
+                replace: "$& if(!$self.shouldFetch($1)) return false;"
             }
         }
     ],
@@ -62,5 +77,12 @@ export default definePlugin({
 
             return summaries;
         });
+    },
+
+    shouldFetch(channelId: string) {
+        const channel = ChannelStore.getChannel(channelId);
+        // SUMMARIES_ENABLED feature is not in discord-types
+        // @ts-ignore
+        return (!channel.hasFlag(1 << 11) && GuildStore.getGuild(channel.guild_id).hasFeature("SUMMARIES_ENABLED"));
     }
 });
