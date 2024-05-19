@@ -41,7 +41,6 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-
             const incomingSummaries: any[] = [];
 
             for (let i = data.summaries.length - 1; i >= 0; i--) {
