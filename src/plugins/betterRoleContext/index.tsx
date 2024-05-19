@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {ImageIcon} from "@components/Icons";
+import { definePluginSettings } from "@api/Settings";
+import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild, openImageModal } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
 
@@ -35,10 +36,34 @@ function AppearanceIcon() {
     );
 }
 
+const settings = definePluginSettings({
+    roleIconFileFormat: {
+        type: OptionType.SELECT,
+        description: "File format to use when viewing role icons",
+        options: [
+            {
+                label: "webp",
+                value: "webp",
+                default: true
+            },
+            {
+                label: "png",
+                value: "png"
+            },
+            {
+                label: "jpg",
+                value: "jpg"
+            }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "BetterRoleContext",
     description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
     authors: [Devs.Ven, Devs.goodbee],
+
+    settings,
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
@@ -84,7 +109,7 @@ export default definePlugin({
                         id="view-role-icon"
                         label="View Icon"
                         action={() => {
-                            openImageModal("https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + ".png");
+                            openImageModal("https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + "." + settings.store.roleIconFileFormat);
                         }}
                         icon={ImageIcon}
                     />
