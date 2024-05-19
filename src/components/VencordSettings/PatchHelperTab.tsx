@@ -306,20 +306,16 @@ function PatchHelper() {
     }, [parsedFind, match, replacement]);
 
     function onFindChange(v: string) {
-        setFindError(void 0);
         setFind(v);
-    }
 
-    function onFindBlur() {
         try {
-            let parsedFind = find as string | RegExp;
-            if (/^\/.+?\/$/.test(find)) parsedFind = new RegExp(find.slice(1, -1));
+            let parsedFind = v as string | RegExp;
+            if (/^\/.+?\/$/.test(v)) parsedFind = new RegExp(v.slice(1, -1));
 
             setFindError(void 0);
-            setFind(find);
             setParsedFind(parsedFind);
 
-            if (find.length) {
+            if (v.length) {
                 findCandidates({ find: parsedFind, setModule, setError: setFindError });
             }
         } catch (e: any) {
@@ -328,15 +324,11 @@ function PatchHelper() {
     }
 
     function onMatchChange(v: string) {
-        setMatchError(void 0);
         setMatch(v);
-    }
 
-    function onMatchBlur() {
         try {
-            new RegExp(match);
+            new RegExp(v);
             setMatchError(void 0);
-            setMatch(match);
         } catch (e: any) {
             setMatchError((e as Error).message);
         }
@@ -357,7 +349,6 @@ function PatchHelper() {
                 type="text"
                 value={find}
                 onChange={onFindChange}
-                onBlur={onFindBlur}
                 error={findError}
             />
 
@@ -366,7 +357,6 @@ function PatchHelper() {
                 type="text"
                 value={match}
                 onChange={onMatchChange}
-                onBlur={onMatchBlur}
                 error={matchError}
             />
 
