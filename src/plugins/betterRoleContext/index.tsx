@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import {ImageIcon} from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getCurrentGuild } from "@utils/discord";
+import { getCurrentGuild, openImageModal } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
@@ -74,6 +75,20 @@ export default definePlugin({
                         }}
                         icon={PencilIcon}
                     />
+                );
+            }
+
+            if(role.icon) {
+                children.push(
+                    <Menu.MenuItem
+                        id="view-role-icon"
+                        label="View Icon"
+                        action={() => {
+                            openImageModal("https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + ".png");
+                        }}
+                        icon={ImageIcon}
+                    />
+
                 );
             }
         }
