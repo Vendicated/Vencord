@@ -5,18 +5,11 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
-
-const DATA_KEY = "YtDlp_binary";
-
-const getYtDlp = async () => (await DataStore.get<ArrayBuffer | null>(DATA_KEY)) ?? null;
-const setYtDlp = (ytDlp: ArrayBuffer) => DataStore.set(DATA_KEY, ytDlp);
-// const delYtDlp = () => DataStore.del(DATA_KEY); // probably don't need this, it's only 17MiB :3
 
 const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
 
@@ -99,6 +92,19 @@ async function checkffmpeg() {
     }
     return res;
 }
+async function checkytdlp() {
+    const ytDlp = await Native.checkytdlp();
+    if (!ytDlp) {
+        showNotification({
+            title: "yt-dlp",
+            body: "yt-dlp not found. Plase download it, add it to PATH and restart Vencord."
+        });
+    }
+    return ytDlp;
+}
+async function checkDependencies() {
+    return await checkffmpeg() && await checkytdlp();
+}
 
 const settings = definePluginSettings({
     additionalArguments: {
@@ -149,7 +155,7 @@ export default definePlugin({
         }],
 
         execute: async (args, ctx) => {
-            if (!await checkffmpeg()) return;
+            if (!await checkDependencies()) return;
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
             const add_args = findOption<string>(args, "additional args", "");
@@ -180,28 +186,9 @@ export default definePlugin({
     }],
     start: async () => {
         if (!await checkffmpeg()) return;
+        if (!await checkytdlp()) return;
 
-        // Download yt-dlp binaries and stuff
-        const ytDlp = await getYtDlp();
-        const newYtDlp = await Native.start(ytDlp);
-
-        switch (newYtDlp) {
-            case "reused":
-                break;
-            case "error":
-                showNotification({
-                    title: "yt-dlp",
-                    body: "Failed to download yt-dlp binary. Please check the log."
-                });
-                break;
-            default:
-                showNotification({
-                    title: "yt-dlp",
-                    body: "yt-dlp binary downloaded"
-                });
-                await setYtDlp(newYtDlp);
-                break;
-        }
+        await Native.start();
     },
     stop: async () => {
         // Clean up the temp files
