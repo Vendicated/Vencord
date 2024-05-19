@@ -80,11 +80,19 @@ export default definePlugin({
             }
         },
         {
-            find: "auto_removed:",
+            find: "prod_discoverable_guilds",
             predicate: () => settings.store.disableDiscoveryFilters,
             replacement: {
-                match: /filters:\i\.join\(" AND "\),facets:\[/,
-                replace: "facets:["
+                match: /\{"auto_removed:.*?\}/,
+                replace: "{}"
+            }
+        },
+        {
+            find: "\">200\"",
+            predicate: () => settings.store.disableDiscoveryFilters,
+            replacement: {
+                match: /">200"/,
+                replace: "\">0\""
             }
         },
         {
