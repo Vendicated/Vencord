@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ImageIcon } from "@components/Icons";
+import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { GuildStore, Menu } from "@webpack/common";
@@ -34,7 +35,7 @@ const RoleContextMenuPatch: NavContextMenuPatchCallback = (children, { id }) => 
 export default definePlugin({
     name: "SaveRoleIcon",
     description: "Allows you to save role icons by right-clicking them.",
-    authors: [],
+    authors: [Devs.goodbee],
     contextMenus: {
         "dev-context": RoleContextMenuPatch
     }
