@@ -34,7 +34,6 @@ import { Alerts, Button, FluxDispatcher, Menu, MessageActions, MessageStore, Rea
 import { OpenLogsButton } from "./components/LogsButton";
 import { openLogModal } from "./components/LogsModal";
 import { ImageCacheDir, LogsDir } from "./components/settings/FolderSelectInput";
-import { openUpdaterModal } from "./components/UpdaterModal";
 import { addMessage, loggedMessages, MessageLoggerStore, removeLog } from "./LoggedMessageManager";
 import * as LoggedMessageManager from "./LoggedMessageManager";
 import { LoadMessagePayload, LoggedAttachment, LoggedMessage, LoggedMessageJSON, MessageCreatePayload, MessageDeleteBulkPayload, MessageDeletePayload, MessageUpdatePayload } from "./types";
@@ -46,7 +45,6 @@ import { doesMatch } from "./utils/parseQuery";
 import * as imageUtils from "./utils/saveImage";
 import * as ImageManager from "./utils/saveImage/ImageManager";
 import { downloadLoggedMessages } from "./utils/settingsUtils";
-import { checkForUpdatesAndNotify } from "./utils/updater";
 
 
 export const Flogger = new Logger("MessageLoggerEnhanced", "#f26c6c");
@@ -229,14 +227,6 @@ function messageLoadSuccess(payload: LoadMessagePayload) {
 }
 
 export const settings = definePluginSettings({
-    checkForUpdate: {
-        type: OptionType.COMPONENT,
-        description: "Check for update",
-        component: () =>
-            <Button onClick={() => openUpdaterModal()}>
-                Check For Updates
-            </Button>
-    },
     saveMessages: {
         default: true,
         type: OptionType.BOOLEAN,
@@ -611,8 +601,6 @@ export default definePlugin({
     async start() {
         // if (!settings.store.saveMessages)
         //     clearLogs();
-
-        checkForUpdatesAndNotify(settings.store.autoCheckForUpdates);
 
         Native.init();
 

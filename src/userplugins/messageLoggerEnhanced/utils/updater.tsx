@@ -21,7 +21,6 @@ import { relaunch } from "@utils/native";
 import { Alerts } from "@webpack/common";
 
 import { Native } from "..";
-import { UpdateErrorCard } from "../components/UpdaterModal";
 import { Commit, GitInfo } from "../native";
 import { GitError, GitResult } from "../types";
 import { getNative } from "./misc";
@@ -61,52 +60,4 @@ export async function checkForUpdates() {
     }
 
     return isOutdated = changes.length > 0;
-}
-
-
-export async function update() {
-    const res = await Native.update();
-    if (!res.ok) {
-        return Alerts.show({
-            title: "Welp!",
-            body: (<UpdateErrorCard updateError={res} title="Failed to update" />),
-        });
-    }
-
-
-    if (!(await VencordNative.updater.rebuild()).ok) {
-        return Alerts.show({
-            title: "Welp!",
-            body: "The Build failed. Please try manually building the new update",
-        });
-    }
-
-    Alerts.show({
-        title: "Update Success!",
-        body: "Successfully updated. Restart now to apply the changes?",
-        confirmText: "Restart",
-        cancelText: "Not now!",
-        onConfirm() {
-            relaunch();
-        },
-    });
-
-    changes = [];
-    isOutdated = false;
-}
-
-
-export async function checkForUpdatesAndNotify(shouldNotify = false) {
-    if (IS_WEB)
-        return;
-
-    const isOutdated = await checkForUpdates();
-    if (!isOutdated) return;
-
-    if (shouldNotify)
-        setTimeout(() => showNotification({
-            title: "Message Logger Enhanced",
-            body: "There are new updates available. Click here to update now!",
-            onClick: () => update(),
-        }), 15_000);
 }
