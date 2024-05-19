@@ -38,7 +38,7 @@ function AppearanceIcon() {
 export default definePlugin({
     name: "BetterRoleContext",
     description: "Adds options to copy role color / edit role when right clicking roles in the user profile",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.goodbee],
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
