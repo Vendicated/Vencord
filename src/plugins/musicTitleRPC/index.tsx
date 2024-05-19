@@ -96,6 +96,17 @@ interface SpotifyEvent {
     connectionId: string;
 }
 
+interface SpotifyDevice {
+    id: string;
+    is_active: boolean;
+    is_private_session: boolean;
+    is_restricted: boolean;
+    name: string;
+    supports_volume: boolean;
+    type: string;
+    volume_percent: number;
+}
+
 
 const settings = definePluginSettings({
     applicationId: {
@@ -130,7 +141,7 @@ const settings = definePluginSettings({
 
 function handleUpdate(data: Data) {
     console.log(data);
-    if (data.activity.state === undefined) return;
+    if (data.activity === null || data.activity.state === undefined) return;
 
     const players = settings.store.musicPlayerNames.split(",").map(x => x.trim());
     if (!players.includes(data.activity.name)) return;
@@ -152,6 +163,8 @@ async function stop() {
     FluxDispatcher.unsubscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
 }
 
+var playbackStoppedTimeout: number | undefined;
+
 export default definePlugin({
     name: "MusicTitleRPC",
     description: "Makes the song's title appear as the activity name when listening to music.",
@@ -164,13 +177,38 @@ export default definePlugin({
             predicate: () => settings.store.cloneSpotifyActivity,
             replacement: [
                 {
-                    match: /let{connectionId:\i,track:\i}=(\i);if\(null!=\i\)\(0,\i\.isEligibleForListenedMediaInventory\)\("ContentInventoryManager.handleSpotifyNewTrack"\)&&\(0,\i\.postTrackToContentInventory\)\(\i,\i\)/,
-                    replace: "$self.handleSpotifySongChange($1)"
+                    match: /(?=let{connectionId:\i,track:\i}=(\i);)/,
+                    replace: "$self.handleSpotifySongChange($1);"
+                }
+            ]
+        },
+        {
+            find: "SPOTIFY_SET_DEVICES:function(",
+            predicate: () => settings.store.cloneSpotifyActivity,
+            replacement: [
+                {
+                    match: /(?<=SPOTIFY_SET_DEVICES:function\((\i)\){)/,
+                    replace: "$self.handleSpotifyChangeDevices($1);"
                 }
             ]
         }
     ],
     settings,
+
+    async handleSpotifyChangeDevices(e: { accountId: string, devices: SpotifyDevice[]; }) {
+        const { devices } = e;
+        let playing: boolean = false;
+        devices.forEach(device => {
+            if (device.is_active) playing = true;
+        });
+        if (!playing) {
+            FluxDispatcher.dispatch({
+                type: "LOCAL_ACTIVITY_UPDATE",
+                activity: null,
+                socketId: "MusicTitleRPC:Spotify"
+            });
+        }
+    },
 
     async handleSpotifySongChange(e: SpotifyEvent) {
         const { applicationId: application_id } = settings.store;
@@ -209,6 +247,15 @@ export default definePlugin({
             activity: activity,
             socketId: "MusicTitleRPC:Spotify"
         });
+
+        if (playbackStoppedTimeout) clearTimeout(playbackStoppedTimeout);
+        playbackStoppedTimeout = window.setTimeout(() => {
+            FluxDispatcher.dispatch({
+                type: "LOCAL_ACTIVITY_UPDATE",
+                activity: null,
+                socketId: "MusicTitleRPC:Spotify"
+            });
+        }, (e.track.duration ?? 0) + 5000);
     },
 
     settingsAboutComponent: () => {
