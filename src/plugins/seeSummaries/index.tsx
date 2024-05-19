@@ -26,11 +26,10 @@ export default definePlugin({
     flux: {
         // @ts-ignore - Sadly this flux event is not in types
         CONVERSATION_SUMMARY_UPDATE(data) {
-            console.log("update blahbalha ", data);
-
             // I pollute the flux object but tbh, its fine
             data.time = new Date().getTime();
 
+            // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= [];
                 summaries.push(data);
