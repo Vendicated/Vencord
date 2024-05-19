@@ -41,7 +41,7 @@ function ytdlp(args: string[]): Promise<string> {
 
     return new Promise<string>((resolve, reject) => {
         const yt = spawn(p("yt-dlp.exe"), args, {
-            cwd: workdir ?? process.cwd(),
+            cwd: getdir(),
         });
 
         yt.stdout.on("data", data => {
@@ -57,6 +57,7 @@ function ytdlp(args: string[]): Promise<string> {
 }
 
 function argsFromFormat(format?: "video" | "audio" | "gif", max_file_size?: number) {
+    // Due to a limitation in yt-dlp, we have to manually determine the size of video and audio
     const HAS_LIMIT = !!max_file_size;
     const MAX_VIDEO_SIZE = HAS_LIMIT ? max_file_size * 0.8 : 0;
     const MAX_AUDIO_SIZE = HAS_LIMIT ? max_file_size * 0.2 : 0;
@@ -100,17 +101,7 @@ async function _download(url: string, { format, additional_arguments, max_file_s
 } | {
     error: string;
 }> {
-    // Due to a limitation in yt-dlp, we have to manually determine the size of video and audio
-    const HAS_LIMIT = !!max_file_size;
-    const MAX_VIDEO_SIZE = HAS_LIMIT ? max_file_size * 0.8 : 0;
-    const MAX_AUDIO_SIZE = HAS_LIMIT ? max_file_size * 0.2 : 0;
-    const FORMAT_STRING = "b*[ext=webm]{VID_SIZE}+ba{AUD_SIZE}/b*[ext=mp4]{VID_SIZE}+ba{AUD_SIZE}/b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w"
-        .replace("{VID_SIZE}", HAS_LIMIT ? `<${MAX_VIDEO_SIZE}` : "")
-        .replace("{AUD_SIZE}", HAS_LIMIT ? `<${MAX_AUDIO_SIZE}` : "")
-        .replace("{TOT_SIZE}", HAS_LIMIT ? `<${max_file_size}` : "");
-    const REMUX_STRING = "webm>webm/mp4";
-
-    const exts = ["webm", "mp4", "mp3", "gif"]; // maybe support stuff like gifs and audio-only later
+    const exts = ["webm", "mp4", "mp3", "gif"]; // To make gifs work we'll need to first download a video, then run ffmpeg on it.
     let title = "video";
 
     const baseArgs = [...argsFromFormat(format), "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
