@@ -267,12 +267,14 @@ export default definePlugin({
                 <Forms.FormText variant="text-md/normal">
                     If you already created one for CustomRPC, you can use the same ID here.
                 </Forms.FormText>
+                <br />
                 <Forms.FormTitle tag="h3">For spotify users</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
-                    If you use spotify, make sure to disable <code>Settings</code> &gt; <code>Connections</code> &gt; <code>Display Spotify as your status</code>.
+                    If you use spotify, make sure to disable <code>Settings</code> &gt; <code>Connections</code> &gt; <code>Display Spotify as your status</code>. Keeping it enabled will result in two activities showing up.
                 </Forms.FormText>
+                <br />
                 <Forms.FormText variant="text-md/normal">
-                    Keeping it enabled will result in two activities showing up.
+                    The new activity this plugin creates will be missing some features (time bar, play on spotify and listen along). This is a compromise, not a bug.
                 </Forms.FormText>
             </React.Fragment>
         );
