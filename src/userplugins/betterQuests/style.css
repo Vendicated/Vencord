@@ -1,9 +1,0 @@
-.quests-container {
-    width: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-overlay-chat,var(--background-primary));
-    padding-left: 50px;
-    padding-right: 50px;
-}
