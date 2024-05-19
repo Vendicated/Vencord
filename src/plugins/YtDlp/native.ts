@@ -39,6 +39,8 @@ function ytdlp(args: string[]): Promise<string> {
 
         yt.stdout.on("data", data => {
             stdout_global += data;
+            // Makes carriage return (\r) work
+            stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1");
         });
         yt.stderr.on("data", data => {
             console.error(`stderr: ${data}`);

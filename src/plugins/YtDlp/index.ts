@@ -19,8 +19,6 @@ const maxFileSize = () => {
     if (premiumType > 0) return 50000000; // 50MB
     return 25000000; // 25MB
 };
-// Remove all lines that start with [download] except the last one
-const formatStdout = (stdout: string) => stdout.replace(/\[download\][\S\s]*(?=\[download\])/gm, "");
 const parseAdditionalArgs = (args: string): string[] => {
     try {
         if (!args) return [];
@@ -67,7 +65,7 @@ async function sendProgress(channelId: string, promise: Promise<{
             type: "MESSAGE_UPDATE",
             message: {
                 ...clydeMessage,
-                content: `Downloading video...\n\`\`\`\n${formatStdout(text)}\n\`\`\`${done ? "\nDone!" : ""}`,
+                content: `Downloading video...\n\`\`\`\n${text}\n\`\`\`${done ? "\nDone!" : ""}`,
             }
         });
     };
