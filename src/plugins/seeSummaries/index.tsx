@@ -24,7 +24,6 @@ export default definePlugin({
         }
     ],
     flux: {
-        // @ts-ignore - Sadly this flux event is not in types
         CONVERSATION_SUMMARY_UPDATE(data) {
             // I pollute the flux object but tbh, its fine
             data.time = new Date().getTime();
