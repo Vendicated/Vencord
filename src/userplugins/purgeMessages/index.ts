@@ -25,7 +25,7 @@ import { Channel, Message } from "discord-types/general";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 
-function DeleteMessages(amount: number, channel: Channel, delay: number = 1500) {
+function DeleteMessages(amount: number = 1000, channel: Channel, delay: number = 1500) {
     const meId = UserStore.getCurrentUser().id;
     const messages: Message[] = MessageStore.getMessages(channel.id)._array.filter((m: Message) => m.author.id === meId).reverse().slice(0, amount);
     var msgs: Message[] = JSON.parse(JSON.stringify(messages));
@@ -59,7 +59,7 @@ export default definePlugin({
                     name: "amount",
                     description: "How many messages you wish to purge",
                     type: ApplicationCommandOptionType.INTEGER,
-                    required: true
+                    required: false
                 },
                 {
                     name: "channel",
@@ -71,12 +71,12 @@ export default definePlugin({
                     name: "delay",
                     description: "Delay inbetween deleting messages",
                     type: ApplicationCommandOptionType.INTEGER,
-                    required: true
+                    required: false
                 }
             ],
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: (opts, ctx) => {
-                const amount: number = findOption(opts, "amount", 0);
+                const amount: number = findOption(opts, "amount", 1000);
                 const channel: Channel = findOption(opts, "channel", ctx.channel);
                 const delay: number = findOption(opts, "delay", 1500);
                 const len = DeleteMessages(amount, channel, delay);
