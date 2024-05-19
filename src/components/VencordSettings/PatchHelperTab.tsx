@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CheckedTextInput } from "@components/CheckedTextInput";
 import { CodeBlock } from "@components/CodeBlock";
 import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
@@ -47,7 +46,7 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
 
 interface ReplacementComponentProps {
     module: [id: number, factory: Function];
-    match: string | RegExp;
+    match: string;
     replacement: string | ReplaceFn;
     setReplacementError(error: any): void;
 }
@@ -58,7 +57,13 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
-        const canonicalMatch = canonicalizeMatch(match);
+
+        try {
+            new RegExp(match);
+        } catch (e) {
+            return ["", [], []];
+        }
+        const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
@@ -286,6 +291,7 @@ function PatchHelper() {
 
     const [module, setModule] = React.useState<[number, Function]>();
     const [findError, setFindError] = React.useState<string>();
+    const [matchError, setMatchError] = React.useState<string>();
 
     const code = React.useMemo(() => {
         return `
@@ -322,12 +328,17 @@ function PatchHelper() {
     }
 
     function onMatchChange(v: string) {
+        setMatchError(void 0);
+        setMatch(v);
+    }
+
+    function onMatchBlur() {
         try {
-            new RegExp(v);
-            setFindError(void 0);
-            setMatch(v);
+            new RegExp(match);
+            setMatchError(void 0);
+            setMatch(match);
         } catch (e: any) {
-            setFindError((e as Error).message);
+            setMatchError((e as Error).message);
         }
     }
 
@@ -351,16 +362,12 @@ function PatchHelper() {
             />
 
             <Forms.FormTitle className={Margins.top8}>match</Forms.FormTitle>
-            <CheckedTextInput
+            <TextInput
+                type="text"
                 value={match}
                 onChange={onMatchChange}
-                validate={v => {
-                    try {
-                        return (new RegExp(v), true);
-                    } catch (e) {
-                        return (e as Error).message;
-                    }
-                }}
+                onBlur={onMatchBlur}
+                error={matchError}
             />
 
             <div className={Margins.top8} />
@@ -374,7 +381,7 @@ function PatchHelper() {
             {module && (
                 <ReplacementComponent
                     module={module}
-                    match={new RegExp(match)}
+                    match={match}
                     replacement={replacement}
                     setReplacementError={setReplacementError}
                 />
