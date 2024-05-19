@@ -368,7 +368,14 @@ export default definePlugin({
             if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
             if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
 
-            if (tag.name !== "OWNER" && GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id) continue;
+            // If the owner tag is disabled, and the user is the owner of the guild,
+            // avoid adding other tags because the owner will always match the condition for them
+            if (
+                tag.name !== "OWNER" &&
+                GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id &&
+                !settings.tagSettings.OWNER.showInChat &&
+                !settings.tagSettings.OWNER.showInNotChat
+            ) continue;
 
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
