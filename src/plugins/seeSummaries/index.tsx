@@ -18,8 +18,8 @@ export default definePlugin({
         {
             find: "ChannelTypesSets.SUMMARIZEABLE.has",
             replacement: {
-                match: /\(.\){var .;let .*GuildFeatures.SUMMARIES_ENABLED_BY_USER\)\)}/,
-                replace: "(e){return true;}"
+                match: /\i\.hasFeature\(\i\.GuildFeatures\.SUMMARIES_ENABLED\w+?\)/g,
+                replace: "true"
             }
         }
     ],
