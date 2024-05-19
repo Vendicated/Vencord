@@ -20,9 +20,9 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { openImageModal } from "@utils/discord";
+import { getCurrentGuild, openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
+import { GuildMemberStore, GuildStore, IconUtils, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
 
 
@@ -145,10 +145,31 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
     ));
 };
 
+const RoleContext: NavContextMenuPatchCallback = (children, { id }) => {
+    const guild = getCurrentGuild();
+    if(!guild) return;
+
+    const role = GuildStore.getRole(guild.id, id);
+    if(!role) return;
+    if(!role.icon) return;
+
+    children.push(
+        <Menu.MenuItem
+            id="view-role-icon"
+            label="View Icon"
+            action={() => {
+                openImage("https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + ".png");
+            }}
+            icon={ImageIcon}
+        />
+
+    );
+};
+
 export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz],
-    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
+    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user, server and role context menu",
     tags: ["ImageUtilities"],
 
     settings,
@@ -157,7 +178,8 @@ export default definePlugin({
 
     contextMenus: {
         "user-context": UserContext,
-        "guild-context": GuildContext
+        "guild-context": GuildContext,
+        "dev-context": RoleContext
     },
 
     patches: [
