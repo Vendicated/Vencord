@@ -7,9 +7,10 @@
 import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
 
-
+const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
+const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
 export default definePlugin({
     name: "Summaries",
     description: "Enables summaries and persists them on restart",
@@ -25,29 +26,39 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            // I pollute the flux object but tbh, its fine
-            data.time = new Date().getTime();
+
+            const summaries: any[] = [];
+
+            for (let i = data.summaries.length - 1; i >= 0; i--) {
+                const summary = createSummaryFromServer(data.summaries[i]);
+                summary.time = new Date().getTime();
+                summaries.push(summary);
+            }
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
-                summaries ??= [];
-                summaries.push(data);
+                summaries ??= {};
+                summaries[data.channel_id] ? summaries[data.channel_id].push(...summaries) : (summaries[data.channel_id] = summaries);
                 return summaries;
             });
         }
     },
 
     async start() {
-        DataStore.update("summaries-data", summaries => {
-            for (let i = summaries.length - 1; i >= 0; i--) {
-                FluxDispatcher.dispatch(summaries[i]);
+        await DataStore.update("summaries-data", summaries => {
+            for (const key of Object.keys(summaries)) {
+                for (let i = summaries[key].length - 1; i >= 0; i--) {
+                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * 3) {
+                        summaries[key].splice(i, 1);
+                    }
+                }
 
-                // Remove summaries older than 3 days
-                if (summaries[i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * 3) {
-                    summaries.splice(i, 1);
-                    i--;
+                if (summaries[key].length === 0) {
+                    delete summaries[key];
                 }
             }
+
+            Object.assign(SummaryStore.allSummaries(), summaries);
 
             return summaries;
         });
