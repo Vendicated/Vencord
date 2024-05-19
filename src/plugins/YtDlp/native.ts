@@ -83,7 +83,6 @@ async function _download(url: string, { format, additional_arguments, max_file_s
 } | {
     error: string;
 }> {
-    const exts = ["webm", "mp4", "mp3", "gif"]; // To make gifs work we'll need to first download a video, then run ffmpeg on it.
     let title = "video";
 
     const baseArgs = [...argsFromFormat(format), "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
@@ -111,7 +110,7 @@ async function _download(url: string, { format, additional_arguments, max_file_s
         // yt-dlp prioritizes the last occurrence of an argument
         await ytdlp([...baseArgs, ...customArgs, url]);
         // get the first file that matches the extensions
-        const filename = "download." + exts.find(ext => fs.existsSync(p(`download.${ext}`)));
+        const filename = "download." + Extensions.find(ext => fs.existsSync(p(`download.${ext}`)));
         if (!filename) throw new Error("Video downloaded, but no file was found!");
         const ext = filename.split(".")[1];
         const buffer = fs.readFileSync(p(filename));
