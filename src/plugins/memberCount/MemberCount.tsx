@@ -27,7 +27,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     const { groups } = useStateFromStores(
         [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, currentChannel.id)
+        () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
     );
 
     if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {

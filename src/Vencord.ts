@@ -17,6 +17,7 @@
 */
 
 export * as Api from "./api";
+export * as Components from "./components";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
@@ -27,6 +28,7 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
+import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
@@ -85,7 +87,7 @@ async function init() {
 
     syncSettings();
 
-    if (!IS_WEB) {
+    if (!IS_WEB && !IS_UPDATER_DISABLED) {
         try {
             const isOutdated = await checkForUpdates();
             if (!isOutdated) return;
@@ -103,16 +105,13 @@ async function init() {
                 return;
             }
 
-            if (Settings.notifyAboutUpdates)
-                setTimeout(() => showNotification({
-                    title: "A Vencord update is available!",
-                    body: "Click here to view the update",
-                    permanent: true,
-                    noPersist: true,
-                    onClick() {
-                        SettingsRouter.open("VencordUpdater");
-                    }
-                }), 10_000);
+            setTimeout(() => showNotification({
+                title: "A Vencord update is available!",
+                body: "Click here to view the update",
+                permanent: true,
+                noPersist: true,
+                onClick: openUpdaterModal!
+            }), 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }
