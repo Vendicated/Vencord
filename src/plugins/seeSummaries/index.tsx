@@ -11,8 +11,8 @@ import { FluxDispatcher } from "@webpack/common";
 
 
 export default definePlugin({
-    name: "See Summaries",
-    description: "Enables Summaries and stores them in IndexedDB",
+    name: "Summaries",
+    description: "Enables summaries and persists them on restart",
     authors: [Devs.mantikafasi],
     patches: [
         {
