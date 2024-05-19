@@ -140,7 +140,6 @@ const settings = definePluginSettings({
 
 
 function handleUpdate(data: Data) {
-    console.log(data);
     if (data.activity === null || data.activity.state === undefined) return;
 
     const players = settings.store.musicPlayerNames.split(",").map(x => x.trim());
@@ -280,6 +279,3 @@ export default definePlugin({
     },
 
 });
-
-
-
