@@ -18,7 +18,7 @@ export default definePlugin({
         {
             find: "ChannelTypesSets.SUMMARIZEABLE.has",
             replacement: {
-                match: /\(e\){var .;let .*GuildFeatures.SUMMARIES_ENABLED_BY_USER\)\)}/,
+                match: /\(.\){var .;let .*GuildFeatures.SUMMARIES_ENABLED_BY_USER\)\)}/,
                 replace: "(e){return true;}"
             }
         }
