@@ -5,17 +5,28 @@
  */
 
 import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
 const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
+
+const settings = definePluginSettings({
+    summaryExpiryThreshold: {
+        type: OptionType.NUMBER,
+        description: "The time in days before a summary is removed",
+        default: 3,
+    }
+});
+
 export default definePlugin({
     name: "Summaries",
     description: "Enables summaries and persists them on restart",
     authors: [Devs.mantikafasi],
+    settings,
     patches: [
         {
             find: "ChannelTypesSets.SUMMARIZEABLE.has",
@@ -34,6 +45,7 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
+
             const incomingSummaries: any[] = [];
 
             for (let i = data.summaries.length - 1; i >= 0; i--) {
@@ -58,7 +70,7 @@ export default definePlugin({
         await DataStore.update("summaries-data", summaries => {
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {
-                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * 3) {
+                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThreshold) {
                         summaries[key].splice(i, 1);
                     }
                 }
