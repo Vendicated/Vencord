@@ -29,7 +29,7 @@ export default definePlugin({
     }],
     dependencies: ["CommandsAPI"],
     commands: [{
-        name: "TypeForever",
+        name: "typeforever",
         description: "Type forever!",
         inputType: ApplicationCommandInputType.BUILT_IN,
         options: [{

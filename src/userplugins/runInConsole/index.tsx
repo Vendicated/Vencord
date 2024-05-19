@@ -134,7 +134,7 @@ function replaceIcon(icon: Function) {
 }
 
 export default definePlugin({
-    name: "Run in Console",
+    name: "RuninConsole",
     description: "Allows you to run code blocks in the console. Press Shift to edit the code before running.",
     authors: [{
         name: "✨Tolgchu✨",
