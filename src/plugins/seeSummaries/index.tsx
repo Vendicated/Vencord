@@ -54,8 +54,8 @@ export default definePlugin({
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
                 summaries[data.channel_id] ? summaries[data.channel_id].push(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
-                if (summaries.length > 50)
-                    summaries.shift();
+                if (summaries[data.channel_id].length > 50)
+                    summaries[data.channel_id].shift();
 
                 return summaries;
             });
