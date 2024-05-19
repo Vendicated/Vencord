@@ -148,7 +148,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
 export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz],
-    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user, server and role context menu",
+    description: "Makes avatars and banners in user profiles clickable, and adds View Icon/Banner entries in the user and server context menu",
     tags: ["ImageUtilities"],
 
     settings,
@@ -157,7 +157,7 @@ export default definePlugin({
 
     contextMenus: {
         "user-context": UserContext,
-        "guild-context": GuildContext,
+        "guild-context": GuildContext
     },
 
     patches: [
