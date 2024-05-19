@@ -150,11 +150,6 @@ async function start() {
 
 async function stop() {
     FluxDispatcher.unsubscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
-    FluxDispatcher.dispatch({
-        type: "LOCAL_ACTIVITY_UPDATE",
-        activity: null,
-        socketId: "MusicTitleRPC:Spotify"
-    });
 }
 
 export default definePlugin({
