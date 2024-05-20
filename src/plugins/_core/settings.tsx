@@ -55,7 +55,6 @@ export default definePlugin({
                 }
             ]
         },
-        // Discord Canary
         {
             find: "Messages.ACTIVITY_SETTINGS",
             replacement: {

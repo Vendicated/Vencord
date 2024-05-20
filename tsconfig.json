@@ -20,6 +20,9 @@
         "jsx": "preserve",
         "baseUrl": "./src/",
         "paths": {
+            "@main/*": [
+                "./main/*"
+            ],
             "@api/*": [
                 "./api/*"
             ],
@@ -41,7 +44,14 @@
             "@webpack": [
                 "./webpack/webpack"
             ]
-        }
+        },
+        "plugins": [
+            // Transform paths in output .d.ts files (Include this line if you output declarations files)
+            {
+                "transform": "typescript-transform-paths",
+                "afterDeclarations": true
+            }
+        ]
     },
     "include": [
         "src/**/*"

@@ -48,7 +48,7 @@ export default definePlugin({
         })),
         {
             // channel mentions
-            find: ".shouldCloseDefaultModals",
+            find: 'className:"channelMention",children',
             replacement: {
                 match: /onClick:(\i)(?=,.{0,30}className:"channelMention".+?(\i)\.inContent)/,
                 replace: (_, onClick, props) => ""
