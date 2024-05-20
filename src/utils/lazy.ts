@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { UNCONFIGURABLE_PROPERTIES } from "./misc";
+
 export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let tries = 0;
     let cache: T;
@@ -28,10 +30,6 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
         return cache;
     };
 }
-
-// Proxies demand that these properties be unmodified, so proxyLazy
-// will always return the function default for them.
-const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {};
 
@@ -59,14 +57,14 @@ for (const method of [
 handler.ownKeys = target => {
     const v = target[kGET]();
     const keys = Reflect.ownKeys(v);
-    for (const key of unconfigurable) {
+    for (const key of UNCONFIGURABLE_PROPERTIES) {
         if (!keys.includes(key)) keys.push(key);
     }
     return keys;
 };
 
 handler.getOwnPropertyDescriptor = (target, p) => {
-    if (typeof p === "string" && unconfigurable.includes(p))
+    if (typeof p === "string" && UNCONFIGURABLE_PROPERTIES.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
 
     const descriptor = Reflect.getOwnPropertyDescriptor(target[kGET](), p);

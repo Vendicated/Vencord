@@ -99,3 +99,6 @@ export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
 }
+
+/** Unconfigurable properties for proxies */
+export const UNCONFIGURABLE_PROPERTIES = ["arguments", "caller", "prototype"];

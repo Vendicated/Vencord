@@ -465,6 +465,12 @@ async function runtime(token: string) {
             }
         }));
 
+        // Call the getter for all the values in the modules object
+        // So modules that were not required get patched by our proxy
+        for (const id in wreq!.m) {
+            wreq!.m[id];
+        }
+
         console.log("[PUP_DEBUG]", "Finished loading all chunks!");
 
         for (const patch of Vencord.Plugins.patches) {
