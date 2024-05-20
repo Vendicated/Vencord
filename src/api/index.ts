@@ -31,7 +31,7 @@ import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
 import * as $Settings from "./Settings";
 import * as $Styles from "./Styles";
-import * as $Tablist from "./Tablist";
+import * as $ExpressionPickerTabs from "./ExpressionPickerTabs";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
@@ -115,4 +115,4 @@ export const ChatButtons = $ChatButtons;
 /**
  * An API allowing you to add panels to the expression picker
  */
-export const Tablist = $Tablist;
+export const ExpressionPickerTabs = $ExpressionPickerTabs;

@@ -45,15 +45,15 @@ export const addTablistButton = (id: string, tab: string, PanelComponent: Tablis
 export const removeTablistButton = (id: string) => TablistComponents.delete(id);
 
 
-export function* RenderButtons(TablistButtonComponent: TablistButtonComponent, selectedTab: string) {
+export function* RenderTabButtons(TablistButtonComponent: TablistButtonComponent, selectedTab: string) {
     for (const [id, { tab }] of TablistComponents) {
-        yield (<TablistButtonComponent
+        yield (<ErrorBoundary><TablistButtonComponent
             id={id + "-picker-tab"}
             aria-controls={id + "-picker-tab-panel"}
             aria-selected={id === selectedTab}
             viewType={id}
             isActive={id === selectedTab}
-        >{tab}</TablistButtonComponent>);
+        >{tab}</TablistButtonComponent></ErrorBoundary>);
     }
 }
 
