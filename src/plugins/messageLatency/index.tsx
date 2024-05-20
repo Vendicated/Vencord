@@ -22,21 +22,35 @@ interface Diff {
     hours: number,
     minutes: number,
     seconds: number;
+    milliseconds: number;
 }
 
+const DISCORD_KT_DELAY = 1471228928;
 const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
     name: "MessageLatency",
     description: "Displays an indicator for messages that took ≥n seconds to send",
     authors: [Devs.arHSM],
+
     settings: definePluginSettings({
         latency: {
             type: OptionType.NUMBER,
             description: "Threshold in seconds for latency indicator",
             default: 2
+        },
+        detectDiscordKotlin: {
+            type: OptionType.BOOLEAN,
+            description: "Detect old Discord Android clients",
+            default: true
+        },
+        showMillis: {
+            type: OptionType.BOOLEAN,
+            description: "Show milliseconds",
+            default: false
         }
     }),
+
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -46,12 +60,14 @@ export default definePlugin({
             }
         }
     ],
-    stringDelta(delta: number) {
+
+    stringDelta(delta: number, showMillis: boolean) {
         const diff: Diff = {
-            days: Math.round(delta / (60 * 60 * 24)),
-            hours: Math.round((delta / (60 * 60)) % 24),
-            minutes: Math.round((delta / (60)) % 60),
-            seconds: Math.round(delta % 60),
+            days: Math.round(delta / (60 * 60 * 24 * 1000)),
+            hours: Math.round((delta / (60 * 60 * 1000)) % 24),
+            minutes: Math.round((delta / (60 * 1000)) % 60),
+            seconds: Math.round(delta / 1000 % 60),
+            milliseconds: Math.round(delta % 1000)
         };
 
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
@@ -63,7 +79,7 @@ export default definePlugin({
             return prev + (
                 isNonNullish(s)
                     ? (prev !== ""
-                        ? k === "seconds"
+                        ? (showMillis ? k === "milliseconds" : k === "seconds")
                             ? " and "
                             : " "
                         : "") + s
@@ -71,49 +87,68 @@ export default definePlugin({
             );
         }, "");
 
-        return [ts || "0 seconds", diff.days === 17 && diff.hours === 1] as const;
+        return ts || "0 seconds";
     },
+
     latencyTooltipData(message: Message) {
+        const { latency, detectDiscordKotlin, showMillis } = this.settings.store;
         const { id, nonce } = message;
 
         // Message wasn't received through gateway
         if (!isNonNullish(nonce)) return null;
 
-        const delta = Math.round((SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce)) / 1000);
+        let isDiscordKotlin = false;
+        let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
+        if (!showMillis) {
+            delta = Math.round(delta / 1000) * 1000;
+        }
+
+        // Old Discord Android clients have a delay of around 17 days
+        // This is a workaround for that
+        if (-delta >= DISCORD_KT_DELAY - 86400000) { // One day of padding for good measure
+            isDiscordKotlin = detectDiscordKotlin;
+            delta += DISCORD_KT_DELAY;
+        }
 
         // Thanks dziurwa (I hate you)
         // This is when the user's clock is ahead
         // Can't do anything if the clock is behind
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
+        const latencyMillis = latency * 1000;
 
-        const [stringDelta, isSuspectedKotlinDiscord] = this.stringDelta(abs);
-        const isKotlinDiscord = ahead && isSuspectedKotlinDiscord;
+        const stringDelta = abs >= latencyMillis ? this.stringDelta(abs, showMillis) : null;
 
         // Also thanks dziurwa
         // 2 minutes
-        const TROLL_LIMIT = 2 * 60;
-        const { latency } = this.settings.store;
+        const TROLL_LIMIT = 2 * 60 * 1000;
 
-        const fill: Fill = isKotlinDiscord
+        const fill: Fill = isDiscordKotlin
             ? ["status-positive", "status-positive", "text-muted"]
             : delta >= TROLL_LIMIT || ahead
                 ? ["text-muted", "text-muted", "text-muted"]
-                : delta >= (latency * 2)
+                : delta >= (latencyMillis * 2)
                     ? ["status-danger", "text-muted", "text-muted"]
                     : ["status-warning", "status-warning", "text-muted"];
 
-        return abs >= latency ? { delta: stringDelta, ahead, fill, isKotlinDiscord } : null;
+        return (abs >= latencyMillis || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
     },
+
     Tooltip() {
         return ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-
             const d = this.latencyTooltipData(message);
 
             if (!isNonNullish(d)) return null;
 
+            let text: string;
+            if (!d.delta) {
+                text = "User is suspected to be on an old Discord Android client";
+            } else {
+                text = (d.ahead ? `This user's clock is ${d.delta} ahead.` : `This message was sent with a delay of ${d.delta}.`) + (d.isDiscordKotlin ? " User is suspected to be on an old Discord Android client." : "");
+            }
+
             return <Tooltip
-                text={d.ahead ? `This user's clock is ${d.delta} ahead. ${d.isKotlinDiscord ? "User is suspected to be on an old mobile client" : ""}` : `This message was sent with a delay of ${d.delta}.`}
+                text={text}
                 position="top"
             >
                 {
@@ -126,8 +161,9 @@ export default definePlugin({
             </Tooltip>;
         });
     },
+
     Icon({ delta, fill, props }: {
-        delta: string;
+        delta: string | null;
         fill: Fill,
         props: {
             onClick(): void;
@@ -147,7 +183,7 @@ export default definePlugin({
             role="img"
             fill="none"
             style={{ marginRight: "8px", verticalAlign: -1 }}
-            aria-label={delta}
+            aria-label={delta ?? "Old Discord Android client"}
             aria-hidden="false"
             {...props}
         >
