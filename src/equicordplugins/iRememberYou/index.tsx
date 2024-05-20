@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import ExpandableHeader from "@components/ExpandableHeader";
+import { ExpandableHeader } from "@components/ExpandableHeader";
 import { Heart } from "@components/Heart";
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
