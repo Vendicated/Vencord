@@ -54,9 +54,11 @@ export default definePlugin({
 
                 const LATEX = `
                 \\documentclass{article}
+                \\usepackage{xcolor}
                 \\begin{document}
-                $${equation}$
+                \\color{orange}
                 \\pagenumbering{gobble}
+                $${equation}$
                 \\end{document}
                 `;
 
