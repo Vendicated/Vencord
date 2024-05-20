@@ -23,7 +23,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { copyWithToast } from "@utils/misc";
+import { classes, copyWithToast } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore } from "@webpack/common";
@@ -132,15 +133,50 @@ export default definePlugin({
             }
         }
     ],
-    start: async () => {
-        await requireColorPicker();
-    },
     settingsAboutComponent: () => {
         const existingColors = decode(
             UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
         ) ?? [0, 0];
-        const [c1, setc1] = React.useState(existingColors[0]);
-        const [c2, setc2] = React.useState(existingColors[1]);
+        const [color1, setColor1] = React.useState(existingColors[0]);
+        const [color2, setColor2] = React.useState(existingColors[1]);
+
+        function ColorPickers() {
+            const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
+
+            if (loadingColorPickerChunk)
+                return <Forms.FormText>Loading colorpicker chunk...</Forms.FormText>;
+
+            return <>
+                <ColorPicker
+                    color={color1}
+                    label={
+                        <Text
+                            variant={"text-xs/normal"}
+                            style={{ marginTop: "4px" }}
+                        >
+                            Primary
+                        </Text>
+                    }
+                    onChange={(color: number) => {
+                        setColor1(color);
+                    }}
+                />
+                <ColorPicker
+                    color={color2}
+                    label={
+                        <Text
+                            variant={"text-xs/normal"}
+                            style={{ marginTop: "4px" }}
+                        >
+                            Accent
+                        </Text>
+                    }
+                    onChange={(color: number) => {
+                        setColor2(color);
+                    }}
+                />
+            </>;
+        }
 
         return (
             <Forms.FormSection>
@@ -157,46 +193,18 @@ export default definePlugin({
                         <li>• click the "Copy 3y3" button</li>
                         <li>• paste the invisible text anywhere in your bio</li>
                     </ul><br />
-                    <b>Please note:</b> if you are using a theme which hides nitro ads, you should disable it temporarily to set colors.
                     <Forms.FormDivider
-                        style={{ marginTop: "8px", marginBottom: "8px" }}
+                        className={classes(Margins.top8, Margins.bottom8)}
                     />
                     <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
                     <Flex
                         direction={Flex.Direction.HORIZONTAL}
                         style={{ gap: "1rem" }}
                     >
-                        <ColorPicker
-                            color={c1}
-                            label={
-                                <Text
-                                    variant={"text-xs/normal"}
-                                    style={{ marginTop: "4px" }}
-                                >
-                                    Primary
-                                </Text>
-                            }
-                            onChange={(color: number) => {
-                                setc1(color);
-                            }}
-                        />
-                        <ColorPicker
-                            color={c2}
-                            label={
-                                <Text
-                                    variant={"text-xs/normal"}
-                                    style={{ marginTop: "4px" }}
-                                >
-                                    Accent
-                                </Text>
-                            }
-                            onChange={(color: number) => {
-                                setc2(color);
-                            }}
-                        />
+                        <ColorPickers />
                         <Button
                             onClick={() => {
-                                const colorString = encode(c1, c2);
+                                const colorString = encode(color1, color2);
                                 copyWithToast(colorString);
                             }}
                             color={Button.Colors.PRIMARY}
@@ -206,13 +214,13 @@ export default definePlugin({
                         </Button>
                     </Flex>
                     <Forms.FormDivider
-                        style={{ marginTop: "8px", marginBottom: "8px" }}
+                        className={classes(Margins.top8, Margins.bottom8)}
                     />
                     <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
                     <div className="vc-fpt-preview">
                         <ProfileModal
                             user={UserStore.getCurrentUser()}
-                            pendingThemeColors={[c1, c2]}
+                            pendingThemeColors={[color1, color2]}
                             onAvatarChange={() => { }}
                             onBannerChange={() => { }}
                             canUsePremiumCustomization={true}
