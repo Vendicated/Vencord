@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { UNCONFIGURABLE_PROPERTIES } from "./misc";
 import { AnyObject } from "./types";
 
 export type ProxyInner<T = AnyObject> = T & {
@@ -14,23 +15,19 @@ export type ProxyInner<T = AnyObject> = T & {
 export const proxyInnerGet = Symbol.for("vencord.proxyInner.get");
 export const proxyInnerValue = Symbol.for("vencord.proxyInner.innerValue");
 
-// Proxies demand that these properties be unmodified, so proxyInner
-// will always return the function default for them.
-const unconfigurable = ["arguments", "caller", "prototype"];
-
 const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyInnerGet](), ...args)]
     )),
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyInnerGet]());
-        for (const key of unconfigurable) {
+        for (const key of UNCONFIGURABLE_PROPERTIES) {
             if (!keys.includes(key)) keys.push(key);
         }
         return keys;
     },
     getOwnPropertyDescriptor: (target, p) => {
-        if (typeof p === "string" && unconfigurable.includes(p))
+        if (typeof p === "string" && UNCONFIGURABLE_PROPERTIES.includes(p))
             return Reflect.getOwnPropertyDescriptor(target, p);
 
         const descriptor = Reflect.getOwnPropertyDescriptor(target[proxyInnerGet](), p);

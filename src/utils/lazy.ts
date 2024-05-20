@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { UNCONFIGURABLE_PROPERTIES } from "./misc";
 import { AnyObject } from "./types";
 
 export type ProxyLazy<T = AnyObject> = T & {
@@ -35,23 +36,19 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
     return getter;
 }
 
-// Proxies demand that these properties be unmodified, so proxyLazy
-// will always return the function default for them.
-const unconfigurable = ["arguments", "caller", "prototype"];
-
 const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyLazyGet](), ...args)]
     )),
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyLazyGet]());
-        for (const key of unconfigurable) {
+        for (const key of UNCONFIGURABLE_PROPERTIES) {
             if (!keys.includes(key)) keys.push(key);
         }
         return keys;
     },
     getOwnPropertyDescriptor: (target, p) => {
-        if (typeof p === "string" && unconfigurable.includes(p))
+        if (typeof p === "string" && UNCONFIGURABLE_PROPERTIES.includes(p))
             return Reflect.getOwnPropertyDescriptor(target, p);
 
         const descriptor = Reflect.getOwnPropertyDescriptor(target[proxyLazyGet](), p);
