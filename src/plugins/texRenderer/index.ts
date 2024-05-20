@@ -36,7 +36,7 @@ type APIResponse = SuccessResponse | FailureResponse;
 
 export default definePlugin({
     name: "TeX Renderer",
-    description: "Allows you to send math equations using TeX.",
+    description: "Allows you to send math equations with slash commands using TeX (/tex).",
     authors: [Devs.DSNS],
     dependencies: ["CommandsAPI"],
     commands: [
