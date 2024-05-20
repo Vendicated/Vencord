@@ -9,9 +9,9 @@ import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, Text, TextInput } from "@webpack/common";
-import noteHandler from "plugins/holynotes/noteHandler";
-import { HolyNotes } from "plugins/holynotes/types";
 
+import noteHandler from "../../noteHandler";
+import { HolyNotes } from "../../types";
 import HelpIcon from "../icons/HelpIcon";
 import Errors from "./Error";
 import HelpModal from "./HelpModal";

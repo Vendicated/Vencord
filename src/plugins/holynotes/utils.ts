@@ -6,10 +6,10 @@
 
 import { createStore } from "@api/DataStore";
 import { DataStore } from "@api/index";
+import { Toasts } from "@webpack/common";
 
 import noteHandler, { noteHandlerCache } from "./noteHandler";
 import { HolyNotes } from "./types";
-import { Toasts } from "@webpack/common";
 
 export const HolyNoteStore = createStore("HolyNoteData", "HolyNoteStore");
 

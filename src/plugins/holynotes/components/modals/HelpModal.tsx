@@ -7,8 +7,9 @@
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { Button, Forms, Text } from "@webpack/common";
-import noteHandler from "plugins/holynotes/noteHandler";
-import { downloadNotes, uploadNotes } from "plugins/holynotes/utils";
+
+import noteHandler from "../../noteHandler";
+import { downloadNotes, uploadNotes } from "../../utils";
 
 export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; }) => {
     const { colorStatusGreen } = findByProps("colorStatusGreen");
