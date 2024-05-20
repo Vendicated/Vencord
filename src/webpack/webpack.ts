@@ -68,20 +68,16 @@ export const filters = {
     }
 };
 
-export const subscriptions = new Map<FilterFn, CallbackFn>();
-export const listeners = new Set<CallbackFn>();
-
 export type CallbackFn = (mod: any, id: string) => void;
 
-export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
-    if (cache !== void 0) throw "no.";
+export const subscriptions = new Map<FilterFn, CallbackFn>();
+export const moduleListeners = new Set<CallbackFn>();
+export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
+export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
 
-    instance.push([[Symbol("Vencord")], {}, r => wreq = r]);
-    instance.pop();
-    if (!wreq) return false;
-
-    cache = wreq.c;
-    return true;
+export function _initWebpack(webpackRequire: WebpackInstance) {
+    wreq = webpackRequire;
+    cache = webpackRequire.c;
 }
 
 let devToolsOpen = false;
@@ -92,7 +88,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
-function handleModuleNotFound(method: string, ...filter: unknown[]) {
+export function handleModuleNotFound(method: string, ...filter: unknown[]) {
     const err = new Error(`webpack.${method} found no module`);
     logger.error(err, "Filter:", filter);
 
@@ -406,13 +402,15 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
     });
 }
 
+const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
+
 /**
  * Extract and load chunks using their entry point
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A promise that resolves when the chunks were loaded
  */
-export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/) {
+export async function extractAndLoadChunks(code: string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -423,7 +421,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Pr
 
     const match = module.toString().match(canonicalizeMatch(matcher));
     if (!match) {
-        const err = new Error("extractAndLoadChunks: Couldn't find entry point id in module factory code");
+        const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
         // Strict behaviour in DevBuilds to fail early and make sure the issue is found
@@ -434,7 +432,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Pr
     }
 
     const [, rawChunkIds, entryPointId] = match;
-    if (!rawChunkIds || Number.isNaN(entryPointId)) {
+    if (Number.isNaN(Number(entryPointId))) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
@@ -445,9 +443,11 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Pr
         return;
     }
 
-    const chunkIds = Array.from(rawChunkIds.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
+    if (rawChunkIds) {
+        const chunkIds = Array.from(rawChunkIds.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
+        await Promise.all(chunkIds.map(id => wreq.e(id)));
+    }
 
-    await Promise.all(chunkIds.map(id => wreq.e(id)));
     wreq(entryPointId);
 }
 
@@ -459,7 +459,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = /Pr
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves when the chunks were loaded, on first call
  */
-export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/) {
+export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return () => extractAndLoadChunks(code, matcher);
@@ -485,14 +485,6 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
     }
 
     subscriptions.set(filter, callback);
-}
-
-export function addListener(callback: CallbackFn) {
-    listeners.add(callback);
-}
-
-export function removeListener(callback: CallbackFn) {
-    listeners.delete(callback);
 }
 
 /**
