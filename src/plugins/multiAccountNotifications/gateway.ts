@@ -23,7 +23,7 @@ const logger = new Logger("DiscordGateway", "#a889d1");
 const addGatewayParams = (url: string): string => {
     const urlObj = new URL(url);
     urlObj.searchParams.set("v", "9");
-    urlObj.searchParams.set("encoding", "9");
+    urlObj.searchParams.set("encoding", "json");
     return urlObj.toString();
 };
 
