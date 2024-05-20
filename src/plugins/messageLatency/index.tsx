@@ -22,9 +22,10 @@ interface Diff {
     hours: number,
     minutes: number,
     seconds: number;
+    milliseconds: number;
 }
 
-const DISCORD_KT_DELAY = 1471228.928;
+const DISCORD_KT_DELAY = 1471228928;
 const HiddenVisually = findExportedComponentLazy("HiddenVisually");
 
 export default definePlugin({
@@ -42,6 +43,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Detect old Discord Android clients",
             default: true
+        },
+        showMillis: {
+            type: OptionType.BOOLEAN,
+            description: "Show milliseconds",
+            default: false
         }
     }),
 
@@ -55,12 +61,13 @@ export default definePlugin({
         }
     ],
 
-    stringDelta(delta: number) {
+    stringDelta(delta: number, showMillis: boolean) {
         const diff: Diff = {
-            days: Math.round(delta / (60 * 60 * 24)),
-            hours: Math.round((delta / (60 * 60)) % 24),
-            minutes: Math.round((delta / (60)) % 60),
-            seconds: Math.round(delta % 60),
+            days: Math.round(delta / (60 * 60 * 24 * 1000)),
+            hours: Math.round((delta / (60 * 60 * 1000)) % 24),
+            minutes: Math.round((delta / (60 * 1000)) % 60),
+            seconds: Math.round(delta / 1000 % 60),
+            milliseconds: Math.round(delta % 1000)
         };
 
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
@@ -72,7 +79,7 @@ export default definePlugin({
             return prev + (
                 isNonNullish(s)
                     ? (prev !== ""
-                        ? k === "seconds"
+                        ? (showMillis ? k === "milliseconds" : k === "seconds")
                             ? " and "
                             : " "
                         : "") + s
@@ -84,18 +91,21 @@ export default definePlugin({
     },
 
     latencyTooltipData(message: Message) {
-        const { latency, detectDiscordKotlin } = this.settings.store;
+        const { latency, detectDiscordKotlin, showMillis } = this.settings.store;
         const { id, nonce } = message;
 
         // Message wasn't received through gateway
         if (!isNonNullish(nonce)) return null;
 
         let isDiscordKotlin = false;
-        let delta = Math.round((SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce)) / 1000);
+        let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
+        if (!showMillis) {
+            delta = Math.round(delta / 1000) * 1000;
+        }
 
         // Old Discord Android clients have a delay of around 17 days
         // This is a workaround for that
-        if (-delta >= DISCORD_KT_DELAY - 86400) { // One day of padding for good measure
+        if (-delta >= DISCORD_KT_DELAY - 86400000) { // One day of padding for good measure
             isDiscordKotlin = detectDiscordKotlin;
             delta += DISCORD_KT_DELAY;
         }
@@ -105,22 +115,23 @@ export default definePlugin({
         // Can't do anything if the clock is behind
         const abs = Math.abs(delta);
         const ahead = abs !== delta;
+        const latencyMillis = latency * 1000;
 
-        const stringDelta = abs >= latency ? this.stringDelta(abs) : null;
+        const stringDelta = abs >= latencyMillis ? this.stringDelta(abs, showMillis) : null;
 
         // Also thanks dziurwa
         // 2 minutes
-        const TROLL_LIMIT = 2 * 60;
+        const TROLL_LIMIT = 2 * 60 * 1000;
 
         const fill: Fill = isDiscordKotlin
             ? ["status-positive", "status-positive", "text-muted"]
             : delta >= TROLL_LIMIT || ahead
                 ? ["text-muted", "text-muted", "text-muted"]
-                : delta >= (latency * 2)
+                : delta >= (latencyMillis * 2)
                     ? ["status-danger", "text-muted", "text-muted"]
                     : ["status-warning", "status-warning", "text-muted"];
 
-        return (abs >= latency || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
+        return (abs >= latencyMillis || isDiscordKotlin) ? { delta: stringDelta, ahead, fill, isDiscordKotlin } : null;
     },
 
     Tooltip() {

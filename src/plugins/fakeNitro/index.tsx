@@ -25,7 +25,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
-import type { CustomEmoji } from "@webpack/types";
+import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -54,15 +54,21 @@ const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoCla
 
 
 const enum EmojiIntentions {
-    REACTION = 0,
-    STATUS = 1,
-    COMMUNITY_CONTENT = 2,
-    CHAT = 3,
-    GUILD_STICKER_RELATED_EMOJI = 4,
-    GUILD_ROLE_BENEFIT_EMOJI = 5,
-    COMMUNITY_CONTENT_ONLY = 6,
-    SOUNDBOARD = 7
+    REACTION,
+    STATUS,
+    COMMUNITY_CONTENT,
+    CHAT,
+    GUILD_STICKER_RELATED_EMOJI,
+    GUILD_ROLE_BENEFIT_EMOJI,
+    COMMUNITY_CONTENT_ONLY,
+    SOUNDBOARD,
+    VOICE_CHANNEL_TOPIC,
+    GIFT,
+    AUTO_SUGGESTION,
+    POLLS
 }
+
+const IS_BYPASSEABLE_INTENTION = `[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`;
 
 const enum StickerType {
     PNG = 1,
@@ -198,37 +204,43 @@ export default definePlugin({
     patches: [
         {
             find: ".PREMIUM_LOCKED;",
+            group: true,
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
                 {
-                    // Create a variable for the intention of listing the emoji
-                    match: /(?<=,intention:(\i).+?;)/,
-                    replace: (_, intention) => `let fakeNitroIntention=${intention};`
+                    // Create a variable for the intention of using the emoji
+                    match: /(?<=\.USE_EXTERNAL_EMOJIS.+?;)(?<=intention:(\i).+?)/,
+                    replace: (_, intention) => `const fakeNitroIntention=${intention};`
                 },
                 {
-                    // Send the intention of listing the emoji to the nitro permission check functions
-                    match: /\.(?:canUseEmojisEverywhere|canUseAnimatedEmojis)\(\i(?=\))/g,
-                    replace: '$&,typeof fakeNitroIntention!=="undefined"?fakeNitroIntention:void 0'
+                    // Disallow the emoji for external if the intention doesn't allow it
+                    match: /&&!\i&&!\i(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
+                    replace: m => `${m}&&!${IS_BYPASSEABLE_INTENTION}`
                 },
                 {
-                    // Disallow the emoji if the intention doesn't allow it
-                    match: /(&&!\i&&)!(\i)(?=\)return \i\.\i\.DISALLOW_EXTERNAL;)/,
-                    replace: (_, rest, canUseExternal) => `${rest}(!${canUseExternal}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)))`
+                    // Disallow the emoji for unavailable if the intention doesn't allow it
+                    match: /!\i\.available(?=\)return \i\.\i\.GUILD_SUBSCRIPTION_UNAVAILABLE;)/,
+                    replace: m => `${m}&&!${IS_BYPASSEABLE_INTENTION}`
                 },
                 {
-                    // Make the emoji always available if the intention allows it
-                    match: /if\(!\i\.available/,
-                    replace: m => `${m}&&(typeof fakeNitroIntention==="undefined"||![${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention))`
+                    // Disallow the emoji for premium locked if the intention doesn't allow it
+                    match: /!\i\.\i\.canUseEmojisEverywhere\(\i\)/,
+                    replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                },
+                {
+                    // Allow animated emojis to be used if the intention allows it
+                    match: /(?<=\|\|)\i\.\i\.canUseAnimatedEmojis\(\i\)/,
+                    replace: m => `(${m}||${IS_BYPASSEABLE_INTENTION})`
                 }
             ]
         },
-        // Allow emojis and animated emojis to be sent everywhere
+        // Allows the usage of subscription-locked emojis
         {
-            find: "canUseAnimatedEmojis:function",
-            predicate: () => settings.store.enableEmojiBypass,
+            find: "isUnusableRoleSubscriptionEmoji:function",
             replacement: {
-                match: /((?:canUseEmojisEverywhere|canUseAnimatedEmojis):function\(\i)\){(.+?\))(?=})/g,
-                replace: (_, rest, premiumCheck) => `${rest},fakeNitroIntention){${premiumCheck}||fakeNitroIntention==null||[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`
+                match: /isUnusableRoleSubscriptionEmoji:function/,
+                // Replace the original export with a func that always returns false and alias the original
+                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
             }
         },
         // Allow stickers to be sent everywhere
@@ -242,10 +254,10 @@ export default definePlugin({
         },
         // Make stickers always available
         {
-            find: "\"SENDABLE\"",
+            find: '"SENDABLE"',
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /(\w+)\.available\?/,
+                match: /\i\.available\?/,
                 replace: "true?"
             }
         },
@@ -407,15 +419,6 @@ export default definePlugin({
             replacement: {
                 match: /canUseCustomNotificationSounds:function\(\i\){/,
                 replace: "$&return true;"
-            }
-        },
-        // Allows the usage of subscription-locked emojis
-        {
-            find: "isUnusableRoleSubscriptionEmoji:function",
-            replacement: {
-                match: /isUnusableRoleSubscriptionEmoji:function/,
-                // replace the original export with a func that always returns false and alias the original
-                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
             }
         }
     ],
@@ -809,8 +812,8 @@ export default definePlugin({
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DraftType.ChannelMessage);
     },
 
-    canUseEmote(e: CustomEmoji, channelId: string) {
-        if (e.require_colons === false) return true;
+    canUseEmote(e: Emoji, channelId: string) {
+        if (e.type === "UNICODE") return true;
         if (e.available === false) return false;
 
         const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
