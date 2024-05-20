@@ -122,7 +122,7 @@ Object.defineProperty(Function.prototype, "m", {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
-        if (stack?.includes("discord.com") || stack?.includes("discordapp.com")) {
+        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(v)) {
             logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
             patchFactories(v);
         }
