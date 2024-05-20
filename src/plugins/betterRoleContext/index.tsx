@@ -103,13 +103,13 @@ export default definePlugin({
                 );
             }
 
-            if(role.icon) {
+            if (role.icon) {
                 children.push(
                     <Menu.MenuItem
-                        id="view-role-icon"
+                        id="vc-view-role-icon"
                         label="View Icon"
                         action={() => {
-                            openImageModal("https://cdn.discordapp.com/role-icons/" + role.id + "/" + role.icon + "." + settings.store.roleIconFileFormat);
+                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
                         }}
                         icon={ImageIcon}
                     />
