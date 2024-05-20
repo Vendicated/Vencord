@@ -42,13 +42,13 @@ const settings = definePluginSettings({
         description: "File format to use when viewing role icons",
         options: [
             {
-                label: "webp",
-                value: "webp",
+                label: "png",
+                value: "png",
                 default: true
             },
             {
-                label: "png",
-                value: "png"
+                label: "webp",
+                value: "webp",
             },
             {
                 label: "jpg",
