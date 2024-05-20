@@ -35,12 +35,6 @@ export default definePlugin({
                     await fetch("" + findOption(option, "url"), { method: "DELETE" }).then(() => sendBotMessage(ctx.channel.id, { content: "The webhook has deleted successfully." }));
                 }
                 catch (error) {
-                    if (!["discord.com", "ptb.discord.com", "canary.discord.com"].includes(findOption(option, "url")) || !findOption(option, "url").startsWith("/api/webhooks/")) {
-                        sendBotMessage(ctx.channel.id, {
-                            content: "Please input a valid webhook URL to delete."
-                        });
-                    }
-
                     sendBotMessage(ctx.channel.id, {
                         content: "There was an error deleting the webhook. Did you input a valid webhook URL? Error: " + error
                     });
