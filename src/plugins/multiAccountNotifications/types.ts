@@ -14,6 +14,7 @@ export type ReadyEvent = {
         id: string;
     };
     guilds: {
+        id: string;
         channels: { id: string; }[];
         members: {
             user: { id: string; };
@@ -47,3 +48,9 @@ export type GuildSettings = {
 };
 
 export type Status = "clear" | "badge" | "ping";
+
+export type Update = "USER_GUILD_SETTINGS_UPDATE" | "GUILD_DELETE" | "CHANNEL_DELETE" | "GUILD_MEMBER_UPDATE";
+export type UpdateEvent = {
+    event: Update;
+    data: unknown;
+};

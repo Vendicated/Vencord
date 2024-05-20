@@ -159,11 +159,15 @@ export class GateWay extends EventTarget {
                 break;
             }
 
-            case 'USER_GUILD_SETTINGS_UPDATE': {
-                const dispatch = new CustomEvent("update", { detail: event.d });
-                this.dispatchEvent(dispatch);
-                break;
-            }
+            case "USER_GUILD_SETTINGS_UPDATE":
+            case "GUILD_DELETE":
+            case "CHANNEL_DELETE":
+            case "GUILD_MEMBER_UPDATE":
+                {
+                    const dispatch = new CustomEvent("update", { detail: { event: event.t, data: event.d } });
+                    this.dispatchEvent(dispatch);
+                    break;
+                }
 
             case 'RESUMED': {
                 this.reconecting = false;
