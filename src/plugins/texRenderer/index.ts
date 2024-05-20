@@ -16,9 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType, findOption } from "@api/Commands";
+import { ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+
+interface SuccessResponse {
+    status: "success";
+    log: string; // LaTeX rendering log, usually quite large
+    filename: string; // Filename of the generated PNG
+}
+
+interface FailureResponse {
+    status: "error";
+    description: string; // Human readable message of what went wrong
+    log?: string; // LaTeX rendering log, not guaranteed to be present
+}
+
+type APIResponse = SuccessResponse | FailureResponse;
 
 export default definePlugin({
     name: "TeX Renderer",
@@ -52,7 +66,12 @@ export default definePlugin({
                         "code": LATEX
                     }),
                     "method": "POST",
-                }).then(res => res.json());
+                }).then(res => res.json()) as APIResponse;
+
+                if (res.status === "error") {
+                    sendBotMessage(ctx.channel.id, { content: "Invalid TeX equation." });
+                    return;
+                }
 
                 return {
                     content: `https://rtex.probablyaweb.site/api/v2/${res.filename}`
