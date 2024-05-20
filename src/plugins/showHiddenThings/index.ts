@@ -88,11 +88,11 @@ export default definePlugin({
             }
         },
         {
-            find: "\">200\"",
+            find: "MINIMUM_MEMBER_COUNT:",
             predicate: () => settings.store.disableDiscoveryFilters,
             replacement: {
-                match: /">200"/,
-                replace: "\">0\""
+                match: /MINIMUM_MEMBER_COUNT:function\(\)\{return \i}/,
+                replace: "MINIMUM_MEMBER_COUNT:() => \">0\""
             }
         },
         {
