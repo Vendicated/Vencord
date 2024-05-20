@@ -21,6 +21,9 @@ export type ReadyEvent = {
             roles: string[];
         }[];
     }[];
+    notification_settings: {
+        flags: number;
+    };
 };
 
 export type CreateEvent = {
@@ -41,7 +44,9 @@ export type GuildSettings = {
     channel_overrides: {
         muted: boolean;
         channel_id: string;
+        flags: number;
     }[];
+    flags: number;
     suppress_everyone: boolean;
     suppress_roles: boolean;
     muted: boolean;

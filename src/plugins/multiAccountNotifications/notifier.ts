@@ -20,10 +20,13 @@ import { GateWay } from "./gateway";
 import { SnowflakeUtils } from "@webpack/common";
 import { AckEvent, CreateEvent, GuildSettings, ReadyEvent, UpdateEvent } from "./types";
 
+const GUILD_NEW_NOTIFY = 1 << 11;
+const CHANNEL_NEW_NOTIFY = 1 << 10;
 
 export class DiscordNotifier extends EventTarget {
     state: {
         userId: string;
+        newUnread: boolean;
         ignoredUsers: string[];
         unread: Record<string, {
             id: string;
@@ -32,6 +35,7 @@ export class DiscordNotifier extends EventTarget {
         channels: Map<string, { guild: string | null; muted: boolean; }>;
         guilds: Map<string, {
             muted: boolean;
+            unread: boolean;
             suppress_roles: boolean;
             suppress_everyone: boolean;
             roles: string[];
@@ -44,6 +48,7 @@ export class DiscordNotifier extends EventTarget {
         this.gateway = new GateWay(token);
         this.state = {
             userId: "",
+            newUnread: false,
             ignoredUsers: [],
             unread: {},
             channels: new Map(),
@@ -60,6 +65,16 @@ export class DiscordNotifier extends EventTarget {
             .map((v) => v.channel_id);
     }
 
+    getMutedChannel(muted: boolean, flags: number) {
+        if (!this.state.newUnread) {
+            return muted;
+        }
+        if (muted) {
+            return true;
+        }
+        return !!(flags & CHANNEL_NEW_NOTIFY);
+    }
+
     handleServerSettings(settings: GuildSettings | undefined) {
         if (settings === undefined) {
             return;
@@ -70,6 +85,7 @@ export class DiscordNotifier extends EventTarget {
         const guild = this.state.guilds.get(settings.guild_id);
         this.state.guilds.set(settings.guild_id, {
             muted: settings.muted,
+            unread: !!(settings.flags & GUILD_NEW_NOTIFY),
             suppress_everyone: settings.suppress_everyone,
             suppress_roles: settings.suppress_roles,
             roles: guild?.roles ?? [],
@@ -77,7 +93,7 @@ export class DiscordNotifier extends EventTarget {
         settings.channel_overrides.forEach((override) => {
             this.state.channels.set(override.channel_id, {
                 guild: settings.guild_id,
-                muted: override.muted
+                muted: this.getMutedChannel(override.muted, override.flags)
             });
             if (override.muted && override.channel_id in this.state.unread) {
                 delete this.state.unread[override.channel_id];
@@ -124,11 +140,17 @@ export class DiscordNotifier extends EventTarget {
         }
         const guild = this.state.guilds.get(message.guild_id);
         if (!guild || guild.muted) {
-            return;
+            return false;
         }
         const channel = this.state.channels.get(message.channel_id);
         if (!channel) {
+            if (this.state.newUnread) {
+                return guild.unread;
+            }
             return true;
+        }
+        if (this.state.newUnread && !channel.muted) {
+            return guild.unread;
         }
         return !channel.muted;
     }
@@ -156,13 +178,16 @@ export class DiscordNotifier extends EventTarget {
                 .filter((e) => e.mention_count > 0)
                 .map((e) => ([e.id, { id: e.last_message_id, ping: true }]))
         );
+        if (ready.notification_settings.flags == 16) {
+            this.state.newUnread = true;
+        }
         this.state.channels = new Map(
             //@ts-expect-error Typescript doesn't like maps
             ready.user_guild_settings.map((server) => server.channel_overrides.map((override) => [
                 override.channel_id,
                 {
                     guild: server.guild_id,
-                    muted: override.muted
+                    muted: this.getMutedChannel(override.muted, override.flags)
                 }
             ])
             ).flat(1)
@@ -171,10 +196,14 @@ export class DiscordNotifier extends EventTarget {
             ready.guilds
                 .map((guild) => {
                     const settings = ready.user_guild_settings.find((v) => v.guild_id === guild.id);
+                    if (!settings) {
+                        return [guild.id, { muted: false, unread: false, suppress_roles: false, suppress_everyone: false, roles: [] }];
+                    }
                     return [guild.id, {
-                        muted: settings?.muted ?? false,
-                        suppress_roles: settings?.suppress_roles ?? false,
-                        suppress_everyone: settings?.suppress_everyone ?? false,
+                        muted: settings.muted,
+                        unread: !!(settings.flags & GUILD_NEW_NOTIFY),
+                        suppress_roles: settings.suppress_roles,
+                        suppress_everyone: settings.suppress_everyone,
                         roles: guild.members.find((v) => v.user.id == this.state.userId)?.roles ?? []
                     }];
                 })
