@@ -23,26 +23,20 @@ import("./index.css");
 
 export type tools = "select" | "add_text" | "add_image";
 
-type idk = { type: "text" | "image", id: number; };
+type editType = { type: "text" | "image", id: number; };
 export type canvasStateType = { width: number, height: number, fill?: { color: string, shouldFill: boolean; }; };
 
-export type edit = idk;
 
 export default function MainBoard() {
     const [currentTool, setCurrentTool] = React.useState<tools>("select");
     const mainCanvasRef = React.useRef<HTMLCanvasElement>(null);
     const [overlays, dispatch] = React.useReducer(overlayReducer, []);
     const [canvasState, setCanvasState] = React.useState<canvasStateType>({ width: 512, height: 512, fill: { shouldFill: true, color: "white" } });
-    const [currentEditing, setCurrentEditing] = React.useState<edit>();
+    const [currentEditing, setCurrentEditing] = React.useState<editType>();
     const CanvasComponent = getCanvass();
     const ImageOverlay = getImageOverlay();
 
     const [canvasSource, setCanvasSource] = React.useState();
-
-    // React.useEffect(() => {
-    //     // console.log(overlays);
-    //     console.log(canvasState);
-    // }, [overlays, canvasState]);
 
     const draw = (ctx: CanvasRenderingContext2D) => {
         ctx.canvas.width = Math.min(canvasState.width, 4096);

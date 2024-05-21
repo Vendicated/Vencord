@@ -16,17 +16,17 @@ import BoardModal from "./BoardApp/BoardModal";
 const openBoard: ChatBarButton = () => {
     // the image is subject to change
     return (
-        <ChatBarButton onClick={() => openModal(props => <BoardModal modalProps={props} />, { modalKey: "ExcaliFakeBoard", onCloseRequest: () => { console.log("Close requested"); closeModal("ExcaliFakeBoard"); } })} tooltip={""}>
+        <ChatBarButton onClick={() => openModal(props => <BoardModal modalProps={props} />, { modalKey: "DrawboardFrame", onCloseRequest: () => { closeModal("DrawboardFrame"); } })} tooltip={""}>
             <img src="https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/main/public/img/emutest.png" width={16} height={16} />
         </ChatBarButton>
     );
 };
 
 export default definePlugin({
-    name: "idkwhattonamethisye", // give rec should i just call it "Excaliboard"
-    description: "idk just a worser version of (not) excaliboard",
+    name: "Drawboard",
+    description: "A worser version of a real image editor",
     authors: [Devs.MaiKokain],
     start() {
-        addChatBarButton("ExcaliBoardModal", openBoard);
+        addChatBarButton("DrawboardModal", openBoard);
     },
 });
