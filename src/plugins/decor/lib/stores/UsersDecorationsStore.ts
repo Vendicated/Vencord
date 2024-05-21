@@ -30,7 +30,7 @@ interface UsersDecorationsState {
     set: (userId: string, decoration: string | null) => void;
 }
 
-export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecorationsState>((set, get) => ({
+export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any, get: any) => ({
     usersDecorations: new Map<string, UserDecorationData>(),
     fetchQueue: new Set(),
     bulkFetch: debounce(async () => {
@@ -40,7 +40,7 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
 
         set({ fetchQueue: new Set() });
 
-        const fetchIds = Array.from(fetchQueue);
+        const fetchIds = [...fetchQueue];
         const fetchedUsersDecorations = await getUsersDecorations(fetchIds);
 
         const newUsersDecorations = new Map(usersDecorations);
@@ -92,7 +92,7 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate<UsersDecor
         newUsersDecorations.set(userId, { asset: decoration, fetchedAt: new Date() });
         set({ usersDecorations: newUsersDecorations });
     }
-})));
+} as UsersDecorationsState)));
 
 export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
     const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
