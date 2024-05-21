@@ -80,11 +80,19 @@ export default definePlugin({
             }
         },
         {
-            find: "auto_removed:",
+            find: "prod_discoverable_guilds",
             predicate: () => settings.store.disableDiscoveryFilters,
             replacement: {
-                match: /filters:\i\.join\(" AND "\),facets:\[/,
-                replace: "facets:["
+                match: /\{"auto_removed:.*?\}/,
+                replace: "{}"
+            }
+        },
+        {
+            find: "MINIMUM_MEMBER_COUNT:",
+            predicate: () => settings.store.disableDiscoveryFilters,
+            replacement: {
+                match: /MINIMUM_MEMBER_COUNT:function\(\)\{return \i}/,
+                replace: "MINIMUM_MEMBER_COUNT:() => \">0\""
             }
         },
         {
