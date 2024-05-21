@@ -510,6 +510,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "verticalsync",
         id: 328165170536775680n
     },
+    Hen: {
+        name: "Hen",
+        id: 279266228151779329n,
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
