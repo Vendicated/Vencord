@@ -274,7 +274,7 @@ interface RestRequestData {
 
 export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
-export type Permissions = "CREATE_INSTANT_INVITE"
+export type PermissionKeys = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"
     | "BAN_MEMBERS"
     | "ADMINISTRATOR"
@@ -322,7 +322,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "MANAGE_EVENTS"
     | "CREATE_EVENTS";
 
-export type PermissionsBits = Record<Permissions, bigint>;
+export type Permissions = Record<PermissionKeys, bigint>;
 
 export interface Locale {
     name: string;

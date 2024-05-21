@@ -18,6 +18,8 @@
 
 import type { ExcludeAction, ExtractAction, FluxAction, FluxActionHandlerMap, FluxDispatchBand, FluxDispatcher } from "./utils";
 
+type Defined<T> = Exclude<T, undefined>;
+
 type Nullish = null | undefined;
 
 type FluxChangeListener = () => boolean;
@@ -196,6 +198,17 @@ export const enum Permissions {
 }
 */
 
+export const enum FormLayout {
+    DEFAULT = 0,
+    LIST = 1,
+    GRID = 2,
+}
+
+export const enum ThreadSortOrder {
+    LATEST_ACTIVITY = 0,
+    CREATION_DATE = 1,
+}
+
 export const enum ChannelFlags {
     GUILD_FEED_REMOVED = 1 << 0,
     PINNED = 1 << 1,
@@ -211,6 +224,33 @@ export const enum ChannelFlags {
     IS_BROADCASTING = 1 << 14,
     HIDE_MEDIA_DOWNLOAD_OPTIONS = 1 << 15,
     IS_JOIN_REQUEST_INTERVIEW_CHANNEL = 1 << 16,
+}
+
+export const enum ThreadMemberFlags {
+    HAS_INTERACTED = 1 << 0,
+    ALL_MESSAGES = 1 << 1,
+    ONLY_MENTIONS = 1 << 2,
+    NO_MESSAGES = 1 << 3,
+}
+
+export const enum PermissionOverwriteType {
+    ROLE = 0,
+    MEMBER = 1,
+}
+
+interface PermissionOverwrites {
+    [roleIdOrUserId: string]: {
+        allow: /* Permissions */ bigint;
+        deny: /* Permissions */ bigint;
+        id: string;
+        type: PermissionOverwriteType;
+    };
+}
+
+export const enum SafetyWarningTypes {
+    STRANGER_DANGER = 1,
+    INAPPROPRIATE_CONVERSATION_TIER_1 = 2,
+    INAPPROPRIATE_CONVERSATION_TIER_2 = 3,
 }
 
 export const enum ChannelTypes {
@@ -231,22 +271,18 @@ export const enum ChannelTypes {
     UNKNOWN = 10_000,
 }
 
-export const enum FormLayout {
-    DEFAULT = 0,
-    LIST = 1,
-    GRID = 2,
+export const enum VideoQualityMode {
+    AUTO = 1,
+    FULL = 2,
 }
 
-export const enum ThreadSortOrder {
-    LATEST_ACTIVITY = 0,
-    CREATION_DATE = 1,
-}
+type ChannelRecordOwnKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
 
-type ChannelRecordBaseOwnProperties = Pick<ChannelRecordBase, "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode">;
+type ChannelRecordOwnProperties<ChannelRecord extends ChannelRecordBase> = Pick<ChannelRecord, ChannelRecordOwnKeys>;
 
 // does not extend ImmutableRecord
-export class ChannelRecordBase<OwnProperties extends ChannelRecordBaseOwnProperties = ChannelRecordBaseOwnProperties> {
-    constructor(channelFromServer: Record<string, any>); // TEMP
+export abstract class ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
 
     get accessPermissions(): /* Permissions */ bigint;
     get bitrate(): number;
@@ -255,124 +291,468 @@ export class ChannelRecordBase<OwnProperties extends ChannelRecordBaseOwnPropert
     getApplicationId(): this["application_id"];
     getDefaultLayout(): FormLayout;
     getDefaultSortOrder(): ThreadSortOrder;
-    getGuildId(): string | null;
-    hasFlag(flag: number): boolean;
-    isActiveThread(): boolean;
-    isAnnouncementThread(): boolean;
-    isArchivedLockedThread(): boolean;
-    isArchivedThread(): boolean;
+    getGuildId(): this["guild_id"];
+    hasFlag(flag: ChannelFlags): boolean;
+    isActiveThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isAnnouncementThread(): this is ThreadChannelRecord<ChannelTypes.ANNOUNCEMENT_THREAD>;
+    isArchivedLockedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isArchivedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
     isBroadcastChannel(): boolean;
-    isCategory(): boolean;
-    isDM(): boolean;
-    isDirectory(): boolean;
-    isForumChannel(): boolean;
-    isForumLikeChannel(): boolean;
-    isForumPost(): boolean;
-    isGroupDM(): boolean;
-    isGuildStageVoice(): boolean;
-    isGuildVocal(): boolean;
-    isGuildVocalOrThread(): boolean;
-    isGuildVoice(): boolean;
-    isListenModeCapable(): boolean;
-    isLockedThread(): boolean;
+    isCategory(): this is GuildCategoryChannelRecord;
+    isDM(): this is DMChannelRecord;
+    isDirectory(): this is GuildDirectoryChannelRecord;
+    isForumChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_FORUM>;
+    isForumLikeChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA>;
+    isForumPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isGroupDM(): this is GroupDMChannelRecord;
+    isGuildStageVoice(): this is GuildStageVoiceChannelRecord;
+    isGuildVocal(): this is GuildVocalChannelRecord;
+    isGuildVocalOrThread(): this is GuildVocalChannelRecord | ThreadChannelRecord<ChannelTypes.PUBLIC_THREAD | ChannelTypes.PRIVATE_THREAD>;
+    isGuildVoice(): this is GuildVoiceChannelRecord;
+    isListenModeCapable(): this is GuildStageVoiceChannelRecord;
+    isLockedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
     isManaged(): boolean;
-    isMediaChannel(): boolean;
-    isMediaPost(): boolean;
-    isMultiUserDM(): boolean;
+    isMediaChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_MEDIA>;
+    isMediaPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isMultiUserDM(): this is GroupDMChannelRecord;
     isNSFW(): boolean;
     isOwner(userId: string): boolean;
-    isPrivate(): boolean;
+    isPrivate(): this is PrivateChannelRecord;
     isRoleSubscriptionTemplatePreviewChannel(): boolean;
     isScheduledForDeletion(): boolean;
     isSystemDM(): boolean;
-    isThread(): boolean;
-    isVocal(): boolean;
-    isVocalThread(): boolean;
-    merge(collection: Partial<OwnProperties>): this;
+    isThread(): this is ThreadChannelRecord;
+    isVocal(): this is PrivateChannelRecord | GuildVocalChannelRecord | ThreadChannelRecord<ChannelTypes.PUBLIC_THREAD | ChannelTypes.PRIVATE_THREAD>;
+    isVocalThread(): this is ThreadChannelRecord<ChannelTypes.PUBLIC_THREAD | ChannelTypes.PRIVATE_THREAD>;
+    merge(collection: Partial<ChannelRecordOwnProperties<this>>): this;
     get nsfw(): boolean;
-    get permissionOverwrites(): Record<string, any>; // TEMP
+    get permissionOverwrites(): PermissionOverwrites;
     get position(): number;
     get rateLimitPerUser(): number;
-    set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
-    toJS(): OwnProperties;
+    set<Key extends ChannelRecordOwnKeys>(key: Key, value: ChannelRecordOwnProperties<this>[Key]): this;
+    toJS(): ChannelRecordOwnProperties<this>;
     get topic(): string;
     get userLimit(): number;
 
-    application_id: undefined; // TEMP
-    appliedTags: undefined; // TEMP
-    availableTags: undefined; // TEMP
-    bitrate_: undefined; // TEMP
-    defaultAutoArchiveDuration: undefined; // TEMP
-    defaultForumLayout: undefined; // TEMP
-    defaultReactionEmoji: undefined; // TEMP
-    defaultSortOrder: undefined; // TEMP
-    defaultThreadRateLimitPerUser: undefined; // TEMP
-    flags_: undefined; // TEMP
+    application_id?: string | undefined;
+    appliedTags?: string[] | undefined;
+    availableTags?: {
+        id: string;
+        emojiId: string | null;
+        emojiName: string | null;
+        moderated: boolean;
+        name: string;
+    }[] | undefined;
+    bitrate_?: number | undefined;
+    defaultAutoArchiveDuration?: number | undefined;
+    defaultForumLayout?: FormLayout | undefined;
+    defaultReactionEmoji?: {
+        emojiId: string | null;
+        emojiName: string | null;
+    } | undefined;
+    defaultSortOrder?: ThreadSortOrder | Nullish;
+    defaultThreadRateLimitPerUser?: number | undefined;
+    flags_: ChannelFlags;
     guild_id: string | null;
-    icon: undefined; // TEMP
-    iconEmoji: undefined; // TEMP
+    icon?: string | Nullish;
+    iconEmoji?: {
+        id: string | null;
+        name: string;
+    } | undefined;
     id: string;
-    isMessageRequest: undefined; // TEMP
-    isMessageRequestTimestamp: undefined; // TEMP
-    isSpam: undefined; // TEMP
-    lastMessageId: undefined; // TEMP
-    lastPinTimestamp: undefined; // TEMP
-    member: undefined; // TEMP
-    memberCount: undefined; // TEMP
-    memberIdsPreview: undefined; // TEMP
-    memberListId: undefined; // TEMP
-    messageCount: undefined; // TEMP
+    isMessageRequest?: boolean | undefined;
+    isMessageRequestTimestamp?: string | Nullish;
+    isSpam?: boolean | undefined;
+    lastMessageId: string | Nullish;
+    lastPinTimestamp: string | Nullish;
+    member?: {
+        flags: ThreadMemberFlags;
+        joinTimestamp: string;
+        muteConfig: {
+            end_time: string | null;
+            selected_time_window: number;
+        } | null;
+        muted: boolean;
+    } | undefined;
+    memberCount?: number | undefined;
+    memberIdsPreview?: string[] | undefined;
+    memberListId?: string | Nullish;
+    messageCount?: number | undefined;
     name: string;
-    nicks: undefined; // TEMP
-    nsfw_: undefined; // TEMP
-    originChannelId: undefined; // TEMP
-    ownerId: undefined; // TEMP
-    parentChannelThreadType: undefined; // TEMP
-    parent_id: undefined; // TEMP
-    permissionOverwrites_: undefined; // TEMP
-    position_: undefined; // TEMP
-    rateLimitPerUser_: undefined; // TEMP
-    rawRecipients: undefined; // TEMP
-    recipients: undefined; // TEMP
-    rtcRegion: undefined; // TEMP
-    safetyWarnings: undefined; // TEMP
-    template: undefined; // TEMP
-    themeColor: undefined; // TEMP
-    threadMetadata: undefined; // TEMP
-    topic_: undefined; // TEMP
-    totalMessageSent: undefined; // TEMP
+    nicks?: { [userId: string]: string; } | undefined;
+    nsfw_?: boolean | undefined;
+    originChannelId?: string | Nullish;
+    ownerId?: string | undefined;
+    parent_id?: string | Nullish;
+    parentChannelThreadType?: ChannelTypes.GUILD_TEXT | ChannelTypes.GUILD_ANNOUNCEMENT | ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA | undefined;
+    permissionOverwrites_?: PermissionOverwrites | undefined;
+    position_?: number | undefined;
+    rateLimitPerUser_?: number | undefined;
+    rawRecipients?: Record<string, any>[] | undefined; // TEMP
+    recipients?: string[] | undefined;
+    rtcRegion?: string | Nullish;
+    safetyWarnings?: {
+        type: SafetyWarningTypes;
+        dismiss_timestamp: string | undefined; // TEMP
+    }[] | undefined; // TEMP
+    template?: string | undefined;
+    themeColor?: number | Nullish;
+    threadMetadata?: {
+        archived: boolean;
+        archiveTimestamp: string;
+        autoArchiveDuration: number;
+        createTimestamp: string | Nullish;
+        invitable: boolean;
+        locked: boolean;
+    } | undefined;
+    topic_?: string | Nullish;
+    totalMessageSent?: number | undefined;
     type: ChannelTypes;
-    userLimit_: undefined; // TEMP
-    version: undefined; // TEMP
-    videoQualityMode: undefined; // TEMP
+    userLimit_?: number | undefined;
+    version?: number | undefined;
+    videoQualityMode?: VideoQualityMode | undefined;
 }
+
+export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildTextualChannelRecord; // TEMP
+
+    application_id: undefined;
+    appliedTags?: undefined;
+    availableTags?: undefined;
+    bitrate_?: undefined;
+    defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
+    defaultForumLayout?: undefined;
+    defaultReactionEmoji?: undefined;
+    defaultSortOrder?: undefined;
+    defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    icon?: undefined;
+    iconEmoji: Defined<ChannelRecordBase["iconEmoji"]>;
+    isMessageRequest?: undefined;
+    isMessageRequestTimestamp?: undefined;
+    isSpam?: undefined;
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    member?: undefined;
+    memberCount?: undefined;
+    memberIdsPreview?: undefined;
+    memberListId: ChannelRecordBase["memberListId"];
+    messageCount?: undefined;
+    nicks?: undefined;
+    nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
+    originChannelId?: undefined;
+    ownerId?: undefined;
+    parent_id: ChannelRecordBase["parent_id"];
+    parentChannelThreadType?: undefined;
+    permissionOverwrites_: Defined<ChannelRecordBase["permissionOverwrites_"]>;
+    position_: Defined<ChannelRecordBase["position_"]>;
+    rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
+    rawRecipients?: undefined;
+    recipients?: undefined;
+    rtcRegion?: undefined;
+    safetyWarnings?: undefined;
+    template?: undefined;
+    themeColor: ChannelRecordBase["themeColor"];
+    threadMetadata?: undefined;
+    topic_: ChannelRecordBase["topic_"];
+    totalMessageSent?: undefined;
+    type: ChannelTypes.GUILD_TEXT | ChannelTypes.GUILD_CATEGORY | ChannelTypes.GUILD_ANNOUNCEMENT | ChannelTypes.GUILD_STORE | ChannelTypes.GUILD_DIRECTORY;
+    userLimit_?: undefined;
+    version: ChannelRecordBase["version"];
+    videoQualityMode?: undefined;
+}
+
+export class GuildTextChannelRecord extends GuildTextualChannelRecordBase {
+    type: ChannelTypes.GUILD_TEXT;
+} // TEMP
+
+export class GuildCategoryChannelRecord extends GuildTextualChannelRecordBase {
+    type: ChannelTypes.GUILD_CATEGORY;
+} // TEMP
+
+export class GuildAnnouncementChannelRecord extends GuildTextualChannelRecordBase {
+    type: ChannelTypes.GUILD_ANNOUNCEMENT;
+} // TEMP
+
+export class GuildStoreChannelRecord extends GuildTextualChannelRecordBase {
+    type: ChannelTypes.GUILD_STORE;
+} // TEMP
+
+export class GuildDirectoryChannelRecord extends GuildTextualChannelRecordBase {
+    type: ChannelTypes.GUILD_DIRECTORY;
+} // TEMP
+
+export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
+
+export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord; // TEMP
+    static sortRecipients(recipients: Record<string, any>[] | Nullish, channelId: string): string[]; // TEMP
+
+    addRecipient(recipientUserId: string, nickname: string | undefined, currentUserId: string): this;
+    getRecipientId(): string | undefined;
+    removeRecipient(recipientUserId: string): this;
+
+    application_id: ChannelRecordBase["application_id"];
+    appliedTags?: undefined;
+    availableTags?: undefined;
+    bitrate_?: undefined;
+    defaultAutoArchiveDuration?: undefined;
+    defaultForumLayout?: undefined;
+    defaultReactionEmoji?: undefined;
+    defaultSortOrder?: undefined;
+    defaultThreadRateLimitPerUser?: undefined;
+    icon: ChannelRecordBase["icon"];
+    iconEmoji?: undefined;
+    isMessageRequest: ChannelRecordBase["isMessageRequest"];
+    isMessageRequestTimestamp: ChannelRecordBase["isMessageRequestTimestamp"];
+    isSpam: Defined<ChannelRecordBase["isSpam"]>;
+    lastMessageId: Defined<ChannelRecordBase["lastMessageId"]>;
+    lastPinTimestamp: undefined;
+    member?: undefined;
+    memberCount?: undefined;
+    memberIdsPreview?: undefined;
+    memberListId?: undefined;
+    messageCount?: undefined;
+    nicks: Defined<ChannelRecordBase["nicks"]>;
+    nsfw_?: undefined;
+    originChannelId?: undefined;
+    ownerId: ChannelRecordBase["ownerId"];
+    parent_id?: undefined;
+    parentChannelThreadType?: undefined;
+    permissionOverwrites_?: undefined;
+    position_?: undefined;
+    rateLimitPerUser_?: undefined;
+    rawRecipients: Defined<ChannelRecordBase["rawRecipients"]>;
+    recipients: Defined<ChannelRecordBase["recipients"]>;
+    rtcRegion?: undefined;
+    safetyWarnings: ChannelRecordBase["safetyWarnings"];
+    template?: undefined;
+    themeColor?: undefined;
+    threadMetadata?: undefined;
+    topic_?: undefined;
+    totalMessageSent?: undefined;
+    type: ChannelTypes.DM | ChannelTypes.GROUP_DM;
+    userLimit_?: undefined;
+    version?: undefined;
+    videoQualityMode?: undefined;
+}
+
+export class DMChannelRecord extends PrivateChannelRecordBase {
+    type: ChannelTypes.DM;
+} // TEMP
+
+export class GroupDMChannelRecord extends PrivateChannelRecordBase{
+    application_id: ChannelRecordBase["application_id"];
+    type: ChannelTypes.GROUP_DM;
+} // TEMP
+
+export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
+
+export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildVocalChannelRecord; // TEMP
+
+    application_id: undefined;
+    appliedTags?: undefined;
+    availableTags?: undefined;
+    bitrate_: Defined<ChannelRecordBase["bitrate_"]>;
+    defaultAutoArchiveDuration?: undefined;
+    defaultForumLayout?: undefined;
+    defaultReactionEmoji?: undefined;
+    defaultSortOrder?: undefined;
+    defaultThreadRateLimitPerUser?: undefined;
+    icon?: undefined;
+    iconEmoji: Defined<ChannelRecordBase["iconEmoji"]>;
+    isMessageRequest?: undefined;
+    isMessageRequestTimestamp?: undefined;
+    isSpam?: undefined;
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: undefined;
+    member?: undefined;
+    memberCount?: undefined;
+    memberIdsPreview?: undefined;
+    memberListId: ChannelRecordBase["memberListId"]; // TEMP
+    messageCount?: undefined;
+    nicks?: undefined;
+    nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
+    originChannelId: ChannelRecordBase["originChannelId"]; // TEMP
+    ownerId?: undefined;
+    parent_id: ChannelRecordBase["parent_id"];
+    parentChannelThreadType?: undefined;
+    permissionOverwrites_: Defined<ChannelRecordBase["permissionOverwrites_"]>;
+    position_: Defined<ChannelRecordBase["position_"]>;
+    rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
+    rawRecipients?: undefined;
+    recipients?: undefined;
+    rtcRegion: Defined<ChannelRecordBase["rtcRegion"]>;
+    safetyWarnings?: undefined;
+    template?: undefined;
+    themeColor: Nullish; // TEMP
+    threadMetadata?: undefined;
+    topic_: Nullish;
+    totalMessageSent?: undefined;
+    type: ChannelTypes.GUILD_VOICE | ChannelTypes.GUILD_STAGE_VOICE;
+    userLimit_: Defined<ChannelRecordBase["userLimit_"]>;
+    version: ChannelRecordBase["version"];
+    videoQualityMode: ChannelRecordBase["videoQualityMode"];
+}
+
+export class GuildVoiceChannelRecord extends GuildVocalChannelRecordBase {
+    type: ChannelTypes.GUILD_VOICE;
+} // TEMP
+
+export class GuildStageVoiceChannelRecord extends GuildVocalChannelRecordBase {
+    type: ChannelTypes.GUILD_STAGE_VOICE;
+} // TEMP
+
+export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
+
+type ThreadChannelType = ChannelTypes.ANNOUNCEMENT_THREAD | ChannelTypes.PUBLIC_THREAD | ChannelTypes.PRIVATE_THREAD;
+
+export class ThreadChannelRecord<ChannelType extends ThreadChannelType = ThreadChannelType> extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ThreadChannelRecord; // TEMP
+
+    application_id?: undefined;
+    appliedTags: Defined<ChannelRecordBase["appliedTags"]>;
+    availableTags?: undefined;
+    bitrate_: undefined;
+    defaultAutoArchiveDuration?: undefined;
+    defaultForumLayout?: undefined;
+    defaultReactionEmoji?: undefined;
+    defaultSortOrder?: undefined;
+    defaultThreadRateLimitPerUser?: undefined;
+    icon?: undefined;
+    iconEmoji?: undefined;
+    isMessageRequest?: undefined;
+    isMessageRequestTimestamp?: undefined;
+    isSpam?: undefined;
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: ChannelRecordBase["lastMessageId"];
+    member: ChannelRecordBase["member"];
+    memberCount: Defined<ChannelRecordBase["memberCount"]>;
+    memberIdsPreview: Defined<ChannelRecordBase["memberIdsPreview"]>;
+    memberListId?: undefined;
+    messageCount: Defined<ChannelRecordBase["messageCount"]>;
+    nicks?: undefined;
+    nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
+    originChannelId?: undefined;
+    ownerId: Defined<ChannelRecordBase["ownerId"]>;
+    parentChannelThreadType: Defined<ChannelRecordBase["parentChannelThreadType"]>;
+    parent_id: NonNullable<ChannelRecordBase["parent_id"]>;
+    permissionOverwrites_?: undefined;
+    position_?: undefined;
+    rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
+    rawRecipients?: undefined;
+    recipients?: undefined;
+    rtcRegion: undefined;
+    safetyWarnings?: undefined;
+    template?: undefined;
+    themeColor?: undefined;
+    threadMetadata: ChannelRecordBase["threadMetadata"];
+    topic_?: undefined;
+    totalMessageSent: ChannelRecordBase["rateLimitPerUser_"];
+    type: ChannelType;
+    userLimit_: undefined;
+    version?: undefined;
+    videoQualityMode: undefined;
+}
+
+type ForumChannelType = ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA;
+
+export class ForumChannelRecord<ChannelType extends ForumChannelType = ForumChannelType> extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ForumChannelRecord; // TEMP
+
+    application_id?: undefined;
+    appliedTags?: undefined;
+    availableTags: Defined<ChannelRecordBase["availableTags"]>;
+    bitrate_?: undefined;
+    defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
+    defaultForumLayout: ChannelRecordBase["defaultForumLayout"];
+    defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];
+    defaultSortOrder: ChannelRecordBase["defaultSortOrder"];
+    defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    icon?: undefined;
+    iconEmoji: ChannelRecordBase["iconEmoji"];
+    isMessageRequest?: undefined;
+    isMessageRequestTimestamp?: undefined;
+    isSpam?: undefined;
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    member?: undefined;
+    memberCount?: undefined;
+    memberIdsPreview?: undefined;
+    memberListId: ChannelRecordBase["memberListId"]; // TEMP
+    messageCount?: undefined;
+    nicks?: undefined;
+    nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
+    originChannelId?: undefined;
+    ownerId?: undefined;
+    parentChannelThreadType?: undefined;
+    parent_id: NonNullable<ChannelRecordBase["parent_id"]>;
+    permissionOverwrites_: Defined<ChannelRecordBase["permissionOverwrites_"]>;
+    position_: Defined<ChannelRecordBase["position_"]>;
+    rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
+    rawRecipients?: undefined;
+    recipients?: undefined;
+    rtcRegion?: undefined;
+    safetyWarnings?: undefined;
+    template: Defined<ChannelRecordBase["template"]>;
+    themeColor: ChannelRecordBase["themeColor"];
+    threadMetadata?: undefined;
+    topic_: ChannelRecordBase["topic_"];
+    totalMessageSent?: undefined;
+    type: ChannelType;
+    userLimit_?: undefined;
+    version: ChannelRecordBase["version"];
+    videoQualityMode?: undefined;
+}
+
+export class UnknownChannelRecord extends ChannelRecordBase {
+    constructor(channelProperties: Record<string, any>); // TEMP
+
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): UnknownChannelRecord; // TEMP
+
+    type: ChannelTypes.UNKNOWN;
+} // TEMP
+
+export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRecord | ForumChannelRecord;
+
+export type ChannelRecord = GuildChannelRecord | PrivateChannelRecord | ThreadChannelRecord | UnknownChannelRecord;
 
 type ChannelStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_FEED_FETCH_SUCCESS" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_CHANNELS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOGOUT" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "SEARCH_FINISH" | "THREAD_CREATE" | "THREAD_DELETE" | "THREAD_LIST_SYNC" | "THREAD_UPDATE">;
 
 export class ChannelStore<Action extends FluxAction = ChannelStoreAction> extends FluxStore<Action> {
     static displayName: "ChannelStore";
 
-    getAllThreadsForParent(channelId: string): ; // TEMP
-    getBasicChannel(channelId?: string | Nullish): ; // TEMP
-    getChannel(channelId?: string | Nullish): ;  // TEMP
+    getAllThreadsForParent(channelId: string): ThreadChannelRecord[];
+    getBasicChannel(channelId?: string | Nullish): ChannelRecord | null; // TEMP
+    getChannel(channelId?: string | Nullish): ChannelRecord | undefined;
     getChannelIds(guildId?: string | Nullish): string[];
     getDebugInfo(): {
-        loadedGuildIds: any[]; // TEMP
+        loadedGuildIds: string[];
         pendingGuildLoads: any[]; // TEMP
         guildSizes: string[];
     };
-    getDMFromUserId(userId?: string | Nullish): ; // TEMP
+    getDMFromUserId(userId?: string | Nullish): string | undefined;
     getDMUserIds(): string[];
-    getGuildChannelsVersion(guildId: string): number; // TEMP
-    getInitialOverlayState(): ; // TEMP
-    getMutableBasicGuildChannelsForGuild(guildId: string): ; // TEMP
-    getMutableDMsByUserIds(): ; // TEMP
-    getMutableGuildChannelsForGuild(guildId: string): ; // TEMP
-    getMutablePrivateChannels(): ; // TEMP
+    getGuildChannelsVersion(guildId: string): number;
+    getInitialOverlayState(): { [channelId: string]: ChannelRecord; };
+    getMutableBasicGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; } | undefined; // TEMP
+    getMutableDMsByUserIds(): { [userId: string]: string; };
+    getMutableGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; } | undefined;
+    getMutablePrivateChannels(): { [channelId: string]: PrivateChannelRecord; };
     getPrivateChannelsVersion(): number;
-    getSortedPrivateChannels(): ; // TEMP
+    getSortedPrivateChannels(): PrivateChannelRecord[];
     hasChannel(channelId: string): boolean;
-    loadAllGuildAndPrivateChannelsFromDisk(): ; // TEMP
+    loadAllGuildAndPrivateChannelsFromDisk(): { [channelId: string]: GuildChannelRecord | PrivateChannelRecord; };
 }
 
 export interface DraftObject {

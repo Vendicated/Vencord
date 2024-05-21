@@ -33,7 +33,7 @@ export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };
 
-// this is not actually a FluxStore
+// Original name: ChannelActionCreators, this is not actually a FluxStore
 export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
