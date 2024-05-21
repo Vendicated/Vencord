@@ -15,12 +15,36 @@ const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
 const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
 
 const settings = definePluginSettings({
-    summaryExpiryThreshold: {
+    summaryExpiryThresholdDays: {
         type: OptionType.NUMBER,
         description: "The time in days before a summary is removed",
         default: 3,
     }
 });
+
+interface Summary {
+    count: number;
+    end_id: string;
+    id: string;
+    message_ids: string[];
+    people: string[];
+    source: number;
+    start_id: string;
+    summ_short: string;
+    topic: string;
+    type: number;
+    unsafe: boolean;
+}
+
+interface ChannelSummaries {
+    type: string;
+    channel_id: string;
+    guild_id: string;
+    summaries: Summary[];
+
+    // custom property
+    time?: number;
+}
 
 export default definePlugin({
     name: "Summaries",
@@ -45,21 +69,14 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-
-            const incomingSummaries: any[] = [];
-
-            for (let i = data.summaries.length - 1; i >= 0; i--) {
-                const summary = createSummaryFromServer(data.summaries[i]);
-                summary.time = new Date().getTime();
-                incomingSummaries.push(summary);
-            }
+            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: new Date().getTime() }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
-                summaries[data.channel_id] ? summaries[data.channel_id].push(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
+                summaries[data.channel_id] ? summaries[data.channel_id].unshift(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
                 if (summaries[data.channel_id].length > 50)
-                    summaries[data.channel_id].shift();
+                    summaries[data.channel_id].pop();
 
                 return summaries;
             });
@@ -70,7 +87,7 @@ export default definePlugin({
         await DataStore.update("summaries-data", summaries => {
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {
-                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThreshold) {
+                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThresholdDays) {
                         summaries[key].splice(i, 1);
                     }
                 }
@@ -81,7 +98,6 @@ export default definePlugin({
             }
 
             Object.assign(SummaryStore.allSummaries(), summaries);
-
             return summaries;
         });
     },
