@@ -33,7 +33,7 @@ export async function preSendListener(channelId, messageObj, extra) {
         if (sticker.available !== false && (allowStickers || sticker.guild_id === getCurrentGuildId()))
             break stickerBypass;
 
-        // [12/12/2023]
+        // [05/21/2024]
         // Work around an annoying bug where getStickerLink will return StickerType.GIF,
         // but will give us a normal non animated png for no reason
         // TODO: Remove this workaround when it's not needed anymore
