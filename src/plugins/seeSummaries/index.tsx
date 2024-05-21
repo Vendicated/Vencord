@@ -38,7 +38,7 @@ export default definePlugin({
         {
             find: "RECEIVE_CHANNEL_SUMMARY(",
             replacement: {
-                match: /shouldFetch\((.{3,5})\){/,
+                match: /shouldFetch\((\i),\i\){/,
                 replace: "$& if(!$self.shouldFetch($1)) return false;"
             }
         }
