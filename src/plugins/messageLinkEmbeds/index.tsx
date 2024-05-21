@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
@@ -27,6 +27,7 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
+    Constants,
     FluxDispatcher,
     GuildStore,
     IconUtils,
@@ -132,7 +133,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     messageCache.set(messageID, { fetched: false });
 
     const res = await RestAPI.get({
-        url: `/channels/${channelID}/messages`,
+        url: Constants.Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
@@ -226,10 +227,8 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     const accessories = [] as (JSX.Element | null)[];
 
-    let match = null as RegExpMatchArray | null;
-    while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, channelID, messageID] = match;
-        if (embeddedBy.includes(messageID)) {
+    for (const [_, channelID, messageID] of message.content!.matchAll(messageLinkRegex)) {
+        if (embeddedBy.includes(messageID) || embeddedBy.length > 2) {
             continue;
         }
 
@@ -377,9 +376,6 @@ export default definePlugin({
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
-            // need to reset the regex because it's global
-            messageLinkRegex.lastIndex = 0;
-
             return (
                 <ErrorBoundary>
                     <MessageEmbedAccessory
@@ -389,4 +385,8 @@ export default definePlugin({
             );
         }, 4 /* just above rich embeds */);
     },
+
+    stop() {
+        removeAccessory("messageLinkEmbed");
+    }
 });
