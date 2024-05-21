@@ -19,8 +19,8 @@
 import definePlugin, { OptionType } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { Menu, Toasts, Clipboard } from "@webpack/common";
-import { showToast } from "@webpack/common";
+import { Menu } from "@webpack/common";
+import { copyWithToast } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 
 const { convertNameToSurrogate } = findByPropsLazy("convertNameToSurrogate");
@@ -41,12 +41,12 @@ function removeCountingPostfix(name: string): string {
 }
 
 function getEmojiFormattedString(target: Target, copyUnicode: boolean): string {
-    const { dataset } = target;
+	const { id: emojiId, name: emojiName } = target.dataset;
 
-    if (!dataset.id) {
+    if (!emojiId) {
         return (
-            (copyUnicode && convertNameToSurrogate(dataset.name)) ||
-            `:${dataset.name}:`
+            (copyUnicode && convertNameToSurrogate(emojiName)) ||
+            `:${emojiName}:`
         );
     }
 
@@ -54,26 +54,23 @@ function getEmojiFormattedString(target: Target, copyUnicode: boolean): string {
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 
-    const emojiName = removeCountingPostfix(dataset.name);
-    const emojiId = dataset.id;
-
     return extension === "gif"
-        ? `<a:${emojiName}:${emojiId}>`
-        : `<:${emojiName}:${emojiId}>`;
+        ? `<a:${removeCountingPostfix(emojiName)}:${emojiId}>`
+        : `<:${removeCountingPostfix(emojiName)}:${emojiId}>`;
 }
 
 const settings = definePluginSettings({
     copyUnicode: {
         type: OptionType.BOOLEAN,
-        description: "Copy unicode symbol instead name of unicode emojies",
-        default: false,
+        description: "Copy the Unicode symbol instead of the name for standard emojis (👽)",
+        default: true,
     },
 });
 
 export default definePlugin({
-    name: "Copy Emoji As Formatted String",
-    description: "Add's button to copy emoji as formatted string!",
-    authors: [Devs.HAPPY_ENDERMAN, Devs.VISHNYA_NET_CHERESHNYA],
+    name: "CopyEmojiMarkdown",
+    description: "Allows you to copy emojis as formatted string (<:blobcatcozy:1026533070955872337>)",
+    authors: [Devs.HappyEnderman, Devs.Vishnya],
     settings: settings,
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target }) {
@@ -81,19 +78,15 @@ export default definePlugin({
 
             children.push(
                 <Menu.MenuItem
-                    id="copy-formatted-string"
-                    key="copy-formatted-string"
-                    label={`Copy as formatted string`}
+                    id="vc-copy-formatted-string"
+                    label="Copy as formatted string"
                     action={() => {
-                        Clipboard.copy(
+                        copyWithToast(
                             getEmojiFormattedString(
                                 target,
                                 settings.store.copyUnicode
-                            )
-                        );
-                        showToast(
-                            "Success! Copied to clipboard as formatted string.",
-                            Toasts.Type.SUCCESS
+                            ),
+                            "Success! Copied to clipboard as formatted string."
                         );
                     }}
                 />
