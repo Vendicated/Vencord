@@ -434,11 +434,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Elvyra",
         id: 708275751816003615n,
     },
-    HAPPY_ENDERMAN: {
+    HappyEnderman: {
         name: "Happy enderman",
         id: 1083437693347827764n
     },
-    VISHNYA_NET_CHERESHNYA: {
+    Vishnya: {
         name: "Vishnya",
         id: 282541644484575233n
     },
