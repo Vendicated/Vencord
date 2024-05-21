@@ -27,7 +27,7 @@ import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore } from "@webpack/common";
+import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
 
@@ -137,46 +137,10 @@ export default definePlugin({
         const existingColors = decode(
             UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
         ) ?? [0, 0];
-        const [color1, setColor1] = React.useState(existingColors[0]);
-        const [color2, setColor2] = React.useState(existingColors[1]);
+        const [color1, setColor1] = useState(existingColors[0]);
+        const [color2, setColor2] = useState(existingColors[1]);
 
-        function ColorPickers() {
-            const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
-
-            if (loadingColorPickerChunk)
-                return <Forms.FormText>Loading colorpicker chunk...</Forms.FormText>;
-
-            return <>
-                <ColorPicker
-                    color={color1}
-                    label={
-                        <Text
-                            variant={"text-xs/normal"}
-                            style={{ marginTop: "4px" }}
-                        >
-                            Primary
-                        </Text>
-                    }
-                    onChange={(color: number) => {
-                        setColor1(color);
-                    }}
-                />
-                <ColorPicker
-                    color={color2}
-                    label={
-                        <Text
-                            variant={"text-xs/normal"}
-                            style={{ marginTop: "4px" }}
-                        >
-                            Accent
-                        </Text>
-                    }
-                    onChange={(color: number) => {
-                        setColor2(color);
-                    }}
-                />
-            </>;
-        }
+        const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
 
         return (
             <Forms.FormSection>
@@ -197,22 +161,51 @@ export default definePlugin({
                         className={classes(Margins.top8, Margins.bottom8)}
                     />
                     <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
-                    <Flex
-                        direction={Flex.Direction.HORIZONTAL}
-                        style={{ gap: "1rem" }}
-                    >
-                        <ColorPickers />
-                        <Button
-                            onClick={() => {
-                                const colorString = encode(color1, color2);
-                                copyWithToast(colorString);
-                            }}
-                            color={Button.Colors.PRIMARY}
-                            size={Button.Sizes.XLARGE}
+                    {!loadingColorPickerChunk && (
+                        <Flex
+                            direction={Flex.Direction.HORIZONTAL}
+                            style={{ gap: "1rem" }}
                         >
-                            Copy 3y3
-                        </Button>
-                    </Flex>
+                            <ColorPicker
+                                color={color1}
+                                label={
+                                    <Text
+                                        variant={"text-xs/normal"}
+                                        style={{ marginTop: "4px" }}
+                                    >
+                                        Primary
+                                    </Text>
+                                }
+                                onChange={(color: number) => {
+                                    setColor1(color);
+                                }}
+                            />
+                            <ColorPicker
+                                color={color2}
+                                label={
+                                    <Text
+                                        variant={"text-xs/normal"}
+                                        style={{ marginTop: "4px" }}
+                                    >
+                                        Accent
+                                    </Text>
+                                }
+                                onChange={(color: number) => {
+                                    setColor2(color);
+                                }}
+                            />
+                            <Button
+                                onClick={() => {
+                                    const colorString = encode(color1, color2);
+                                    copyWithToast(colorString);
+                                }}
+                                color={Button.Colors.PRIMARY}
+                                size={Button.Sizes.XLARGE}
+                            >
+                                Copy 3y3
+                            </Button>
+                        </Flex>
+                    )}
                     <Forms.FormDivider
                         className={classes(Margins.top8, Margins.bottom8)}
                     />
