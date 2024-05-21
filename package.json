@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.8.4",
+    "version": "1.8.5",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -19,16 +19,17 @@
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
+        "watch": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs --watch",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
+        "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types",
         "inject": "node scripts/runInstaller.mjs",
+        "uninject": "node scripts/runInstaller.mjs",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
-        "testTsc": "tsc --noEmit",
-        "uninject": "node scripts/runInstaller.mjs",
-        "watch": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs --watch"
+        "testTsc": "tsc --noEmit"
     },
     "dependencies": {
         "@sapphi-red/web-noise-suppressor": "0.3.3",
@@ -65,11 +66,12 @@
         "standalone-electron-types": "^1.0.0",
         "stylelint": "^15.6.0",
         "stylelint-config-standard": "^33.0.0",
+        "ts-patch": "^3.1.2",
         "tsx": "^3.12.7",
         "type-fest": "^3.9.0",
-        "typescript": "^5.0.4",
-        "zip-local": "^0.3.5",
-        "zustand": "^3.7.2"
+        "typescript": "^5.4.5",
+        "typescript-transform-paths": "^3.4.7",
+        "zip-local": "^0.3.5"
     },
     "packageManager": "pnpm@9.1.0",
     "pnpm": {
