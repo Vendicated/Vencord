@@ -89,6 +89,20 @@ export default definePlugin({
                 );
             }
 
+            if (role.icon) {
+                children.push(
+                    <Menu.MenuItem
+                        id="vc-view-role-icon"
+                        label="View Role Icon"
+                        action={() => {
+                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
+                        }}
+                        icon={ImageIcon}
+                    />
+
+                );
+            }
+
             if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
                 children.push(
                     <Menu.MenuItem
@@ -100,20 +114,6 @@ export default definePlugin({
                         }}
                         icon={PencilIcon}
                     />
-                );
-            }
-
-            if (role.icon) {
-                children.push(
-                    <Menu.MenuItem
-                        id="vc-view-role-icon"
-                        label="View Icon"
-                        action={() => {
-                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
-                        }}
-                        icon={ImageIcon}
-                    />
-
                 );
             }
         }
