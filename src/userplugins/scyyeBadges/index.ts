@@ -113,7 +113,7 @@ function addScyyeBadges() {
         image: UserStore.getUser("318902553024659456").getAvatarURL(),
         shouldShow(userInfo: BadgeUserArgs): boolean {
             // UserStore.getUser(userInfo.user.id);
-            return userInfo.user.username.includes("』");
+            return (userInfo.user as any).globalName.includes("』");
         }
     });
     badge("cc", {
