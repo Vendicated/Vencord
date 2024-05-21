@@ -1,0 +1,101 @@
+.excali-parent {
+    pointer-events: all;
+    width: 100%;
+    height: 100%;
+}
+
+.excali-container {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.excali-bar {
+    position: absolute;
+    bottom: 5px;
+    padding: 5px;
+    display: flex;
+    flex: 0 0 auto;
+    background-color: var(--background-primary);
+    border-radius: 3px;
+    max-width: 400px;
+}
+
+.excali-bar-scroll {
+    overflow: scroll hidden;
+    flex-direction: row;
+    display: flex;
+    gap: 6px;
+}
+
+.excali-frame {
+    width: 86%;
+    height: 92%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.excali-frame-scroll {
+    max-width: 99%;
+    max-height: 99%;
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+.excali-frame-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.excali-frame-canvas-container {
+    display: flex   ;
+}
+
+.excali-frame-canvas {
+    width: inherit;
+    height: inherit;
+}
+
+.excali-frame-canvas-overlay {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    overflow: hidden;
+}
+
+.excali-config {
+    width: 13%;
+    height: 92%;
+    top: 0;
+    right: 0;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding-top: 6px;
+    gap: 5px;
+    align-items: center;
+    justify-items: center;
+    margin-right: 15px;
+}
+
+.excali-config-frame {
+    width: 99%;
+    max-height: 99%;
+    background-color: var(--background-primary);
+    padding: 10px 5px;
+    top: 6px;
+    border-radius: 3px;
+}
