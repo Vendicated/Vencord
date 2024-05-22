@@ -138,6 +138,12 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
             sandbox: false
         }
     });
+    win.webContents.on("before-input-event", (event, input) => {
+        if (input.alt && input.key === "F4") {
+            event.preventDefault();
+            win.close();
+        }
+    });
 
     makeLinksOpenExternally(win);
 
