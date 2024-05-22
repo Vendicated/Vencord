@@ -14,6 +14,7 @@ import { InfoIcon, PlusIcon } from "@components/Icons";
 import { Button, ChannelStore, React, ScrollerThin, SelectedChannelStore, Tooltip, UploadHandler } from "@webpack/common";
 
 import getCanvass from "./Components/Drawing/Canvas";
+import CanvasImage from "./Components/Drawing/CanvasImage";
 import CanvasText from "./Components/Drawing/CanvasText";
 import getImageOverlay from "./Components/Drawing/Image";
 import CanvasSettings from "./Components/Settings/CanvasSettings";
@@ -23,7 +24,7 @@ import("./index.css");
 
 export type tools = "select" | "add_text" | "add_image";
 
-type editType = { type: "text" | "image", id: number; };
+export type editType = { type: "text" | "image", id: number; };
 export type canvasStateType = { width: number, height: number, fill?: { color: string, shouldFill: boolean; }; };
 
 
@@ -55,7 +56,7 @@ export default function MainBoard() {
                     <ScrollerThin className="excali-frame-scroll" style={{ overflow: "scroll" }}>
                         <div className="excali-frame-canvas-container" style={{ width: canvasState.width, height: canvasState.height }}>
                             <CanvasComponent className="excali-frame-canvas" draw={draw} ref={mainCanvasRef} />
-                            <div className="excali-frame-canvas-overlay" onClick={e => handleOverdispatch(e, currentTool, dispatch, overlays)}>
+                            <div className="excali-frame-canvas-overlay" onClick={e => handleOverdispatch(e, currentTool, dispatch, overlays, setCurrentEditing)}>
                                 {overlays && overlays.map(v => {
                                     if (v.type === "text") {
                                         return (
@@ -84,6 +85,39 @@ export default function MainBoard() {
                                             />
 
                                         );
+                                    } else if (v.type === "image") {
+                                        const img = new Image();
+                                        img.crossOrigin = "anonymous";
+                                        img.src = v.value.src;
+                                        return (
+                                            <CanvasImage
+                                                draw={ctx => {
+                                                    img.onload = () => {
+                                                        ctx.canvas.width = img.width;
+                                                        ctx.canvas.height = img.height;
+                                                        ctx.drawImage(
+                                                            img,
+                                                            0,
+                                                            0,
+                                                            img.width,
+                                                            img.height,
+                                                            0,
+                                                            0,
+                                                            img.width,
+                                                            img.height
+                                                        );
+                                                    };
+                                                }}
+                                                key={v.id}
+                                                style={{
+                                                    position: "absolute",
+                                                    ...v.value.style
+                                                }}
+                                                setTool={setCurrentTool}
+                                                onClick={() => setCurrentEditing({ id: v.id, type: "image" })}
+                                                toDispatch={{ currentState: v, id: v.id, dispatch }}
+                                            />
+                                        );
                                     }
                                 })}
                             </div>
@@ -105,6 +139,13 @@ export default function MainBoard() {
                         <Tooltip text="LOLL" position="top">
                             {props => (
                                 <Button size={Button.Sizes.SMALL} style={{ borderRadius: 3, height: 48 }} onClick={e => { props.onClick.call(e); setCurrentTool("add_text"); }} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
+                                    <PlusIcon />
+                                </Button>
+                            )}
+                        </Tooltip>
+                        <Tooltip text="LOLL" position="top">
+                            {props => (
+                                <Button size={Button.Sizes.SMALL} style={{ borderRadius: 3, height: 48 }} onClick={e => { props.onClick.call(e); setCurrentTool("add_image"); }} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
                                     <PlusIcon />
                                 </Button>
                             )}
@@ -286,8 +327,7 @@ const handleCanvasMaps = (ctx: CanvasRenderingContext2D | null | undefined, over
 
 };
 
-
-const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, currentTool: tools, dispatch: React.Dispatch<overlayAction>, overlays: overlayState[]) => {
+const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, currentTool: tools, dispatch: React.Dispatch<overlayAction>, overlays: overlayState[], setCurrentEditing?: React.Dispatch<React.SetStateAction<editType | undefined>>) => {
     switch (currentTool) {
         case "add_text": {
             dispatch({
@@ -308,6 +348,7 @@ const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cur
                     }
                 }
             });
+            setCurrentEditing ? setCurrentEditing({ id: overlays.length, type: "text" }) : null;
             break;
         }
         case "add_image": {

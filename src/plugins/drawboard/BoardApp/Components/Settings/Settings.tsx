@@ -6,11 +6,11 @@
 
 import { React, TextInput } from "@webpack/common";
 
-import { overlayAction, overlayState, overlayText } from "../../hooks/overlayStore";
-import { edit } from "../../MainBoard";
+import { overlayAction, overlayImage, overlayState, overlayText } from "../../hooks/overlayStore";
+import { editType } from "../../MainBoard";
 
 type customConfigProps = {
-    editting: edit | undefined,
+    editting: editType | undefined,
     overlays: overlayState[],
     overlaydispatch: React.Dispatch<overlayAction>;
 } & React.HTMLProps<React.ReactElement>;
@@ -27,7 +27,10 @@ const Settings = (props: customConfigProps): JSX.Element | null => {
             );
         }
         case "image": {
-            break;
+            const overlay = overlays.find(v => v.id === editting.id) as overlayImage;
+            return (
+                <TextInput type="text" value={overlay.value.src} onChange={e => overlaydispatch({ type: "update", state: { type: "image", id: editting.id, value: { ...overlay.value, src: e } } })} />
+            );
         }
     }
     return null;

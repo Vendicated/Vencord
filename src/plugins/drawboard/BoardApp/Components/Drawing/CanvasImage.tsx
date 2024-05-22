@@ -6,7 +6,7 @@
 
 import { React } from "@webpack/common";
 
-import { overlayAction, overlayText } from "../../hooks/overlayStore";
+import { overlayAction, overlayImage } from "../../hooks/overlayStore";
 import { tools } from "../../MainBoard";
 import Draggable from "../Functions/Draggable";
 
@@ -14,14 +14,13 @@ import Draggable from "../Functions/Draggable";
 type CanvasTextProps = React.HTMLProps<HTMLCanvasElement> & {
     setTool: React.Dispatch<React.SetStateAction<tools>>;
     draw: (ctx: CanvasRenderingContext2D) => void;
-    toDispatch?: { dispatch: React.Dispatch<overlayAction>, id: number, currentState: overlayText; };
+    toDispatch?: { dispatch: React.Dispatch<overlayAction>, id: number, currentState: overlayImage; };
 };
 
-const CanvasText = (props: CanvasTextProps) => {
+const CanvasImage = (props: CanvasTextProps) => {
     const ref = React.useRef<HTMLCanvasElement>(null);
     const { draw, toDispatch, onMouseDown, onMouseUp, setTool, ...prop } = props;
     let oldZIndex = "";
-
 
     React.useEffect(() => {
         const canvas = ref.current;
@@ -35,7 +34,7 @@ const CanvasText = (props: CanvasTextProps) => {
     }, [draw]);
 
     if (toDispatch && !toDispatch.currentState.node) {
-        toDispatch.dispatch({ type: "update", state: { ...toDispatch.currentState, type: "text", node: ref, id: toDispatch.id } });
+        toDispatch.dispatch({ type: "update", state: { ...toDispatch.currentState, type: "image", node: ref, id: toDispatch.id } });
     }
 
     const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
@@ -63,4 +62,4 @@ const CanvasText = (props: CanvasTextProps) => {
     );
 };
 
-export default CanvasText;
+export default CanvasImage;

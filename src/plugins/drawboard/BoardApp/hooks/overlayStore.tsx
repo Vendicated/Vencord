@@ -52,8 +52,9 @@ export type overlayState = overlayImage | overlayText;
 export type overlayImage = {
     type: "image",
     id: number,
-    node?: HTMLImageElement,
+    node?: React.RefObject<HTMLCanvasElement>,
     value: {
+        // image?: HTMLImageElement;
         style: imageStyleDef,
         src: string;
     };
