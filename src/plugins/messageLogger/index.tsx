@@ -23,15 +23,19 @@ import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, Parser, Timestamp, UserStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+import { openHistoryModal } from "./HistoryModal";
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const { getMessage } = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -92,7 +96,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Kyuuhachi],
 
     contextMenus: {
         "message": patchMessageContextMenu
@@ -103,7 +107,7 @@ export default definePlugin({
     },
 
     renderEdit(edit: { timestamp: any, content: string; }) {
-        return (
+        return Settings.plugins.MessageLogger.inlineEdits ? (
             <ErrorBoundary noop>
                 <div className="messagelogger-edited">
                     {Parser.parse(edit.content)}
@@ -116,7 +120,7 @@ export default definePlugin({
                     </Timestamp>
                 </div>
             </ErrorBoundary>
-        );
+        ) : null;
     },
 
     makeEdit(newMessage: any, oldMessage: any): any {
@@ -142,10 +146,20 @@ export default definePlugin({
             description: "Whether to log deleted messages",
             default: true,
         },
+        collapseDeleted: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to collapse deleted messages, similar to blocked messages",
+            default: false
+        },
         logEdits: {
             type: OptionType.BOOLEAN,
             description: "Whether to log edited messages",
             default: true,
+        },
+        inlineEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to display edit history as part of message content",
+            default: true
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
@@ -222,6 +236,23 @@ export default definePlugin({
             (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
 
+    EditMarker({ message, className, children, ...props }: any) {
+        return (
+            <span
+                {...props}
+                className={classes("messagelogger-edit-marker", className)}
+                onClick={() => openHistoryModal(message)}
+                aria-role="button"
+            >
+                {children}
+            </span>
+        );
+    },
+
+    Messages: proxyLazy(() => ({
+        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+    })),
+
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
     patches: [
         {
@@ -278,7 +309,8 @@ export default definePlugin({
                     match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
                     replace: "this.customRenderedContent = $1.customRenderedContent," +
                         "this.deleted = $1.deleted || false," +
-                        "this.editHistory = $1.editHistory || [],"
+                        "this.editHistory = $1.editHistory || []," +
+                        "this.firstEditTimestamp = $1.firstEditTimestamp || this.timestamp,"
                 }
             ]
         },
@@ -300,7 +332,8 @@ export default definePlugin({
                         "interactionData:$1.interactionData," +
                         "deleted:$1.deleted," +
                         "editHistory:$1.editHistory," +
-                        "attachments:$1.attachments"
+                        "attachments:$1.attachments," +
+                        "firstEditTimestamp:$1.firstEditTimestamp"
                 },
 
                 // {
@@ -324,7 +357,8 @@ export default definePlugin({
                         "   return $2;" +
                         "})())," +
                         "deleted: arguments[1]?.deleted," +
-                        "editHistory: arguments[1]?.editHistory"
+                        "editHistory: arguments[1]?.editHistory," +
+                        "firstEditTimestamp: new Date(arguments[1]?.firstEditTimestamp ?? $2.edited_timestamp ?? $2.timestamp)"
                 },
                 {
                     // Preserve deleted attribute on attachments
@@ -375,6 +409,11 @@ export default definePlugin({
                     // Render editHistory in the deepest div for message content
                     match: /(\)\("div",\{id:.+?children:\[)/,
                     replace: "$1 (arguments[0].message.editHistory?.length > 0 ? arguments[0].message.editHistory.map(edit => $self.renderEdit(edit)) : null), "
+                },
+                {
+                    // Make edit marker clickable
+                    match: /"span",\{(?=className:\i\.edited,)/,
+                    replace: "$self.EditMarker,{message:arguments[0].message,"
                 }
             ]
         },
@@ -406,6 +445,30 @@ export default definePlugin({
                     replace: "children:arguments[0].message.deleted?[]:$1"
                 }
             ]
+        },
+        {
+            // Message grouping
+            // Module 51714
+            find: "MessageTypesSets.NON_COLLAPSIBLE.has(",
+            replacement: {
+                match: /if\((\i)\.blocked\)return \i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED;/,
+                replace: '$&else if($1.deleted && Vencord.Settings.plugins.MessageLogger.collapseDeleted) return"MESSAGE_GROUP_DELETED";',
+            },
+        },
+        {
+            // Message group rendering
+            // Module 221068
+            find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
+            replacement: [
+                {
+                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\|\|/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"||',
+                },
+                {
+                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\?.*?:/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
+                },
+            ],
         }
 
         // {
