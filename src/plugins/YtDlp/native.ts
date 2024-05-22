@@ -78,9 +78,12 @@ function argsFromFormat(format?: "video" | "audio" | "gif", max_file_size?: numb
     }
 }
 
-export async function start(_: IpcMainInvokeEvent) {
-    workdir = fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
+export async function start(_: IpcMainInvokeEvent, _workdir: string | undefined) {
+    _workdir ||= fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
+    if (!fs.existsSync(_workdir)) fs.mkdirSync(_workdir, { recursive: true });
+    workdir = _workdir;
     console.log("[Plugin:yt-dlp] Using workdir: ", workdir);
+    return workdir;
 }
 export async function stop(_: IpcMainInvokeEvent) {
     if (workdir) {

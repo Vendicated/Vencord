@@ -5,6 +5,7 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -184,11 +185,14 @@ export default definePlugin({
         await Native.checkytdlp();
         await Native.checkffmpeg();
 
-        await Native.start();
+        const videoDir = await DataStore.get<string>("yt-dlp-video-dir");
+        const newVideoDir = await Native.start(videoDir);
+        await DataStore.set("yt-dlp-video-dir", newVideoDir);
     },
     stop: async () => {
         // Clean up the temp files
         await Native.stop();
+        await DataStore.del("yt-dlp-video-dir");
     }
 });
 
