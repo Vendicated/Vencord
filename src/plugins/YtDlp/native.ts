@@ -15,6 +15,10 @@ const Extensions = ["webm", "mp4", "mp3", "gif"] as const;
 let workdir: string | null = null;
 let stdout_global: string = "";
 
+let ytdlpAvailable = false;
+let ytdlp_command: "yt-dlp" | "python" = "yt-dlp";
+let ffmpegAvailable = false;
+
 const getdir = () => workdir ?? process.cwd();
 const p = (file: string) => path.join(getdir(), file);
 const cleanVideoFiles = () => {
@@ -152,24 +156,28 @@ export function getStdout() {
 export function checkffmpeg(_?: IpcMainInvokeEvent) {
     try {
         execFileSync("ffmpeg", ["-version"]);
+        ffmpegAvailable = true;
         return true;
     } catch (e) {
+        ffmpegAvailable = false;
         return false;
     }
 }
 export async function checkytdlp(_?: IpcMainInvokeEvent) {
-    const base = () => execFileSync("yt-dlp", ["--version"]);
-    const python = () => execFileSync("python", ["-m", "yt_dlp", "--version"]);
-    try {
-        base();
-        return true;
-    } catch (e) {
-        // how do I unnest this shit
+    const checks = [
+        () => execFileSync("yt-dlp", ["--version"]),
+        () => (execFileSync("python", ["-m", "yt_dlp", "--version"]), ytdlp_command = "python")
+    ];
+
+    for (const check of checks) {
         try {
-            python();
+            check();
+            ytdlpAvailable = true;
             return true;
         } catch (e) {
-            return false;
+            continue;
         }
     }
+    ytdlpAvailable = false;
+    return false;
 }
