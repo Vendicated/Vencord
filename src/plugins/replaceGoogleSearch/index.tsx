@@ -37,7 +37,7 @@ const settings = definePluginSettings({
 });
 
 function search(src: string, engine: string) {
-    open(engine + encodeURIComponent(src.trimEnd()), "_blank");
+    open(engine + encodeURIComponent(src.trim()), "_blank");
 }
 
 function makeSearchItem(src: string) {
