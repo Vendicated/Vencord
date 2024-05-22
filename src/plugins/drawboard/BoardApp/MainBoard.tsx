@@ -312,17 +312,15 @@ const handleCanvasMaps = (ctx: CanvasRenderingContext2D | null | undefined, over
     const canvas_bound: DOMRect = canvas.getBoundingClientRect();
 
     overlays.forEach(v => {
-        if (v.type === "text") {
-            if (!v.node) return;
-            if (!v.node.current) return;
+        if (!v.node) return;
+        if (!v.node.current) return;
 
-            ctx.restore();
-            const base = v.node.current.getBoundingClientRect();
-            ctx.translate(base?.x - canvas_bound.left, base?.y - canvas_bound.top);
-            ctx.drawImage(v.node.current, 0, 0, base.width, base.height, 0, 0, base.width, base.height);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.save();
-        }
+        ctx.restore();
+        const base = v.node.current.getBoundingClientRect();
+        ctx.translate(base.x - canvas_bound.left, base.y - canvas_bound.top);
+        ctx.drawImage(v.node.current, 0, 0, base.width, base.height, 0, 0, base.width, base.height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.save();
     });
 
 };
