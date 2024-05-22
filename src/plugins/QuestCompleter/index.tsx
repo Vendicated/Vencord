@@ -87,10 +87,17 @@ export default definePlugin({
             shouldDisable = true;
         }
         if (currentStream) {
-            if (!findByProps("getParticipants").getParticipants(currentStream.channelId).filter(participent => participent.user.id !== window.currentUserId).length) {
+            const participants = findByProps("getParticipants").getParticipants(currentStream.channelId);
+            const validParticipants = participants.filter(participent =>
+                participent.user &&
+                participent.user.id &&
+                participent.user.id !== window.currentUserId
+            );
+
+            if (!validParticipants.length) {
                 shouldDisable = true;
             }
-            if (currentStream?.ownerId !== window.currentUserId) {
+            if (currentStream.ownerId !== window.currentUserId) {
                 shouldDisable = true;
             }
         }
