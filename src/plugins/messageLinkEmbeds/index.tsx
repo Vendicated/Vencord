@@ -376,6 +376,9 @@ export default definePlugin({
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
+            // need to reset the regex because it's global
+            messageLinkRegex.lastIndex = 0;
+
             return (
                 <ErrorBoundary>
                     <MessageEmbedAccessory

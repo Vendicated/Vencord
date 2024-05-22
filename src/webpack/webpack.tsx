@@ -654,7 +654,8 @@ export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAl
  */
 export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFindBulk);
 
-export const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
+export const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\))|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/;
+export const ChunkIdsRegex = /\("(.+?)"\)/g;
 
 /**
  * Extract and load chunks using their entry point.
@@ -683,7 +684,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return;
     }
 
-    const [, rawChunkIds, entryPointId] = match;
+    const [, rawChunkIdsArray, rawChunkIdsSingle, entryPointId] = match;
     if (Number.isNaN(Number(entryPointId))) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
@@ -695,8 +696,9 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return;
     }
 
+    const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
+        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
