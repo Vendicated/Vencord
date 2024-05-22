@@ -456,17 +456,18 @@ async function runtime(token: string) {
         });
 
         await chunksSearchingDone;
+        wreq = wreq!;
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire as any);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const allChunks = [] as string[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -494,8 +495,8 @@ async function runtime(token: string) {
 
         // Call the getter for all the values in the modules object
         // So modules that were not required get patched by our proxy
-        for (const id in wreq!.m) {
-            wreq!.m[id];
+        for (const id in wreq.m) {
+            wreq.m[id];
         }
 
         console.log("[PUP_DEBUG]", "Finished loading all chunks!");
