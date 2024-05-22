@@ -7,10 +7,14 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
+
+import { DependencyModal } from "./DependencyModal";
 
 const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
 
@@ -81,28 +85,18 @@ async function sendProgress(channelId: string, promise: Promise<{
     updateMessage(stdout, true);
     return data;
 }
-async function checkffmpeg() {
-    const res = await Native.checkffmpeg();
-    if (!res) {
-        showNotification({
-            title: "yt-dlp",
-            body: "ffmpeg not found. yt-dlp requires ffmpeg to work."
-        });
-    }
-    return res;
-}
-async function checkytdlp() {
-    const ytDlp = await Native.checkytdlp();
-    if (!ytDlp) {
-        showNotification({
-            title: "yt-dlp",
-            body: "yt-dlp not found. Plase download it, add it to PATH and restart Vencord."
-        });
-    }
-    return ytDlp;
-}
-async function checkDependencies() {
-    return await checkffmpeg() && await checkytdlp();
+
+// Mostly taken from viewRaw plugin.
+async function openDependencyModal() {
+    const key = openModal(props => (
+        <ErrorBoundary>
+            <DependencyModal props={props} options={{
+                key,
+                checkffmpeg: Native.checkffmpeg,
+                checkytdlp: Native.checkytdlp,
+            }} />
+        </ErrorBoundary>
+    ));
 }
 
 const settings = definePluginSettings({
@@ -123,7 +117,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "yt-dlp",
-    description: "Download and send videos with yt-dlp",
+    description: "Download and send videos with yt-dlp.",
     authors: [Devs.Colorman],
     dependencies: ["CommandsAPI"],
     settings,
@@ -154,7 +148,6 @@ export default definePlugin({
         }],
 
         execute: async (args, ctx) => {
-            if (!await checkDependencies()) return;
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
             const add_args = findOption<string>(args, "additional args", "");
@@ -167,8 +160,8 @@ export default definePlugin({
         }
     }],
     start: async () => {
-        if (!await checkffmpeg()) return;
-        if (!await checkytdlp()) return;
+        await Native.checkytdlp();
+        await Native.checkffmpeg();
 
         await Native.start();
     },
