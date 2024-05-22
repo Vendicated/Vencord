@@ -46,7 +46,7 @@ export let useToken: t.useToken;
 
 export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = findComponent<t.TimestampProps>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align", "Wrap"));
+export const Flex = findComponent(filters.byProps("Justify", "Align", "Wrap")) as t.Flex;
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
