@@ -44,7 +44,7 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
                         <br /><br />
                         <ul style={{ listStyleType: "disc", marginLeft: "1rem" }}>
                             <li>
-                                <a href="https://github.com/yt-dlp/yt-dlp/wiki/Installation#with-pip" target="_blank" rel="noreferrer">yt-dlp installation guide</a>
+                                <a href="https://github.com/yt-dlp/yt-dlp/wiki/Installation#windows" target="_blank" rel="noreferrer">yt-dlp installation guide</a>
                             </li>
                             <li>
                                 <a href="https://phoenixnap.com/kb/ffmpeg-windows" target="_blank" rel="noreferrer">Unofficial ffmpeg installation guide</a>

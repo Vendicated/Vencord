@@ -16,7 +16,6 @@ let workdir: string | null = null;
 let stdout_global: string = "";
 
 let ytdlpAvailable = false;
-let ytdlp_command: "yt-dlp" | "python" = "yt-dlp";
 let ffmpegAvailable = false;
 
 const getdir = () => workdir ?? process.cwd();
@@ -163,22 +162,14 @@ export function checkffmpeg(_?: IpcMainInvokeEvent) {
     }
 }
 export async function checkytdlp(_?: IpcMainInvokeEvent) {
-    const checks = [
-        () => execFileSync("yt-dlp", ["--version"]),
-        () => (execFileSync("python", ["-m", "yt_dlp", "--version"]), ytdlp_command = "python")
-    ];
-
-    for (const check of checks) {
-        try {
-            check();
-            ytdlpAvailable = true;
-            return true;
-        } catch (e) {
-            continue;
-        }
+    try {
+        execFileSync("yt-dlp", ["--version"]);
+        ytdlpAvailable = true;
+        return true;
+    } catch (e) {
+        ytdlpAvailable = false;
+        return false;
     }
-    ytdlpAvailable = false;
-    return false;
 }
 
 export const getStdout = () => stdout_global;
