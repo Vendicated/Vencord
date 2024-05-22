@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import { closeModal, Modals, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Flex, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import { ChannelStore, Flex, Forms, Menu, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 import { Guild, ReactionEmoji } from "discord-types/general";
 
 const EmojiPicker = findComponentByCodeLazy(".useEmojiSelectHandler)");
@@ -49,7 +49,6 @@ async function emojiForServer(serverId: string) {
         return defaultEmoji;
 
     const emojis = await DataStore.get("QuickStar-emojis");
-    console.log(emojis);
 
     if (emojis === undefined) {
         await DataStore.set("QuickStar-emojis", { [serverId]: defaultEmoji });
@@ -95,10 +94,6 @@ const serverContextPatch: NavContextMenuPatchCallback = (children, { guild }: { 
                                                 name: emoji.id ? emoji.name : emoji.optionallyDiverseSequence,
                                                 animated: emoji.animated ?? false
                                             };
-
-                                            console.log(emoji);
-                                            console.log(emoji.optionallyDiverseSequence);
-                                            console.log(reactionEmoji);
 
                                             await DataStore.update("QuickStar-emojis", emojis => {
                                                 return Object.assign({}, emojis, { [guild.id]: reactionEmoji });
@@ -155,19 +150,6 @@ export default definePlugin({
                 }
             };
         });
-
-        // there's no easy way to detect when the user has left a server (without patches, at least)
-        // so im just gonna clean-up the datastore every plugin start
-        const emojis = await DataStore.get("QuickStar-emojis");
-        if (emojis !== undefined) {
-            const guilds = GuildStore.getGuildIds();
-            // remove all emoji info from the database that isnt in the guilds list
-            for (const guild in emojis) {
-                if (!guilds.includes(guild))
-                    delete emojis[guild];
-            }
-            await DataStore.set("QuickStar-emojis", emojis);
-        }
     },
 
     stop() {
