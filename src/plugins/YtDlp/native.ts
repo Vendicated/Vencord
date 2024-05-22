@@ -10,7 +10,7 @@ import * as fs from "fs";
 import os from "os";
 import path from "path";
 
-import { Extensions } from "./constants";
+const Extensions = ["webm", "mp4", "mp3", "gif"] as const;
 
 type DownloadOptions = {
     format?: "video" | "audio" | "gif";
