@@ -16,7 +16,6 @@ import { Button, ChannelStore, React, ScrollerThin, SelectedChannelStore, Toolti
 import getCanvass from "./Components/Drawing/Canvas";
 import CanvasImage from "./Components/Drawing/CanvasImage";
 import CanvasText from "./Components/Drawing/CanvasText";
-import getImageOverlay from "./Components/Drawing/Image";
 import CanvasSettings from "./Components/Settings/CanvasSettings";
 import Settings from "./Components/Settings/Settings";
 import overlayReducer, { overlayAction, overlayState } from "./hooks/overlayStore";
@@ -35,9 +34,6 @@ export default function MainBoard() {
     const [canvasState, setCanvasState] = React.useState<canvasStateType>({ width: 512, height: 512, fill: { shouldFill: true, color: "white" } });
     const [currentEditing, setCurrentEditing] = React.useState<editType>();
     const CanvasComponent = getCanvass();
-    const ImageOverlay = getImageOverlay();
-
-    const [canvasSource, setCanvasSource] = React.useState();
 
     const draw = (ctx: CanvasRenderingContext2D) => {
         ctx.canvas.width = Math.min(canvasState.width, 4096);
@@ -63,7 +59,6 @@ export default function MainBoard() {
                                             <CanvasText
                                                 draw={ctx => {
                                                     const textMeasure = ctx.measureText(v.value.text);
-                                                    console.log(textMeasure);
                                                     ctx.canvas.width = textMeasure.width + textMeasure.fontBoundingBoxAscent + textMeasure.fontBoundingBoxDescent + textMeasure.actualBoundingBoxAscent;
                                                     ctx.canvas.height = textMeasure.fontBoundingBoxAscent + textMeasure.fontBoundingBoxDescent;
 
@@ -110,8 +105,8 @@ export default function MainBoard() {
                                                 }}
                                                 key={v.id}
                                                 style={{
+                                                    ...v.value.style,
                                                     position: "absolute",
-                                                    ...v.value.style
                                                 }}
                                                 setTool={setCurrentTool}
                                                 onClick={() => setCurrentEditing({ id: v.id, type: "image" })}
@@ -191,6 +186,7 @@ const handleCanvasMaps = (ctx: CanvasRenderingContext2D | null | undefined, over
 };
 
 const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, currentTool: tools, dispatch: React.Dispatch<overlayAction>, overlays: overlayState[], setCurrentEditing?: React.Dispatch<React.SetStateAction<editType | undefined>>) => {
+    const element_bounding_rect = e.currentTarget.getBoundingClientRect();
     switch (currentTool) {
         case "add_text": {
             dispatch({
@@ -200,8 +196,8 @@ const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cur
                     id: overlays.length,
                     value: {
                         style: {
-                            top: e.clientY - e.currentTarget.getBoundingClientRect().top,
-                            left: e.clientX - e.currentTarget.getBoundingClientRect().left,
+                            top: e.clientY - element_bounding_rect.top,
+                            left: e.clientX - element_bounding_rect.left,
                             color: "black",
                             fontSize: 24,
                             textAlign: "start",
@@ -223,8 +219,8 @@ const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cur
                     value: {
                         src: "https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/main/public/img/emutest.png",
                         style: {
-                            top: 0,
-                            left: 0,
+                            top: e.clientY - element_bounding_rect.y,
+                            left: e.clientX - element_bounding_rect.x,
                         }
                     }
                 }
