@@ -1,0 +1,3 @@
+[submodule "src/plugins/wakaTime"]
+	path = src/plugins/wakaTime
+	url = https://github.com/wakatime/vencord-wakatime.git
