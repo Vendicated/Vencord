@@ -133,7 +133,7 @@ type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     O: OnChunksLoaded;
     /**
      * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports"
-     * @returns The exports of the wasm instance
+     * @returns The exports argument, but now assigned with the exports of the wasm instance
      */
     v: (exports: AnyRecord, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
     /** Bundle public path, where chunk files are stored. Used by other methods which load chunks to obtain the full asset url */
