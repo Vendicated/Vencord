@@ -158,6 +158,12 @@ export default definePlugin({
                 addArgs: add_args
             });
         }
+    }, {
+        description: "test",
+        name: "test",
+        execute: async (args, ctx) => {
+            openDependencyModal();
+        }
     }],
     start: async () => {
         await Native.checkytdlp();
