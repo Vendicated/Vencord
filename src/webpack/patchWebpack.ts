@@ -141,7 +141,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
     }
 
     const originalMod = mod;
-    const patchedBy = new Set();
+    const patchedBy = new Set<string>();
 
     // Discords Webpack chunks for some ungodly reason contain random
     // newlines. Cyn recommended this workaround and it seems to work fine,
