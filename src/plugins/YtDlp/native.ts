@@ -12,12 +12,6 @@ import path from "path";
 
 const Extensions = ["webm", "mp4", "mp3", "gif"] as const;
 
-type DownloadOptions = {
-    format?: "video" | "audio" | "gif";
-    additional_arguments?: string[];
-    max_file_size?: number;
-};
-
 let workdir: string | null = null;
 let stdout_global: string = "";
 
@@ -94,7 +88,11 @@ export async function stop(_: IpcMainInvokeEvent) {
 export async function download(
     _: IpcMainInvokeEvent,
     url: string,
-    { format, additional_arguments, max_file_size }: DownloadOptions
+    { format, additional_arguments, max_file_size }: {
+        format?: "video" | "audio" | "gif";
+        additional_arguments?: string[];
+        max_file_size?: number;
+    }
 ): Promise<{
     buffer: Buffer;
     title: string;
