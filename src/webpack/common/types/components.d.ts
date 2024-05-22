@@ -327,7 +327,7 @@ export type Slider = ComponentType<PropsWithChildren<{
 }>>;
 
 // TODO - type maybe idk probably not that useful other than the constants
-export type FlexProps = PropsWithChildren<any> & {
+export type Flex = ComponentType<PropsWithChildren<any>> & {
     Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
     Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
     Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
