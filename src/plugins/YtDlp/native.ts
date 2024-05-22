@@ -26,6 +26,8 @@ const cleanVideoFiles = () => {
         .filter(f => f.startsWith("download."))
         .forEach(f => fs.unlinkSync(p(f)));
 };
+const appendOut = (data: string) => ( // Makes carriage return (\r) work
+    (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
 function ytdlp(args: string[]): Promise<string> {
     stdout_global = "";
 
@@ -34,12 +36,9 @@ function ytdlp(args: string[]): Promise<string> {
             cwd: getdir(),
         });
 
-        yt.stdout.on("data", data => {
-            stdout_global += data;
-            // Makes carriage return (\r) work
-            stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1");
-        });
+        yt.stdout.on("data", data => appendOut(data));
         yt.stderr.on("data", data => {
+            appendOut(data);
             console.error(`stderr: ${data}`);
         });
         yt.on("exit", code => {
