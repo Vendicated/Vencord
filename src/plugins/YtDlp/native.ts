@@ -10,7 +10,13 @@ import * as fs from "fs";
 import os from "os";
 import path from "path";
 
-const Extensions = ["webm", "mp4", "mp3", "gif"] as const;
+type Format = "video" | "audio" | "gif";
+type DownloadOptions = {
+    url: string;
+    format?: Format;
+    additional_arguments?: string[];
+    max_file_size?: number;
+};
 
 let workdir: string | null = null;
 let stdout_global: string = "";
@@ -23,14 +29,12 @@ const p = (file: string) => path.join(getdir(), file);
 const cleanVideoFiles = () => {
     if (!workdir) return;
     fs.readdirSync(workdir)
-        .filter(f => f.startsWith("download."))
+        .filter(f => f.startsWith("download.") || f.startsWith("remux."))
         .forEach(f => fs.unlinkSync(p(f)));
 };
 const appendOut = (data: string) => ( // Makes carriage return (\r) work
     (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
 function ytdlp(args: string[]): Promise<string> {
-    stdout_global = "";
-
     return new Promise<string>((resolve, reject) => {
         const yt = spawn("yt-dlp", args, {
             cwd: getdir(),
@@ -45,6 +49,23 @@ function ytdlp(args: string[]): Promise<string> {
             code === 0 ? resolve(stdout_global) : reject(new Error(`yt-dlp exited with code ${code}`));
         });
     });
+}
+function ffmpeg(args: string[]): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        const yt = spawn("ffmpeg", args, {
+            cwd: getdir(),
+        });
+
+        yt.stdout.on("data", data => appendOut(data));
+        yt.stderr.on("data", data => {
+            appendOut(data);
+            console.error(`stderr: ${data}`);
+        });
+        yt.on("exit", code => {
+            code === 0 ? resolve(stdout_global) : reject(new Error(`ffmpeg exited with code ${code}`));
+        });
+    });
+
 }
 
 function argsFromFormat(format?: "video" | "audio" | "gif", max_file_size?: number) {
@@ -90,64 +111,125 @@ export async function stop(_: IpcMainInvokeEvent) {
     }
 }
 
-export async function download(
-    _: IpcMainInvokeEvent,
-    url: string,
-    { format, additional_arguments, max_file_size }: {
-        format?: "video" | "audio" | "gif";
-        additional_arguments?: string[];
-        max_file_size?: number;
+function executePipeline(pipeline: ((...args: any[]) => any | Promise<any>)[], options: DownloadOptions) {
+    pipeline.reduce(async (output, next) => {
+        try {
+            return next(output, options);
+        } catch (e) {
+            throw new Error(`Failed to execute pipeline, error at ${next.name}:\n${e}`);
+        }
+    }, Promise.resolve());
+}
+async function metadata(options: DownloadOptions) {
+    stdout_global = "";
+    const metadata = JSON.parse(await ytdlp(["-J", options.url, "--no-warnings"]));
+    if (metadata.is_live) throw "Live streams are not supported.";
+    stdout_global = "";
+    return { videoTitle: metadata.title || "video" };
+}
+function genFormat({ videoTitle }: { videoTitle: string; }, { max_file_size, format }: DownloadOptions) {
+    const HAS_LIMIT = !!max_file_size;
+    const MAX_VIDEO_SIZE = HAS_LIMIT ? max_file_size * 0.8 : 0;
+    const MAX_AUDIO_SIZE = HAS_LIMIT ? max_file_size * 0.2 : 0;
+
+    const audio = {
+        noFfmpeg: "ba[ext=mp3]{TOT_SIZE}/wa[ext=mp3]{TOT_SIZE}",
+        ffmpeg: "ba*{TOT_SIZE}/ba{TOT_SIZE}/wa{TOT_SIZE}/wa*{TOT_SIZE}"
+    };
+    const video = {
+        noFfmpeg: "b{TOT_SIZE}[ext=webm]/b{TOT_SIZE}[ext=mp4]/w{TOT_SIZE}",
+        ffmpeg: "b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w{TOT_SIZE}",
+    };
+    const gif = {
+        ffmpeg: "bv{TOT_SIZE}/wv{TOT_SIZE}"
+    };
+
+    let format_group: { noFfmpeg?: string; ffmpeg: string; };
+    switch (format) {
+        case "audio":
+            format_group = audio;
+            break;
+        case "gif":
+            format_group = gif;
+            break;
+        case "video":
+        default:
+            format_group = video;
+            break;
     }
+
+    const format_string = (ffmpegAvailable ? format_group.ffmpeg : format_group.noFfmpeg)
+        ?.replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${max_file_size}]` : "")
+        .replace("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
+        .replace("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
+    if (!format_string) throw "Gif format is only supported with ffmpeg.";
+    return { format: format_string, videoTitle };
+}
+async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url }: DownloadOptions) {
+    cleanVideoFiles();
+    const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
+    const customArgs = additional_arguments?.filter(Boolean) || [];
+
+    await ytdlp([url, ...baseArgs, ...customArgs]);
+    const file = fs.readdirSync(getdir()).find(f => f.startsWith("download."));
+    if (!file) throw "No video file was found!";
+    return { file, videoTitle };
+}
+async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, max_file_size }: DownloadOptions) {
+    if (!ffmpegAvailable) {
+        const ext = file.split(".").pop();
+        if (!ext) throw "Invalid file extension.";
+        return { file, videoTitle, extension: ext };
+    }
+
+    const duration = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", p(file)]).toString());
+    if (isNaN(duration)) throw "Failed to get video duration.";
+    // ffmpeg tends to go above the target size, so I'm setting it to 7/8
+    const target_bits = max_file_size ? max_file_size * 7 / duration : 0;
+
+    let ffmpegArgs: string[] = [];
+    let ext = "";
+    switch (format) {
+        case "audio":
+            ffmpegArgs = ["-i", p(file), "-b:a", `${Math.floor(target_bits / 1000)}k`, "-y", p("remux.mp3")];
+            ext = "mp3";
+            break;
+        case "video":
+            ffmpegArgs = ["-i", p(file), "-b:v", `${Math.floor(target_bits * 0.8)}k`, "-b:a", `${Math.floor(target_bits * 0.2)}k`, "-y", p("remux.mp4")];
+            ext = "mp4";
+            break;
+        case "gif":
+            ffmpegArgs = ["-i", p(file), "-vf", "fps=10,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse,", "-loop", "0", "-y", p("remux.gif")];
+            ext = "gif";
+            break;
+        default:
+            break;
+    }
+
+    if (!ffmpegArgs.length) throw "Invalid format.";
+    if (!ext) throw "Invalid extension.";
+    await ffmpeg(ffmpegArgs);
+    return { file: `remux.${ext}`, videoTitle, extension: ext };
+}
+function upload({ file, videoTitle, extension }: { file: string; videoTitle: string; extension: string; }) {
+    const buffer = fs.readFileSync(p(file));
+    return { buffer, title: `${videoTitle}.${extension}` };
+}
+export async function execute(
+    _: IpcMainInvokeEvent,
+    opt: DownloadOptions
 ): Promise<{
     buffer: Buffer;
     title: string;
 } | {
     error: string;
 }> {
-    let title = "video";
-
-    const baseArgs = [...argsFromFormat(format, max_file_size), "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
-
-    cleanVideoFiles();
-
-    // === Get metadata ===
-    try {
-        const metadata = JSON.parse(await ytdlp(["-J", url, "--no-warnings"]));
-        if (metadata.is_live) return { error: "Live streams are not supported." };
-        if (metadata.title) title = `${metadata.title}`;
-    } catch (e: any) {
-        console.error(e);
-        return {
-            error:
-                "Failed to get video metadata:\n" +
-                `\`\`\`\n${e?.stderr?.toString() || e?.toString()}\n\`\`\``
-        };
-    }
-
-    // === Download video ===
-    try {
-        const customArgs = additional_arguments?.filter(Boolean) || [];
-
-        // yt-dlp prioritizes the last occurrence of an argument
-        await ytdlp([...baseArgs, ...customArgs, url]);
-        // get the first file that matches the extensions
-        const filename = "download." + Extensions.find(ext => fs.existsSync(p(`download.${ext}`)));
-        if (!filename) throw new Error("Video downloaded, but no file was found!");
-        const ext = filename.split(".")[1];
-        const buffer = fs.readFileSync(p(filename));
-
-        return {
-            buffer,
-            title: `${title}.${ext}`
-        };
-    } catch (e: any) {
-        console.error(e);
-        return {
-            error:
-                "Failed to download or remux video:\n" +
-                `\`\`\`\n${e?.stderr?.toString() || e?.toString()}\n\`\`\``
-        };
-    }
+    const m = await metadata(opt);
+    const f = genFormat(m, opt);
+    const d = await download(f, opt);
+    const r = await remux(d, opt);
+    const u = upload(r);
+    return u;
 }
 
 export function checkffmpeg(_?: IpcMainInvokeEvent) {

@@ -203,7 +203,8 @@ async function download(channel: Channel, {
     format: "video" | "audio" | "gif";
     addArgs: string;
 }) {
-    const promise = Native.download(url, {
+    const promise = Native.execute({
+        url,
         format,
         additional_arguments: [
             ...parseAdditionalArgs(settings.store.additionalArguments),
