@@ -153,6 +153,7 @@ export async function download(
 export function checkffmpeg(_?: IpcMainInvokeEvent) {
     try {
         execFileSync("ffmpeg", ["-version"]);
+        execFileSync("ffprobe", ["-version"]);
         ffmpegAvailable = true;
         return true;
     } catch (e) {
