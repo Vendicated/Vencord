@@ -86,7 +86,13 @@ async function sendProgress(channelId: string, promise: Promise<{
     return data;
 }
 
-// Mostly taken from viewRaw plugin.
+function sendFfmpegWarning(channelId: string) {
+    sendBotMessage(channelId, {
+        content: "FFmpeg not detected. You may experience lower download quality and missing features."
+    });
+}
+
+// Mostly taken from viewRaw and betterSessions plugins.
 async function openDependencyModal() {
     const key = openModal(props => (
         <ErrorBoundary>
@@ -110,6 +116,12 @@ const settings = definePluginSettings({
     showProgress: {
         type: OptionType.BOOLEAN,
         description: "Send a Clyde message with the download progress.",
+        default: true,
+        restartNeeded: false
+    },
+    showFfmpegWarning: {
+        type: OptionType.BOOLEAN,
+        description: "Show a warning message if ffmpeg is not installed.",
         default: true,
         restartNeeded: false
     }
@@ -148,6 +160,9 @@ export default definePlugin({
         }],
 
         execute: async (args, ctx) => {
+            if (!await Native.isYtdlpAvailable()) return openDependencyModal();
+            if (!await Native.isFfmpegAvailable() && settings.store.showFfmpegWarning) sendFfmpegWarning(ctx.channel.id);
+
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
             const add_args = findOption<string>(args, "additional args", "");
