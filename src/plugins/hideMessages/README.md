@@ -2,6 +2,9 @@
 
 Allow you to hide annoying messages without blocking their author
 
-![Before](https://github.com/henmalib/Vencord/assets/68553709/6b74018a-77c9-4937-b504-a70b2cee1d65)
-![After](https://github.com/henmalib/Vencord/assets/68553709/59ec88d7-f9a4-4b07-8775-db2fb67a8ad2)
+### Before
+![Before](https://github.com/Vendicated/Vencord/assets/68553709/bfb796a8-c4cc-4bac-a94c-25772b342d06)
+
+### After
+![After](https://github.com/Vendicated/Vencord/assets/68553709/348db69a-67ef-46d5-ba3c-8db27703bdf1)
 
