@@ -8,11 +8,11 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { ImageInvisible } from "@components/Icons";
+import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs, openModal } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Menu, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import { Message, User } from "discord-types/general";
 
 import { HiddenPeopleModal } from "./HiddenPeopleModal";
 import { STORE_KEY, userIds } from "./store";
@@ -28,7 +28,7 @@ const userProfileContextPatch: NavContextMenuPatchCallback = (children, { user }
         <Menu.MenuItem
             label={label}
             id="vc-hide-user"
-            icon={ImageInvisible}
+            icon={isIgnored ? ImageVisible : ImageInvisible}
             action={() => {
                 isIgnored ? removeIgnore(user.id) :
                     createIgnore(user.id);
@@ -68,7 +68,7 @@ export default definePlugin({
         {
             find: ".messageListItem",
             replacement: {
-                match: /(.{1,30})\.messageListItem,/,
+                match: /(\i)\.messageListItem,/,
                 replace: "$self.checkHidden(arguments[0]?.message)+$&"
             }
         }
@@ -82,8 +82,8 @@ export default definePlugin({
     stop() {
         disableStyle(styles);
     },
-    checkHidden(message: any): string {
-        if (userIds.includes(message?.user?.id)) {
+    checkHidden(message: Message): string {
+        if (userIds.includes(message.author.id)) {
             return "vc-message-hidden ";
         }
 
