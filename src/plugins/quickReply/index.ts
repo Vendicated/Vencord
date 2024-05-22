@@ -24,6 +24,7 @@ import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionsBi
 import { Message } from "discord-types/general";
 
 const Kangaroo = findByPropsLazy("jumpToMessage");
+const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
@@ -137,6 +138,10 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     if (!isReply) { // we are editing so only include own
         const meId = UserStore.getCurrentUser().id;
         messages = messages.filter(m => m.author.id === meId);
+    }
+
+    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
+        messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
     }
 
     const mutate = (i: number) => isUp
