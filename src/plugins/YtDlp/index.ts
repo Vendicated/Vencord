@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
 const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
 
@@ -158,28 +159,11 @@ export default definePlugin({
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
             const add_args = findOption<string>(args, "additional args", "");
 
-            const promise = Native.download(url, {
+            return await download(ctx.channel, {
+                url,
                 format,
-                additional_arguments: [
-                    ...parseAdditionalArgs(settings.store.additionalArguments),
-                    ...parseAdditionalArgs(add_args)
-                ],
-                max_file_size: maxFileSize()
+                addArgs: add_args
             });
-
-            const data = await sendProgress(ctx.channel.id, promise);
-
-            if ("error" in data) {
-                return sendBotMessage(ctx.channel.id, {
-                    content: `Failed to download video: ${data.error}`
-                });
-            }
-
-            const { buffer, title } = data;
-            UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
-            const file = new File([buffer], title, { type: mimetype(title.split(".")[1]) });
-            // See petpet
-            setTimeout(() => UploadHandler.promptToUpload([file], ctx.channel, DraftType.ChannelMessage), 10);
         }
     }],
     start: async () => {
@@ -193,3 +177,34 @@ export default definePlugin({
         await Native.stop();
     }
 });
+
+async function download(channel: Channel, {
+    url, format, addArgs
+}: {
+    url: string;
+    format: "video" | "audio" | "gif";
+    addArgs: string;
+}) {
+    const promise = Native.download(url, {
+        format,
+        additional_arguments: [
+            ...parseAdditionalArgs(settings.store.additionalArguments),
+            ...parseAdditionalArgs(addArgs)
+        ],
+        max_file_size: maxFileSize()
+    });
+
+    const data = await sendProgress(channel.id, promise);
+
+    if ("error" in data) {
+        return sendBotMessage(channel.id, {
+            content: `Failed to download video: ${data.error}`
+        });
+    }
+
+    const { buffer, title } = data;
+    UploadManager.clearAll(channel.id, DraftType.SlashCommand);
+    const file = new File([buffer], title, { type: mimetype(title.split(".")[1]) });
+    // See petpet
+    setTimeout(() => UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage), 10);
+}
