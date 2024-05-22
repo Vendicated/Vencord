@@ -243,19 +243,27 @@ page.on("console", async e => {
         }
     }
 
-    if (isDebug) {
-        console.error(e.text());
-    } else if (level === "error") {
-        const text = await Promise.all(
-            e.args().map(async a => {
-                try {
+    async function getText() {
+        try {
+            return await Promise.all(
+                e.args().map(async a => {
                     return await maybeGetError(a) || await a.jsonValue();
-                } catch (e) {
-                    return a.toString();
-                }
-            })
-        ).then(a => a.join(" ").trim());
+                })
+            ).then(a => a.join(" ").trim());
+        } catch {
+            return e.text();
+        }
+    }
 
+    if (isDebug) {
+        const text = await getText();
+
+        console.error(text);
+        if (text.includes("A fatal error occurred:")) {
+            process.exit(1);
+        }
+    } else if (level === "error") {
+        const text = await getText();
 
         if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             console.error("[Unexpected Error]", text);
@@ -322,22 +330,31 @@ async function runtime(token: string) {
 
         const validChunks = new Set<string>();
         const invalidChunks = new Set<string>();
+        const deferredRequires = new Set<string>();
 
         let chunksSearchingResolve: (value: void | PromiseLike<void>) => void;
         const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
 
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
-        const lazyChunkRegex = canonicalizeMatch(/Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\)/g);
-        const chunkIdsRegex = canonicalizeMatch(/\("(.+?)"\)/g);
+
+        const LazyChunkRegex = canonicalizeMatch(/(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\)))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
-            const lazyChunks = factoryCode.matchAll(lazyChunkRegex);
+            const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: string[], entryPoint: string]>();
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = Array.from(rawChunkIds.matchAll(chunkIdsRegex)).map(m => m[1]);
-                if (chunkIds.length === 0) return;
+            // Workaround for a chunk that depends on the ChannelMessage component but may be be force loaded before
+            // the chunk containing the component
+            const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
+
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIdsArray, rawChunkIdsSingle, entryPoint]) => {
+                const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
+                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Vencord.Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
+
+                if (chunkIds.length === 0) {
+                    return;
+                }
 
                 let invalidChunkGroup = false;
 
@@ -373,6 +390,11 @@ async function runtime(token: string) {
             // Requires the entry points for all valid chunk groups
             for (const [, entryPoint] of validChunkGroups) {
                 try {
+                    if (shouldForceDefer) {
+                        deferredRequires.add(entryPoint);
+                        continue;
+                    }
+
                     if (wreq.m[entryPoint]) wreq(entryPoint as any);
                 } catch (err) {
                     console.error(err);
@@ -434,6 +456,11 @@ async function runtime(token: string) {
         });
 
         await chunksSearchingDone;
+
+        // Require deferred entry points
+        for (const deferredRequire of deferredRequires) {
+            wreq!(deferredRequire as any);
+        }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const allChunks = [] as string[];
@@ -514,7 +541,6 @@ async function runtime(token: string) {
         setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
     } catch (e) {
         console.log("[PUP_DEBUG]", "A fatal error occurred:", e);
-        process.exit(1);
     }
 }
 
