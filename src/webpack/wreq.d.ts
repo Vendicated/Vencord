@@ -98,7 +98,7 @@ type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * The ensure chunk function, it ensures a chunk is loaded, or loads if needed.
      * Internally it uses the handlers in {@link WebpackRequire.f} to load/ensure the chunk is loaded.
      */
-    e: (chunkId: string | number) => Promise<any[]>;
+    e: (chunkId: string | number) => Promise<void[]>;
     /** Get the filename name for the css part of a chunk */
     k: (chunkId: string | number) => `${chunkId}.css`;
     /** Get the filename for the js part of a chunk */
