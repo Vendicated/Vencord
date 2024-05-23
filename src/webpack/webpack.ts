@@ -500,7 +500,6 @@ export function search(...filters: Array<string | RegExp>) {
     const factories = wreq.m;
     outer:
     for (const id in factories) {
-        // @ts-ignore
         const factory = factories[id];
         const str: string = factory.toString();
         for (const filter of filters) {
