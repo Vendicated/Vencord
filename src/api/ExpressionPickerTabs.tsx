@@ -1,17 +1,13 @@
-import { Channel } from "discord-types/general";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import ErrorBoundary from "@components/ErrorBoundary";
-//import { Logger } from "@utils/Logger";
+import { Channel } from "discord-types/general";
 
-//const logger = new Logger("Tablist"); useless
-
-export interface ExpressionMate {
-    CHAT_INPUT_BUTTON_CLASSNAME: string;
-    expressionPickerViewType: object;
-    expressionPickerWidths: { MIN: "min", MAX: "max"; };
-    MIN_EXPRESSION_PICKER_WIDTH: number; // what's really matter here
-}
-
-export interface TablistButtonProps {
+export interface ExpressionPickerButtonProps {
     id?: string;
     "aria-controls": string;
     "aria-selected": boolean;
@@ -22,45 +18,44 @@ export interface TablistButtonProps {
     [key: string]: any;
 }
 
-export interface TablistPanelProps {
+export interface ExpressionPickerPanelProps {
     selectedTab: string;
     channel: Channel;
-    expressionMate: ExpressionMate;
 }
 
-export type TablistButtonComponent = (props: TablistButtonProps) => JSX.Element | null;
-export type TablistPanelComponent = (props: TablistPanelProps) => JSX.Element | null;
+export type ExpressionPickerButtonComponent = (props: ExpressionPickerButtonProps) => JSX.Element | null;
+export type ExpressionPickerPanelComponent = (props: ExpressionPickerPanelProps) => JSX.Element | null;
 
 
-export interface TablistItem {
+export interface ExpressionPickerTabItem {
     tab: string,
-    Component: TablistPanelComponent;
+    Component: ExpressionPickerPanelComponent;
     autoFocus?: boolean;
 }
 
-const TablistComponents = new Map<string, TablistItem>();
+const ExpressionPickerComponents = new Map<string, ExpressionPickerTabItem>();
 
 
-export const addTablistButton = (id: string, tab: string, PanelComponent: TablistPanelComponent, autoFocus?: boolean) => TablistComponents.set(id, { tab: tab, Component: PanelComponent, autoFocus: autoFocus });
-export const removeTablistButton = (id: string) => TablistComponents.delete(id);
+export const addExpressionPickerTabButton = (id: string, tab: string, PanelComponent: ExpressionPickerPanelComponent, autoFocus?: boolean) => ExpressionPickerComponents.set(id, { tab: tab, Component: PanelComponent, autoFocus: autoFocus });
+export const removeExpressionPickerTabButton = (id: string) => ExpressionPickerComponents.delete(id);
 
 
-export function* RenderTabButtons(TablistButtonComponent: TablistButtonComponent, selectedTab: string) {
-    for (const [id, { tab }] of TablistComponents) {
-        yield (<ErrorBoundary><TablistButtonComponent
+export function* RenderTabButtons(ExpressionPickerButtonComponent: ExpressionPickerButtonComponent, selectedTab: string) {
+    for (const [id, { tab }] of ExpressionPickerComponents) {
+        yield (<ErrorBoundary><ExpressionPickerButtonComponent
             id={id + "-picker-tab"}
             aria-controls={id + "-picker-tab-panel"}
             aria-selected={id === selectedTab}
             viewType={id}
             isActive={id === selectedTab}
-        >{tab}</TablistButtonComponent></ErrorBoundary>);
+        >{tab}</ExpressionPickerButtonComponent></ErrorBoundary>);
     }
 }
 
-export function* TabPanels(selectedTab: string, expressionMate: ExpressionMate, channel: Channel) {
-    for (const [id, { Component }] of TablistComponents) {
+export function* TabPanels(selectedTab: string, channel: Channel) {
+    for (const [id, { Component }] of ExpressionPickerComponents) {
         if (id !== selectedTab) { continue; }
-        let PanelComponent: TablistPanelComponent = Component;
-        yield (<ErrorBoundary><PanelComponent selectedTab={selectedTab} channel={channel} expressionMate={expressionMate} /></ErrorBoundary>);
+        const PanelComponent: ExpressionPickerPanelComponent = Component;
+        yield (<ErrorBoundary><PanelComponent selectedTab={selectedTab} channel={channel} /></ErrorBoundary>);
     }
 }

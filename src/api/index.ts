@@ -21,6 +21,7 @@ import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
+import * as $ExpressionPickerTabs from "./ExpressionPickerTabs";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -31,7 +32,6 @@ import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
 import * as $Settings from "./Settings";
 import * as $Styles from "./Styles";
-import * as $ExpressionPickerTabs from "./ExpressionPickerTabs";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic

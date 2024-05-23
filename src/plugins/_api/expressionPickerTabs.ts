@@ -1,5 +1,11 @@
-import definePlugin from "@utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 
 
 export default definePlugin({
@@ -15,8 +21,8 @@ export default definePlugin({
                     replace: "$&,...Vencord.Api.ExpressionPickerTabs.RenderTabButtons($1, $2)"
                 },
                 {
-                    match: /null,(\i)===(\i)\.ExpressionPickerViewType\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
-                    replace: "$&,...Vencord.Api.ExpressionPickerTabs.TabPanels($1, $2, $3)"
+                    match: /null,(\i)===\i\.ExpressionPickerViewType\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
+                    replace: "$&,...Vencord.Api.ExpressionPickerTabs.TabPanels($1, $3)"
                 }
             ]
         }
