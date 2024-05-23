@@ -154,7 +154,7 @@ export default definePlugin({
             ],
             required: false
         }, {
-            name: "additional args",
+            name: "additional_args",
             description: "Additional JSON-parsable array of arguments to pass to yt-dlp. These will take precedence over arguments set in the settings.",
             required: false,
             type: ApplicationCommandOptionType.STRING
@@ -166,7 +166,7 @@ export default definePlugin({
 
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
-            const add_args = findOption<string>(args, "additional args", "");
+            const addArgs = findOption<string>(args, "additional_args", "");
 
             return await download(ctx.channel, {
                 url,
