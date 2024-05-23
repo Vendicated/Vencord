@@ -19,7 +19,7 @@ const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 const allProxiedModules = new Set<WebpackRequire["m"]>();
 
-const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
+const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (...args: any[]) => Reflect[propName](...args)]
     )),
@@ -176,7 +176,7 @@ Object.defineProperty(Function.prototype, "m", {
             // @ts-ignore
             originalModules.$$proxiedModules = proxiedModules;
             allProxiedModules.add(proxiedModules);
-            Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyhandler));
+            Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyHandler));
         }
 
         Object.defineProperty(this, "m", {
