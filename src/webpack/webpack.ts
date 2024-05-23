@@ -20,9 +20,9 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
+import { ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -33,8 +33,8 @@ export let _resolveReady: () => void;
  */
 export const onceReady = new Promise<void>(r => _resolveReady = r);
 
-export let wreq: WebpackInstance;
-export let cache: WebpackInstance["c"];
+export let wreq: WebpackRequire;
+export let cache: WebpackRequire["c"];
 
 export type FilterFn = (mod: any) => boolean;
 
@@ -68,14 +68,14 @@ export const filters = {
     }
 };
 
-export type CallbackFn = (mod: any, id: string) => void;
+export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
-export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
-export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
+export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const beforeInitListeners = new Set<(wreq: WebpackRequire) => void>();
 
-export function _initWebpack(webpackRequire: WebpackInstance) {
+export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
 }
@@ -500,6 +500,7 @@ export function search(...filters: Array<string | RegExp>) {
     const factories = wreq.m;
     outer:
     for (const id in factories) {
+        // @ts-ignore
         const factory = factories[id].original ?? factories[id];
         const str: string = factory.toString();
         for (const filter of filters) {

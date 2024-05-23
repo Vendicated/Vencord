@@ -8,20 +8,19 @@ import { Logger } from "@utils/Logger";
 import { UNCONFIGURABLE_PROPERTIES } from "@utils/misc";
 import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
-import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, moduleListeners, subscriptions, WebpackRequire, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
-const modulesProxyhandler: ProxyHandler<any> = {
+const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (target: any, ...args: any[]) => Reflect[propName](target, ...args)]
+        [propName, (target: WebpackRequire["m"], ...args: any[]) => Reflect[propName](target, ...args)]
     )),
-    get: (target, p: string) => {
+    get: (target, p) => {
         const mod = Reflect.get(target, p);
 
         // If the property is not a module id, return the value of it without trying to patch
@@ -48,7 +47,7 @@ const modulesProxyhandler: ProxyHandler<any> = {
 Object.defineProperty(Function.prototype, "O", {
     configurable: true,
 
-    set(onChunksLoaded: any) {
+    set(onChunksLoaded: WebpackRequire["O"]) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
         // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
@@ -59,14 +58,14 @@ Object.defineProperty(Function.prototype, "O", {
             delete (Function.prototype as any).O;
 
             const originalOnChunksLoaded = onChunksLoaded;
-            onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
+            onChunksLoaded = function (result, chunkIds, callback, priority) {
                 if (callback != null && initCallbackRegex.test(callback.toString())) {
                     Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true
                     });
 
-                    const wreq = this as WebpackInstance;
+                    const wreq = this;
 
                     const originalCallback = callback;
                     callback = function (this: unknown) {
@@ -85,7 +84,7 @@ Object.defineProperty(Function.prototype, "O", {
                 }
 
                 originalOnChunksLoaded.apply(this, arguments as any);
-            };
+            } as WebpackRequire["O"];
 
             onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
         }
@@ -131,7 +130,7 @@ Object.defineProperty(Function.prototype, "m", {
 
 let webpackNotInitializedLogged = false;
 
-function patchFactory(id: string, mod: (module: any, exports: any, require: WebpackInstance) => void) {
+function patchFactory(id: string | number, mod: ModuleFactory) {
     for (const factoryListener of factoryListeners) {
         try {
             factoryListener(mod);
@@ -255,7 +254,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    function patchedFactory(module: any, exports: any, require: WebpackInstance) {
+    const patchedFactory: ModuleFactory = (module, exports, require) => {
         if (wreq == null && IS_DEV) {
             if (!webpackNotInitializedLogged) {
                 webpackNotInitializedLogged = true;
@@ -312,7 +311,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
                 logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
             }
         }
-    }
+    };
 
     patchedFactory.toString = originalMod.toString.bind(originalMod);
     // @ts-ignore
