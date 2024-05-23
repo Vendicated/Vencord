@@ -127,10 +127,17 @@ Object.defineProperty(Function.prototype, "O", {
                 configurable: true,
 
                 set(v: OnChunksLoaded["j"]) {
-                    // @ts-ignore
-                    delete onChunksLoaded.j;
-                    onChunksLoaded.j = v;
-                    originalOnChunksLoaded.j = v;
+                    function setValue(target: any) {
+                        Object.defineProperty(target, "j", {
+                            value: v,
+                            configurable: true,
+                            enumerable: true,
+                            writable: true
+                        });
+                    }
+
+                    setValue(onChunksLoaded);
+                    setValue(originalOnChunksLoaded);
                 }
             });
         }
@@ -318,7 +325,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         // @ts-ignore
         originalFactory.$$vencordRequired = true;
         for (const proxiedModules of allProxiedModules) {
-            proxiedModules[id] = originalFactory;
+            Reflect.set(proxiedModules, id, originalFactory);
         }
 
         if (wreq == null && IS_DEV) {
