@@ -65,13 +65,13 @@ async function sendProgress(channelId: string, promise: Promise<{
     if (!settings.store.showProgress) return await promise;
     // Hacky way to send info from native to renderer for progress updates
     const clydeMessage = sendBotMessage(channelId, { content: "Downloading video..." });
-    const updateMessage = (stdout: string, done?: boolean) => {
+    const updateMessage = (stdout: string, append?: string) => {
         const text = stdout.toString();
         FluxDispatcher.dispatch({
             type: "MESSAGE_UPDATE",
             message: {
                 ...clydeMessage,
-                content: `Downloading video...\n\`\`\`\n${text}\n\`\`\`${done ? "\nDone!" : ""}`,
+                content: `Downloading video...\n\`\`\`\n${text}\n\`\`\`${append || ""}`,
             }
         });
     };
@@ -83,7 +83,7 @@ async function sendProgress(channelId: string, promise: Promise<{
     const data = await promise;
     clearInterval(id);
     const stdout = await Native.getStdout();
-    updateMessage(stdout, true);
+    updateMessage(stdout, "error" in data ? "Error!" : "Done!");
     return data;
 }
 
