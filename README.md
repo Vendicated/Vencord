@@ -1,5 +1,11 @@
 # Equicord
 
+### CURRENTLY ON HIATUS
+
+We are on hiatus for the most part due to recent events involving our fork and others like us.
+
+I also need to take some time to focus on me and my fellow developers discord bot that is currently being converted from js to ts.
+
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord
 
 Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for letting me rob your code sometimes :3
