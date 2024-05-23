@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "VCSupport",
-    description: "Wumpus Dance + Support Warning",
+    description: "Wumpus Dance + Support Warnings",
     authors: [EquicordDevs.thororen],
     enabledByDefault: true
 });

@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
@@ -20,10 +21,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ThemeLibrary",
     description: "A library of themes for Vencord.",
-    authors: [{
-        name: "Fafa",
-        id: 428188716641812481n,
-    }],
+    authors: [EquicordDevs.Fafa],
     settings,
     toolboxActions: {
         "Open Theme Library": () => {

@@ -1,4 +1,4 @@
-# Equicord (Vencord+)
+# Equicord
 
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord
 
@@ -21,6 +21,79 @@ Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync
 -   Same supporter badges as on Vencord (Don't lose your benefits)
 -   Easy to install third-party plugins through the plugin page in Discord.
 -   Request for plugins from Discord.
+
+<details>
+<summary>Extra included plugins (69 additional plugins)</summary>
+
+- AllCallTimers by MaxHerbold and D3SOX
+- AllowedMentions by arHSM and amia
+- AltKrispSwitch by newwares
+- Annamox by Kyuuhachi
+- BetterQuests by kvba
+- BetterQuickReact by Ven and Sqaaakoi
+- BetterShopPreview by Tolgchu
+- BlockKrsip by D3SOX
+- BypassDND by Inbestigator
+- CleanChannelName by AutumnVN
+- ColorMessage by Kyuuhachi
+- CopyEmojiAsFormattedString (CopyEmojiAsString) by HAPPY_ENDERMAN and VISHNYA_NET_CHERESHNYA
+- CopyUserMention by Cortex and castdrian
+- CustomAppIcons by HAPPY_ENDERMAN and SerStars
+- CustomScreenShare by KawaiianPizza
+- DeadMembers by Kyuuhachi
+- DiscordColorways by DaBluLite and ImLvna
+- DNDWhilePlaying by thororen
+- DoNotLeak by Perny
+- DoubleCounterBypass by nyx
+- EmojiDumper by Cortex, Samwich, Woosh
+- Encryptcord by Inbestigator
+- EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
+- ExportContacts by dat_insanity
+- FakeProfileThemes by Ryan
+- FindReply by newwares
+- FriendshipRanks by Samwich
+- Gif Collection by Aria
+- GlobalBadges by HypedDomi and Hosted by Wolfie
+- GodMode by Tolgchu
+- HideMessage by Hanzy
+- HolyNotes by Wolfie
+- Hop On by ImLvna
+- IgnoreTerms by D3SOX
+- IRememberYou by zoodogood
+- Keyboard Sounds by HypedDomi
+- KeywordNotify by camila314
+- MessageLinkTooltip by Kyuuhachi
+- MessageLoggerEnhanced (MLEnhanced) by Aria
+- noAppsAllowed by kvba
+- NoModalAnimation by AutumnVN
+- NoNitroUpsell by thororen
+- NotifyUserChanges by D3SOX
+- OnePingPerDM by ProffDea
+- PlatformSpoofer by Drag
+- MessagePurge by bhop and nyx
+- QuestionMarkReplacement (QuestionMarkReplace) by nyx
+- Quoter by Samwich
+- RepeatMessage by Tolgchu
+- ReplyPingControl by ant0n and MrDiamond
+- ScreenRecorder by AutumnVN
+- Search by JacobTm and thororen
+- SearchFix by jaxx
+- Sekai Stickers by MaiKokain
+- ServerProfilesToolbox by D3SOX
+- ShowBadgesInChat by Inbestigator and KrystalSkull
+- Slap by Korbo
+- SoundBoardLogger by Moxxie, fres, echo, thororen
+- TalkInReverse by Tolgchu
+- ThemeLibrary by Fafa
+- Title by Kyuuhachi
+- UnlimitedAccounts by Balaclava and thororen
+- UserPFP by nexpid and thororen
+- VCSupport by thororen
+- VencordRPC by AutumnVN
+- VoiceChatUtilities by Dams and D3SOX
+- WhosWatching by fres
+- YoutubeDescription by arHSM
+</details>
 
 
 ## Installing / Uninstalling
@@ -86,7 +159,7 @@ Mentioning it does not imply any affiliation with or endorsement by Discord Inc.
 Vencord is not connected to Equicord and as such, all donation links go to Vendicated's donation link.
 
 <details>
-<summary>Using Equicord (Vencord+) violates Discord's terms of service</summary>
+<summary>Using Equicord violates Discord's terms of service</summary>
 
 Client modifications are against Discord’s Terms of Service.
 
