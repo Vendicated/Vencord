@@ -36,7 +36,7 @@ export const onceReady = new Promise<void>(r => _resolveReady = r);
 export let wreq: WebpackRequire;
 export let cache: WebpackRequire["c"];
 
-export type FilterFn = (mod: any) => boolean;
+export type FilterFn = (module: ModuleExports) => boolean;
 
 export const filters = {
     byProps: (...props: string[]): FilterFn =>
@@ -129,7 +129,7 @@ export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
-    const ret = [] as any[];
+    const ret: ModuleExports[] = [];
     for (const key in cache) {
         const mod = cache[key];
         if (!mod?.exports) continue;
@@ -169,7 +169,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     const filters = filterFns as Array<FilterFn | undefined>;
 
     let found = 0;
-    const results = Array(length);
+    const results: ModuleExports[] = Array(length);
 
     outer:
     for (const key in cache) {
@@ -496,12 +496,12 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
  * @returns Mapping of found modules
  */
 export function search(...filters: Array<string | RegExp>) {
-    const results = {} as Record<number, Function>;
+    const results: WebpackRequire["m"] = {};
     const factories = wreq.m;
     outer:
     for (const id in factories) {
         // @ts-ignore
-        const factory = factories[id].original ?? factories[id];
+        const factory = factories[id].$$vencordOriginal ?? factories[id];
         const str: string = factory.toString();
         for (const filter of filters) {
             if (typeof filter === "string" && !str.includes(filter)) continue outer;
@@ -521,18 +521,18 @@ export function search(...filters: Array<string | RegExp>) {
  * so putting breakpoints or similar will have no effect.
  * @param id The id of the module to extract
  */
-export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
+export function extract(id: PropertyKey) {
+    const mod = wreq.m[id];
     if (!mod) return null;
 
     const code = `
-// [EXTRACTED] WebpackModule${id}
+// [EXTRACTED] WebpackModule${String(id)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
 0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+//# sourceURL=ExtractedWebpackModule${String(id)}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+    const extracted: ModuleFactory = (0, eval)(code);
+    return extracted;
 }

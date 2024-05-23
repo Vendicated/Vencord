@@ -41,7 +41,7 @@ const browser = await pup.launch({
 const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 
-function maybeGetError(handle: JSHandle) {
+async function maybeGetError(handle: JSHandle) {
     return (handle as JSHandle<Error>)?.getProperty("message")
         .then(m => m.jsonValue());
 }
@@ -383,7 +383,7 @@ async function runtime(token: string) {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
                     )
             );
 
@@ -395,7 +395,7 @@ async function runtime(token: string) {
                         continue;
                     }
 
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                    if (wreq.m[entryPoint]) wreq(entryPoint);
                 } catch (err) {
                     console.error(err);
                 }
@@ -460,7 +460,7 @@ async function runtime(token: string) {
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq(deferredRequire as any);
+            wreq(deferredRequire);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
@@ -488,8 +488,8 @@ async function runtime(token: string) {
 
             // Loads and requires a chunk
             if (!isWasm) {
-                await wreq.e(id as any);
-                if (wreq.m[id]) wreq(id as any);
+                await wreq.e(id);
+                if (wreq.m[id]) wreq(id);
             }
         }));
 

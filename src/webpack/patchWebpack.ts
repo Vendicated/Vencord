@@ -24,6 +24,7 @@ const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
         const mod = Reflect.get(target, p);
 
         // If the property is not a module id, return the value of it without trying to patch
+        // @ts-ignore
         if (mod == null || mod.$$vencordOriginal != null || Number.isNaN(Number(p))) return mod;
 
         const patchedMod = patchFactory(p, mod);
@@ -90,12 +91,14 @@ Object.defineProperty(Function.prototype, "O", {
 
             // Returns whether a chunk has been loaded
             Object.defineProperty(onChunksLoaded, "j", {
+                configurable: true,
+
                 set(v) {
+                    // @ts-ignore
                     delete onChunksLoaded.j;
                     onChunksLoaded.j = v;
                     originalOnChunksLoaded.j = v;
-                },
-                configurable: true
+                }
             });
         }
 
@@ -113,7 +116,7 @@ Object.defineProperty(Function.prototype, "O", {
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
-    set(originalModules: any) {
+    set(originalModules: WebpackRequire["m"]) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
@@ -140,7 +143,7 @@ Object.defineProperty(Function.prototype, "m", {
 
 let webpackNotInitializedLogged = false;
 
-function patchFactory(id: string | number, mod: ModuleFactory) {
+function patchFactory(id: PropertyKey, mod: ModuleFactory) {
     for (const factoryListener of factoryListeners) {
         try {
             factoryListener(mod);
@@ -192,7 +195,7 @@ function patchFactory(id: string | number, mod: ModuleFactory) {
                 const newCode = executePatch(replacement.match, replacement.replace as string);
                 if (newCode === code) {
                     if (!patch.noWarn) {
-                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(id)}): ${replacement.match}`);
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
                         }
@@ -210,9 +213,9 @@ function patchFactory(id: string | number, mod: ModuleFactory) {
                 }
 
                 code = newCode;
-                mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+                mod = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
             } catch (err) {
-                logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
+                logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(id)}): ${replacement.match}\n`, err);
 
                 if (IS_DEV) {
                     const changeSize = code.length - lastCode.length;

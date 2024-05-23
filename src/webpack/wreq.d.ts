@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export type AnyRecord = Record<PropertyKey, any>;
-
 export type ModuleExports = any;
 
 export type Module = {
@@ -14,8 +12,8 @@ export type Module = {
     exports: ModuleExports;
 };
 
-/** exports ({@link ModuleExports}) can be anything, however initially it is always an empty object */
-export type ModuleFactory = (module: Module, exports: AnyRecord, require: WebpackRequire) => void;
+/** exports can be anything, however initially it is always an empty object */
+export type ModuleFactory = (module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
 export type AsyncModuleBody = (
     handleDependencies: (deps: Promise<any>[]) => Promise<any[]> & (() => void)
@@ -40,7 +38,7 @@ export type ScriptLoadDone = (event: Event) => void;
 
 export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: PropertyKey[] | undefined | null, callback: () => any, priority: number) => any) & {
     /** Check if a chunk has been loaded */
-    j: (chunkId: PropertyKey) => boolean;
+    j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
 };
 
 export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
@@ -57,7 +55,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * });
      * @returns fromObject
      */
-    es: (this: WebpackRequire, fromObject: AnyRecord, toObject: AnyRecord) => AnyRecord;
+    es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
     /**
      * Creates an async module. The body function must be a async function.
      * "module.exports" will be decorated with an AsyncModulePromise.
@@ -91,7 +89,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      *      Object.defineProperty(exports, key, { get: definition[key] }
      * }
     */
-    d: (this: WebpackRequire, exports: AnyRecord, definiton: AnyRecord) => void;
+    d: (this: WebpackRequire, exports: Record<PropertyKey, any>, definiton: Record<PropertyKey, any>) => void;
     /** The chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
     f: ChunkHandlers;
     /**
@@ -100,7 +98,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     e: (this: WebpackRequire, chunkId: PropertyKey) => Promise<void[]>;
     /** Get the filename name for the css part of a chunk */
-    k: (this: WebpackRequire, chunkId: PropertyKey) => `${chunkId}.css`;
+    k: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** Get the filename for the js part of a chunk */
     u: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** The global object, will likely always be the window */
@@ -116,7 +114,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     l: (this: WebpackRequire, url: string, done: ScriptLoadDone, key?: string | number, chunkId?: PropertyKey) => void;
     /** Defines __esModule on the exports, marking ES Modules compatibility as true */
-    r: (this: WebpackRequire, exports: AnyRecord) => void;
+    r: (this: WebpackRequire, exports: ModuleExports) => void;
     /** Node.js module decorator. Decorates a module as a Node.js module */
     nmd: (this: WebpackRequire, module: Module) => any;
     /**
@@ -135,7 +133,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports"
      * @returns The exports argument, but now assigned with the exports of the wasm instance
      */
-    v: (this: WebpackRequire, exports: AnyRecord, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
+    v: (this: WebpackRequire, exports: ModuleExports, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
     /** Bundle public path, where chunk files are stored. Used by other methods which load chunks to obtain the full asset url */
     p: string;
     /** Document baseURI or WebWorker location.href */
