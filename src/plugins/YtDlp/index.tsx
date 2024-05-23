@@ -150,7 +150,7 @@ export default definePlugin({
             choices: [
                 { name: "Video", value: "video", label: "Video" },
                 { name: "Audio", value: "audio", label: "Audio" },
-                // { name: "GIF", value: "gif", label: "GIF" }
+                { name: "GIF", value: "gif", label: "GIF" }
             ],
             required: false
         }, {
@@ -210,7 +210,7 @@ async function download(channel: Channel, {
             ...parseAdditionalArgs(settings.store.additionalArguments),
             ...parseAdditionalArgs(addArgs)
         ],
-        max_file_size: maxFileSize()
+        maxFileSize: maxFileSize()
     });
 
     const data = await sendProgress(channel.id, promise);
