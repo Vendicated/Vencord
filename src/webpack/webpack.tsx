@@ -77,8 +77,8 @@ export const filters = {
     }
 };
 
-export type ModCallbackFn = (mod: ModuleExports) => void;
-export type ModCallbackFnWithId = (mod: ModuleExports, id: PropertyKey) => void;
+export type ModCallbackFn = (module: ModuleExports) => void;
+export type ModCallbackFnWithId = (module: ModuleExports, id: PropertyKey) => void;
 
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
 export const moduleListeners = new Set<ModCallbackFnWithId>();
@@ -164,7 +164,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * @param callback A function that takes the found module as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the module, instead of all of it. Defaults to the module itself
  * @returns A proxy that has the callback return value as its true value, or the callback return value if the callback was called when the function was called
  */
-export function find<T = AnyObject>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function find<T = AnyObject>(filter: FilterFn, callback: (module: ModuleExports) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof callback !== "function")
@@ -196,7 +196,7 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (mod: any) => an
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: any) => React.ComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: ModuleExports) => React.ComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof parse !== "function")
@@ -250,8 +250,8 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<T extends object = any>(...props: string[] | [...string[], (component: any) => React.ComponentType<T>]) {
-    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: any) => React.ComponentType<T>;
+export function findExportedComponent<T extends object = any>(...props: string[] | [...string[], (component: ModuleExports) => React.ComponentType<T>]) {
+    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => React.ComponentType<T>;
     const newProps = props as string[];
 
     const filter = filters.byProps(...newProps);
@@ -302,8 +302,8 @@ export function findExportedComponent<T extends object = any>(...props: string[]
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<T extends object = any>(...code: string[] | [...string[], (component: any) => React.ComponentType<T>]) {
-    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: any) => React.ComponentType<T>;
+export function findComponentByCode<T extends object = any>(...code: string[] | [...string[], (component: ModuleExports) => React.ComponentType<T>]) {
+    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => React.ComponentType<T>;
     const newCode = code as string[];
 
     const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
