@@ -4,35 +4,66 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { UNCONFIGURABLE_PROPERTIES } from "@utils/misc";
 import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
-import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, waitForSubscriptions, wreq } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, moduleListeners, OnChunksLoaded, waitForSubscriptions, WebpackRequire, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
-const modulesProxyhandler: ProxyHandler<any> = {
+const allProxiedModules = new Set<WebpackRequire["m"]>();
+
+const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (target: any, ...args: any[]) => Reflect[propName](target, ...args)]
+        [propName, (...args: any[]) => Reflect[propName](...args)]
     )),
-    get: (target, p: string) => {
-        const mod = Reflect.get(target, p);
+    get: (target, p) => {
+        const propValue = Reflect.get(target, p);
 
-        // If the property is not a module id, return the value of it without trying to patch
-        if (mod == null || mod.$$vencordOriginal != null || Number.isNaN(Number(p))) return mod;
+        // If the property is not a number, we are not dealing with a module factory
+        // $$vencordOriginal means the factory is already patched, $$vencordRequired means it has already been required
+        // and replaced with the original
+        // @ts-ignore
+        if (propValue == null || Number.isNaN(Number(p)) || propValue.$$vencordOriginal != null || propValue.$$vencordRequired === true) {
+            return propValue;
+        }
 
-        const patchedMod = patchFactory(p, mod);
-        Reflect.set(target, p, patchedMod);
+        // This patches factories if eagerPatches are disabled
+        const patchedFactory = patchFactory(p, propValue);
+        Reflect.set(target, p, patchedFactory);
 
-        return patchedMod;
+        return patchedFactory;
     },
-    set: (target, p, newValue) => Reflect.set(target, p, newValue),
+    set: (target, p, newValue) => {
+        // $$vencordRequired means we are resetting the factory to its original after being required
+        // If the property is not a number, we are not dealing with a module factory
+        if (!Settings.eagerPatches || newValue?.$$vencordRequired === true || Number.isNaN(Number(p))) {
+            return Reflect.set(target, p, newValue);
+        }
+
+        const existingFactory = Reflect.get(target, p);
+
+        // Check if this factory is already patched
+        // @ts-ignore
+        if (existingFactory?.$$vencordOriginal === newValue) {
+            return true;
+        }
+
+        const patchedFactory = patchFactory(p, newValue);
+
+        // Modules are only patched once, so we need to set the patched factory on all the modules
+        for (const proxiedModules of allProxiedModules) {
+            Reflect.set(proxiedModules, p, patchedFactory);
+        }
+
+        return true;
+    },
     ownKeys: target => {
         const keys = Reflect.ownKeys(target);
         for (const key of UNCONFIGURABLE_PROPERTIES) {
@@ -48,7 +79,7 @@ const modulesProxyhandler: ProxyHandler<any> = {
 Object.defineProperty(Function.prototype, "O", {
     configurable: true,
 
-    set(onChunksLoaded: any) {
+    set(this: WebpackRequire, onChunksLoaded: WebpackRequire["O"]) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
         // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
@@ -59,14 +90,16 @@ Object.defineProperty(Function.prototype, "O", {
             delete (Function.prototype as any).O;
 
             const originalOnChunksLoaded = onChunksLoaded;
-            onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
+            onChunksLoaded = function (result, chunkIds, callback, priority) {
                 if (callback != null && initCallbackRegex.test(callback.toString())) {
                     Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
-                        configurable: true
+                        configurable: true,
+                        enumerable: true,
+                        writable: true
                     });
 
-                    const wreq = this as WebpackInstance;
+                    const wreq = this;
 
                     const originalCallback = callback;
                     callback = function (this: unknown) {
@@ -85,36 +118,40 @@ Object.defineProperty(Function.prototype, "O", {
                 }
 
                 originalOnChunksLoaded.apply(this, arguments as any);
-            };
+            } as WebpackRequire["O"];
 
             onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
 
             // Returns whether a chunk has been loaded
             Object.defineProperty(onChunksLoaded, "j", {
-                set(v) {
+                configurable: true,
+
+                set(v: OnChunksLoaded["j"]) {
+                    // @ts-ignore
                     delete onChunksLoaded.j;
                     onChunksLoaded.j = v;
                     originalOnChunksLoaded.j = v;
-                },
-                configurable: true
+                }
             });
         }
 
         Object.defineProperty(this, "O", {
             value: onChunksLoaded,
-            configurable: true
+            configurable: true,
+            enumerable: true,
+            writable: true
         });
     }
 });
 
 // wreq.m is the webpack object containing module factories.
-// This is pre-populated with modules, and is also populated via webpackGlobal.push
-// The sentry module also has their own webpack with a pre-populated modules object, so this also targets that
-// We replace its prototype with our proxy, which is responsible for returning patched module factories containing our patches
+// This is pre-populated with module factories, and is also populated via webpackGlobal.push
+// The sentry module also has their own webpack with a pre-populated module factories object, so this also targets that
+// We replace its prototype with our proxy, which is responsible for patching the module factories
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
-    set(originalModules: any) {
+    set(this: WebpackRequire, originalModules: WebpackRequire["m"]) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
@@ -122,36 +159,48 @@ Object.defineProperty(Function.prototype, "m", {
             logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
 
             // The new object which will contain the factories
-            const modules = Object.assign({}, originalModules);
+            const proxiedModules: WebpackRequire["m"] = {};
 
-            // Clear the original object so pre-populated factories are patched
-            for (const propName in originalModules) {
-                delete originalModules[propName];
+            for (const id in originalModules) {
+                // If we have eagerPatches enabled we have to patch the pre-populated factories
+                if (Settings.eagerPatches) {
+                    proxiedModules[id] = patchFactory(id, originalModules[id]);
+                } else {
+                    proxiedModules[id] = originalModules[id];
+                }
+
+                // Clear the original object so pre-populated factories are patched if eagerPatches are disabled
+                delete originalModules[id];
             }
 
-            Object.setPrototypeOf(originalModules, new Proxy(modules, modulesProxyhandler));
+            // @ts-ignore
+            originalModules.$$proxiedModules = proxiedModules;
+            allProxiedModules.add(proxiedModules);
+            Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyhandler));
         }
 
         Object.defineProperty(this, "m", {
             value: originalModules,
-            configurable: true
+            configurable: true,
+            enumerable: true,
+            writable: true
         });
     }
 });
 
 let webpackNotInitializedLogged = false;
 
-function patchFactory(id: string, mod: (module: any, exports: any, require: WebpackInstance) => void) {
+function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     for (const factoryListener of factoryListeners) {
         try {
-            factoryListener(mod);
+            factoryListener(factory);
         } catch (err) {
             logger.error("Error in Webpack factory listener:\n", err, factoryListener);
         }
     }
 
-    const originalMod = mod;
-    const patchedBy = new Set();
+    const originalFactory = factory;
+    const patchedBy = new Set<string>();
 
     // Discords Webpack chunks for some ungodly reason contain random
     // newlines. Cyn recommended this workaround and it seems to work fine,
@@ -162,7 +211,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
     // cause issues.
     //
     // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + mod.toString().replaceAll("\n", "");
+    let code: string = "0," + factory.toString().replaceAll("\n", "");
 
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
@@ -177,14 +226,14 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
         patchedBy.add(patch.plugin);
 
         const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
-        const previousMod = mod;
+        const previousFactory = factory;
         const previousCode = code;
 
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (replacement.predicate && !replacement.predicate()) continue;
 
-            const lastMod = mod;
+            const lastFactory = factory;
             const lastCode = code;
 
             canonicalizeReplacement(replacement, patch.plugin);
@@ -193,7 +242,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
                 const newCode = executePatch(replacement.match, replacement.replace as string);
                 if (newCode === code) {
                     if (!patch.noWarn) {
-                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(id)}): ${replacement.match}`);
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
                         }
@@ -201,7 +250,7 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
 
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
-                        mod = previousMod;
+                        factory = previousFactory;
                         code = previousCode;
                         patchedBy.delete(patch.plugin);
                         break;
@@ -211,9 +260,9 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
                 }
 
                 code = newCode;
-                mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+                factory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
             } catch (err) {
-                logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
+                logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(id)}): ${replacement.match}\n`, err);
 
                 if (IS_DEV) {
                     const changeSize = code.length - lastCode.length;
@@ -252,12 +301,12 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
 
                 if (patch.group) {
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                    mod = previousMod;
+                    factory = previousFactory;
                     code = previousCode;
                     break;
                 }
 
-                mod = lastMod;
+                factory = lastFactory;
                 code = lastCode;
             }
         }
@@ -265,24 +314,30 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    function patchedFactory(module: any, exports: any, require: WebpackInstance) {
+    const patchedFactory: ModuleFactory = (module, exports, require) => {
+        // @ts-ignore
+        originalFactory.$$vencordRequired = true;
+        for (const proxiedModules of allProxiedModules) {
+            proxiedModules[id] = originalFactory;
+        }
+
         if (wreq == null && IS_DEV) {
             if (!webpackNotInitializedLogged) {
                 webpackNotInitializedLogged = true;
                 logger.error("WebpackRequire was not initialized, running modules without patches instead.");
             }
 
-            return void originalMod(module, exports, require);
+            return void originalFactory(module, exports, require);
         }
 
         try {
-            mod(module, exports, require);
+            factory(module, exports, require);
         } catch (err) {
             // Just rethrow Discord errors
-            if (mod === originalMod) throw err;
+            if (factory === originalFactory) throw err;
 
             logger.error("Error in patched module", err);
-            return void originalMod(module, exports, require);
+            return void originalFactory(module, exports, require);
         }
 
         // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
@@ -295,8 +350,8 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
             Object.defineProperty(require.c, id, {
                 value: require.c[id],
                 configurable: true,
-                writable: true,
-                enumerable: false
+                enumerable: false,
+                writable: true
             });
             return;
         }
@@ -322,11 +377,11 @@ function patchFactory(id: string, mod: (module: any, exports: any, require: Webp
                 logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
             }
         }
-    }
+    };
 
-    patchedFactory.toString = originalMod.toString.bind(originalMod);
+    patchedFactory.toString = originalFactory.toString.bind(originalFactory);
     // @ts-ignore
-    patchedFactory.$$vencordOriginal = originalMod;
+    patchedFactory.$$vencordOriginal = originalFactory;
 
     return patchedFactory;
 }

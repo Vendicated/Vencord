@@ -66,6 +66,11 @@ function VencordSettings() {
                 title: "Enable React Developer Tools",
                 note: "Requires a full restart"
             },
+            {
+                key: "eagerPatches",
+                title: "Apply Vencord patches before they are needed",
+                note: "Increases startup timing, but may make app usage more fluid. Note that the difference of having this on or off is minimal."
+            },
             !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",

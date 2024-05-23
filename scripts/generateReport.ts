@@ -41,7 +41,7 @@ const browser = await pup.launch({
 const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 
-function maybeGetError(handle: JSHandle) {
+async function maybeGetError(handle: JSHandle) {
     return (handle as JSHandle<Error>)?.getProperty("message")
         .then(m => m.jsonValue());
 }
@@ -285,7 +285,7 @@ async function runtime(token: string) {
         Object.defineProperty(navigator, "languages", {
             get: function () {
                 return ["en-US", "en"];
-            },
+            }
         });
 
         // Monkey patch Logger to not log with custom css
@@ -323,6 +323,9 @@ async function runtime(token: string) {
                 Vencord.Plugins.patches.push(patch);
             });
         });
+
+        // Enable eagerPatches to make all patches apply regardless of the module being required
+        Vencord.Settings.eagerPatches = true;
 
         let wreq: typeof Vencord.Webpack.wreq;
 
@@ -383,7 +386,7 @@ async function runtime(token: string) {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
                     )
             );
 
@@ -395,7 +398,7 @@ async function runtime(token: string) {
                         continue;
                     }
 
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                    if (wreq.m[entryPoint]) wreq(entryPoint);
                 } catch (err) {
                     console.error(err);
                 }
@@ -456,17 +459,18 @@ async function runtime(token: string) {
         });
 
         await chunksSearchingDone;
+        wreq = wreq!;
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const allChunks = [] as string[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -487,16 +491,10 @@ async function runtime(token: string) {
 
             // Loads and requires a chunk
             if (!isWasm) {
-                await wreq.e(id as any);
-                if (wreq.m[id]) wreq(id as any);
+                await wreq.e(id);
+                if (wreq.m[id]) wreq(id);
             }
         }));
-
-        // Call the getter for all the values in the modules object
-        // So modules that were not required get patched by our proxy
-        for (const id in wreq!.m) {
-            wreq!.m[id];
-        }
 
         console.log("[PUP_DEBUG]", "Finished loading all chunks!");
 

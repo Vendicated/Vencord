@@ -10,10 +10,10 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { ProxyInner, proxyInner, proxyInnerValue } from "@utils/proxyInner";
 import { AnyObject } from "@utils/types";
-import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { GenericStore } from "./common";
+import { ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -24,10 +24,10 @@ export let _resolveReady: () => void;
  */
 export const onceReady = new Promise<void>(r => _resolveReady = r);
 
-export let wreq: WebpackInstance;
-export let cache: WebpackInstance["c"];
+export let wreq: WebpackRequire;
+export let cache: WebpackRequire["c"];
 
-export type FilterFn = (mod: any) => boolean;
+export type FilterFn = (module: ModuleExports) => boolean;
 
 export const filters = {
     byProps: (...props: string[]): FilterFn => {
@@ -77,15 +77,15 @@ export const filters = {
     }
 };
 
-export type ModCallbackFn = (mod: any) => void;
-export type ModCallbackFnWithId = (mod: any, id: string) => void;
+export type ModCallbackFn = (mod: ModuleExports) => void;
+export type ModCallbackFnWithId = (mod: ModuleExports, id: PropertyKey) => void;
 
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
 export const moduleListeners = new Set<ModCallbackFnWithId>();
-export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
-export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
+export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const beforeInitListeners = new Set<(wreq: WebpackRequire) => void>();
 
-export function _initWebpack(webpackRequire: WebpackInstance) {
+export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
 }
@@ -390,7 +390,7 @@ export function cacheFindAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
-    const ret = [] as any[];
+    const ret: ModuleExports[] = [];
     for (const key in cache) {
         const mod = cache[key];
         if (!mod?.exports) continue;
@@ -431,7 +431,7 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
     }
 
     let found = 0;
-    const results = Array(length);
+    const results: ModuleExports[] = Array(length);
 
     outer:
     for (const key in cache) {
@@ -726,7 +726,7 @@ export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtrac
  * @returns Mapping of found modules
  */
 export function search(...filters: Array<string | RegExp>) {
-    const results = {} as Record<number, Function>;
+    const results: WebpackRequire["m"] = {};
     const factories = wreq.m;
     outer:
     for (const id in factories) {
@@ -750,18 +750,18 @@ export function search(...filters: Array<string | RegExp>) {
  * so putting breakpoints or similar will have no effect.
  * @param id The id of the module to extract
  */
-export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
+export function extract(id: PropertyKey) {
+    const mod = wreq.m[id];
     if (!mod) return null;
 
     const code = `
-// [EXTRACTED] WebpackModule${id}
+// [EXTRACTED] WebpackModule${String(id)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
 0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+//# sourceURL=ExtractedWebpackModule${String(id)}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+    const extracted: ModuleFactory = (0, eval)(code);
+    return extracted;
 }
