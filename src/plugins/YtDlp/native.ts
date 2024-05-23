@@ -12,11 +12,11 @@ import path from "path";
 
 type Format = "video" | "audio" | "gif";
 type DownloadOptions = {
-    url: string;
-    format?: Format;
-    gifQuality?: 1 | 2 | 3 | 4 | 5;
-    additional_arguments?: string[];
-    maxFileSize?: number;
+	url: string;
+	format?: Format;
+	gifQuality?: 1 | 2 | 3 | 4 | 5;
+	additional_arguments?: string[];
+	maxFileSize?: number;
 };
 
 let workdir: string | null = null;
@@ -106,11 +106,11 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
 
     const audio = {
         noFfmpeg: "ba[ext=mp3]{TOT_SIZE}/wa[ext=mp3]{TOT_SIZE}",
-        ffmpeg: "ba*{TOT_SIZE}/ba{TOT_SIZE}/wa{TOT_SIZE}/wa*{TOT_SIZE}/ba*"
+        ffmpeg: "ba*{TOT_SIZE}/ba{TOT_SIZE}/wa*{TOT_SIZE}/ba*"
     };
     const video = {
-        noFfmpeg: "b{TOT_SIZE}[ext=webm]/b{TOT_SIZE}[ext=mp4]/w{TOT_SIZE}",
-        ffmpeg: "b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w{TOT_SIZE}/b*+ba",
+        noFfmpeg: "b{TOT_SIZE}{HEIGHT}[ext=webm]/b{TOT_SIZE}{HEIGHT}[ext=mp4]/w{HEIGHT}{TOT_SIZE}",
+        ffmpeg: "b*{VID_SIZE}{HEIGHT}+ba{AUD_SIZE}/b{TOT_SIZE}{HEIGHT}/b*{HEIGHT}+ba",
     };
     const gif = {
         ffmpeg: "bv{TOT_SIZE}/wv{TOT_SIZE}"
@@ -133,7 +133,8 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
     const format_string = (ffmpegAvailable ? format_group.ffmpeg : format_group.noFfmpeg)
         ?.replaceAll("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${maxFileSize}]` : "")
         .replaceAll("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
-        .replaceAll("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
+        .replaceAll("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "")
+        .replaceAll("{HEIGHT}", "[height<=1080]");
     if (!format_string) throw "Gif format is only supported with ffmpeg.";
     log("Video formated calculated as ", format_string);
     log(`Based on: format=${format}, maxFileSize=${maxFileSize}, ffmpegAvailable=${ffmpegAvailable}`);
@@ -227,10 +228,10 @@ export async function execute(
     _: IpcMainInvokeEvent,
     opt: DownloadOptions
 ): Promise<{
-    buffer: Buffer;
-    title: string;
+	buffer: Buffer;
+	title: string;
 } | {
-    error: string;
+	error: string;
 }> {
     try {
         const m = await metadata(opt);
