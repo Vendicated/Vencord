@@ -285,7 +285,7 @@ async function runtime(token: string) {
         Object.defineProperty(navigator, "languages", {
             get: function () {
                 return ["en-US", "en"];
-            },
+            }
         });
 
         // Monkey patch Logger to not log with custom css

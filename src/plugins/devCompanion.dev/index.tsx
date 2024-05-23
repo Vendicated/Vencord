@@ -160,7 +160,8 @@ function initWs(isManual = false) {
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
                 const mod = candidates[keys[0]];
-                let src = String(mod.original ?? mod).replaceAll("\n", "");
+                // @ts-ignore
+                let src = String(mod.$$vencordOriginal ?? mod).replaceAll("\n", "");
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
