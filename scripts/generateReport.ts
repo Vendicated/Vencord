@@ -513,31 +513,41 @@ async function runtime(token: string) {
             try {
                 let result = null as any;
 
-                if (searchType === "webpackDependantLazy" || searchType === "webpackDependantLazyComponent") {
-                    const [factory] = args;
-                    result = factory();
-                } else if (searchType === "extractAndLoadChunks") {
-                    const [code, matcher] = args;
-
-                    const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) {
-                        result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
+                switch (searchType) {
+                    case "webpackDependantLazy":
+                    case "webpackDependantLazyComponent": {
+                        const [factory] = args;
+                        result = factory();
+                        break;
                     }
-                } else {
-                    const findResult = args.shift();
+                    case "extractAndLoadChunks": {
+                        const [code, matcher] = args;
 
-                    if (findResult != null) {
-                        if (findResult.$$vencordCallbackCalled != null && findResult.$$vencordCallbackCalled()) {
-                            result = findResult;
+                        const module = Vencord.Webpack.findModuleFactory(...code);
+                        if (module) {
+                            result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
                         }
 
-                        if (findResult[Vencord.Util.proxyInnerGet] != null) {
-                            result = findResult[Vencord.Util.proxyInnerValue];
+                        break;
+                    }
+                    default: {
+                        const findResult = args.shift();
+
+                        if (findResult != null) {
+                            if (findResult.$$vencordCallbackCalled != null && findResult.$$vencordCallbackCalled()) {
+                                result = findResult;
+                            }
+
+                            if (findResult[Vencord.Util.proxyInnerGet] != null) {
+                                result = findResult[Vencord.Util.proxyInnerValue];
+                            }
+
+                            if (findResult.$$vencordInner != null) {
+                                result = findResult.$$vencordInner();
+                            }
                         }
 
-                        if (findResult.$$vencordInner != null) {
-                            result = findResult.$$vencordInner();
-                        }
+                        break;
                     }
                 }
 
