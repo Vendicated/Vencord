@@ -157,7 +157,7 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
             ext = "mp3";
             break;
         case "video":
-            ffmpegArgs = ["-i", p(file), "-b:v", `${Math.floor(target_bits * 0.8)}k`, "-b:a", `${Math.floor(target_bits * 0.2)}k`, "-y", p("remux.mp4")];
+            ffmpegArgs = ["-i", p(file), "-b:v", `${Math.floor((target_bits * 0.8) / 1000)}k`, "-b:a", `${Math.floor(target_bits * 0.2)}k`, "-y", p("remux.mp4")];
             ext = "mp4";
             break;
         case "gif":
