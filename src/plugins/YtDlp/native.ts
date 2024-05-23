@@ -68,35 +68,6 @@ function ffmpeg(args: string[]): Promise<string> {
 
 }
 
-function argsFromFormat(format?: "video" | "audio" | "gif", max_file_size?: number) {
-    // Due to a limitation in yt-dlp, we have to manually determine the size of video and audio
-    const HAS_LIMIT = !!max_file_size;
-    const MAX_VIDEO_SIZE = HAS_LIMIT ? max_file_size * 0.8 : 0;
-    const MAX_AUDIO_SIZE = HAS_LIMIT ? max_file_size * 0.2 : 0;
-
-    switch (format) {
-        case "audio": {
-            const FORMAT_STRING = "ba*{TOT_SIZE}/wa/w"
-                .replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${max_file_size}]` : "");
-            return ["-f", FORMAT_STRING, "-x", "--audio-format", "mp3"];
-        }
-        // fuck this shit
-        // case "gif": {
-        //     const FORMAT_STRING = "bv{TOT_SIZE}/wv";
-        //     return ["-f", FORMAT_STRING, "--remux-video", "gif"];
-        // }
-        case "video":
-        default: {
-            const FORMAT_STRING = "b*[ext=webm]{VID_SIZE}+ba{AUD_SIZE}/b*[ext=mp4]{VID_SIZE}+ba{AUD_SIZE}/b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w"
-                .replace("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
-                .replace("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "")
-                .replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${max_file_size}]` : "");
-            const REMUX_STRING = "webm>webm/mp4";
-            return ["-f", FORMAT_STRING, "--remux-video", REMUX_STRING];
-        }
-    }
-}
-
 export async function start(_: IpcMainInvokeEvent, _workdir: string | undefined) {
     _workdir ||= fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
     if (!fs.existsSync(_workdir)) fs.mkdirSync(_workdir, { recursive: true });
@@ -111,15 +82,6 @@ export async function stop(_: IpcMainInvokeEvent) {
     }
 }
 
-function executePipeline(pipeline: ((...args: any[]) => any | Promise<any>)[], options: DownloadOptions) {
-    pipeline.reduce(async (output, next) => {
-        try {
-            return next(output, options);
-        } catch (e) {
-            throw new Error(`Failed to execute pipeline, error at ${next.name}:\n${e}`);
-        }
-    }, Promise.resolve());
-}
 async function metadata(options: DownloadOptions) {
     stdout_global = "";
     const metadata = JSON.parse(await ytdlp(["-J", options.url, "--no-warnings"]));
