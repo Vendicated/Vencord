@@ -122,9 +122,9 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize: maxFi
     }
 
     const format_string = (ffmpegAvailable ? format_group.ffmpeg : format_group.noFfmpeg)
-        ?.replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${maxFileSize}]` : "")
-        .replace("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
-        .replace("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
+        ?.replaceAll("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${maxFileSize}]` : "")
+        .replaceAll("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
+        .replaceAll("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
     if (!format_string) throw "Gif format is only supported with ffmpeg.";
     return { format: format_string, videoTitle };
 }
