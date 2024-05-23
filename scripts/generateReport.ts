@@ -325,7 +325,7 @@ async function runtime(token: string) {
         });
 
         // Enable eagerPatches to make all patches apply regardless of the module being required
-        Vencord.Settings.eagerPatches = false;
+        Vencord.Settings.eagerPatches = true;
 
         let wreq: typeof Vencord.Webpack.wreq;
 
