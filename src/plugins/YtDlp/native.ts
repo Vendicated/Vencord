@@ -106,11 +106,11 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
 
     const audio = {
         noFfmpeg: "ba[ext=mp3]{TOT_SIZE}/wa[ext=mp3]{TOT_SIZE}",
-        ffmpeg: "ba*{TOT_SIZE}/ba{TOT_SIZE}/wa{TOT_SIZE}/wa*{TOT_SIZE}"
+        ffmpeg: "ba*{TOT_SIZE}/ba{TOT_SIZE}/wa{TOT_SIZE}/wa*{TOT_SIZE}/ba*"
     };
     const video = {
         noFfmpeg: "b{TOT_SIZE}[ext=webm]/b{TOT_SIZE}[ext=mp4]/w{TOT_SIZE}",
-        ffmpeg: "b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w{TOT_SIZE}",
+        ffmpeg: "b*{VID_SIZE}+ba{AUD_SIZE}/b{TOT_SIZE}/w{TOT_SIZE}/b*+ba",
     };
     const gif = {
         ffmpeg: "bv{TOT_SIZE}/wv{TOT_SIZE}"
@@ -139,12 +139,19 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
     log(`Based on: format=${format}, maxFileSize=${maxFileSize}, ffmpegAvailable=${ffmpegAvailable}`);
     return { format: format_string, videoTitle };
 }
-async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url }: DownloadOptions) {
+async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url, format: usrFormat }: DownloadOptions) {
     cleanVideoFiles();
-    const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1", ...(ffmpegAvailable ? ["--remux-video", "mp4"] : [])];
+    const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
+    const remuxArgs = ffmpegAvailable
+        ? usrFormat === "video"
+            ? ["--remux-video", "webm>webm/mp4"]
+            : usrFormat === "audio"
+                ? ["--remux-audio", "mp3"]
+                : []
+        : [];
     const customArgs = additional_arguments?.filter(Boolean) || [];
 
-    await ytdlp([url, ...baseArgs, ...customArgs]);
+    await ytdlp([url, ...baseArgs, ...remuxArgs, ...customArgs]);
     const file = fs.readdirSync(getdir()).find(f => f.startsWith("download."));
     if (!file) throw "No video file was found!";
     return { file, videoTitle };
