@@ -91,7 +91,7 @@ Object.defineProperty(Function.prototype, "O", {
 
             const originalOnChunksLoaded = onChunksLoaded;
             onChunksLoaded = function (result, chunkIds, callback, priority) {
-                if (callback != null && initCallbackRegex.test(callback.toString())) {
+                if (callback != null && initCallbackRegex.test(String(callback))) {
                     Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true,
@@ -218,7 +218,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     // cause issues.
     //
     // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + factory.toString().replaceAll("\n", "");
+    let code: string = "0," + String(factory).replaceAll("\n", "");
 
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];

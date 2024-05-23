@@ -218,7 +218,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
     outer:
     for (const id in wreq.m) {
-        const str = wreq.m[id].toString();
+        const str = String(wreq.m[id]);
 
         for (const c of code) {
             if (!str.includes(c)) continue outer;
@@ -420,7 +420,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return;
     }
 
-    const match = module.toString().match(canonicalizeMatch(matcher));
+    const match = String(module).match(canonicalizeMatch(matcher));
     if (!match) {
         const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
@@ -501,7 +501,7 @@ export function search(...filters: Array<string | RegExp>) {
     outer:
     for (const id in factories) {
         const factory = factories[id];
-        const str: string = factory.toString();
+        const str: string = String(factory);
         for (const filter of filters) {
             if (typeof filter === "string" && !str.includes(filter)) continue outer;
             if (filter instanceof RegExp && !filter.test(str)) continue outer;
@@ -529,7 +529,7 @@ export function extract(id: PropertyKey) {
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-0,${mod.toString()}
+0,${String(mod)}
 //# sourceURL=ExtractedWebpackModule${String(id)}
 `;
     const extracted: ModuleFactory = (0, eval)(code);

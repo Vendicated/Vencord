@@ -441,7 +441,7 @@ async function runtime(token: string) {
 
             Vencord.Webpack.factoryListeners.add(factory => {
                 let isResolved = false;
-                searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+                searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
 
                 chunksSearchPromises.push(() => isResolved);
             });
@@ -451,7 +451,7 @@ async function runtime(token: string) {
             setTimeout(() => {
                 for (const factoryId in wreq.m) {
                     let isResolved = false;
-                    searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+                    searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
 
                     chunksSearchPromises.push(() => isResolved);
                 }
@@ -470,7 +470,7 @@ async function runtime(token: string) {
         const allChunks = [] as string[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of String(wreq.u).matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -525,7 +525,7 @@ async function runtime(token: string) {
                     const [code, matcher] = args;
 
                     const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) result = module.toString().match(canonicalizeMatch(matcher));
+                    if (module) result = String(module).match(canonicalizeMatch(matcher));
                 } else {
                     // @ts-ignore
                     result = Vencord.Webpack[method](...args);
@@ -534,8 +534,8 @@ async function runtime(token: string) {
                 if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
             } catch (e) {
                 let logMessage = searchType;
-                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
+                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${String(args[0]).slice(0, 147)}...)`;
+                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${String(args[1])})`;
                 else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                 console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
