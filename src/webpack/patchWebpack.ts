@@ -18,7 +18,7 @@ const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (target: WebpackRequire["m"], ...args: any[]) => Reflect[propName](target, ...args)]
+        [propName, (...args: any[]) => Reflect[propName](...args)]
     )),
     get: (target, p) => {
         const mod = Reflect.get(target, p);
