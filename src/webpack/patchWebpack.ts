@@ -11,7 +11,7 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, moduleListeners, subscriptions, WebpackRequire, wreq } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, moduleListeners, OnChunksLoaded, subscriptions, WebpackRequire, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
@@ -93,7 +93,7 @@ Object.defineProperty(Function.prototype, "O", {
             Object.defineProperty(onChunksLoaded, "j", {
                 configurable: true,
 
-                set(v) {
+                set(v: OnChunksLoaded["j"]) {
                     // @ts-ignore
                     delete onChunksLoaded.j;
                     onChunksLoaded.j = v;
