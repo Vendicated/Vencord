@@ -14,6 +14,7 @@ type Format = "video" | "audio" | "gif";
 type DownloadOptions = {
     url: string;
     format?: Format;
+    gifQuality?: 1 | 2 | 3 | 4 | 5;
     additional_arguments?: string[];
     maxFileSize?: number;
 };
@@ -137,7 +138,7 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
     if (!file) throw "No video file was found!";
     return { file, videoTitle };
 }
-async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, maxFileSize }: DownloadOptions) {
+async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, maxFileSize, gifQuality }: DownloadOptions) {
     const sourceExtension = file.split(".").pop();
     if (!ffmpegAvailable) return { file, videoTitle, extension: sourceExtension };
 
@@ -174,7 +175,28 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
             ext = "mp4";
             break;
         case "gif":
-            ffmpegArgs = ["-i", p(file), "-vf", "fps=10,scale=w=480:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=64[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5", "-loop", "0", "-bufsize", "1M", "-y", p("remux.gif")];
+            let fps: number, width: number, colors: number, bayer_scale: number;
+            // WARNING: these parameters have been arbitrarily chosen, optimization is welcome!
+            switch (gifQuality) {
+                case 1:
+                    fps = 5, width = 360, colors = 24, bayer_scale = 5;
+                    break;
+                case 2:
+                    fps = 10, width = 420, colors = 32, bayer_scale = 5;
+                    break;
+                default:
+                case 3:
+                    fps = 15, width = 480, colors = 64, bayer_scale = 4;
+                    break;
+                case 4:
+                    fps = 20, width = 540, colors = 64, bayer_scale = 3;
+                    break;
+                case 5:
+                    fps = 30, width = 720, colors = 128, bayer_scale = 1;
+                    break;
+            }
+
+            ffmpegArgs = ["-i", p(file), "-vf", `fps=${fps},scale=w=${width}:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=${colors}[p];[s1][p]paletteuse=dither=bayer:bayer_scale=${bayer_scale}`, "-loop", "0", "-bufsize", "1M", "-y", p("remux.gif")];
             ext = "gif";
             break;
         default:

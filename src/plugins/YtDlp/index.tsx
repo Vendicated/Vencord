@@ -152,7 +152,19 @@ export default definePlugin({
                 { name: "Audio", value: "audio", label: "Audio" },
                 { name: "GIF", value: "gif", label: "GIF" }
             ],
-            required: false
+            required: false,
+        }, {
+            name: "gif_quality",
+            type: ApplicationCommandOptionType.INTEGER,
+            description: "The quality level when using GIF. Try lowering this number if the GIF is too large.",
+            required: false,
+            choices: [
+                { name: "5", value: "5", label: "5" },
+                { name: "4", value: "4", label: "4" },
+                { name: "3", value: "3", label: "3" },
+                { name: "2", value: "2", label: "2" },
+                { name: "1", value: "1", label: "1" }
+            ]
         }, {
             name: "additional_args",
             description: "Additional JSON-parsable array of arguments to pass to yt-dlp. These will take precedence over arguments set in the settings.",
@@ -166,12 +178,14 @@ export default definePlugin({
 
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
+            const gifQuality = parseInt(findOption<string>(args, "gif_quality", "3")) as 1 | 2 | 3 | 4 | 5;
             const addArgs = findOption<string>(args, "additional_args", "");
 
             return await download(ctx.channel, {
                 url,
                 format,
-                addArgs: add_args
+                gifQuality,
+                addArgs
             });
         }
     }, {
@@ -197,15 +211,17 @@ export default definePlugin({
 });
 
 async function download(channel: Channel, {
-    url, format, addArgs
+    url, format, addArgs, gifQuality
 }: {
     url: string;
     format: "video" | "audio" | "gif";
     addArgs: string;
+    gifQuality: 1 | 2 | 3 | 4 | 5;
 }) {
     const promise = Native.execute({
         url,
         format,
+        gifQuality,
         additional_arguments: [
             ...parseAdditionalArgs(settings.store.additionalArguments),
             ...parseAdditionalArgs(addArgs)
