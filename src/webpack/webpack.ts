@@ -501,7 +501,7 @@ export function search(...filters: Array<string | RegExp>) {
     outer:
     for (const id in factories) {
         // @ts-ignore
-        const factory = factories[id].$$vencordOriginal ?? factories[id];
+        const factory = factories[id];
         const str: string = factory.toString();
         for (const filter of filters) {
             if (typeof filter === "string" && !str.includes(filter)) continue outer;
