@@ -324,6 +324,9 @@ async function runtime(token: string) {
             });
         });
 
+        // Enable eagerPatches to make all patches apply regardless of the module being required
+        Vencord.Settings.eagerPatches = false;
+
         let wreq: typeof Vencord.Webpack.wreq;
 
         const { canonicalizeMatch, Logger } = Vencord.Util;
@@ -492,12 +495,6 @@ async function runtime(token: string) {
                 if (wreq.m[id]) wreq(id);
             }
         }));
-
-        // Call the getter for all the values in the modules object
-        // So modules that were not required get patched by our proxy
-        for (const id in wreq.m) {
-            wreq.m[id];
-        }
 
         console.log("[PUP_DEBUG]", "Finished loading all chunks!");
 
