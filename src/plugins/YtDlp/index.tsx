@@ -238,8 +238,12 @@ async function download(channel: Channel, {
     const data = await sendProgress(channel.id, promise);
 
     if ("error" in data) {
+        // Open the modal if the error is due to missing formats (could be fixed by downloading ffmpeg)
+        if (data.error.includes("--list-formats") && !(await Native.isFfmpegAvailable()))
+            return sendBotMessage(channel.id, { content: "No good streams found. Consider installing ffmpeg to increase the likelihood of a successful stream." }), openDependencyModal();
+
         return sendBotMessage(channel.id, {
-            content: `Failed to download video: ${data.error}`
+            content: `Failed to download video: \`${data.error}\``
         });
     }
 
