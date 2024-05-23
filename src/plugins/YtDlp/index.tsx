@@ -128,6 +128,22 @@ const settings = definePluginSettings({
         description: "The quality level to use if no value is specified when downloading gifs. A number between 1 and 5.",
         default: 3,
     }
+}, {
+    additionalArguments: {
+        isValid(value) {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch {
+                return false;
+            }
+        },
+    },
+    defaultGifQuality: {
+        isValid(value) {
+            return value >= 1 && value <= 5;
+        }
+    }
 });
 
 export default definePlugin({
