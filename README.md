@@ -153,7 +153,7 @@ https://discord.gg/5Xh2W87egW
 
 Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for helping me when needed.
 
-Thank you to [Vendicated](https://github.com/Vendicated) for creating Vencord.
+Thank you to [Vendicated](https://github.com/Vendicated) for creating [Vencord](https://github.com/Vendicated/Vencord).
 
 ## Star History
 
