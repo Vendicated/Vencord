@@ -141,7 +141,7 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
 }
 async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url }: DownloadOptions) {
     cleanVideoFiles();
-    const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
+    const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1", ...(ffmpegAvailable ? ["--remux-video", "mp4"] : [])];
     const customArgs = additional_arguments?.filter(Boolean) || [];
 
     await ytdlp([url, ...baseArgs, ...customArgs]);
