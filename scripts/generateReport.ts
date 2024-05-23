@@ -386,7 +386,7 @@ async function runtime(token: string) {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
