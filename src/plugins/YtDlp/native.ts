@@ -35,7 +35,11 @@ const cleanVideoFiles = () => {
 };
 const appendOut = (data: string) => ( // Makes carriage return (\r) work
     (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
+const log = (...data: string[]) => console.log(`[Plugin:yt-dlp] ${data.join(" ")}`);
+const error = (...data: string[]) => console.error(`[Plugin:yt-dlp] [ERROR] ${data.join(" ")}`);
 function ytdlp(args: string[]): Promise<string> {
+    let errorMsg = "";
+
     return new Promise<string>((resolve, reject) => {
         const yt = spawn("yt-dlp", args, {
             cwd: getdir(),
@@ -44,14 +48,17 @@ function ytdlp(args: string[]): Promise<string> {
         yt.stdout.on("data", data => appendOut(data));
         yt.stderr.on("data", data => {
             appendOut(data);
-            console.error(`stderr: ${data}`);
+            error(`yt-dlp encountered an error: ${data}`);
+            errorMsg += data;
         });
         yt.on("exit", code => {
-            code === 0 ? resolve(stdout_global) : reject(new Error(`yt-dlp exited with code ${code}`));
+            code === 0 ? resolve(stdout_global) : reject(new Error(errorMsg || `yt-dlp exited with code ${code}`));
         });
     });
 }
 function ffmpeg(args: string[]): Promise<string> {
+    let errorMsg = "";
+
     return new Promise<string>((resolve, reject) => {
         const yt = spawn("ffmpeg", args, {
             cwd: getdir(),
@@ -60,10 +67,11 @@ function ffmpeg(args: string[]): Promise<string> {
         yt.stdout.on("data", data => appendOut(data));
         yt.stderr.on("data", data => {
             appendOut(data);
-            console.error(`stderr: ${data}`);
+            error(`ffmpeg encountered an error: ${data}`);
+            errorMsg += data;
         });
         yt.on("exit", code => {
-            code === 0 ? resolve(stdout_global) : reject(new Error(`ffmpeg exited with code ${code}`));
+            code === 0 ? resolve(stdout_global) : reject(new Error(errorMsg || `ffmpeg exited with code ${code}`));
         });
     });
 
@@ -73,11 +81,12 @@ export async function start(_: IpcMainInvokeEvent, _workdir: string | undefined)
     _workdir ||= fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
     if (!fs.existsSync(_workdir)) fs.mkdirSync(_workdir, { recursive: true });
     workdir = _workdir;
-    console.log("[Plugin:yt-dlp] Using workdir: ", workdir);
+    log("Using workdir: ", workdir);
     return workdir;
 }
 export async function stop(_: IpcMainInvokeEvent) {
     if (workdir) {
+        log("Cleaning up workdir");
         fs.rmSync(workdir, { recursive: true });
         workdir = null;
     }
@@ -90,7 +99,7 @@ async function metadata(options: DownloadOptions) {
     stdout_global = "";
     return { videoTitle: metadata.title || "video" };
 }
-function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize: maxFileSize, format }: DownloadOptions) {
+function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, format }: DownloadOptions) {
     const HAS_LIMIT = !!maxFileSize;
     const MAX_VIDEO_SIZE = HAS_LIMIT ? maxFileSize * 0.8 : 0;
     const MAX_AUDIO_SIZE = HAS_LIMIT ? maxFileSize * 0.2 : 0;
@@ -126,6 +135,8 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize: maxFi
         .replaceAll("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
         .replaceAll("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
     if (!format_string) throw "Gif format is only supported with ffmpeg.";
+    log("Video formated calculated as ", format_string);
+    log(`Based on: format=${format}, maxFileSize=${maxFileSize}, ffmpegAvailable=${ffmpegAvailable}`);
     return { format: format_string, videoTitle };
 }
 async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url }: DownloadOptions) {
@@ -161,7 +172,6 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
     // ffmpeg tends to go above the target size, so I'm setting it to 7/8
     const targetBits = maxFileSize ? (maxFileSize * 7) / duration : 9999999;
     const kilobits = ~~(targetBits / 1024);
-    console.log(`[Plugin:yt-dlp] Target bitrate: ${kilobits.toFixed(2)}kbps`);
 
     let ffmpegArgs: string[] = [];
     let ext = "";
