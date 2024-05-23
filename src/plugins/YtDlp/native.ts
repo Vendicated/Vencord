@@ -232,12 +232,16 @@ export async function execute(
 } | {
     error: string;
 }> {
-    const m = await metadata(opt);
-    const f = genFormat(m, opt);
-    const d = await download(f, opt);
-    const r = await remux(d, opt);
-    const u = upload(r);
-    return u;
+    try {
+        const m = await metadata(opt);
+        const f = genFormat(m, opt);
+        const d = await download(f, opt);
+        const r = await remux(d, opt);
+        const u = upload(r);
+        return u;
+    } catch (e: any) {
+        return { error: e.toString() };
+    }
 }
 
 export function checkffmpeg(_?: IpcMainInvokeEvent) {
