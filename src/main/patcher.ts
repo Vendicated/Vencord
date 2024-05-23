@@ -73,6 +73,9 @@ if (!IS_VANILLA) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
                 options.webPreferences.sandbox = false;
+                // work around discord unloading when in background
+                options.webPreferences.backgroundThrottling = false;
+
                 if (settings.frameless) {
                     options.frame = false;
                 } else if (process.platform === "win32" && settings.winNativeTitleBar) {
@@ -128,14 +131,8 @@ if (!IS_VANILLA) {
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
-    // Monkey patch commandLine to disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
-    const originalAppend = app.commandLine.appendSwitch;
-    app.commandLine.appendSwitch = function (...args) {
-        if (args[0] === "disable-features" && !args[1]?.includes("WidgetLayering")) {
-            args[1] += ",WidgetLayering";
-        }
-        return originalAppend.apply(this, args);
-    };
+    // work around discord unloading when in background
+    app.commandLine.appendSwitch("disable-renderer-backgrounding");
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }
