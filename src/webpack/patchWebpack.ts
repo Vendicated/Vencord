@@ -48,7 +48,7 @@ const modulesProxyhandler: ProxyHandler<WebpackRequire["m"]> = {
 Object.defineProperty(Function.prototype, "O", {
     configurable: true,
 
-    set(onChunksLoaded: WebpackRequire["O"]) {
+    set(this: WebpackRequire, onChunksLoaded: WebpackRequire["O"]) {
         // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
         // This ensures we actually got the right one
         // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
@@ -116,7 +116,7 @@ Object.defineProperty(Function.prototype, "O", {
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
-    set(originalModules: WebpackRequire["m"]) {
+    set(this: WebpackRequire, originalModules: WebpackRequire["m"]) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
