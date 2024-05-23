@@ -1,4 +1,4 @@
-### CURRENTLY ON HIATUS
+# CURRENTLY ON HIATUS
 
 We are on hiatus for the most part due to recent events involving our fork and others like us.
 
