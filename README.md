@@ -8,9 +8,7 @@ I also need to take some time to focus on my fellow developers discord bot that 
 
 # Equicord
 
-An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord
-
-Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for letting me rob your code sometimes :3
+An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord.
 
 ![image](https://i.ibb.co/xgNr2gq/image-2023-11-24-122019133.png)
 
@@ -101,6 +99,7 @@ Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync
 - VoiceChatUtilities by Dams and D3SOX
 - WhosWatching by fres
 - YoutubeDescription by arHSM
+
 </details>
 
 
@@ -149,6 +148,12 @@ After you have done this command, it will look like you are just installing Equi
 ## Join our Support/Community Server
 
 https://discord.gg/5Xh2W87egW
+
+## Credits
+
+Thank you to [Suncord](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for helping me when needed.
+
+Thank you to [Vendicated](https://github.com/Vendicated) for creating Vencord.
 
 ## Star History
 
