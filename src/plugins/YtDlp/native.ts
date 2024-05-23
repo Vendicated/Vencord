@@ -15,7 +15,7 @@ type DownloadOptions = {
     url: string;
     format?: Format;
     additional_arguments?: string[];
-    max_file_size?: number;
+    maxFileSize?: number;
 };
 
 let workdir: string | null = null;
@@ -89,10 +89,10 @@ async function metadata(options: DownloadOptions) {
     stdout_global = "";
     return { videoTitle: metadata.title || "video" };
 }
-function genFormat({ videoTitle }: { videoTitle: string; }, { max_file_size, format }: DownloadOptions) {
-    const HAS_LIMIT = !!max_file_size;
-    const MAX_VIDEO_SIZE = HAS_LIMIT ? max_file_size * 0.8 : 0;
-    const MAX_AUDIO_SIZE = HAS_LIMIT ? max_file_size * 0.2 : 0;
+function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize: maxFileSize, format }: DownloadOptions) {
+    const HAS_LIMIT = !!maxFileSize;
+    const MAX_VIDEO_SIZE = HAS_LIMIT ? maxFileSize * 0.8 : 0;
+    const MAX_AUDIO_SIZE = HAS_LIMIT ? maxFileSize * 0.2 : 0;
 
     const audio = {
         noFfmpeg: "ba[ext=mp3]{TOT_SIZE}/wa[ext=mp3]{TOT_SIZE}",
@@ -121,7 +121,7 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { max_file_size, for
     }
 
     const format_string = (ffmpegAvailable ? format_group.ffmpeg : format_group.noFfmpeg)
-        ?.replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${max_file_size}]` : "")
+        ?.replace("{TOT_SIZE}", HAS_LIMIT ? `[filesize<${maxFileSize}]` : "")
         .replace("{VID_SIZE}", HAS_LIMIT ? `[filesize<${MAX_VIDEO_SIZE}]` : "")
         .replace("{AUD_SIZE}", HAS_LIMIT ? `[filesize<${MAX_AUDIO_SIZE}]` : "");
     if (!format_string) throw "Gif format is only supported with ffmpeg.";
@@ -137,31 +137,44 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
     if (!file) throw "No video file was found!";
     return { file, videoTitle };
 }
-async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, max_file_size }: DownloadOptions) {
-    if (!ffmpegAvailable) {
-        const ext = file.split(".").pop();
-        if (!ext) throw "Invalid file extension.";
-        return { file, videoTitle, extension: ext };
+async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, maxFileSize }: DownloadOptions) {
+    const sourceExtension = file.split(".").pop();
+    if (!ffmpegAvailable) return { file, videoTitle, extension: sourceExtension };
+
+    // We only really need to remux if
+    // 1. The file is too big
+    // 2. The file is in a format not supported by discord
+    switch (format) {
+        case "audio":
+            if (sourceExtension === "mp3") return { file, videoTitle, extension: sourceExtension };
+            break;
+        case "video":
+            if (["webm", "mp4"].includes(sourceExtension ?? "")) return { file, videoTitle, extension: sourceExtension };
+            break;
     }
+    const fileSize = fs.statSync(p(file)).size;
+    if (format !== "gif" && (!maxFileSize || fileSize <= maxFileSize)) return { file, videoTitle, extension: sourceExtension };
 
     const duration = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", p(file)]).toString());
     if (isNaN(duration)) throw "Failed to get video duration.";
     // ffmpeg tends to go above the target size, so I'm setting it to 7/8
-    const target_bits = max_file_size ? max_file_size * 7 / duration : 0;
+    const targetBits = maxFileSize ? (maxFileSize * 7) / duration : 9999999;
+    const kilobits = ~~(targetBits / 1024);
+    console.log(`[Plugin:yt-dlp] Target bitrate: ${kilobits.toFixed(2)}kbps`);
 
     let ffmpegArgs: string[] = [];
     let ext = "";
     switch (format) {
         case "audio":
-            ffmpegArgs = ["-i", p(file), "-b:a", `${Math.floor(target_bits / 1000)}k`, "-y", p("remux.mp3")];
+            ffmpegArgs = ["-i", p(file), "-b:a", `${kilobits}k`, "-maxrate", `${kilobits}k`, "-bufsize", "1M", "-y", p("remux.mp3")];
             ext = "mp3";
             break;
         case "video":
-            ffmpegArgs = ["-i", p(file), "-b:v", `${Math.floor((target_bits * 0.8) / 1000)}k`, "-b:a", `${Math.floor(target_bits * 0.2)}k`, "-y", p("remux.mp4")];
+            ffmpegArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", p("remux.mp4")];
             ext = "mp4";
             break;
         case "gif":
-            ffmpegArgs = ["-i", p(file), "-vf", "fps=10,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse,", "-loop", "0", "-y", p("remux.gif")];
+            ffmpegArgs = ["-i", p(file), "-vf", "fps=10,scale=w=480:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=64[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5", "-loop", "0", "-bufsize", "1M", "-y", p("remux.gif")];
             ext = "gif";
             break;
         default:
@@ -173,7 +186,8 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
     await ffmpeg(ffmpegArgs);
     return { file: `remux.${ext}`, videoTitle, extension: ext };
 }
-function upload({ file, videoTitle, extension }: { file: string; videoTitle: string; extension: string; }) {
+function upload({ file, videoTitle, extension }: { file: string; videoTitle: string; extension: string | undefined; }) {
+    if (!extension) throw "Invalid extension.";
     const buffer = fs.readFileSync(p(file));
     return { buffer, title: `${videoTitle}.${extension}` };
 }
