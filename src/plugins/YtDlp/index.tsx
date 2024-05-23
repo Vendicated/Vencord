@@ -111,26 +111,22 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Additional arguments to pass to yt-dlp. Format: JSON-parsable array of strings, e.g. [\"--format\", \"bestvideo+bestaudio\"]",
         default: "[]",
-        restartNeeded: false,
         placeholder: '["--format", "bestvideo+bestaudio"]',
     },
     showProgress: {
         type: OptionType.BOOLEAN,
         description: "Send a Clyde message with the download progress.",
         default: true,
-        restartNeeded: false
     },
     showFfmpegWarning: {
         type: OptionType.BOOLEAN,
         description: "Show a warning message if ffmpeg is not installed.",
         default: true,
-        restartNeeded: false
     },
     defaultGifQuality: {
         type: OptionType.NUMBER,
         description: "The quality level to use if no value is specified when downloading gifs. A number between 1 and 5.",
         default: 3,
-        restartNeeded: false
     }
 });
 
