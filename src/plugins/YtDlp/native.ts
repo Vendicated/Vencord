@@ -156,16 +156,9 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
     // We only really need to remux if
     // 1. The file is too big
     // 2. The file is in a format not supported by discord
-    switch (format) {
-        case "audio":
-            if (sourceExtension === "mp3") return { file, videoTitle, extension: sourceExtension };
-            break;
-        case "video":
-            if (["webm", "mp4"].includes(sourceExtension ?? "")) return { file, videoTitle, extension: sourceExtension };
-            break;
-    }
+    const acceptableFormats = ["mp3", "mp4", "webm"];
     const fileSize = fs.statSync(p(file)).size;
-    if (format !== "gif" && (!maxFileSize || fileSize <= maxFileSize)) return { file, videoTitle, extension: sourceExtension };
+    if (acceptableFormats.includes(sourceExtension ?? "") && (!maxFileSize || fileSize <= maxFileSize)) return { file, videoTitle, extension: sourceExtension };
 
     const duration = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", p(file)]).toString());
     if (isNaN(duration)) throw "Failed to get video duration.";
