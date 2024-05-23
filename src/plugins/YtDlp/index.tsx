@@ -125,6 +125,12 @@ const settings = definePluginSettings({
         description: "Show a warning message if ffmpeg is not installed.",
         default: true,
         restartNeeded: false
+    },
+    defaultGifQuality: {
+        type: OptionType.NUMBER,
+        description: "The quality level to use if no value is specified when downloading gifs. A number between 1 and 5.",
+        default: 3,
+        restartNeeded: false
     }
 });
 
@@ -178,7 +184,7 @@ export default definePlugin({
 
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
-            const gifQuality = parseInt(findOption<string>(args, "gif_quality", "3")) as 1 | 2 | 3 | 4 | 5;
+            const gifQuality = parseInt(findOption<string>(args, "gif_quality", settings.store.defaultGifQuality.toString())) as 1 | 2 | 3 | 4 | 5;
             const addArgs = findOption<string>(args, "additional_args", "");
 
             return await download(ctx.channel, {
