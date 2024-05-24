@@ -35,24 +35,30 @@ const URL_REGEX = new RegExp(
 );
 
 // Cache to avoid excessive requests in component updates
-const FileSizeCache: Map<string, number> = new Map();
-async function getFileSize(url: string) {
+const FileSizeCache: Map<string, boolean> = new Map();
+async function checkFileSize(url: string) {
     if (FileSizeCache.has(url)) {
         return FileSizeCache.get(url);
     }
 
-    let size = 0;
+    let belowMaxSize = false;
     try {
-        const res = await fetch(url, { method: "HEAD" });
-        const contentLength = res.headers.get("Content-Length");
+        // We cannot check Content-Length due to Access-Control-Expose-Headers.
+        // Instead, we request 1 byte past the size limit, and see if it succeeds.
+        const res = await fetch(url, {
+            method: "HEAD",
+            headers: {
+                Range: `bytes=${MAX_SVG_SIZE_MB * 1024 * 1024}-${MAX_SVG_SIZE_MB * 1024 * 1024 + 1}`
+            }
+        });
 
-        if (contentLength) {
-            size = parseInt(contentLength);
+        if (res.status === 416) {
+            belowMaxSize = true;
         }
     } catch (ex) { }
 
-    FileSizeCache.set(url, size);
-    return size;
+    FileSizeCache.set(url, belowMaxSize);
+    return belowMaxSize;
 }
 
 async function getSVGDimensions(svgUrl: string) {
@@ -168,14 +174,8 @@ export default definePlugin({
             if (imageEmbedsCount >= MAX_EMBEDS_PER_MESSAGE) break;
             if (existingUrls.has(url)) continue;
 
-            // Check size of files on the cdn.
-            // The files under https://discord.com/assets/* don't return Content-Length
-            // but they don't really have to be checked.
-            const domain = new URL(url).hostname;
-            if (domain === "cdn.discordapp.com") {
-                const size = await getFileSize(url);
-                if (!size || size / 1024 / 1024 > MAX_SVG_SIZE_MB) continue;
-            }
+            const belowMaxSize = await checkFileSize(url);
+            if (!belowMaxSize) continue;
 
             const { width, height } = await getSVGDimensions(url);
             // @ts-ignore
