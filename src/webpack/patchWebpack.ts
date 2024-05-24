@@ -116,7 +116,7 @@ Object.defineProperty(Function.prototype, "m", {
                 set(this: WebpackRequire, v: WebpackRequire["p"]) {
                     if (v !== "/assets/") return;
 
-                    logger.info("Main Webpack found, initializing internal references to WebpackRequire ");
+                    logger.info("Main Webpack found, initializing internal references to WebpackRequire");
                     _initWebpack(this);
                     clearTimeout(setterTimeout);
 
