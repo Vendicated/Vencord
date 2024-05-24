@@ -386,7 +386,7 @@ async function runtime(token: string) {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
@@ -440,10 +440,13 @@ async function runtime(token: string) {
             wreq = webpackRequire;
 
             Vencord.Webpack.factoryListeners.add(factory => {
-                let isResolved = false;
-                searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+                // setImmediate to avoid blocking the factory patching execution while checking for lazy chunks
+                setTimeout(() => {
+                    let isResolved = false;
+                    searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
 
-                chunksSearchPromises.push(() => isResolved);
+                    chunksSearchPromises.push(() => isResolved);
+                }, 0);
             });
 
             // setImmediate to only search the initial factories after Discord initialized the app
@@ -451,7 +454,7 @@ async function runtime(token: string) {
             setTimeout(() => {
                 for (const factoryId in wreq.m) {
                     let isResolved = false;
-                    searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+                    searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
 
                     chunksSearchPromises.push(() => isResolved);
                 }
@@ -470,7 +473,7 @@ async function runtime(token: string) {
         const allChunks = [] as string[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of String(wreq.u).matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -523,7 +526,7 @@ async function runtime(token: string) {
 
                         const module = Vencord.Webpack.findModuleFactory(...code);
                         if (module) {
-                            result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
+                            result = String(module).match(Vencord.Util.canonicalizeMatch(matcher));
                         }
 
                         break;
@@ -572,7 +575,7 @@ async function runtime(token: string) {
                     parsedArgs === args &&
                     ["waitFor", "find", "findComponent", "webpackDependantLazy", "webpackDependantLazyComponent"].includes(searchType)
                 ) {
-                    let filter = parsedArgs[0].toString();
+                    let filter = String(parsedArgs[0]);
                     if (filter.length > 150) {
                         filter = filter.slice(0, 147) + "...";
                     }
@@ -583,7 +586,7 @@ async function runtime(token: string) {
                     if (parsedArgs[1] === Vencord.Webpack.DefaultExtractAndLoadChunksRegex) {
                         regexStr = "DefaultExtractAndLoadChunksRegex";
                     } else {
-                        regexStr = parsedArgs[1].toString();
+                        regexStr = String(parsedArgs[1]);
                     }
 
                     logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${regexStr})`;

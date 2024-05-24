@@ -24,7 +24,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
         [propName, (...args: any[]) => Reflect[propName](...args)]
     )),
     get: (target, p) => {
-        const propValue = Reflect.get(target, p);
+        const propValue = Reflect.get(target, p, target);
 
         // If the property is not a number, we are not dealing with a module factory
         // $$vencordOriginal means the factory is already patched, $$vencordRequired means it has already been required
@@ -36,7 +36,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
 
         // This patches factories if eagerPatches are disabled
         const patchedFactory = patchFactory(p, propValue);
-        Reflect.set(target, p, patchedFactory);
+        Reflect.set(target, p, patchedFactory, target);
 
         return patchedFactory;
     },
@@ -44,10 +44,10 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
         // $$vencordRequired means we are resetting the factory to its original after being required
         // If the property is not a number, we are not dealing with a module factory
         if (!Settings.eagerPatches || newValue?.$$vencordRequired === true || Number.isNaN(Number(p))) {
-            return Reflect.set(target, p, newValue);
+            return Reflect.set(target, p, newValue, target);
         }
 
-        const existingFactory = Reflect.get(target, p);
+        const existingFactory = Reflect.get(target, p, target);
 
         // Check if this factory is already patched
         // @ts-ignore
@@ -59,7 +59,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
 
         // Modules are only patched once, so we need to set the patched factory on all the modules
         for (const proxiedModules of allProxiedModules) {
-            Reflect.set(proxiedModules, p, patchedFactory);
+            Reflect.set(proxiedModules, p, patchedFactory, proxiedModules);
         }
 
         return true;
@@ -91,7 +91,7 @@ Object.defineProperty(Function.prototype, "O", {
 
             const originalOnChunksLoaded = onChunksLoaded;
             onChunksLoaded = function (result, chunkIds, callback, priority) {
-                if (callback != null && initCallbackRegex.test(callback.toString())) {
+                if (callback != null && initCallbackRegex.test(String(callback))) {
                     Object.defineProperty(this, "O", {
                         value: originalOnChunksLoaded,
                         configurable: true,
@@ -127,10 +127,17 @@ Object.defineProperty(Function.prototype, "O", {
                 configurable: true,
 
                 set(v: OnChunksLoaded["j"]) {
-                    // @ts-ignore
-                    delete onChunksLoaded.j;
-                    onChunksLoaded.j = v;
-                    originalOnChunksLoaded.j = v;
+                    function setValue(target: any) {
+                        Object.defineProperty(target, "j", {
+                            value: v,
+                            configurable: true,
+                            enumerable: true,
+                            writable: true
+                        });
+                    }
+
+                    setValue(onChunksLoaded);
+                    setValue(originalOnChunksLoaded);
                 }
             });
         }
@@ -160,6 +167,8 @@ Object.defineProperty(Function.prototype, "m", {
 
             // The new object which will contain the factories
             const proxiedModules: WebpackRequire["m"] = {};
+            // @ts-ignore
+            proxiedModules[Symbol.toStringTag] = "ProxiedModules";
 
             for (const id in originalModules) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
@@ -173,9 +182,10 @@ Object.defineProperty(Function.prototype, "m", {
                 delete originalModules[id];
             }
 
-            // @ts-ignore
-            originalModules.$$proxiedModules = proxiedModules;
             allProxiedModules.add(proxiedModules);
+
+            // @ts-ignore
+            originalModules[Symbol.toStringTag] = "OriginalModules";
             Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyHandler));
         }
 
@@ -211,7 +221,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     // cause issues.
     //
     // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + factory.toString().replaceAll("\n", "");
+    let code: string = "0," + String(factory).replaceAll("\n", "");
 
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
@@ -318,7 +328,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         // @ts-ignore
         originalFactory.$$vencordRequired = true;
         for (const proxiedModules of allProxiedModules) {
-            proxiedModules[id] = originalFactory;
+            Reflect.set(proxiedModules, id, originalFactory, proxiedModules);
         }
 
         if (wreq == null && IS_DEV) {
