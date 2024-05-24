@@ -167,6 +167,8 @@ Object.defineProperty(Function.prototype, "m", {
 
             // The new object which will contain the factories
             const proxiedModules: WebpackRequire["m"] = {};
+            // @ts-ignore
+            proxiedModules[Symbol.toStringTag] = "ProxiedModules";
 
             for (const id in originalModules) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
@@ -180,9 +182,10 @@ Object.defineProperty(Function.prototype, "m", {
                 delete originalModules[id];
             }
 
-            // @ts-ignore
-            originalModules.$$proxiedModules = proxiedModules;
             allProxiedModules.add(proxiedModules);
+
+            // @ts-ignore
+            originalModules[Symbol.toStringTag] = "OriginalModules";
             Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyHandler));
         }
 
