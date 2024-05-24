@@ -18,6 +18,22 @@ import { Channel } from "discord-types/general";
 
 import { DependencyModal } from "./DependencyModal";
 
+type ButtonComponent = {
+    customId?: string;
+    disabled?: boolean;
+    emoji?: {
+        animated?: boolean | string;
+        id?: string;
+        name?: string;
+        src?: string;
+    };
+    id: string;
+    label?: string;
+    style: number;
+    type: number;
+    url?: string;
+};
+
 const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
 const logger = new Logger("yt-dlp", "#ff0b01");
 
@@ -41,8 +57,8 @@ const parseAdditionalArgs = (args: string): string[] => {
         });
         return [];
     }
-
 };
+
 function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
     switch (extension) {
         case "mp4":
@@ -67,8 +83,22 @@ async function sendProgress(channelId: string, promise: Promise<{
     logs: string;
 }>) {
     if (!settings.store.showProgress) return await promise;
-    // Hacky way to send info from native to renderer for progress updates
-    const clydeMessage = sendBotMessage(channelId, { content: "Downloading video..." });
+    const clydeMessage = sendBotMessage(channelId, {
+        content: "Downloading video...",
+        components: [{
+            components: [{
+                customId: "yt-dlp-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
+                emoji: {
+                    name: "⚪",
+                    animated: "yt-dlp-stop-download"
+                },
+                label: "Cancel download",
+                id: "0,0",
+                style: 4,
+                type: 2,
+            }], id: "0", type: 1
+        }]
+    });
     const updateMessage = (stdout: string, append?: string) => {
         const text = stdout.toString();
         FluxDispatcher.dispatch({
@@ -76,9 +106,11 @@ async function sendProgress(channelId: string, promise: Promise<{
             message: {
                 ...clydeMessage,
                 content: `Downloading video...\n\`\`\`\n${text}\n\`\`\`${append || ""}`,
+                components: append ? [] : clydeMessage.components
             }
         });
     };
+    // Hacky way to send info from native to renderer for progress updates
     const id = setInterval(async () => {
         const stdout = await Native.getStdout();
         updateMessage(stdout);
@@ -217,6 +249,19 @@ export default definePlugin({
             openDependencyModal();
         }
     }],
+    patches: [
+        {
+            find: "missing validator for this component",
+            replacement: {
+                match: /(\i)(\.type\)\{case \i\.ComponentType\.BUTTON):return null;/,
+                replace: "$1$2:return ($self.handleButtonClick($1),null);"
+            }
+        }
+    ],
+    handleButtonClick: (buttonComponent: ButtonComponent) => {
+        if (!(buttonComponent.emoji?.animated === "yt-dlp-stop-download")) return;
+        Native.interrupt();
+    },
     start: async () => {
         await Native.checkytdlp();
         await Native.checkffmpeg();

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { execFileSync, spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
 import { IpcMainInvokeEvent } from "electron";
 import * as fs from "fs";
 import os from "os";
@@ -26,6 +26,9 @@ let logs_global: string = "";
 let ytdlpAvailable = false;
 let ffmpegAvailable = false;
 
+let ytdlpProcess: ChildProcessWithoutNullStreams | null = null;
+let ffmpegProcess: ChildProcessWithoutNullStreams | null = null;
+
 const getdir = () => workdir ?? process.cwd();
 const p = (file: string) => path.join(getdir(), file);
 const cleanVideoFiles = () => {
@@ -42,17 +45,18 @@ function ytdlp(args: string[]): Promise<string> {
     let errorMsg = "";
 
     return new Promise<string>((resolve, reject) => {
-        const yt = spawn("yt-dlp", args, {
+        ytdlpProcess = spawn("yt-dlp", args, {
             cwd: getdir(),
         });
 
-        yt.stdout.on("data", data => appendOut(data));
-        yt.stderr.on("data", data => {
+        ytdlpProcess.stdout.on("data", data => appendOut(data));
+        ytdlpProcess.stderr.on("data", data => {
             appendOut(data);
             error(`yt-dlp encountered an error: ${data}`);
             errorMsg += data;
         });
-        yt.on("exit", code => {
+        ytdlpProcess.on("exit", code => {
+            ytdlpProcess = null;
             code === 0 ? resolve(stdout_global) : reject(new Error(errorMsg || `yt-dlp exited with code ${code}`));
         });
     });
@@ -61,17 +65,18 @@ function ffmpeg(args: string[]): Promise<string> {
     let errorMsg = "";
 
     return new Promise<string>((resolve, reject) => {
-        const yt = spawn("ffmpeg", args, {
+        ffmpegProcess = spawn("ffmpeg", args, {
             cwd: getdir(),
         });
 
-        yt.stdout.on("data", data => appendOut(data));
-        yt.stderr.on("data", data => {
+        ffmpegProcess.stdout.on("data", data => appendOut(data));
+        ffmpegProcess.stderr.on("data", data => {
             appendOut(data);
             error(`ffmpeg encountered an error: ${data}`);
             errorMsg += data;
         });
-        yt.on("exit", code => {
+        ffmpegProcess.on("exit", code => {
+            ffmpegProcess = null;
             code === 0 ? resolve(stdout_global) : reject(new Error(errorMsg || `ffmpeg exited with code ${code}`));
         });
     });
@@ -271,6 +276,13 @@ export async function checkytdlp(_?: IpcMainInvokeEvent) {
         ytdlpAvailable = false;
         return false;
     }
+}
+
+export async function interrupt(_: IpcMainInvokeEvent) {
+    log("Interrupting...");
+    ytdlpProcess?.kill();
+    ffmpegProcess?.kill();
+    cleanVideoFiles();
 }
 
 export const getStdout = () => stdout_global;
