@@ -23,10 +23,6 @@ const handler: ProxyHandler<any> = {
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyInnerGet](), ...args)]
     )),
     set: (target, p, value) => {
-        if (p === Symbol.toStringTag) {
-            return Reflect.set(target, p, value, target);
-        }
-
         const innerTarget = target[proxyInnerGet]();
         return Reflect.set(innerTarget, p, value, innerTarget);
     },
