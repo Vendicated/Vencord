@@ -180,7 +180,7 @@ export default definePlugin({
             const { width, height } = await getSVGDimensions(url);
             // @ts-ignore
             message.embeds.push({
-                id: "embed_1",
+                id: "embed_1", // The id can be anything as it seems to be changed by the client anyways
                 url,
                 type: "image",
                 image: { url, proxyURL: url, width, height },
