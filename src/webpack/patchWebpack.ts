@@ -67,7 +67,7 @@ const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
 
         // Check if this factory is already patched
         // @ts-ignore
-        if (existingFactory.$$vencordOriginal != null) {
+        if (existingFactory?.$$vencordOriginal != null) {
             // @ts-ignore
             existingFactory.$$vencordOriginal = newValue;
             return true;
