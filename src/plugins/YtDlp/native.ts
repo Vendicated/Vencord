@@ -12,11 +12,11 @@ import path from "path";
 
 type Format = "video" | "audio" | "gif";
 type DownloadOptions = {
-	url: string;
-	format?: Format;
-	gifQuality?: 1 | 2 | 3 | 4 | 5;
-	additional_arguments?: string[];
-	maxFileSize?: number;
+    url: string;
+    format?: Format;
+    gifQuality?: 1 | 2 | 3 | 4 | 5;
+    additional_arguments?: string[];
+    maxFileSize?: number;
 };
 
 let workdir: string | null = null;
@@ -182,7 +182,9 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
             ext = "mp3";
             break;
         case "video":
-            ffmpegArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", p("remux.mp4")];
+            // Dynamically resize based on target bitrate
+            const height = kilobits <= 100 ? 480 : kilobits <= 500 ? 720 : 1080;
+            ffmpegArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`, p("remux.mp4")];
             ext = "mp4";
             break;
         case "gif":
@@ -228,10 +230,10 @@ export async function execute(
     _: IpcMainInvokeEvent,
     opt: DownloadOptions
 ): Promise<{
-	buffer: Buffer;
-	title: string;
+    buffer: Buffer;
+    title: string;
 } | {
-	error: string;
+    error: string;
 }> {
     try {
         const m = await metadata(opt);
