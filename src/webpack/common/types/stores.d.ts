@@ -1396,6 +1396,8 @@ interface UserProfileStoreSnapshotData {
 type UserProfileStoreAction = ExtractAction<FluxAction, "CACHE_LOADED_LAZY" | "GUILD_DELETE" | "GUILD_JOIN" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "LOGOUT" | "MUTUAL_FRIENDS_FETCH_FAILURE" | "MUTUAL_FRIENDS_FETCH_START" | "MUTUAL_FRIENDS_FETCH_SUCCESS" | "USER_PROFILE_ACCESSIBILITY_TOOLTIP_VIEWED" | "USER_PROFILE_FETCH_FAILURE" | "USER_PROFILE_FETCH_START" | "USER_PROFILE_FETCH_SUCCESS" | "USER_PROFILE_UPDATE_FAILURE" | "USER_PROFILE_UPDATE_START" | "USER_PROFILE_UPDATE_SUCCESS" | "USER_UPDATE">;
 
 export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore, UserProfileStoreSnapshotData, UserProfileStoreAction> {
+    constructor();
+
     static displayName: "UserProfileStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
