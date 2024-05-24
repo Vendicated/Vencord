@@ -22,6 +22,7 @@ const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyInnerGet](), ...args)]
     )),
+    set: (target, p, value) => Reflect.set(target[proxyInnerGet](), p, value, target[proxyInnerGet]()),
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyInnerGet]());
         for (const key of unconfigurable) {
@@ -67,7 +68,7 @@ export function proxyInner<T = AnyObject>(
 
     const proxy = new Proxy(proxyDummy, {
         ...handler,
-        get(target, p, receiver) {
+        get(target, p) {
             if (p === proxyInnerValue) return target[proxyInnerValue];
             if (p === proxyInnerGet) return target[proxyInnerGet];
 
@@ -80,7 +81,7 @@ export function proxyInner<T = AnyObject>(
 
                 recursiveSetInnerValues.push((innerValue: T) => {
                     // Set the inner value of the destructured value as the prop value p of the parent
-                    recursiveSetInnerValue(Reflect.get(innerValue as object, p, receiver));
+                    recursiveSetInnerValue(Reflect.get(innerValue as object, p, innerValue));
                 });
 
                 return recursiveProxy;
@@ -88,7 +89,7 @@ export function proxyInner<T = AnyObject>(
 
             const innerTarget = target[proxyInnerGet]();
             if (typeof innerTarget === "object" || typeof innerTarget === "function") {
-                return Reflect.get(innerTarget, p, receiver);
+                return Reflect.get(innerTarget, p, innerTarget);
             }
 
             throw new Error(primitiveErrMsg);
