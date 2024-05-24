@@ -40,6 +40,10 @@ const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyLazyGet](), ...args)]
     )),
+    set: (target, p, newValue) => {
+        const lazyTarget = target[proxyLazyGet]();
+        return Reflect.set(lazyTarget, p, newValue, lazyTarget);
+    },
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyLazyGet]());
         for (const key of UNCONFIGURABLE_PROPERTIES) {
@@ -70,7 +74,9 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    const proxyDummy = Object.assign(function ProxyDummy() { }, {
+    // Define the function in an object to preserve the name after minification
+    const proxyDummy = ({ ProxyDummy() { } }).ProxyDummy;
+    Object.assign(proxyDummy, {
         [proxyLazyGet]() {
             if (!proxyDummy[proxyLazyCache]) {
                 // @ts-ignore
@@ -80,6 +86,10 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
 
                 if (!proxyDummy[proxyLazyCache]) {
                     throw new Error(`proxyLazy factory failed:\n\n${factory}`);
+                } else {
+                    if (typeof proxyDummy[proxyLazyCache] === "function") {
+                        proxy.toString = proxyDummy[proxyLazyCache].toString.bind(proxyDummy[proxyLazyCache]);
+                    }
                 }
             }
 
@@ -88,9 +98,9 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
         [proxyLazyCache]: void 0 as T | undefined
     });
 
-    return new Proxy(proxyDummy, {
+    const proxy = new Proxy(proxyDummy, {
         ...handler,
-        get(target, p, receiver) {
+        get(target, p) {
             if (p === proxyLazyGet) return target[proxyLazyGet];
             if (p === proxyLazyCache) return target[proxyLazyCache];
 
@@ -100,7 +110,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
             // `const { meow } = proxyLazy(() => ({ meow: [] }));`
             if (!isChild && isSameTick) {
                 return proxyLazy(
-                    () => Reflect.get(target[proxyLazyGet](), p, receiver),
+                    () => Reflect.get(target[proxyLazyGet](), p, target[proxyLazyGet]()),
                     attempts,
                     true
                 );
@@ -108,10 +118,12 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
 
             const lazyTarget = target[proxyLazyGet]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
-                return Reflect.get(lazyTarget, p, receiver);
+                return Reflect.get(lazyTarget, p, lazyTarget);
             }
 
             throw new Error("proxyLazy called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.");
         }
     });
+
+    return proxy;
 }
