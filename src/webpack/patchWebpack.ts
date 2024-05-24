@@ -17,9 +17,7 @@ type PatchedModuleFactory = ModuleFactory & {
     $$vencordOriginal?: ModuleFactory;
 };
 
-type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory> & {
-    [Symbol.toStringTag]?: string;
-};
+type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory>;
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -140,7 +138,11 @@ Object.defineProperty(Function.prototype, "m", {
 
             allModuleFactories.add(moduleFactories);
 
-            moduleFactories[Symbol.toStringTag] = "ModuleFactories";
+            Object.defineProperty(moduleFactories, Symbol.toStringTag, {
+                value: "ModuleFactories",
+                configurable: true,
+                writable: true
+            });
             moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
         }
 
