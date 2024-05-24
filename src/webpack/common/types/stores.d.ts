@@ -38,7 +38,7 @@ declare class FluxChangeListeners {
     remove: (listener: FluxChangeListener) => void;
 }
 
-export class FluxStore<Action extends FluxAction = FluxAction> {
+export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     constructor(
         dispatcher: FluxDispatcher,
         actionHandlers: FluxActionHandlerMap<Action>,
@@ -88,7 +88,9 @@ export class FluxStore<Action extends FluxAction = FluxAction> {
     removeReactChangeListener: FluxChangeListeners["remove"];
 }
 
-interface GenericConstructor { new (...args: any[]): any }
+interface GenericConstructor {
+    new (...args: any[]): any;
+}
 
 interface FluxSnapshot<SnapshotData = any> {
     data: SnapshotData;
@@ -97,7 +99,7 @@ interface FluxSnapshot<SnapshotData = any> {
 
 type FluxSnapshotStoreAction = ExcludeAction<FluxAction, "CLEAR_CACHES" | "WRITE_CACHES">;
 
-export class FluxSnapshotStore<
+export abstract class FluxSnapshotStore<
     Constructor extends GenericConstructor = GenericConstructor,
     SnapshotData = any,
     Action extends FluxSnapshotStoreAction = FluxSnapshotStoreAction
@@ -113,6 +115,7 @@ export class FluxSnapshotStore<
     get persistKey(): string;
     readSnapshot(version: number): SnapshotData | null;
     save(): void;
+    abstract takeSnapshot(): FluxSnapshot<SnapshotData>;
 }
 
 export interface Flux {
@@ -276,9 +279,14 @@ export const enum VideoQualityMode {
     FULL = 2,
 }
 
-type ChannelRecordOwnKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
+export const enum VoiceCallBackgroundTypes {
+    EMPTY = 0,
+    GRADIENT = 1,
+}
 
-type ChannelRecordOwnProperties<ChannelRecord extends ChannelRecordBase> = Pick<ChannelRecord, ChannelRecordOwnKeys>;
+type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
+
+type ChannelRecordOwnProperties<ChannelRecord extends ChannelRecordBase> = Pick<ChannelRecord, ChannelRecordOwnPropertyKeys>;
 
 // does not extend ImmutableRecord
 export abstract class ChannelRecordBase {
@@ -329,7 +337,7 @@ export abstract class ChannelRecordBase {
     get permissionOverwrites(): PermissionOverwrites;
     get position(): number;
     get rateLimitPerUser(): number;
-    set<Key extends ChannelRecordOwnKeys>(key: Key, value: ChannelRecordOwnProperties<this>[Key]): this;
+    set<Key extends ChannelRecordOwnPropertyKeys>(key: Key, value: ChannelRecordOwnProperties<this>[Key]): this;
     toJS(): ChannelRecordOwnProperties<this>;
     get topic(): string;
     get userLimit(): number;
@@ -411,6 +419,9 @@ export abstract class ChannelRecordBase {
     userLimit_?: number | undefined;
     version?: number | undefined;
     videoQualityMode?: VideoQualityMode | undefined;
+    voiceBackgroundDisplay?: { type: VoiceCallBackgroundTypes.EMPTY; }
+        | { type: VoiceCallBackgroundTypes.GRADIENT; resourceId: string; }
+        | Nullish;
 }
 
 export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
@@ -461,6 +472,7 @@ export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
+    voiceBackgroundDisplay?: undefined;
 }
 
 export class GuildTextChannelRecord extends GuildTextualChannelRecordBase {
@@ -488,7 +500,7 @@ export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryCh
 export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
     constructor(channelProperties: Record<string, any>); // TEMP
 
-    static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord; // TEMP
+    static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord;
     static sortRecipients(recipients: Record<string, any>[] | Nullish, channelId: string): string[]; // TEMP
 
     addRecipient(recipientUserId: string, nickname: string | undefined, currentUserId: string): this;
@@ -504,13 +516,14 @@ export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
     defaultReactionEmoji?: undefined;
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser?: undefined;
+    guild_id: null;
     icon: ChannelRecordBase["icon"];
     iconEmoji?: undefined;
     isMessageRequest: ChannelRecordBase["isMessageRequest"];
     isMessageRequestTimestamp: ChannelRecordBase["isMessageRequestTimestamp"];
     isSpam: Defined<ChannelRecordBase["isSpam"]>;
-    lastMessageId: Defined<ChannelRecordBase["lastMessageId"]>;
-    lastPinTimestamp: undefined;
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
@@ -538,16 +551,23 @@ export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
     userLimit_?: undefined;
     version?: undefined;
     videoQualityMode?: undefined;
+    voiceBackgroundDisplay?: undefined;
 }
 
 export class DMChannelRecord extends PrivateChannelRecordBase {
+    application_id: undefined;
+    icon: undefined;
+    name: "";
+    ownerId: undefined;
     type: ChannelTypes.DM;
-} // TEMP
+}
 
-export class GroupDMChannelRecord extends PrivateChannelRecordBase{
-    application_id: ChannelRecordBase["application_id"];
+export class GroupDMChannelRecord extends PrivateChannelRecordBase {
+    isMessageRequest: undefined;
+    isMessageRequestTimestamp: undefined;
+    ownerId: PrivateChannelRecordBase["ownerId"];
     type: ChannelTypes.GROUP_DM;
-} // TEMP
+}
 
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
@@ -599,15 +619,16 @@ export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
     userLimit_: Defined<ChannelRecordBase["userLimit_"]>;
     version: ChannelRecordBase["version"];
     videoQualityMode: ChannelRecordBase["videoQualityMode"];
+    voiceBackgroundDisplay: Defined<ChannelRecordBase["voiceBackgroundDisplay"]>;
 }
 
 export class GuildVoiceChannelRecord extends GuildVocalChannelRecordBase {
     type: ChannelTypes.GUILD_VOICE;
-} // TEMP
+}
 
 export class GuildStageVoiceChannelRecord extends GuildVocalChannelRecordBase {
     type: ChannelTypes.GUILD_STAGE_VOICE;
-} // TEMP
+}
 
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
@@ -661,11 +682,10 @@ export class ThreadChannelRecord<ChannelType extends ThreadChannelType = ThreadC
     userLimit_: undefined;
     version?: undefined;
     videoQualityMode: undefined;
+    voiceBackgroundDisplay?: undefined;
 }
 
-type ForumChannelType = ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA;
-
-export class ForumChannelRecord<ChannelType extends ForumChannelType = ForumChannelType> extends ChannelRecordBase {
+export abstract class ForumChannelRecordBase extends ChannelRecordBase {
     constructor(channelProperties: Record<string, any>); // TEMP
 
     static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ForumChannelRecord; // TEMP
@@ -709,11 +729,22 @@ export class ForumChannelRecord<ChannelType extends ForumChannelType = ForumChan
     threadMetadata?: undefined;
     topic_: ChannelRecordBase["topic_"];
     totalMessageSent?: undefined;
-    type: ChannelType;
+    type: ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA;
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
+    voiceBackgroundDisplay?: undefined;
 }
+
+export class GuildForumChannelRecord extends ForumChannelRecordBase {
+    type: ChannelTypes.GUILD_FORUM;
+}
+
+export class GuildMediaChannelRecord extends ForumChannelRecordBase {
+    type: ChannelTypes.GUILD_MEDIA;
+}
+
+export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
 
 export class UnknownChannelRecord extends ChannelRecordBase {
     constructor(channelProperties: Record<string, any>); // TEMP
@@ -725,7 +756,7 @@ export class UnknownChannelRecord extends ChannelRecordBase {
 
 export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRecord | ForumChannelRecord;
 
-export type ChannelRecord = GuildChannelRecord | PrivateChannelRecord | ThreadChannelRecord | UnknownChannelRecord;
+export type ChannelRecord = GuildChannelRecord | PrivateChannelRecord | ThreadChannelRecord;
 
 type ChannelStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_FEED_FETCH_SUCCESS" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_CHANNELS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOGOUT" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "SEARCH_FINISH" | "THREAD_CREATE" | "THREAD_DELETE" | "THREAD_LIST_SYNC" | "THREAD_UPDATE">;
 
@@ -958,7 +989,7 @@ export class GuildMemberStore<Action extends FluxAction = GuildMemberStoreAction
 }
 
 export const enum RoleFlags {
-    IN_PROMPT = 1
+    IN_PROMPT = 1,
 }
 
 export interface Role {
@@ -1319,7 +1350,7 @@ interface UserProfileFetchSucceeded {
     }[];
     lastFetched: number;
     legacyUsername: string | Nullish;
-    popoutAnimationParticleType: Nullish; // TEMP
+    popoutAnimationParticleType: any /* |  Nullish */; // TEMP
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
     premiumType: PremiumTypes | Nullish;
@@ -1333,7 +1364,6 @@ interface UserProfileFetchSucceeded {
 export type UserProfile<FetchFailed extends boolean = boolean> = FetchFailed extends true
     ? UserProfileFetchFailed
     : UserProfileFetchSucceeded;
-
 
 export interface GuildMemberProfile {
     accentColor: number | Nullish;
@@ -1365,7 +1395,7 @@ interface UserProfileStoreSnapshotData {
 
 type UserProfileStoreAction = ExtractAction<FluxAction, "CACHE_LOADED_LAZY" | "GUILD_DELETE" | "GUILD_JOIN" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "LOGOUT" | "MUTUAL_FRIENDS_FETCH_FAILURE" | "MUTUAL_FRIENDS_FETCH_START" | "MUTUAL_FRIENDS_FETCH_SUCCESS" | "USER_PROFILE_ACCESSIBILITY_TOOLTIP_VIEWED" | "USER_PROFILE_FETCH_FAILURE" | "USER_PROFILE_FETCH_START" | "USER_PROFILE_FETCH_SUCCESS" | "USER_PROFILE_UPDATE_FAILURE" | "USER_PROFILE_UPDATE_START" | "USER_PROFILE_UPDATE_SUCCESS" | "USER_UPDATE">;
 
-export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore, UserProfileStoreSnapshotData> {
+export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore, UserProfileStoreSnapshotData, UserProfileStoreAction> {
     static displayName: "UserProfileStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
@@ -1498,7 +1528,9 @@ export class UserRecord<
     verified: boolean;
 }
 
-interface UserStoreSnapshotData { users: [UserRecord] | []; }
+interface UserStoreSnapshotData {
+    users: [UserRecord] | [];
+}
 
 type UserStoreAction = ExtractAction<FluxAction, "AUDIT_LOG_FETCH_NEXT_PAGE_SUCCESS" | "AUDIT_LOG_FETCH_SUCCESS" | "CACHE_LOADED" | "CHANNEL_CREATE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "CURRENT_USER_UPDATE" | "FAMILY_CENTER_INITIAL_LOAD" | "FAMILY_CENTER_LINKED_USERS_FETCH_SUCCESS" | "FAMILY_CENTER_REQUEST_LINK_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_FETCH_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_MORE_FETCH_SUCCESS" | "FETCH_PRIVATE_CHANNEL_INTEGRATIONS_SUCCESS" | "FRIEND_SUGGESTION_CREATE" | "GIFT_CODE_RESOLVE_SUCCESS" | "GUILD_APPLIED_BOOSTS_FETCH_SUCCESS" | "GUILD_BAN_ADD" | "GUILD_BAN_REMOVE" | "GUILD_CREATE" | "GUILD_FEED_FETCH_SUCCESS" | "GUILD_JOIN_REQUEST_CREATE" | "GUILD_JOIN_REQUEST_UPDATE" | "GUILD_MEMBERS_CHUNK_BATCH" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_LIST_UPDATE" | "GUILD_MEMBER_UPDATE" | "GUILD_SCHEDULED_EVENT_USERS_FETCH_SUCCESS" | "GUILD_SETTINGS_LOADED_BANS" | "GUILD_SETTINGS_LOADED_BANS_BATCH" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_FORUM_POSTS" | "LOAD_FRIEND_SUGGESTIONS_SUCCESS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_MESSAGE_REQUESTS_SUPPLEMENTAL_DATA_SUCCESS" | "LOAD_NOTIFICATION_CENTER_ITEMS_SUCCESS" | "LOAD_PINNED_MESSAGES_SUCCESS" | "LOAD_RECENT_MENTIONS_SUCCESS" | "LOAD_RELATIONSHIPS_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "MEMBER_SAFETY_GUILD_MEMBER_SEARCH_SUCCESS" | "MESSAGE_CREATE" | "MESSAGE_UPDATE" | "MOD_VIEW_SEARCH_FINISH" | "NOTIFICATION_CENTER_ITEM_CREATE" | "OVERLAY_INITIALIZE" | "PASSIVE_UPDATE_V1" | "PRESENCE_UPDATES" | "PRIVATE_CHANNEL_INTEGRATION_CREATE" | "PRIVATE_CHANNEL_INTEGRATION_UPDATE" | "RELATIONSHIP_ADD" | "SEARCH_FINISH" | "THREAD_LIST_SYNC" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE" | "UPDATE_CLIENT_PREMIUM_TYPE" | "USER_UPDATE">;
 

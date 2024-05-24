@@ -129,7 +129,7 @@ declare class FluxActionLog<Action extends FluxAction = FluxAction> {
     constructor(actionType: Action["type"]);
 
     get name(): Action["type"];
-    toJSON(): Pick<FluxActionLog<Action>, "action" | "createdAt" | "traces"> & {
+    toJSON(): Pick<this, "action" | "createdAt" | "traces"> & {
         created_at: FluxActionLog["createdAt"];
     };
 
@@ -158,7 +158,7 @@ declare class FluxActionLogger extends EventEmitter {
     ): FluxActionMetric<ActionType>[];
     log<Action extends FluxAction>(
         action: Action,
-        callback: (func: <T extends () => any>(storeName: string, func: T) => ReturnType<T>) => void
+        callback: (func: <T>(storeName: string, func: () => T) => T) => void
     ): FluxActionLog<Action>;
 
     logs: FluxActionLog[];
@@ -172,7 +172,7 @@ declare class FluxActionLogger extends EventEmitter {
  * the alternative option, allowing plugins to use the main Dispatcher instance, would require removing type information for
  * Discord's actions from Dispatcher, and would introduce the potential for action type name conflicts. Both of these
  * options would harm the main use case of these types. Furthermore, there are other state management libraries bundled with
- * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~388
+ * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~398
  * stores use the same instance), implying that their type for Dispatcher is also not generic.
  */
 export class FluxDispatcher {
@@ -184,8 +184,8 @@ export class FluxDispatcher {
 
     _dispatch(
         action: FluxAction,
-        func: <U extends () => any>(storeName: string, func: U) => ReturnType<U>
-    ): false | void;
+        func: <T>(storeName: string, func: () => T) => T
+    ): boolean | void;
     _dispatchWithDevtools(action: FluxAction): void;
     _dispatchWithLogging(action: FluxAction): void;
     addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
