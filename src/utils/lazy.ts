@@ -77,7 +77,13 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    const proxyDummy = Object.assign(function ProxyDummy() { }, {
+    // Define the function in an object to preserve the name after minification
+    const dummyObj = {
+        ProxyDummy() { }
+    } as { ProxyDummy: any; };
+
+    const proxyDummy = dummyObj.ProxyDummy;
+    Object.assign(proxyDummy, {
         [proxyLazyGet]() {
             if (!proxyDummy[proxyLazyCache]) {
                 // @ts-ignore
@@ -98,6 +104,8 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
         },
         [proxyLazyCache]: void 0 as T | undefined
     });
+
+    delete dummyObj.ProxyDummy;
 
     const proxy = new Proxy(proxyDummy, {
         ...handler,
