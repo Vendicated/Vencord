@@ -111,8 +111,8 @@ export default definePlugin({
                     replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
                 },
                 {
-                    match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
+                    match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
+                    replace: "$1[...$2,...$self.getAllUncollapsedChannels()]"
                 },
 
             ]

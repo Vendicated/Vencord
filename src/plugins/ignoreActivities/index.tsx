@@ -228,15 +228,15 @@ export default definePlugin({
         {
             find: ".activityTitleText,variant",
             replacement: {
-                match: /(?<=\i\.activityTitleText.+?children:(\i)\.name.*?}\),)/,
-                replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
+                match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
+                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             },
         },
         {
             find: ".activityCardDetails,children",
             replacement: {
-                match: /(?<=\i\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),)/,
-                replace: (_, props) => `$self.renderToggleActivityButton(${props}),`
+                match: /\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),/,
+                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             }
         }
     ],
