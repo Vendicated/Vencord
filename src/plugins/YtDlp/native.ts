@@ -21,6 +21,7 @@ type DownloadOptions = {
 
 let workdir: string | null = null;
 let stdout_global: string = "";
+let logs_global: string = "";
 
 let ytdlpAvailable = false;
 let ffmpegAvailable = false;
@@ -35,7 +36,7 @@ const cleanVideoFiles = () => {
 };
 const appendOut = (data: string) => ( // Makes carriage return (\r) work
     (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
-const log = (...data: string[]) => console.log(`[Plugin:yt-dlp] ${data.join(" ")}`);
+const log = (...data: string[]) => (console.log(`[Plugin:yt-dlp] ${data.join(" ")}`), logs_global += `[Plugin:yt-dlp] ${data.join(" ")}\n`);
 const error = (...data: string[]) => console.error(`[Plugin:yt-dlp] [ERROR] ${data.join(" ")}`);
 function ytdlp(args: string[]): Promise<string> {
     let errorMsg = "";
@@ -232,18 +233,21 @@ export async function execute(
 ): Promise<{
     buffer: Buffer;
     title: string;
+    logs: string;
 } | {
     error: string;
+    logs: string;
 }> {
+    logs_global = "";
     try {
         const m = await metadata(opt);
         const f = genFormat(m, opt);
         const d = await download(f, opt);
         const r = await remux(d, opt);
         const u = upload(r);
-        return u;
+        return { logs: logs_global, ...u };
     } catch (e: any) {
-        return { error: e.toString() };
+        return { error: e.toString(), logs: logs_global };
     }
 }
 

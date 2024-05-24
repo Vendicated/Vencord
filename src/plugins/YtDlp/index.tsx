@@ -10,6 +10,7 @@ import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
@@ -18,6 +19,7 @@ import { Channel } from "discord-types/general";
 import { DependencyModal } from "./DependencyModal";
 
 const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
+const logger = new Logger("yt-dlp", "#ff0b01");
 
 const maxFileSize = () => {
     const premiumType = (UserStore.getCurrentUser().premiumType ?? 0);
@@ -59,8 +61,10 @@ function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
 async function sendProgress(channelId: string, promise: Promise<{
     buffer: Buffer;
     title: string;
+    logs: string;
 } | {
     error: string;
+    logs: string;
 }>) {
     if (!settings.store.showProgress) return await promise;
     // Hacky way to send info from native to renderer for progress updates
@@ -248,6 +252,8 @@ async function download(channel: Channel, {
     });
 
     const data = await sendProgress(channel.id, promise);
+
+    for (const log of data.logs.trim().split("\n")) logger.info(log);
 
     if ("error" in data) {
         // Open the modal if the error is due to missing formats (could be fixed by downloading ffmpeg)
