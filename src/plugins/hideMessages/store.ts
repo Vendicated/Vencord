@@ -9,6 +9,5 @@ export const userIds: string[] = [];
 
 export const removeHiddenUser = (userId: string) => {
     const current = userIds.findIndex(id => id === userId);
-    userIds[current] = userIds[userIds.length - 1];
-    userIds.pop();
+    userIds.splice(current, 1);
 };
