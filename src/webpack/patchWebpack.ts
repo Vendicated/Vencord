@@ -107,7 +107,7 @@ Object.defineProperty(Function.prototype, "m", {
 
             // setImmediate to clear this property setter if this is not the main Webpack
             // If this is the main Webpack, wreq.m will always be set before the timeout runs
-            const setterTimeout = setTimeout(() => delete (this as Partial<WebpackRequire>).p, 0);
+            const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
             Object.defineProperty(this, "p", {
                 configurable: true,
 
