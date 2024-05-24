@@ -21,7 +21,7 @@ const allModuleFactories = new Set<WebpackRequire["m"]>();
 
 function defineModuleFactoryGetter(modulesFactories: WebpackRequire["m"], id: PropertyKey, factory: ModuleFactory) {
     Object.defineProperty(modulesFactories, id, {
-        get: () => {
+        get() {
             // $$vencordOriginal means the factory is already patched
             // @ts-ignore
             if (factory.$$vencordOriginal != null) {
@@ -30,6 +30,15 @@ function defineModuleFactoryGetter(modulesFactories: WebpackRequire["m"], id: Pr
 
             // This patches factories if eagerPatches are disabled
             return (factory = patchFactory(id, factory));
+        },
+        set(v: ModuleFactory) {
+            // @ts-ignore
+            if (factory.$$vencordOriginal != null) {
+                // @ts-ignore
+                factory.$$vencordOriginal = v;
+            } else {
+                factory = v;
+            }
         },
         configurable: true,
         enumerable: true
@@ -43,16 +52,24 @@ const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
             return Reflect.set(target, p, newValue, receiver);
         }
 
+        const existingFactory = Reflect.get(target, p, target);
+
         if (!Settings.eagerPatches) {
+            // If existingFactory exists, its either wrapped in defineModuleFactoryGetter, or it has already been required
+            // so call Reflect.set with the new original and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
+            if (existingFactory != null) {
+                return Reflect.set(target, p, newValue, receiver);
+            }
+
             defineModuleFactoryGetter(target, p, newValue);
             return true;
         }
 
-        const existingFactory = Reflect.get(target, p, target);
-
         // Check if this factory is already patched
         // @ts-ignore
-        if (existingFactory?.$$vencordOriginal === newValue) {
+        if (existingFactory?.$$vencordOriginal != null) {
+            // @ts-ignore
+            existingFactory.$$vencordOriginal = newValue;
             return true;
         }
 
@@ -318,7 +335,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     const patchedFactory: ModuleFactory = (module, exports, require) => {
         for (const moduleFactories of allModuleFactories) {
             Object.defineProperty(moduleFactories, id, {
-                value: originalFactory,
+                // @ts-ignore
+                value: patchFactory.$$vencordOriginal,
                 configurable: true,
                 enumerable: true,
                 writable: true
