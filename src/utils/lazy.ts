@@ -83,6 +83,10 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
 
                 if (!proxyDummy[proxyLazyCache]) {
                     throw new Error(`proxyLazy factory failed:\n\n${factory}`);
+                } else {
+                    if (typeof proxyDummy[proxyLazyCache] === "function") {
+                        proxy.toString = proxyDummy[proxyLazyCache].toString.bind(proxyDummy[proxyLazyCache]);
+                    }
                 }
             }
 
@@ -91,7 +95,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
         [proxyLazyCache]: void 0 as T | undefined
     });
 
-    return new Proxy(proxyDummy, {
+    const proxy = new Proxy(proxyDummy, {
         ...handler,
         get(target, p, receiver) {
             if (p === proxyLazyGet) return target[proxyLazyGet];
@@ -117,4 +121,6 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
             throw new Error("proxyLazy called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.");
         }
     });
+
+    return proxy;
 }

@@ -65,17 +65,7 @@ export function proxyInner<T = AnyObject>(
         [proxyInnerValue]: void 0 as T | undefined
     });
 
-    // Values destructured in the same tick the proxy was created will push their setInnerValue here
-    const recursiveSetInnerValues = [] as Array<(innerValue: T) => void>;
-
-    // Once we set the parent inner value, we will call the setInnerValue functions of the destructured values,
-    // for them to get the proper value from the parent and use as their inner instead
-    function setInnerValue(innerValue: T) {
-        proxyDummy[proxyInnerValue] = innerValue;
-        recursiveSetInnerValues.forEach(setInnerValue => setInnerValue(innerValue));
-    }
-
-    return [new Proxy(proxyDummy, {
+    const proxy = new Proxy(proxyDummy, {
         ...handler,
         get(target, p, receiver) {
             if (p === proxyInnerValue) return target[proxyInnerValue];
@@ -104,5 +94,21 @@ export function proxyInner<T = AnyObject>(
             throw new Error(primitiveErrMsg);
 
         }
-    }), setInnerValue];
+    });
+
+    // Values destructured in the same tick the proxy was created will push their setInnerValue here
+    const recursiveSetInnerValues = [] as Array<(innerValue: T) => void>;
+
+    // Once we set the parent inner value, we will call the setInnerValue functions of the destructured values,
+    // for them to get the proper value from the parent and use as their inner instead
+    function setInnerValue(innerValue: T) {
+        proxyDummy[proxyInnerValue] = innerValue;
+        recursiveSetInnerValues.forEach(setInnerValue => setInnerValue(innerValue));
+
+        if (typeof innerValue === "function") {
+            proxy.toString = innerValue.toString.bind(innerValue);
+        }
+    }
+
+    return [proxy, setInnerValue];
 }
