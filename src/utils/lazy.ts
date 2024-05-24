@@ -43,7 +43,10 @@ const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyLazyGet](), ...args)]
     )),
-    set: (target, p, newValue) => Reflect.set(target[proxyLazyGet](), p, newValue, target[proxyLazyGet]()),
+    set: (target, p, newValue) => {
+        const lazyTarget = target[proxyLazyGet]();
+        return Reflect.set(lazyTarget, p, newValue, lazyTarget);
+    },
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyLazyGet]());
         for (const key of unconfigurable) {

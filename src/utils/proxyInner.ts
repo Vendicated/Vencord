@@ -22,7 +22,10 @@ const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
         [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyInnerGet](), ...args)]
     )),
-    set: (target, p, value) => Reflect.set(target[proxyInnerGet](), p, value, target[proxyInnerGet]()),
+    set: (target, p, value) => {
+        const innerTarget = target[proxyInnerGet]();
+        return Reflect.set(innerTarget, p, value, innerTarget);
+    },
     ownKeys: target => {
         const keys = Reflect.ownKeys(target[proxyInnerGet]());
         for (const key of unconfigurable) {
