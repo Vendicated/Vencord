@@ -162,6 +162,7 @@ export default definePlugin({
     },
 
     async processEmbeds(message: Message) {
+        if (message.state !== "SENT") return;
         if (message.hasFlag(EMBED_SUPPRESSED)) return;
 
         let updateMessage = false;
