@@ -161,9 +161,13 @@ export default definePlugin({
         }
     },
 
+    debounce: new Set<string>(),
     async processEmbeds(message: Message) {
         if (message.state !== "SENT") return;
         if (message.hasFlag(EMBED_SUPPRESSED)) return;
+
+        if (this.debounce.has(message.id)) return;
+        this.debounce.add(message.id);
 
         let updateMessage = false;
 
@@ -195,5 +199,7 @@ export default definePlugin({
         if (updateMessage) {
             FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message });
         }
+
+        this.debounce.delete(message.id);
     }
 });
