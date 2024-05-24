@@ -336,7 +336,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         for (const moduleFactories of allModuleFactories) {
             Object.defineProperty(moduleFactories, id, {
                 // @ts-ignore
-                value: patchFactory.$$vencordOriginal,
+                value: patchedFactory.$$vencordOriginal,
                 configurable: true,
                 enumerable: true,
                 writable: true
