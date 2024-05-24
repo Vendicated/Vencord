@@ -162,7 +162,7 @@ Object.defineProperty(Function.prototype, "m", {
         // This ensures we actually got the right one
         const { stack } = new Error();
         if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
-            logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+            logger.info("Found Webpack module factories", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
 
             for (const id in moduleFactories) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
