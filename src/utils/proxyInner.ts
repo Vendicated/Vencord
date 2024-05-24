@@ -59,11 +59,7 @@ export function proxyInner<T = AnyObject>(
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     // Define the function in an object to preserve the name after minification
-    const dummyObj = {
-        ProxyDummy() { }
-    } as { ProxyDummy: any; };
-
-    const proxyDummy = dummyObj.ProxyDummy;
+    const proxyDummy = ({ ProxyDummy() { } }).ProxyDummy;
     Object.assign(proxyDummy, {
         [proxyInnerGet]: function () {
             if (proxyDummy[proxyInnerValue] == null) {
@@ -74,8 +70,6 @@ export function proxyInner<T = AnyObject>(
         },
         [proxyInnerValue]: void 0 as T | undefined
     });
-
-    delete dummyObj.ProxyDummy;
 
     const proxy = new Proxy(proxyDummy, {
         ...handler,
