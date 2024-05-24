@@ -19,8 +19,8 @@ const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 /** A set with all the module factories objects */
 const allModuleFactories = new Set<WebpackRequire["m"]>();
 
-function defineModuleFactoryGetter(modules: WebpackRequire["m"], id: PropertyKey, factory: ModuleFactory) {
-    Object.defineProperty(modules, id, {
+function defineModuleFactoryGetter(modulesFactories: WebpackRequire["m"], id: PropertyKey, factory: ModuleFactory) {
+    Object.defineProperty(modulesFactories, id, {
         get: () => {
             // $$vencordOriginal means the factory is already patched
             // @ts-ignore
