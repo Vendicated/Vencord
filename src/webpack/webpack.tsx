@@ -171,7 +171,7 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (module: ModuleE
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
 
     const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
-    waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
+    waitFor(filter, module => setInnerValue(callback(module)), { isIndirect: true });
 
     if (IS_DEV && !isIndirect) {
         webpackSearchHistory.push(["find", [proxy, filter]]);
