@@ -18,7 +18,7 @@ type PatchedModuleFactory = ModuleFactory & {
 };
 
 type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory> & {
-    [Symbol.toStringTag]?: "ModuleFactories";
+    [Symbol.toStringTag]?: string;
 };
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");

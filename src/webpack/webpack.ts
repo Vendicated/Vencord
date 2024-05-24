@@ -77,6 +77,9 @@ export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
+
+    // @ts-ignore
+    webpackRequire.c[Symbol.toStringTag] = "ModuleCache";
 }
 
 let devToolsOpen = false;
