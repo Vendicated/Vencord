@@ -327,8 +327,51 @@ async function runtime(token: string) {
         // Enable eagerPatches to make all patches apply regardless of the module being required
         Vencord.Settings.eagerPatches = true;
 
-        let wreq: typeof Vencord.Webpack.wreq;
+        // The main patch for starting the reporter chunk loading
+        Vencord.Plugins.patches.push({
+            plugin: "Vencord Reporter",
+            find: '"Could not find app-mount"',
+            replacement: [{
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }]
+        });
 
+        Vencord.Webpack.waitFor(
+            Vencord.Webpack.filters.byProps("loginToken"),
+            m => {
+                console.log("[PUP_DEBUG]", "Logging in with token...");
+                m.loginToken(token);
+            }
+        );
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(() => {
+                console.log("[PUP_DEBUG]", "Loading all chunks...");
+
+                Vencord.Webpack.factoryListeners.add(factory => {
+                    // setImmediate to avoid blocking the factory patching execution while checking for lazy chunks
+                    setTimeout(() => {
+                        let isResolved = false;
+                        searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
+
+                        chunksSearchPromises.push(() => isResolved);
+                    }, 0);
+                });
+
+                for (const factoryId in wreq.m) {
+                    let isResolved = false;
+                    searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
+
+                    chunksSearchPromises.push(() => isResolved);
+                }
+            }, 0);
+        };
+
+        const wreq = Vencord.Util.proxyLazy(() => Vencord.Webpack.wreq);
         const { canonicalizeMatch, Logger } = Vencord.Util;
 
         const validChunks = new Set<string>();
@@ -426,43 +469,7 @@ async function runtime(token: string) {
             }, 0);
         }
 
-        Vencord.Webpack.waitFor(
-            Vencord.Webpack.filters.byProps("loginToken"),
-            m => {
-                console.log("[PUP_DEBUG]", "Logging in with token...");
-                m.loginToken(token);
-            }
-        );
-
-        Vencord.Webpack.beforeInitListeners.add(async webpackRequire => {
-            console.log("[PUP_DEBUG]", "Loading all chunks...");
-
-            wreq = webpackRequire;
-
-            Vencord.Webpack.factoryListeners.add(factory => {
-                // setImmediate to avoid blocking the factory patching execution while checking for lazy chunks
-                setTimeout(() => {
-                    let isResolved = false;
-                    searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
-
-                    chunksSearchPromises.push(() => isResolved);
-                }, 0);
-            });
-
-            // setImmediate to only search the initial factories after Discord initialized the app
-            // our beforeInitListeners are called before Discord initializes the app
-            setTimeout(() => {
-                for (const factoryId in wreq.m) {
-                    let isResolved = false;
-                    searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
-
-                    chunksSearchPromises.push(() => isResolved);
-                }
-            }, 0);
-        });
-
         await chunksSearchingDone;
-        wreq = wreq!;
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
