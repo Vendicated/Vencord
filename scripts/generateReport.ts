@@ -440,10 +440,13 @@ async function runtime(token: string) {
             wreq = webpackRequire;
 
             Vencord.Webpack.factoryListeners.add(factory => {
-                let isResolved = false;
-                searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
+                // setImmediate to avoid blocking the factory patching execution while checking for lazy chunks
+                setTimeout(() => {
+                    let isResolved = false;
+                    searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
 
-                chunksSearchPromises.push(() => isResolved);
+                    chunksSearchPromises.push(() => isResolved);
+                }, 0);
             });
 
             // setImmediate to only search the initial factories after Discord initialized the app
