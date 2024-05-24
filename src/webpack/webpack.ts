@@ -73,7 +73,6 @@ export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
-export const beforeInitListeners = new Set<(wreq: WebpackRequire) => void>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;

@@ -6,24 +6,33 @@
 
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
+import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, moduleListeners, OnChunksLoaded, subscriptions, WebpackRequire, wreq } from ".";
+import { _initWebpack, factoryListeners, ModuleFactory, moduleListeners, subscriptions, WebpackRequire, wreq } from ".";
+
+type PatchedModuleFactory = ModuleFactory & {
+    $$vencordOriginal?: ModuleFactory;
+};
+
+type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory> & {
+    [Symbol.toStringTag]?: "ModuleFactories";
+};
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
-const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 /** A set with all the module factories objects */
-const allModuleFactories = new Set<WebpackRequire["m"]>();
+const allModuleFactories = new Set<PatchedModuleFactories>();
 
-function defineModuleFactoryGetter(modulesFactories: WebpackRequire["m"], id: PropertyKey, factory: ModuleFactory) {
+function defineModuleFactoryGetter(modulesFactories: PatchedModuleFactories, id: PropertyKey, factory: PatchedModuleFactory) {
     Object.defineProperty(modulesFactories, id, {
+        configurable: true,
+        enumerable: true,
+
         get() {
             // $$vencordOriginal means the factory is already patched
-            // @ts-ignore
             if (factory.$$vencordOriginal != null) {
                 return factory;
             }
@@ -32,20 +41,16 @@ function defineModuleFactoryGetter(modulesFactories: WebpackRequire["m"], id: Pr
             return (factory = patchFactory(id, factory));
         },
         set(v: ModuleFactory) {
-            // @ts-ignore
             if (factory.$$vencordOriginal != null) {
-                // @ts-ignore
                 factory.$$vencordOriginal = v;
             } else {
                 factory = v;
             }
-        },
-        configurable: true,
-        enumerable: true
+        }
     });
 }
 
-const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
+const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
     set: (target, p, newValue, receiver) => {
         // If the property is not a number, we are not dealing with a module factory
         if (Number.isNaN(Number(p))) {
@@ -66,9 +71,7 @@ const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
         }
 
         // Check if this factory is already patched
-        // @ts-ignore
         if (existingFactory?.$$vencordOriginal != null) {
-            // @ts-ignore
             existingFactory.$$vencordOriginal = newValue;
             return true;
         }
@@ -89,84 +92,6 @@ const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
     }
 };
 
-// wreq.O is the webpack onChunksLoaded function
-// Discord uses it to await for all the chunks to be loaded before initializing the app
-// We monkey patch it to also monkey patch the initialize app callback to get immediate access to the webpack require and run our listeners before doing it
-Object.defineProperty(Function.prototype, "O", {
-    configurable: true,
-
-    set(this: WebpackRequire, onChunksLoaded: WebpackRequire["O"]) {
-        // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
-        // This ensures we actually got the right one
-        // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
-        const { stack } = new Error();
-        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && String(this.e).includes("Promise.all")) {
-            logger.info("Found main WebpackRequire.onChunksLoaded");
-
-            delete (Function.prototype as any).O;
-
-            const originalOnChunksLoaded = onChunksLoaded;
-            onChunksLoaded = function (result, chunkIds, callback, priority) {
-                if (callback != null && initCallbackRegex.test(String(callback))) {
-                    Object.defineProperty(this, "O", {
-                        value: originalOnChunksLoaded,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true
-                    });
-
-                    const wreq = this;
-
-                    const originalCallback = callback;
-                    callback = function (this: unknown) {
-                        logger.info("Patched initialize app callback invoked, initializing our internal references to WebpackRequire and running beforeInitListeners");
-                        _initWebpack(wreq);
-
-                        for (const beforeInitListener of beforeInitListeners) {
-                            beforeInitListener(wreq);
-                        }
-
-                        originalCallback.apply(this, arguments as any);
-                    };
-
-                    callback.toString = originalCallback.toString.bind(originalCallback);
-                    arguments[2] = callback;
-                }
-
-                originalOnChunksLoaded.apply(this, arguments as any);
-            } as WebpackRequire["O"];
-
-            onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
-
-            // Returns whether a chunk has been loaded
-            Object.defineProperty(onChunksLoaded, "j", {
-                configurable: true,
-
-                set(v: OnChunksLoaded["j"]) {
-                    function setValue(target: any) {
-                        Object.defineProperty(target, "j", {
-                            value: v,
-                            configurable: true,
-                            enumerable: true,
-                            writable: true
-                        });
-                    }
-
-                    setValue(onChunksLoaded);
-                    setValue(originalOnChunksLoaded);
-                }
-            });
-        }
-
-        Object.defineProperty(this, "O", {
-            value: onChunksLoaded,
-            configurable: true,
-            enumerable: true,
-            writable: true
-        });
-    }
-});
-
 // wreq.m is the webpack object containing module factories.
 // This is pre-populated with module factories, and is also populated via webpackGlobal.push
 // The sentry module also has their own webpack with a pre-populated module factories object, so this also targets that
@@ -174,12 +99,34 @@ Object.defineProperty(Function.prototype, "O", {
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
-    set(this: WebpackRequire, moduleFactories: WebpackRequire["m"]) {
-        // When using react devtools or other extensions, we may also catch their webpack here.
-        // This ensures we actually got the right one
+    set(this: WebpackRequire, moduleFactories: PatchedModuleFactories) {
+        // When using React DevTools or other extensions, we may also catch their Webpack here.
+        // This ensures we actually got the right ones
         const { stack } = new Error();
         if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
             logger.info("Found Webpack module factories", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+
+            // setImmediate to clear this property setter if this is not the main Webpack
+            // If this is the main Webpack, wreq.m will always be set before the timeout runs
+            const setterTimeout = setTimeout(() => delete (this as Partial<WebpackRequire>).p, 0);
+            Object.defineProperty(this, "p", {
+                configurable: true,
+
+                set(this: WebpackRequire, v: WebpackRequire["p"]) {
+                    if (v !== "/assets/") return;
+
+                    logger.info("Main Webpack found, initializing internal references to WebpackRequire ");
+                    _initWebpack(this);
+                    clearTimeout(setterTimeout);
+
+                    Object.defineProperty(this, "p", {
+                        value: v,
+                        configurable: true,
+                        enumerable: true,
+                        writable: true
+                    });
+                }
+            });
 
             for (const id in moduleFactories) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
@@ -192,7 +139,6 @@ Object.defineProperty(Function.prototype, "m", {
 
             allModuleFactories.add(moduleFactories);
 
-            // @ts-ignore
             moduleFactories[Symbol.toStringTag] = "ModuleFactories";
             moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
         }
@@ -332,10 +278,9 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    const patchedFactory: ModuleFactory = (module, exports, require) => {
+    const patchedFactory: PatchedModuleFactory = (module, exports, require) => {
         for (const moduleFactories of allModuleFactories) {
             Object.defineProperty(moduleFactories, id, {
-                // @ts-ignore
                 value: patchedFactory.$$vencordOriginal,
                 configurable: true,
                 enumerable: true,
@@ -402,7 +347,6 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     };
 
     patchedFactory.toString = originalFactory.toString.bind(originalFactory);
-    // @ts-ignore
     patchedFactory.$$vencordOriginal = originalFactory;
 
     return patchedFactory;
