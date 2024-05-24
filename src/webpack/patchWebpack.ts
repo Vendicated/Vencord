@@ -166,7 +166,7 @@ Object.defineProperty(Function.prototype, "m", {
             logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
 
             // The new object which will contain the factories
-            const proxiedModules: WebpackRequire["m"] = {};
+            const proxiedModules: WebpackRequire["m"] = Object.create(Object.getPrototypeOf(originalModules));
             // @ts-ignore
             proxiedModules[Symbol.toStringTag] = "ProxiedModules";
 
