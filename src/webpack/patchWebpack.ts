@@ -6,7 +6,6 @@
 
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { UNCONFIGURABLE_PROPERTIES } from "@utils/misc";
 import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
@@ -17,34 +16,36 @@ import { _initWebpack, beforeInitListeners, factoryListeners, ModuleFactory, mod
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
-const allProxiedModules = new Set<WebpackRequire["m"]>();
+/** A set with all the module factories objects */
+const allModuleFactories = new Set<WebpackRequire["m"]>();
 
-const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
-    ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (...args: any[]) => Reflect[propName](...args)]
-    )),
-    get: (target, p) => {
-        const propValue = Reflect.get(target, p, target);
+function defineModuleFactoryGetter(modules: WebpackRequire["m"], id: PropertyKey, factory: ModuleFactory) {
+    Object.defineProperty(modules, id, {
+        get: () => {
+            // $$vencordOriginal means the factory is already patched
+            // @ts-ignore
+            if (factory.$$vencordOriginal != null) {
+                return factory;
+            }
 
+            // This patches factories if eagerPatches are disabled
+            return (factory = patchFactory(id, factory));
+        },
+        configurable: true,
+        enumerable: true
+    });
+}
+
+const moduleFactoriesHandler: ProxyHandler<WebpackRequire["m"]> = {
+    set: (target, p, newValue, receiver) => {
         // If the property is not a number, we are not dealing with a module factory
-        // $$vencordOriginal means the factory is already patched, $$vencordRequired means it has already been required
-        // and replaced with the original
-        // @ts-ignore
-        if (propValue == null || Number.isNaN(Number(p)) || propValue.$$vencordOriginal != null || propValue.$$vencordRequired === true) {
-            return propValue;
+        if (Number.isNaN(Number(p))) {
+            return Reflect.set(target, p, newValue, receiver);
         }
 
-        // This patches factories if eagerPatches are disabled
-        const patchedFactory = patchFactory(p, propValue);
-        Reflect.set(target, p, patchedFactory, target);
-
-        return patchedFactory;
-    },
-    set: (target, p, newValue) => {
-        // $$vencordRequired means we are resetting the factory to its original after being required
-        // If the property is not a number, we are not dealing with a module factory
-        if (!Settings.eagerPatches || newValue?.$$vencordRequired === true || Number.isNaN(Number(p))) {
-            return Reflect.set(target, p, newValue, target);
+        if (!Settings.eagerPatches) {
+            defineModuleFactoryGetter(target, p, newValue);
+            return true;
         }
 
         const existingFactory = Reflect.get(target, p, target);
@@ -58,18 +59,16 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
         const patchedFactory = patchFactory(p, newValue);
 
         // Modules are only patched once, so we need to set the patched factory on all the modules
-        for (const proxiedModules of allProxiedModules) {
-            Reflect.set(proxiedModules, p, patchedFactory, proxiedModules);
+        for (const moduleFactories of allModuleFactories) {
+            Object.defineProperty(moduleFactories, p, {
+                value: patchedFactory,
+                configurable: true,
+                enumerable: true,
+                writable: true
+            });
         }
 
         return true;
-    },
-    ownKeys: target => {
-        const keys = Reflect.ownKeys(target);
-        for (const key of UNCONFIGURABLE_PROPERTIES) {
-            if (!keys.includes(key)) keys.push(key);
-        }
-        return keys;
     }
 };
 
@@ -154,43 +153,35 @@ Object.defineProperty(Function.prototype, "O", {
 // wreq.m is the webpack object containing module factories.
 // This is pre-populated with module factories, and is also populated via webpackGlobal.push
 // The sentry module also has their own webpack with a pre-populated module factories object, so this also targets that
-// We replace its prototype with our proxy, which is responsible for patching the module factories
+// We replace wrap it with our proxy, which is responsible for patching the module factories, or setting up getters for them
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
-    set(this: WebpackRequire, originalModules: WebpackRequire["m"]) {
+    set(this: WebpackRequire, moduleFactories: WebpackRequire["m"]) {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
-        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(originalModules)) {
+        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
             logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
 
-            // The new object which will contain the factories
-            const proxiedModules: WebpackRequire["m"] = Object.create(Object.getPrototypeOf(originalModules));
-            // @ts-ignore
-            proxiedModules[Symbol.toStringTag] = "ProxiedModules";
-
-            for (const id in originalModules) {
+            for (const id in moduleFactories) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
                 if (Settings.eagerPatches) {
-                    proxiedModules[id] = patchFactory(id, originalModules[id]);
+                    moduleFactories[id] = patchFactory(id, moduleFactories[id]);
                 } else {
-                    proxiedModules[id] = originalModules[id];
+                    defineModuleFactoryGetter(moduleFactories, id, moduleFactories[id]);
                 }
-
-                // Clear the original object so pre-populated factories are patched if eagerPatches are disabled
-                delete originalModules[id];
             }
 
-            allProxiedModules.add(proxiedModules);
+            allModuleFactories.add(moduleFactories);
 
             // @ts-ignore
-            originalModules[Symbol.toStringTag] = "OriginalModules";
-            Object.setPrototypeOf(originalModules, new Proxy(proxiedModules, modulesProxyHandler));
+            moduleFactories[Symbol.toStringTag] = "ModuleFactories";
+            moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
         }
 
         Object.defineProperty(this, "m", {
-            value: originalModules,
+            value: moduleFactories,
             configurable: true,
             enumerable: true,
             writable: true
@@ -325,10 +316,13 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     }
 
     const patchedFactory: ModuleFactory = (module, exports, require) => {
-        // @ts-ignore
-        originalFactory.$$vencordRequired = true;
-        for (const proxiedModules of allProxiedModules) {
-            Reflect.set(proxiedModules, id, originalFactory, proxiedModules);
+        for (const moduleFactories of allModuleFactories) {
+            Object.defineProperty(moduleFactories, id, {
+                value: originalFactory,
+                configurable: true,
+                enumerable: true,
+                writable: true
+            });
         }
 
         if (wreq == null && IS_DEV) {
