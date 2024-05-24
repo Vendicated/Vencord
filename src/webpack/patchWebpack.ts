@@ -281,7 +281,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    const patchedFactory: PatchedModuleFactory = (module, exports, require) => {
+    const patchedFactory: PatchedModuleFactory = function (module, exports, require) {
         for (const moduleFactories of allModuleFactories) {
             Object.defineProperty(moduleFactories, id, {
                 value: patchedFactory.$$vencordOriginal,
@@ -297,17 +297,17 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
                 logger.error("WebpackRequire was not initialized, running modules without patches instead.");
             }
 
-            return void originalFactory(module, exports, require);
+            return void originalFactory.call(this, module, exports, require);
         }
 
         try {
-            factory(module, exports, require);
+            factory.call(this, module, exports, require);
         } catch (err) {
             // Just rethrow Discord errors
             if (factory === originalFactory) throw err;
 
             logger.error("Error in patched module", err);
-            return void originalFactory(module, exports, require);
+            return void originalFactory.call(this, module, exports, require);
         }
 
         // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it

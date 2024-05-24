@@ -13,7 +13,7 @@ export type Module = {
 };
 
 /** exports can be anything, however initially it is always an empty object */
-export type ModuleFactory = (module: Module, exports: ModuleExports, require: WebpackRequire) => void;
+export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
 export type AsyncModuleBody = (
     handleDependencies: (deps: Promise<any>[]) => Promise<any[]> & (() => void)
