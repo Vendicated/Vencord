@@ -88,8 +88,11 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
 
-    // @ts-ignore
-    webpackRequire.c[Symbol.toStringTag] = "ModuleCache";
+    Object.defineProperty(webpackRequire.c, Symbol.toStringTag, {
+        value: "ModuleCache",
+        configurable: true,
+        writable: true
+    });
 }
 
 let devToolsOpen = false;
