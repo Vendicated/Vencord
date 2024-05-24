@@ -50,6 +50,7 @@ interface TagSettings {
     MODERATOR_STAFF: TagSetting,
     MODERATOR: TagSetting,
     VOICE_MODERATOR: TagSetting,
+    TRIAL_MODERATOR: TagSetting,
     [k: string]: TagSetting;
 }
 
@@ -93,6 +94,11 @@ const tags: Tag[] = [
         displayName: "VC Mod",
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
+    }, {
+        name: "CHAT_MODERATOR",
+        displayName: "Chat Mod",
+        description: "Can timeout people",
+        permissions: ["MODERATE_MEMBERS"]
     }
 ];
 const defaultSettings = Object.fromEntries(
@@ -198,8 +204,7 @@ export default definePlugin({
             replacement: [
                 // make the tag show the right text
                 {
-                    // FIXME: Remove the BOT_TAG_BOT variant when the change arrives in stable
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.(?:APP_TAG|BOT_TAG_BOT)/,
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.APP_TAG/,
                     replace: (_, origSwitch, variant, tags, displayedText, strings) =>
                         `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
                 },
@@ -264,34 +269,14 @@ export default definePlugin({
     ],
 
     start() {
-        if (settings.store.tagSettings) return;
-        // @ts-ignore
-        if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
-        else {
-            const newSettings = { ...defaultSettings };
-            Object.entries(Vencord.PlainSettings.plugins.MoreUserTags).forEach(([name, value]) => {
-                const [setting, tag] = name.split("_");
-                if (setting === "visibility") {
-                    switch (value) {
-                        case "always":
-                            // its the default
-                            break;
-                        case "chat":
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                        case "not-chat":
-                            newSettings[tag].showInChat = false;
-                            break;
-                        case "never":
-                            newSettings[tag].showInChat = false;
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                    }
-                }
-                settings.store.tagSettings = newSettings;
-                delete Vencord.Settings.plugins.MoreUserTags[name];
-            });
-        }
+        settings.store.tagSettings ??= defaultSettings;
+
+        // newly added field might be missing from old users
+        settings.store.tagSettings.CHAT_MODERATOR ??= {
+            text: "Chat Mod",
+            showInChat: true,
+            showInNotChat: true
+        };
     },
 
     getPermissions(user: User, channel: Channel): string[] {
@@ -322,20 +307,19 @@ export default definePlugin({
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
-    // FIXME: Remove the BOT_TAG_BOT variants from strings when the change arrives in stable
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
+        if (!passedTagName) return strings.APP_TAG;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG ?? strings.BOT_TAG_BOT;
+        if (!tag) return strings.APP_TAG;
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;
 
         const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
         switch (variant) {
             case "OP":
                 return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
             case "BOT":
-                return `${strings.APP_TAG ?? strings.BOT_TAG_BOT} • ${tagText}`;
+                return `${strings.APP_TAG} • ${tagText}`;
             default:
                 return tagText;
         }
@@ -369,6 +353,15 @@ export default definePlugin({
         for (const tag of tags) {
             if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
             if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
+
+            // If the owner tag is disabled, and the user is the owner of the guild,
+            // avoid adding other tags because the owner will always match the condition for them
+            if (
+                tag.name !== "OWNER" &&
+                GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id &&
+                (location === "chat" && !settings.tagSettings.OWNER.showInChat) ||
+                (location === "not-chat" && !settings.tagSettings.OWNER.showInNotChat)
+            ) continue;
 
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
