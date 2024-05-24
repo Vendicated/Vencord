@@ -24,7 +24,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
         [propName, (...args: any[]) => Reflect[propName](...args)]
     )),
     get: (target, p) => {
-        const propValue = Reflect.get(target, p);
+        const propValue = Reflect.get(target, p, target);
 
         // If the property is not a number, we are not dealing with a module factory
         // $$vencordOriginal means the factory is already patched, $$vencordRequired means it has already been required
@@ -36,7 +36,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
 
         // This patches factories if eagerPatches are disabled
         const patchedFactory = patchFactory(p, propValue);
-        Reflect.set(target, p, patchedFactory);
+        Reflect.set(target, p, patchedFactory, target);
 
         return patchedFactory;
     },
@@ -44,10 +44,10 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
         // $$vencordRequired means we are resetting the factory to its original after being required
         // If the property is not a number, we are not dealing with a module factory
         if (!Settings.eagerPatches || newValue?.$$vencordRequired === true || Number.isNaN(Number(p))) {
-            return Reflect.set(target, p, newValue);
+            return Reflect.set(target, p, newValue, target);
         }
 
-        const existingFactory = Reflect.get(target, p);
+        const existingFactory = Reflect.get(target, p, target);
 
         // Check if this factory is already patched
         // @ts-ignore
@@ -59,7 +59,7 @@ const modulesProxyHandler: ProxyHandler<WebpackRequire["m"]> = {
 
         // Modules are only patched once, so we need to set the patched factory on all the modules
         for (const proxiedModules of allProxiedModules) {
-            Reflect.set(proxiedModules, p, patchedFactory);
+            Reflect.set(proxiedModules, p, patchedFactory, proxiedModules);
         }
 
         return true;
@@ -328,7 +328,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         // @ts-ignore
         originalFactory.$$vencordRequired = true;
         for (const proxiedModules of allProxiedModules) {
-            Reflect.set(proxiedModules, id, originalFactory);
+            Reflect.set(proxiedModules, id, originalFactory, proxiedModules);
         }
 
         if (wreq == null && IS_DEV) {
