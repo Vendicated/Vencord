@@ -170,7 +170,7 @@ Object.defineProperty(Function.prototype, "O", {
 // wreq.m is the webpack object containing module factories.
 // This is pre-populated with module factories, and is also populated via webpackGlobal.push
 // The sentry module also has their own webpack with a pre-populated module factories object, so this also targets that
-// We replace wrap it with our proxy, which is responsible for patching the module factories, or setting up getters for them
+// We wrap it with our proxy, which is responsible for patching the module factories, or setting up getters for them
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
