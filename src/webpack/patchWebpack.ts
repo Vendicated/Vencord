@@ -99,6 +99,16 @@ Object.defineProperty(Function.prototype, "O", {
             };
 
             onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
+
+            // Returns whether a chunk has been loaded
+            Object.defineProperty(onChunksLoaded, "j", {
+                set(v) {
+                    delete onChunksLoaded.j;
+                    onChunksLoaded.j = v;
+                    originalOnChunksLoaded.j = v;
+                },
+                configurable: true
+            });
         }
 
         Object.defineProperty(this, "O", {
