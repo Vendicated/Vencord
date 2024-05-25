@@ -24,7 +24,7 @@ import type { ReactNode } from "react";
 import type { ExcludeAction, ExtractAction, FluxAction, FluxActionType } from "./fluxActions";
 import type { i18nMessages } from "./i18nMessages";
 
-export { ExcludeAction, ExtractAction, FluxAction, FluxActionType };
+export type { ExcludeAction, ExtractAction, FluxAction, FluxActionType };
 
 type Nullish = null | undefined;
 

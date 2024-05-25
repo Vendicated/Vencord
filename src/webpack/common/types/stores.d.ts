@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { SnakeCasedProperties } from "type-fest";
+
 import type { ExcludeAction, ExtractAction, FluxAction, FluxActionHandlerMap, FluxDispatchBand, FluxDispatcher } from "./utils";
 
 type Defined<T> = Exclude<T, undefined>;
@@ -54,7 +56,7 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
-    initialize(): void;
+    initialize(...args: any[]): void;
     initializeIfNeeded(): void;
     mustEmitChanges(
         mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */
@@ -90,6 +92,50 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
 
 interface GenericConstructor {
     new (...args: any[]): any;
+}
+
+export abstract class FluxPersistedStore<
+    Constructor extends GenericConstructor = GenericConstructor,
+    State = any,
+    Action extends FluxAction = FluxAction
+> extends FluxStore<Action> {
+    constructor(dispatcher: FluxDispatcher, actionHandlerst: FluxActionHandlerMap<Action>);
+
+    static _clearAllPromise: Promise<void> | Nullish;
+    static _writePromises: Map<any, any>; // TEMP
+    static _writeResolvers: Map<any, any>; // TEMP
+    static allPersistKeys: Set<string>;
+    static clearAll(e: any): Promise<void>; // TEMP
+    static clearPersistQueue(e: any): void; // TEMP
+    static disableWrite: boolean;
+    static disableWrites: boolean;
+    static getAllStates(): Promise<any>; // TEMP
+    static initializeAll(stateMap: Record<string, any>): void; // TEMP
+    static migrateAndReadStoreState(e: any, t: any): { // TEMP
+        state: any /* | undefined */; // TEMP
+        requiresPersist: boolean;
+    };
+    static migrations: ((...args: any[]) => any)[] | undefined;
+    static persistKey: string; // not actually defined on PersistedStore's constructor, but all subclasses are required to have it
+    static shouldClear(e: any, t: any): boolean; // TEMP
+    static throttleDelay: number;
+    static userAgnosticPersistKeys: Set<string>;
+
+    asyncPersist(): Promise<boolean | void>;
+    clear(): void;
+    getClass(): Constructor;
+    abstract getState(): State; // TEMP
+    abstract initialize(state: State): void; // TEMP
+    initializeFromState(state: State): void; // TEMP
+    persist(): void;
+
+    _version: number;
+    callback: (callback: () => void) => void;
+    throttledCallback: {
+        (callback: () => void): () => void;
+        cancel: () => void;
+        flush: () => () => void;
+    };
 }
 
 interface FluxSnapshot<SnapshotData = any> {
@@ -201,6 +247,14 @@ export const enum Permissions {
 }
 */
 
+export interface ForumTag {
+    id: string;
+    emojiId: string | null;
+    emojiName: string | null;
+    moderated: boolean;
+    name: string;
+}
+
 export const enum FormLayout {
     DEFAULT = 0,
     LIST = 1,
@@ -236,24 +290,63 @@ export const enum ThreadMemberFlags {
     NO_MESSAGES = 1 << 3,
 }
 
+export interface ChannelMember {
+    flags: ThreadMemberFlags;
+    joinTimestamp: string;
+    muteConfig: {
+        end_time: string | null;
+        selected_time_window: number;
+    } | null;
+    muted: boolean;
+}
+
 export const enum PermissionOverwriteType {
     ROLE = 0,
     MEMBER = 1,
 }
 
-interface PermissionOverwrites {
-    [roleIdOrUserId: string]: {
-        allow: /* Permissions */ bigint;
-        deny: /* Permissions */ bigint;
-        id: string;
-        type: PermissionOverwriteType;
-    };
+export interface PermissionOverwrite {
+    allow: /* Permissions */ bigint;
+    deny: /* Permissions */ bigint;
+    id: string;
+    type: PermissionOverwriteType;
+}
+
+interface PermissionOverwriteMap {
+    [roleIdOrUserId: string]: PermissionOverwrite;
+}
+
+export interface ChannelRecipient {
+    avatar: string | null;
+    avatar_decoration_data: SnakeCasedProperties<AvatarDecorationData> | null;
+    bot?: boolean;
+    clan: SnakeCasedProperties<UserClanData> | null;
+    discriminator: string;
+    display_name?: string | null;
+    global_name: string | null;
+    id: string;
+    public_flags: UserFlags;
+    username: string;
 }
 
 export const enum SafetyWarningTypes {
     STRANGER_DANGER = 1,
     INAPPROPRIATE_CONVERSATION_TIER_1 = 2,
     INAPPROPRIATE_CONVERSATION_TIER_2 = 3,
+}
+
+export interface SafetyWarning {
+    type: SafetyWarningTypes;
+    dismiss_timestamp?: string | Nullish; // TEMP
+}
+
+export interface ThreadMetadata {
+    archived: boolean;
+    archiveTimestamp: string;
+    autoArchiveDuration: number;
+    createTimestamp: string | Nullish;
+    invitable: boolean;
+    locked: boolean;
 }
 
 export const enum ChannelTypes {
@@ -309,8 +402,8 @@ export abstract class ChannelRecordBase {
     isCategory(): this is GuildCategoryChannelRecord;
     isDM(): this is DMChannelRecord;
     isDirectory(): this is GuildDirectoryChannelRecord;
-    isForumChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_FORUM>;
-    isForumLikeChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA>;
+    isForumChannel(): this is GuildForumChannelRecord;
+    isForumLikeChannel(): this is ForumChannelRecord;
     isForumPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
     isGroupDM(): this is GroupDMChannelRecord;
     isGuildStageVoice(): this is GuildStageVoiceChannelRecord;
@@ -320,7 +413,7 @@ export abstract class ChannelRecordBase {
     isListenModeCapable(): this is GuildStageVoiceChannelRecord;
     isLockedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
     isManaged(): boolean;
-    isMediaChannel(): this is ForumChannelRecord<ChannelTypes.GUILD_MEDIA>;
+    isMediaChannel(): this is GuildMediaChannelRecord;
     isMediaPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
     isMultiUserDM(): this is GroupDMChannelRecord;
     isNSFW(): boolean;
@@ -334,7 +427,7 @@ export abstract class ChannelRecordBase {
     isVocalThread(): this is ThreadChannelRecord<ChannelTypes.PUBLIC_THREAD | ChannelTypes.PRIVATE_THREAD>;
     merge(collection: Partial<ChannelRecordOwnProperties<this>>): this;
     get nsfw(): boolean;
-    get permissionOverwrites(): PermissionOverwrites;
+    get permissionOverwrites(): PermissionOverwriteMap;
     get position(): number;
     get rateLimitPerUser(): number;
     set<Key extends ChannelRecordOwnPropertyKeys>(key: Key, value: ChannelRecordOwnProperties<this>[Key]): this;
@@ -344,13 +437,7 @@ export abstract class ChannelRecordBase {
 
     application_id?: string | undefined;
     appliedTags?: string[] | undefined;
-    availableTags?: {
-        id: string;
-        emojiId: string | null;
-        emojiName: string | null;
-        moderated: boolean;
-        name: string;
-    }[] | undefined;
+    availableTags?: ForumTag[] | undefined;
     bitrate_?: number | undefined;
     defaultAutoArchiveDuration?: number | undefined;
     defaultForumLayout?: FormLayout | undefined;
@@ -373,15 +460,7 @@ export abstract class ChannelRecordBase {
     isSpam?: boolean | undefined;
     lastMessageId: string | Nullish;
     lastPinTimestamp: string | Nullish;
-    member?: {
-        flags: ThreadMemberFlags;
-        joinTimestamp: string;
-        muteConfig: {
-            end_time: string | null;
-            selected_time_window: number;
-        } | null;
-        muted: boolean;
-    } | undefined;
+    member?: ChannelMember | undefined;
     memberCount?: number | undefined;
     memberIdsPreview?: string[] | undefined;
     memberListId?: string | Nullish;
@@ -393,26 +472,16 @@ export abstract class ChannelRecordBase {
     ownerId?: string | undefined;
     parent_id?: string | Nullish;
     parentChannelThreadType?: ChannelTypes.GUILD_TEXT | ChannelTypes.GUILD_ANNOUNCEMENT | ChannelTypes.GUILD_FORUM | ChannelTypes.GUILD_MEDIA | undefined;
-    permissionOverwrites_?: PermissionOverwrites | undefined;
+    permissionOverwrites_?: PermissionOverwriteMap | undefined;
     position_?: number | undefined;
     rateLimitPerUser_?: number | undefined;
-    rawRecipients?: Record<string, any>[] | undefined; // TEMP
+    rawRecipients?: ChannelRecipient[] | undefined;
     recipients?: string[] | undefined;
     rtcRegion?: string | Nullish;
-    safetyWarnings?: {
-        type: SafetyWarningTypes;
-        dismiss_timestamp: string | undefined; // TEMP
-    }[] | undefined; // TEMP
+    safetyWarnings?: SafetyWarning[] | undefined;
     template?: string | undefined;
     themeColor?: number | Nullish;
-    threadMetadata?: {
-        archived: boolean;
-        archiveTimestamp: string;
-        autoArchiveDuration: number;
-        createTimestamp: string | Nullish;
-        invitable: boolean;
-        locked: boolean;
-    } | undefined;
+    threadMetadata?: ThreadMetadata | undefined;
     topic_?: string | Nullish;
     totalMessageSent?: number | undefined;
     type: ChannelTypes;
@@ -439,7 +508,7 @@ export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
     icon?: undefined;
-    iconEmoji: Defined<ChannelRecordBase["iconEmoji"]>;
+    iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
@@ -448,7 +517,7 @@ export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
-    memberListId: ChannelRecordBase["memberListId"];
+    memberListId: ChannelRecordBase["memberListId"]; // TEMP
     messageCount?: undefined;
     nicks?: undefined;
     nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
@@ -477,15 +546,23 @@ export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
 
 export class GuildTextChannelRecord extends GuildTextualChannelRecordBase {
     type: ChannelTypes.GUILD_TEXT;
-} // TEMP
+}
 
 export class GuildCategoryChannelRecord extends GuildTextualChannelRecordBase {
+    defaultAutoArchiveDuration: undefined;
+    defaultThreadRateLimitPerUser: undefined;
+    lastMessageId: undefined;
+    lastPinTimestamp: undefined;
+    memberListId: undefined; // TEMP
+    parent_id: Nullish;
+    themeColor: undefined; // TEMP
+    topic_: undefined;
     type: ChannelTypes.GUILD_CATEGORY;
-} // TEMP
+}
 
 export class GuildAnnouncementChannelRecord extends GuildTextualChannelRecordBase {
     type: ChannelTypes.GUILD_ANNOUNCEMENT;
-} // TEMP
+}
 
 export class GuildStoreChannelRecord extends GuildTextualChannelRecordBase {
     type: ChannelTypes.GUILD_STORE;
@@ -501,7 +578,7 @@ export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
     constructor(channelProperties: Record<string, any>); // TEMP
 
     static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord;
-    static sortRecipients(recipients: Record<string, any>[] | Nullish, channelId: string): string[]; // TEMP
+    static sortRecipients(recipients: ChannelRecipient[] | Nullish, channelId: string): string[];
 
     addRecipient(recipientUserId: string, nickname: string | undefined, currentUserId: string): this;
     getRecipientId(): string | undefined;
@@ -586,7 +663,7 @@ export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser?: undefined;
     icon?: undefined;
-    iconEmoji: Defined<ChannelRecordBase["iconEmoji"]>;
+    iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
@@ -751,8 +828,50 @@ export class UnknownChannelRecord extends ChannelRecordBase {
 
     static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): UnknownChannelRecord; // TEMP
 
+    application_id: ChannelRecordBase["application_id"];
+    appliedTags: ChannelRecordBase["appliedTags"];
+    availableTags: ChannelRecordBase["availableTags"];
+    bitrate_: ChannelRecordBase["bitrate_"];
+    defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
+    defaultForumLayout: ChannelRecordBase["defaultForumLayout"];
+    defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];
+    defaultSortOrder: ChannelRecordBase["defaultSortOrder"];
+    defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    icon: ChannelRecordBase["icon"];
+    iconEmoji: ChannelRecordBase["iconEmoji"];
+    isMessageRequest: ChannelRecordBase["isMessageRequest"];
+    isMessageRequestTimestamp: ChannelRecordBase["isMessageRequestTimestamp"];
+    isSpam: ChannelRecordBase["isSpam"];
+    lastMessageId: ChannelRecordBase["lastMessageId"];
+    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    member: ChannelRecordBase["member"];
+    memberCount: ChannelRecordBase["memberCount"];
+    memberIdsPreview: ChannelRecordBase["memberIdsPreview"];
+    memberListId: ChannelRecordBase["memberListId"];
+    messageCount: ChannelRecordBase["messageCount"];
+    nicks: ChannelRecordBase["nicks"];
+    nsfw_: ChannelRecordBase["nsfw_"];
+    originChannelId: ChannelRecordBase["originChannelId"];
+    ownerId: ChannelRecordBase["ownerId"];
+    parent_id: ChannelRecordBase["parent_id"];
+    parentChannelThreadType: undefined;
+    permissionOverwrites_: Defined<ChannelRecordBase["permissionOverwrites_"]>;
+    position_: ChannelRecordBase["position_"];
+    rateLimitPerUser_: ChannelRecordBase["rateLimitPerUser_"];
+    rawRecipients: Defined<ChannelRecordBase["rawRecipients"]>;
+    recipients: Defined<ChannelRecordBase["recipients"]>;
+    rtcRegion: ChannelRecordBase["rtcRegion"];
+    safetyWarnings: ChannelRecordBase["safetyWarnings"];
+    template: ChannelRecordBase["template"];
+    themeColor: ChannelRecordBase["themeColor"];
+    threadMetadata: ChannelRecordBase["threadMetadata"];
+    topic_: ChannelRecordBase["topic_"];
+    totalMessageSent: ChannelRecordBase["totalMessageSent"];
     type: ChannelTypes.UNKNOWN;
-} // TEMP
+    userLimit_: ChannelRecordBase["userLimit_"];
+    version: ChannelRecordBase["version"];
+    videoQualityMode: ChannelRecordBase["videoQualityMode"];
+}
 
 export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRecord | ForumChannelRecord;
 
@@ -776,9 +895,9 @@ export class ChannelStore<Action extends FluxAction = ChannelStoreAction> extend
     getDMUserIds(): string[];
     getGuildChannelsVersion(guildId: string): number;
     getInitialOverlayState(): { [channelId: string]: ChannelRecord; };
-    getMutableBasicGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; } | undefined; // TEMP
+    getMutableBasicGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; }; // TEMP
     getMutableDMsByUserIds(): { [userId: string]: string; };
-    getMutableGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; } | undefined;
+    getMutableGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; };
     getMutablePrivateChannels(): { [channelId: string]: PrivateChannelRecord; };
     getPrivateChannelsVersion(): number;
     getSortedPrivateChannels(): PrivateChannelRecord[];
@@ -920,11 +1039,6 @@ export class EmojiStore extends FluxStore {
     };
 }
 
-interface AvatarDecorationData {
-    asset: string;
-    skuId: string;
-}
-
 export const enum GuildMemberFlags {
     DID_REJOIN = 1 << 0,
     COMPLETED_ONBOARDING = 1 << 1,
@@ -944,7 +1058,7 @@ export interface GuildMember {
     avatarDecoration: AvatarDecorationData | undefined;
     colorRoleId: string | undefined;
     colorString: string | undefined;
-    communicationDisabledUntil: string | Nullish;
+    communicationDisabledUntil: string | null;
     flags: GuildMemberFlags;
     fullProfileLoadedTimestamp: number | undefined;
     guildId: string;
@@ -960,14 +1074,14 @@ export interface GuildMember {
     userId: string;
 }
 
-type GuildMemberStoreAction = ExtractAction<FluxAction, "CACHE_LOADED" | "CLEAR_PENDING_CHANNEL_AND_ROLE_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBERS_CHUNK_BATCH" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_PROFILE_UPDATE" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "GUILD_MEMBER_UPDATE_LOCAL" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_MEMBER_ADD" | "GUILD_ROLE_MEMBER_REMOVE" | "GUILD_ROLE_UPDATE" | "IMPERSONATE_STOP" | "IMPERSONATE_UPDATE" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_FORUM_POSTS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_PINNED_MESSAGES_SUCCESS" | "LOAD_RECENT_MENTIONS_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "MEMBER_SAFETY_GUILD_MEMBER_SEARCH_SUCCESS" | "MESSAGE_CREATE" | "MESSAGE_UPDATE" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "PASSIVE_UPDATE_V1" | "SEARCH_FINISH" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE">;
+type GuildMemberStoreAction = ExtractAction<FluxAction, "CACHE_LOADED" | "CLEAR_PENDING_CHANNEL_AND_ROLE_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBERS_CHUNK_BATCH" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_PROFILE_UPDATE" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "GUILD_MEMBER_UPDATE_LOCAL" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_MEMBER_ADD" | "GUILD_ROLE_MEMBER_REMOVE" | "GUILD_ROLE_UPDATE" | "IMPERSONATE_STOP" | "IMPERSONATE_UPDATE" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_FORUM_POSTS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_PINNED_MESSAGES_SUCCESS" | "LOAD_RECENT_MENTIONS_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "MEMBER_SAFETY_GUILD_MEMBER_SEARCH_SUCCESS" | "MESSAGE_CREATE" | "MESSAGE_UPDATE" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "PASSIVE_UPDATE_V2" | "SEARCH_FINISH" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE">;
 
 export class GuildMemberStore<Action extends FluxAction = GuildMemberStoreAction> extends FluxStore<Action> {
     static displayName: "GuildMemberStore";
 
     getCommunicationDisabledUserMap(): { [userId: string]: string; };
     getCommunicationDisabledVersion(): number;
-    getMember(guildId: string, userId: string): GuildMember | null; // TEMP
+    getMember(guildId: string, userId: string): GuildMember | null;
     getMemberIds(guildId?: string | Nullish): string[];
     getMemberRoleWithPendingUpdates(guildId: string, userId: string): string[];
     getMembers(guildId?: string | Nullish): GuildMember[];
@@ -1020,11 +1134,73 @@ interface IconSource {
     uri: string;
 }
 
+export const enum ClanBadgeKind {
+    SWORD = 0,
+    WATER_DROP = 1,
+    SKULL = 2,
+    TOADSTOOL = 3,
+    MOON = 4,
+    LIGHTNING = 5,
+    LEAF = 6,
+    HEART = 7,
+    FIRE = 8,
+    COMPASS = 9,
+    CROSSHAIRS = 10,
+    FLOWER = 11,
+    FORCE = 12,
+    GEM = 13,
+    LAVA = 14,
+    PSYCHIC = 15,
+    SMOKE = 16,
+    SNOW = 17,
+    SOUND = 18,
+    SUN = 19,
+    WIND = 20,
+}
+
+export const enum ClanBannerKind {
+    NIGHT_SKY = 0,
+    CASTLE = 1,
+    WORLD_MAP = 2,
+    SEA_FOAM = 3,
+    WARP_TUNNEL = 4,
+    HOUSE = 5,
+    HEIGHTMAP = 6,
+    MESH = 7,
+    SPATTER = 8,
+}
+
+export const enum ClanPlaystyles {
+    NONE = 0,
+    SOCIAL = 1,
+    CASUAL = 2,
+    COMPETITIVE = 3,
+    CREATIVE = 4,
+    VERY_HARDCORE = 5,
+}
+
 export interface Clan {
-    badge: string | Nullish;
-    identityEnabled: boolean | undefined;
-    identityGuildId: string | Nullish;
-    tag: string | Nullish;
+    badge: {
+        badgeKind: ClanBadgeKind;
+        primaryColor: string;
+        secondaryColor: string;
+    };
+    banner: ClanBannerKind;
+    bannerHash: string | null;
+    branding: {
+        primaryColor: string;
+        secondaryColor: string;
+    };
+    description: string | null;
+    games: string[];
+    icon: string | null;
+    id: string;
+    memberCount: number;
+    name: string;
+    playstyle: ClanPlaystyles;
+    tag: string;
+    traits: string[];
+    wildcardDescriptors: string[];
 }
 
 export const enum UserNotificationSettings {
@@ -1186,7 +1362,7 @@ export class GuildRecord<
     afkTimeout: number;
     application_id: string | null;
     banner: string | null;
-    clan: Clan | null; // TEMP
+    clan: Clan | null;
     defaultMessageNotifications: UserNotificationSettings;
     description: string | null;
     discoverySplash: string | null;
@@ -1233,6 +1409,65 @@ export class GuildStore<Action extends FluxAction = GuildStoreAction> extends Fl
     getRole(guildId: string, roleId: string): Role | undefined;
     getRoles(guildId: string): { [roleId: string]: Role; };
     isLoaded(): boolean;
+}
+
+type RelationshipStoreAction = ExtractAction<FluxAction, "CONNECTION_OPEN" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_PENDING_INCOMING_REMOVED" | "RELATIONSHIP_REMOVE" | "RELATIONSHIP_UPDATE">;
+
+export class RelationshipStore<Action extends FluxAction = RelationshipStoreAction> extends FluxStore<Action> {
+    static displayName: "RelationshipStore";
+
+    getFriendCount(): any; // TEMP
+    getFriendIDs(): any; // TEMP
+    getNickname(e?: any): any; // TEMP
+    getOutgoingCount(): any; // TEMP
+    getPendingCount(): any; // TEMP
+    getRelationshipCount(): any; // TEMP
+    getRelationships(): any; // TEMP
+    getRelationshipType(e?: any): any; // TEMP
+    getSince(e?: any): any; // TEMP
+    getSinces(): any; // TEMP
+    isBlocked(e?: any): any; // TEMP
+    isFriend(e?: any): any; // TEMP
+}
+
+type SelectedChannelStoreAction = ExtractAction<FluxAction, "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_FOLLOWER_CREATED" | "CHANNEL_SELECT" | "CHANNEL_UPDATES" | "CONNECTION_CLOSED" | "CONNECTION_OPEN" | "GUILD_CREATE" | "GUILD_DELETE" | "LOGOUT" | "OVERLAY_INITIALIZE" | "THREAD_DELETE" | "VOICE_CHANNEL_SELECT" | "VOICE_STATE_UPDATES">;
+
+export class SelectedChannelStore<Action extends FluxAction = SelectedChannelStoreAction> extends FluxStore<Action> {
+    static displayName: "SelectedChannelStore";
+
+    getChannelId(guildId?: string | Nullish): string | undefined;
+    getCurrentlySelectedChannelId(guildId?: string | Nullish): string | Nullish;
+    getLastChannelFollowingDestination(): {
+        channelId: string;
+        guildId: string;
+    };
+    getLastSelectedChannelId(arg?: string | Nullish): string | undefined; // TEMP
+    getLastSelectedChannels(arg: string): string | undefined; // TEMP
+    getMostRecentSelectedTextChannelId(guildId?: string | Nullish): string | null;
+    getVoiceChannelId(): string | null;
+}
+
+interface SelectedGuildStoreState {
+    lastSelectedGuildId: string | null;
+    selectedGuildId: string | null;
+    selectedGuildTimestampMillis: { [guildId: string]: number; };
+}
+
+type SelectedGuildStoreAction = ExtractAction<FluxAction, "CHANNEL_SELECT" | "CONNECTION_OPEN" | "GUILD_DELETE" | "GUILD_MEMBER_REMOVE" | "LOGOUT" | "OVERLAY_INITIALIZE">;
+
+export class SelectedGuildStore<
+    Constructor extends GenericConstructor = typeof SelectedGuildStore,
+    State extends SelectedGuildStoreState = SelectedGuildStoreState,
+    Action extends FluxAction = SelectedGuildStoreAction
+> extends FluxPersistedStore<Constructor, State, Action> {
+    static displayName: "SelectedGuildStore";
+    static persistKey: "SelectedGuildStore";
+
+    initialize(state: SelectedGuildStoreState): void;
+    getState(): State;
+    getGuildId(): string | null;
+    getLastSelectedGuildId(): string | null;
+    getLastSelectedTimestamp(guildId: string): number | undefined;
 }
 
 export const enum ApplicationFlags {
@@ -1292,16 +1527,80 @@ export const enum OAuth2Scopes {
     WEBHOOK_INCOMING = "webhook.incoming",
 }
 
+export interface ApplicationInstallParams {
+    scopes: OAuth2Scopes[];
+    permissions: string; // Permissions serialized as string
+}
+
 export const enum ApplicationIntegrationType {
     GUILD_INSTALL = 0,
     USER_INSTALL = 1,
 }
 
-interface ProfileBadge {
+export interface Application {
+    customInstallUrl: string | undefined;
+    flags: ApplicationFlags;
+    id: string;
+    installParams: ApplicationInstallParams | undefined;
+    integrationTypesConfig: Partial<Record<ApplicationIntegrationType, {
+        oauth2_install_params?: ApplicationInstallParams;
+    } | null>>;
+    popularApplicationCommandIds: string[] | undefined;
+    primarySkuId: string | undefined;
+    storefront_available: boolean;
+}
+
+export interface ApplicationRoleConnection {
+    metadata: Record<string, string | number>;
+    platform_name: string | null;
+    platform_username: string | null;
+}
+
+export interface ProfileBadge {
     description: string;
     icon: string;
     id: string;
     link?: string;
+}
+
+export const enum PlatformTypes {
+    AMAZON_MUSIC = "amazon-music",
+    BATTLENET = "battlenet",
+    BUNGIE = "bungie",
+    CONTACTS = "contacts",
+    CRUNCHYROLL = "crunchyroll",
+    DOMAIN = "domain",
+    EBAY = "ebay",
+    EPIC_GAMES = "epicgames",
+    FACEBOOK = "facebook",
+    GITHUB = "github",
+    INSTAGRAM = "instagram",
+    LEAGUE_OF_LEGENDS = "leagueoflegends",
+    PAYPAL = "paypal",
+    PLAYSTATION = "playstation",
+    PLAYSTATION_STAGING = "playstation-stg",
+    REDDIT = "reddit",
+    RIOT_GAMES = "riotgames",
+    ROBLOX = "roblox",
+    SAMSUNG = "samsung",
+    SKYPE = "skype",
+    SOUNDCLOUD = "soundcloud",
+    SPOTIFY = "spotify",
+    STEAM = "steam",
+    TIKTOK = "tiktok",
+    TWITCH = "twitch",
+    TWITTER = "twitter",
+    TWITTER_LEGACY = "twitter_legacy",
+    XBOX = "xbox",
+    YOUTUBE = "youtube",
+}
+
+export interface ConnectedAccount {
+    id: string;
+    metadata?: Record<string, string | number | boolean>;
+    name: string;
+    type: PlatformTypes;
+    verified: boolean;
 }
 
 type ProfileThemeColors = [primaryColor: number, accentColor: number];
@@ -1323,31 +1622,13 @@ interface UserProfileFetchFailed {
 }
 
 interface UserProfileFetchSucceeded {
-    application: {
-        customInstallUrl: string | Nullish;
-        flags: ApplicationFlags;
-        id: string;
-        installParams: {
-            scopes: OAuth2Scopes[] | Nullish;
-            permissions: string | Nullish;
-        } | Nullish;
-        integrationTypesConfig: Partial<Record<ApplicationIntegrationType, any /* | Nullish */>> | Nullish; // TEMP
-        popularApplicationCommandIds: string[] | undefined;
-        primarySkuId: string | Nullish;
-        storefront_available: boolean;
-    } | null;
+    application: Application | null;
     accentColor: number | Nullish;
-    applicationRoleConnections: any[]; // TEMP
+    applicationRoleConnections: ApplicationRoleConnection[];
     badges: ProfileBadge[];
     banner: string | Nullish;
     bio: string;
-    connectedAccounts: {
-        id: string;
-        metadata?: Record<string, any>;
-        name: string;
-        type: string;
-        verified: boolean;
-    }[];
+    connectedAccounts: ConnectedAccount[];
     lastFetched: number;
     legacyUsername: string | Nullish;
     popoutAnimationParticleType: any /* |  Nullish */; // TEMP
@@ -1371,7 +1652,7 @@ export interface GuildMemberProfile {
     banner: string | Nullish;
     bio: string | undefined;
     guildId: string;
-    popoutAnimationParticleType: Nullish; // TEMP
+    popoutAnimationParticleType: any /* | Nullish */; // TEMP
     profileEffectId: string | undefined;
     pronouns: string;
     themeColors: ProfileThemeColors | Nullish;
@@ -1395,7 +1676,9 @@ interface UserProfileStoreSnapshotData {
 
 type UserProfileStoreAction = ExtractAction<FluxAction, "CACHE_LOADED_LAZY" | "GUILD_DELETE" | "GUILD_JOIN" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "LOGOUT" | "MUTUAL_FRIENDS_FETCH_FAILURE" | "MUTUAL_FRIENDS_FETCH_START" | "MUTUAL_FRIENDS_FETCH_SUCCESS" | "USER_PROFILE_ACCESSIBILITY_TOOLTIP_VIEWED" | "USER_PROFILE_FETCH_FAILURE" | "USER_PROFILE_FETCH_START" | "USER_PROFILE_FETCH_SUCCESS" | "USER_PROFILE_UPDATE_FAILURE" | "USER_PROFILE_UPDATE_START" | "USER_PROFILE_UPDATE_SUCCESS" | "USER_UPDATE">;
 
-export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore, UserProfileStoreSnapshotData, UserProfileStoreAction> {
+export class UserProfileStore<
+    Constructor extends GenericConstructor = typeof UserProfileStore
+> extends FluxSnapshotStore<Constructor, UserProfileStoreSnapshotData, UserProfileStoreAction> {
     constructor();
 
     static displayName: "UserProfileStore";
@@ -1420,6 +1703,18 @@ export class UserProfileStore extends FluxSnapshotStore<typeof UserProfileStore,
     takeSnapshot(): FluxSnapshot<UserProfileStoreSnapshotData>;
 
     loadCache: () => void;
+}
+
+export interface AvatarDecorationData {
+    asset: string;
+    skuId: string;
+}
+
+export interface UserClanData {
+    badge: string | null;
+    identityEnabled: boolean | null;
+    identityGuildId: string | null;
+    tag: string | null;
 }
 
 export const enum UserFlags {
@@ -1503,7 +1798,7 @@ export class UserRecord<
     avatarDecorationData: AvatarDecorationData | null;
     banner: string | Nullish;
     bot: boolean;
-    clan: Clan | null;
+    clan: UserClanData | null;
     desktop: boolean;
     discriminator: string;
     email: string | null;
@@ -1534,9 +1829,11 @@ interface UserStoreSnapshotData {
     users: [UserRecord] | [];
 }
 
-type UserStoreAction = ExtractAction<FluxAction, "AUDIT_LOG_FETCH_NEXT_PAGE_SUCCESS" | "AUDIT_LOG_FETCH_SUCCESS" | "CACHE_LOADED" | "CHANNEL_CREATE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "CURRENT_USER_UPDATE" | "FAMILY_CENTER_INITIAL_LOAD" | "FAMILY_CENTER_LINKED_USERS_FETCH_SUCCESS" | "FAMILY_CENTER_REQUEST_LINK_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_FETCH_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_MORE_FETCH_SUCCESS" | "FETCH_PRIVATE_CHANNEL_INTEGRATIONS_SUCCESS" | "FRIEND_SUGGESTION_CREATE" | "GIFT_CODE_RESOLVE_SUCCESS" | "GUILD_APPLIED_BOOSTS_FETCH_SUCCESS" | "GUILD_BAN_ADD" | "GUILD_BAN_REMOVE" | "GUILD_CREATE" | "GUILD_FEED_FETCH_SUCCESS" | "GUILD_JOIN_REQUEST_CREATE" | "GUILD_JOIN_REQUEST_UPDATE" | "GUILD_MEMBERS_CHUNK_BATCH" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_LIST_UPDATE" | "GUILD_MEMBER_UPDATE" | "GUILD_SCHEDULED_EVENT_USERS_FETCH_SUCCESS" | "GUILD_SETTINGS_LOADED_BANS" | "GUILD_SETTINGS_LOADED_BANS_BATCH" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_FORUM_POSTS" | "LOAD_FRIEND_SUGGESTIONS_SUCCESS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_MESSAGE_REQUESTS_SUPPLEMENTAL_DATA_SUCCESS" | "LOAD_NOTIFICATION_CENTER_ITEMS_SUCCESS" | "LOAD_PINNED_MESSAGES_SUCCESS" | "LOAD_RECENT_MENTIONS_SUCCESS" | "LOAD_RELATIONSHIPS_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "MEMBER_SAFETY_GUILD_MEMBER_SEARCH_SUCCESS" | "MESSAGE_CREATE" | "MESSAGE_UPDATE" | "MOD_VIEW_SEARCH_FINISH" | "NOTIFICATION_CENTER_ITEM_CREATE" | "OVERLAY_INITIALIZE" | "PASSIVE_UPDATE_V1" | "PRESENCE_UPDATES" | "PRIVATE_CHANNEL_INTEGRATION_CREATE" | "PRIVATE_CHANNEL_INTEGRATION_UPDATE" | "RELATIONSHIP_ADD" | "SEARCH_FINISH" | "THREAD_LIST_SYNC" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE" | "UPDATE_CLIENT_PREMIUM_TYPE" | "USER_UPDATE">;
+type UserStoreAction = ExtractAction<FluxAction, "AUDIT_LOG_FETCH_NEXT_PAGE_SUCCESS" | "AUDIT_LOG_FETCH_SUCCESS" | "CACHE_LOADED" | "CHANNEL_CREATE" | "CHANNEL_RECIPIENT_ADD" | "CHANNEL_RECIPIENT_REMOVE" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "CURRENT_USER_UPDATE" | "FAMILY_CENTER_INITIAL_LOAD" | "FAMILY_CENTER_LINKED_USERS_FETCH_SUCCESS" | "FAMILY_CENTER_REQUEST_LINK_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_FETCH_SUCCESS" | "FAMILY_CENTER_TEEN_ACTIVITY_MORE_FETCH_SUCCESS" | "FETCH_PRIVATE_CHANNEL_INTEGRATIONS_SUCCESS" | "FRIEND_SUGGESTION_CREATE" | "GIFT_CODE_RESOLVE_SUCCESS" | "GUILD_APPLIED_BOOSTS_FETCH_SUCCESS" | "GUILD_BAN_ADD" | "GUILD_BAN_REMOVE" | "GUILD_CREATE" | "GUILD_FEED_FETCH_SUCCESS" | "GUILD_JOIN_REQUEST_CREATE" | "GUILD_JOIN_REQUEST_UPDATE" | "GUILD_MEMBERS_CHUNK_BATCH" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_LIST_UPDATE" | "GUILD_MEMBER_UPDATE" | "GUILD_SCHEDULED_EVENT_USERS_FETCH_SUCCESS" | "GUILD_SETTINGS_LOADED_BANS" | "GUILD_SETTINGS_LOADED_BANS_BATCH" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_FORUM_POSTS" | "LOAD_FRIEND_SUGGESTIONS_SUCCESS" | "LOAD_MESSAGES_AROUND_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_MESSAGE_REQUESTS_SUPPLEMENTAL_DATA_SUCCESS" | "LOAD_NOTIFICATION_CENTER_ITEMS_SUCCESS" | "LOAD_PINNED_MESSAGES_SUCCESS" | "LOAD_RECENT_MENTIONS_SUCCESS" | "LOAD_RELATIONSHIPS_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "MEMBER_SAFETY_GUILD_MEMBER_SEARCH_SUCCESS" | "MESSAGE_CREATE" | "MESSAGE_UPDATE" | "MOD_VIEW_SEARCH_FINISH" | "NOTIFICATION_CENTER_ITEM_CREATE" | "OVERLAY_INITIALIZE" | "PASSIVE_UPDATE_V2" | "PRESENCE_UPDATES" | "PRIVATE_CHANNEL_INTEGRATION_CREATE" | "PRIVATE_CHANNEL_INTEGRATION_UPDATE" | "RELATIONSHIP_ADD" | "SEARCH_FINISH" | "THREAD_LIST_SYNC" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE" | "UPDATE_CLIENT_PREMIUM_TYPE" | "USER_UPDATE">;
 
-export class UserStore extends FluxSnapshotStore<typeof UserStore, UserStoreSnapshotData, UserStoreAction> {
+export class UserStore<
+    Constructor extends GenericConstructor = typeof UserStore
+> extends FluxSnapshotStore<Constructor, UserStoreSnapshotData, UserStoreAction> {
     constructor();
 
     static displayName: "UserStore";
