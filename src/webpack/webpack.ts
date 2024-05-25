@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
+import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -402,7 +402,8 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
     });
 }
 
-const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\((\[\i\.\i\(".+?"\).+?\])\)|Promise\.resolve\(\)).then\(\i\.bind\(\i,"(.+?)"\)\)/;
+export const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\))|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/;
+export const ChunkIdsRegex = /\("(.+?)"\)/g;
 
 /**
  * Extract and load chunks using their entry point
@@ -431,8 +432,8 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return;
     }
 
-    const [, rawChunkIds, entryPointId] = match;
-    if (Number.isNaN(entryPointId)) {
+    const [, rawChunkIdsArray, rawChunkIdsSingle, entryPointId] = match;
+    if (Number.isNaN(Number(entryPointId))) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
@@ -443,8 +444,9 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return;
     }
 
+    const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(/\("(.+?)"\)/g)).map((m: any) => m[1]);
+        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
@@ -462,7 +464,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
-    return () => extractAndLoadChunks(code, matcher);
+    return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
 
 /**
