@@ -60,8 +60,8 @@ export default definePlugin({
                 },
                 {
                     predicate: () => settings.store.keepSpotifyActivityOnIdle,
-                    match: /(?<=shouldShowActivity\(\){.{0,50})&&!\i\.\i\.isIdle\(\)/,
-                    replace: ""
+                    match: /(shouldShowActivity\(\){.{0,50})&&!\i\.\i\.isIdle\(\)/,
+                    replace: "$1"
                 }
             ]
         }

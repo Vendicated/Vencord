@@ -227,10 +227,8 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     const accessories = [] as (JSX.Element | null)[];
 
-    let match = null as RegExpMatchArray | null;
-    while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, channelID, messageID] = match;
-        if (embeddedBy.includes(messageID)) {
+    for (const [_, channelID, messageID] of message.content!.matchAll(messageLinkRegex)) {
+        if (embeddedBy.includes(messageID) || embeddedBy.length > 2) {
             continue;
         }
 

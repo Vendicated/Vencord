@@ -73,13 +73,13 @@ export default definePlugin({
         {
             find: "instantBatchUpload:function",
             replacement: {
-                match: /uploadFiles:(.{1,2}),/,
+                match: /uploadFiles:(\i),/,
                 replace:
                     "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=$self.anonymise(f)),$1(...args)),",
             },
         },
         {
-            find: "message.attachments",
+            find: 'addFilesTo:"message.attachments"',
             replacement: {
                 match: /(\i.uploadFiles\((\i),)/,
                 replace: "$2.forEach(f=>f.filename=$self.anonymise(f)),$1"

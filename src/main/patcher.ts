@@ -73,6 +73,9 @@ if (!IS_VANILLA) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
                 options.webPreferences.sandbox = false;
+                // work around discord unloading when in background
+                options.webPreferences.backgroundThrottling = false;
+
                 if (settings.frameless) {
                     options.frame = false;
                 } else if (process.platform === "win32" && settings.winNativeTitleBar) {
@@ -136,6 +139,9 @@ if (!IS_VANILLA) {
         }
         return originalAppend.apply(this, args);
     };
+
+    // Work around discord unloading when in background
+    app.commandLine.appendSwitch("disable-renderer-backgrounding");
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }

@@ -112,8 +112,8 @@ export default definePlugin({
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
                 {
-                    match: /(?<=let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?)(?=}=\i,)/,
-                    replace: ",isBetterFolders"
+                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    replace: "$&,isBetterFolders"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
                 {
