@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type * as Stores from "discord-types/stores";
-
 // eslint-disable-next-line path-alias/no-relative
 import { findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
@@ -29,9 +27,7 @@ export type GenericStore = t.FluxStore & Record<string, any>;
 
 export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
 
-export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
-    getMessages(chanId: string): any;
-};
+export let MessageStore: t.MessageStore;
 
 // Original name: ChannelActionCreators, this is not actually a FluxStore
 export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");

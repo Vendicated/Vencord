@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { Duration, Moment } from "moment";
 import type { SnakeCasedProperties } from "type-fest";
 
 import type { ExcludeAction, ExtractAction, FluxAction, FluxActionHandlerMap, FluxDispatchBand, FluxDispatcher } from "./utils";
@@ -56,7 +57,7 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
-    initialize(...args: any[]): void;
+    initialize(...args: unknown[]): void;
     initializeIfNeeded(): void;
     mustEmitChanges(
         mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */
@@ -290,7 +291,7 @@ export const enum ThreadMemberFlags {
     NO_MESSAGES = 1 << 3,
 }
 
-export interface ChannelMember {
+export interface ThreadMember {
     flags: ThreadMemberFlags;
     joinTimestamp: string;
     muteConfig: {
@@ -460,7 +461,7 @@ export abstract class ChannelRecordBase {
     isSpam?: boolean | undefined;
     lastMessageId: string | Nullish;
     lastPinTimestamp: string | Nullish;
-    member?: ChannelMember | undefined;
+    member?: ThreadMember | undefined;
     memberCount?: number | undefined;
     memberIdsPreview?: string[] | undefined;
     memberListId?: string | Nullish;
@@ -902,6 +903,7 @@ export class ChannelStore<Action extends FluxAction = ChannelStoreAction> extend
     getPrivateChannelsVersion(): number;
     getSortedPrivateChannels(): PrivateChannelRecord[];
     hasChannel(channelId: string): boolean;
+    initialize(): void;
     loadAllGuildAndPrivateChannelsFromDisk(): { [channelId: string]: GuildChannelRecord | PrivateChannelRecord; };
 }
 
@@ -1096,6 +1098,7 @@ export class GuildMemberStore<Action extends FluxAction = GuildMemberStoreAction
     };
     getSelfMember(guildId: string): GuildMember | Nullish;
     getTrueMember(guildId: string, userId: string): GuildMember | Nullish;
+    initialize(): void;
     isCurrentUserGuest(guildId?: string | Nullish): boolean;
     isGuestOrLurker(guildId?: string | Nullish, userId?: string | Nullish): boolean;
     isMember(guildId?: string | Nullish, userId?: string | Nullish): boolean;
@@ -1411,23 +1414,556 @@ export class GuildStore<Action extends FluxAction = GuildStoreAction> extends Fl
     isLoaded(): boolean;
 }
 
+export const enum MessageAttachmentFlags {
+    IS_CLIP = 1 << 0,
+    IS_THUMBNAIL = 1 << 1,
+    IS_REMIX = 1 << 2,
+    IS_SPOILER = 1 << 3,
+    CONTAINS_EXPLICIT_MEDIA = 1 << 4,
+}
+
+export interface MessageAttachment {
+    content_scan_version?: number;
+    content_type?: string;
+    description?: string;
+    duration_secs?: number;
+    ephemeral?: boolean;
+    filename: string;
+    flags?: MessageAttachmentFlags;
+    height?: number | null;
+    id: string;
+    placeholder?: string;
+    placeholder_version?: number;
+    proxy_url: string;
+    size: number;
+    spoiler: boolean;
+    url: string;
+    waveform?: string;
+    width?: number | null;
+}
+
+export interface MessageCall {
+    duration: Duration | null;
+    endedTimestamp: Moment | null;
+    participants: string[];
+}
+
+export const enum CodedLinkType {
+    ACTIVITY_BOOKMARK = "ACTIVITY_BOOKMARK",
+    APP_DIRECTORY_PROFILE = "APP_DIRECTORY_PROFILE",
+    BUILD_OVERRIDE = "BUILD_OVERRIDE",
+    CHANNEL_LINK = "CHANNEL_LINK",
+    EMBEDDED_ACTIVITY_INVITE = "EMBEDDED_ACTIVITY_INVITE",
+    EVENT = "EVENT",
+    GUILD_PRODUCT = "GUILD_PRODUCT",
+    INVITE = "INVITE",
+    MANUAL_BUILD_OVERRIDE = "MANUAL_BUILD_OVERRIDE",
+    QUESTS_EMBED = "QUESTS_EMBED",
+    SERVER_SHOP = "SERVER_SHOP",
+    TEMPLATE = "TEMPLATE",
+}
+
+export interface CodedLink {
+    code: string;
+    type: CodedLinkType;
+}
+
+// Original name: ComponentType, renamed to avoid conflict with ComponentType from React
+export const enum MessageComponentType {
+    ACTION_ROW = 1,
+    BUTTON = 2,
+    STRING_SELECT = 3,
+    INPUT_TEXT = 4,
+    USER_SELECT = 5,
+    ROLE_SELECT = 6,
+    MENTIONABLE_SELECT = 7,
+    CHANNEL_SELECT = 8,
+    TEXT = 10,
+    MEDIA_GALLERY = 12,
+    SEPARATOR = 14,
+}
+
+/*
+export interface MessageActionRowComponent {
+    type: MessageComponentType.ACTION_ROW;
+    id: T(r);
+    components: s;
+}
+
+export interface MessageButtonComponent {
+    type: MessageComponentType.BUTTON;
+    id: T(r);
+    customId: t.custom_id;
+    style: t.style;
+    disabled: t.disabled;
+    url: t.url;
+    label: t.label;
+    emoji: e;
+}
+
+export interface MessageStringSelectComponent {
+    type: MessageComponentType.STRING_SELECT;
+    id: T(r);
+    customId: t.custom_id;
+    disabled: t.disabled;
+    options: {
+        type: l.SelectOptionType.STRING;
+        label: e.label;
+        value: e.value;
+        default: e.default;
+        description: e.description;
+        emoji: null != e.emoji ? d(e.emoji, m) : void 0;
+    }[];
+    placeholder: null !== (a = t.placeholder) && void 0 !== a ? a : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
+    minValues: t.min_values;
+    maxValues: t.max_values;
+}
+
+export interface MessageTextInputComponent {
+    type: MessageComponentType.INPUT_TEXT;
+    id: T(r);
+    style: t.style;
+    customId: t.custom_id;
+    label: t.label;
+    value: t.value;
+    placeholder: t.placeholder;
+    disabled: t.disabled;
+    required: null !== (_ = t.required) && void 0 !== _ && _;
+    minLength: t.min_length;
+    maxLength: t.max_length;
+}
+
+export interface MessageUserSelectComponent {
+    type: MessageComponentType.USER_SELECT;
+    id: T(r);
+    customId: t.custom_id;
+    disabled: t.disabled;
+    placeholder: null !== (c = t.placeholder) && void 0 !== c ? c : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
+    minValues: t.min_values;
+    maxValues: t.max_values;
+    defaultValues: t.default_values;
+}
+
+export interface MessageRoleSelectComponent {
+    type: MessageComponentType.ROLE_SELECT;
+    id: T(r);
+    customId: t.custom_id;
+    disabled: t.disabled;
+    placeholder: null !== (I = t.placeholder) && void 0 !== I ? I : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
+    minValues: t.min_values;
+    maxValues: t.max_values;
+    defaultValues: t.default_values;
+}
+
+export interface MessageMentionableSelectComponent {
+    type: MessageComponentType.MENTIONABLE_SELECT;
+    id: T(r);
+    customId: t.custom_id;
+    disabled: t.disabled;
+    placeholder: null !== (f = t.placeholder) && void 0 !== f ? f : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
+    minValues: t.min_values;
+    maxValues: t.max_values;
+    defaultValues: t.default_values;
+}
+
+export interface MessageChannelSelectComponent {
+    type: MessageComponentType.CHANNEL_SELECT;
+    id: T(r);
+    customId: t.custom_id;
+    disabled: t.disabled;
+    placeholder: null !== (S = t.placeholder) && void 0 !== S ? S : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
+    minValues: t.min_values;
+    maxValues: t.max_values;
+    channelTypes: t.channel_types;
+    defaultValues: t.default_values;
+}
+
+export interface MessageTextComponent {
+    type: MessageComponentType.TEXT;
+    id: T(r);
+    content: t.content;
+}
+
+export interface MessageMediaGalleryComponent {
+    type: MessageComponentType.MEDIA_GALLERY;
+    id: T(r);
+    items: {
+        media: (0, s.toUnfurledMediaItem)(e.media);
+        description: e.description;
+        spoiler: e.spoiler;
+    }[];
+}
+
+export interface MessageSeparatorComponent {
+    type: MessageComponentType.SEPARATOR;
+    id: T(r);
+    divider: null === (h = t.divider) || void 0 === h || h;
+    spacing: null !== (A = t.spacing) && void 0 !== A ? A : i.SeparatorSpacingSize.SMALL;
+}
+
+export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageStringSelectComponent | MessageTextInputComponent | MessageUserSelectComponent | MessageRoleSelectComponent | MessageMentionableSelectComponent | MessageChannelSelectComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
+*/
+
+export const enum MessageFlags {
+    CROSSPOSTED = 1 << 0,
+    IS_CROSSPOST = 1 << 1,
+    SUPPRESS_EMBEDS = 1 << 2,
+    SOURCE_MESSAGE_DELETED = 1 << 3,
+    URGENT = 1 << 4,
+    HAS_THREAD = 1 << 5,
+    EPHEMERAL = 1 << 6,
+    LOADING = 1 << 7,
+    FAILED_TO_MENTION_SOME_ROLES_IN_THREAD = 1 << 8,
+    SHOULD_SHOW_LINK_NOT_DISCORD_WARNING = 1 << 10,
+    SUPPRESS_NOTIFICATIONS = 1 << 12,
+    IS_VOICE_MESSAGE = 1 << 13,
+    HAS_SNAPSHOT = 1 << 14,
+    IS_UIKIT_COMPONENTS = 1 << 15,
+}
+
+export const enum MessageStates {
+    SEND_FAILED = "SEND_FAILED",
+    SENDING = "SENDING",
+    SENT = "SENT",
+}
+
+export const enum MessageTypes {
+    DEFAULT = 0,
+    RECIPIENT_ADD = 1,
+    RECIPIENT_REMOVE = 2,
+    CALL = 3,
+    CHANNEL_NAME_CHANGE = 4,
+    CHANNEL_ICON_CHANGE = 5,
+    CHANNEL_PINNED_MESSAGE = 6,
+    USER_JOIN = 7,
+    GUILD_BOOST = 8,
+    GUILD_BOOST_TIER_1 = 9,
+    GUILD_BOOST_TIER_2 = 10,
+    GUILD_BOOST_TIER_3 = 11,
+    CHANNEL_FOLLOW_ADD = 12,
+    GUILD_STREAM = 13,
+    GUILD_DISCOVERY_DISQUALIFIED = 14,
+    GUILD_DISCOVERY_REQUALIFIED = 15,
+    GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING = 16,
+    GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING = 17,
+    THREAD_CREATED = 18,
+    REPLY = 19,
+    CHAT_INPUT_COMMAND = 20,
+    THREAD_STARTER_MESSAGE = 21,
+    GUILD_INVITE_REMINDER = 22,
+    CONTEXT_MENU_COMMAND = 23,
+    AUTO_MODERATION_ACTION = 24,
+    ROLE_SUBSCRIPTION_PURCHASE = 25,
+    INTERACTION_PREMIUM_UPSELL = 26,
+    STAGE_START = 27,
+    STAGE_END = 28,
+    STAGE_SPEAKER = 29,
+    STAGE_RAISE_HAND = 30,
+    STAGE_TOPIC = 31,
+    GUILD_APPLICATION_PREMIUM_SUBSCRIPTION = 32,
+    PRIVATE_CHANNEL_INTEGRATION_ADDED = 33,
+    PRIVATE_CHANNEL_INTEGRATION_REMOVED = 34,
+    PREMIUM_REFERRAL = 35,
+    GUILD_INCIDENT_ALERT_MODE_ENABLED = 36,
+    GUILD_INCIDENT_ALERT_MODE_DISABLED = 37,
+    GUILD_INCIDENT_REPORT_RAID = 38,
+    GUILD_INCIDENT_REPORT_FALSE_ALARM = 39,
+    GUILD_DEADCHAT_REVIVE_PROMPT = 40,
+    CUSTOM_GIFT = 41,
+    GUILD_GAMING_STATS_PROMPT = 42,
+    PURCHASE_NOTIFICATION = 44,
+    VOICE_HANGOUT_INVITE = 45,
+    POLL_RESULT = 46,
+    CHANGELOG = 47,
+}
+
+type MessageRecordOwnProperties = Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "attachments" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "codedLinks" | "colorString" | "components" | "content" | "customRenderedContent" | "editedTimestamp" | "embeds" | "flags" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentionEveryone" | "mentionRoles" | "mentioned" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "timestamp" | "tts" | "type" | "webhookId">;
+
+export class MessageRecord<
+    OwnProperties extends MessageRecordOwnProperties = MessageRecordOwnProperties
+> extends ImmutableRecord<OwnProperties> {
+    constructor(messageFromServer: Record<string, any>); // TEMP
+
+    addReaction(e?: any, t?: any, n?: any, r?: any): this; // TEMP
+    addReactionBatch(e?: any, t?: any): any; // TEMP
+    canDeleteOwnMessage(userId: string): boolean;
+    getChannelId(): string;
+    getReaction(e?: any): any; // TEMP
+    hasFlag(flag: MessageFlags): boolean;
+    isCommandType(): boolean;
+    isEdited(): boolean;
+    isFirstMessageInForumPost(channel: ChannelRecord): boolean; // TEMP
+    isInteractionPlaceholder(): boolean;
+    isPoll(): boolean;
+    isSystemDM(): boolean;
+    isUIKitComponents(): boolean;
+    removeReaction(e?: any, t?: any, n?: any): this; // TEMP
+    removeReactionsForEmoji(e?: any): this; // TEMP
+    toJS(): OwnProperties & SnakeCasedProperties<Pick<OwnProperties, "editedTimestamp" | "mentionEveryone" | "webhookId">>;
+    userHasReactedWithEmoji(e?: any, t?: any): boolean; // TEMP
+
+    activity: any | null; // TEMP
+    activityInstance: any | null; // TEMP
+    application: any | null; // TEMP
+    applicationId: string | null; // TEMP
+    attachments: MessageAttachment[];
+    author: UserRecord;
+    blocked: boolean;
+    bot: boolean;
+    call: MessageCall | null;
+    changelogId: string | null;
+    channel_id: string;
+    codedLinks: CodedLink[];
+    colorString: string | undefined;
+    components: {
+        components: any[]; // TEMP
+        id: string;
+        type: number;
+    }[];
+    content: string;
+    customRenderedContent: any; // TEMP
+    editedTimestamp: string | null; // TEMP
+    embeds: any[]; // TEMP
+    flags: MessageFlags;
+    giftCodes: any[]; // TEMP
+    giftInfo: any; // TEMP
+    id: string;
+    interaction: any | null; // TEMP
+    interactionData: any | null; // TEMP
+    interactionError: any | null; // TEMP
+    interactionMetadata: any | null; // TEMP
+    isSearchHit: boolean;
+    isUnsupported: boolean;
+    loggingName: string | null; // TEMP
+    mentionChannels: any[]; // TEMP
+    mentionEveryone: boolean;
+    mentionRoles: any[]; // TEMP
+    mentioned: boolean;
+    mentions: any[]; // TEMP
+    messageReference: any | null; // TEMP
+    messageSnapshots: any[]; // TEMP
+    nick: any; // TEMP
+    nonce: any | null; // TEMP
+    pinned: boolean;
+    poll: any; // TEMP
+    purchaseNotification: any; // TEMP
+    reactions: any[]; // TEMP
+    referralTrialOfferId: string | null; // TEMP
+    roleSubscriptionData: any; // TEMP
+    state: MessageStates;
+    stickerItems: any[]; // TEMP
+    stickers: any[]; // TEMP
+    timestamp: Date; // TEMP
+    tts: boolean;
+    type: MessageTypes;
+    webhookId: string | null; // TEMP
+}
+
+declare class MessageCache {
+    constructor(isCacheBefore: boolean);
+
+    cache(e?: any): void; // TEMP
+    clear(): void; // TEMP
+    clone(): any; // TEMP
+    extract(e?: any): any; // TEMP
+    extractAll(): any; // TEMP
+    forEach(callback: (value: any, index: number, array: any[]) => void, thisArg?: unknown): void; // TEMP
+    get(e?: any): any; // TEMP
+    has(e?: any): boolean; // TEMP
+    get length(): any; // TEMP
+    remove(e?: any): void; // TEMP
+    removeMany(e?: any): void; // TEMP
+    replace(e?: any, t?: any): void; // TEMP
+    update(e?: any, t?: any): void; // TEMP
+    get wasAtEdge(): any; // TEMP
+    set wasAtEdge(e: any); // TEMP
+
+    _isCacheBefore: boolean;
+    _map: any; // TEMP
+    _messages: any[]; // TEMP
+    _wasAtEdge: boolean;
+}
+
+export const enum JumpTypes {
+    ANIMATED = "ANIMATED",
+    INSTANT = "INSTANT",
+}
+
+export class ChannelMessages {
+    constructor(channelId: string);
+
+    static _channelMessages: any; // TEMP
+    static clear(e?: any): any; // TEMP
+    static clearCache(e?: any): any; // TEMP
+    static commit(e?: any): any; // TEMP
+    static forEach(e?: any): any; // TEMP
+    static get(e?: any): any; // TEMP
+    static getOrCreate(e?: any): any; // TEMP
+    static hasPresent(e?: any): any; // TEMP
+
+    _clearMessages(): void;
+    _merge(e?: any): any; // TEMP
+    addCachedMessages(e?: any, t?: any): any; // TEMP
+    filter<T extends MessageRecord>(
+        predicate: (value: MessageRecord, index: number, array: MessageRecord[]) => value is T,
+        thisArg?: unknown
+    ): T[];
+    filter(
+        predicate: (value: MessageRecord, index: number, array: MessageRecord[]) => unknown,
+        thisArg?: unknown
+    ): MessageRecord[];
+    findNewest(e?: any): any; // TEMP
+    findOldest(e?: any): any; // TEMP
+    first(): MessageRecord | undefined;
+    focusOnMessage(e?: any): any; // TEMP
+    forAll(
+        callback: (value: MessageRecord, index: number, array: MessageRecord[]) => void,
+        thisArg?: unknown
+    ): void;
+    forEach(
+        callback: (value: MessageRecord, index: number, array: MessageRecord[]) => void,
+        thisArg?: unknown
+    ): void;
+    get(e?: any): any; // TEMP
+    getAfter(e?: any): any; // TEMP
+    getByIndex(index: number): any | undefined; // TEMP
+    getManyAfter(e?: any, t?: any, n?: any): any; // TEMP
+    getManyBefore(e?: any, t?: any, n?: any): any; // TEMP
+    has(e?: any): boolean; // TEMP
+    hasAfterCached(e?: any): any; // TEMP
+    hasBeforeCached(e?: any): any; // TEMP
+    hasPresent(): any; // TEMP
+    indexOf(searchElement: any): number; // TEMP
+    jumpToMessage(e?: any): any; // TEMP
+    jumpToPresent(e?: any): any; // TEMP
+    last(): MessageRecord | undefined;
+    get length(): number;
+    loadComplete(e?: any): any; // TEMP
+    loadFromCache(e?: any, t?: any): any; // TEMP
+    loadStart(e?: any): any; // TEMP
+    map<T>(
+        callback: (value: MessageRecord, index: number, array: MessageRecord[]) => T,
+        thisArg?: unknown
+    ): T[];
+    merge(e?: any): any; // TEMP
+    mergeDelta(): any; // TEMP
+    mutate(e?: any): any; // TEMP
+    receiveMessage(e?: any): any; // TEMP
+    receivePushNotification(e?: any): any; // TEMP
+    reduce(
+        callback: (
+            previousValue: MessageRecord,
+            currentValue: MessageRecord,
+            currentIndex: number,
+            array: MessageRecord[]
+        ) => MessageRecord
+    ): MessageRecord;
+    reduce(
+        callback: (
+            previousValue: MessageRecord,
+            currentValue: MessageRecord,
+            currentIndex: number,
+            array: MessageRecord[]
+        ) => MessageRecord,
+        initialValue: MessageRecord
+    ): MessageRecord;
+    reduce<T>(
+        callback: (
+            previousValue: MessageRecord,
+            currentValue: T,
+            currentIndex: number,
+            array: MessageRecord[]
+        ) => T,
+        initialValue: T
+    ): T;
+    remove(e?: any): any; // TEMP
+    removeMany(e?: any): any; // TEMP
+    replace(e?: any, t?: any): any; // TEMP
+    reset(e?: any): any; // TEMP
+    some(
+        predicate: (value: MessageRecord, index: number, array: MessageRecord[]) => unknown,
+        thisArg?: unknown
+    ): boolean;
+    toArray(): MessageRecord[];
+    truncate(e?: any, t?: any): any; // TEMP
+    truncateBottom(e?: any): any; // TEMP
+    truncateTop(e?: any): any; // TEMP
+    update(e?: any, t?: any): any; // TEMP
+
+    _after: MessageCache;
+    _array: MessageRecord[];
+    _before: MessageCache;
+    _map: { [messageId: string]: MessageRecord; };
+    cached: boolean;
+    channelId: string;
+    error: boolean;
+    focusTargetId: any; // TEMP
+    hasFetched: boolean;
+    hasMoreAfter: boolean;
+    hasMoreBefore: boolean;
+    jumpFlash: boolean;
+    jumpReturnTargetId: string | null; // TEMP
+    jumpSequenceId: number; // TEMP
+    jumpTargetId: string | null; // TEMP
+    jumpTargetOffset: number; // TEMP
+    jumpType: JumpTypes;
+    jumped: boolean;
+    jumpedToPresent: boolean;
+    loadingMore: boolean;
+    ready: boolean;
+    revealedMessageId: string | null; // TEMP
+}
+
+type MessageStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC_CHANNEL_MESSAGES" | "CACHE_LOADED" | "CHANNEL_DELETE" | "CLEAR_MESSAGES" | "CONNECTION_OPEN" | "GUILD_DELETE" | "GUILD_MEMBERS_CHUNK_BATCH" | "LOAD_MESSAGES" | "LOAD_MESSAGES_FAILURE" | "LOAD_MESSAGES_SUCCESS" | "LOAD_MESSAGES_SUCCESS_CACHED" | "LOAD_MESSAGE_INTERACTION_DATA_SUCCESS" | "LOCAL_MESSAGES_LOADED" | "LOCAL_MESSAGE_CREATE" | "LOGOUT" | "MESSAGE_CREATE" | "MESSAGE_DELETE" | "MESSAGE_DELETE_BULK" | "MESSAGE_EDIT_FAILED_AUTOMOD" | "MESSAGE_EXPLICIT_CONTENT_SCAN_TIMEOUT" | "MESSAGE_REACTION_ADD" | "MESSAGE_REACTION_ADD_MANY" | "MESSAGE_REACTION_REMOVE" | "MESSAGE_REACTION_REMOVE_ALL" | "MESSAGE_REACTION_REMOVE_EMOJI" | "MESSAGE_REVEAL" | "MESSAGE_SEND_FAILED" | "MESSAGE_SEND_FAILED_AUTOMOD" | "MESSAGE_UPDATE" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_REMOVE" | "THREAD_CREATE_LOCAL" | "THREAD_DELETE" | "THREAD_MEMBER_LIST_UPDATE" | "TRUNCATE_MESSAGES" | "UPLOAD_FAIL" | "UPLOAD_START">;
+
+export class MessageStore<Action extends FluxAction = MessageStoreAction> extends FluxStore<Action> {
+    static displayName: "MessageStore";
+
+    focusedMessageId(e?: any): any; // TEMP
+    getLastCommandMessage(e?: any): any; // TEMP
+    getLastEditableMessage(e?: any): any; // TEMP
+    getLastMessage(e?: any): any; // TEMP
+    getLastNonCurrentUserMessage(e?: any): any; // TEMP
+    getMessage(e?: any, t?: any): any; // TEMP
+    getMessages(guildId?: string | Nullish): any; // TEMP
+    hasCurrentUserSentMessage(e?: any): any; // TEMP
+    hasCurrentUserSentMessageSinceAppStart(): any; // TEMP
+    hasPresent(e?: any): any; // TEMP
+    initialize(): void;
+    isLoadingMessages(e?: any): any; // TEMP
+    isReady(e?: any): any; // TEMP
+    jumpedMessageId(e?: any): any; // TEMP
+    whenReady(e?: any, t?: any): any; // TEMP
+}
+
+export const enum RelationshipTypes {
+    NONE = 0,
+    FRIEND = 1,
+    BLOCKED = 2,
+    PENDING_INCOMING = 3,
+    PENDING_OUTGOING = 4,
+    IMPLICIT = 5,
+    SUGGESTION = 6,
+}
+
 type RelationshipStoreAction = ExtractAction<FluxAction, "CONNECTION_OPEN" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_PENDING_INCOMING_REMOVED" | "RELATIONSHIP_REMOVE" | "RELATIONSHIP_UPDATE">;
 
 export class RelationshipStore<Action extends FluxAction = RelationshipStoreAction> extends FluxStore<Action> {
     static displayName: "RelationshipStore";
 
-    getFriendCount(): any; // TEMP
-    getFriendIDs(): any; // TEMP
-    getNickname(e?: any): any; // TEMP
-    getOutgoingCount(): any; // TEMP
-    getPendingCount(): any; // TEMP
-    getRelationshipCount(): any; // TEMP
-    getRelationships(): any; // TEMP
-    getRelationshipType(e?: any): any; // TEMP
-    getSince(e?: any): any; // TEMP
-    getSinces(): any; // TEMP
-    isBlocked(e?: any): any; // TEMP
-    isFriend(e?: any): any; // TEMP
+    getFriendCount(): number;
+    getFriendIDs(): string[];
+    getNickname(userId: string): string | undefined;
+    getOutgoingCount(): number;
+    getPendingCount(): number;
+    getRelationshipCount(): number;
+    getRelationships(): { [userId: string]: RelationshipTypes; };
+    getRelationshipType(userId: string): RelationshipTypes;
+    getSince(userId: string): string | undefined;
+    getSinces(): { [userId: string]: string; };
+    initialize(): void;
+    isBlocked(userId: string): boolean;
+    isFriend(userId: string): boolean;
 }
 
 type SelectedChannelStoreAction = ExtractAction<FluxAction, "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_FOLLOWER_CREATED" | "CHANNEL_SELECT" | "CHANNEL_UPDATES" | "CONNECTION_CLOSED" | "CONNECTION_OPEN" | "GUILD_CREATE" | "GUILD_DELETE" | "LOGOUT" | "OVERLAY_INITIALIZE" | "THREAD_DELETE" | "VOICE_CHANNEL_SELECT" | "VOICE_STATE_UPDATES">;
@@ -1441,10 +1977,11 @@ export class SelectedChannelStore<Action extends FluxAction = SelectedChannelSto
         channelId: string;
         guildId: string;
     };
-    getLastSelectedChannelId(arg?: string | Nullish): string | undefined; // TEMP
-    getLastSelectedChannels(arg: string): string | undefined; // TEMP
+    getLastSelectedChannelId(guildId?: string | Nullish): string | undefined;
+    getLastSelectedChannels(guildId: string | null): string | undefined;
     getMostRecentSelectedTextChannelId(guildId?: string | Nullish): string | null;
     getVoiceChannelId(): string | null;
+    initialize(): void;
 }
 
 interface SelectedGuildStoreState {
