@@ -217,7 +217,9 @@ export default definePlugin({
             ignoreChannels.includes(message.channel_id) ||
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channel
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
 
     // Based on canary 63b8f1b4f2025213c5cf62f0966625bee3d53136
@@ -293,12 +295,9 @@ export default definePlugin({
                 // },
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
-                    match: /interactionData:(\i)\.interactionData/,
+                    match: /(?<=null!=\i\.edited_timestamp\)return )\i\(\i,\{reactions:(\i)\.reactions.{0,50}\}\)/,
                     replace:
-                        "interactionData:$1.interactionData," +
-                        "deleted:$1.deleted," +
-                        "editHistory:$1.editHistory," +
-                        "attachments:$1.attachments"
+                        "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory, attachments:$1.attachments })"
                 },
 
                 // {
