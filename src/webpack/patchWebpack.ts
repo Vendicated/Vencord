@@ -6,6 +6,7 @@
 
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
+import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
@@ -105,8 +106,8 @@ Reflect.defineProperty(Function.prototype, "m", {
         // This ensures we actually got the right ones
         const { stack } = new Error();
         if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
-            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "";
-            logger.info("Found Webpack module factories in", fileName);
+            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
+            logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
 
             // setImmediate to clear this property setter if this is not the main Webpack
             // If this is the main Webpack, wreq.m will always be set before the timeout runs
@@ -117,7 +118,7 @@ Reflect.defineProperty(Function.prototype, "m", {
                 set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
                     if (bundlePath !== "/assets/") return;
 
-                    logger.info(`Main Webpack found in ${fileName}, initializing internal references to WebpackRequire`);
+                    logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                     _initWebpack(this);
                     clearTimeout(setterTimeout);
 
@@ -159,8 +160,6 @@ Reflect.defineProperty(Function.prototype, "m", {
         });
     }
 });
-
-let webpackNotInitializedLogged = false;
 
 function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     const originalFactory = factory;
@@ -287,7 +286,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    const patchedFactory: PatchedModuleFactory = function (module, exports, require) {
+    const patchedFactory: PatchedModuleFactory = function (...args: Parameters<ModuleFactory>) {
         for (const moduleFactories of allModuleFactories) {
             Reflect.defineProperty(moduleFactories, id, {
                 value: patchedFactory.$$vencordOriginal,
@@ -297,38 +296,44 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
             });
         }
 
-        if (wreq == null && IS_DEV) {
-            if (!webpackNotInitializedLogged) {
-                webpackNotInitializedLogged = true;
-                logger.error("WebpackRequire was not initialized, running modules without patches instead.");
-            }
+        // eslint-disable-next-line prefer-const
+        let [module, exports, require] = args;
 
-            return originalFactory.call(this, module, exports, require);
+        // Make sure the require argument is actually the WebpackRequire functioin
+        if (wreq == null && String(require).includes("exports:{}")) {
+            const { stack } = new Error();
+            const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+            logger.warn(
+                "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
+                `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                ")"
+            );
+            _initWebpack(require);
         }
 
         let factoryReturn: unknown;
         try {
-            factoryReturn = factory.call(this, module, exports, require);
+            factoryReturn = factory.apply(this, args);
         } catch (err) {
-            // Just rethrow Discord errors
+            // Just re-throw Discord errors
             if (factory === originalFactory) throw err;
 
-            logger.error("Error in patched module", err);
-            return originalFactory.call(this, module, exports, require);
+            logger.error("Error in patched module factory", err);
+            return originalFactory.apply(this, args);
         }
 
         // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
-        exports = module.exports;
+        exports = module?.exports;
         if (exports == null) return factoryReturn;
 
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
-        if (exports === window && require.c) {
+        if (exports === window && require?.c) {
             Reflect.defineProperty(require.c, id, {
                 value: require.c[id],
                 configurable: true,
-                enumerable: false,
-                writable: true
+                writable: true,
+                enumerable: false
             });
             return factoryReturn;
         }
