@@ -69,7 +69,7 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: new Date().getTime() }));
+            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
