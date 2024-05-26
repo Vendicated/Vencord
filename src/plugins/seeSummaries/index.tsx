@@ -76,7 +76,7 @@ export default definePlugin({
                 summaries ??= {};
                 summaries[data.channel_id] ? summaries[data.channel_id].unshift(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
                 if (summaries[data.channel_id].length > 50)
-                    summaries[data.channel_id].pop();
+                    summaries[data.channel_id] = summaries[data.channel_id].slice(0, 50);
 
                 return summaries;
             });
@@ -87,7 +87,7 @@ export default definePlugin({
         await DataStore.update("summaries-data", summaries => {
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {
-                    if (summaries[key][i].time < new Date().getTime() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThresholdDays) {
+                    if (summaries[key][i].time < Date.now() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThresholdDays) {
                         summaries[key].splice(i, 1);
                     }
                 }
