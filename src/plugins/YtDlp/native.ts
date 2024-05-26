@@ -245,12 +245,12 @@ export async function execute(
 }> {
     logs_global = "";
     try {
-        const m = await metadata(opt);
-        const f = genFormat(m, opt);
-        const d = await download(f, opt);
-        const r = await remux(d, opt);
-        const u = upload(r);
-        return { logs: logs_global, ...u };
+        const videoMetadata = await metadata(opt);
+        const videoFormat = genFormat(videoMetadata, opt);
+        const videoDownload = await download(videoFormat, opt);
+        const videoRemux = await remux(videoDownload, opt);
+        const videoUpload = upload(videoRemux);
+        return { logs: logs_global, ...videoUpload };
     } catch (e: any) {
         return { error: e.toString(), logs: logs_global };
     }
