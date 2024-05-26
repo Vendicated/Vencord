@@ -132,16 +132,6 @@ async function openDependencyModal() {
 }
 
 const settings = definePluginSettings({
-    ytdlpArgs: {
-        type: OptionType.STRING,
-        description: "Additional arguments to pass to yt-dlp. Note: if modifyind the ouptup, ensure the filename starts with `download`.",
-        placeholder: "--format bestvideo+bestaudio",
-    },
-    ffmpegArgs: {
-        type: OptionType.STRING,
-        description: "Additional arguments to pass to ffmpeg. Note: if modifying the output, ensure the filename starts with `remux`.",
-        placeholder: "-vf scale=1280:720",
-    },
     showProgress: {
         type: OptionType.BOOLEAN,
         description: "Send a Clyde message with the download progress.",
@@ -156,6 +146,16 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The quality level to use if no value is specified when downloading gifs. A number between 1 and 5.",
         default: 3,
+    },
+    ytdlpArgs: {
+        type: OptionType.STRING,
+        description: "Additional arguments to pass to yt-dlp. Note: if modifyind the ouptup, ensure the filename starts with `download`.",
+        placeholder: "--format bestvideo+bestaudio",
+    },
+    ffmpegArgs: {
+        type: OptionType.STRING,
+        description: "Additional arguments to pass to ffmpeg. Note: if modifying the output, ensure the filename starts with `remux`.",
+        placeholder: "-vf scale=1280:720",
     }
 }, {
     additionalArguments: {
