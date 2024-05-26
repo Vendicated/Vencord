@@ -6,7 +6,6 @@
 
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -18,8 +17,8 @@ const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
         type: OptionType.SLIDER,
-        description: "The time in days before a summary is removed",
-        markers: makeRange(1, 14, 1),
+        description: "The time in days before a summary is removed. Note that only up to 50 summaries are kept per channel",
+        markers: [1, 3, 5, 7, 10, 15, 20, 25, 30],
         stickToMarkers: false,
         default: 3,
     }
