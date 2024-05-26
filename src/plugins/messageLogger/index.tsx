@@ -255,7 +255,7 @@ export default definePlugin({
                     replace: "$1" +
                         ".update($3,m =>" +
                         "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
-                        "   $2.message.content !== m.content ?" +
+                        "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
@@ -295,12 +295,9 @@ export default definePlugin({
                 // },
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
-                    match: /interactionData:(\i)\.interactionData/,
+                    match: /(?<=null!=\i\.edited_timestamp\)return )\i\(\i,\{reactions:(\i)\.reactions.{0,50}\}\)/,
                     replace:
-                        "interactionData:$1.interactionData," +
-                        "deleted:$1.deleted," +
-                        "editHistory:$1.editHistory," +
-                        "attachments:$1.attachments"
+                        "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory, attachments:$1.attachments })"
                 },
 
                 // {

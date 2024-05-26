@@ -31,13 +31,28 @@ const settings = definePluginSettings({
         description: "Show the invites paused tooltip in the server list.",
         default: true,
     },
+    showModView: {
+        type: OptionType.BOOLEAN,
+        description: "Show the member mod view context menu item in all servers.",
+        default: true,
+    },
+    disableDiscoveryFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
+        default: true,
+    },
+    disableDisallowedDiscoveryFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
+        default: true,
+    },
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
-    tags: ["ShowTimeouts", "ShowInvitesPaused"],
-    description: "Displays various moderator-only elements regardless of permissions.",
+    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
+    description: "Displays various hidden & moderator-only things regardless of permissions.",
     authors: [Devs.Dolfies],
     patches: [
         {
@@ -55,6 +70,47 @@ export default definePlugin({
                 match: /\i\.\i\.can\(\i\.Permissions.MANAGE_GUILD,\i\)/,
                 replace: "true",
             },
+        },
+        {
+            find: "canAccessGuildMemberModViewWithExperiment:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /return \i\.hasAny\(\i\.computePermissions\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.MemberSafetyPagePermissions\)/,
+                replace: "return true",
+            }
+        },
+        {
+            find: "prod_discoverable_guilds",
+            predicate: () => settings.store.disableDiscoveryFilters,
+            replacement: {
+                match: /\{"auto_removed:.*?\}/,
+                replace: "{}"
+            }
+        },
+        {
+            find: "MINIMUM_MEMBER_COUNT:",
+            predicate: () => settings.store.disableDiscoveryFilters,
+            replacement: {
+                match: /MINIMUM_MEMBER_COUNT:function\(\)\{return \i}/,
+                replace: "MINIMUM_MEMBER_COUNT:() => \">0\""
+            }
+        },
+        {
+            find: "DiscoveryBannedSearchWords.includes",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            replacement: {
+                match: /(?<=function\(\){)(?=.{0,130}DiscoveryBannedSearchWords\.includes)/,
+                replace: "return false;"
+            }
+        },
+        {
+            find: "Endpoints.GUILD_DISCOVERY_VALID_TERM",
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            all: true,
+            replacement: {
+                match: /\i\.HTTP\.get\(\{url:\i\.Endpoints\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
+                replace: "Promise.resolve({ body: { valid: true } });"
+            }
         }
     ],
     settings,
