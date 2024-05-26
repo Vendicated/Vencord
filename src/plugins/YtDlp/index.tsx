@@ -305,7 +305,7 @@ async function download(channel: Channel, {
             return sendBotMessage(channel.id, { content: "No good streams found. Consider installing ffmpeg to increase the likelihood of a successful stream." }), openDependencyModal();
 
         return sendBotMessage(channel.id, {
-            content: `Failed to download video: \`${data.error}\``
+            content: `Failed to download video: ${data.error.includes("\n") ? "\n```" + data.error + "\n```" : `\`${data.error}\``}`
         });
     }
 
