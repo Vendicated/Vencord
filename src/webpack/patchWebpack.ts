@@ -161,7 +161,7 @@ Reflect.defineProperty(Function.prototype, "m", {
     }
 });
 
-let wreqNotInitializedLogged = false;
+let wreqFallbackApplied = false;
 
 function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     const originalFactory = factory;
@@ -302,22 +302,25 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         let [module, exports, require] = args;
 
         if (wreq == null) {
-            // Make sure the require argument is actually the WebpackRequire function
-            if (typeof require === "function" && require.m != null) {
-                const { stack } = new Error();
-                const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
-                logger.warn(
-                    "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
-                    `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
-                    ")"
-                );
-                _initWebpack(require);
-            } else if (IS_DEV) {
-                if (!wreqNotInitializedLogged) {
-                    wreqNotInitializedLogged = true;
+            if (!wreqFallbackApplied) {
+                wreqFallbackApplied = true;
+
+                // Make sure the require argument is actually the WebpackRequire function
+                if (typeof require === "function" && require.m != null) {
+                    const { stack } = new Error();
+                    const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+                    logger.warn(
+                        "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
+                        `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                        ")"
+                    );
+                    _initWebpack(require);
+                } else if (IS_DEV) {
                     logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                 }
+            }
 
+            if (IS_DEV) {
                 return originalFactory.apply(this, args);
             }
         }
