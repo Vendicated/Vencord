@@ -19,7 +19,7 @@ export type WebpackQueues = unique symbol;
 export type WebpackExports = unique symbol;
 export type WebpackError = unique symbol;
 
-type AsyncModulePromise = Promise<ModuleExports> & {
+export type AsyncModulePromise = Promise<ModuleExports> & {
     [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
     [WebpackExports]: ModuleExports;
     [WebpackError]?: any;
