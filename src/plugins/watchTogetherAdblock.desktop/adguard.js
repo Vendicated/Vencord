@@ -176,9 +176,6 @@ const overrideObject = (obj, propertyName, overrideValue) => {
             }
         }
     }
-    if (overriden) {
-        console.log("found: " + propertyName);
-    }
     return overriden;
 };
 /**

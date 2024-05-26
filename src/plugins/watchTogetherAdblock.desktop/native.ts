@@ -11,9 +11,7 @@ import adguard from "file://adguard.js?minify";
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
         frame.once("dom-ready", () => {
-            console.log(frame.url);
             if (frame.url.includes("discordsays") && frame.url.includes("youtube.com")) {
-                console.log("injecting");
                 if (!RendererSettings.store.plugins?.WatchTogetherAdblock?.enabled) return;
 
                 frame.executeJavaScript(adguard);
