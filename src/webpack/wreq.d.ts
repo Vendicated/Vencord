@@ -15,23 +15,33 @@ export type Module = {
 /** exports can be anything, however initially it is always an empty object */
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
+export type WebpackQueues = unique symbol;
+export type WebpackExports = unique symbol;
+export type WebpackError = unique symbol;
+
+export type AsyncModulePromise = Promise<ModuleExports> & {
+    [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
+    [WebpackExports]: ModuleExports;
+    [WebpackError]?: any;
+};
+
 export type AsyncModuleBody = (
-    handleAsyncDependencies: (deps: Promise<any>[]) =>
-        Promise<() => any[]> | (() => any[]),
+    handleAsyncDependencies: (deps: AsyncModulePromise[]) =>
+        Promise<() => ModuleExports[]> | (() => ModuleExports[]),
     asyncResult: (error?: any) => void
 ) => Promise<void>;
 
 export type ChunkHandlers = {
     /**
-     * Ensures the js file for this chunk is loaded, or starts to load if it's not
+     * Ensures the js file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
-     * @param promises The promises array to add the loading promise to.
+     * @param promises The promises array to add the loading promise to
      */
     j: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
     /**
-     * Ensures the css file for this chunk is loaded, or starts to load if it's not
+     * Ensures the css file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
-     * @param promises The promises array to add the loading promise to. This array will likely contain the promise of the js file too.
+     * @param promises The promises array to add the loading promise to. This array will likely contain the promise of the js file too
      */
     css: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
 };
@@ -53,7 +63,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * @example
      * const fromObject = { a: 1 };
      * Object.keys(fromObject).forEach(key => {
-     *     if (key !== "default" && !(key in toObject)) {
+     *     if (key !== "default" && !Object.hasOwn(toObject, key)) {
      *         Object.defineProperty(toObject, key, {
      *             get: () => fromObject[key],
      *             enumerable: true
@@ -65,8 +75,8 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
     /**
      * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
-     * The body function must be an async function. "module.exports" will become a Promise.
-     * The body function will be called with a function to handle requires that import from an async module, and a function to resolve this async module. An example to handle async depedencies:
+     * The body function must be an async function. "module.exports" will become a AsyncModulePromise.
+     * The body function will be called with a function to handle requires that import from an async module, and a function to resolve this async module. An example on how to handle async dependencies:
      * @example
      * const factory = (module, exports, wreq) => {
      *     wreq.a(module, async (handleAsyncDependencies, asyncResult) => {
@@ -111,7 +121,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * const exports = {};
      * const definition = { exportName: () => someExportedValue };
      * for (const key in definition) {
-     *     if (key in definition && !(key in exports)) {
+     *     if (Object.hasOwn(definition, key) && !Object.hasOwn(exports, key)) {
      *         Object.defineProperty(exports, key, {
      *             get: definition[key],
      *             enumerable: true
@@ -133,7 +143,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     /** Get the filename for the js part of a chunk */
     u: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** The global object, will likely always be the window */
-    g: Window;
+    g: typeof globalThis;
     /** Harmony module decorator. Decorates a module as an ES Module, and prevents Node.js "module.exports" from being set */
     hmd: (this: WebpackRequire, module: Module) => any;
     /** Shorthand for Object.prototype.hasOwnProperty */
@@ -161,7 +171,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     O: OnChunksLoaded;
     /**
-     * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports"
+     * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports".
      * @returns The exports argument, but now assigned with the exports of the wasm instance
      */
     v: (this: WebpackRequire, exports: ModuleExports, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
