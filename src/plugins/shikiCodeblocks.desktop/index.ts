@@ -21,8 +21,7 @@ import "./shiki.css";
 import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
-import previewExampleText from "~fileContent/previewExample.tsx";
+import previewExampleText from "file://previewExample.tsx";
 
 import { shiki } from "./api/shiki";
 import { createHighlighter } from "./components/Highlighter";
