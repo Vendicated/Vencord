@@ -24,28 +24,30 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 /** A set with all the module factories objects */
 const allModuleFactories = new Set<PatchedModuleFactories>();
 
-function defineModuleFactoryGetter(modulesFactories: PatchedModuleFactories, id: PropertyKey, factory: PatchedModuleFactory) {
-    Object.defineProperty(modulesFactories, id, {
-        configurable: true,
-        enumerable: true,
+function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
+    for (const moduleFactories of allModuleFactories) {
+        Reflect.defineProperty(moduleFactories, id, {
+            configurable: true,
+            enumerable: true,
 
-        get() {
-            // $$vencordOriginal means the factory is already patched
-            if (factory.$$vencordOriginal != null) {
-                return factory;
-            }
+            get() {
+                // $$vencordOriginal means the factory is already patched
+                if (factory.$$vencordOriginal != null) {
+                    return factory;
+                }
 
-            // This patches factories if eagerPatches are disabled
-            return (factory = patchFactory(id, factory));
-        },
-        set(v: ModuleFactory) {
-            if (factory.$$vencordOriginal != null) {
-                factory.$$vencordOriginal = v;
-            } else {
-                factory = v;
+                // This patches factories if eagerPatches are disabled
+                return (factory = patchFactory(id, factory));
+            },
+            set(v: ModuleFactory) {
+                if (factory.$$vencordOriginal != null) {
+                    factory.$$vencordOriginal = v;
+                } else {
+                    factory = v;
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
@@ -64,7 +66,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
                 return Reflect.set(target, p, newValue, receiver);
             }
 
-            defineModuleFactoryGetter(target, p, newValue);
+            defineModulesFactoryGetter(p, newValue);
             return true;
         }
 
@@ -78,7 +80,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
 
         // Modules are only patched once, so we need to set the patched factory on all the modules
         for (const moduleFactories of allModuleFactories) {
-            Object.defineProperty(moduleFactories, p, {
+            Reflect.defineProperty(moduleFactories, p, {
                 value: patchedFactory,
                 configurable: true,
                 enumerable: true,
@@ -95,7 +97,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
 // The sentry module also has their own Webpack with a pre-populated module factories object, so this also targets that
 // We wrap it with our proxy, which is responsible for patching the module factories, or setting up getters for them
 // If this is the main Webpack, we also set up the internal references to WebpackRequire
-Object.defineProperty(Function.prototype, "m", {
+Reflect.defineProperty(Function.prototype, "m", {
     configurable: true,
 
     set(this: WebpackRequire, moduleFactories: PatchedModuleFactories) {
@@ -103,23 +105,24 @@ Object.defineProperty(Function.prototype, "m", {
         // This ensures we actually got the right ones
         const { stack } = new Error();
         if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
-            logger.info("Found Webpack module factories", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "";
+            logger.info("Found Webpack module factories in", fileName);
 
             // setImmediate to clear this property setter if this is not the main Webpack
             // If this is the main Webpack, wreq.m will always be set before the timeout runs
             const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
-            Object.defineProperty(this, "p", {
+            Reflect.defineProperty(this, "p", {
                 configurable: true,
 
-                set(this: WebpackRequire, v: WebpackRequire["p"]) {
-                    if (v !== "/assets/") return;
+                set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
+                    if (bundlePath !== "/assets/") return;
 
-                    logger.info("Main Webpack found, initializing internal references to WebpackRequire");
+                    logger.info(`Main Webpack found in ${fileName}, initializing internal references to WebpackRequire`);
                     _initWebpack(this);
                     clearTimeout(setterTimeout);
 
-                    Object.defineProperty(this, "p", {
-                        value: v,
+                    Reflect.defineProperty(this, "p", {
+                        value: bundlePath,
                         configurable: true,
                         enumerable: true,
                         writable: true
@@ -127,26 +130,28 @@ Object.defineProperty(Function.prototype, "m", {
                 }
             });
 
+            // This needs to be added before the loop below
+            allModuleFactories.add(moduleFactories);
+
             for (const id in moduleFactories) {
                 // If we have eagerPatches enabled we have to patch the pre-populated factories
                 if (Settings.eagerPatches) {
                     moduleFactories[id] = patchFactory(id, moduleFactories[id]);
                 } else {
-                    defineModuleFactoryGetter(moduleFactories, id, moduleFactories[id]);
+                    defineModulesFactoryGetter(id, moduleFactories[id]);
                 }
             }
 
-            allModuleFactories.add(moduleFactories);
-
-            Object.defineProperty(moduleFactories, Symbol.toStringTag, {
+            Reflect.defineProperty(moduleFactories, Symbol.toStringTag, {
                 value: "ModuleFactories",
                 configurable: true,
-                writable: true
+                writable: true,
+                enumerable: false
             });
             moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
         }
 
-        Object.defineProperty(this, "m", {
+        Reflect.defineProperty(this, "m", {
             value: moduleFactories,
             configurable: true,
             enumerable: true,
@@ -158,15 +163,16 @@ Object.defineProperty(Function.prototype, "m", {
 let webpackNotInitializedLogged = false;
 
 function patchFactory(id: PropertyKey, factory: ModuleFactory) {
+    const originalFactory = factory;
+
     for (const factoryListener of factoryListeners) {
         try {
-            factoryListener(factory);
+            factoryListener(originalFactory);
         } catch (err) {
             logger.error("Error in Webpack factory listener:\n", err, factoryListener);
         }
     }
 
-    const originalFactory = factory;
     const patchedBy = new Set<string>();
 
     // Discords Webpack chunks for some ungodly reason contain random
@@ -193,15 +199,15 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         patchedBy.add(patch.plugin);
 
         const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
-        const previousFactory = factory;
         const previousCode = code;
+        const previousFactory = factory;
 
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (replacement.predicate && !replacement.predicate()) continue;
 
-            const lastFactory = factory;
             const lastCode = code;
+            const lastFactory = factory;
 
             canonicalizeReplacement(replacement, patch.plugin);
 
@@ -217,8 +223,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
-                        factory = previousFactory;
                         code = previousCode;
+                        factory = previousFactory;
                         patchedBy.delete(patch.plugin);
                         break;
                     }
@@ -268,13 +274,13 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
                 if (patch.group) {
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                    factory = previousFactory;
                     code = previousCode;
+                    factory = previousFactory;
                     break;
                 }
 
-                factory = lastFactory;
                 code = lastCode;
+                factory = lastFactory;
             }
         }
 
@@ -283,7 +289,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
     const patchedFactory: PatchedModuleFactory = function (module, exports, require) {
         for (const moduleFactories of allModuleFactories) {
-            Object.defineProperty(moduleFactories, id, {
+            Reflect.defineProperty(moduleFactories, id, {
                 value: patchedFactory.$$vencordOriginal,
                 configurable: true,
                 enumerable: true,
@@ -297,33 +303,34 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
                 logger.error("WebpackRequire was not initialized, running modules without patches instead.");
             }
 
-            return void originalFactory.call(this, module, exports, require);
+            return originalFactory.call(this, module, exports, require);
         }
 
+        let factoryReturn: unknown;
         try {
-            factory.call(this, module, exports, require);
+            factoryReturn = factory.call(this, module, exports, require);
         } catch (err) {
             // Just rethrow Discord errors
             if (factory === originalFactory) throw err;
 
             logger.error("Error in patched module", err);
-            return void originalFactory.call(this, module, exports, require);
+            return originalFactory.call(this, module, exports, require);
         }
 
         // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
         exports = module.exports;
-        if (exports == null) return;
+        if (exports == null) return factoryReturn;
 
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
         if (exports === window && require.c) {
-            Object.defineProperty(require.c, id, {
+            Reflect.defineProperty(require.c, id, {
                 value: require.c[id],
                 configurable: true,
                 enumerable: false,
                 writable: true
             });
-            return;
+            return factoryReturn;
         }
 
         for (const callback of moduleListeners) {
@@ -347,6 +354,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
                 logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
             }
         }
+
+        return factoryReturn;
     };
 
     patchedFactory.toString = originalFactory.toString.bind(originalFactory);
