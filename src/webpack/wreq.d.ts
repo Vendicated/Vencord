@@ -63,7 +63,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * @example
      * const fromObject = { a: 1 };
      * Object.keys(fromObject).forEach(key => {
-     *     if (key !== "default" && !(key in toObject)) {
+     *     if (key !== "default" && !Object.hasOwn(toObject, key) {
      *         Object.defineProperty(toObject, key, {
      *             get: () => fromObject[key],
      *             enumerable: true
@@ -121,7 +121,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * const exports = {};
      * const definition = { exportName: () => someExportedValue };
      * for (const key in definition) {
-     *     if (key in definition && !(key in exports)) {
+     *     if (Objeect.hasOwn(definition, key) && !Object.hasOwn(exports, key) {
      *         Object.defineProperty(exports, key, {
      *             get: definition[key],
      *             enumerable: true
