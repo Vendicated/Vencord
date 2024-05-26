@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ModalProps } from "@utils/modal";
 import { findByPropsLazy, waitFor } from "@webpack";
 import { useRef } from "@webpack/common";
 
@@ -17,7 +16,7 @@ waitFor(["useSpring", "animated"], m => {
 });
 
 
-const BoardModal = ({ modalProps }: { modalProps: ModalProps; }) => {
+const BoardModal = modalProps => {
     const divref = useRef<HTMLDivElement>(null);
 
     const state = modalProps.transitionState === 0 || modalProps.transitionState === 1; // ModalTransitionState.ENTERING || ModalTransitionState.ENTERED

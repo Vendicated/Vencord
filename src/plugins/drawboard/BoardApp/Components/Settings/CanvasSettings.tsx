@@ -5,6 +5,7 @@
  */
 
 import { Flex } from "@components/Flex";
+import { findComponentByCodeLazy } from "@webpack";
 import { Forms, React, TextInput } from "@webpack/common";
 
 import { canvasStateType } from "../../MainBoard";
@@ -13,6 +14,15 @@ type CanvasSettingsProps = {
     currentState: canvasStateType,
     setGlobal: React.Dispatch<React.SetStateAction<canvasStateType>>;
 } & React.HTMLProps<React.ReactElement>;
+
+interface ColorPickerProps {
+    color: number | null;
+    showEyeDropper?: boolean;
+    suggestedColors?: string[];
+    onChange(value: number | null): void;
+}
+
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
 const CanvasSettings = (props: CanvasSettingsProps) => {
     const { setGlobal, currentState } = props;
@@ -35,9 +45,11 @@ const CanvasSettings = (props: CanvasSettingsProps) => {
                             <TextInput height={"Height"} type="number" defaultValue={currentState.height} width={16} placeholder="Height" onChange={e => { nextValue.height = Math.min(parseInt(e), 4096); setGlobal({ ...nextValue }); }} max={4096} />
                         </Flex>
                     </Flex>
-
                 </Forms.FormSection>
-
+                <Forms.FormSection>
+                    <Forms.FormTitle tag="h3">Background</Forms.FormTitle>
+                    <ColorPicker color={10070709} onChange={e => console.log(e)} />
+                </Forms.FormSection>
             </Forms.FormSection>
         </div>
     );
