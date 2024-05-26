@@ -70,8 +70,8 @@ export default definePlugin({
         {
             find: ".invitesDisabledTooltip",
             replacement: {
-                match: /(?<=\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100})]/,
-                replace: ",$self.renderTooltip(arguments[0].guild)]"
+                match: /\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100}(?=])/,
+                replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip
         }
