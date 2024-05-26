@@ -33,15 +33,15 @@ export type AsyncModuleBody = (
 
 export type ChunkHandlers = {
     /**
-     * Ensures the js file for this chunk is loaded, or starts to load if it's not
+     * Ensures the js file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
-     * @param promises The promises array to add the loading promise to.
+     * @param promises The promises array to add the loading promise to
      */
     j: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
     /**
-     * Ensures the css file for this chunk is loaded, or starts to load if it's not
+     * Ensures the css file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
-     * @param promises The promises array to add the loading promise to. This array will likely contain the promise of the js file too.
+     * @param promises The promises array to add the loading promise to. This array will likely contain the promise of the js file too
      */
     css: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
 };
@@ -171,7 +171,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     O: OnChunksLoaded;
     /**
-     * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports"
+     * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports".
      * @returns The exports argument, but now assigned with the exports of the wasm instance
      */
     v: (this: WebpackRequire, exports: ModuleExports, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
