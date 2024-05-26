@@ -143,7 +143,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     /** Get the filename for the js part of a chunk */
     u: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** The global object, will likely always be the window */
-    g: Window;
+    g: typeof globalThis;
     /** Harmony module decorator. Decorates a module as an ES Module, and prevents Node.js "module.exports" from being set */
     hmd: (this: WebpackRequire, module: Module) => any;
     /** Shorthand for Object.prototype.hasOwnProperty */
