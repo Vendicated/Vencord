@@ -1,0 +1,35 @@
+.discord-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background: #36393f;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+}
+
+.discord-popup-close {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: #202225;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.discord-popup-title {
+    margin: 0;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.discord-popup-message {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #ffffff;
+}
