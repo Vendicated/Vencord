@@ -19,10 +19,10 @@
 import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
-import definePlugin from "@utils/types";
+import definePlugin, { StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { extract, filters, findAll, search } from "@webpack";
-import { React, ReactDOM } from "@webpack/common";
+import { extract, filters, findAll, findModuleId, search } from "@webpack";
+import * as Common from "@webpack/common";
 import type { ComponentType } from "react";
 
 const WEB_ONLY = (f: string) => () => {
@@ -34,7 +34,7 @@ export default definePlugin({
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
 
-    getShortcuts() {
+    getShortcuts(): Record<PropertyKey, any> {
         function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
             const cache = new Map<string, unknown>();
 
@@ -64,16 +64,17 @@ export default definePlugin({
         let fakeRenderWin: WeakRef<Window> | undefined;
         const find = newFindWrapper(f => f);
         const findByProps = newFindWrapper(filters.byProps);
+
         return {
-            ...Vencord.Webpack.Common,
-            wp: Vencord.Webpack,
-            wpc: Webpack.wreq.c,
-            wreq: Webpack.wreq,
+            ...Object.fromEntries(Object.keys(Common).map(key => [key, { getter: () => Common[key] }])),
+            wp: Webpack,
+            wpc: { getter: () => Webpack.cache },
+            wreq: { getter: () => Webpack.wreq },
             wpsearch: search,
             wpex: extract,
-            wpexs: (code: string) => extract(Webpack.findModuleId(code)!),
+            wpexs: (code: string) => extract(findModuleId(code)!),
             find,
-            findAll,
+            findAll: findAll,
             findByProps,
             findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
             findByCode: newFindWrapper(filters.byCode),
@@ -82,10 +83,10 @@ export default definePlugin({
             findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
             findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
             findStore: newFindWrapper(filters.byStoreName),
-            PluginsApi: Vencord.Plugins,
-            plugins: Vencord.Plugins.plugins,
-            Settings: Vencord.Settings,
-            Api: Vencord.Api,
+            PluginsApi: { getter: () => Vencord.Plugins },
+            plugins: { getter: () => Vencord.Plugins.plugins },
+            Settings: { getter: () => Vencord.Settings },
+            Api: { getter: () => Vencord.Api },
             reload: () => location.reload(),
             restart: IS_WEB ? WEB_ONLY("restart") : relaunch,
             canonicalizeMatch,
@@ -115,21 +116,40 @@ export default definePlugin({
                     });
                 }
 
-                ReactDOM.render(React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
+                Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
             }
         };
     },
 
+    startAt: StartAt.Init,
     start() {
         const shortcuts = this.getShortcuts();
-        window.shortcutList = shortcuts;
-        for (const [key, val] of Object.entries(shortcuts))
-            window[key] = val;
+        window.shortcutList = {};
+
+        for (const [key, val] of Object.entries(shortcuts)) {
+            if (val.getter != null) {
+                Object.defineProperty(window.shortcutList, key, {
+                    get: val.getter,
+                    configurable: true,
+                    enumerable: true
+                });
+
+                Object.defineProperty(window, key, {
+                    get: () => window.shortcutList[key],
+                    configurable: true,
+                    enumerable: true
+                });
+            } else {
+                window.shortcutList[key] = val;
+                window[key] = val;
+            }
+        }
     },
 
     stop() {
         delete window.shortcutList;
-        for (const key in this.getShortcuts())
+        for (const key in this.getShortcuts()) {
             delete window[key];
+        }
     }
 });
