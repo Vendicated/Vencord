@@ -18,7 +18,7 @@ export default definePlugin({
             type: OptionType.SELECT,
             options: [
                 {
-                    label: "Ctrl+Enter (Enter or Shift+Enter for new line)",
+                    label: "Ctrl+Enter (Enter or Shift+Enter for new line) (cmd+enter on macOS)",
                     value: "ctrl+enter"
                 },
                 {
@@ -54,7 +54,7 @@ export default definePlugin({
                 result = event.shiftKey;
                 break;
             case "ctrl+enter":
-                result = event.ctrlKey;
+                result = navigator.platform.includes("Mac") ? event.metaKey : event.ctrlKey;
                 break;
             case "enter":
                 result = !event.shiftKey && !event.ctrlKey;
