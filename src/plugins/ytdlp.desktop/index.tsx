@@ -149,12 +149,12 @@ const settings = definePluginSettings({
     },
     ytdlpArgs: {
         type: OptionType.STRING,
-        description: "Additional arguments to pass to yt-dlp. Note: if modifyind the ouptup, ensure the filename starts with `download`.",
+        description: "Additional arguments to pass to yt-dlp. This may overwrite default plugin arguments such format selection. Note: if modifying the ouptup, ensure the filename starts with `download`.",
         placeholder: "--format bestvideo+bestaudio",
     },
     ffmpegArgs: {
         type: OptionType.STRING,
-        description: "Additional arguments to pass to ffmpeg. Note: if modifying the output, ensure the filename starts with `remux`.",
+        description: "Additional arguments to pass to ffmpeg. This may overwrite default plugin arguments such as auto-scaling. Note: if modifying the output, ensure the filename starts with `remux`.",
         placeholder: "-vf scale=1280:720",
     }
 }, {
