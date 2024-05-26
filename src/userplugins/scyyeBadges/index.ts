@@ -19,8 +19,7 @@
 import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import { Badges } from "@api/index";
 import definePlugin from "@utils/types";
-import { ChannelStore, GuildChannelStore, GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
-import { GuildMember } from "discord-types/general";
+import { GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
 import React from "react";
 
 var registered: ProfileBadge[] = [];
@@ -60,7 +59,7 @@ class Badge {
     key: string | undefined;
     image: string | undefined;
     description: string | undefined;
-    shouldShow(user: BadgeUserArgs): boolean {
+    shouldShow(_: BadgeUserArgs): boolean {
         return false;
     }
     link: string | undefined;
@@ -113,6 +112,7 @@ function addScyyeBadges() {
         image: UserStore.getUser("318902553024659456").getAvatarURL(),
         shouldShow(userInfo: BadgeUserArgs): boolean {
             // UserStore.getUser(userInfo.user.id);
+            if ((userInfo.user as any).globalName === undefined || (userInfo.user as any).globalName === null) return false;
             return (userInfo.user as any).globalName.includes("』");
         }
     });
