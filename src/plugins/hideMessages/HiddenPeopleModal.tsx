@@ -12,6 +12,7 @@ import {
     ModalHeader,
     ModalProps,
     ModalRoot,
+    useForceUpdater,
 } from "@utils/index";
 import { Forms, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -50,15 +51,14 @@ function UserElement({ userId, onClick }: UserElementProps) {
 }
 
 export function HiddenPeopleModal({ rootProps }: { rootProps: ModalProps; }) {
-    const [, forceUpdate] = useState(false);
-    useEffect(() => forceUpdate(p => !p), []);
+    const forceUpdate = useForceUpdater();
+
 
     const Users = userIds.map(id => {
         // Without this variable for some reason 'removeIgnore' is not defined in onClick event
-        // And I don't know any better way to force-update react component :p
         const removeUser = () => {
             removeIgnore(id);
-            forceUpdate(p => !p);
+            forceUpdate();
         };
 
         return (
