@@ -813,7 +813,7 @@ export default definePlugin({
     },
 
     canUseEmote(e: Emoji, channelId: string) {
-        if (e.type === "UNICODE") return true;
+        if (e.type === 0) return true;
         if (e.available === false) return false;
 
         const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;

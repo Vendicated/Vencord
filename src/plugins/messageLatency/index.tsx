@@ -97,6 +97,9 @@ export default definePlugin({
         // Message wasn't received through gateway
         if (!isNonNullish(nonce)) return null;
 
+        // Bots basically never send a nonce, and if someone does do it then it's usually not a snowflake
+        if (message.bot) return null;
+
         let isDiscordKotlin = false;
         let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
         if (!showMillis) {
