@@ -158,16 +158,6 @@ const settings = definePluginSettings({
         placeholder: "-vf scale=1280:720",
     }
 }, {
-    additionalArguments: {
-        isValid(value) {
-            try {
-                JSON.parse(value);
-                return true;
-            } catch {
-                return false;
-            }
-        },
-    },
     defaultGifQuality: {
         isValid(value) {
             return value >= 1 && value <= 5;
