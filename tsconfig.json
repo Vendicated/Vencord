@@ -21,14 +21,14 @@
 
         "baseUrl": "./src/",
         "paths": {
-            "@main/*": [ "./main/*" ],
-            "@api/*": [ "./api/*" ],
-            "@components/*": [ "./components/*" ],
-            "@utils/*": [ "./utils/*" ],
-            "@shared/*": [ "./shared/*" ],
-            "@webpack/types": [ "./webpack/common/types" ],
-            "@webpack/common": [ "./webpack/common" ],
-            "@webpack": [ "./webpack/webpack" ]
+            "@main/*": ["./main/*"],
+            "@api/*": ["./api/*"],
+            "@components/*": ["./components/*"],
+            "@utils/*": ["./utils/*"],
+            "@shared/*": ["./shared/*"],
+            "@webpack/types": ["./webpack/common/types"],
+            "@webpack/common": ["./webpack/common"],
+            "@webpack": ["./webpack/webpack"]
         },
 
         "plugins": [
@@ -39,5 +39,5 @@
             }
         ]
     },
-    "include": [ "src/**/*", "browser/**/*", "scripts/**/*", "packages/**/*" ],
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "packages/**/*"]
 }
