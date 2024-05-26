@@ -202,8 +202,7 @@ const jsonOverride = (propertyName, overrideValue) => {
     Response.prototype.json = new Proxy(nativeResponseJson, {
         apply(...args) {
             // Call the target function, get the original Promise
-            // @ts-ignore
-            const promise = Reflect.apply(args);
+            const promise = Reflect.apply(...args);
             // Create a new one and override the JSON inside
             return new Promise((resolve, reject) => {
                 promise.then(data => {
