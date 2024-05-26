@@ -16,7 +16,9 @@ export type Module = {
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
 export type AsyncModuleBody = (
-    handleDependencies: (deps: Promise<any>[]) => Promise<any[]> & (() => void)
+    handleAsyncDependencies: (deps: Promise<any>[]) =>
+        Promise<() => any[]> | (() => any[]),
+    asyncResult: (error?: any) => void
 ) => Promise<void>;
 
 export type ChunkHandlers = {
@@ -62,11 +64,29 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
     /**
-     * Creates an async module. The body function must be a async function.
-     * "module.exports" will be decorated with an AsyncModulePromise.
-     * The body function will be called.
-     * To handle async dependencies correctly do this inside the body: "([a, b, c] = await handleDependencies([a, b, c]));".
-     * If "hasAwaitAfterDependencies" is truthy, "handleDependencies()" must be called at the end of the body function.
+     * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
+     * The body function must be an async function. "module.exports" will become a Promise.
+     * The body function will be called with a function to handle requires that import from an async module, and a function to resolve this async module. An example to handle async depedencies:
+     * @example
+     * const factory = (module, exports, wreq) => {
+     *     wreq.a(module, async (handleAsyncDependencies, asyncResult) => {
+     *         try {
+     *             const asyncRequireA = wreq(...);
+    *
+     *             const asyncDependencies = handleAsyncDependencies([asyncRequire]);
+     *             const [requireAResult] = asyncDependencies.then != null ? (await asyncDependencies)() : asyncDependencies;
+     *
+     *             // Use the required module
+     *             console.log(requireAResult);
+     *
+     *             // Mark this async module as resolved
+     *             asyncResult();
+     *         } catch(error) {
+     *             // Mark this async module as rejected with an error
+     *             asyncResult(error);
+     *         }
+     *     }, false); // false because our module does not have an await after dealing with the async requires
+     * }
      */
     a: (this: WebpackRequire, module: Module, body: AsyncModuleBody, hasAwaitAfterDependencies?: boolean) => void;
     /** getDefaultExport function for compatibility with non-harmony modules */
