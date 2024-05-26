@@ -15,9 +15,19 @@ export type Module = {
 /** exports can be anything, however initially it is always an empty object */
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
+export type WebpackQueues = unique symbol;
+export type WebpackExports = unique symbol;
+export type WebpackError = unique symbol;
+
+type AsyncModulePromise = Promise<ModuleExports> & {
+    [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
+    [WebpackExports]: ModuleExports;
+    [WebpackError]?: any;
+};
+
 export type AsyncModuleBody = (
-    handleAsyncDependencies: (deps: Promise<any>[]) =>
-        Promise<() => any[]> | (() => any[]),
+    handleAsyncDependencies: (deps: AsyncModulePromise[]) =>
+        Promise<() => ModuleExports[]> | (() => ModuleExports[]),
     asyncResult: (error?: any) => void
 ) => Promise<void>;
 
