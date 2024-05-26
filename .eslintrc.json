@@ -4,7 +4,7 @@
     "parserOptions": {
         "project": "./tsconfig.json"
     },
-    "ignorePatterns": ["dist", "browser"],
+    "ignorePatterns": ["dist", "browser", "packages/vencord-types"],
     "plugins": [
         "@typescript-eslint",
         "simple-header",

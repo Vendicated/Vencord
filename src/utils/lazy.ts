@@ -67,7 +67,7 @@ const handler: ProxyHandler<any> = {
 
 /**
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the factory is evaluated
+ * On first property access, the factory is evaluated.
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
