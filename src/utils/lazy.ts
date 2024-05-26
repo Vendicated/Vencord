@@ -15,7 +15,11 @@ export type ProxyLazy<T = AnyObject> = T & {
 export const proxyLazyGet = Symbol.for("vencord.lazy.get");
 export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
 
-export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false }: { isIndirect?: boolean; } = {}): () => T {
+export type LazyFunction<T> = (() => T) & {
+    $$vencordLazyFailed: () => boolean;
+};
+
+export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false }: { isIndirect?: boolean; } = {}): LazyFunction<T> {
     let tries = 0;
     let cache: T;
 
@@ -79,7 +83,6 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     Object.assign(proxyDummy, {
         [proxyLazyGet]() {
             if (!proxyDummy[proxyLazyCache]) {
-                // @ts-ignore
                 if (!get.$$vencordLazyFailed()) {
                     proxyDummy[proxyLazyCache] = get();
                 }
@@ -110,7 +113,10 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
             // `const { meow } = proxyLazy(() => ({ meow: [] }));`
             if (!isChild && isSameTick) {
                 return proxyLazy(
-                    () => Reflect.get(target[proxyLazyGet](), p, target[proxyLazyGet]()),
+                    () => {
+                        const lazyTarget = target[proxyLazyGet]();
+                        return Reflect.get(lazyTarget, p, lazyTarget);
+                    },
                     attempts,
                     true
                 );

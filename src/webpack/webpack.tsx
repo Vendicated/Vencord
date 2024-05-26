@@ -27,21 +27,22 @@ export const onceReady = new Promise<void>(r => _resolveReady = r);
 export let wreq: WebpackRequire;
 export let cache: WebpackRequire["c"];
 
-export type FilterFn = (module: ModuleExports) => boolean;
+export type FilterFn = ((module: ModuleExports) => boolean) & {
+    $$vencordProps?: string[];
+};
 
 export const filters = {
     byProps: (...props: string[]): FilterFn => {
-        const filter = props.length === 1
+        const filter: FilterFn = props.length === 1
             ? m => m?.[props[0]] !== void 0
             : m => props.every(p => m?.[p] !== void 0);
 
-        // @ts-ignore
         filter.$$vencordProps = ["byProps", ...props];
         return filter;
     },
 
     byCode: (...code: string[]): FilterFn => {
-        const filter = m => {
+        const filter: FilterFn = m => {
             if (typeof m !== "function") return false;
             const s = Function.prototype.toString.call(m);
             for (const c of code) {
@@ -55,29 +56,36 @@ export const filters = {
     },
 
     byStoreName: (name: string): FilterFn => {
-        const filter = m => m?.constructor?.displayName === name;
+        const filter: FilterFn = m => m?.constructor?.displayName === name;
 
         filter.$$vencordProps = ["byStoreName", name];
         return filter;
     },
 
     componentByCode: (...code: string[]): FilterFn => {
-        const filter = filters.byCode(...code);
-        const wrapper = m => {
-            if (filter(m)) return true;
-            if (!m?.$$typeof) return false;
-            if (m?.type && m.type.render) return filter(m.type.render); // memo + forwardRef
-            if (m?.type) return filter(m.type); // memos
-            if (m?.render) return filter(m.render); // forwardRefs
+        const byCodeFilter = filters.byCode(...code);
+        const filter: FilterFn = m => {
+            let inner = m;
+
+            while (inner != null) {
+                if (byCodeFilter(inner)) return true;
+                else if (!inner.$$typeof) return false;
+                else if (inner.type) inner = inner.type; // memos
+                else if (inner.render) inner = inner.render; // forwardRefs
+                else return false;
+            }
+
             return false;
         };
 
-        wrapper.$$vencordProps = ["componentByCode", ...code];
-        return wrapper;
+        filter.$$vencordProps = ["componentByCode", ...code];
+        return filter;
     }
 };
 
-export type ModCallbackFn = (module: ModuleExports) => void;
+export type ModCallbackFn = ((module: ModuleExports) => void) & {
+    $$vencordCallbackCalled?: () => boolean;
+};
 export type ModCallbackFnWithId = (module: ModuleExports, id: PropertyKey) => void;
 
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
@@ -99,15 +107,15 @@ let devToolsOpen = false;
 if (IS_DEV && IS_DISCORD_DESKTOP) {
     // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
     setTimeout(() => {
-        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+        DiscordNative?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
     }, 0);
 }
 
 export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 function printFilter(filter: FilterFn) {
-    if ("$$vencordProps" in filter) {
-        const props = filter.$$vencordProps as string[];
+    if (filter.$$vencordProps != null) {
+        const props = filter.$$vencordProps;
         return `${props[0]}(${props.slice(1).map(arg => `"${arg}"`).join(", ")})`;
     }
 
@@ -132,16 +140,13 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
         const originalCallback = callback;
 
         let callbackCalled = false;
-        callback = function () {
+        callback = function (this: unknown) {
             callbackCalled = true;
 
-            // @ts-ignore
-            originalCallback(...arguments);
+            Reflect.apply(originalCallback, this, arguments);
         };
 
-        // @ts-ignore
         callback.$$vencordCallbackCalled = () => callbackCalled;
-
         webpackSearchHistory.push(["waitFor", [callback, filter]]);
     }
 
@@ -282,7 +287,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 
     if (IS_DEV) {
         WrapperComponent.$$vencordInner = () => InnerComponent;
-        webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...props]]);
+        webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
 
     if (InnerComponent !== null) return InnerComponent;
@@ -314,7 +319,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
     const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
 
     if (IS_DEV) {
-        webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...code]]);
+        webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newCode]]);
     }
 
     return ComponentResult;
@@ -480,7 +485,6 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
 
 /**
  * Find the id of the first module factory that includes all the given code.
- * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
     outer:
@@ -508,7 +512,6 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
 
 /**
  * Find the first module factory that includes all the given code.
- * @returns The module factory or null
  */
 export function findModuleFactory(...code: string[]) {
     const id = findModuleId(...code);
