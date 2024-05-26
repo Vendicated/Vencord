@@ -205,7 +205,6 @@ export const fileUrlPlugin = {
                         entryPoints: [path],
                         write: false,
                         minify: true,
-                        bundle: true,
                         format: "iife"
                     });
                     content = res.outputFiles[0].text;
