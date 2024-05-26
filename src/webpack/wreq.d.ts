@@ -121,7 +121,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * const exports = {};
      * const definition = { exportName: () => someExportedValue };
      * for (const key in definition) {
-     *     if (Objeect.hasOwn(definition, key) && !Object.hasOwn(exports, key) {
+     *     if (Object.hasOwn(definition, key) && !Object.hasOwn(exports, key) {
      *         Object.defineProperty(exports, key, {
      *             get: definition[key],
      *             enumerable: true
