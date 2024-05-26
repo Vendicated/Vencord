@@ -78,10 +78,11 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
 
-    Object.defineProperty(webpackRequire.c, Symbol.toStringTag, {
+    Reflect.defineProperty(webpackRequire.c, Symbol.toStringTag, {
         value: "ModuleCache",
         configurable: true,
-        writable: true
+        writable: true,
+        enumerable: false
     });
 }
 
@@ -506,7 +507,7 @@ export function search(...filters: Array<string | RegExp>) {
     outer:
     for (const id in factories) {
         const factory = factories[id];
-        const str: string = String(factory);
+        const str = String(factory);
         for (const filter of filters) {
             if (typeof filter === "string" && !str.includes(filter)) continue outer;
             if (filter instanceof RegExp && !filter.test(str)) continue outer;
