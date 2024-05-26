@@ -39,5 +39,5 @@
             }
         ]
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "packages/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
 }
