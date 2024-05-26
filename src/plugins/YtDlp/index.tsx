@@ -6,7 +6,6 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -43,20 +42,10 @@ const maxFileSize = () => {
     if (premiumType > 0) return 50000000; // 50MB
     return 25000000; // 25MB
 };
-const parseAdditionalArgs = (args: string): string[] => {
-    try {
-        if (!args) return [];
-        const parsed = JSON.parse(args);
-        if (!Array.isArray(parsed)) throw new Error("Not an array");
-        if (!parsed.every(a => typeof a === "string")) throw new Error("Not all elements are strings");
-        return parsed;
-    } catch (e: any) {
-        showNotification({
-            title: "yt-dlp",
-            body: "Failed to parse additional arguments: " + e?.message,
-        });
-        return [];
-    }
+const argParse = (args: string): string[] => {
+    return args.match(
+        /(?:[^\s"']+|"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|([^\s]+))/g
+    ) ?? [];
 };
 
 function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
@@ -143,11 +132,15 @@ async function openDependencyModal() {
 }
 
 const settings = definePluginSettings({
-    additionalArguments: {
+    ytdlpArgs: {
         type: OptionType.STRING,
-        description: "Additional arguments to pass to yt-dlp. Format: JSON-parsable array of strings, e.g. [\"--format\", \"bestvideo+bestaudio\"]",
-        default: "[]",
-        placeholder: '["--format", "bestvideo+bestaudio"]',
+        description: "Additional arguments to pass to yt-dlp. Note: if modifyind the ouptup, ensure the filename starts with `download`.",
+        placeholder: "--format bestvideo+bestaudio",
+    },
+    ffmpegArgs: {
+        type: OptionType.STRING,
+        description: "Additional arguments to pass to ffmpeg. Note: if modifying the output, ensure the filename starts with `remux`.",
+        placeholder: "-vf scale=1280:720",
     },
     showProgress: {
         type: OptionType.BOOLEAN,
@@ -220,8 +213,13 @@ export default definePlugin({
                 { name: "1", value: "1", label: "1" }
             ]
         }, {
-            name: "additional_args",
-            description: "Additional JSON-parsable array of arguments to pass to yt-dlp. These will take precedence over arguments set in the settings.",
+            name: "yt-dlp_args",
+            description: "Additional arguments to pass to yt-dlp. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such format selection. Note: if modifying the output, ensure the filename starts with `download`.",
+            required: false,
+            type: ApplicationCommandOptionType.STRING
+        }, {
+            name: "ffmpeg_args",
+            description: "Additional arguments to pass to ffmpeg. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such as auto-scaling. Note: if modifying the output, ensure the filename starts with `remux`.",
             required: false,
             type: ApplicationCommandOptionType.STRING
         }],
@@ -233,13 +231,15 @@ export default definePlugin({
             const url = findOption<string>(args, "url", "");
             const format = findOption<"video" | "audio" | "gif">(args, "format", "video");
             const gifQuality = parseInt(findOption<string>(args, "gif_quality", settings.store.defaultGifQuality.toString())) as 1 | 2 | 3 | 4 | 5;
-            const addArgs = findOption<string>(args, "additional_args", "");
+            const ytdlpArgs = findOption<string>(args, "yt-dlp_args", "");
+            const ffmpegArgs = findOption<string>(args, "ffmpeg_args", "");
 
             return await download(ctx.channel, {
                 url,
                 format,
                 gifQuality,
-                addArgs
+                ytdlpArgs,
+                ffmpegArgs
             });
         }
     }],
@@ -272,20 +272,25 @@ export default definePlugin({
 });
 
 async function download(channel: Channel, {
-    url, format, addArgs, gifQuality
+    url, format, ytdlpArgs, ffmpegArgs, gifQuality
 }: {
     url: string;
     format: "video" | "audio" | "gif";
-    addArgs: string;
+    ytdlpArgs: string;
+    ffmpegArgs: string;
     gifQuality: 1 | 2 | 3 | 4 | 5;
 }) {
     const promise = Native.execute({
         url,
         format,
         gifQuality,
-        additional_arguments: [
-            ...parseAdditionalArgs(settings.store.additionalArguments),
-            ...parseAdditionalArgs(addArgs)
+        ytdlpArgs: [
+            ...argParse(settings.store.ytdlpArgs || ""),
+            ...argParse(ytdlpArgs)
+        ],
+        ffmpegArgs: [
+            ...argParse(settings.store.ffmpegArgs || ""),
+            ...argParse(ffmpegArgs)
         ],
         maxFileSize: maxFileSize()
     });

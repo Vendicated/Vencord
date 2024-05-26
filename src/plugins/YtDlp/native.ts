@@ -15,7 +15,8 @@ type DownloadOptions = {
     url: string;
     format?: Format;
     gifQuality?: 1 | 2 | 3 | 4 | 5;
-    additional_arguments?: string[];
+    ytdlpArgs?: string[];
+    ffmpegArgs?: string[];
     maxFileSize?: number;
 };
 
@@ -146,7 +147,7 @@ function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, forma
     log(`Based on: format=${format}, maxFileSize=${maxFileSize}, ffmpegAvailable=${ffmpegAvailable}`);
     return { format: format_string, videoTitle };
 }
-async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { additional_arguments, url, format: usrFormat }: DownloadOptions) {
+async function download({ format, videoTitle }: { format: string; videoTitle: string; }, { ytdlpArgs, url, format: usrFormat }: DownloadOptions) {
     cleanVideoFiles();
     const baseArgs = ["-f", format, "-o", "download.%(ext)s", "--force-overwrites", "-I", "1"];
     const remuxArgs = ffmpegAvailable
@@ -156,23 +157,25 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
                 ? ["--remux-audio", "mp3"]
                 : []
         : [];
-    const customArgs = additional_arguments?.filter(Boolean) || [];
+    const customArgs = ytdlpArgs?.filter(Boolean) || [];
 
     await ytdlp([url, ...baseArgs, ...remuxArgs, ...customArgs]);
     const file = fs.readdirSync(getdir()).find(f => f.startsWith("download."));
     if (!file) throw "No video file was found!";
     return { file, videoTitle };
 }
-async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { format, maxFileSize, gifQuality }: DownloadOptions) {
+async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { ffmpegArgs, format, maxFileSize, gifQuality }: DownloadOptions) {
     const sourceExtension = file.split(".").pop();
     if (!ffmpegAvailable) return { file, videoTitle, extension: sourceExtension };
 
     // We only really need to remux if
     // 1. The file is too big
     // 2. The file is in a format not supported by discord
+    // 3. The user provided custom ffmpeg arguments
     const acceptableFormats = ["mp3", "mp4", "webm"];
     const fileSize = fs.statSync(p(file)).size;
-    if (acceptableFormats.includes(sourceExtension ?? "") && (!maxFileSize || fileSize <= maxFileSize)) return { file, videoTitle, extension: sourceExtension };
+    const customArgs = ffmpegArgs?.filter(Boolean) || [];
+    if (acceptableFormats.includes(sourceExtension ?? "") && (!maxFileSize || fileSize <= maxFileSize) && !customArgs.length) return { file, videoTitle, extension: sourceExtension };
 
     const duration = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", p(file)]).toString());
     if (isNaN(duration)) throw "Failed to get video duration.";
@@ -180,17 +183,21 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
     const targetBits = maxFileSize ? (maxFileSize * 7) / duration : 9999999;
     const kilobits = ~~(targetBits / 1024);
 
-    let ffmpegArgs: string[] = [];
-    let ext = "";
+    let baseArgs: string[];
+    let outfile: string;
+    let ext: string;
     switch (format) {
         case "audio":
-            ffmpegArgs = ["-i", p(file), "-b:a", `${kilobits}k`, "-maxrate", `${kilobits}k`, "-bufsize", "1M", "-y", p("remux.mp3")];
+            baseArgs = ["-i", p(file), "-b:a", `${kilobits}k`, "-maxrate", `${kilobits}k`, "-bufsize", "1M", "-y"];
+            outfile = "remux.mp3";
             ext = "mp3";
             break;
         case "video":
+        default:
             // Dynamically resize based on target bitrate
             const height = kilobits <= 100 ? 480 : kilobits <= 500 ? 720 : 1080;
-            ffmpegArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`, p("remux.mp4")];
+            baseArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`];
+            outfile = "remux.mp4";
             ext = "mp4";
             break;
         case "gif":
@@ -215,16 +222,13 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
                     break;
             }
 
-            ffmpegArgs = ["-i", p(file), "-vf", `fps=${fps},scale=w=${width}:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=${colors}[p];[s1][p]paletteuse=dither=bayer:bayer_scale=${bayer_scale}`, "-loop", "0", "-bufsize", "1M", "-y", p("remux.gif")];
+            baseArgs = ["-i", p(file), "-vf", `fps=${fps},scale=w=${width}:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=${colors}[p];[s1][p]paletteuse=dither=bayer:bayer_scale=${bayer_scale}`, "-loop", "0", "-bufsize", "1M", "-y"];
+            outfile = "remux.gif";
             ext = "gif";
-            break;
-        default:
             break;
     }
 
-    if (!ffmpegArgs.length) throw "Invalid format.";
-    if (!ext) throw "Invalid extension.";
-    await ffmpeg(ffmpegArgs);
+    await ffmpeg([...baseArgs, ...customArgs, outfile]);
     return { file: `remux.${ext}`, videoTitle, extension: ext };
 }
 function upload({ file, videoTitle, extension }: { file: string; videoTitle: string; extension: string | undefined; }) {
