@@ -42,7 +42,9 @@ const appendOut = (data: string) => ( // Makes carriage return (\r) work
     (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
 const log = (...data: string[]) => (console.log(`[Plugin:yt-dlp] ${data.join(" ")}`), logs_global += `[Plugin:yt-dlp] ${data.join(" ")}\n`);
 const error = (...data: string[]) => console.error(`[Plugin:yt-dlp] [ERROR] ${data.join(" ")}`);
+
 function ytdlp(args: string[]): Promise<string> {
+    log(`Executing yt-dlp with args: ["${args.map(a => a.replace('"', '\\"')).join('", "')}"]`);
     let errorMsg = "";
 
     return new Promise<string>((resolve, reject) => {
@@ -63,6 +65,7 @@ function ytdlp(args: string[]): Promise<string> {
     });
 }
 function ffmpeg(args: string[]): Promise<string> {
+    log(`Executing ffmpeg with args: ["${args.map(a => a.replace('"', '\\"')).join('", "')}"]`);
     let errorMsg = "";
 
     return new Promise<string>((resolve, reject) => {
