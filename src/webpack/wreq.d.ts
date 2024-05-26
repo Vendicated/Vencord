@@ -50,8 +50,13 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      * Export star. Sets properties of "fromObject" to "toObject" as getters that return the value from "fromObject", like this:
      * @example
      * const fromObject = { a: 1 };
-     * Object.defineProperty(fromObject, "a", {
-     *      get: () => fromObject["a"]
+     * Object.keys(fromObject).forEach(key => {
+     *     if (key !== "default" && !(key in toObject)) {
+     *         Object.defineProperty(toObject, key, {
+     *             get: () => fromObject[key],
+     *             enumerable: true
+     *         });
+     *     }
      * });
      * @returns fromObject
      */
@@ -81,14 +86,20 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
      */
     t: (this: WebpackRequire, value: any, mode: number) => any;
     /**
-     * Define property getters. For every prop in "definiton", set a getter in "exports" for the value in "definitiion", like this:
+     * Define getter functions for harmony exports. For every prop in "definiton" (the module exports), set a getter in "exports" for the getter function in the "definition", like this:
      * @example
      * const exports = {};
-     * const definition = { a: 1 };
+     * const definition = { exportName: () => someExportedValue };
      * for (const key in definition) {
-     *      Object.defineProperty(exports, key, { get: definition[key] }
+     *     if (key in definition && !(key in exports)) {
+     *         Object.defineProperty(exports, key, {
+     *             get: definition[key],
+     *             enumerable: true
+     *         });
+     *     }
      * }
-    */
+     * // exports is now { exportName: someExportedValue } (but each value is actually a getter)
+     */
     d: (this: WebpackRequire, exports: Record<PropertyKey, any>, definiton: Record<PropertyKey, any>) => void;
     /** The chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
     f: ChunkHandlers;
