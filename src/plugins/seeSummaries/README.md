@@ -1,7 +1,7 @@
 # Summaries
 
-Enables Discord summaries and stores them in a database for persistence.
+Enables Discord's experimental Summaries feature on every server, displaying AI generated summaries of conversations.
 
-Only shows new summaries after the plugin has been enabled.
+Note that this plugin can't fetch old summaries, it can only display ones created while your Discord is running with the plugin enabled.
 
-![Visualization](https://github.com/Vendicated/Vencord/assets/67705577/bb68bc23-a1a9-48f7-980c-c4151faa4db6)
+![](https://github.com/Vendicated/Vencord/assets/45497981/bd931b0c-2e85-4c10-9f7c-8ba01eb55745)

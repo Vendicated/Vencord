@@ -48,7 +48,7 @@ interface ChannelSummaries {
 
 export default definePlugin({
     name: "Summaries",
-    description: "Enables summaries and persists them on restart",
+    description: "Enables Discord's experimental Summaries feature on every server, displaying AI generated summaries of conversations",
     authors: [Devs.mantikafasi],
     settings,
     patches: [
