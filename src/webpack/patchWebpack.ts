@@ -161,6 +161,8 @@ Reflect.defineProperty(Function.prototype, "m", {
     }
 });
 
+let wreqNotInitializedLogged = false;
+
 function patchFactory(id: PropertyKey, factory: ModuleFactory) {
     const originalFactory = factory;
 
@@ -299,16 +301,25 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         // eslint-disable-next-line prefer-const
         let [module, exports, require] = args;
 
-        // Make sure the require argument is actually the WebpackRequire function
-        if (wreq == null && typeof require === "function" && require.m != null) {
-            const { stack } = new Error();
-            const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
-            logger.warn(
-                "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
-                `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
-                ")"
-            );
-            _initWebpack(require);
+        if (wreq == null) {
+            // Make sure the require argument is actually the WebpackRequire function
+            if (typeof require === "function" && require.m != null) {
+                const { stack } = new Error();
+                const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+                logger.warn(
+                    "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
+                    `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                    ")"
+                );
+                _initWebpack(require);
+            } else if (IS_DEV) {
+                if (!wreqNotInitializedLogged) {
+                    wreqNotInitializedLogged = true;
+                    logger.error("WebpackRequire was not initialized, running modules without patches instead.");
+                }
+
+                return originalFactory.apply(this, args);
+            }
         }
 
         let factoryReturn: unknown;
