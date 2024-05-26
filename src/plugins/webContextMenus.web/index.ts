@@ -20,8 +20,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
+
+const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -44,6 +46,28 @@ const settings = definePluginSettings({
     }
 });
 
+const MEDIA_PROXY_URL = "https://media.discordapp.net";
+const CDN_URL = "cdn.discordapp.com";
+
+function fixImageUrl(urlString: string) {
+    const url = new URL(urlString);
+    if (url.host === CDN_URL) return urlString;
+
+    url.searchParams.delete("width");
+    url.searchParams.delete("height");
+
+    if (url.origin === MEDIA_PROXY_URL) {
+        url.host = CDN_URL;
+        url.searchParams.delete("size");
+        url.searchParams.delete("quality");
+        url.searchParams.delete("format");
+    } else {
+        url.searchParams.set("quality", "lossless");
+    }
+
+    return url.toString();
+}
+
 export default definePlugin({
     name: "WebContextMenus",
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
@@ -55,7 +79,6 @@ export default definePlugin({
 
     start() {
         if (settings.store.addBack) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             this.changedListeners = true;
@@ -64,7 +87,6 @@ export default definePlugin({
 
     stop() {
         if (this.changedListeners) {
-            const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
         }
@@ -169,32 +191,53 @@ export default definePlugin({
                 match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
             }
+        },
+
+        // Add back "Show My Camera" context menu
+        {
+            find: '"MediaEngineWebRTC");',
+            replacement: {
+                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
+                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+            }
         }
     ],
 
     async copyImage(url: string) {
-        // Clipboard only supports image/png, jpeg and similar won't work. Thus, we need to convert it to png
-        // via canvas first
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            canvas.getContext("2d")!.drawImage(img, 0, 0);
+        url = fixImageUrl(url);
 
-            canvas.toBlob(data => {
-                navigator.clipboard.write([
-                    new ClipboardItem({
-                        "image/png": data!
-                    })
-                ]);
-            }, "image/png");
-        };
-        img.crossOrigin = "anonymous";
-        img.src = url;
+        let imageData = await fetch(url).then(r => r.blob());
+        if (imageData.type !== "image/png") {
+            const bitmap = await createImageBitmap(imageData);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
+
+            await new Promise<void>(done => {
+                canvas.toBlob(data => {
+                    imageData = data!;
+                    done();
+                }, "image/png");
+            });
+        }
+
+        if (IS_VESKTOP && VesktopNative.clipboard) {
+            VesktopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
+            return;
+        } else {
+            navigator.clipboard.write([
+                new ClipboardItem({
+                    "image/png": imageData
+                })
+            ]);
+        }
     },
 
     async saveImage(url: string) {
+        url = fixImageUrl(url);
+
         const data = await fetchImage(url);
         if (!data) return;
 

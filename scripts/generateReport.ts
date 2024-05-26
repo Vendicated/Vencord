@@ -67,7 +67,8 @@ const IGNORED_DISCORD_ERRORS = [
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
     /\[GatewaySocket\].{0,110}Cannot access '/,
-    "search for 'name' in undefined"
+    "search for 'name' in undefined",
+    "Attempting to set fast connect zstd when unsupported"
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {
@@ -105,10 +106,24 @@ async function printReport() {
 
     console.log();
 
-    report.otherErrors = report.otherErrors.filter(e => !IGNORED_DISCORD_ERRORS.some(regex => e.match(regex)));
+    const ignoredErrors = [] as string[];
+    report.otherErrors = report.otherErrors.filter(e => {
+        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
+            ignoredErrors.push(e);
+            return false;
+        }
+        return true;
+    });
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
+        console.log(`- ${toCodeBlock(e)}`);
+    });
+
+    console.log();
+
+    console.log("## Ignored Discord Errors");
+    ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -123,7 +138,7 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/icons/1015060230222131221/6101cff21e241cebb60c4a01563d0c01.webp?size=512",
+                avatar_url: "https://cdn.discordapp.com/avatars/1017176847865352332/c312b6b44179ae6817de7e4b09e9c6af.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
@@ -197,9 +212,12 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                if (!patchFailMatch) break;
+
                 process.exitCode = 1;
 
-                const [, plugin, type, id, regex] = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const [, plugin, type, id, regex] = patchFailMatch;
                 report.badPatches.push({
                     plugin,
                     type,
@@ -225,21 +243,29 @@ page.on("console", async e => {
         }
     }
 
-    if (isDebug) {
-        console.error(e.text());
-    } else if (level === "error") {
-        const text = await Promise.all(
-            e.args().map(async a => {
-                try {
+    async function getText() {
+        try {
+            return await Promise.all(
+                e.args().map(async a => {
                     return await maybeGetError(a) || await a.jsonValue();
-                } catch (e) {
-                    return a.toString();
-                }
-            })
-        ).then(a => a.join(" ").trim());
+                })
+            ).then(a => a.join(" ").trim());
+        } catch {
+            return e.text();
+        }
+    }
 
+    if (isDebug) {
+        const text = await getText();
 
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("found no module Filter:")) {
+        console.error(text);
+        if (text.includes("A fatal error occurred:")) {
+            process.exit(1);
+        }
+    } else if (level === "error") {
+        const text = await getText();
+
+        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             console.error("[Unexpected Error]", text);
             report.otherErrors.push(text);
         }
@@ -251,7 +277,7 @@ page.on("pageerror", e => console.error("[Page Error]", e));
 
 await page.setBypassCSP(true);
 
-function runTime(token: string) {
+async function runtime(token: string) {
     console.log("[PUP_DEBUG]", "Starting test...");
 
     try {
@@ -264,9 +290,13 @@ function runTime(token: string) {
 
         // Monkey patch Logger to not log with custom css
         // @ts-ignore
+        const originalLog = Vencord.Util.Logger.prototype._log;
+        // @ts-ignore
         Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
             if (level === "warn" || level === "error")
-                console[level]("[Vencord]", this.name + ":", ...args);
+                return console[level]("[Vencord]", this.name + ":", ...args);
+
+            return originalLog.call(this, level, levelColor, args);
         };
 
         // Force enable all plugins and patches
@@ -279,9 +309,12 @@ function runTime(token: string) {
             p.patches?.forEach(patch => {
                 patch.plugin = p.name;
                 delete patch.predicate;
+                delete patch.group;
 
-                if (!Array.isArray(patch.replacement))
+                Vencord.Util.canonicalizeFind(patch);
+                if (!Array.isArray(patch.replacement)) {
                     patch.replacement = [patch.replacement];
+                }
 
                 patch.replacement.forEach(r => {
                     delete r.predicate;
@@ -291,6 +324,105 @@ function runTime(token: string) {
             });
         });
 
+        let wreq: typeof Vencord.Webpack.wreq;
+
+        const { canonicalizeMatch, Logger } = Vencord.Util;
+
+        const validChunks = new Set<string>();
+        const invalidChunks = new Set<string>();
+        const deferredRequires = new Set<string>();
+
+        let chunksSearchingResolve: (value: void | PromiseLike<void>) => void;
+        const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
+
+        // True if resolved, false otherwise
+        const chunksSearchPromises = [] as Array<() => boolean>;
+
+        const LazyChunkRegex = canonicalizeMatch(/(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\)))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
+
+        async function searchAndLoadLazyChunks(factoryCode: string) {
+            const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
+            const validChunkGroups = new Set<[chunkIds: string[], entryPoint: string]>();
+
+            // Workaround for a chunk that depends on the ChannelMessage component but may be be force loaded before
+            // the chunk containing the component
+            const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
+
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIdsArray, rawChunkIdsSingle, entryPoint]) => {
+                const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
+                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Vencord.Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
+
+                if (chunkIds.length === 0) {
+                    return;
+                }
+
+                let invalidChunkGroup = false;
+
+                for (const id of chunkIds) {
+                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
+
+                    const isWasm = await fetch(wreq.p + wreq.u(id))
+                        .then(r => r.text())
+                        .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+
+                    if (isWasm) {
+                        invalidChunks.add(id);
+                        invalidChunkGroup = true;
+                        continue;
+                    }
+
+                    validChunks.add(id);
+                }
+
+                if (!invalidChunkGroup) {
+                    validChunkGroups.add([chunkIds, entryPoint]);
+                }
+            }));
+
+            // Loads all found valid chunk groups
+            await Promise.all(
+                Array.from(validChunkGroups)
+                    .map(([chunkIds]) =>
+                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                    )
+            );
+
+            // Requires the entry points for all valid chunk groups
+            for (const [, entryPoint] of validChunkGroups) {
+                try {
+                    if (shouldForceDefer) {
+                        deferredRequires.add(entryPoint);
+                        continue;
+                    }
+
+                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            // setImmediate to only check if all chunks were loaded after this function resolves
+            // We check if all chunks were loaded every time a factory is loaded
+            // If we are still looking for chunks in the other factories, the array will have that factory's chunk search promise not resolved
+            // But, if all chunk search promises are resolved, this means we found every lazy chunk loaded by Discord code and manually loaded them
+            setTimeout(() => {
+                let allResolved = true;
+
+                for (let i = 0; i < chunksSearchPromises.length; i++) {
+                    const isResolved = chunksSearchPromises[i]();
+
+                    if (isResolved) {
+                        // Remove finished promises to avoid having to iterate through a huge array everytime
+                        chunksSearchPromises.splice(i--, 1);
+                    } else {
+                        allResolved = false;
+                    }
+                }
+
+                if (allResolved) chunksSearchingResolve();
+            }, 0);
+        }
+
         Vencord.Webpack.waitFor(
             "loginToken",
             m => {
@@ -299,146 +431,123 @@ function runTime(token: string) {
             }
         );
 
-        // Force load all chunks
-        Vencord.Webpack.onceReady.then(() => setTimeout(async () => {
-            console.log("[PUP_DEBUG]", "Webpack is ready!");
-
-            const { wreq } = Vencord.Webpack;
-
+        Vencord.Webpack.beforeInitListeners.add(async webpackRequire => {
             console.log("[PUP_DEBUG]", "Loading all chunks...");
 
-            let chunks = null as Record<number, string[]> | null;
-            const sym = Symbol("Vencord.chunksExtract");
+            wreq = webpackRequire;
 
-            Object.defineProperty(Object.prototype, sym, {
-                get() {
-                    chunks = this;
-                },
-                set() { },
-                configurable: true,
+            Vencord.Webpack.factoryListeners.add(factory => {
+                let isResolved = false;
+                searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+
+                chunksSearchPromises.push(() => isResolved);
             });
 
-            await (wreq as any).el(sym);
-            delete Object.prototype[sym];
+            // setImmediate to only search the initial factories after Discord initialized the app
+            // our beforeInitListeners are called before Discord initializes the app
+            setTimeout(() => {
+                for (const factoryId in wreq.m) {
+                    let isResolved = false;
+                    searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
 
-            const validChunksEntryPoints = [] as string[];
-            const validChunks = [] as string[];
-            const invalidChunks = [] as string[];
+                    chunksSearchPromises.push(() => isResolved);
+                }
+            }, 0);
+        });
 
-            if (!chunks) throw new Error("Failed to get chunks");
+        await chunksSearchingDone;
 
-            chunksLoop:
-            for (const entryPoint in chunks) {
-                const chunkIds = chunks[entryPoint];
+        // Require deferred entry points
+        for (const deferredRequire of deferredRequires) {
+            wreq!(deferredRequire as any);
+        }
 
-                for (const id of chunkIds) {
-                    if (!wreq.u(id)) continue;
+        // All chunks Discord has mapped to asset files, even if they are not used anymore
+        const allChunks = [] as string[];
 
-                    const isWasm = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+        // Matches "id" or id:
+        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+            const id = currentMatch[1] ?? currentMatch[2];
+            if (id == null) continue;
 
-                    if (isWasm) {
-                        invalidChunks.push(id);
-                        continue chunksLoop;
-                    }
+            allChunks.push(id);
+        }
 
-                    validChunks.push(id);
+        if (allChunks.length === 0) throw new Error("Failed to get all chunks");
+
+        // Chunks that are not loaded (not used) by Discord code anymore
+        const chunksLeft = allChunks.filter(id => {
+            return !(validChunks.has(id) || invalidChunks.has(id));
+        });
+
+        await Promise.all(chunksLeft.map(async id => {
+            const isWasm = await fetch(wreq.p + wreq.u(id))
+                .then(r => r.text())
+                .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+
+            // Loads and requires a chunk
+            if (!isWasm) {
+                await wreq.e(id as any);
+                if (wreq.m[id]) wreq(id as any);
+            }
+        }));
+
+        console.log("[PUP_DEBUG]", "Finished loading all chunks!");
+
+        for (const patch of Vencord.Plugins.patches) {
+            if (!patch.all) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+            }
+        }
+
+        for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
+            let method = searchType;
+
+            if (searchType === "findComponent") method = "find";
+            if (searchType === "findExportedComponent") method = "findByProps";
+            if (searchType === "waitFor" || searchType === "waitForComponent") {
+                if (typeof args[0] === "string") method = "findByProps";
+                else method = "find";
+            }
+            if (searchType === "waitForStore") method = "findStore";
+
+            try {
+                let result: any;
+
+                if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
+                    const [factory] = args;
+                    result = factory();
+                } else if (method === "extractAndLoadChunks") {
+                    const [code, matcher] = args;
+
+                    const module = Vencord.Webpack.findModuleFactory(...code);
+                    if (module) result = module.toString().match(canonicalizeMatch(matcher));
+                } else {
+                    // @ts-ignore
+                    result = Vencord.Webpack[method](...args);
                 }
 
-                validChunksEntryPoints.push(entryPoint);
+                if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
+            } catch (e) {
+                let logMessage = searchType;
+                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
+                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
+                else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+
+                console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
             }
+        }
 
-            for (const entryPoint of validChunksEntryPoints) {
-                try {
-                    // Loads all chunks required for an entry point
-                    await (wreq as any).el(entryPoint);
-                } catch (err) { }
-            }
-
-            const allChunks = Function("return " + (wreq.u.toString().match(/(?<=\()\{.+?\}/s)?.[0] ?? "null"))() as Record<string | number, string[]> | null;
-            if (!allChunks) throw new Error("Failed to get all chunks");
-            const chunksLeft = Object.keys(allChunks).filter(id => {
-                return !(validChunks.includes(id) || invalidChunks.includes(id));
-            });
-
-            for (const id of chunksLeft) {
-                const isWasm = await fetch(wreq.p + wreq.u(id))
-                    .then(r => r.text())
-                    .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
-
-                // Loads a chunk
-                if (!isWasm) await wreq.e(id as any);
-            }
-
-            // Make sure every chunk has finished loading
-            await new Promise(r => setTimeout(r, 1000));
-
-            for (const entryPoint of validChunksEntryPoints) {
-                try {
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-
-            console.log("[PUP_DEBUG]", "Finished loading all chunks!");
-
-            for (const patch of Vencord.Plugins.patches) {
-                if (!patch.all) {
-                    new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
-                }
-            }
-
-            for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
-                let method = searchType;
-
-                if (searchType === "findComponent") method = "find";
-                if (searchType === "findExportedComponent") method = "findByProps";
-                if (searchType === "waitFor" || searchType === "waitForComponent" || searchType === "waitForStore") {
-                    if (typeof args[0] === "string") method = "findByProps";
-                    else method = "find";
-                }
-
-                try {
-                    let result: any;
-
-                    if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
-                        const [factory] = args;
-                        result = factory();
-                    } else if (method === "extractAndLoadChunks") {
-                        const [code, matcher] = args;
-
-                        const module = Vencord.Webpack.findModuleFactory(...code);
-                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
-                    } else {
-                        // @ts-ignore
-                        result = Vencord.Webpack[method](...args);
-                    }
-
-                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
-                } catch (e) {
-                    let logMessage = searchType;
-                    if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
-                    else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
-
-                    console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
-                }
-            }
-
-            setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
-        }, 1000));
+        setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
     } catch (e) {
         console.log("[PUP_DEBUG]", "A fatal error occurred:", e);
-        process.exit(1);
     }
 }
 
 await page.evaluateOnNewDocument(`
     ${readFileSync("./dist/browser.js", "utf-8")}
 
-    ;(${runTime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    ;(${runtime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
 `);
 
 await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");

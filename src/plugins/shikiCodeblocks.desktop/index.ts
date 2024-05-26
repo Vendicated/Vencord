@@ -21,8 +21,7 @@ import "./shiki.css";
 import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
-import previewExampleText from "~fileContent/previewExample.tsx";
+import previewExampleText from "file://previewExample.tsx";
 
 import { shiki } from "./api/shiki";
 import { createHighlighter } from "./components/Highlighter";
@@ -41,6 +40,13 @@ export default definePlugin({
             replacement: {
                 match: /codeBlock:\{react\((\i),(\i),(\i)\)\{/,
                 replace: "$&return $self.renderHighlighter($1,$2,$3);"
+            }
+        },
+        {
+            find: ".PREVIEW_NUM_LINES",
+            replacement: {
+                match: /(?<=function \i\((\i)\)\{)(?=let\{text:\i,language:)/,
+                replace: "return $self.renderHighlighter({lang:$1.language,content:$1.text});"
             }
         }
     ],

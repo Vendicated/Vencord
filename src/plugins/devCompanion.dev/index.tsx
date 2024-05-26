@@ -215,6 +215,9 @@ function initWs(isManual = false) {
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
+                        case "ComponentByCode":
+                            results = findAll(filters.componentByCode(...parsedArgs));
+                            break;
                         default:
                             return reply("Unknown Find Type " + type);
                     }

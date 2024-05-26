@@ -18,10 +18,9 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { MessageActions } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 interface Sticker {

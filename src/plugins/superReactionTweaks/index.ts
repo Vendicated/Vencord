@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { UserStore } from "@webpack/common";
 
 export const settings = definePluginSettings({
     superReactByDefault: {
@@ -41,15 +42,15 @@ export default definePlugin({
         {
             find: ",BURST_REACTION_EFFECT_PLAY",
             replacement: {
-                match: /(?<=BURST_REACTION_EFFECT_PLAY:\i=>{.{50,100})(\i\(\i,\i\))>=\d+/,
-                replace: "!$self.shouldPlayBurstReaction($1)"
+                match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.{50,100})(\i\(\i,\i\))>=\d+/,
+                replace: "$1!$self.shouldPlayBurstReaction($2)"
             }
         },
         {
-            find: ".hasAvailableBurstCurrency)",
+            find: ".trackEmojiSearchEmpty,200",
             replacement: {
-                match: /(?<=\.useBurstReactionsExperiment.{0,20})useState\(!1\)(?=.+?(\i===\i\.EmojiIntention.REACTION))/,
-                replace: "useState($self.settings.store.superReactByDefault && $1)"
+                match: /(\.trackEmojiSearchEmpty,200(?=.+?isBurstReaction:(\i).+?(\i===\i\.EmojiIntention.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
+                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
             }
         }
     ],
@@ -59,5 +60,9 @@ export default definePlugin({
         if (settings.store.unlimitedSuperReactionPlaying) return true;
         if (playingCount <= settings.store.superReactionPlayingLimit) return true;
         return false;
+    },
+
+    get shouldSuperReactByDefault() {
+        return settings.store.superReactByDefault && UserStore.getCurrentUser().premiumType != null;
     }
 });
