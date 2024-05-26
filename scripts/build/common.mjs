@@ -206,7 +206,7 @@ export const fileUrlPlugin = {
                         write: false,
                         minify: true,
                         bundle: true,
-                        format: "esm"
+                        format: "iife"
                     });
                     content = res.outputFiles[0].text;
                 } else {
