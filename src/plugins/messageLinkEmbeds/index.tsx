@@ -212,10 +212,9 @@ function computeWidthAndHeight(width: number, height: number) {
 
 function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
-        get(_, prop) {
+        get(target, prop, receiver) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-ignore ts so bad
-            return Reflect.get(...arguments);
+            return Reflect.get(target, prop, receiver);
         }
     });
 }

@@ -27,7 +27,6 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
 
     let lazyFailedLogged = false;
     const LazyComponent = (props: T) => {
-        // @ts-ignore
         if (!get.$$vencordLazyFailed()) {
             const ResultComponent = get();
             if (ResultComponent != null) {
@@ -36,7 +35,6 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         }
 
         if (InnerComponent === null && !lazyFailedLogged) {
-            // @ts-ignore
             if (get.$$vencordLazyFailed()) {
                 lazyFailedLogged = true;
             }
