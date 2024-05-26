@@ -299,8 +299,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         // eslint-disable-next-line prefer-const
         let [module, exports, require] = args;
 
-        // Make sure the require argument is actually the WebpackRequire functioin
-        if (wreq == null && String(require).includes("exports:{}")) {
+        // Make sure the require argument is actually the WebpackRequire function
+        if (wreq == null && typeof require === "function" && require.m != null) {
             const { stack } = new Error();
             const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
             logger.warn(
@@ -328,7 +328,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
-        if (exports === window && require?.c) {
+        if (exports === window && typeof require === "function" && require.c != null) {
             Reflect.defineProperty(require.c, id, {
                 value: require.c[id],
                 configurable: true,
