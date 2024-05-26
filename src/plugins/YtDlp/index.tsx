@@ -242,12 +242,6 @@ export default definePlugin({
                 addArgs
             });
         }
-    }, {
-        description: "test",
-        name: "test",
-        execute: async (args, ctx) => {
-            openDependencyModal();
-        }
     }],
     patches: [
         {
