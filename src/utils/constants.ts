@@ -186,7 +186,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 296776625432035328n,
     },
     TheSun: {
-        name: "ActuallyTheSun",
+        name: "sunnie",
         id: 406028027768733696n
     },
     axyie: {
@@ -333,6 +333,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     rad: {
         name: "rad",
         id: 610945092504780823n
+    },
+    keifufu: {
+        name: "keifufu",
+        id: 469588398110146590n
     },
     AndrewDLO: {
         name: "Andrew-DLO",
