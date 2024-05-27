@@ -1,0 +1,32 @@
+import definePlugin from "@utils/types";
+
+const toSmallCaps = (text: string) => {
+    const smallCapsMap = {
+        a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ғ', g: 'ɢ', h: 'ʜ', i: 'ɪ', j: 'ᴊ',
+        k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'ǫ', r: 'ʀ', s: 's', t: 'ᴛ',
+        u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x', y: 'ʏ', z: 'ᴢ'
+    };
+    return text.split('').map(char => smallCapsMap[char] || char).join('');
+};
+
+export default definePlugin({
+    name: "SmallSpeak",
+    description: "Converts lowercase letters into small caps!",
+    authors: [
+        {
+            id: 1241791492276621434,
+            name: "jsh4d",
+        },
+    ],
+    patches: [
+        {
+            find: "sendMessage",
+            replace: (original) => function(channelId, message, ...args) {
+                message.content = toSmallCaps(message.content);
+                return original.call(this, channelId, message, ...args);
+            }
+        }
+    ],
+    start() {},
+    stop() {},
+});
