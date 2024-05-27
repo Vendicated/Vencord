@@ -5,15 +5,14 @@
  */
 
 import { Flex } from "@components/Flex";
-import { debounce } from "@shared/debounce";
 import { findComponentByCodeLazy } from "@webpack";
-import { Forms, React, TextInput } from "@webpack/common";
+import { Forms, React, Switch, Text, TextInput } from "@webpack/common";
 
 import { canvasStateType } from "../../MainBoard";
 
 type CanvasSettingsProps = {
     currentState: canvasStateType,
-    setGlobal: React.Dispatch<React.SetStateAction<canvasStateType>>;
+    setCanvas: React.Dispatch<React.SetStateAction<canvasStateType>>;
 } & React.HTMLProps<React.ReactElement>;
 
 interface ColorPickerProps {
@@ -21,12 +20,27 @@ interface ColorPickerProps {
     showEyeDropper?: boolean;
     suggestedColors?: string[];
     onChange(value: number | null): void;
+    onClose(): void;
+    disabled?: boolean;
+}
+
+interface ColorPickerWithSwatchesProps {
+    defaultColor: number;
+    colors: number[];
+    value: number;
+    disabled?: boolean;
+    onChange(value: number | null): void;
+    renderDefaultButton?: () => React.ReactNode;
+    renderCustomButton?: () => React.ReactNode;
 }
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>("presets,", "customColor:");
+
 
 const CanvasSettings = (props: CanvasSettingsProps) => {
-    const { setGlobal, currentState } = props;
+    const { setCanvas, currentState } = props;
+    const [changedColor, setChangedColor] = React.useState<number>(currentState.fill?.color ?? 16777215);
 
     return (
         <div className="excali-config-frame">
@@ -38,17 +52,22 @@ const CanvasSettings = (props: CanvasSettingsProps) => {
                     <Flex flexDirection="row" style={{ gap: 5 }}>
                         <Flex flexDirection="column" style={{ width: "50%", gap: 5 }}>
                             <Forms.FormText variant="text-md/bold">Width</Forms.FormText>
-                            <TextInput key={"Width"} type="number" defaultValue={currentState.width} width={16} placeholder="Width" onChange={e => { setGlobal({ ...currentState, width: frameSize(e) }); }} max={4096} />
+                            <TextInput key={"Width"} type="number" defaultValue={currentState.width} width={16} placeholder="Width" onChange={e => { setCanvas({ ...currentState, width: frameSize(e) }); }} max={4096} />
                         </Flex>
                         <Flex flexDirection="column" style={{ width: "50%", gap: 5 }}>
                             <Forms.FormText variant="text-md/bold">Height</Forms.FormText>
-                            <TextInput height={"Height"} type="number" defaultValue={currentState.height} width={16} placeholder="Height" onChange={e => { setGlobal({ ...currentState, height: frameSize(e) }); }} max={4096} />
+                            <TextInput height={"Height"} type="number" defaultValue={currentState.height} width={16} placeholder="Height" onChange={e => { setCanvas({ ...currentState, height: frameSize(e) }); }} max={4096} />
                         </Flex>
                     </Flex>
                 </Forms.FormSection>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">Background</Forms.FormTitle>
-                    <ColorPicker color={currentState.fill?.color ?? 16777215} onChange={debounce((e: number) => { setGlobal({ ...currentState, fill: { color: e, shouldFill: true } }); }, 350)} />
+                    <Flex flexDirection="column" style={{ gap: 0 }}>
+                        <Switch onChange={e => setCanvas({ ...currentState, fill: { color: currentState.fill?.color ?? 16777215, shouldFill: e } })} value={currentState.fill?.shouldFill ?? true} note={"When disabled the background color is not set, and is transparent on the processed image."} tooltipNote={`${currentState.fill?.shouldFill ? "Disable" : "Enable"} background color`} hideBorder={true}>
+                            <Text>Enable</Text>
+                        </Switch>
+                        <ColorPicker color={changedColor} onChange={e => setChangedColor(e ?? 16777215)} onClose={() => setCanvas({ ...currentState, fill: { color: changedColor, shouldFill: currentState.fill?.shouldFill ?? true } })} disabled={!currentState.fill?.shouldFill} />
+                    </Flex>
                 </Forms.FormSection>
             </Forms.FormSection>
         </div>

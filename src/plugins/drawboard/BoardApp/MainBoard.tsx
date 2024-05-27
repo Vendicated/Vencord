@@ -41,7 +41,6 @@ export default function MainBoard() {
 
         if (canvasState.fill && canvasState.fill.shouldFill) {
             const color = `#${canvasState.fill.color.toString(16).padStart(6, "0")}`;
-            console.log(canvasState.fill.color, color);
             ctx.fillStyle = color;
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         }
@@ -122,7 +121,7 @@ export default function MainBoard() {
                     </ScrollerThin>
                 </div>
                 <div className="excali-config">
-                    <CanvasSettings setGlobal={setCanvasState} currentState={canvasState} />
+                    <CanvasSettings setCanvas={setCanvasState} currentState={canvasState} />
                     {
                         currentEditing && (
                             <div className="excali-config-frame">

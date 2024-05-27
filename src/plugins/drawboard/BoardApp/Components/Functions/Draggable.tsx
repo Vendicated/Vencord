@@ -18,8 +18,6 @@ const Draggable = (props): JSX.Element | null => {
         const container = children.ref.current.parentElement;
         if (!container) return;
 
-        console.log(children.ref.current.getBoundingClientRect());
-
         const onMouseDown = (e: MouseEvent) => {
             if (e.button !== 0) return;
             isClicked.current = true;
