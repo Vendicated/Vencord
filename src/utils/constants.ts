@@ -386,6 +386,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ant0n",
         id: 145224646868860928n
     },
+    Board: {
+        name: "BoardTM",
+        id: 285475344817848320n,
+    },
     philipbry: {
         name: "philipbry",
         id: 554994003318276106n
@@ -418,6 +422,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Av32000",
         id: 593436735380127770n,
     },
+    Noxillio: {
+        name: "Noxillio",
+        id: 138616536502894592n,
+    },
     Kyuuhachi: {
         name: "Kyuuhachi",
         id: 236588665420251137n,
@@ -437,6 +445,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     newwares: {
         name: "newwares",
         id: 421405303951851520n
+    },
+    JohnyTheCarrot: {
+        name: "JohnyTheCarrot",
+        id: 132819036282159104n
     },
     puv: {
         name: "puv",
@@ -481,7 +493,27 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     xocherry: {
         name: "xocherry",
         id: 221288171013406720n
-    }
+    },
+    ScattrdBlade: {
+        name: "ScattrdBlade",
+        id: 678007540608532491n
+    },
+    goodbee: {
+        name: "goodbee",
+        id: 658968552606400512n
+    },
+    Moxxie: {
+        name: "Moxxie",
+        id: 712653921692155965n,
+    },
+    Ethan: {
+        name: "Ethan",
+        id: 721717126523781240n,
+    },
+    nyx: {
+        name: "verticalsync",
+        id: 328165170536775680n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
