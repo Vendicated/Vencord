@@ -82,7 +82,8 @@ waitFor(["FormItem", "Button"], m => {
         Clickable,
         Avatar,
         FocusLock,
-        Heading
+        Heading,
+        Dots
     } = m);
     Forms = m;
 });
