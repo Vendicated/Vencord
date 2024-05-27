@@ -87,6 +87,7 @@ export default definePlugin({
 
     async start() {
         await DataStore.update("summaries-data", summaries => {
+            summaries ??= {};
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {
                     if (summaries[key][i].time < Date.now() - 1000 * 60 * 60 * 24 * settings.store.summaryExpiryThresholdDays) {
