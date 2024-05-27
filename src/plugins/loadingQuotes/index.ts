@@ -19,8 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import presetQuotesText from "~fileContent/quotes.txt";
+import presetQuotesText from "file://quotes.txt";
 
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
