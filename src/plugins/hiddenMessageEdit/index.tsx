@@ -12,10 +12,11 @@ import {
     Flex,
     React,
     ReactDOM,
+    RestAPI,
 } from "../../webpack/common";
+import { findByProps } from "@webpack";
 import "./styles.css";
 import { HiddenMessageEditIcon } from "./icons";
-import { getToken } from "./utils";
 
 interface MessageContextProps {
     channel: Channel;
@@ -42,6 +43,7 @@ const HiddenMessageEditForm = ({ message, onSave }) => {
                 >
                     Use the cutest hidden message editing feature
                 </Forms.FormText>
+                <div style={{ marginBottom: "10px" }}></div>
                 <Flex className="inputContainer" align={Flex.Align.CENTER}>
                     <input
                         type="text"
@@ -60,9 +62,11 @@ const HiddenMessageEditForm = ({ message, onSave }) => {
                         Save
                     </Button>
                 </Flex>
+                <div style={{ marginTop: "20px" }}></div>
                 <Forms.FormText
                     type={Forms.FormText.Types.DESCRIPTION}
                     className="hidden-message-edit-note"
+                    style={{ fontSize: "11px" }}
                 >
                     NOTE: If too much time passes, you won't be able to modify
                     the message as it will be sent as a new message.
@@ -88,6 +92,8 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
     }
 
     const handleEditClick = () => {
+        console.log("Edit button clicked");
+
         const overlay = document.createElement("div");
         overlay.className = "hidden-message-edit-overlay";
 
@@ -95,11 +101,15 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
         formContainer.className = "hidden-message-edit-form-container";
 
         const closeOverlay = () => {
+            console.log("Closing overlay");
             document.body.removeChild(overlay);
         };
 
         overlay.addEventListener("click", (e) => {
-            if (e.target === overlay) {
+            if (
+                e.target === overlay &&
+                !formContainer.contains(e.target as Node)
+            ) {
                 closeOverlay();
             }
         });
@@ -120,38 +130,45 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
         const handleSave = async (newContent: string) => {
             closeOverlay();
 
-            const token = getToken();
-            if (!token) {
-                return;
-            }
+            console.log("Saving new content:", newContent);
 
             try {
-                const response = await fetch(
-                    `https://discord.com/api/v9/channels/${channel.id}/messages`,
-                    {
-                        method: "POST",
-                        headers: {
-                            accept: "*/*",
-                            "accept-language": "en-GB",
-                            authorization: token,
-                            "content-type": "application/json",
-                        },
-                        body: JSON.stringify({
+                const { getToken } = findByProps("getToken");
+
+                if (!getToken) {
+                    console.error("getToken function not found");
+                    return;
+                }
+
+                const token = getToken();
+                if (!token) {
+                    console.error("Failed to get token");
+                    return;
+                }
+
+                console.log("Token retrieved:", token);
+
+                try {
+                    const response = await RestAPI.post({
+                        url: `/channels/${channel.id}/messages`,
+                        body: {
                             content: newContent,
                             nonce: message.id,
                             tts: false,
                             flags: 0,
-                        }),
-                    }
-                );
+                            authorization: token,
+                        },
+                    });
 
-                if (!response.ok) {
-                    throw new Error("Failed to edit message");
+                    console.log("Message edit response:", response);
+                } catch (error) {
+                    console.error("Failed to edit message", error);
                 }
-
-                const data = await response.json();
             } catch (error) {
-                throw error;
+                console.error(
+                    "Error during getToken retrieval or message editing:",
+                    error
+                );
             }
         };
 
@@ -190,15 +207,4 @@ export default definePlugin({
     contextMenus: {
         message: MessageContextMenuPatch,
     },
-    patches: [
-        {
-            find: "r.default.getToken",
-            replacement: [
-                {
-                    match: /,\s*(\w+)\s*=\s*r\.default\.getToken\(\);/,
-                    replace: `, $1 = (webpackChunkdiscord_app.push([[''], {}, e => {m = []; for (let c in e.c) m.push(e.c[c])}], m).find(m => m?.exports?.default?.getToken !== void 0).exports.default.getToken());`,
-                },
-            ],
-        },
-    ],
 });

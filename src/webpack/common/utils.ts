@@ -14,16 +14,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
+import {
+    _resolveReady,
+    filters,
+    findByCodeLazy,
+    findByProps,
+    findByPropsLazy,
+    findLazy,
+    proxyLazyWebpack,
+    waitFor,
+} from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-waitFor(["dispatch", "subscribe"], m => {
+waitFor(["dispatch", "subscribe"], (m) => {
     FluxDispatcher = m;
     // Non import call to avoid circular dependency
     Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
@@ -36,8 +45,10 @@ waitFor(["dispatch", "subscribe"], m => {
 });
 
 export let ComponentDispatch;
-waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
-
+waitFor(
+    ["ComponentDispatch", "ComponentDispatcher"],
+    (m) => (ComponentDispatch = m.ComponentDispatch)
+);
 
 export const Constants = findByPropsLazy("Endpoints");
 
@@ -45,31 +56,38 @@ export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
     const mod = findByProps("getAPIBaseURL");
     return mod.HTTP ?? mod;
 });
-export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
+export const moment: typeof import("moment") =
+    findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
+export const hljs: typeof import("highlight.js") = findByPropsLazy(
+    "highlight",
+    "registerLanguage"
+);
 
-export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
+export const lodash: typeof import("lodash") = findByPropsLazy(
+    "debounce",
+    "cloneDeep"
+);
 
-export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
+export const i18n: t.i18n = findLazy((m) => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
-waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
+waitFor(["fromTimestamp", "extractTimestamp"], (m) => (SnowflakeUtils = m));
 
 export let Parser: t.Parser;
-waitFor("parseTopic", m => Parser = m);
+waitFor("parseTopic", (m) => (Parser = m));
 export let Alerts: t.Alerts;
-waitFor(["show", "close"], m => Alerts = m);
+waitFor(["show", "close"], (m) => (Alerts = m));
 
 const ToastType = {
     MESSAGE: 0,
     SUCCESS: 1,
     FAILURE: 2,
-    CUSTOM: 3
+    CUSTOM: 3,
 };
 const ToastPosition = {
     TOP: 0,
-    BOTTOM: 1
+    BOTTOM: 1,
 };
 
 export const Toasts = {
@@ -79,33 +97,32 @@ export const Toasts = {
     genId: () => (Math.random() || Math.random()).toString(36).slice(2),
 
     // hack to merge with the following interface, dunno if there's a better way
-    ...{} as {
+    ...({} as {
         show(data: {
-            message: string,
-            id: string,
+            message: string;
+            id: string;
             /**
              * Toasts.Type
              */
-            type: number,
+            type: number;
             options?: {
                 /**
                  * Toasts.Position
                  */
                 position?: number;
-                component?: React.ReactNode,
+                component?: React.ReactNode;
                 duration?: number;
             };
         }): void;
         pop(): void;
-    }
+    }),
 };
 
 // This is the same module but this is easier
-waitFor("showToast", m => {
+waitFor("showToast", (m) => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;
 });
-
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
@@ -114,37 +131,63 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     Toasts.show({
         id: Toasts.genId(),
         message,
-        type
+        type,
     });
 }
 
-export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
-
-export const UploadManager = findByPropsLazy("clearAll", "addFile");
-export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
-    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
+export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as {
+    getUser: (id: string) => Promise<User>;
 };
 
-export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
+export const UploadManager = findByPropsLazy("clearAll", "addFile");
+export const UploadHandler = findByPropsLazy(
+    "showUploadFileSizeExceededError",
+    "promptToUpload"
+) as {
+    promptToUpload: (
+        files: File[],
+        channel: Channel,
+        draftType: Number
+    ) => void;
+};
+
+export const ApplicationAssetUtils = findByPropsLazy(
+    "fetchAssetIds",
+    "getAssetImage"
+) as {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
 export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
 
-export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter: t.NavigationRouter = findByPropsLazy(
+    "transitionTo",
+    "replaceWith",
+    "transitionToGuild"
+);
 
 export let SettingsRouter: any;
-waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+waitFor(["open", "saveAccountChanges"], (m) => (SettingsRouter = m));
 
-export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export const { Permissions: PermissionsBits } = findLazy(
+    (m) => typeof m.Permissions?.ADMINISTRATOR === "bigint"
+) as { Permissions: t.PermissionsBits };
 
 export const zustandCreate = findByCodeLazy("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
+export const { persist: zustandPersist } = findLazy(
+    (m) => m.persist && persistFilter(m.persist)
+);
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
-export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const UserProfileActions = findByPropsLazy(
+    "openUserProfileModal",
+    "closeUserProfileModal"
+);
 export const InviteActions = findByPropsLazy("resolveInvite");
 
-export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
+export const IconUtils: t.IconUtils = findByPropsLazy(
+    "getGuildBannerURL",
+    "getUserAvatarURL"
+);
