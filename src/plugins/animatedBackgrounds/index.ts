@@ -1,34 +1,25 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { Devs } from "@utils/constants";
 import { OptionType } from "@utils/types";
 import definePlugin from "@utils/types";
 import './styles.css';
+import { Link } from "@components/Link";
+import {Forms,React,} from "@webpack/common";
 
 export default definePlugin({
     name: "AnimatedBackgrounds",
     description: "Allows you to use a YouTube video URL as an animated background.",
     authors: [Devs.soul_fire_],
     patches: [],
+
     options: {
         source: {
-            description: "Source URL to replace the background (a background-supporting theme must be installed first)",
+            description: "Source URL to replace the background",
             type: OptionType.STRING,
             restartNeeded: true,
         }
@@ -64,5 +55,21 @@ export default definePlugin({
 
         container.appendChild(iframe);
         return container;
+    },
+
+    settingsAboutComponent: () => {
+
+
+        return (
+            <>
+                <Forms.FormText>
+                    A background-supporting theme must be installed first. For example, <Link href="https://raw.githubusercontent.com/CapnKitten/Translucence/master/Translucence.theme.css">this theme</Link>.
+                </Forms.FormText>
+                <Forms.FormText>
+                    Here is a video link example: <Link href="https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc">https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc</Link>.
+                </Forms.FormText>
+            </>
+        );
     }
+
 });
