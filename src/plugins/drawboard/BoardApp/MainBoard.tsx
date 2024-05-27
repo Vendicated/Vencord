@@ -24,14 +24,14 @@ import("./index.css");
 export type tools = "select" | "add_text" | "add_image";
 
 export type editType = { type: "text" | "image", id: number; };
-export type canvasStateType = { width: number, height: number, fill?: { color: string, shouldFill: boolean; }; };
+export type canvasStateType = { width: number, height: number, fill?: { color: number, shouldFill: boolean; }; };
 
 
 export default function MainBoard() {
     const [currentTool, setCurrentTool] = React.useState<tools>("select");
     const mainCanvasRef = React.useRef<HTMLCanvasElement>(null);
     const [overlays, dispatch] = React.useReducer(overlayReducer, []);
-    const [canvasState, setCanvasState] = React.useState<canvasStateType>({ width: 512, height: 512, fill: { shouldFill: true, color: "white" } });
+    const [canvasState, setCanvasState] = React.useState<canvasStateType>({ width: 512, height: 512, fill: { shouldFill: true, color: 16777215 } });
     const [currentEditing, setCurrentEditing] = React.useState<editType>();
     const CanvasComponent = getCanvass();
 
@@ -40,7 +40,9 @@ export default function MainBoard() {
         ctx.canvas.height = Math.min(canvasState.height, 4096);
 
         if (canvasState.fill && canvasState.fill.shouldFill) {
-            ctx.fillStyle = canvasState.fill.color;
+            const color = `#${canvasState.fill.color.toString(16).padStart(6, "0")}`;
+            console.log(canvasState.fill.color, color);
+            ctx.fillStyle = color;
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         }
         ctx.save();

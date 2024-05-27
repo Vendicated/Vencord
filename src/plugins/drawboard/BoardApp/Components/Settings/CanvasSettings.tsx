@@ -5,6 +5,7 @@
  */
 
 import { Flex } from "@components/Flex";
+import { debounce } from "@shared/debounce";
 import { findComponentByCodeLazy } from "@webpack";
 import { Forms, React, TextInput } from "@webpack/common";
 
@@ -26,7 +27,6 @@ const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SE
 
 const CanvasSettings = (props: CanvasSettingsProps) => {
     const { setGlobal, currentState } = props;
-    const nextValue: canvasStateType = currentState;
 
     return (
         <div className="excali-config-frame">
@@ -38,21 +38,27 @@ const CanvasSettings = (props: CanvasSettingsProps) => {
                     <Flex flexDirection="row" style={{ gap: 5 }}>
                         <Flex flexDirection="column" style={{ width: "50%", gap: 5 }}>
                             <Forms.FormText variant="text-md/bold">Width</Forms.FormText>
-                            <TextInput key={"Width"} type="number" defaultValue={currentState.width} width={16} placeholder="Width" onChange={e => { nextValue.width = Math.min(parseInt(e), 4096); setGlobal({ ...nextValue }); }} max={4096} />
+                            <TextInput key={"Width"} type="number" defaultValue={currentState.width} width={16} placeholder="Width" onChange={e => { setGlobal({ ...currentState, width: frameSize(e) }); }} max={4096} />
                         </Flex>
                         <Flex flexDirection="column" style={{ width: "50%", gap: 5 }}>
                             <Forms.FormText variant="text-md/bold">Height</Forms.FormText>
-                            <TextInput height={"Height"} type="number" defaultValue={currentState.height} width={16} placeholder="Height" onChange={e => { nextValue.height = Math.min(parseInt(e), 4096); setGlobal({ ...nextValue }); }} max={4096} />
+                            <TextInput height={"Height"} type="number" defaultValue={currentState.height} width={16} placeholder="Height" onChange={e => { setGlobal({ ...currentState, height: frameSize(e) }); }} max={4096} />
                         </Flex>
                     </Flex>
                 </Forms.FormSection>
                 <Forms.FormSection>
                     <Forms.FormTitle tag="h3">Background</Forms.FormTitle>
-                    <ColorPicker color={10070709} onChange={e => console.log(e)} />
+                    <ColorPicker color={currentState.fill?.color ?? 16777215} onChange={debounce((e: number) => { setGlobal({ ...currentState, fill: { color: e, shouldFill: true } }); }, 350)} />
                 </Forms.FormSection>
             </Forms.FormSection>
         </div>
     );
 };
+
+const frameSize = (n: string): number => {
+    return Math.min(Math.max(parseInt(n), 25), 4096);
+};
+
+
 
 export default CanvasSettings;

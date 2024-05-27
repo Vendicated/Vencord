@@ -17,7 +17,8 @@ const openBoard: ChatBarButton = () => {
     // the image is subject to change
     return (
         <ChatBarButton onClick={() => openModalLazy(async () => {
-            await extractAndLoadChunksLazy(["name:\"UserSettings\""])(); // Probably bad way of loading
+            // Probably bad way of loading
+            await extractAndLoadChunksLazy(["name:\"UserSettings\""])();
             return props => <BoardModal {...props} />;
         }, { modalKey: "DrawboardFrame", onCloseRequest: () => { closeModal("DrawboardFrame"); } })} tooltip={""}>
             <img src="https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/main/public/img/emutest.png" width={16} height={16} />

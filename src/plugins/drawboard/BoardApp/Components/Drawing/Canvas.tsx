@@ -12,13 +12,16 @@ type CanvasCustomProps = React.HTMLProps<HTMLCanvasElement> & {
 };
 
 
-const getCanvass = makeLazy(() => React.forwardRef<HTMLCanvasElement, CanvasCustomProps>((props, ref) => {
+const getCanvass = makeLazy(() => React.forwardRef<HTMLCanvasElement, CanvasCustomProps>(function Canvas(props, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const { draw, ...prop } = props;
 
+    // ok waht ga hell is this fix for type warning/error
     React.useEffect(() => {
-        if (!ref?.current) return;
-        const canvas: HTMLCanvasElement = ref.current;
-        const context = canvas.getContext("2d");
+        ref = ref as React.MutableRefObject<HTMLCanvasElement>;
+        if (ref && !ref?.current) return;
+        const canvas: HTMLCanvasElement | null = ref.current;
+        if (!canvas) return;
+        const context = canvas?.getContext("2d");
 
         draw((context as unknown) as CanvasRenderingContext2D);
     }, [props, ref, draw]);
