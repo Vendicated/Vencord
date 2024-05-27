@@ -42,11 +42,10 @@ const maxFileSize = () => {
     if (premiumType > 0) return 50000000; // 50MB
     return 25000000; // 25MB
 };
-const argParse = (args: string): string[] => {
-    return args.match(
-        /(?:[^\s"']+|"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|([^\s]+))/g
-    ) ?? [];
-};
+/** Takes a string and splits it into an array of arguments. */
+const argParse = (args: string): string[] => args.match(
+    /(?:[^\s"']+|"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|([^\s]+))/g
+) ?? [];
 
 function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
     switch (extension) {
