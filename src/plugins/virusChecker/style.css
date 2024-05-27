@@ -1,0 +1,12 @@
+.attachment-check-virus {
+    width: 24px;
+    height: 24px;
+    color: var(--interactive-normal);
+    margin-left: 12px;
+    cursor: pointer;
+    position: relative;
+}
+
+.attachment-check-virus:hover {
+    color: var(--interactive-active);
+}
