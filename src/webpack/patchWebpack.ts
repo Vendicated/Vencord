@@ -72,13 +72,7 @@ Reflect.defineProperty(Function.prototype, "m", {
 
             // Patch the pre-populated factories
             for (const id in moduleFactories) {
-                if (Settings.eagerPatches) {
-                    // Patches the factory directly
-                    moduleFactories[id] = patchFactory(id, moduleFactories[id]);
-                } else {
-                    // Define a getter for the patched version
-                    defineModulesFactoryGetter(id, moduleFactories[id]);
-                }
+                defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, moduleFactories[id]) : moduleFactories[id]);
             }
 
             Reflect.defineProperty(moduleFactories, Symbol.toStringTag, {
@@ -90,6 +84,11 @@ Reflect.defineProperty(Function.prototype, "m", {
 
             // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
             moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
+            /*
+            If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
+            Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
+            */
+
         }
 
         Reflect.defineProperty(this, "m", {
@@ -102,17 +101,17 @@ Reflect.defineProperty(Function.prototype, "m", {
 });
 
 /**
- * Define the getter for returning the patched version of the module factory. This only executes and patches the factory when its accessed for the first time.
+ * Define the getter for returning the patched version of the module factory.
  *
- * It is what patches factories when eagerPatches are disabled.
+ * If eagerPatches is enabled, the factory argument should already be the patched version, else it will be the original
+ * and only be patched when accessed for the first time.
  *
- * The factory argument will become the patched version of the factory once it is accessed.
  * @param id The id of the module
  * @param factory The original or patched module factory
  */
 function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
     // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
-    // have the the patched version
+    // have the patched version
     for (const moduleFactories of allModuleFactories) {
         Reflect.defineProperty(moduleFactories, id, {
             configurable: true,
@@ -138,6 +137,17 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
 }
 
 const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
+    /*
+    If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
+    and that requires defining additional traps for keeping the object working
+
+    // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
+    // to avoid Reflect.get having no effect and causing a stack overflow
+    get: (target, p, receiver) => {
+        return undefined;
+    },
+    */
+
     // The set trap for patching or defining getters for the module factories when new module factories are loaded
     set: (target, p, newValue, receiver) => {
         // If the property is not a number, we are not dealing with a module factory
@@ -145,7 +155,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
             return Reflect.set(target, p, newValue, receiver);
         }
 
-        const existingFactory = Reflect.get(target, p, target);
+        const existingFactory = Reflect.get(target, p, receiver);
 
         if (!Settings.eagerPatches) {
             // If existingFactory exists, its either wrapped in defineModuleFactoryGetter, or it has already been required
@@ -154,7 +164,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
                 return Reflect.set(target, p, newValue, receiver);
             }
 
-            // eagerPatches are disabled, so set up the getter for the patched version
+            // eagerPatches are disabled, so the factory argument should be the original
             defineModulesFactoryGetter(p, newValue);
             return true;
         }
@@ -170,14 +180,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
         // If multiple Webpack instances exist, when new a new module is loaded, it will be set in all the module factories objects.
         // Because patches are only executed once, we need to set the patched version in all of them, to avoid the Webpack instance
         // that uses the factory to contain the original factory instead of the patched, in case it was set first in another instance
-        for (const moduleFactories of allModuleFactories) {
-            Reflect.defineProperty(moduleFactories, p, {
-                value: patchedFactory,
-                configurable: true,
-                enumerable: true,
-                writable: true
-            });
-        }
+        defineModulesFactoryGetter(p, patchedFactory);
 
         return true;
     }
