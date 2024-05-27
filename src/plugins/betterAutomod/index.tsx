@@ -30,7 +30,6 @@ import { renderTestTextHeader, settingsAboutComponent, TestInputBoxComponent } f
 
 const logger = new Logger("betterModeration");
 
-
 let currentRules: Array<AutoModRule> | null = null;
 
 interface EMessage extends Message {
@@ -127,14 +126,14 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (message?.echoed) return;
-            if (message.type !== 24) return; // message type is automod embed
+            if (message.type !== 24) return; // automod embed
             message.embeds.forEach((embed: Embed) => {
                 if (embed.type !== "auto_moderation_message") { return; }
                 embed.fields.forEach((field: { name: string, value: string; }) => {
                     if (field.name !== "channel_id") { return; }
                     message.echoed = true;
                     message.flags = 1 << 6; // ephemeral
-                    message.author.bot = false; // making sure the bot badge don't show up
+                    message.author.bot = false; // making sure the bot badge don't show up (a bug from discord)
                     sendBotMessage(field.value, message);
                 });
             });
