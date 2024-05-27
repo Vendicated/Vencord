@@ -92,8 +92,6 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
     }
 
     const handleEditClick = () => {
-        console.log("Edit button clicked");
-
         const overlay = document.createElement("div");
         overlay.className = "hidden-message-edit-overlay";
 
@@ -101,7 +99,6 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
         formContainer.className = "hidden-message-edit-form-container";
 
         const closeOverlay = () => {
-            console.log("Closing overlay");
             document.body.removeChild(overlay);
         };
 
@@ -129,25 +126,17 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
 
         const handleSave = async (newContent: string) => {
             closeOverlay();
-
-            console.log("Saving new content:", newContent);
-
             try {
                 const { getToken } = findByProps("getToken");
 
                 if (!getToken) {
-                    console.error("getToken function not found");
                     return;
                 }
 
                 const token = getToken();
                 if (!token) {
-                    console.error("Failed to get token");
                     return;
                 }
-
-                console.log("Token retrieved:", token);
-
                 try {
                     const response = await RestAPI.post({
                         url: `/channels/${channel.id}/messages`,
@@ -159,17 +148,8 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
                             authorization: token,
                         },
                     });
-
-                    console.log("Message edit response:", response);
-                } catch (error) {
-                    console.error("Failed to edit message", error);
-                }
-            } catch (error) {
-                console.error(
-                    "Error during getToken retrieval or message editing:",
-                    error
-                );
-            }
+                } catch (error) {}
+            } catch (error) {}
         };
 
         ReactDOM.render(

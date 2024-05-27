@@ -16,7 +16,7 @@ function Icon({
     children,
     viewBox,
     ...svgProps
-}: React.PropsWithChildren<IconProps & { viewBox: string; }>) {
+}: React.PropsWithChildren<IconProps & { viewBox: string }>) {
     return (
         <svg
             className={classes(className, "vc-icon")}
