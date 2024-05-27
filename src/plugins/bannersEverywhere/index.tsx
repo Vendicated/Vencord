@@ -6,15 +6,15 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { fetchUserProfile } from "@utils/discord";
+import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { RestAPI, UserProfileStore, useEffect, useStateFromStores } from "@webpack/common";
+import { useEffect, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import style from "./index.css";
-import { fetchUserProfile, getCurrentGuild } from "@utils/discord";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Queue } from "@utils/Queue";
 
 const settings = definePluginSettings({
     animate: {
@@ -24,7 +24,7 @@ const settings = definePluginSettings({
     },
 });
 
-let queue = new Queue();
+const queue = new Queue();
 
 
 const useFetchMemberProfile = (userId: string): string => {
