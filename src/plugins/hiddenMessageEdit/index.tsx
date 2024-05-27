@@ -1,21 +1,30 @@
-import definePlugin from "../../utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import "./styles.css";
+
 import {
-    NavContextMenuPatchCallback,
     findGroupChildrenByChildId,
-} from "../../api/ContextMenu";
-import type { Channel, Message } from "discord-types/general";
+    NavContextMenuPatchCallback,
+} from "@api/ContextMenu";
+import { Devs } from "@utils/constants";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
 import {
-    Menu,
-    UserStore,
-    Forms,
     Button,
     Flex,
+    Forms,
+    Menu,
     React,
-    ReactDOM,
     RestAPI,
-} from "../../webpack/common";
-import { findByProps } from "@webpack";
-import "./styles.css";
+    UserStore,
+    useToken
+} from "@webpack/common";
+import type { Channel, Message } from "discord-types/general";
+
 import { HiddenMessageEditIcon } from "./icons";
 
 interface MessageContextProps {
@@ -24,55 +33,54 @@ interface MessageContextProps {
     message: Message;
 }
 
-const HiddenMessageEditForm = ({ message, onSave }) => {
+interface HiddenMessageEditFormProps extends ModalProps {
+    message: Message;
+    onSave: (newContent: string) => void;
+}
+
+const HiddenMessageEditForm = ({ message, onSave, transitionState, onClose }: HiddenMessageEditFormProps) => {
     const [newContent, setNewContent] = React.useState(message.content);
 
     const handleSave = () => {
         onSave(newContent);
+        onClose();
     };
 
     return (
-        <div className="hidden-message-edit-form-wrapper">
-            <Forms.FormSection className="hidden-message-edit-form">
-                <Forms.FormTitle className="hidden-message-edit-title">
-                    Hidden Message Edit
-                </Forms.FormTitle>
-                <Forms.FormText
-                    type={Forms.FormText.Types.DESCRIPTION}
-                    className="hidden-message-edit-description"
-                >
-                    Use the cutest hidden message editing feature
-                </Forms.FormText>
-                <div style={{ marginBottom: "10px" }}></div>
-                <Flex className="inputContainer" align={Flex.Align.CENTER}>
-                    <input
-                        type="text"
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
-                        placeholder="Enter new message content"
-                        className="hidden-message-edit-input"
-                        style={{ flex: 1, marginRight: "10px" }}
-                    />
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.SMALL}
-                        onClick={handleSave}
-                        className="hidden-message-edit-button"
-                    >
-                        Save
-                    </Button>
-                </Flex>
-                <div style={{ marginTop: "20px" }}></div>
-                <Forms.FormText
-                    type={Forms.FormText.Types.DESCRIPTION}
-                    className="hidden-message-edit-note"
-                    style={{ fontSize: "11px" }}
-                >
-                    NOTE: If too much time passes, you won't be able to modify
-                    the message as it will be sent as a new message.
-                </Forms.FormText>
-            </Forms.FormSection>
-        </div>
+        <ModalRoot size={ModalSize.SMALL} transitionState={transitionState} className="hidden-message-edit-form-container">
+            <div className="hidden-message-edit-form">
+                <ModalHeader>
+                    <Forms.FormTitle className="hidden-message-edit-title">Hidden Message Edit</Forms.FormTitle>
+                    <ModalCloseButton onClick={onClose} className="modal-close-button" />
+                </ModalHeader>
+                <ModalContent>
+                    <Forms.FormText type={Forms.FormText.Types.DESCRIPTION} className="hidden-message-edit-description">
+                        Use the <span className="magic"><span className="magic-text">CUTEST</span></span> hidden message editing feature
+                    </Forms.FormText>
+                    <Flex className="inputContainer" align={Flex.Align.CENTER} justify={Flex.Justify.CENTER}>
+                        <input
+                            type="text"
+                            value={newContent}
+                            onChange={e => setNewContent(e.target.value)}
+                            placeholder="Enter new message content"
+                            className="hidden-message-edit-input"
+                            style={{ flex: 1, marginRight: "10px" }}
+                        />
+                        <Button
+                            color={Button.Colors.PRIMARY}
+                            size={Button.Sizes.SMALL}
+                            onClick={handleSave}
+                            className="hidden-message-edit-button"
+                        >
+                            Save
+                        </Button>
+                    </Flex>
+                    <Forms.FormText type={Forms.FormText.Types.DESCRIPTION} style={{ fontSize: "11px", marginTop: "20px" }}>
+                        NOTE: If too much time passes, you won't be able to modify the message as it will be sent as a new message.
+                    </Forms.FormText>
+                </ModalContent>
+            </div>
+        </ModalRoot>
     );
 };
 
@@ -92,51 +100,13 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
     }
 
     const handleEditClick = () => {
-        const overlay = document.createElement("div");
-        overlay.className = "hidden-message-edit-overlay";
-
-        const formContainer = document.createElement("div");
-        formContainer.className = "hidden-message-edit-form-container";
-
-        const closeOverlay = () => {
-            document.body.removeChild(overlay);
-        };
-
-        overlay.addEventListener("click", (e) => {
-            if (
-                e.target === overlay &&
-                !formContainer.contains(e.target as Node)
-            ) {
-                closeOverlay();
-            }
-        });
-
-        document.addEventListener(
-            "keydown",
-            (e) => {
-                if (e.key === "Escape") {
-                    closeOverlay();
-                }
-            },
-            { once: true }
-        );
-
-        overlay.appendChild(formContainer);
-        document.body.appendChild(overlay);
-
         const handleSave = async (newContent: string) => {
-            closeOverlay();
             try {
-                const { getToken } = findByProps("getToken");
-
-                if (!getToken) {
-                    return;
-                }
-
-                const token = getToken();
+                const token = useToken;
                 if (!token) {
                     return;
                 }
+
                 try {
                     const response = await RestAPI.post({
                         url: `/channels/${channel.id}/messages`,
@@ -148,14 +118,13 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
                             authorization: token,
                         },
                     });
-                } catch (error) {}
-            } catch (error) {}
+                } catch (error) {
+                }
+            } catch (error) {
+            }
         };
 
-        ReactDOM.render(
-            <HiddenMessageEditForm message={message} onSave={handleSave} />,
-            formContainer
-        );
+        openModal(props => <HiddenMessageEditForm {...props} message={message} onSave={handleSave} />);
     };
 
     if (!menuGroup) {
@@ -181,9 +150,8 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (
 
 export default definePlugin({
     name: "HiddenMessageEdit",
-    authors: [{ id: 390884143749136386n, name: "Prism" }],
-    description:
-        "Adds a 'Hidden Message Edit' option to your message context menu.",
+    authors: [Devs.Prism],
+    description: "Adds a 'Hidden Message Edit' option to your message context menu.",
     contextMenus: {
         message: MessageContextMenuPatch,
     },

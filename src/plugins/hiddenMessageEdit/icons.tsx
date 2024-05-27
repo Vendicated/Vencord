@@ -1,7 +1,13 @@
-import React from "react";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./iconStyles.css";
-import { classes } from "../../utils/misc";
-import type { SVGProps } from "react";
+
+import { classes } from "@utils/misc";
+import React, { type SVGProps } from "react";
 
 interface IconProps extends SVGProps<SVGSVGElement> {
     className?: string;
@@ -16,7 +22,7 @@ function Icon({
     children,
     viewBox,
     ...svgProps
-}: React.PropsWithChildren<IconProps & { viewBox: string }>) {
+}: React.PropsWithChildren<IconProps & { viewBox: string; }>) {
     return (
         <svg
             className={classes(className, "vc-icon")}
