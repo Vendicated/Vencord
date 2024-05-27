@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import presetQuotesText from "file://quotes.txt";
 
@@ -26,7 +27,7 @@ const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon
 
 const settings = definePluginSettings({
     replaceEvents: {
-        description: "This plugin affects events (e.g. Halloween)",
+        description: "Should this plugin also apply during events with special event themed quotes? (e.g. Halloween)",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -41,7 +42,7 @@ const settings = definePluginSettings({
         default: false
     },
     additionalQuotes: {
-        description: "Additional custom quotes to possibly appear",
+        description: "Additional custom quotes to possibly appear, separated by the below delimiter",
         type: OptionType.STRING,
         default: "",
     },
@@ -64,24 +65,35 @@ export default definePlugin({
             find: ".LOADING_DID_YOU_KNOW",
             replacement: [
                 {
-                    match: /return (.{0,200}?),?((\i)\[.{1,10}?\.random)/,
-                    replace: "$1; $3 = $self.quotes($3); return $2"
+                    match: /("_loadingText".+?)(?=(\i)\[.{0,10}\.random)/,
+                    replace: "$1$self.mutateQuotes($2),"
                 },
                 {
-                    match: /(?<="_eventLoadingText",function.{10,200}?)return ((\i)\[.{1,30}?\])/,
-                    replace: "{ $2 = $self.quotes($2); return $1 }",
+                    match: /("_eventLoadingText".+?)(?=(\i)\[.{0,10}\.random)/,
+                    replace: "$1$self.mutateQuotes($2),",
                     predicate: () => settings.store.replaceEvents
                 }
             ]
         },
     ],
 
-    quotes(preset: string[]) {
-        const result: string[] = settings.store.enableDiscordPresetQuotes ? preset : [];
-        if (settings.store.enablePluginPresetQuotes) {
-            result.push(...presetQuotes);
+    mutateQuotes(quotes: string[]) {
+        try {
+            const { enableDiscordPresetQuotes, additionalQuotes, additionalQuotesDelimiter, enablePluginPresetQuotes } = settings.store;
+
+            if (!enableDiscordPresetQuotes)
+                quotes.length = 0;
+
+
+            if (enablePluginPresetQuotes)
+                quotes.push(...presetQuotes);
+
+            quotes.push(...additionalQuotes.split(additionalQuotesDelimiter).filter(Boolean));
+
+            if (!quotes.length)
+                quotes.push(noQuotesQuote);
+        } catch (e) {
+            new Logger("LoadingQuotes").error("Failed to mutate quotes", e);
         }
-        result.push(...settings.store.additionalQuotes.split(settings.store.additionalQuotesDelimiter).filter(Boolean));
-        return result.length > 0 ? result : [noQuotesQuote];
     }
 });
