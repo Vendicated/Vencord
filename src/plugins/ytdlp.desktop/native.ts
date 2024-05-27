@@ -187,12 +187,10 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
     const kilobits = ~~(targetBits / 1024);
 
     let baseArgs: string[];
-    let outfile: string;
     let ext: string;
     switch (format) {
         case "audio":
             baseArgs = ["-i", p(file), "-b:a", `${kilobits}k`, "-maxrate", `${kilobits}k`, "-bufsize", "1M", "-y"];
-            outfile = "remux.mp3";
             ext = "mp3";
             break;
         case "video":
@@ -200,7 +198,6 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
             // Dynamically resize based on target bitrate
             const height = kilobits <= 100 ? 480 : kilobits <= 500 ? 720 : 1080;
             baseArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`];
-            outfile = "remux.mp4";
             ext = "mp4";
             break;
         case "gif":
@@ -226,12 +223,11 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
             }
 
             baseArgs = ["-i", p(file), "-vf", `fps=${fps},scale=w=${width}:h=-1:flags=lanczos,mpdecimate,split[s0][s1];[s0]palettegen=max_colors=${colors}[p];[s1][p]paletteuse=dither=bayer:bayer_scale=${bayer_scale}`, "-loop", "0", "-bufsize", "1M", "-y"];
-            outfile = "remux.gif";
             ext = "gif";
             break;
     }
 
-    await ffmpeg([...baseArgs, ...customArgs, outfile]);
+    await ffmpeg([...baseArgs, ...customArgs, `remux.${ext}`]);
     return { file: `remux.${ext}`, videoTitle, extension: ext };
 }
 function upload({ file, videoTitle, extension }: { file: string; videoTitle: string; extension: string | undefined; }) {
