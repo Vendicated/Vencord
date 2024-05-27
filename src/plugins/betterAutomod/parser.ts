@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// custom discord automod parser
-
-
 const Flags: { NONE: number, START: number, END: number, START_AND_END: number; } = {
     NONE: 0,
     START: 1,
@@ -17,10 +14,10 @@ const Flags: { NONE: number, START: number, END: number, START_AND_END: number; 
 function matchKeywords(text: string, keywords: Array<string>, allowed: Array<string> = []): [boolean, string | null] { // [boolean, string | null]
     for (const keyword of keywords) {
         if (matchKeyword(text, keyword, allowed)) {
-            return [true, keyword]; // Return true if the keyword is found
+            return [true, keyword];
         }
     }
-    return [false, null]; // Return false if none of the keywords are found
+    return [false, null];
 }
 
 
@@ -36,7 +33,7 @@ function matchKeyword(text: string, keyword: string, allowed: Array<string> = []
         keyword = keyword.slice(0, -1);
     }
 
-    // Check if the text is an exact match to the keyword
+    // Check if the text is an exact match to the keyword, or their size don't match
     if (text === keyword) {
         return true;
     } else if (text.length < keyword.length) {
@@ -127,31 +124,6 @@ function matchKeyword(text: string, keyword: string, allowed: Array<string> = []
         }
     }
     return null;
-}
-
-function tests() {
-    const words = [
-        "this is another one but teststick on the side like this otest",
-        "test here",
-        "look guys i am testing this", "this is a test message",
-        "this is another one but teststick on the side like this otest",
-        "test",
-        "whjilouktyjrthtestergwew.umng",
-        "startest only will work with the start flag or any",
-        "there is nothing here!"
-    ];
-
-
-    const patterns = ["*test", "test*", "*test*", "test"];
-
-    for (let i = 0; i < words.length; i++) {
-        console.log(`test ${i + 1}. ${JSON.stringify(words[i])}`);
-        for (let j = 0; j < patterns.length; j++) {
-            console.log("pattern:", JSON.stringify(patterns[j]));
-            console.log("match?:", matchKeyword(words[i], patterns[j], []));
-        }
-    }
-    console.log("tests ended");
 }
 
 export { matchKeyword, matchKeywords };
