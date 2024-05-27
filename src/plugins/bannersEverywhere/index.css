@@ -2,7 +2,9 @@
 .vc-banners-everywhere-memberlist {
     opacity: 0.8;
     -webkit-mask-image: linear-gradient(to right, transparent 20%, #fff);
+    mask-image: linear-gradient(to right, transparent 20%, #fff);
     height: 100%;
+    width: 100%;
     background-size: cover;
     background-position: center;
     position: absolute;
