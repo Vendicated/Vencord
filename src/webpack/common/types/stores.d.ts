@@ -951,8 +951,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    url: string;
-    type: "GUILD_EMOJI";
+    type: 1;
 }
 
 export interface UnicodeEmoji {
@@ -964,7 +963,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
-    type: "UNICODE";
+    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
@@ -1468,6 +1467,13 @@ export interface CodedLink {
     type: CodedLinkType;
 }
 
+export interface MessageComponentEmoji {
+    animated: boolean | undefined;
+    id: string | undefined;
+    src: string | undefined;
+    name: string | undefined;
+}
+
 // Original name: ComponentType, renamed to avoid conflict with ComponentType from React
 export const enum MessageComponentType {
     ACTION_ROW = 1,
@@ -1483,126 +1489,285 @@ export const enum MessageComponentType {
     SEPARATOR = 14,
 }
 
-/*
 export interface MessageActionRowComponent {
     type: MessageComponentType.ACTION_ROW;
-    id: T(r);
-    components: s;
+    id: string;
+    components: Exclude<MessageComponent, MessageActionRowComponent>[];
 }
 
+export const enum ButtonStyle {
+    PRIMARY = 1,
+    SECONDARY = 2,
+    SUCCESS = 3,
+    DESTRUCTIVE = 4,
+    LINK = 5,
+    PREMIUM = 6,
+}
+
+// TODO: Must have one of either `customId` or `url`, but never both.
+// If a button has `url` it must have the `Link` button style.
 export interface MessageButtonComponent {
+    customId: string | undefined;
+    disabled: boolean | undefined;
+    emoji: MessageComponentEmoji | undefined;
+    id: string;
+    label: string | undefined;
+    style: ButtonStyle;
     type: MessageComponentType.BUTTON;
-    id: T(r);
-    customId: t.custom_id;
-    style: t.style;
-    disabled: t.disabled;
-    url: t.url;
-    label: t.label;
-    emoji: e;
+    url: string | undefined;
+}
+
+export const enum SelectOptionType {
+    STRING = 1,
+    USER = 2,
+    ROLE = 3,
+    CHANNEL = 4,
+    GUILD = 5,
+}
+
+export interface SelectMenuOption<OptionType extends SelectOptionType = SelectOptionType> {
+    type: OptionType;
+    label: string;
+    value: string;
+    default: boolean | undefined;
+    description: string | undefined;
+    emoji: MessageComponentEmoji | undefined;
 }
 
 export interface MessageStringSelectComponent {
+    customId: string;
+    disabled: boolean | undefined;
+    id: string;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    options: SelectMenuOption<SelectOptionType.STRING>[];
+    placeholder: string;
     type: MessageComponentType.STRING_SELECT;
-    id: T(r);
-    customId: t.custom_id;
-    disabled: t.disabled;
-    options: {
-        type: l.SelectOptionType.STRING;
-        label: e.label;
-        value: e.value;
-        default: e.default;
-        description: e.description;
-        emoji: null != e.emoji ? d(e.emoji, m) : void 0;
-    }[];
-    placeholder: null !== (a = t.placeholder) && void 0 !== a ? a : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
-    minValues: t.min_values;
-    maxValues: t.max_values;
+}
+
+export const enum TextComponentStyle {
+    SMALL = 1,
+    PARAGRAPH = 2,
 }
 
 export interface MessageTextInputComponent {
+    customId: string;
+    disabled: boolean | undefined;
+    id: string;
+    label: string;
+    maxLength: number | undefined;
+    minLength: number | undefined;
+    placeholder: string | undefined;
+    required: boolean;
+    style: TextComponentStyle;
     type: MessageComponentType.INPUT_TEXT;
-    id: T(r);
-    style: t.style;
-    customId: t.custom_id;
-    label: t.label;
-    value: t.value;
-    placeholder: t.placeholder;
-    disabled: t.disabled;
-    required: null !== (_ = t.required) && void 0 !== _ && _;
-    minLength: t.min_length;
-    maxLength: t.max_length;
+    value: string | undefined;
+}
+
+export const enum SnowflakeSelectDefaultValueTypes {
+    CHANNEL = "channel",
+    ROLE = "role",
+    USER = "user",
+}
+
+export interface SelectMenuDefaultValue<DefaultValueType extends SnowflakeSelectDefaultValueTypes = SnowflakeSelectDefaultValueTypes> {
+    id: string;
+    type: DefaultValueType;
 }
 
 export interface MessageUserSelectComponent {
+    customId: string;
+    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueTypes.USER>[];
+    disabled: boolean | undefined;
+    id: string;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    placeholder: string;
     type: MessageComponentType.USER_SELECT;
-    id: T(r);
-    customId: t.custom_id;
-    disabled: t.disabled;
-    placeholder: null !== (c = t.placeholder) && void 0 !== c ? c : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
-    minValues: t.min_values;
-    maxValues: t.max_values;
-    defaultValues: t.default_values;
 }
 
 export interface MessageRoleSelectComponent {
+    customId: string;
+    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueTypes.ROLE>[];
+    disabled: boolean | undefined;
+    id: string;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    placeholder: string;
     type: MessageComponentType.ROLE_SELECT;
-    id: T(r);
-    customId: t.custom_id;
-    disabled: t.disabled;
-    placeholder: null !== (I = t.placeholder) && void 0 !== I ? I : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
-    minValues: t.min_values;
-    maxValues: t.max_values;
-    defaultValues: t.default_values;
 }
 
 export interface MessageMentionableSelectComponent {
+    customId: string;
+    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueTypes.ROLE | SnowflakeSelectDefaultValueTypes.USER>[];
+    disabled: boolean | undefined;
+    id: string;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    placeholder: string;
     type: MessageComponentType.MENTIONABLE_SELECT;
-    id: T(r);
-    customId: t.custom_id;
-    disabled: t.disabled;
-    placeholder: null !== (f = t.placeholder) && void 0 !== f ? f : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
-    minValues: t.min_values;
-    maxValues: t.max_values;
-    defaultValues: t.default_values;
 }
 
 export interface MessageChannelSelectComponent {
+    channelTypes: ChannelTypes[] | undefined;
+    customId: string;
+    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueTypes.CHANNEL>[];
+    disabled: boolean | undefined;
+    id: string;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    placeholder: string;
     type: MessageComponentType.CHANNEL_SELECT;
-    id: T(r);
-    customId: t.custom_id;
-    disabled: t.disabled;
-    placeholder: null !== (S = t.placeholder) && void 0 !== S ? S : u.default.Messages.MESSAGE_SELECT_COMPONENT_DEFAULT_PLACEHOLDER;
-    minValues: t.min_values;
-    maxValues: t.max_values;
-    channelTypes: t.channel_types;
-    defaultValues: t.default_values;
 }
 
 export interface MessageTextComponent {
+    content: string | undefined;
+    id: string;
     type: MessageComponentType.TEXT;
-    id: T(r);
-    content: t.content;
+}
+
+export const enum ContentScanFlags {
+    EXPLICIT = 1,
+}
+
+export interface MediaItem {
+    contentScanMetadata: {
+        version: number | undefined;
+        contentScanFlags: ContentScanFlags | undefined;
+    } | undefined;
+    contentType: string | undefined;
+    height: number | Nullish;
+    placeholder: string | undefined;
+    placeholderVersion: number | undefined;
+    proxyUrl: string;
+    url: string;
+    width: number | Nullish;
 }
 
 export interface MessageMediaGalleryComponent {
-    type: MessageComponentType.MEDIA_GALLERY;
-    id: T(r);
+    id: string;
     items: {
-        media: (0, s.toUnfurledMediaItem)(e.media);
-        description: e.description;
-        spoiler: e.spoiler;
+        media: MediaItem;
+        description: string | undefined;
+        spoiler: boolean;
     }[];
+    type: MessageComponentType.MEDIA_GALLERY;
+}
+
+export const enum SeparatorSpacingSize {
+    SMALL = 1,
+    LARGE = 2,
 }
 
 export interface MessageSeparatorComponent {
+    divider: boolean;
+    id: string;
+    spacing: SeparatorSpacingSize;
     type: MessageComponentType.SEPARATOR;
-    id: T(r);
-    divider: null === (h = t.divider) || void 0 === h || h;
-    spacing: null !== (A = t.spacing) && void 0 !== A ? A : i.SeparatorSpacingSize.SMALL;
 }
 
 export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageStringSelectComponent | MessageTextInputComponent | MessageUserSelectComponent | MessageRoleSelectComponent | MessageMentionableSelectComponent | MessageChannelSelectComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
-*/
+
+export interface MessageEmbedAuthor {
+    iconProxyURL: string | undefined;
+    iconURL: string | undefined;
+    name: string;
+    url: string | undefined;
+}
+
+export interface MessageEmbedField {
+    inline: boolean | undefined;
+    rawName: string;
+    rawValue: string;
+}
+
+export const enum MessageEmbedFlags {
+    CONTAINS_EXPLICIT_MEDIA = 1 << 4,
+}
+
+export interface MessageEmbedFooter {
+    iconProxyURL: string | undefined;
+    iconURL: string | undefined;
+    text: string;
+}
+
+export interface MessageEmbedImage {
+    height: number | undefined;
+    placeholder: string | undefined;
+    placeholderVersion: number | undefined;
+    proxyURL: string | undefined;
+    url: string;
+    width: number | undefined;
+}
+
+export interface MessageEmbedProvider {
+    name: string;
+    url: string | undefined;
+}
+
+// TODO: An embed thumbnail either:
+// has `height`, `placeholder`, `placeholderVersion`, `proxyURL`, `url`, and `width`
+// or has only `height`, `url`, and `width`.
+export interface MessageEmbedThumbnail {
+    height: number;
+    placeholder: string | undefined;
+    placeholderVersion: number | undefined;
+    proxyURL: string | undefined;
+    url: string;
+    width: number;
+}
+
+export const enum MessageEmbedTypes {
+    APPLICATION_NEWS = "application_news",
+    ARTICLE = "article",
+    AUTO_MODERATION_MESSAGE = "auto_moderation_message",
+    AUTO_MODERATION_NOTIFICATION = "auto_moderation_notification",
+    GAMING_PROFILE = "gaming_profile",
+    GIFT = "gift",
+    GIFV = "gifv",
+    IMAGE = "image",
+    LINK = "link",
+    POLL_RESULT = "poll_result",
+    POST_PREVIEW = "post_preview",
+    RICH = "rich",
+    SAFETY_POLICY_NOTICE = "safety_policy_notice",
+    SAFETY_SYSTEM_NOTIFICATION = "safety_system_notification",
+    TEXT = "text",
+    TWEET = "tweet",
+    VIDEO = "video",
+    VOICE_CHANNEL = "voice_channel",
+}
+
+// TODO: An embed video must have either `proxyURL` or `url`, and having both is possible.
+// It might not be possible for an embed video to have `proxyURL` without `url`, though.
+export interface MessageEmbedVideo {
+    height: number;
+    placeholder: string | undefined;
+    placeholderVersion: number | undefined;
+    proxyURL: string | undefined;
+    url: string | undefined;
+    width: number;
+}
+
+export interface MessageEmbed {
+    author?: MessageEmbedAuthor;
+    color?: string;
+    contentScanVersion: number | undefined;
+    fields: MessageEmbedField[];
+    flags: MessageEmbedFlags | undefined;
+    footer?: MessageEmbedFooter;
+    id: string;
+    image?: MessageEmbedImage;
+    provider?: MessageEmbedProvider;
+    rawDescription: string | undefined;
+    rawTitle: string | undefined;
+    referenceId: string | undefined;
+    thumbnail?: MessageEmbedThumbnail;
+    timestamp?: Moment;
+    type: MessageEmbedTypes | undefined;
+    url: string | undefined;
+    video?: MessageEmbedVideo;
+}
 
 export const enum MessageFlags {
     CROSSPOSTED = 1 << 0,
@@ -1621,10 +1786,179 @@ export const enum MessageFlags {
     IS_UIKIT_COMPONENTS = 1 << 15,
 }
 
+export interface MessageGiftInfo {
+    emoji?: string | null; // TEMP
+    sound?: string | null; // TEMP
+} // TEMP
+
+export const enum InteractionTypes {
+    PING = 1,
+    APPLICATION_COMMAND = 2,
+    MESSAGE_COMPONENT = 3,
+    APPLICATION_COMMAND_AUTOCOMPLETE = 4,
+    MODAL_SUBMIT = 5,
+}
+
+export class InteractionRecord extends ImmutableRecord {
+    constructor(interaction: Record<string, any>); // TEMP
+
+    static createFromServer(interactionFromServer: Record<string, any>): InteractionRecord; // TEMP
+
+    displayName: string;
+    id: string;
+    name: string;
+    type: InteractionTypes;
+    user: UserRecord;
+}
+
+export interface InteractionData {
+    application_command: any; // TEMP
+    guild_id: any; // TEMP
+    id: any; // TEMP
+    name: any; // TEMP
+    options: any; // TEMP
+    type: any; // TEMP
+    version: any; // TEMP
+} // TEMP
+
+export interface InteractionMetadata {
+    authorizing_integration_owners: Partial<Record<ApplicationIntegrationType, string>>;
+    id: string;
+    interacted_message_id?: string;
+    original_response_message_id?: string;
+    type: InteractionTypes;
+    triggering_interaction_metadata?: InteractionMetadata;
+    user: Record<string, any>; // TEMP: This is not a UserRecord, it's a user object from the API.
+} // TEMP
+
+export interface ChannelMention {
+    guild_id: string;
+    id: string;
+    name: string;
+    type: ChannelTypes;
+}
+
+export interface MessageReference {
+    channel_id: string;
+    guild_id?: string;
+    message_id?: string;
+}
+
+export const enum PollLayoutTypes {
+    UNKNOWN = 0,
+    DEFAULT = 1,
+    IMAGE_ONLY_ANSWERS = 2,
+}
+
+export interface MessageEmoji {
+    animated?: boolean;
+    id: string | null;
+    name: string | null;
+}
+
+export interface MessagePollMedia {
+    emoji?: MessageEmoji;
+    text?: string;
+}
+
+export interface MessagePollAnswer {
+    answer_id: number;
+    poll_media: MessagePollMedia;
+}
+
+export interface MessagePollAnswerCount {
+    count: number;
+    id: number;
+    me_voted: boolean;
+}
+
+export interface MessagePollResults {
+    answer_counts: MessagePollAnswerCount[];
+    is_finalized: boolean;
+}
+
+export interface MessagePoll {
+    allow_multiselect: boolean;
+    answers: MessagePollAnswer[];
+    expiry: Moment;
+    layout_type: PollLayoutTypes;
+    question: MessagePollMedia;
+    results?: MessagePollResults;
+}
+
+export const enum PurchaseNotificationType {
+    GUILD_PRODUCT = 0,
+}
+
+export interface MessagePurchaseNotification {
+    guild_product_purchase: {
+        listing_id?: string | null; // TEMP
+        product_name?: string | null; // TEMP
+    } // TEMP
+    type: PurchaseNotificationType;
+} // TEMP
+
+export interface MessageReactionCountDetails {
+    burst: number;
+    normal: number;
+    vote?: number;
+}
+
+export interface MessageReaction {
+    burst_colors: string[];
+    burst_count: number;
+    count: number;
+    count_details: MessageReactionCountDetails;
+    emoji: MessageEmoji;
+    me: boolean;
+    me_burst: boolean;
+    me_vote?: boolean;
+}
+
+export interface MessageRoleSubscriptionData {
+    is_renewal?: boolean | null; // TEMP
+    role_subscription_listing_id?: string | null; // TEMP
+    tier_name?: string | null; // TEMP
+    total_months_subscribed?: number | null; // TEMP
+} // TEMP
+
 export const enum MessageStates {
     SEND_FAILED = "SEND_FAILED",
     SENDING = "SENDING",
     SENT = "SENT",
+}
+
+export const enum StickerFormat {
+    PNG = 1,
+    APNG = 2,
+    LOTTIE = 3,
+    GIF = 4,
+}
+
+export interface MessageStickerItem {
+    format_type: StickerFormat;
+    id: string;
+    name: string;
+}
+
+export const enum MetaStickerType {
+    STANDARD = 1,
+    GUILD = 2,
+}
+
+export interface MessageSticker {
+    asset?: "";
+    available?: boolean;
+    description: string | null;
+    format_type: StickerFormat;
+    guild_id?: string;
+    id: string;
+    name: string;
+    pack_id?: string;
+    sort_value?: number;
+    tags: string;
+    type: MetaStickerType;
+    user?: Record<string, any>; // TEMP: This is not a UserRecord, it's a user object from the API.
 }
 
 export const enum MessageTypes {
@@ -1715,48 +2049,44 @@ export class MessageRecord<
     channel_id: string;
     codedLinks: CodedLink[];
     colorString: string | undefined;
-    components: {
-        components: any[]; // TEMP
-        id: string;
-        type: number;
-    }[];
+    components: MessageComponent[];
     content: string;
-    customRenderedContent: any; // TEMP
-    editedTimestamp: string | null; // TEMP
-    embeds: any[]; // TEMP
+    customRenderedContent: any | undefined; // TEMP
+    editedTimestamp: Date | null;
+    embeds: MessageEmbed[];
     flags: MessageFlags;
-    giftCodes: any[]; // TEMP
-    giftInfo: any; // TEMP
+    giftCodes: string[];
+    giftInfo: MessageGiftInfo | undefined;
     id: string;
-    interaction: any | null; // TEMP
-    interactionData: any | null; // TEMP
-    interactionError: any | null; // TEMP
-    interactionMetadata: any | null; // TEMP
+    interaction: InteractionRecord | null;
+    interactionData: InteractionData | null;
+    interactionError: string | null;
+    interactionMetadata: InteractionMetadata | null;
     isSearchHit: boolean;
     isUnsupported: boolean;
     loggingName: string | null; // TEMP
-    mentionChannels: any[]; // TEMP
+    mentionChannels: ChannelMention[];
     mentionEveryone: boolean;
-    mentionRoles: any[]; // TEMP
+    mentionRoles: string[];
     mentioned: boolean;
-    mentions: any[]; // TEMP
-    messageReference: any | null; // TEMP
+    mentions: string[];
+    messageReference: MessageReference | null;
     messageSnapshots: any[]; // TEMP
-    nick: any; // TEMP
-    nonce: any | null; // TEMP
+    nick: any | undefined; // TEMP
+    nonce: string | number | null;
     pinned: boolean;
-    poll: any; // TEMP
-    purchaseNotification: any; // TEMP
-    reactions: any[]; // TEMP
+    poll: MessagePoll | undefined;
+    purchaseNotification: MessagePurchaseNotification | undefined;
+    reactions: MessageReaction[];
     referralTrialOfferId: string | null; // TEMP
-    roleSubscriptionData: any; // TEMP
+    roleSubscriptionData: MessageRoleSubscriptionData | undefined;
     state: MessageStates;
-    stickerItems: any[]; // TEMP
-    stickers: any[]; // TEMP
-    timestamp: Date; // TEMP
+    stickerItems: MessageStickerItem[];
+    stickers: MessageSticker[];
+    timestamp: Date;
     tts: boolean;
     type: MessageTypes;
-    webhookId: string | null; // TEMP
+    webhookId: string | null;
 }
 
 declare class MessageCache {
