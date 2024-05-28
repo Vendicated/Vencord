@@ -79,6 +79,7 @@ function makeShortcuts() {
         wp: Webpack,
         wpc: { getter: () => Webpack.cache },
         wreq: { getter: () => Webpack.wreq },
+        WebpackInstances: { getter: () => Vencord.WebpackPatcher.allWebpackInstances },
         wpsearch: search,
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
