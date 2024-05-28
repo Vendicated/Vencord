@@ -17,7 +17,7 @@ https://github.com/Vendicated/Vencord/assets/119569726/c7543516-f691-42c5-baa2-6
 ---
 
 All badges can fit easily, for example here's Vencord's creator: Vee (vending.machine):
-![image](https://github.com/Vendicated/Vencord/assets/119569726/fc768079-5027-482b-ac52-a652812d482d)
+![](https://github.com/Vendicated/Vencord/assets/119569726/fc768079-5027-482b-ac52-a652812d482d)
 
 ---
 
