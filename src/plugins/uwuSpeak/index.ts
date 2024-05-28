@@ -28,7 +28,7 @@ const settings = definePluginSettings({
 });
 
 
-const endings: string[] = [
+const endwings: string[] = [
     "UwU",
     "OwO",
     "Nya~",
@@ -41,7 +41,7 @@ const endings: string[] = [
     ":>"
 ];
 
-const substitutions = {
+const substitUwUtions = {
     "r": "w",
     "l": "w",
     "no": "nyo",
@@ -52,7 +52,7 @@ const substitutions = {
 };
 
 
-const wordsubstitutions = {
+const wordSubstitUwUtions = {
     "this": "dis",
     "the": "da",
     "says": "sez",
@@ -119,33 +119,33 @@ const wordsubstitutions = {
 
 
 
-function uwuIt(input: string): string {
+function uwuIt(inpUwUt: string): string {
 
-    const manyInputBlock: string[] = input.split(" ");
+    const manyInputBlock: string[] = inpUwUt.split(" ");
     var fimishedStwing: string = "";
-    manyInputBlock.forEach((block: string) => {
-        if (block.includes("http") || block.includes(".com") || block.includes(".net") || block.includes(".org")) {
+    manyInputBlock.forEach((smolTextBwoc: string) => {
+        if (smolTextBwoc.includes("http") || smolTextBwoc.includes(".com") || smolTextBwoc.includes(".net") || smolTextBwoc.includes(".org")) {
             // uhhhhhh how would i just "go around" in this? I'm dum ;-;
         } else {
-            block = block.toLowerCase();
+            smolTextBwoc = smolTextBwoc.toLowerCase();
 
             if (settings.store.textReplacements) {
-                if (wordsubstitutions[block]) {
-                    block = wordsubstitutions[block];
+                if (wordSubstitUwUtions[smolTextBwoc]) {
+                    smolTextBwoc = wordSubstitUwUtions[smolTextBwoc];
                 } else {
                     // pardon me but what the actual fuck is this
                     // https://stackoverflow.com/questions/34913675/how-to-iterate-keys-values-in-javascript
-                    for (const [key, value] of Object.entries(substitutions)) {
-                        block = block.replaceAll(key, value);
+                    for (const [key, value] of Object.entries(substitUwUtions)) {
+                        smolTextBwoc = smolTextBwoc.replaceAll(key, value);
                     }
                 }
             }
         }
-        fimishedStwing += block + " ";
+        fimishedStwing += smolTextBwoc + " ";
     });
 
     if (settings.store.suffixes) {
-        fimishedStwing += endings[randomInt(0, endings.length - 1)];
+        fimishedStwing += endwings[randomInt(0, endwings.length - 1)];
     }
 
     return fimishedStwing;
@@ -164,7 +164,6 @@ export default definePlugin({
             description: "Makes your message more silly and cute",
             options: [OptionalMessageOption],
             execute: opts => ({
-
                 content: uwuIt(findOption(opts, "message", ""))
             }),
         },
