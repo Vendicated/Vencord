@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin, { StartAt } from "@utils/types";
@@ -25,16 +26,19 @@ import { extract, filters, findAll, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
 import type { ComponentType } from "react";
 
-const WEB_ONLY = (f: string) => () => {
+const DESKTOP_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
 };
+
+const define: typeof Object.defineProperty =
+    (obj, prop, desc) => Object.defineProperty(obj, prop, { ...desc, configurable: true, enumerable: true });
 
 export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
 
-    getShortcuts(): Record<PropertyKey, any> {
+    getShortcuts() {
         function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
             const cache = new Map<string, unknown>();
 
@@ -88,13 +92,15 @@ export default definePlugin({
             Settings: { getter: () => Vencord.Settings },
             Api: { getter: () => Vencord.Api },
             reload: () => location.reload(),
-            restart: IS_WEB ? WEB_ONLY("restart") : relaunch,
+            restart: IS_WEB ? DESKTOP_ONLY("restart") : relaunch,
             canonicalizeMatch,
             canonicalizeReplace,
             canonicalizeReplacement,
             fakeRender: (component: ComponentType, props: any) => {
                 const prevWin = fakeRenderWin?.deref();
-                const win = prevWin?.closed === false ? prevWin : window.open("about:blank", "Fake Render", "popup,width=500,height=500")!;
+                const win = prevWin?.closed === false
+                    ? prevWin
+                    : window.open("about:blank", "Fake Render", "popup,width=500,height=500")!;
                 fakeRenderWin = new WeakRef(win);
                 win.focus();
 
@@ -127,23 +133,46 @@ export default definePlugin({
         window.shortcutList = {};
 
         for (const [key, val] of Object.entries(shortcuts)) {
-            if (val.getter != null) {
-                Object.defineProperty(window.shortcutList, key, {
-                    get: val.getter,
-                    configurable: true,
-                    enumerable: true
+            if ("getter" in val) {
+                define(window.shortcutList, key, {
+                    get() {
+                        const rawValue = val.getter();
+                        if (!rawValue) return rawValue;
+
+                        const value = rawValue[SYM_LAZY_GET]
+                            ? rawValue[SYM_LAZY_GET]()
+                            : rawValue;
+
+                        if (value) define(window.shortcutList, key, { value });
+
+                        return value;
+                    }
                 });
 
-                Object.defineProperty(window, key, {
-                    get: () => window.shortcutList[key],
-                    configurable: true,
-                    enumerable: true
+                define(window, key, {
+                    get: () => window.shortcutList[key]
                 });
             } else {
                 window.shortcutList[key] = val;
                 window[key] = val;
             }
         }
+
+        // unproxy loaded modules
+        Webpack.onceReady.then(() => {
+            for (const [key, val] of Object.entries(shortcuts)) {
+                const currentVal = "getter" in val
+                    ? val.getter()
+                    : val;
+                if (!currentVal) continue;
+
+                const value = currentVal[SYM_LAZY_GET]
+                    ? currentVal[SYM_LAZY_CACHED]
+                    : currentVal;
+
+                if (value) define(window.shortcutList, key, { value });
+            }
+        });
     },
 
     stop() {
