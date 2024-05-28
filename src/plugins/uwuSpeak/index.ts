@@ -129,23 +129,30 @@ function uwuIt(inpUwUt: string): string {
     const manyInputBlock: string[] = inpUwUt.split(" ");
     var finishedString: string = "";
     manyInputBlock.forEach((block: string) => {
+        if (block.length <= settings.store.minimumWordLength) {
+            // so just ignore it
+            return;
+        }
+
         if (block.includes("http") || block.includes(".com") || block.includes(".net") || block.includes(".org")) {
             // uhhhhhh how would i just "go around" in this? I'm dum ;-;
-        } else {
-            block = block.toLowerCase();
+            return;
+        }
 
-            if (settings.store.replacements) {
-                if (wordSubstitutions[block]) {
-                    block = wordSubstitutions[block];
-                } else {
-                    // pardon me but what the actual fuck is this
-                    // https://stackoverflow.com/questions/34913675/how-to-iterate-keys-values-in-javascript
-                    for (const [key, value] of Object.entries(substitutions)) {
-                        block = block.replaceAll(key, value);
-                    }
+        block = block.toLowerCase();
+
+        if (settings.store.replacements) {
+            if (wordSubstitutions[block]) {
+                block = wordSubstitutions[block];
+            } else {
+                // pardon me but what the actual fuck is this
+                // https://stackoverflow.com/questions/34913675/how-to-iterate-keys-values-in-javascript
+                for (const [key, value] of Object.entries(substitutions)) {
+                    block = block.replaceAll(key, value);
                 }
             }
         }
+
         finishedString += block + " ";
     });
 
