@@ -17,7 +17,9 @@
 */
 
 import { Settings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
@@ -39,8 +41,12 @@ export default definePlugin({
                 match: /hideNote:.+?(?=([,}].*?\)))/g,
                 replace: (m, rest) => {
                     const destructuringMatch = rest.match(/}=.+/);
-                    if (destructuringMatch == null) return "hideNote:!0";
-                    return m;
+                    if (destructuringMatch) {
+                        const defaultValueMatch = m.match(canonicalizeMatch(/hideNote:(\i)=!?\d/));
+                        return defaultValueMatch ? `hideNote:${defaultValueMatch[1]}=!0` : m;
+                    }
+
+                    return "hideNote:!0";
                 }
             }
         },
@@ -52,10 +58,10 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.NOTE}",
+            find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /(?<=return \i\?)null(?=:\(0,\i\.jsxs)/,
-                replace: "$self.patchPadding(arguments[0])"
+                match: /lastSection:(!?\i)}\),/,
+                replace: "$&$self.patchPadding({lastSection:$1}),"
             }
         }
     ],
@@ -75,10 +81,10 @@ export default definePlugin({
         }
     },
 
-    patchPadding(e: any) {
-        if (!e.lastSection) return;
+    patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
+        if (!lastSection) return null;
         return (
-            <div className={UserPopoutSectionCssClasses.lastSection}></div>
+            <div className={UserPopoutSectionCssClasses.lastSection} ></div>
         );
-    }
+    })
 });

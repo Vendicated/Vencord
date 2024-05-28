@@ -213,7 +213,7 @@ function applyRules(content: string): string {
 
     if (stringRules) {
         for (const rule of stringRules) {
-            if (!rule.find || !rule.replace) continue;
+            if (!rule.find) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
             content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
@@ -222,7 +222,7 @@ function applyRules(content: string): string {
 
     if (regexRules) {
         for (const rule of regexRules) {
-            if (!rule.find || !rule.replace) continue;
+            if (!rule.find) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
             try {
