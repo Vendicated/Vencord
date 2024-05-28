@@ -7,7 +7,10 @@
 import { IpcMainInvokeEvent } from "electron";
 
 export function initDevtoolsListener(e: IpcMainInvokeEvent) {
-    e.sender.once("devtools-opened", () => {
-        e.sender.executeJavaScript("Vencord.Plugins.plugins.ConsoleShortcuts.eagerLoad(true)");
-    });
+    const handleDevtoolsOpened = () => e.sender.executeJavaScript("Vencord.Plugins.plugins.ConsoleShortcuts.eagerLoad(true)");
+
+    if (e.sender.isDevToolsOpened())
+        handleDevtoolsOpened();
+    else
+        e.sender.once("devtools-opened", () => handleDevtoolsOpened());
 }
