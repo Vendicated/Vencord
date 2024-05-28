@@ -130,12 +130,12 @@ function uwuIt(inpUwUt: string): string {
     var finishedString: string = "";
     manyInputBlock.forEach((block: string) => {
         if (block.length <= settings.store.minimumWordLength) {
-            // so just ignore it
+            // so just ignore it since its too short
             return;
         }
 
-        if (block.includes("http") || block.includes(".com") || block.includes(".net") || block.includes(".org")) {
-            // uhhhhhh how would i just "go around" in this? I'm dum ;-;
+        if (block.includes("http") || block.includes(".com") || block.includes(".net") || block.includes(".org") || block.includes(".dev")) {
+            // so since its *probably* a link lets just ignore it
             return;
         }
 
@@ -165,7 +165,7 @@ function uwuIt(inpUwUt: string): string {
 
 
 export default definePlugin({
-    name: "UwUSpeak",
+    name: "UwUify",
     description: "Makes your text more UwU",
     authors: [Devs.UnluckyCrafter, Devs.WackyModer],
     dependencies: ["CommandsAPI"],
@@ -173,7 +173,7 @@ export default definePlugin({
     commands: [
         {
             name: "uwuify",
-            description: "Makes your message more silly and cute",
+            description: "With the command /uwuify you can makes your messages more silly and cute",
             options: [OptionalMessageOption],
             execute: opts => ({
                 content: uwuIt(findOption(opts, "message", ""))
