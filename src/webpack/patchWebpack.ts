@@ -327,98 +327,100 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         if (!patch.all) patches.splice(i--, 1);
     }
 
-    // The patched factory wrapper
-    const patchedFactory: PatchedModuleFactory = function (...args: Parameters<ModuleFactory>) {
-        // Restore the original factory in all the module factories objects,
-        // because we want to make sure the original factory is restored properly, no matter what is the Webpack instance
-        for (const moduleFactories of allModuleFactories) {
-            Reflect.defineProperty(moduleFactories, id, {
-                value: patchedFactory.$$vencordOriginal,
-                configurable: true,
-                enumerable: true,
-                writable: true
-            });
-        }
+    // The patched factory wrapper, define it in an object to preserve the name after minification
+    const patchedFactory: PatchedModuleFactory = {
+        PatchedFactory(...args: Parameters<ModuleFactory>) {
+            // Restore the original factory in all the module factories objects,
+            // because we want to make sure the original factory is restored properly, no matter what is the Webpack instance
+            for (const moduleFactories of allModuleFactories) {
+                Reflect.defineProperty(moduleFactories, id, {
+                    value: patchedFactory.$$vencordOriginal,
+                    configurable: true,
+                    enumerable: true,
+                    writable: true
+                });
+            }
 
-        // eslint-disable-next-line prefer-const
-        let [module, exports, require] = args;
+            // eslint-disable-next-line prefer-const
+            let [module, exports, require] = args;
 
-        if (wreq == null) {
-            if (!wreqFallbackApplied) {
-                wreqFallbackApplied = true;
+            if (wreq == null) {
+                if (!wreqFallbackApplied) {
+                    wreqFallbackApplied = true;
 
-                // Make sure the require argument is actually the WebpackRequire function
-                if (typeof require === "function" && require.m != null) {
-                    const { stack } = new Error();
-                    const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
-                    logger.warn(
-                        "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
-                        `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
-                        ")"
-                    );
-                    _initWebpack(require);
-                } else if (IS_DEV) {
-                    logger.error("WebpackRequire was not initialized, running modules without patches instead.");
+                    // Make sure the require argument is actually the WebpackRequire function
+                    if (typeof require === "function" && require.m != null) {
+                        const { stack } = new Error();
+                        const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+                        logger.warn(
+                            "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
+                            `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                            ")"
+                        );
+                        _initWebpack(require);
+                    } else if (IS_DEV) {
+                        logger.error("WebpackRequire was not initialized, running modules without patches instead.");
+                    }
+                }
+
+                if (IS_DEV) {
+                    return originalFactory.apply(this, args);
                 }
             }
 
-            if (IS_DEV) {
+            let factoryReturn: unknown;
+            try {
+                // Call the patched factory
+                factoryReturn = factory.apply(this, args);
+            } catch (err) {
+                // Just re-throw Discord errors
+                if (factory === originalFactory) throw err;
+
+                logger.error("Error in patched module factory", err);
                 return originalFactory.apply(this, args);
             }
-        }
 
-        let factoryReturn: unknown;
-        try {
-            // Call the patched factory
-            factoryReturn = factory.apply(this, args);
-        } catch (err) {
-            // Just re-throw Discord errors
-            if (factory === originalFactory) throw err;
+            // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
+            exports = module?.exports;
+            if (exports == null) return factoryReturn;
 
-            logger.error("Error in patched module factory", err);
-            return originalFactory.apply(this, args);
-        }
+            // There are (at the time of writing) 11 modules exporting the window
+            // Make these non enumerable to improve webpack search performance
+            if (exports === window && typeof require === "function" && require.c != null) {
+                Reflect.defineProperty(require.c, id, {
+                    value: require.c[id],
+                    configurable: true,
+                    writable: true,
+                    enumerable: false
+                });
+                return factoryReturn;
+            }
 
-        // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
-        exports = module?.exports;
-        if (exports == null) return factoryReturn;
+            for (const callback of moduleListeners) {
+                try {
+                    callback(exports, id);
+                } catch (err) {
+                    logger.error("Error in Webpack module listener:\n", err, callback);
+                }
+            }
 
-        // There are (at the time of writing) 11 modules exporting the window
-        // Make these non enumerable to improve webpack search performance
-        if (exports === window && typeof require === "function" && require.c != null) {
-            Reflect.defineProperty(require.c, id, {
-                value: require.c[id],
-                configurable: true,
-                writable: true,
-                enumerable: false
-            });
+            for (const [filter, callback] of subscriptions) {
+                try {
+                    if (filter(exports)) {
+                        subscriptions.delete(filter);
+                        callback(exports, id);
+                    } else if (exports.default && filter(exports.default)) {
+                        subscriptions.delete(filter);
+                        callback(exports.default, id);
+                    }
+                } catch (err) {
+                    logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
+                }
+            }
+
             return factoryReturn;
         }
-
-        for (const callback of moduleListeners) {
-            try {
-                callback(exports, id);
-            } catch (err) {
-                logger.error("Error in Webpack module listener:\n", err, callback);
-            }
-        }
-
-        for (const [filter, callback] of subscriptions) {
-            try {
-                if (filter(exports)) {
-                    subscriptions.delete(filter);
-                    callback(exports, id);
-                } else if (exports.default && filter(exports.default)) {
-                    subscriptions.delete(filter);
-                    callback(exports.default, id);
-                }
-            } catch (err) {
-                logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
-            }
-        }
-
-        return factoryReturn;
-    };
+    }.PatchedFactory;
 
     patchedFactory.toString = originalFactory.toString.bind(originalFactory);
     patchedFactory.$$vencordOriginal = originalFactory;
