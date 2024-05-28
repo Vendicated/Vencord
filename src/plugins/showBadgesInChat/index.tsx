@@ -8,13 +8,12 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Devs } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import badges from "plugins/_api/badges";
+const roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
+const RoleIconComponent = findComponentByCodeLazy(".Messages.ROLE_ICON_ALT_TEXT");
 
 import settings from "./settings";
-
-let RoleIconComponent: React.ComponentType<any> = () => null;
-let roleIconClassName: string;
 
 const discordBadges: readonly [number, string, string][] = Object.freeze([
     [0, "Discord Staff", "5e74e9b61934fc1f67c65515d1f7e60d"],
@@ -94,7 +93,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
 
 function ChatBadges({ author }: any) {
     return (
-        <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
+        <span className="vc-sbic-badge-row">
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
@@ -108,21 +107,8 @@ export default definePlugin({
     authors: [Devs.Inbestigator, Devs.KrystalSkull],
     description: "Shows the message author's badges beside their name in chat.",
     dependencies: ["MessageDecorationsAPI"],
-    patches: [
-        {
-            find: "Messages.ROLE_ICON_ALT_TEXT",
-            replacement: {
-                match: /function\s+\w+?\(\w+?\)\s*{let\s+\w+?,\s*{className:.+}\)}/,
-                replace: "$self.RoleIconComponent=$&;$&",
-            }
-        }
-    ],
     settings,
-    set RoleIconComponent(component: any) {
-        RoleIconComponent = component;
-    },
     start: () => {
-        roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
         addDecoration("vc-show-badges-in-chat", props => <ChatBadges author={props.message?.author} />);
     },
     stop: () => {

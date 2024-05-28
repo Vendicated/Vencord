@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { Text, useEffect, UserStore, useState } from "@webpack/common";
@@ -137,22 +135,21 @@ const BadgeSettings = () => {
     return (
         <>
             <Text>Drag the badges to reorder them, you can click to enable/disable a specific badge type.</Text>
-            <div className="badge-settings">
-                <img style={{ width: "50px", height: "50px", borderRadius: "50%", marginRight: "12px" }} src={UserStore.getCurrentUser().getAvatarURL()}></img>
-                <Text style={{ fontSize: "22px", color: "white", marginRight: "5px" }}>{(UserStore.getCurrentUser() as any).globalName}</Text>
+            <div className="vc-sbic-badge-settings">
+                <img className="vc-sbic-settings-avatar" src={UserStore.getCurrentUser().getAvatarURL()}></img>
+                <Text className="vc-sbic-settings-username">{(UserStore.getCurrentUser() as any).globalName}</Text>
                 {images
                     .sort((a, b) => a.position - b.position)
                     .map((image, index) => (
                         <div
                             key={image.key}
-                            className={`image-container ${!image.shown ? "disabled" : ""}`}
+                            className={`vc-sbic-image-container ${!image.shown ? "vc-sbic-disabled" : ""}`}
                             onDragOver={e => handleDragOver(e)}
                             onDrop={e => handleDrop(e, index)}
                             onClick={() => toggleDisable(index)}
                         >
                             <img
                                 src={image.src}
-                                alt={image.title}
                                 draggable={image.shown}
                                 onDragStart={e => handleDragStart(e, index)}
                                 title={image.title}
