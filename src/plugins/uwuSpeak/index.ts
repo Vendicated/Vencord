@@ -166,14 +166,14 @@ function uwuIt(inpUwUt: string): string {
 
 export default definePlugin({
     name: "UwUify",
-    description: "Makes your text more UwU",
+    description: "Adds a command (/uwuify) that makes your text more UwU",
     authors: [Devs.UnluckyCrafter, Devs.WackyModer],
     dependencies: ["CommandsAPI"],
     settings,
     commands: [
         {
             name: "uwuify",
-            description: "With the command /uwuify you can makes your messages more silly and cute",
+            description: "Makes your messages more silly and cute",
             options: [OptionalMessageOption],
             execute: opts => ({
                 content: uwuIt(findOption(opts, "message", ""))
