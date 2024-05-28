@@ -88,7 +88,6 @@ Reflect.defineProperty(Function.prototype, "m", {
             If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
             Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
             */
-
         }
 
         Reflect.defineProperty(this, "m", {
@@ -146,13 +145,23 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
     get: (target, p, receiver) => {
         return undefined;
     },
+    // Same thing as get
+    has: (target, p) => {
+        return false;
+    }
     */
 
     // The set trap for patching or defining getters for the module factories when new module factories are loaded
     set: (target, p, newValue, receiver) => {
         // If the property is not a number, we are not dealing with a module factory
         if (Number.isNaN(Number(p))) {
-            return Reflect.set(target, p, newValue, receiver);
+            Reflect.defineProperty(target, p, {
+                value: newValue,
+                configurable: true,
+                enumerable: true,
+                writable: true
+            });
+            return true;
         }
 
         const existingFactory = Reflect.get(target, p, receiver);
