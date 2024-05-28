@@ -13,13 +13,13 @@ import definePlugin, { OptionType } from "@utils/types";
 const randomInt = (min, max) => { return Math.floor(Math.random() * (max + 1 - min)) + min; };
 
 const settings = definePluginSettings({
-    enabledSuffixes: {
-        description: "Suffixes like UwU and OwO",
+    suffixes: {
+        description: "Suffixes like UwU, OwO, and :3",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
     },
-    replacements: {
+    textReplacements: {
         description: "Replacements like bye -> bai, cool -> kewl, and what -> wat",
         type: OptionType.BOOLEAN,
         default: true,
@@ -113,7 +113,8 @@ const wordsubstitutions = {
     "bomb": "bom",
     "code": "cowde",
     "programmer": "pwogwammr",
-    "funny": "silly"
+    "funny": "silly",
+    "because": "bc",
 };
 
 
@@ -128,7 +129,7 @@ function uwuIt(input: string): string {
         } else {
             block = block.toLowerCase();
 
-            if (settings.store.replacements) {
+            if (settings.store.textReplacements) {
                 if (wordsubstitutions[block]) {
                     block = wordsubstitutions[block];
                 } else {
@@ -143,7 +144,7 @@ function uwuIt(input: string): string {
         fimishedStwing += block + " ";
     });
 
-    if (settings.store.enabledSuffixes) {
+    if (settings.store.suffixes) {
         fimishedStwing += endings[randomInt(0, endings.length - 1)];
     }
 
@@ -153,7 +154,7 @@ function uwuIt(input: string): string {
 
 export default definePlugin({
     name: "UwUSpeak",
-    description: "Makes your text more UwU",
+    description: "Adds a command (/uwuify) that makes your text more silly and cute",
     authors: [Devs.UnluckyCrafter, Devs.WackyModer],
     dependencies: ["CommandsAPI"],
     settings,
