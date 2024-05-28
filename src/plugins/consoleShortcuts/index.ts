@@ -131,7 +131,7 @@ function makeShortcuts() {
             Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
         },
 
-        preenable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,
+        preEnable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,
 
         channel: { getter: () => getCurrentChannel(), preload: false },
         channelId: { getter: () => Common.SelectedChannelStore.getChannelId(), preload: false },
