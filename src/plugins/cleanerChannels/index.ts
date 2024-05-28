@@ -2,8 +2,8 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "Remove Channel Icons",
-    description: "Removes the # symbol next to text channels, the blowhorn icon next to announcement channels, and the rules icon.",
+    name: "CleanerChannels",
+    description: "Simplifies Discord UI by removing redundant channel icons.",
     authors: [Devs.jsh4d],
     patches: [
         {
