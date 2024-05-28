@@ -127,6 +127,21 @@ function makeShortcuts() {
     };
 }
 
+function preload(key: string, val: any, forceLoad: boolean) {
+    const currentVal = "getter" in val
+        ? val.getter()
+        : val;
+    if (!currentVal) return;
+
+    const value = currentVal[SYM_LAZY_GET]
+        ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
+        : currentVal;
+
+    if (value) define(window.shortcutList, key, { value });
+
+    return value;
+}
+
 export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
@@ -140,18 +155,7 @@ export default definePlugin({
         for (const [key, val] of Object.entries(shortcuts)) {
             if ("getter" in val) {
                 define(window.shortcutList, key, {
-                    get() {
-                        const rawValue = val.getter();
-                        if (!rawValue) return rawValue;
-
-                        const value = rawValue[SYM_LAZY_GET]
-                            ? rawValue[SYM_LAZY_GET]()
-                            : rawValue;
-
-                        if (value) define(window.shortcutList, key, { value });
-
-                        return value;
-                    }
+                    get: () => preload(key, val, false)
                 });
 
                 define(window, key, {
@@ -178,16 +182,7 @@ export default definePlugin({
         const shortcuts = makeShortcuts();
 
         for (const [key, val] of Object.entries(shortcuts)) {
-            const currentVal = "getter" in val
-                ? val.getter()
-                : val;
-            if (!currentVal) continue;
-
-            const value = currentVal[SYM_LAZY_GET]
-                ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
-                : currentVal;
-
-            if (value) define(window.shortcutList, key, { value });
+            preload(key, val, forceLoad);
         }
     },
 
