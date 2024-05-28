@@ -41,9 +41,9 @@ const browser = await pup.launch({
 const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 
-async function maybeGetError(handle: JSHandle) {
-    return (handle as JSHandle<Error>).getProperty("message")
-        .then(m => m?.jsonValue() ?? "Unknown Error");
+async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
+    return await (handle as JSHandle<Error>)?.getProperty("message")
+        .then(m => m?.jsonValue());
 }
 
 const report = {
@@ -236,7 +236,7 @@ page.on("console", async e => {
                 const [, name] = failedToStartMatch;
                 report.badStarts.push({
                     plugin: name,
-                    error: cause
+                    error: cause ?? "Unknown error"
                 });
 
                 break;
