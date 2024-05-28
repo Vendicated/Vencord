@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// For handling overlays such as Text, Images
-
 import moveIndex from "../utils/arrays";
 
 const overlayReducer = (overlayState: Array<overlayState>, action: overlayAction) => {
