@@ -52,7 +52,7 @@ async function checkFileSize(url: string) {
             }
         });
 
-        if (res.status === 416) {
+        if (res.status === 416 /* Range Not Satisfiable */) {
             belowMaxSize = true;
         }
     } catch (ex) { }
@@ -139,7 +139,7 @@ export default definePlugin({
     ],
 
     async processAttachments(message: Message) {
-        let updateMessage = false;
+        let shouldUpdateMessage = false;
 
         const toProcess = message.attachments.filter(x => x.content_type?.startsWith("image/svg+xml") && x.width == null && x.height == null);
         for (const attachment of toProcess) {
@@ -153,26 +153,26 @@ export default definePlugin({
             // since the media one will return http 415 for svgs
             attachment.proxy_url = attachment.url;
 
-            updateMessage = true;
+            shouldUpdateMessage = true;
         }
 
-        if (updateMessage) {
+        if (shouldUpdateMessage) {
             FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message });
         }
     },
 
-    debounce: new Set<string>(),
+    currentlyProcessing: new Set<string>(),
     async processEmbeds(message: Message) {
         if (message.state !== "SENT") return;
         if (message.hasFlag(EMBED_SUPPRESSED)) return;
 
-        if (this.debounce.has(message.id)) return;
-        this.debounce.add(message.id);
+        if (this.currentlyProcessing.has(message.id)) return;
+        this.currentlyProcessing.add(message.id);
 
-        let updateMessage = false;
+        let shouldUpdateMessage = false;
 
         const svgUrls = new Set(message.content.match(URL_REGEX));
-        const existingUrls = new Set(message.embeds.filter(x => x.type === "image").map(x => x.image?.url));
+        const existingUrls = new Set(message.embeds.filter(e => e.type === "image").map(e => e.image?.url));
 
         let imageEmbedsCount = existingUrls.size;
         for (const url of [...svgUrls.values()]) {
@@ -183,7 +183,7 @@ export default definePlugin({
             if (!belowMaxSize) continue;
 
             const { width, height } = await getSVGDimensions(url);
-            // @ts-ignore
+            // @ts-ignore ~ bad types
             message.embeds.push({
                 id: "embed_1", // The id can be anything as it seems to be changed by the client anyways
                 url,
@@ -193,13 +193,13 @@ export default definePlugin({
             });
 
             imageEmbedsCount++;
-            updateMessage = true;
+            shouldUpdateMessage = true;
         }
 
-        if (updateMessage) {
+        if (shouldUpdateMessage) {
             FluxDispatcher.dispatch({ type: "MESSAGE_UPDATE", message });
         }
 
-        this.debounce.delete(message.id);
+        this.currentlyProcessing.delete(message.id);
     }
 });
