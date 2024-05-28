@@ -14,6 +14,8 @@ import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
 import { _initWebpack, factoryListeners, ModuleFactory, moduleListeners, subscriptions, WebpackRequire, wreq } from ".";
 
+type AnyWebpackRequire = Partial<WebpackRequire> & Pick<WebpackRequire, "m">;
+
 type PatchedModuleFactory = ModuleFactory & {
     $$vencordOriginal?: ModuleFactory;
 };
@@ -22,82 +24,86 @@ type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory>;
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
-/** A set with all the module factories objects */
-const allModuleFactories = new Set<PatchedModuleFactories>();
+/** A set with all the Webpack instances */
+export const allWebpackInstances = new Set<AnyWebpackRequire>();
 /** Whether we tried to fallback to factory WebpackRequire, or disabled patches */
 let wreqFallbackApplied = false;
+
+type Define = typeof Reflect.defineProperty;
+const define: Define = (target, p, attributes) => {
+    if (Object.hasOwn(attributes, "value")) {
+        attributes.writable = true;
+    }
+
+    return Reflect.defineProperty(target, p, {
+        configurable: true,
+        enumerable: true,
+        ...attributes
+    });
+};
 
 // wreq.m is the Webpack object containing module factories.
 // We wrap it with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
 // If this is the main Webpack, we also set up the internal references to WebpackRequire.
 // wreq.m is pre-populated with module factories, and is also populated via webpackGlobal.push
 // The sentry module also has their own Webpack with a pre-populated wreq.m, so this also patches the sentry module factories.
-Reflect.defineProperty(Function.prototype, "m", {
-    configurable: true,
+define(Function.prototype, "m", {
+    enumerable: false,
 
     set(this: WebpackRequire, moduleFactories: PatchedModuleFactories) {
         // When using React DevTools or other extensions, we may also catch their Webpack here.
         // This ensures we actually got the right ones.
         const { stack } = new Error();
-        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(moduleFactories)) {
-            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
-            logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
-
-            // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
-            // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
-            Reflect.defineProperty(this, "p", {
-                configurable: true,
-
-                set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
-                    if (bundlePath !== "/assets/") return;
-
-                    logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
-                    _initWebpack(this);
-                    clearTimeout(setterTimeout);
-
-                    Reflect.defineProperty(this, "p", {
-                        value: bundlePath,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true
-                    });
-                }
-            });
-            // setImmediate to clear this property setter if this is not the main Webpack.
-            // If this is the main Webpack, wreq.m will always be set before the timeout runs.
-            const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
-
-            // This needs to be added before the loop below
-            allModuleFactories.add(moduleFactories);
-
-            // Patch the pre-populated factories
-            for (const id in moduleFactories) {
-                defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, moduleFactories[id]) : moduleFactories[id]);
-            }
-
-            Reflect.defineProperty(moduleFactories, Symbol.toStringTag, {
-                value: "ModuleFactories",
-                configurable: true,
-                writable: true,
-                enumerable: false
-            });
-
-            // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
-            moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
-            /*
-            If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
-            Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
-            */
+        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) && Array.isArray(moduleFactories)) {
+            define(this, "m", { value: moduleFactories });
+            return;
         }
 
-        Reflect.defineProperty(this, "m", {
-            value: moduleFactories,
-            configurable: true,
-            enumerable: true,
-            writable: true
+        const fileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+        logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
+
+        allWebpackInstances.add(this);
+
+        // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
+        // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
+        define(this, "p", {
+            enumerable: false,
+
+            set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
+                if (bundlePath !== "/assets/") return;
+
+                logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
+                _initWebpack(this);
+                clearTimeout(setterTimeout);
+
+                define(this, "p", { value: bundlePath });
+            }
         });
+        // setImmediate to clear this property setter if this is not the main Webpack.
+        // If this is the main Webpack, wreq.m will always be set before the timeout runs.
+        const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
+
+        define(moduleFactories, Symbol.toStringTag, {
+            value: "ModuleFactories",
+            enumerable: false
+        });
+
+        // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
+        moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
+        /*
+        If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
+        Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
+        */
+
+        define(this, "m", { value: moduleFactories });
+
+        // Patch the pre-populated factories
+        for (const id in moduleFactories) {
+            defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, moduleFactories[id]) : moduleFactories[id]);
+        }
     }
 });
+
 
 /**
  * Define the getter for returning the patched version of the module factory.
@@ -111,11 +117,8 @@ Reflect.defineProperty(Function.prototype, "m", {
 function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
     // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
     // have the patched version
-    for (const moduleFactories of allModuleFactories) {
-        Reflect.defineProperty(moduleFactories, id, {
-            configurable: true,
-            enumerable: true,
-
+    for (const wreq of allWebpackInstances) {
+        define(wreq.m, id, {
             get() {
                 // $$vencordOriginal means the factory is already patched
                 if (factory.$$vencordOriginal != null) {
@@ -155,13 +158,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
     set: (target, p, newValue, receiver) => {
         // If the property is not a number, we are not dealing with a module factory
         if (Number.isNaN(Number(p))) {
-            Reflect.defineProperty(target, p, {
-                value: newValue,
-                configurable: true,
-                enumerable: true,
-                writable: true
-            });
-            return true;
+            return define(target, p, { value: newValue });
         }
 
         const existingFactory = Reflect.get(target, p, receiver);
@@ -332,13 +329,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         PatchedFactory(...args: Parameters<ModuleFactory>) {
             // Restore the original factory in all the module factories objects,
             // because we want to make sure the original factory is restored properly, no matter what is the Webpack instance
-            for (const moduleFactories of allModuleFactories) {
-                Reflect.defineProperty(moduleFactories, id, {
-                    value: patchedFactory.$$vencordOriginal,
-                    configurable: true,
-                    enumerable: true,
-                    writable: true
-                });
+            for (const wreq of allWebpackInstances) {
+                define(wreq.m, id, { value: patchedFactory.$$vencordOriginal });
             }
 
             // eslint-disable-next-line prefer-const
@@ -387,10 +379,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
             if (exports === window && typeof require === "function" && require.c != null) {
-                Reflect.defineProperty(require.c, id, {
+                define(require.c, id, {
                     value: require.c[id],
-                    configurable: true,
-                    writable: true,
                     enumerable: false
                 });
                 return factoryReturn;
