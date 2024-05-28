@@ -7,12 +7,12 @@
 import { AnyObject } from "./types";
 
 export type ProxyInner<T = AnyObject> = T & {
-    [proxyInnerGet]?: () => T;
-    [proxyInnerValue]?: T | undefined;
+    [SYM_PROXY_INNER_GET]?: () => T;
+    [SYM_PROXY_INNER_VALUE]?: T | undefined;
 };
 
-export const proxyInnerGet = Symbol.for("vencord.proxyInner.get");
-export const proxyInnerValue = Symbol.for("vencord.proxyInner.innerValue");
+export const SYM_PROXY_INNER_GET = Symbol.for("vencord.proxyInner.get");
+export const SYM_PROXY_INNER_VALUE = Symbol.for("vencord.proxyInner.innerValue");
 
 // Proxies demand that these properties be unmodified, so proxyInner
 // will always return the function default for them.
@@ -20,14 +20,14 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyInnerGet](), ...args)]
+        [propName, (target: any, ...args: any[]) => Reflect[propName](target[SYM_PROXY_INNER_GET](), ...args)]
     )),
     set: (target, p, value) => {
-        const innerTarget = target[proxyInnerGet]();
+        const innerTarget = target[SYM_PROXY_INNER_GET]();
         return Reflect.set(innerTarget, p, value, innerTarget);
     },
     ownKeys: target => {
-        const keys = Reflect.ownKeys(target[proxyInnerGet]());
+        const keys = Reflect.ownKeys(target[SYM_PROXY_INNER_GET]());
         for (const key of unconfigurable) {
             if (!keys.includes(key)) keys.push(key);
         }
@@ -37,7 +37,7 @@ const handler: ProxyHandler<any> = {
         if (typeof p === "string" && unconfigurable.includes(p))
             return Reflect.getOwnPropertyDescriptor(target, p);
 
-        const descriptor = Reflect.getOwnPropertyDescriptor(target[proxyInnerGet](), p);
+        const descriptor = Reflect.getOwnPropertyDescriptor(target[SYM_PROXY_INNER_GET](), p);
         if (descriptor) Object.defineProperty(target, p, descriptor);
         return descriptor;
     }
@@ -61,21 +61,22 @@ export function proxyInner<T = AnyObject>(
     // Define the function in an object to preserve the name after minification
     const proxyDummy = ({ ProxyDummy() { } }).ProxyDummy;
     Object.assign(proxyDummy, {
-        [proxyInnerGet]: function () {
-            if (proxyDummy[proxyInnerValue] == null) {
+        [SYM_PROXY_INNER_GET]: function () {
+            if (proxyDummy[SYM_PROXY_INNER_VALUE] == null) {
                 throw new Error(errMsg);
             }
 
-            return proxyDummy[proxyInnerValue];
+            return proxyDummy[SYM_PROXY_INNER_VALUE];
         },
-        [proxyInnerValue]: void 0 as T | undefined
+        [SYM_PROXY_INNER_VALUE]: void 0 as T | undefined
     });
 
     const proxy = new Proxy(proxyDummy, {
         ...handler,
-        get(target, p) {
-            if (p === proxyInnerValue) return target[proxyInnerValue];
-            if (p === proxyInnerGet) return target[proxyInnerGet];
+        get(target, p, receiver) {
+            if (p === SYM_PROXY_INNER_GET || p === SYM_PROXY_INNER_VALUE) {
+                return Reflect.get(target, p, receiver);
+            }
 
             // If we're still in the same tick, it means the proxy was immediately used.
             // thus, we proxy the get access to make things like destructuring work as expected
@@ -92,7 +93,7 @@ export function proxyInner<T = AnyObject>(
                 return recursiveProxy;
             }
 
-            const innerTarget = target[proxyInnerGet]();
+            const innerTarget = target[SYM_PROXY_INNER_GET]();
             if (typeof innerTarget === "object" || typeof innerTarget === "function") {
                 return Reflect.get(innerTarget, p, innerTarget);
             }
@@ -107,7 +108,7 @@ export function proxyInner<T = AnyObject>(
     // Once we set the parent inner value, we will call the setInnerValue functions of the destructured values,
     // for them to get the proper value from the parent and use as their inner instead
     function setInnerValue(innerValue: T) {
-        proxyDummy[proxyInnerValue] = innerValue;
+        proxyDummy[SYM_PROXY_INNER_VALUE] = innerValue;
         recursiveSetInnerValues.forEach(setInnerValue => setInnerValue(innerValue));
 
         if (typeof innerValue === "function") {

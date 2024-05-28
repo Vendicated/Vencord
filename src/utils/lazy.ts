@@ -7,12 +7,12 @@
 import { AnyObject } from "./types";
 
 export type ProxyLazy<T = AnyObject> = T & {
-    [proxyLazyGet]: () => T;
-    [proxyLazyCache]: T | undefined;
+    [SYM_LAZY_GET]: () => T;
+    [SYM_LAZY_CACHED]: T | undefined;
 };
 
-export const proxyLazyGet = Symbol.for("vencord.lazy.get");
-export const proxyLazyCache = Symbol.for("vencord.lazy.cached");
+export const SYM_LAZY_GET = Symbol.for("vencord.lazy.get");
+export const SYM_LAZY_CACHED = Symbol.for("vencord.lazy.cached");
 
 export type LazyFunction<T> = (() => T) & {
     $$vencordLazyFailed: () => boolean;
@@ -45,14 +45,14 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(propName =>
-        [propName, (target: any, ...args: any[]) => Reflect[propName](target[proxyLazyGet](), ...args)]
+        [propName, (target: any, ...args: any[]) => Reflect[propName](target[SYM_LAZY_GET](), ...args)]
     )),
     set: (target, p, newValue) => {
-        const lazyTarget = target[proxyLazyGet]();
+        const lazyTarget = target[SYM_LAZY_GET]();
         return Reflect.set(lazyTarget, p, newValue, lazyTarget);
     },
     ownKeys: target => {
-        const keys = Reflect.ownKeys(target[proxyLazyGet]());
+        const keys = Reflect.ownKeys(target[SYM_LAZY_GET]());
         for (const key of unconfigurable) {
             if (!keys.includes(key)) keys.push(key);
         }
@@ -62,7 +62,7 @@ const handler: ProxyHandler<any> = {
         if (typeof p === "string" && unconfigurable.includes(p))
             return Reflect.getOwnPropertyDescriptor(target, p);
 
-        const descriptor = Reflect.getOwnPropertyDescriptor(target[proxyLazyGet](), p);
+        const descriptor = Reflect.getOwnPropertyDescriptor(target[SYM_LAZY_GET](), p);
         if (descriptor) Object.defineProperty(target, p, descriptor);
         return descriptor;
     }
@@ -84,31 +84,32 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     // Define the function in an object to preserve the name after minification
     const proxyDummy = ({ ProxyDummy() { } }).ProxyDummy;
     Object.assign(proxyDummy, {
-        [proxyLazyGet]() {
-            if (!proxyDummy[proxyLazyCache]) {
+        [SYM_LAZY_GET]() {
+            if (!proxyDummy[SYM_LAZY_CACHED]) {
                 if (!get.$$vencordLazyFailed()) {
-                    proxyDummy[proxyLazyCache] = get();
+                    proxyDummy[SYM_LAZY_CACHED] = get();
                 }
 
-                if (!proxyDummy[proxyLazyCache]) {
+                if (!proxyDummy[SYM_LAZY_CACHED]) {
                     throw new Error(`proxyLazy factory failed:\n\n${factory}`);
                 } else {
-                    if (typeof proxyDummy[proxyLazyCache] === "function") {
-                        proxy.toString = proxyDummy[proxyLazyCache].toString.bind(proxyDummy[proxyLazyCache]);
+                    if (typeof proxyDummy[SYM_LAZY_CACHED] === "function") {
+                        proxy.toString = proxyDummy[SYM_LAZY_CACHED].toString.bind(proxyDummy[SYM_LAZY_CACHED]);
                     }
                 }
             }
 
-            return proxyDummy[proxyLazyCache];
+            return proxyDummy[SYM_LAZY_CACHED];
         },
-        [proxyLazyCache]: void 0 as T | undefined
+        [SYM_LAZY_CACHED]: void 0 as T | undefined
     });
 
     const proxy = new Proxy(proxyDummy, {
         ...handler,
-        get(target, p) {
-            if (p === proxyLazyGet) return target[proxyLazyGet];
-            if (p === proxyLazyCache) return target[proxyLazyCache];
+        get(target, p, receiver) {
+            if (p === SYM_LAZY_GET || p === SYM_LAZY_CACHED) {
+                return Reflect.get(target, p, receiver);
+            }
 
             // If we're still in the same tick, it means the lazy was immediately used.
             // thus, we lazy proxy the get access to make things like destructuring work as expected
@@ -117,7 +118,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
             if (!isChild && isSameTick) {
                 return proxyLazy(
                     () => {
-                        const lazyTarget = target[proxyLazyGet]();
+                        const lazyTarget = target[SYM_LAZY_GET]();
                         return Reflect.get(lazyTarget, p, lazyTarget);
                     },
                     attempts,
@@ -125,7 +126,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
                 );
             }
 
-            const lazyTarget = target[proxyLazyGet]();
+            const lazyTarget = target[SYM_LAZY_GET]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
                 return Reflect.get(lazyTarget, p, lazyTarget);
             }
