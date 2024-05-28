@@ -26,7 +26,7 @@ const settings = definePluginSettings({
         restartNeeded: false
     },
     minimumWordLength: {
-        description: "Minimum amount of letters before a word gets UwU'd. for example 3 letters would remove words like the, bye, etc",
+        description: "Minimum letters before a word gets UwU'd (3 removes bye to bai, etc)",
         type: OptionType.NUMBER,
         default: 0,
         restartNeeded: false
