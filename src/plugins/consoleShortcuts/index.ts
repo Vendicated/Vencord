@@ -132,9 +132,7 @@ function makeShortcuts() {
 }
 
 function preload(key: string, val: any, forceLoad: boolean) {
-    const currentVal = "getter" in val
-        ? val.getter()
-        : val;
+    const currentVal = val.getter();
     if (!currentVal) return;
 
     const value = currentVal[SYM_LAZY_GET]
@@ -188,6 +186,8 @@ export default definePlugin({
         const shortcuts = makeShortcuts();
 
         for (const [key, val] of Object.entries(shortcuts)) {
+            if (!Object.hasOwn(val, "getter")) continue;
+
             try {
                 preload(key, val, forceLoad);
             } catch { } // swallow not found errors in DEV
