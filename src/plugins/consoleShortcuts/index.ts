@@ -143,7 +143,7 @@ function makeShortcuts() {
     };
 }
 
-function preload(key: string, val: any, forceLoad: boolean) {
+function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
     if (!currentVal || val.preload === false) return currentVal;
 
@@ -169,7 +169,7 @@ export default definePlugin({
         for (const [key, val] of Object.entries(shortcuts)) {
             if ("getter" in val) {
                 define(window.shortcutList, key, {
-                    get: () => preload(key, val, true)
+                    get: () => loadAndCacheShortcut(key, val, true)
                 });
 
                 define(window, key, {
@@ -201,7 +201,7 @@ export default definePlugin({
             if (!Object.hasOwn(val, "getter") || (val as any).preload === false) continue;
 
             try {
-                preload(key, val, forceLoad);
+                loadAndCacheShortcut(key, val, forceLoad);
             } catch { } // swallow not found errors in DEV
         }
     },
