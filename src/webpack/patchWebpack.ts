@@ -89,13 +89,13 @@ define(Function.prototype, "m", {
         });
 
         // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
-        moduleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
+        const proxiedModuleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
         /*
         If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
         Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
         */
 
-        define(this, "m", { value: moduleFactories });
+        define(this, "m", { value: proxiedModuleFactories });
 
         // Patch the pre-populated factories
         for (const id in moduleFactories) {
