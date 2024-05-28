@@ -63,7 +63,7 @@ export default definePlugin({
         return (
             <>
                 <Forms.FormText>
-                    A background-supporting theme must be installed first. For example, <Link href="https://raw.githubusercontent.com/CapnKitten/Translucence/master/Translucence.theme.css">this theme</Link>.
+                    A background-supporting theme must be installed first. For example, <Link href="https://raw.githubusercontent.com/soulfireneedusername/Background-removing-theme/main/background-removing-theme">this theme</Link>.
                 </Forms.FormText>
                 <Forms.FormText>
                     Here is a video link example: <Link href="https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc">https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc</Link>.
