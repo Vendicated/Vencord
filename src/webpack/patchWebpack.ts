@@ -54,7 +54,7 @@ define(Function.prototype, "m", {
         // When using React DevTools or other extensions, we may also catch their Webpack here.
         // This ensures we actually got the right ones.
         const { stack } = new Error();
-        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) && Array.isArray(moduleFactories)) {
+        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(moduleFactories)) {
             define(this, "m", { value: moduleFactories });
             return;
         }
