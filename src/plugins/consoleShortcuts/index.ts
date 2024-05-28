@@ -31,13 +31,16 @@ const DESKTOP_ONLY = (f: string) => () => {
 };
 
 const define: typeof Object.defineProperty =
-    (obj, prop, desc) =>
-        Object.defineProperty(obj, prop, {
+    (obj, prop, desc) => {
+        if (Object.hasOwn(desc, "value"))
+            desc.writable = true;
+
+        return Object.defineProperty(obj, prop, {
             configurable: true,
             enumerable: true,
-            writable: Object.hasOwn(desc, "value"),
             ...desc
         });
+    };
 
 function makeShortcuts() {
     function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
@@ -185,7 +188,9 @@ export default definePlugin({
         const shortcuts = makeShortcuts();
 
         for (const [key, val] of Object.entries(shortcuts)) {
-            preload(key, val, forceLoad);
+            try {
+                preload(key, val, forceLoad);
+            } catch { } // swallow not found errors in DEV
         }
     },
 
