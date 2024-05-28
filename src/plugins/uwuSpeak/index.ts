@@ -125,9 +125,9 @@ const wordSubstitutions = {
 
 
 
-function uwuIt(inpUwUt: string): string {
+function uwuIt(input: string): string {
 
-    const manyInputBlock: string[] = inpUwUt.split(" ");
+    const manyInputBlock: string[] = input.split(" ");
     var finishedString: string = "";
     manyInputBlock.forEach((block: string) => {
         if (block.length <= settings.store.minimumWordLength) {
@@ -167,7 +167,7 @@ function uwuIt(inpUwUt: string): string {
 
 export default definePlugin({
     name: "UwUify",
-    description: "Adds a command (/uwuify) that makes your text more UwU",
+    description: "Adds a command (/uwuify) that makes your text more cute :3",
     authors: [Devs.UnluckyCrafter, Devs.WackyModer],
     dependencies: ["CommandsAPI"],
     settings,
