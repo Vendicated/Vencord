@@ -59,6 +59,7 @@ const substitutions = {
 
 
 const wordSubstitutions = {
+    "shit": "shoot",
     "this": "dis",
     "the": "da",
     "says": "sez",
