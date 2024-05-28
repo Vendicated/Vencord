@@ -4,27 +4,29 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { spawn } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 
 import type { TrackData } from ".";
 
-function exec(file: string, args: string[] = []) {
-    return new Promise<{ code: number | null, stdout: string | null, stderr: string | null; }>((resolve, reject) => {
-        const process = spawn(file, args, { stdio: [null, "pipe", "pipe"] });
+const exec = promisify(execFile);
 
-        let stdout: string | null = null;
-        process.stdout.on("data", (chunk: string) => { stdout ??= ""; stdout += chunk; });
-        let stderr: string | null = null;
-        process.stderr.on("data", (chunk: string) => { stdout ??= ""; stderr += chunk; });
+// function exec(file: string, args: string[] = []) {
+//     return new Promise<{ code: number | null, stdout: string | null, stderr: string | null; }>((resolve, reject) => {
+//         const process = spawn(file, args, { stdio: [null, "pipe", "pipe"] });
 
-        process.on("exit", code => { resolve({ code, stdout, stderr }); });
-        process.on("error", err => reject(err));
-    });
-}
+//         let stdout: string | null = null;
+//         process.stdout.on("data", (chunk: string) => { stdout ??= ""; stdout += chunk; });
+//         let stderr: string | null = null;
+//         process.stderr.on("data", (chunk: string) => { stdout ??= ""; stderr += chunk; });
+
+//         process.on("exit", code => { resolve({ code, stdout, stderr }); });
+//         process.on("error", err => reject(err));
+//     });
+// }
 
 async function applescript(cmds: string[]) {
-    const { code, stdout, stderr } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
-    if (code !== 0 || !stdout) throw new Error(`AppleScript execution failed: ${{ code, stdout, stderr }}`);
+    const { stdout } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
     return stdout;
 }
 
@@ -73,7 +75,7 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
         };
         return cachedRemoteData.data;
     } catch (e) {
-        console.error(e);
+        console.error("[AppleMusicRichPresence] Failed to fetch remote data:", e);
         cachedRemoteData = {
             id,
             failures: (id === cachedRemoteData?.id && "failures" in cachedRemoteData ? cachedRemoteData.failures : 0) + 1
@@ -83,25 +85,28 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
 }
 
 export async function fetchTrackData(): Promise<TrackData | null> {
-    const { code: pgrepCode } = await exec("pgrep", ["^Music$"]);
-    if (pgrepCode !== 0) return null;
+    try {
+        await exec("pgrep", ["^Music$"]);
+    } catch (error) {
+        return null;
+    }
 
-    const playerState = await applescript(["tell application \"Music\"", "get player state", "end tell"])
+    const playerState = await applescript(['tell application "Music"', "get player state", "end tell"])
         .then(out => out.trim());
     if (playerState !== "playing") return null;
 
-    const playerPosition = await applescript(["tell application \"Music\"", "get player position", "end tell"])
+    const playerPosition = await applescript(['tell application "Music"', "get player position", "end tell"])
         .then(text => Number.parseFloat(text.trim()));
 
     const stdout = await applescript([
-        "set output to \"\"",
-        "tell application \"Music\"",
+        'set output to ""',
+        'tell application "Music"',
         "set t_id to database id of current track",
         "set t_name to name of current track",
         "set t_album to album of current track",
         "set t_artist to artist of current track",
         "set t_duration to duration of current track",
-        "set output to \"\" & t_id & \"\\n\" & t_name & \"\\n\" & t_album & \"\\n\" & t_artist & \"\\n\" & t_duration",
+        'set output to "" & t_id & "\\n" & t_name & "\\n" & t_album & "\\n" & t_artist & "\\n" & t_duration',
         "end tell",
         "return output"
     ]);

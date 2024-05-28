@@ -68,7 +68,7 @@ export interface TrackData {
     duration: number;
 }
 
-enum AssetImageType {
+const enum AssetImageType {
     Album = "Album",
     Artist = "Artist",
 }
@@ -160,10 +160,9 @@ function customFormat(formatStr: string, data: TrackData) {
 }
 
 function getImageAsset(type: AssetImageType, data: TrackData) {
-    const source =
-        type === AssetImageType.Album ? data.albumArtwork
-            : type === AssetImageType.Artist ? data.artistArtwork
-                : (() => { throw new Error("unreachable"); })();
+    const source = type === AssetImageType.Album
+        ? data.albumArtwork
+        : data.artistArtwork;
 
     if (!source) return undefined;
 
@@ -216,16 +215,21 @@ export default definePlugin({
             small_text: customFormat(settings.store.smallTextString, trackData),
         };
 
-        const buttons: ActivityButton[] = settings.store.enableButtons ? [
-            ...(!!trackData.appleMusicLink ? [{
-                label: "Listen on Apple Music",
-                url: trackData.appleMusicLink,
-            }] : []),
-            ...(!!trackData.songLink ? [{
-                label: "View on SongLink",
-                url: trackData.songLink,
-            }] : []),
-        ] : [];
+        const buttons: ActivityButton[] = [];
+
+        if (settings.store.enableButtons) {
+            if (trackData.appleMusicLink)
+                buttons.push({
+                    label: "Listen on Apple Music",
+                    url: trackData.appleMusicLink,
+                });
+
+            if (trackData.songLink)
+                buttons.push({
+                    label: "View on SongLink",
+                    url: trackData.songLink,
+                });
+        }
 
         return {
             application_id: applicationId,
@@ -241,8 +245,8 @@ export default definePlugin({
 
             assets,
 
-            buttons: buttons.map(v => v.label),
-            metadata: { button_urls: buttons.map(v => v.url), },
+            buttons: buttons.map(v => v.label) || undefined,
+            metadata: { button_urls: buttons.map(v => v.url) || undefined, },
 
             type: settings.store.activityType,
             flags: ActivityFlag.INSTANCE,
