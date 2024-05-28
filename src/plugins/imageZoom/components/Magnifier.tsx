@@ -67,15 +67,18 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             }
         };
         const syncVideos = () => {
-            currentVideoElementRef.current!.currentTime = originalVideoElementRef.current!.currentTime;
+            if (currentVideoElementRef.current && originalVideoElementRef.current)
+                currentVideoElementRef.current.currentTime = originalVideoElementRef.current.currentTime;
         };
 
         const updateMousePosition = (e: MouseEvent) => {
+            if (!element.current) return;
+
             if (instance.state.mouseOver && instance.state.mouseDown) {
                 const offset = size.current / 2;
                 const pos = { x: e.pageX, y: e.pageY };
-                const x = -((pos.x - element.current!.getBoundingClientRect().left) * zoom.current - offset);
-                const y = -((pos.y - element.current!.getBoundingClientRect().top) * zoom.current - offset);
+                const x = -((pos.x - element.current.getBoundingClientRect().left) * zoom.current - offset);
+                const y = -((pos.y - element.current.getBoundingClientRect().top) * zoom.current - offset);
                 setLensPosition({ x: e.x - offset, y: e.y - offset });
                 setImagePosition({ x, y });
                 setOpacity(1);
@@ -184,6 +187,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                         src={originalVideoElementRef.current?.src ?? instance.props.src}
                         autoPlay
                         loop
+                        muted
                     />
                 ) : (
                     <img
