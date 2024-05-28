@@ -30,12 +30,14 @@ const discordBadges: readonly [number, string, string][] = Object.freeze([
     [18, "Moderator Programs Alumni", "fee1624003e2fee35cb398e125dc479b"]
 ]);
 
-function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Element | null {
+function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.Element | null {
+
     switch (badge) {
         case "VencordDonor":
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
-                    {badges.getDonorBadges(author.id)?.map((badge: any) => (
+                    {badges.getDonorBadges(author.id)?.map(badge => (
+
                         <RoleIconComponent
                             className={roleIconClassName}
                             name={badge.description}
@@ -58,8 +60,10 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
             ) : null;
         case "DiscordProfile":
             const chatBadges = discordBadges
-                .filter((badge: any) => (author.flags || author.publicFlags) & (1 << badge[0]))
-                .map((badge: any) => (
+                .filter(badge => (author.flags || author.publicFlags) & (1 << badge[0]))
+
+                .map(badge => (
+
                     <RoleIconComponent
                         className={roleIconClassName}
                         name={badge[1]}
@@ -91,7 +95,8 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
     }
 }
 
-function ChatBadges({ author }: any) {
+function ChatBadges({ author }: { author: User }) {
+
     return (
         <span className="vc-sbic-badge-row">
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
@@ -109,7 +114,8 @@ export default definePlugin({
     dependencies: ["MessageDecorationsAPI"],
     settings,
     start: () => {
-        addDecoration("vc-show-badges-in-chat", props => <ChatBadges author={props.message?.author} />);
+        addDecoration("vc-show-badges-in-chat", props => props.message?.author ? <ChatBadges author={props.message.author} /> : null);
+
     },
     stop: () => {
         removeDecoration("vc-show-badges-in-chat");
