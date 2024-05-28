@@ -188,7 +188,7 @@ export default definePlugin({
         }
 
         // unproxy loaded modules
-        Webpack.onceReady.then(() => {
+        Webpack.onceDiscordLoaded.then(() => {
             setTimeout(() => this.eagerLoad(false), 1000);
 
             if (!IS_WEB) {
@@ -199,7 +199,7 @@ export default definePlugin({
     },
 
     async eagerLoad(forceLoad: boolean) {
-        await Webpack.onceReady;
+        await Webpack.onceDiscordLoaded;
 
         const shortcuts = makeShortcuts();
 

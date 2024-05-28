@@ -39,7 +39,7 @@ import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
-import { onceReady } from "./webpack";
+import { onceDiscordLoaded } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
 async function syncSettings() {
@@ -82,7 +82,7 @@ async function syncSettings() {
 }
 
 async function init() {
-    await onceReady;
+    await onceDiscordLoaded;
     startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
