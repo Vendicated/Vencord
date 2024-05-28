@@ -104,7 +104,6 @@ define(Function.prototype, "m", {
     }
 });
 
-
 /**
  * Define the getter for returning the patched version of the module factory.
  *
