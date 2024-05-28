@@ -75,7 +75,9 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
     /**
      * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
-     * The body function must be an async function. "module.exports" will become a AsyncModulePromise.
+     *
+     * The body function must be an async function. "module.exports" will become a {@link AsyncModulePromise}.
+     *
      * The body function will be called with a function to handle requires that import from an async module, and a function to resolve this async module. An example on how to handle async dependencies:
      * @example
      * const factory = (module, exports, wreq) => {
