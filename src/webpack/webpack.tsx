@@ -8,7 +8,7 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { ProxyInner, proxyInner, proxyInnerValue } from "@utils/proxyInner";
+import { ProxyInner, proxyInner, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import { AnyObject } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
@@ -190,7 +190,7 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (module: ModuleE
         webpackSearchHistory.push(["find", [proxy, filter]]);
     }
 
-    if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as ProxyInner<T>;
+    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<T>;
 
     return proxy;
 }
