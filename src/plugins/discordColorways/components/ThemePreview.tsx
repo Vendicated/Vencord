@@ -110,7 +110,11 @@ export default function ThemePreview({
                             background: `var(--dc-secondary-alt, hsl(${HexToHSL(secondary)[0]} ${HexToHSL(secondary)[1]}% ${Math.max(HexToHSL(secondary)[2] - 3.6, 0)}%))`
                         }}
                     />
-                    <div className="colorwayPreview-filler" />
+                    <div className="colorwayPreview-filler">
+                        <div className="colorwayPreview-channel" style={{ backgroundColor: "var(--white-500)" }} />
+                        <div className="colorwayPreview-channel" style={{ backgroundColor: "var(--primary-360)" }} />
+                        <div className="colorwayPreview-channel" style={{ backgroundColor: "var(--primary-500)" }} />
+                    </div>
                     <div
                         className="colorwayPreview-topShadow"
                         style={{
@@ -144,4 +148,3 @@ export default function ThemePreview({
         </div>
     </>;
 }
-

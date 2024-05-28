@@ -11,6 +11,7 @@ import { FluxDispatcher, Text, Tooltip, useEffect, useState } from "@webpack/com
 import { FluxEvents } from "@webpack/types";
 
 import { getAutoPresets } from "../css";
+import { ColorwayObject } from "../types";
 import Selector from "./Selector";
 
 export default function () {
@@ -49,7 +50,7 @@ export default function () {
                 className={"ColorwaySelectorBtn" + (isThin ? " ColorwaySelectorBtn_thin" : "")}
                 onMouseEnter={async () => {
                     onMouseEnter();
-                    setActiveColorway(await DataStore.get("actveColorwayID") || "None");
+                    setActiveColorway((await DataStore.get("activeColorwayObject") as ColorwayObject).id || "None");
                     setAutoPreset(await DataStore.get("activeAutoPreset") as string);
                 }}
                 onMouseLeave={onMouseLeave}
