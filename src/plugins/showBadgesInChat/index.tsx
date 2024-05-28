@@ -13,6 +13,8 @@ import badges from "plugins/_api/badges";
 const roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
 const RoleIconComponent = findComponentByCodeLazy(".Messages.ROLE_ICON_ALT_TEXT");
 
+import { User } from "discord-types/general";
+
 import settings from "./settings";
 
 const discordBadges: readonly [number, string, string][] = Object.freeze([
@@ -95,7 +97,7 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
     }
 }
 
-function ChatBadges({ author }: { author: User }) {
+function ChatBadges({ author }: { author: User; }) {
 
     return (
         <span className="vc-sbic-badge-row">
