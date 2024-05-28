@@ -245,7 +245,7 @@ export default definePlugin({
 
             assets,
 
-            buttons: buttons.map(v => v.label) || undefined,
+            buttons: buttons.length ? buttons.map(v => v.label) : undefined,
             metadata: { button_urls: buttons.map(v => v.url) || undefined, },
 
             type: settings.store.activityType,
