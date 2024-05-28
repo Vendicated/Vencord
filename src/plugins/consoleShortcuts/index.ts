@@ -33,9 +33,10 @@ const DESKTOP_ONLY = (f: string) => () => {
 const define: typeof Object.defineProperty =
     (obj, prop, desc) =>
         Object.defineProperty(obj, prop, {
-            ...desc,
             configurable: true,
-            enumerable: true
+            enumerable: true,
+            writable: true,
+            ...desc
         });
 
 function makeShortcuts() {
@@ -155,7 +156,7 @@ export default definePlugin({
         for (const [key, val] of Object.entries(shortcuts)) {
             if ("getter" in val) {
                 define(window.shortcutList, key, {
-                    get: () => preload(key, val, false)
+                    get: () => preload(key, val, true)
                 });
 
                 define(window, key, {
