@@ -18,7 +18,7 @@
 
 import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/Settings";
-import { Toasts } from "@webpack/common";
+import { moment, Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
@@ -36,20 +36,20 @@ export async function importSettings(data: string) {
 
     if ("settings" in parsed && "quickCss" in parsed) {
         Object.assign(PlainSettings, parsed.settings);
-        await VencordNative.settings.set(JSON.stringify(parsed.settings, null, 4));
+        await VencordNative.settings.set(parsed.settings);
         await VencordNative.quickCss.set(parsed.quickCss);
     } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
 export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
-    const settings = JSON.parse(VencordNative.settings.get());
+    const settings = VencordNative.settings.get();
     const quickCss = await VencordNative.quickCss.get();
     return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
 }
 
 export async function downloadSettingsBackup() {
-    const filename = "vencord-settings-backup.json";
+    const filename = `vencord-settings-backup-${moment().format("YYYY-MM-DD")}.json`;
     const backup = await exportSettings();
     const data = new TextEncoder().encode(backup);
 
@@ -118,10 +118,10 @@ export async function putCloudSettings(manual?: boolean) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
-            }),
+            },
             body: deflateSync(new TextEncoder().encode(settings))
         });
 
@@ -137,7 +137,7 @@ export async function putCloudSettings(manual?: boolean) {
 
         const { written } = await res.json();
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(PlainSettings);
 
         cloudSettingsLogger.info("Settings uploaded to cloud successfully");
 
@@ -162,11 +162,11 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "GET",
-            headers: new Headers({
+            headers: {
                 Authorization: await getCloudAuth(),
                 Accept: "application/octet-stream",
                 "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
-            }),
+            },
         });
 
         if (res.status === 404) {
@@ -222,7 +222,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 
         // sync with server timestamp instead of local one
         PlainSettings.cloud.settingsSyncVersion = written;
-        VencordNative.settings.set(JSON.stringify(PlainSettings, null, 4));
+        VencordNative.settings.set(PlainSettings);
 
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
@@ -251,9 +251,7 @@ export async function deleteCloudSettings() {
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "DELETE",
-            headers: new Headers({
-                Authorization: await getCloudAuth()
-            }),
+            headers: { Authorization: await getCloudAuth() },
         });
 
         if (!res.ok) {

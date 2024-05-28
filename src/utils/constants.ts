@@ -16,17 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import gitHash from "~git-hash";
-import gitRemote from "~git-remote";
-
-export {
-    gitHash,
-    gitRemote
-};
-
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
@@ -42,6 +33,10 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
+    Nobody: {
+        name: "Nobody",
+        id: 0n,
+    },
     Ven: {
         name: "Vendicated",
         id: 343383572805058560n
@@ -54,6 +49,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cynosphere",
         id: 150745989836308480n
     },
+    Trwy: {
+        name: "trey",
+        id: 354427199023218689n
+    },
     Megu: {
         name: "Megumin",
         id: 545581357812678656n
@@ -62,8 +61,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "botato",
         id: 440990343899643943n
     },
-    obscurity: {
-        name: "obscurity",
+    fawn: {
+        name: "fawn",
         id: 336678828233588736n,
     },
     rushii: {
@@ -156,7 +155,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     kemo: {
         name: "kemo",
-        id: 299693897859465228n
+        id: 715746190813298788n
     },
     dzshn: {
         name: "dzshn",
@@ -187,7 +186,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 296776625432035328n,
     },
     TheSun: {
-        name: "ActuallyTheSun",
+        name: "sunnie",
         id: 406028027768733696n
     },
     axyie: {
@@ -267,6 +266,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Dziurwa",
         id: 1001086404203389018n
     },
+    arHSM: {
+        name: "arHSM",
+        id: 841509053422632990n
+    },
     F53: {
         name: "F53",
         id: 280411966126948353n
@@ -286,10 +289,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RyanCaoDev: {
         name: "RyanCaoDev",
         id: 952235800110694471n,
-    },
-    Strencher: {
-        name: "Strencher",
-        id: 415849376598982656n
     },
     FieryFlames: {
         name: "Fiery",
@@ -359,10 +358,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "bb010g",
         id: 72791153467990016n,
     },
-    Lumap: {
-        name: "lumap",
-        id: 635383782576357407n
-    },
     Dolfies: {
         name: "Dolfies",
         id: 852892297661906993n,
@@ -383,9 +378,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    UlyssesZhan: {
+        name: "UlyssesZhan",
+        id: 586808226058862623n
+    },
     ant0n: {
         name: "ant0n",
         id: 145224646868860928n
+    },
+    Board: {
+        name: "BoardTM",
+        id: 285475344817848320n,
     },
     philipbry: {
         name: "philipbry",
@@ -402,6 +405,118 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Lexi: {
         name: "Lexi",
         id: 506101469787717658n
+    },
+    Mopi: {
+        name: "Mopi",
+        id: 1022189106614243350n
+    },
+    Grzesiek11: {
+        name: "Grzesiek11",
+        id: 368475654662127616n,
+    },
+    Samwich: {
+        name: "Samwich",
+        id: 976176454511509554n,
+    },
+    coolelectronics: {
+        name: "coolelectronics",
+        id: 696392247205298207n,
+    },
+    Av32000: {
+        name: "Av32000",
+        id: 593436735380127770n,
+    },
+    Noxillio: {
+        name: "Noxillio",
+        id: 138616536502894592n,
+    },
+    Kyuuhachi: {
+        name: "Kyuuhachi",
+        id: 236588665420251137n,
+    },
+    nin0dev: {
+        name: "nin0dev",
+        id: 886685857560539176n
+    },
+    Elvyra: {
+        name: "Elvyra",
+        id: 708275751816003615n,
+    },
+    Inbestigator: {
+        name: "Inbestigator",
+        id: 761777382041714690n
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n
+    },
+    JohnyTheCarrot: {
+        name: "JohnyTheCarrot",
+        id: 132819036282159104n
+    },
+    puv: {
+        name: "puv",
+        id: 469441552251355137n
+    },
+    Kodarru: {
+        name: "Kodarru",
+        id: 785227396218748949n
+    },
+    nakoyasha: {
+        name: "nakoyasha",
+        id: 222069018507345921n
+    },
+    Sqaaakoi: {
+        name: "Sqaaakoi",
+        id: 259558259491340288n
+    },
+    Byron: {
+        name: "byeoon",
+        id: 1167275288036655133n
+    },
+    Kaitlyn: {
+        name: "kaitlyn",
+        id: 306158896630988801n
+    },
+    PolisanTheEasyNick: {
+        name: "Oleh Polisan",
+        id: 242305263313485825n
+    },
+    HAHALOSAH: {
+        name: "HAHALOSAH",
+        id: 903418691268513883n
+    },
+    GabiRP: {
+        name: "GabiRP",
+        id: 507955112027750401n
+    },
+    ImBanana: {
+        name: "Im_Banana",
+        id: 635250116688871425n
+    },
+    xocherry: {
+        name: "xocherry",
+        id: 221288171013406720n
+    },
+    ScattrdBlade: {
+        name: "ScattrdBlade",
+        id: 678007540608532491n
+    },
+    goodbee: {
+        name: "goodbee",
+        id: 658968552606400512n
+    },
+    Moxxie: {
+        name: "Moxxie",
+        id: 712653921692155965n,
+    },
+    Ethan: {
+        name: "Ethan",
+        id: 721717126523781240n,
+    },
+    nyx: {
+        name: "verticalsync",
+        id: 328165170536775680n
     },
 } satisfies Record<string, Dev>);
 

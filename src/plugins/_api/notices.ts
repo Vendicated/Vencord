@@ -26,10 +26,10 @@ export default definePlugin({
     required: true,
     patches: [
         {
-            find: 'displayName="NoticeStore"',
+            find: '"NoticeStore"',
             replacement: [
                 {
-                    match: /\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
+                    match: /(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
                 {

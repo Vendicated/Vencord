@@ -16,18 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export * from "../shared/debounce";
+export * from "../shared/onceDefined";
 export * from "./ChangeList";
 export * from "./constants";
-export * from "./debounce";
 export * from "./discord";
 export * from "./guards";
 export * from "./lazy";
+export * from "./lazyReact";
 export * from "./localStorage";
 export * from "./Logger";
 export * from "./margins";
+export * from "./mergeDefaults";
 export * from "./misc";
 export * from "./modal";
-export * from "./onceDefined";
 export * from "./onlyOnce";
 export * from "./patches";
 export * from "./Queue";

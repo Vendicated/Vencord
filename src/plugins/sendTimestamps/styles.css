@@ -42,10 +42,6 @@
     margin-bottom: 1em;
 }
 
-.vc-st-button {
-    padding: 0 6px;
-}
-
 .vc-st-button svg {
     transform: scale(1.1) translateY(1px);
 }
