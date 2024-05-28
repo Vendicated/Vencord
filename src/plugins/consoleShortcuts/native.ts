@@ -6,7 +6,7 @@
 
 import { IpcMainInvokeEvent } from "electron";
 
-export function initDevtoolsListener(e: IpcMainInvokeEvent) {
+export function initDevtoolsOpenEagerLoad(e: IpcMainInvokeEvent) {
     const handleDevtoolsOpened = () => e.sender.executeJavaScript("Vencord.Plugins.plugins.ConsoleShortcuts.eagerLoad(true)");
 
     if (e.sender.isDevToolsOpened())

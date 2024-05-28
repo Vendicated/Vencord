@@ -169,12 +169,14 @@ export default definePlugin({
         }
 
         // unproxy loaded modules
-        Webpack.onceReady.then(() => setTimeout(() => this.eagerLoad(false), 1000));
+        Webpack.onceReady.then(() => {
+            setTimeout(() => this.eagerLoad(false), 1000);
 
-        if (!IS_WEB) {
-            const Native = VencordNative.pluginHelpers.ConsoleShortcuts as PluginNative<typeof import("./native")>;
-            Native.initDevtoolsListener();
-        }
+            if (!IS_WEB) {
+                const Native = VencordNative.pluginHelpers.ConsoleShortcuts as PluginNative<typeof import("./native")>;
+                Native.initDevtoolsOpenEagerLoad();
+            }
+        });
     },
 
     async eagerLoad(forceLoad: boolean) {
