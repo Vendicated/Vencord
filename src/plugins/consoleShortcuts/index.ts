@@ -35,7 +35,7 @@ const define: typeof Object.defineProperty =
         Object.defineProperty(obj, prop, {
             configurable: true,
             enumerable: true,
-            writable: true,
+            writable: Object.hasOwn(desc, "value"),
             ...desc
         });
 
