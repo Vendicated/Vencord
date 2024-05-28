@@ -37,7 +37,6 @@ interface ColorPickerWithSwatchesProps {
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>("presets,", "customColor:");
 
-
 const CanvasSettings = (props: CanvasSettingsProps) => {
     const { setCanvas, currentState } = props;
     const [changedColor, setChangedColor] = React.useState<number>(currentState.fill?.color ?? 16777215);
