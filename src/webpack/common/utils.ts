@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, find, findByCode, findByProps, waitFor } from "../webpack";
+import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {
@@ -26,7 +26,7 @@ export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch",
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
-        _resolveReady();
+        _resolveDiscordLoaded();
     };
     m.subscribe("CONNECTION_OPEN", cb);
 

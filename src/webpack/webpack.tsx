@@ -17,12 +17,12 @@ import { GenericStore } from "./common";
 
 const logger = new Logger("Webpack");
 
-export let _resolveReady: () => void;
+export let _resolveDiscordLoaded: () => void;
 /**
  * Fired once a gateway connection to Discord has been established.
- * This indicates that the core webpack modules have been initialised
+ * This indicates that the core Webpack modules have been initialized, and we are logged in.
  */
-export const onceReady = new Promise<void>(r => _resolveReady = r);
+export const onceDiscordLoaded = new Promise<void>(r => _resolveDiscordLoaded = r);
 
 export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
