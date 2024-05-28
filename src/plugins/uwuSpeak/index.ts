@@ -13,22 +13,28 @@ import definePlugin, { OptionType } from "@utils/types";
 const randomInt = (min, max) => { return Math.floor(Math.random() * (max + 1 - min)) + min; };
 
 const settings = definePluginSettings({
-    suffixes: {
-        description: "Suffixes like UwU, OwO, and :3",
+    enabledSuffixes: {
+        description: "Suffixes like UwU and OwO",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
     },
-    textReplacements: {
+    replacements: {
         description: "Replacements like bye -> bai, cool -> kewl, and what -> wat",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
     },
+    minimumWordLength: {
+        description: "Minimum amount of letters before a word gets UwU'd. for example 3 letters would remove words like the, bye, etc",
+        type: OptionType.NUMBER,
+        default: 0,
+        restartNeeded: false
+    },
 });
 
 
-const endwings: string[] = [
+const endings: string[] = [
     "UwU",
     "OwO",
     "Nya~",
@@ -41,7 +47,7 @@ const endwings: string[] = [
     ":>"
 ];
 
-const substitUwUtions = {
+const substitutions = {
     "r": "w",
     "l": "w",
     "no": "nyo",
@@ -52,7 +58,7 @@ const substitUwUtions = {
 };
 
 
-const wordSubstitUwUtions = {
+const wordSubstitutions = {
     "this": "dis",
     "the": "da",
     "says": "sez",
@@ -113,8 +119,7 @@ const wordSubstitUwUtions = {
     "bomb": "bom",
     "code": "cowde",
     "programmer": "pwogwammr",
-    "funny": "silly",
-    "because": "bc",
+    "funny": "silly"
 };
 
 
@@ -122,39 +127,39 @@ const wordSubstitUwUtions = {
 function uwuIt(inpUwUt: string): string {
 
     const manyInputBlock: string[] = inpUwUt.split(" ");
-    var fimishedStwing: string = "";
-    manyInputBlock.forEach((smolTextBwoc: string) => {
-        if (smolTextBwoc.includes("http") || smolTextBwoc.includes(".com") || smolTextBwoc.includes(".net") || smolTextBwoc.includes(".org")) {
+    var finishedString: string = "";
+    manyInputBlock.forEach((block: string) => {
+        if (block.includes("http") || block.includes(".com") || block.includes(".net") || block.includes(".org")) {
             // uhhhhhh how would i just "go around" in this? I'm dum ;-;
         } else {
-            smolTextBwoc = smolTextBwoc.toLowerCase();
+            block = block.toLowerCase();
 
-            if (settings.store.textReplacements) {
-                if (wordSubstitUwUtions[smolTextBwoc]) {
-                    smolTextBwoc = wordSubstitUwUtions[smolTextBwoc];
+            if (settings.store.replacements) {
+                if (wordSubstitutions[block]) {
+                    block = wordSubstitutions[block];
                 } else {
                     // pardon me but what the actual fuck is this
                     // https://stackoverflow.com/questions/34913675/how-to-iterate-keys-values-in-javascript
-                    for (const [key, value] of Object.entries(substitUwUtions)) {
-                        smolTextBwoc = smolTextBwoc.replaceAll(key, value);
+                    for (const [key, value] of Object.entries(substitutions)) {
+                        block = block.replaceAll(key, value);
                     }
                 }
             }
         }
-        fimishedStwing += smolTextBwoc + " ";
+        finishedString += block + " ";
     });
 
-    if (settings.store.suffixes) {
-        fimishedStwing += endwings[randomInt(0, endwings.length - 1)];
+    if (settings.store.enabledSuffixes) {
+        finishedString += endings[randomInt(0, endings.length - 1)];
     }
 
-    return fimishedStwing;
+    return finishedString;
 }
 
 
 export default definePlugin({
     name: "UwUSpeak",
-    description: "Adds a command (/uwuify) that makes your text more silly and cute",
+    description: "Makes your text more UwU",
     authors: [Devs.UnluckyCrafter, Devs.WackyModer],
     dependencies: ["CommandsAPI"],
     settings,
