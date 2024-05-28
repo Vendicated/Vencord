@@ -511,7 +511,7 @@ export function search(...filters: Array<string | RegExp>) {
         const factory = factories[id];
         const factoryStr = String(factory);
         for (const filter of filters) {
-            if (typeof filter === "string" && !factoryStr.includes(factoryStr)) continue outer;
+            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
             if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
         }
         results[id] = factory;
