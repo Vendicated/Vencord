@@ -86,7 +86,7 @@ const wordSubstitutions = {
     "that's": "dat's",
     "thats": "dats",
     "angry": "angy",
-    "wtf": "wat the fawk",
+    "wtf": "wat the fuwk",
     "love": "wuv",
     "goodbye": "bai-bai",
     "thank you": "thamks",
