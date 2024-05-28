@@ -27,10 +27,10 @@ import style from "./index.css?managed";
 const API_URL = "https://usrbg.is-hardly.online/users";
 
 interface UsrbgApiReturn {
-    endpoint: string
-    bucket: string
-    prefix: string
-    users: Record<string, string>
+    endpoint: string;
+    bucket: string;
+    prefix: string;
+    users: Record<string, string>;
 }
 
 const settings = definePluginSettings({
@@ -70,6 +70,19 @@ export default definePlugin({
                 {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
                     replace: "&&$self.shouldShowBadge(arguments[0])$&"
+                }
+            ]
+        },
+        {
+            find: /overrideBannerSrc:\i,profileType:/,
+            replacement: [
+                {
+                    match: /(\i)\.premiumType/,
+                    replace: "$self.premiumHook($1)||$&"
+                },
+                {
+                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},overrideBannerSrc:)/,
+                    replace: "$1.overrideBannerSrc=$self.useBannerHook($1);"
                 }
             ]
         },
@@ -123,7 +136,7 @@ export default definePlugin({
         return !!this.data?.users[userId];
     },
 
-    getImageUrl(userId: string): string|null {
+    getImageUrl(userId: string): string | null {
         if (!this.userHasBackground(userId)) return null;
 
         // We can assert that data exists because userHasBackground returned true
