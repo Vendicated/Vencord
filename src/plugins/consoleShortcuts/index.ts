@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
@@ -95,6 +96,7 @@ function makeShortcuts() {
         plugins: { getter: () => Vencord.Plugins.plugins },
         Settings: { getter: () => Vencord.Settings },
         Api: { getter: () => Vencord.Api },
+        Util: { getter: () => Vencord.Util },
         reload: () => location.reload(),
         restart: IS_WEB ? DESKTOP_ONLY("restart") : relaunch,
         canonicalizeMatch,
@@ -127,13 +129,23 @@ function makeShortcuts() {
             }
 
             Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
-        }
+        },
+
+        preenable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,
+
+        channel: { getter: () => getCurrentChannel(), preload: false },
+        channelId: { getter: () => Common.SelectedChannelStore.getChannelId(), preload: false },
+        guild: { getter: () => getCurrentGuild(), preload: false },
+        guildId: { getter: () => Common.SelectedGuildStore.getGuildId(), preload: false },
+        me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
+        meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
+        messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false }
     };
 }
 
 function preload(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
-    if (!currentVal) return;
+    if (!currentVal || val.preload === false) return currentVal;
 
     const value = currentVal[SYM_LAZY_GET]
         ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
@@ -186,7 +198,7 @@ export default definePlugin({
         const shortcuts = makeShortcuts();
 
         for (const [key, val] of Object.entries(shortcuts)) {
-            if (!Object.hasOwn(val, "getter")) continue;
+            if (!Object.hasOwn(val, "getter") || (val as any).preload === false) continue;
 
             try {
                 preload(key, val, forceLoad);
