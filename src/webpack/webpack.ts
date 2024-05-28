@@ -76,6 +76,8 @@ export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
+
+    if (webpackRequire.c == null) return;
     cache = webpackRequire.c;
 
     Reflect.defineProperty(webpackRequire.c, Symbol.toStringTag, {
@@ -507,10 +509,10 @@ export function search(...filters: Array<string | RegExp>) {
     outer:
     for (const id in factories) {
         const factory = factories[id];
-        const str = String(factory);
+        const factoryStr = String(factory);
         for (const filter of filters) {
-            if (typeof filter === "string" && !str.includes(filter)) continue outer;
-            if (filter instanceof RegExp && !filter.test(str)) continue outer;
+            if (typeof filter === "string" && !factoryStr.includes(factoryStr)) continue outer;
+            if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
         }
         results[id] = factory;
     }
