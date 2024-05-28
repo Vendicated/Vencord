@@ -12,7 +12,7 @@ The settings editor lets you:
 
 https://github.com/Vendicated/Vencord/assets/119569726/c7543516-f691-42c5-baa2-68dbda96d46a
 
-![image](https://github.com/Vendicated/Vencord/assets/119569726/ca736d0d-c09a-4737-9cfa-4fc88cfc91ae)
+![](https://github.com/Vendicated/Vencord/assets/119569726/ca736d0d-c09a-4737-9cfa-4fc88cfc91ae)
 
 ---
 
