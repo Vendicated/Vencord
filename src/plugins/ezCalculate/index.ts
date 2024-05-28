@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 
 export default definePlugin({
     name: "ezCalculate",
-    description: "A plugin to perform basic mathematical calculations",
+    description: "A simple way to solve equations via Vencord.",
     authors: [Devs.jsh4d],
     patches: [],
     start() {
