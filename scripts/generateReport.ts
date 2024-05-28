@@ -548,8 +548,8 @@ async function runtime(token: string) {
                                 result = findResult;
                             }
 
-                            if (findResult[Vencord.Util.proxyInnerGet] != null) {
-                                result = findResult[Vencord.Util.proxyInnerValue];
+                            if (findResult[Vencord.Util.SYM_PROXY_INNER_GET] != null) {
+                                result = findResult[Vencord.Util.SYM_PROXY_INNER_VALUE];
                             }
 
                             if (findResult.$$vencordInner != null) {
