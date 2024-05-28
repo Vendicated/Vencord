@@ -172,7 +172,9 @@ export default definePlugin({
         }
     },
 
-    eagerLoad(forceLoad: boolean) {
+    async eagerLoad(forceLoad: boolean) {
+        await Webpack.onceReady;
+
         const shortcuts = makeShortcuts();
 
         for (const [key, val] of Object.entries(shortcuts)) {
