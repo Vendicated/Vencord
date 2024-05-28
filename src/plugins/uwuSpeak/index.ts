@@ -145,7 +145,7 @@ function uwuIt(inpUwUt: string): string {
             if (wordSubstitutions[block]) {
                 block = wordSubstitutions[block];
             } else {
-                // pardon me but what the actual fuck is this
+                // pardon me but what
                 // https://stackoverflow.com/questions/34913675/how-to-iterate-keys-values-in-javascript
                 for (const [key, value] of Object.entries(substitutions)) {
                     block = block.replaceAll(key, value);
