@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,17 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "ColorSighted",
-    description: "Removes the colorblind-friendly icons from statuses, just like 2015-2017 Discord",
-    authors: [Devs.lewisakura],
+    name: "MessageUpdaterAPI",
+    description: "API for updating and re-rendering messages.",
+    authors: [Devs.Nuckyz],
+
     patches: [
         {
-            find: "Masks.STATUS_ONLINE",
+            // Message accessories have a custom logic to decide if they should render again, so we need to make it not ignore changed message reference
+            find: "}renderEmbeds(",
             replacement: {
-                match: /Masks\.STATUS_(?:IDLE|DND|STREAMING|OFFLINE)/g,
-                replace: "Masks.STATUS_ONLINE"
-            }
-        },
-        {
-            find: ".AVATAR_STATUS_MOBILE_16;",
-            replacement: {
-                match: /(fromIsMobile:\i=!0,.+?)status:(\i)/,
-                // Rename field to force it to always use "online"
-                replace: '$1status_$:$2="online"'
+                match: /(?<=this.props,\i,\[)"message",/,
+                replace: ""
             }
         }
     ]

@@ -99,6 +99,16 @@ Object.defineProperty(Function.prototype, "O", {
             };
 
             onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
+
+            // Returns whether a chunk has been loaded
+            Object.defineProperty(onChunksLoaded, "j", {
+                set(v) {
+                    delete onChunksLoaded.j;
+                    onChunksLoaded.j = v;
+                    originalOnChunksLoaded.j = v;
+                },
+                configurable: true
+            });
         }
 
         Object.defineProperty(this, "O", {
@@ -199,7 +209,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (exports === window && require.c) {
+            if (require.c && (exports === window || exports?.default === window)) {
                 Object.defineProperty(require.c, id, {
                     value: require.c[id],
                     enumerable: false,
@@ -219,7 +229,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             for (const [filter, callback] of subscriptions) {
                 try {
-                    if (filter(exports)) {
+                    if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
                     } else if (exports.default && filter(exports.default)) {
