@@ -333,7 +333,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "renderEmbeds(",
+            find: "}renderEmbeds(",
             replacement: [
                 {
                     // Call our function to decide whether the embed should be ignored or not

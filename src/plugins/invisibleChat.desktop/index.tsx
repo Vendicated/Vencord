@@ -18,12 +18,13 @@
 
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
 import { addButton, removeButton } from "@api/MessagePopover";
+import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Constants, FluxDispatcher, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
@@ -103,7 +104,7 @@ export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way!",
     authors: [Devs.SammCheese],
-    dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI"],
+    dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI", "MessageUpdaterAPI"],
     patches: [
         {
             // Indicator
@@ -180,14 +181,7 @@ export default definePlugin({
                 message.embeds.push(embed);
         }
 
-        this.updateMessage(message);
-    },
-
-    updateMessage: (message: any) => {
-        FluxDispatcher.dispatch({
-            type: "MESSAGE_UPDATE",
-            message,
-        });
+        updateMessage(message.channel_id, message.id, { embeds: message.embeds });
     },
 
     popOverIcon: () => <PopOverIcon />,
