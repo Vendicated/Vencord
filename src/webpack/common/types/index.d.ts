@@ -18,7 +18,7 @@
 
 export * from "./classes";
 export * from "./components";
-export * from "./fluxActions";
+export * from "./fluxEvents";
 export * from "./i18nMessages";
 export * from "./menu";
 export * from "./settingsStores";

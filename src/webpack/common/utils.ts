@@ -136,7 +136,7 @@ export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionT
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.Permissions; };
+export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
 
 export const zustandCreate = findByCodeLazy("will be removed in v4");
 

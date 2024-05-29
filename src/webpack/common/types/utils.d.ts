@@ -16,213 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Guild, GuildMember } from "discord-types/general"; // TODO
-import type { EventEmitter } from "events"; // Discord uses a polyfill for Node's EventEmitter
+import { Guild, GuildMember } from "discord-types/general";
 import type { ReactNode } from "react";
 
-// import type { OmitIndexSignature } from "type-fest";
-import type { ExcludeAction, ExtractAction, FluxAction, FluxActionType } from "./fluxActions";
-import type { i18nMessages } from "./i18nMessages";
+import type { FluxEvents } from "./fluxEvents";
+import { i18nMessages } from "./i18nMessages";
 
-export type { ExcludeAction, ExtractAction, FluxAction, FluxActionType };
+export { FluxEvents };
 
-type Nullish = null | undefined;
-
-declare class DepGraph<Data = any> {
-    constructor(options?: { circular?: boolean | undefined; } | undefined);
-
-    addDependency(from: string, to: string): void;
-    addNode(name: string, data/* ?*/: Data/* | undefined*/): void;
-    clone(): DepGraph<Data>;
-    dependantsOf(name: string, leavesOnly?: boolean | undefined): string[];
-    dependenciesOf(name: string, leavesOnly?: boolean | undefined): string[];
-    getNodeData(name: string): Data;
-    hasNode(name: string): Data;
-    overallOrder(leavesOnly?: boolean | undefined): string[];
-    removeDependency(from: string, to: string): void;
-    removeNode(name: string): void;
-    setNodeData(name: string, data/* ?*/: Data/* | undefined*/): void;
-    size(): number;
-
-    circular: boolean | undefined;
-    nodes: Record<string, Data/* | string*/>;
-    outgoingEdges: Record<string, string[]>;
-    incomingEdges: Record<string, string[]>;
-}
-
-export const enum FluxDispatchBand {
-    Early = 0,
-    Database = 1,
-    Default = 2
-}
-
-/*
-export type FluxActionHandler<Action = FluxAction, Return = void> = Action extends FluxAction
-    ? Exclude<keyof OmitIndexSignature<Action>, "type"> extends never
-        ? (action: any) => Return
-        : (action: Action) => Return
-    : never;
-*/
-
-export type FluxActionHandler<Action extends FluxAction = FluxAction> = (action: Action) => void;
-
-export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
-    = { [ActionType in Action["type"]]: FluxActionHandler<ExtractAction<Action, ActionType>>; };
-
-interface FluxActionHandlersGraphNode {
-    name: string; // storeName
-    band: FluxDispatchBand;
-    actionHandler: FluxActionHandlerMap<FluxAction>;
-    storeDidChange: FluxActionHandler<FluxAction>;
-}
-
-type FluxOrderedActionHandlers<Action extends FluxAction = FluxAction> = {
-    name: string; // storeName
-    actionHandler: FluxActionHandler<Action>;
-    storeDidChange: FluxActionHandler<Action>;
-}[];
-
-declare class FluxActionHandlersGraph {
-    _addToBand(dispatchToken: string, dispatchBand: FluxDispatchBand): void;
-    _bandToken(dispatchBand: FluxDispatchBand): string;
-    _computeOrderedActionHandlers<ActionType extends FluxActionType>(
-        actionType: ActionType
-    ): FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>>[];
-    _computeOrderedCallbackTokens(): string[];
-    _invalidateCaches(): void;
-    _validateDependencies(fromDispatchToken: string, toDispatchToken: string): void;
-    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
-    createToken(): string;
-    getOrderedActionHandlers<ActionType extends FluxActionType>({ type }: {
-        type: ActionType;
-    }): FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>>;
-    register<Action extends FluxAction>(
-        storeName: string,
-        actionHandlers: FluxActionHandlerMap<Action>,
-        storeDidChange: FluxActionHandler<Action>,
-        dispatchBand: FluxDispatchBand,
-        dispatchToken?: string | undefined
-    ): string;
-
-    _dependencyGraph: DepGraph<FluxActionHandlersGraphNode>;
-    _lastID: number;
-    _orderedActionHandlers: {
-        [ActionType in FluxActionType]?: FluxOrderedActionHandlers<ExtractAction<FluxAction, ActionType>> | Nullish;
-    };
-    _orderedCallbackTokens: string[] | Nullish;
-}
-
-interface SentryUtils {
-    addBreadcrumb: (breadcrumb: {
-        category?: string | undefined;
-        data?: any;
-        level?: string | undefined;
-        message?: string | undefined;
-        type?: string | undefined;
-    }) => void;
-}
-
-type FluxActionMetric<ActionType extends FluxActionType = FluxActionType>
-    = [storeName: string, actionType: ActionType, totalTime: number];
-
-declare class FluxActionLog<Action extends FluxAction = FluxAction> {
-    constructor(actionType: Action["type"]);
-
-    get name(): Action["type"];
-    toJSON(): Pick<this, "action" | "createdAt" | "traces"> & {
-        created_at: FluxActionLog["createdAt"];
-    };
-
-    action: Action;
-    createdAt: Date;
-    error: Error | undefined;
-    id: number;
-    startTime: number;
-    totalTime: number;
-    traces: {
-        name: string;
-        time: number;
-    }[];
-}
-
-declare class FluxActionLogger extends EventEmitter {
-    constructor(options?: { persist?: boolean | undefined; } | undefined);
-
-    getLastActionMetrics(
-        title: string,
-        limit?: number | undefined /* = 20 */
-    ): FluxActionMetric[];
-    getSlowestActions<ActionType extends FluxActionType = FluxActionType>(
-        actionType?: ActionType | Nullish,
-        limit?: number | undefined /* = 20 */
-    ): FluxActionMetric<ActionType>[];
-    log<Action extends FluxAction>(
-        action: Action,
-        callback: (func: <T>(storeName: string, func: () => T) => T) => void
-    ): FluxActionLog<Action>;
-
-    logs: FluxActionLog[];
-    persist: boolean;
-}
-
-/*
- * The only reason to make Dispatcher generic with a type parameter for the actions it handles would be to allow plugins
- * to create their own Flux stores with their own actions. However, this would require removing all contravariant properties
- * from Dispatcher so that plugins could create stores with their own Dispatcher instances. This would be required, since
- * the alternative option, allowing plugins to use the main Dispatcher instance, would require removing type information for
- * Discord's actions from Dispatcher, and would introduce the potential for action type name conflicts. Both of these
- * options would harm the main use case of these types. Furthermore, there are other state management libraries bundled with
- * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~398
- * stores use the same instance), implying that their type for Dispatcher is also not generic.
- */
-export class FluxDispatcher {
-    constructor(
-        defaultBand?: FluxDispatchBand | undefined /* = FluxDispatchBand.Early */,
-        actionLogger?: FluxActionLogger | Nullish,
-        sentryUtils?: SentryUtils | Nullish
-    );
-
-    _dispatch(
-        action: FluxAction,
-        func: <T>(storeName: string, func: () => T) => T
-    ): boolean | void;
-    _dispatchWithDevtools(action: FluxAction): void;
-    _dispatchWithLogging(action: FluxAction): void;
-    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
-    addInterceptor(interceptor: FluxActionHandler): void;
-    createToken(): string;
-    dispatch(action: FluxAction): Promise<void>;
-    flushWaitQueue(): void;
+export interface FluxDispatcher {
+    _actionHandlers: any;
+    _subscriptions: any;
+    dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
     isDispatching(): boolean;
-    register<Action extends FluxAction>(
-        storeName: string,
-        actionHandlers: FluxActionHandlerMap<Action>,
-        storeDidChange: FluxActionHandler<Action>,
-        dispatchBand?: FluxDispatchBand | Nullish,
-        dispatchToken?: string | undefined
-    ): string;
-    subscribe<ActionType extends FluxActionType>(
-        actionType: ActionType,
-        listener: FluxActionHandler<ExtractAction<FluxAction, ActionType>>
-    ): void;
-    unsubscribe<ActionType extends FluxActionType>(
-        actionType: ActionType,
-        listener: FluxActionHandler<ExtractAction<FluxAction, ActionType>>
-    ): void;
+    subscribe(event: FluxEvents, callback: (data: any) => void): void;
+    unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
     wait(callback: () => void): void;
-
-    _actionHandlers: FluxActionHandlersGraph;
-    _currentDispatchActionType: FluxActionType | Nullish;
-    _defaultBand: FluxDispatchBand;
-    _interceptors: ((action: FluxAction) => boolean)[];
-    _processingWaitQueue: boolean;
-    _sentryUtils: SentryUtils | Nullish;
-    _subscriptions: {
-        [ActionType in FluxActionType]?: Set<FluxActionHandler<ExtractAction<FluxAction, ActionType>>> | Nullish;
-    };
-    _waitQueue: (() => void)[];
-    actionLogger: FluxActionLogger;
-    functionCache: FluxActionHandlerMap<FluxAction>;
 }
 
 export type Parser = Record<
@@ -274,7 +83,7 @@ interface RestRequestData {
 
 export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
-export type PermissionKeys = "CREATE_INSTANT_INVITE"
+export type Permissions = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"
     | "BAN_MEMBERS"
     | "ADMINISTRATOR"
@@ -322,7 +131,7 @@ export type PermissionKeys = "CREATE_INSTANT_INVITE"
     | "MANAGE_EVENTS"
     | "CREATE_EVENTS";
 
-export type Permissions = Record<PermissionKeys, bigint>;
+export type PermissionsBits = Record<Permissions, bigint>;
 
 export interface Locale {
     name: string;
@@ -373,7 +182,6 @@ export interface NavigationRouter {
 }
 
 export interface IconUtils {
-    // @ts-expect-error: TODO
     getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
     getDefaultAvatarURL(id: string, discriminator?: string): string;
     getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;

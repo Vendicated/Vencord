@@ -1,0 +1,32 @@
+{
+    "name": "@vencord/discord-types",
+    "version": "0.0.0-development",
+    "description": "",
+    "license": "GPL-3.0-or-later",
+    "author": "Vencord",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Vendicated/Vencord.git",
+        "directory": "packages/discord-types"
+    },
+    "files": ["src"],
+    "sideEffects": false,
+    "types": "./src/index.d.ts",
+    "dependencies": {
+        "@types/events": "~3.0.3",
+        "dependency-graph": "0.9.0",
+        "moment": "2.22.2",
+        "type-fest": "^4.18.3"
+    },
+    "devDependencies": {
+        "@eslint-types/unicorn": "^52.0.0",
+        "@stylistic/eslint-plugin": "^2.1.0",
+        "eslint": "^9.3.0",
+        "eslint-plugin-headers": "^1.1.2",
+        "eslint-plugin-import-x": "^0.5.1",
+        "eslint-plugin-simple-import-sort": "^12.1.0",
+        "eslint-plugin-unicorn": "^53.0.0",
+        "typescript": "^5.4.5",
+        "typescript-eslint": "^8.0.0-alpha.20"
+    }
+}

@@ -18,7 +18,7 @@
 
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import type { FluxActionType } from "@webpack/types";
+import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -120,7 +120,7 @@ export interface PluginDef {
      * Allows you to subscribe to Flux events
      */
     flux?: {
-        [E in FluxActionType]?: (event: any) => void;
+        [E in FluxEvents]?: (event: any) => void;
     };
     /**
      * Allows you to manipulate context menus

@@ -1,0 +1,30 @@
+{
+    "include": ["src"],
+
+    "compilerOptions": {
+        "exactOptionalPropertyTypes": true,
+        "strict": true,
+
+        "module": "Node16",
+        "types": ["events"],
+
+        "noEmit": true,
+
+        "lib": [
+            "DOM",
+            "ES2019",
+            "ES2020.BigInt",
+            "ES2020.Date",
+            "ES2020.Intl",
+            "ES2020.Number",
+            "ES2020.Promise",
+            "ES2020.String",
+            "ES2021.String",
+            "ES2022.Array",
+            "ES2022.Object",
+            "ES2022.String",
+            "ES2023.Array"
+        ],
+        "target": "ES2020"
+    }
+}
