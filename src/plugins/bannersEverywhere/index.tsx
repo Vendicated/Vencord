@@ -44,7 +44,10 @@ const useFetchMemberProfile = (userId: string): string => {
     }, []);
 
     if (!profile?.banner) return "";
-    return `https://cdn.discordapp.com/banners/${userId}/${profile.banner}`;
+    const extension = settings.store.animate && profile.banner.startsWith("a_")
+        ? ".gif"
+        : ".png";
+    return `https://cdn.discordapp.com/banners/${userId}/${profile.banner}${extension}`;
 };
 export default definePlugin({
     name: "BannersEverywhere",
@@ -83,7 +86,9 @@ export default definePlugin({
 
     memberListBanner: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         let url: string | null = null;
-        if (Vencord.Plugins.isPluginEnabled("USRBG")) {
+        // usrbg api has no way of telling if the banner is animated or not
+        // if the user doesnt want animated banners, just get rid of usrbg until there is a way to tell
+        if (settings.store.animate && Vencord.Plugins.isPluginEnabled("USRBG")) {
             const USRBG = Vencord.Plugins.plugins.USRBG as unknown as typeof import("../usrbg/index").default;
             url = USRBG.getImageUrl(user.id);
         }
