@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
+import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
@@ -155,6 +155,7 @@ export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
+    reporterTestable: ReporterTestable.None,
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {

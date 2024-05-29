@@ -35,24 +35,26 @@ const PackageJSON = JSON.parse(readFileSync("package.json"));
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
+
 export const watch = process.argv.includes("--watch");
-export const isDev = watch || process.argv.includes("--dev");
-export const isStandalone = JSON.stringify(process.argv.includes("--standalone"));
-export const updaterDisabled = JSON.stringify(process.argv.includes("--disable-updater"));
+export const IS_DEV = watch || process.argv.includes("--dev");
+export const IS_REPORTER = process.argv.includes("--reporter");
+export const IS_STANDALONE = process.argv.includes("--standalone");
+
+export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+
 export const banner = {
     js: `
 // Vencord ${gitHash}
-// Standalone: ${isStandalone}
-// Platform: ${isStandalone === "false" ? process.platform : "Universal"}
-// Updater disabled: ${updaterDisabled}
+// Standalone: ${IS_STANDALONE}
+// Platform: ${IS_STANDALONE === false ? process.platform : "Universal"}
+// Updater Disabled: ${IS_UPDATER_DISABLED}
 `.trim()
 };
 
-const isWeb = process.argv.slice(0, 2).some(f => f.endsWith("buildWeb.mjs"));
-
-export function existsAsync(path) {
-    return access(path, FsConstants.F_OK)
+export async function exists(path) {
+    return await access(path, FsConstants.F_OK)
         .then(() => true)
         .catch(() => false);
 }
@@ -66,7 +68,7 @@ export const makeAllPackagesExternalPlugin = {
     setup(build) {
         const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
         build.onResolve({ filter }, args => ({ path: args.path, external: true }));
-    },
+    }
 };
 
 /**
@@ -89,14 +91,14 @@ export const globPlugins = kind => ({
             let plugins = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!await existsAsync(`./src/${dir}`)) continue;
+                if (!await exists(`./src/${dir}`)) continue;
                 const files = await readdir(`./src/${dir}`);
                 for (const file of files) {
                     if (file.startsWith("_") || file.startsWith(".")) continue;
                     if (file === "index.ts") continue;
 
                     const target = getPluginTarget(file);
-                    if (target) {
+                    if (target && !IS_REPORTER) {
                         if (target === "dev" && !watch) continue;
                         if (target === "web" && kind === "discordDesktop") continue;
                         if (target === "desktop" && kind === "web") continue;
@@ -178,7 +180,7 @@ export const fileUrlPlugin = {
         build.onLoad({ filter, namespace: "file-uri" }, async ({ pluginData: { path, uri } }) => {
             const { searchParams } = new URL(uri);
             const base64 = searchParams.has("base64");
-            const minify = isStandalone === "true" && searchParams.has("minify");
+            const minify = IS_STANDALONE === true && searchParams.has("minify");
             const noTrim = searchParams.get("trim") === "false";
 
             const encoding = base64 ? "base64" : "utf-8";
