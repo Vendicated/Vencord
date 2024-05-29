@@ -11,10 +11,11 @@ import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { useEffect, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { useEffect, UserProfileStore, useState, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import style from "./index.css";
+import { useAwaiter } from "@utils/react";
 
 const settings = definePluginSettings({
     animate: {
@@ -24,16 +25,20 @@ const settings = definePluginSettings({
     },
 });
 
-const queue = new Queue();
+const discordQueue = new Queue();
+const usrbgQueue = new Queue();
 
 
 const useFetchMemberProfile = (userId: string): string => {
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(userId));
 
+    const usrbgUrl = (Vencord.Plugins.plugins.USRBG as any)?.getImageUrl(userId);
+
     useEffect(() => {
+        if (usrbgUrl) return;
         let cancel = false;
 
-        queue.push(() => {
+        discordQueue.push(() => {
             if (cancel) return Promise.resolve(void 0);
             return fetchUserProfile(userId).finally(async () => {
                 await new Promise<void>(resolve => setTimeout(resolve, 1000));
@@ -42,6 +47,8 @@ const useFetchMemberProfile = (userId: string): string => {
 
         return () => { cancel = true; };
     }, []);
+
+    if (usrbgUrl) return usrbgUrl;
 
     if (!profile?.banner) return "";
     const extension = settings.store.animate && profile.banner.startsWith("a_")
@@ -85,18 +92,29 @@ export default definePlugin({
     },
 
     memberListBanner: ErrorBoundary.wrap(({ user }: { user: User; }) => {
-        let url: string | null = null;
-        // usrbg api has no way of telling if the banner is animated or not
-        // if the user doesnt want animated banners, just get rid of usrbg until there is a way to tell
-        if (settings.store.animate && Vencord.Plugins.isPluginEnabled("USRBG")) {
-            const USRBG = Vencord.Plugins.plugins.USRBG as unknown as typeof import("../usrbg/index").default;
-            url = USRBG.getImageUrl(user.id);
-        }
-        if (!url) {
-            url = useFetchMemberProfile(user.id);
-        }
-        if (url === "") return null;
-        if (!settings.store.animate) url = url.replace(".gif", ".png");
+        const url = useFetchMemberProfile(user.id);
+
+        const [shouldShow] = useAwaiter(async () => {
+            // This will get re-run when the url changes
+            if (!url || url === "") return false;
+            if (!settings.store.animate) {
+                // Discord cdn can return both png and gif, useFetchMemberProfile gives it respectively
+                if (url!.includes("cdn.discordapp.com")) return true;
+
+                // HEAD request to check if the image is a png
+                return await new Promise(async (resolve) => {
+                    usrbgQueue.push(() => fetch(url!.replace(".gif", ".png"), { method: "HEAD" }).then(async res => {
+                        console.log(res);
+                        await new Promise<void>(resolve => setTimeout(resolve, 1000));
+                        resolve(res.ok && res.headers.get("content-type")?.startsWith("image/png"));
+                        return;
+                    }));
+                });
+            }
+            return true;
+        }, { fallbackValue: false, deps: [url] });
+
+        if (!shouldShow) return null;
         return (
             <img src={url} className="vc-banners-everywhere-memberlist"></img>
         );
