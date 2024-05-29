@@ -127,6 +127,7 @@ const persistFilter = filters.byCode("[zustand persist middleware]");
 export const zustandPersist = find(m => m.persist && persistFilter(m.persist), m => m.persist);
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
+export const MessageCache = findByProps("clearCache", "_channelMessages");
 export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByProps("resolveInvite");
 
