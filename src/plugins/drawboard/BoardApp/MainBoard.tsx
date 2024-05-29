@@ -14,10 +14,10 @@ import { InfoIcon, PlusIcon } from "@components/Icons";
 import { Button, ChannelStore, React, ScrollerThin, SelectedChannelStore, Tooltip, UploadHandler } from "@webpack/common";
 
 import getCanvass from "./Components/Drawing/Canvas";
-import CanvasImage from "./Components/Drawing/CanvasImage";
 import CanvasText from "./Components/Drawing/CanvasText";
 import CanvasSettings from "./Components/Settings/CanvasSettings";
 import Settings from "./Components/Settings/Settings";
+import { overlayStore } from "./hooks/boardStore";
 import overlayReducer, { overlayAction, overlayState } from "./hooks/overlayStore";
 import("./index.css");
 
@@ -30,6 +30,7 @@ export type canvasStateType = { width: number, height: number, fill?: { color: n
 export default function MainBoard() {
     const [currentTool, setCurrentTool] = React.useState<tools>("select");
     const mainCanvasRef = React.useRef<HTMLCanvasElement>(null);
+    const trueOverlays = overlayStore?.useStore();
     const [overlays, dispatch] = React.useReducer(overlayReducer, []);
     const [canvasState, setCanvasState] = React.useState<canvasStateType>({ width: 512, height: 512, fill: { shouldFill: true, color: 16777215 } });
     const [currentEditing, setCurrentEditing] = React.useState<editType>();
@@ -54,7 +55,30 @@ export default function MainBoard() {
                         <div className="excali-frame-canvas-container" style={{ width: canvasState.width, height: canvasState.height }}>
                             <CanvasComponent className="excali-frame-canvas" draw={draw} ref={mainCanvasRef} />
                             <div className="excali-frame-canvas-overlay" onClick={e => handleOverdispatch(e, currentTool, dispatch, overlays, setCurrentEditing)}>
-                                {overlays && overlays.map(v => {
+                                {
+                                    trueOverlays && trueOverlays.map(v => {
+                                        if (v.type === "text") {
+                                            return (
+                                                <CanvasText
+                                                    draw={ctx => {
+                                                        const textMeasure = ctx.measureText(v.value.text);
+                                                        ctx.canvas.width = textMeasure.width + textMeasure.fontBoundingBoxAscent + textMeasure.fontBoundingBoxDescent + textMeasure.actualBoundingBoxAscent;
+                                                        ctx.canvas.height = textMeasure.fontBoundingBoxAscent + textMeasure.fontBoundingBoxDescent;
+
+                                                        ctx.font = `${v.value.style.fontSize}px ${v.value.style?.fontFamily}`;
+                                                        ctx.fillStyle = "black";
+                                                        ctx.fillText(v.value.text, 0, ctx.canvas.height);
+                                                        ctx.save();
+                                                    }}
+                                                    key={v.id}
+                                                    toDispatch={{ currentState: v, id: v.id, dispatch }}
+                                                    setTool={setCurrentTool}
+                                                />
+                                            );
+                                        }
+                                    })
+                                }
+                                {/* {overlays && overlays.map(v => {
                                     if (v.type === "text") {
                                         return (
                                             <CanvasText
@@ -115,7 +139,7 @@ export default function MainBoard() {
                                             />
                                         );
                                     }
-                                })}
+                                })} */}
                             </div>
                         </div>
                     </ScrollerThin>
@@ -132,6 +156,13 @@ export default function MainBoard() {
                 </div>
                 <div className="excali-bar">
                     <ScrollerThin orientation="horizontal" className="excali-bar-scroll" style={{ paddingBottom: 4 }}>
+                        <Tooltip text="ddd" position="top">
+                            {props => (
+                                <Button size={Button.Sizes.SMALL} style={{ borderRadius: 3, height: 48 }} onClick={e => { console.log(overlayStore?.getStore()); }} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
+                                    <PlusIcon />
+                                </Button>
+                            )}
+                        </Tooltip>
                         <Tooltip text="LOLL" position="top">
                             {props => (
                                 <Button size={Button.Sizes.SMALL} style={{ borderRadius: 3, height: 48 }} onClick={e => { props.onClick.call(e); setCurrentTool("add_text"); }} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
@@ -190,11 +221,11 @@ const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cur
     const element_bounding_rect = e.currentTarget.getBoundingClientRect();
     switch (currentTool) {
         case "add_text": {
-            dispatch({
-                type: "add",
-                state: {
+            overlayStore?.dispatch([
+                ...overlayStore.getStore(),
+                {
                     type: "text",
-                    id: overlays.length,
+                    id: overlayStore.getStore().length,
                     value: {
                         style: {
                             top: e.clientY - element_bounding_rect.top,
@@ -202,13 +233,31 @@ const handleOverdispatch = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cur
                             color: "black",
                             fontSize: 24,
                             textAlign: "start",
-                            fontFamily: "Serif",
+                            fontFamily: "Serif"
                         },
-                        text: "Text Here"
+                        text: "taaaa"
                     }
                 }
-            });
-            setCurrentEditing ? setCurrentEditing({ id: overlays.length, type: "text" }) : null;
+            ]);
+            // dispatch({
+            //     type: "add",
+            //     state: {
+            //         type: "text",
+            //         id: overlays.length,
+            //         value: {
+            //             style: {
+            //                 top: e.clientY - element_bounding_rect.top,
+            //                 left: e.clientX - element_bounding_rect.left,
+            //                 color: "black",
+            //                 fontSize: 24,
+            //                 textAlign: "start",
+            //                 fontFamily: "Serif",
+            //             },
+            //             text: "Text Here"
+            //         }
+            //     }
+            // });
+            // setCurrentEditing ? setCurrentEditing({ id: overlays.length, type: "text" }) : null;
             break;
         }
         case "add_image": {

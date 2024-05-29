@@ -41,13 +41,12 @@ const Draggable = (props): JSX.Element | null => {
         container.addEventListener("mousemove", onMouseMove);
         container.addEventListener("mouseleave", onMouseUp);
 
-        if (!isClicked) {
+        () => {
             children.ref.current.removeEventListener("mousedown", onMouseDown);
             children.ref.current.removeEventListener("mouseup", onMouseUp);
             container.removeEventListener("mousemove", onMouseMove);
             container.removeEventListener("mouseleave", onMouseUp);
-        }
-
+        };
     }, [children, isClicked]);
 
     return (

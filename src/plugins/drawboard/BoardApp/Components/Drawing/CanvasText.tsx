@@ -6,6 +6,7 @@
 
 import { React } from "@webpack/common";
 
+import { overlayStore } from "../../hooks/boardStore";
 import { overlayAction, overlayText } from "../../hooks/overlayStore";
 import { tools } from "../../MainBoard";
 import Draggable from "../Functions/Draggable";
@@ -20,6 +21,7 @@ type CanvasTextProps = React.HTMLProps<HTMLCanvasElement> & {
 const CanvasText = (props: CanvasTextProps) => {
     const ref = React.useRef<HTMLCanvasElement>(null);
     const { draw, toDispatch, onMouseDown, onMouseUp, setTool, ...prop } = props;
+    const currentElement = overlayStore?.getStore().find(v => v.id === toDispatch?.id);
     let oldZIndex = "";
 
 
@@ -34,9 +36,19 @@ const CanvasText = (props: CanvasTextProps) => {
         draw(context);
     }, [draw]);
 
-    if (toDispatch && !toDispatch.currentState.node) {
-        toDispatch.dispatch({ type: "update", state: { ...toDispatch.currentState, type: "text", node: ref, id: toDispatch.id } });
+    if (currentElement && !currentElement.node) {
+        // more worse than useReducer??
+        currentElement.node = ref;
+        overlayStore?.dispatch([
+            ...overlayStore.getStore().filter(v => v.id !== toDispatch?.id),
+            currentElement
+        ]);
     }
+
+    // if (toDispatch && !toDispatch.currentState.node) {
+    //     toDispatch.dispatch({ type: "update", state: { ...toDispatch.currentState, type: "text", node: ref, id: toDispatch.id } });
+    // }
+
 
     const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
         if (onMouseDown) onMouseDown.call(this, event);
