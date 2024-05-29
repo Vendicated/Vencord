@@ -384,7 +384,7 @@ export const cacheFind = traceFunction("cacheFind", function cacheFind(filter: F
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod?.exports || mod.exports === window) continue;
+        if (!mod?.exports) continue;
 
         if (filter(mod.exports)) {
             return mod.exports;
