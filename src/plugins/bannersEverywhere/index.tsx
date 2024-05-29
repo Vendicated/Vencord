@@ -10,12 +10,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { Queue } from "@utils/Queue";
+import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { useEffect, UserProfileStore, useState, useStateFromStores } from "@webpack/common";
+import { useEffect, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import style from "./index.css";
-import { useAwaiter } from "@utils/react";
 
 const settings = definePluginSettings({
     animate: {
@@ -102,7 +102,7 @@ export default definePlugin({
                 if (url!.includes("cdn.discordapp.com")) return true;
 
                 // HEAD request to check if the image is a png
-                return await new Promise(async (resolve) => {
+                return await new Promise(resolve => {
                     usrbgQueue.push(() => fetch(url!.replace(".gif", ".png"), { method: "HEAD" }).then(async res => {
                         console.log(res);
                         await new Promise<void>(resolve => setTimeout(resolve, 1000));
