@@ -1,0 +1,10 @@
+.vc-color-block {
+    aspect-ratio: 1/1;
+    background: var(--color);
+    height: 1rem;
+    vertical-align: middle;
+    border-radius: 4px;
+    display: inline-block;
+    user-select: none;
+    margin-left: 2px;
+}
