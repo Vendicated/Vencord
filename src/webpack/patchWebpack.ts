@@ -377,7 +377,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (exports === window && typeof require === "function" && require.c != null) {
+            if ((exports === window || exports?.default === window) && typeof require === "function" && require.c != null) {
                 define(require.c, id, {
                     value: require.c[id],
                     enumerable: false
@@ -395,7 +395,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
             for (const [filter, callback] of subscriptions) {
                 try {
-                    if (filter(exports)) {
+                    if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
                     } else if (exports.default && filter(exports.default)) {
