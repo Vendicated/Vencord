@@ -204,7 +204,7 @@ page.on("console", async e => {
         report.badWebpackFinds.push(await rawArgs[1].jsonValue() as string);
     }
 
-    if (isVencord && level !== "error") {
+    if (isVencord) {
         let args: unknown[] = [];
         try {
             args = await Promise.all(e.args().map(a => a.jsonValue()));
