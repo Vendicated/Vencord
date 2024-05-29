@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./index.css";
+
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
@@ -14,8 +15,6 @@ import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { useEffect, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
-
-import "./index.css";
 
 const settings = definePluginSettings({
     animate: {
