@@ -82,8 +82,14 @@ export default definePlugin({
     },
 
     memberListBanner: ErrorBoundary.wrap(({ user }: { user: User; }) => {
-
-        let url = useFetchMemberProfile(user.id);
+        let url: string | null = null;
+        if (Vencord.Plugins.isPluginEnabled("USRBG")) {
+            const USRBG = Vencord.Plugins.plugins.USRBG as unknown as typeof import("../usrbg/index").default;
+            url = USRBG.getImageUrl(user.id);
+        }
+        if (!url) {
+            url = useFetchMemberProfile(user.id);
+        }
         if (url === "") return null;
         if (!settings.store.animate) url = url.replace(".gif", ".png");
         return (
