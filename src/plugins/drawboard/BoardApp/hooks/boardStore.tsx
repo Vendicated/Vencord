@@ -6,6 +6,8 @@
 
 import { React } from "@webpack/common";
 
+import { overlayState } from "./overlayStore";
+
 
 function createBoardStore<T>(init?: T) {
     if (!init) return;
@@ -26,10 +28,13 @@ function createBoardStore<T>(init?: T) {
         listeners.forEach(l => l(store));
     }
 
-    function getStore() { return store; }
-    return { dispatch, getStore, useStore };
+    function getStore(): T { return store; }
+
+    return { dispatch, useStore, getStore };
 }
 
 export const drawboardStore = createBoardStore<{ images: Array<{ url: string; }>; }>({ images: [] });
+export const overlayStore = createBoardStore<overlayState[]>([]);
+
 
 // lol?.dispatch({ ...lol.getStore(), images: [...lol.getStore().images, { url: "HAHAHAHA" }] });
