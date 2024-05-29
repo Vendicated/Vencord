@@ -15,7 +15,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { useEffect, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import style from "./index.css";
+import "./index.css";
 
 const settings = definePluginSettings({
     animate: {
@@ -82,14 +82,6 @@ export default definePlugin({
         }
 
     ],
-
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    },
 
     memberListBanner: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         const url = useFetchMemberProfile(user.id);
