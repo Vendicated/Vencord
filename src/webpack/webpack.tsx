@@ -122,6 +122,7 @@ function printFilter(filter: FilterFn) {
  * then call the callback with the module as the first argument.
  *
  * If the module is already required, the callback will be called immediately.
+ *
  * @param filter A function that takes a module and returns a boolean
  * @param callback A function that takes the found module as its first argument
  */
@@ -165,6 +166,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * The callback must return a value that will be used as the proxy inner value.
  *
  * If no callback is specified, the default callback will assign the proxy inner value to all the module.
+ *
  * @param filter A function that takes a module and returns a boolean
  * @param callback A function that takes the found module as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the module, instead of all of it. Defaults to the module itself
  * @returns A proxy that has the callback return value as its true value, or the callback return value if the callback was called when the function was called
@@ -190,13 +192,6 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (mod: any) => an
 /**
  * Find the first component that matches the filter.
  *
- * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
- *
- * Example of how you cannot access the properties set on the component:
- * ```
- * const Component = findComponent(...);
- * console.log(Component.Types); // This will not work
- * ````
  * @param filter A function that takes a module and returns a boolean
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
@@ -222,7 +217,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v);
         InnerComponent = parsedComponent;
-        Object.assign(InnerComponent, parsedComponent);
+        Object.assign(WrapperComponent, parsedComponent);
     }, { isIndirect: true });
 
     if (IS_DEV) {
@@ -241,13 +236,6 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
 /**
  * Find the first component that is exported by the first prop name.
  *
- * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
- *
- * Example of how you cannot access the properties set on the component:
- * ```
- * const Component = findExportedComponent(...);
- * console.log(Component.Types); // This will not work
- * ````
  * @example findExportedComponent("FriendRow")
  * @example findExportedComponent("FriendRow", "Friend", FriendRow => React.memo(FriendRow))
  *
@@ -277,7 +265,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v[newProps[0]]);
         InnerComponent = parsedComponent;
-        Object.assign(InnerComponent, parsedComponent);
+        Object.assign(WrapperComponent, parsedComponent);
     }, { isIndirect: true });
 
     if (IS_DEV) {
@@ -293,13 +281,6 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 /**
  * Find the first component in a default export that includes all the given code.
  *
- * IMPORTANT: You cannot access properties set on the found component using this method. You should instead try to obtain the property using a non component find instead.
- *
- * Example of how you cannot access the properties set on the component:
- * ```
- * const Component = findComponentByCode(...);
- * console.log(Component.Types); // This will not work
- * ````
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR")
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)", ColorPicker => React.memo(ColorPicker))
  *
@@ -367,6 +348,7 @@ export function findStore<T = GenericStore>(name: string) {
 
 /**
  * Find the first already required module that matches the filter.
+ *
  * @param filter A function that takes a module and returns a boolean
  * @returns The found module or null
  */
@@ -414,6 +396,7 @@ export function cacheFindAll(filter: FilterFn) {
 
 /**
  * Same as {@link cacheFind} but in bulk.
+ *
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
@@ -520,6 +503,7 @@ export function findModuleFactory(...code: string[]) {
  *
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the factory is evaluated.
+ *
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
@@ -535,13 +519,6 @@ export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?:
  *
  * A lazy component. The factory method is called on first render.
  *
- * IMPORTANT: You cannot access properties set on the lazy component using this method.
- *
- * Example of how you cannot access the properties set on the component:
- * ```
- * const Component = webpackDependantLazyComponent(...);
- * console.log(Component.Types); // This will not work
- * ````
  * @param factory Function returning a Component
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
@@ -566,6 +543,7 @@ function deprecatedRedirect<T extends (...args: any[]) => any>(oldMethod: string
  *
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the factory is evaluated.
+ *
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
@@ -579,13 +557,6 @@ export const proxyLazyWebpack = deprecatedRedirect("proxyLazyWebpack", "webpackD
  *
  * A lazy component. The factory method is called on first render.
  *
- * IMPORTANT: You cannot access properties set on the lazy component using this method.
- *
- * Example of how you cannot access the properties set on the component:
- * ```
- * const Component = LazyComponentWebpack(...);
- * console.log(Component.Types); // This will not work
- * ````
  * @param factory Function returning a Component
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
@@ -651,6 +622,7 @@ export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAl
  * @deprecated Use {@link cacheFindBulk} instead
  *
  * Same as {@link cacheFind} but in bulk
+ *
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
@@ -662,6 +634,7 @@ export const ChunkIdsRegex = /\("(.+?)"\)/g;
 
 /**
  * Extract and load chunks using their entry point.
+ *
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A promise that resolves when the chunks were loaded
@@ -712,6 +685,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
  * This is just a wrapper around {@link extractAndLoadChunks} to make our reporter test for your webpack finds.
  *
  * Extract and load chunks using their entry point.
+ *
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves when the chunks were loaded, on first call
@@ -724,7 +698,8 @@ export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtrac
 
 /**
  * Search modules by keyword. This searches the factory methods,
- * meaning you can search all sorts of things, displayName, methodName, strings somewhere in the code, etc
+ * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
+ *
  * @param filters One or more strings or regexes
  * @returns Mapping of found modules
  */
@@ -751,6 +726,7 @@ export function search(...filters: Array<string | RegExp>) {
  * to view a massive file. extract then returns the extracted module so you can jump to it.
  * As mentioned above, note that this extracted module is not actually used,
  * so putting breakpoints or similar will have no effect.
+ *
  * @param id The id of the module to extract
  */
 export function extract(id: string | number) {

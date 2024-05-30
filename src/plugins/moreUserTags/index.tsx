@@ -56,8 +56,7 @@ const PermissionUtil = findByProps("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }>;
-const { BotTagTypes } = findByProps("BotTagTypes");
+const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 
@@ -123,7 +122,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
                                 >
-                                    {t.displayName} Tag <Tag type={BotTagTypes[t.name]} />
+                                    {t.displayName} Tag <Tag type={Tag.Types[t.name]} />
                                 </div>
                             )}
                         </Tooltip>
@@ -303,7 +302,7 @@ export default definePlugin({
         return obj;
     },
 
-    isOPTag: (tag: number) => tag === BotTagTypes.ORIGINAL_POSTER || tags.some(t => tag === BotTagTypes[`${t.name}-OP`]),
+    isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
         if (!passedTagName) return strings.APP_TAG;
@@ -336,9 +335,9 @@ export default definePlugin({
         if (!user)
             return null;
         if (location === "chat" && user.id === "1")
-            return BotTagTypes.OFFICIAL;
+            return Tag.Types.OFFICIAL;
         if (user.isClyde())
-            return BotTagTypes.AI;
+            return Tag.Types.AI;
 
         let type = typeof origType === "number" ? origType : null;
 
@@ -366,11 +365,11 @@ export default definePlugin({
                 (tag.condition?.(message!, user, channel))
             ) {
                 if (channel.isForumPost() && channel.ownerId === user.id)
-                    type = BotTagTypes[`${tag.name}-OP`];
+                    type = Tag.Types[`${tag.name}-OP`];
                 else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
-                    type = BotTagTypes[`${tag.name}-BOT`];
+                    type = Tag.Types[`${tag.name}-BOT`];
                 else
-                    type = BotTagTypes[tag.name];
+                    type = Tag.Types[tag.name];
                 break;
             }
         }

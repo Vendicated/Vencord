@@ -46,6 +46,7 @@ const handler: ProxyHandler<any> = {
 /**
  * A proxy which has an inner value that can be set later.
  * When a property is accessed, the proxy looks for the property value in its inner value, and errors if it's not set.
+ *
  * @param err The error message to throw when the inner value is not set
  * @param primitiveErr The error message to throw when the inner value is a primitive
  * @returns A proxy which will act like the inner value when accessed
