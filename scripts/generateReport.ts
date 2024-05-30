@@ -297,14 +297,13 @@ async function reporterRuntime(token: string) {
         Vencord.Settings.eagerPatches = true;
 
         // The main patch for starting the reporter chunk loading
-        Vencord.Plugins.patches.push({
-            plugin: "Vencord Reporter",
+        Vencord.Plugins.addPatch({
             find: '"Could not find app-mount"',
-            replacement: [{
+            replacement: {
                 match: /(?<="use strict";)/,
                 replace: "Vencord.Webpack._initReporter();"
-            }]
-        });
+            }
+        }, "Vencord Reporter");
 
         Vencord.Webpack.waitFor(
             Vencord.Webpack.filters.byProps("loginToken"),
