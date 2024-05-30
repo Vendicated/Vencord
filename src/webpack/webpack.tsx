@@ -702,8 +702,8 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
  * Extract and load chunks using their entry point.
  *
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
- * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
- * @returns A function that returns a promise that resolves when the chunks were loaded, on first call
+ * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
+ * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
     if (IS_DEV) webpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
