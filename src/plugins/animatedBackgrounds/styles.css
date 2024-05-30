@@ -6,6 +6,7 @@
     height: 100%;
     overflow: hidden;
     pointer-events: none;
+    z-index: 0;
 }
 
 .iframe {
@@ -15,5 +16,10 @@
     width: calc(100% + 60px);
     height: calc(100% + 60px);
     pointer-events: none;
-    z-index: -1;
+    z-index: 0;
 }
+
+.appAsidePanelWrapper__5e6e2{
+    z-index: 1;
+}
+
