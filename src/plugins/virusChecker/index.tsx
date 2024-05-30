@@ -16,14 +16,14 @@ const Native = VencordNative.pluginHelpers.VirusChecker as PluginNative<typeof i
 const settings = definePluginSettings({
     apiKey: {
         type: OptionType.STRING,
-        description: "Input your VirusTotal API-Key",
+        description: "Input your Hybrid Analysis API-Key",
         default: "null"
     },
 });
 
 export default definePlugin({
     name: "VirusChecker",
-    description: "Adds a button to attachments, allowing users to scan files via VirusTotal.",
+    description: "Adds a button to attachments, allowing users to scan files via Hybrid Analysis.",
     authors: [Devs.Karfy],
     settings,
     patches: [
@@ -63,29 +63,20 @@ export default definePlugin({
 });
 
 async function checkIfVirus(srcUrl: string) {
-    showToast("Loading...", Toasts.Type.MESSAGE);
     const { apiKey } = settings.store;
     if (apiKey == "") {
-        showToast("Please inout a valid Api-Key.", Toasts.Type.FAILURE);
+        showToast("Please input a valid Api-Key.", Toasts.Type.FAILURE);
         return;
     }
+    showToast("Loading...", Toasts.Type.MESSAGE);
     try {
-        let { data: { id } } = await Native.postAttachment(srcUrl, apiKey);
-        try {
-            let { meta: { url_info } } = await Native.getUrlId(id, apiKey);
-            VencordNative.native.openExternal(`https://www.virustotal.com/gui/url/${url_info.id}/detection`);
-        }
-        catch (e) {
-            handlerError(e);
-        }
+        const { sha256 } = await Native.postAttachment(srcUrl, apiKey);
+        VencordNative.native.openExternal(`https://www.hybrid-analysis.com/sample/${sha256}`);
     }
     catch (e) {
-        handlerError(e);
+        if (e instanceof Error) {
+            let error = String(e.message).split("Error: ");
+            showToast(error[error.length - 1], Toasts.Type.FAILURE);
+        }
     }
-}
-
-function handlerError(e: error) {
-    let error = String(e.message).split("Error: ");
-    showToast(error[error.length - 1], Toasts.Type.FAILURE);
-    return;
 }
