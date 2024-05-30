@@ -186,7 +186,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 296776625432035328n,
     },
     TheSun: {
-        name: "ActuallyTheSun",
+        name: "sunnie",
         id: 406028027768733696n
     },
     axyie: {
@@ -402,6 +402,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "maisy",
         id: 257109471589957632n,
     },
+    Lexi: {
+        name: "Lexi",
+        id: 506101469787717658n
+    },
     Mopi: {
         name: "Mopi",
         id: 1022189106614243350n
@@ -497,6 +501,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     ScattrdBlade: {
         name: "ScattrdBlade",
         id: 678007540608532491n
+    },
+    goodbee: {
+        name: "goodbee",
+        id: 658968552606400512n
     },
     Moxxie: {
         name: "Moxxie",
