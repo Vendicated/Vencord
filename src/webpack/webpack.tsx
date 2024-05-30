@@ -140,7 +140,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
     if (typeof callback !== "function")
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
 
-    if (IS_DEV && !isIndirect) {
+    if (IS_REPORTER && !isIndirect) {
         const originalCallback = callback;
 
         let callbackCalled = false;
@@ -188,7 +188,7 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (module: ModuleE
     const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, module => setInnerValue(callback(module)), { isIndirect: true });
 
-    if (IS_DEV && !isIndirect) {
+    if (IS_REPORTER && !isIndirect) {
         webpackSearchHistory.push(["find", [proxy, filter]]);
     }
 
@@ -228,7 +228,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         Object.assign(WrapperComponent, parsedComponent);
     }, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         WrapperComponent.$$vencordInner = () => InnerComponent;
 
         if (!isIndirect) {
@@ -276,7 +276,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
         Object.assign(WrapperComponent, parsedComponent);
     }, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         WrapperComponent.$$vencordInner = () => InnerComponent;
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
@@ -302,7 +302,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
 
     const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newCode]]);
     }
 
@@ -317,7 +317,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
 export function findByProps<T = AnyObject>(...props: string[]) {
     const result = find<T>(filters.byProps(...props), m => m, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         webpackSearchHistory.push(["findByProps", [result, ...props]]);
     }
 
@@ -332,7 +332,7 @@ export function findByProps<T = AnyObject>(...props: string[]) {
 export function findByCode<T = AnyObject>(...code: string[]) {
     const result = find<T>(filters.byCode(...code), m => m, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         webpackSearchHistory.push(["findByCode", [result, ...code]]);
     }
 
@@ -347,7 +347,7 @@ export function findByCode<T = AnyObject>(...code: string[]) {
 export function findStore<T = GenericStore>(name: string) {
     const result = find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 
-    if (IS_DEV) {
+    if (IS_REPORTER) {
         webpackSearchHistory.push(["findStore", [result, name]]);
     }
 
@@ -456,12 +456,10 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
 
-        if (!IS_DEV) {
+        if (!IS_DEV || devToolsOpen) {
             logger.warn(err);
-            return results;
-        }
-
-        if (!devToolsOpen) {
+            return null;
+        } else {
             throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
         }
     }
@@ -484,16 +482,13 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
-    if (!IS_DEV) {
+
+    if (!IS_DEV || devToolsOpen) {
         logger.warn(err);
         return null;
-    }
-
-    if (!devToolsOpen) {
+    } else {
         throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
     }
-
-    return null;
 });
 
 /**
@@ -517,7 +512,7 @@ export function findModuleFactory(...code: string[]) {
  * @returns Result of factory function
  */
 export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?: number) {
-    if (IS_DEV) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
+    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
 }
@@ -532,7 +527,7 @@ export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?:
  * @returns Result of factory function
  */
 export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_DEV) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
+    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
 }
@@ -651,37 +646,37 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
-        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        if (IS_DEV && !devToolsOpen)
-            throw err;
-
-        return false;
+        if (!IS_DEV || devToolsOpen) {
+            logger.warn(err, "Code:", code, "Matcher:", matcher);
+            return false;
+        } else {
+            throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        }
     }
 
     const match = String(module).match(canonicalizeMatch(matcher));
     if (!match) {
         const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
-        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        if (IS_DEV && !devToolsOpen)
-            throw err;
-
-        return false;
+        if (!IS_DEV || devToolsOpen) {
+            logger.warn(err, "Code:", code, "Matcher:", matcher);
+            return false;
+        } else {
+            throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        }
     }
 
     const [, rawChunkIds, entryPointId] = match;
     if (Number.isNaN(Number(entryPointId))) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
-        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        if (IS_DEV && !devToolsOpen)
-            throw err;
-
-        return false;
+        if (!IS_DEV || devToolsOpen) {
+            logger.warn(err, "Code:", code, "Matcher:", matcher);
+            return false;
+        } else {
+            throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        }
     }
 
     if (rawChunkIds) {
@@ -691,13 +686,13 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
 
     if (wreq.m[entryPointId] == null) {
         const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
-        logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-        if (IS_DEV && !devToolsOpen)
-            throw err;
-
-        return false;
+        if (!IS_DEV || devToolsOpen) {
+            logger.warn(err, "Code:", code, "Matcher:", matcher);
+            return false;
+        } else {
+            throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        }
     }
 
     wreq(entryPointId);
@@ -714,7 +709,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
-    if (IS_DEV) webpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
+    if (IS_REPORTER) webpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
