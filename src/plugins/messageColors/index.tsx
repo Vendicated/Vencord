@@ -6,47 +6,55 @@
 
 import "./styles.css";
 
+import { addChatBarButton } from "@api/ChatButtons";
+import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
-import { Message } from "discord-types/general";
+import type { Message } from "discord-types/general";
 
-// I made an array so it's easier to add rgb/hsl/etc later
-const regex = [
-    /(#(?:[0-9a-fA-F]{3}){1,2})/g,
-    /(rgb\(\s*?\d+?\s*?,\s*?\d+?\s*?,\s*?\d+?\s*?\))/g,
-    /(hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\))/g
-];
+import { ColorPickerChatButton } from "./ColorPicker";
+import { COLOR_PICKER_DATA_KEY, regex, savedColors } from "./constants";
 
 enum RenderType {
     BLOCK,
     FOREGROUND,
     BACKGROUND,
+    NONE
 }
 
 const settings = definePluginSettings({
+    colorPicker: {
+        type: OptionType.BOOLEAN,
+        description: "Enable color picker",
+        default: true,
+        restartNeeded: true
+    },
     renderType: {
         type: OptionType.SELECT,
         description: "How to render colors",
         options: [
             {
-                label: "Block nearby",
-                value: RenderType.BLOCK,
-                default: true
-            },
-            {
                 label: "Text color",
                 value: RenderType.FOREGROUND,
+                default: true,
+            },
+            {
+                label: "Block nearby",
+                value: RenderType.BLOCK,
             },
             {
                 label: "Background color",
                 value: RenderType.BACKGROUND
+            },
+            {
+                label: "Disabled",
+                value: RenderType.NONE
             }
         ]
     },
 });
-
 
 export default definePlugin({
     authors: [Devs.hen],
@@ -60,8 +68,42 @@ export default definePlugin({
             replace: "function $1($2,$3){return $4$self.getColoredText($2,$3)}"
         }
     }],
+    async start() {
+        if (!settings.store.colorPicker) return;
+
+        addChatBarButton("vc-color-picker", ColorPickerChatButton);
+        let colors = await DataStore.get(COLOR_PICKER_DATA_KEY);
+        if (!colors) {
+            colors = [
+                1752220,
+                3066993,
+                3447003,
+                10181046,
+                15277667,
+                15844367,
+                15105570,
+                15158332,
+                9807270,
+                6323595,
+
+                1146986,
+                2067276,
+                2123412,
+                7419530,
+                11342935,
+                12745742,
+                11027200,
+                10038562,
+                9936031,
+                5533306
+            ];
+        }
+
+        savedColors.push(...colors);
+    },
 
     getColoredText(message: Message, originalChildren: React.ReactElement[]) {
+        if (settings.store.renderType === RenderType.NONE) return originalChildren;
         if (![0, 19].includes(message.type)) return originalChildren;
 
         let hasColor = false;
