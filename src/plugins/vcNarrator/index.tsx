@@ -22,12 +22,21 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
-import { VoiceState } from "@webpack/types";
 
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
+interface VoiceState {
+    userId: string;
+    channelId?: string;
+    oldChannelId?: string;
+    deaf: boolean;
+    mute: boolean;
+    selfDeaf: boolean;
+    selfMute: boolean;
+}
+
+const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
@@ -146,6 +155,7 @@ export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
+    reporterTestable: ReporterTestable.None,
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {

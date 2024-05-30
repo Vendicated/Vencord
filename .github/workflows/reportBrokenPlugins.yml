@@ -36,8 +36,8 @@ jobs:
         with:
           chrome-version: stable
 
-      - name: Build web
-        run: pnpm buildWeb --standalone --dev
+      - name: Build Equicord Reporter Version
+        run: pnpm buildReporter
 
       - name: Create Report
         timeout-minutes: 10
