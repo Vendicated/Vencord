@@ -3,7 +3,8 @@
     "parser": "@typescript-eslint/parser",
     "ignorePatterns": [
         "dist",
-        "browser"
+        "browser",
+        "packages/vencord-types"
     ],
     "plugins": [
         "@typescript-eslint",
