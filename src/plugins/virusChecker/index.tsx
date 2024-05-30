@@ -8,8 +8,10 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { RestAPI, showToast, Toasts } from "@webpack/common";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
+
+const Native = VencordNative.pluginHelpers.VirusChecker as PluginNative<typeof import("./native")>;
 
 const settings = definePluginSettings({
     apiKey: {
@@ -21,7 +23,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "VirusChecker",
-    description: "Adds a button to attachments to scan t",
+    description: "Adds a button to attachments, allowing users to scan files via VirusTotal.",
     authors: [Devs.Karfy],
     settings,
 
@@ -61,23 +63,28 @@ export default definePlugin({
     )
 });
 
-async function checkIfVirus(src: string) {
+async function checkIfVirus(srcUrl: string) {
     const { apiKey } = settings.store;
     if (apiKey == "") {
         showToast("Please inout a valid Api-Key.", Toasts.Type.FAILURE);
         return;
     }
-    let formdata = new FormData()
-    formdata.append("url", src)
-    // TODO: fix problem with CORS
-    let res = await fetch('https://virustotal.com/api/v3/urls', {
-        mode: "cors",
-        method: "post",
-        headers: {
-            "api-key": apiKey,
-            "Content-Type": "*",
-        },
-        body: formdata,
-    })
-    console.info(res);
+    try {
+        let { data: { id } } = await Native.postAttachment(srcUrl, apiKey);
+        try {
+            let { meta: { url_info } } = await Native.getUrlId(id, apiKey);
+            let test2 = url_info.id
+            VencordNative.native.openExternal(`https://www.virustotal.com/gui/url/${url_info.id}/detection`);
+        }
+        catch (e) {
+            let error = String(e.message).split("Error: ");
+            showToast(error[error.length - 1], Toasts.Type.FAILURE);
+            return;
+        }   
+    }
+    catch (e) {
+        let error = String(e.message).split("Error: ");
+        showToast(error[error.length - 1], Toasts.Type.FAILURE);
+        return;
+    }
 }
