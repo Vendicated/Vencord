@@ -38,7 +38,6 @@ export default definePlugin({
                 }
                 const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&vq=highres`;
                 const iframe = this.createIframe(iframeSrc);
-                appMount.style.background = 'none';
                 appMount.appendChild(iframe);
             } catch (error) {
             }
