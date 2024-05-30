@@ -5,9 +5,12 @@
  */
 
 import { Link } from "@components/Link";
+import { findByPropsLazy } from "@webpack";
 import { Forms, Text, TextArea, useMemo, useState } from "@webpack/common";
 
 import { AutoModRule, MatchedRule, matchRules } from "./automod";
+
+const useAutomodRulesStore = findByPropsLazy("useAutomodRulesList");
 
 export function settingsAboutComponent() {
     return (<>
@@ -24,15 +27,12 @@ export function settingsAboutComponent() {
     </>);
 }
 
-export function renderTestTextHeader() {
-    return (<Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>);
-}
-
-export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | null; }) {
+export function TestInputBoxComponent({ guildId }: { guildId: string; }) {
+    const { rulesByTriggerType }: { rulesByTriggerType: Array<Array<AutoModRule>>; } = useAutomodRulesStore.useAutomodRulesList(guildId);
+    if (rulesByTriggerType.length === 0 || !rulesByTriggerType[0] || rulesByTriggerType[0].length === 0) return null;
     const [inputValue, setInputValue] = useState("");
     const [warningText, setWarningText] = useState("");
-    const { currentRules: currentRulesProp } = props;
-    const currentRules: null | Array<AutoModRule> = currentRulesProp;
+    const currentRules: Array<AutoModRule> = rulesByTriggerType[0];
 
     useMemo(() => {
         if (!inputValue || !currentRules) return null;
@@ -45,6 +45,7 @@ export function TestInputBoxComponent(props: { currentRules: AutoModRule[] | nul
     }, [inputValue, currentRules]);
     return (
         <div>
+            <Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>
             <TextArea
                 className="automod-test-box"
                 value={inputValue}

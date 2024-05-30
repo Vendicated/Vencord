@@ -23,14 +23,13 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
+import { SelectedGuildStore } from "@webpack/common";
 import { Embed, Message } from "discord-types/general";
 
-import { AutoModRule } from "./automod";
-import { renderTestTextHeader, settingsAboutComponent, TestInputBoxComponent } from "./UI";
+import { settingsAboutComponent, TestInputBoxComponent } from "./UI";
 
-const logger = new Logger("betterModeration");
+const logger = new Logger("betterAutomod");
 
-let currentRules: Array<AutoModRule> | null = null;
 
 interface EMessage extends Message {
     echoed: boolean;
@@ -71,57 +70,15 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.textBadge.+?}\),/,
-                    replace: "$&$self.renderTestTextHeader(), $self.renderInputBox(),"
+                    replace: "$& $self.renderInputBox(),"
                 }
             ],
-            predicate: () => settings.store.testBox
-        },
-        {
-            find: "syncRules:async",
-            replacement: {
-                match: /\.fetchAutomodRules\)\(\i\),\i=\i\((\i)\),\i=\i\(\)\.rules;/,
-                replace: "$&$self.setRules($1);"
-            },
-            predicate: () => settings.store.testBox
-        },
-        {
-            find: "saveRule:async",
-            replacement: [
-                {
-                    match: /return (\i)=(\(0,\i\.isBackendPersistedRule\)\((\i)\)&&!\(0,\i\.isDefaultRuleId\)\(\i\.id\))/,
-                    replace: "$1=$2;$self.saveOrUpdateAutomodRule($1,$3);return $1=$1"
-                }
-            ],
-            predicate: () => settings.store.testBox
-        },
-        {
-            find: "removeRule:(",
-            replacement: {
-                match: /\}=\i\(\),\i=\i\[(\i)\].+?,\i\);/,
-                replace: "$&$self.deleteAutomodRule($1);"
-            },
             predicate: () => settings.store.testBox
         }
     ],
-    deleteAutomodRule: async (ruleid: string) => {
-        if (!currentRules) return;
-        currentRules = currentRules.filter(r => r.id !== ruleid);
-        logger.info("Deleted a Rule", ruleid);
-    },
-    saveOrUpdateAutomodRule: async (type: boolean, rule: AutoModRule) => {
-        if (!currentRules) return;
-        currentRules = currentRules.filter(r => r.id !== rule.id);
-        currentRules.push(rule);
-        logger.info((type ? "Updated" : "Created") + " a Rule", rule);
-    },
-    setRules: (rules: Array<AutoModRule>) => {
-        currentRules = rules;
-        logger.info("loading Rules", rules);
-    },
-    renderInputBox: () => { return <TestInputBoxComponent currentRules={currentRules} />; },
-    renderTestTextHeader: renderTestTextHeader,
+    renderInputBox: () => { return <TestInputBoxComponent guildId={SelectedGuildStore.getGuildId()} />; },
     flux: {
-        async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
+        async MESSAGE_CREATE({ optimistic, type, message }: IMessageCreate) {
             if (!settings.store.echoIt) return;
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
