@@ -23,7 +23,7 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
 
@@ -36,7 +36,7 @@ let reactions: Record<string, ReactionCacheEntry>;
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
     return RestAPI.get({
-        url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${key}`,
+        url: Constants.Endpoints.REACTIONS(msg.channel_id, msg.id, key),
         query: {
             limit: 100,
             type

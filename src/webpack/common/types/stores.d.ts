@@ -63,7 +63,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    url: string;
+    type: 1;
 }
 
 export interface UnicodeEmoji {
@@ -75,6 +75,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
+    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
@@ -173,6 +174,15 @@ export class DraftStore extends FluxStore {
     getThreadSettings(channelId: string): any | null;
 }
 
+export enum DraftType {
+    ChannelMessage,
+    ThreadSettings,
+    FirstThreadMessage,
+    ApplicationLauncherCommand,
+    Poll,
+    SlashCommand,
+}
+
 export class GuildStore extends FluxStore {
     getGuild(guildId: string): Guild;
     getGuildCount(): number;
@@ -182,3 +192,10 @@ export class GuildStore extends FluxStore {
     getRoles(guildId: string): Record<string, Role>;
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
+
+export type useStateFromStores = <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    dependencies?: any,
+    isEqual?: (old: T, newer: T) => boolean
+) => T;

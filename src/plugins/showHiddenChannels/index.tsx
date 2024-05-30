@@ -36,6 +36,8 @@ const enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
+const CONNECT = 1n << 20n;
+
 export const settings = definePluginSettings({
     hideUnreads: {
         description: "Hide Unreads",
@@ -87,8 +89,8 @@ export default definePlugin({
                 },
                 // Remove permission checking for getRenderLevel function
                 {
-                    match: /(?<=getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
-                    replace: " "
+                    match: /(getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
+                    replace: (_, rest) => `${rest} `
                 }
             ]
         },
@@ -157,8 +159,8 @@ export default definePlugin({
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
-                    match: /(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
-                    replace: (_, channel, muted) => `${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
+                    match: /{channel:(\i),name:\i,muted:(\i).+?;/,
+                    replace: (m, channel, muted) => `${m}${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
@@ -184,8 +186,8 @@ export default definePlugin({
                 {
                     // Hide unreads
                     predicate: () => settings.store.hideUnreads === true,
-                    match: /(?<={channel:(\i),name:\i,.+?unread:(\i).+?;)/,
-                    replace: (_, channel, unread) => `${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
+                    match: /{channel:(\i),name:\i,.+?unread:(\i).+?;/,
+                    replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
                 }
             ]
         },
@@ -273,12 +275,12 @@ export default definePlugin({
                 {
                     // Change the role permission check to CONNECT if the channel is locked
                     match: /ADMINISTRATOR\)\|\|(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
-                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${PermissionsBits.CONNECT}n,${channel})?${permCheck}CONNECT):`
+                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
                     match: /permissionOverwrites\[.+?\i=(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
-                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${PermissionsBits.CONNECT}n,${channel})?${permCheck}CONNECT):`
+                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
                     // Include the @everyone role in the allowed roles list for Hidden Channels
@@ -434,7 +436,7 @@ export default definePlugin({
             },
         },
         {
-            find: ".shouldCloseDefaultModals",
+            find: 'className:"channelMention",children',
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
                 match: /(?<=getChannel\(\i\);if\(null!=(\i))(?=.{0,100}?selectVoiceChannel)/,

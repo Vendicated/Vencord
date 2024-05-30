@@ -23,9 +23,11 @@ import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, f
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
-
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
+    // Non import call to avoid circular dependency
+    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
         _resolveReady();
@@ -36,6 +38,8 @@ waitFor(["dispatch", "subscribe"], m => {
 export let ComponentDispatch;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
+
+export const Constants = findByPropsLazy("Endpoints");
 
 export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
     const mod = findByProps("getAPIBaseURL");
@@ -115,6 +119,8 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
 }
 
 export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+
+export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
     promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
 };
@@ -132,10 +138,10 @@ waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
 
-export const zustandCreate: typeof import("zustand").default = findByCodeLazy("will be removed in v4");
+export const zustandCreate = findByCodeLazy("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist }: typeof import("zustand/middleware") = findLazy(m => m.persist && persistFilter(m.persist));
+export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
