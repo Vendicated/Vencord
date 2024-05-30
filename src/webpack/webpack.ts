@@ -264,7 +264,7 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
 }
@@ -278,7 +278,7 @@ export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number)
  * @returns Result of factory function
  */
 export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
 }
@@ -287,7 +287,7 @@ export function LazyComponentWebpack<T extends object = any>(factory: () => any,
  * Find the first module that matches the filter, lazily
  */
 export function findLazy(filter: FilterFn) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["find", [filter]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["find", [filter]]);
 
     return proxyLazy(() => find(filter));
 }
@@ -306,7 +306,7 @@ export function findByProps(...props: string[]) {
  * Find the first module that has the specified properties, lazily
  */
 export function findByPropsLazy(...props: string[]) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findByProps", props]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findByProps", props]);
 
     return proxyLazy(() => findByProps(...props));
 }
@@ -325,7 +325,7 @@ export function findByCode(...code: string[]) {
  * Find the first function that includes all the given code, lazily
  */
 export function findByCodeLazy(...code: string[]) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findByCode", code]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findByCode", code]);
 
     return proxyLazy(() => findByCode(...code));
 }
@@ -344,7 +344,7 @@ export function findStore(name: string) {
  * Find a store by its displayName, lazily
  */
 export function findStoreLazy(name: string) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findStore", [name]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findStore", [name]]);
 
     return proxyLazy(() => findStore(name));
 }
@@ -363,7 +363,7 @@ export function findComponentByCode(...code: string[]) {
  * Finds the first component that matches the filter, lazily.
  */
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
 
     return LazyComponent<T>(() => {
@@ -378,7 +378,7 @@ export function findComponentLazy<T extends object = any>(filter: FilterFn) {
  * Finds the first component that includes all the given code, lazily
  */
 export function findComponentByCodeLazy<T extends object = any>(...code: string[]) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
 
     return LazyComponent<T>(() => {
         const res = find(filters.componentByCode(...code), { isIndirect: true });
@@ -392,7 +392,7 @@ export function findComponentByCodeLazy<T extends object = any>(...code: string[
  * Finds the first component that is exported by the first prop name, lazily
  */
 export function findExportedComponentLazy<T extends object = any>(...props: string[]) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
 
     return LazyComponent<T>(() => {
         const res = find(filters.byProps(...props), { isIndirect: true });
@@ -477,7 +477,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtractAndLoadChunksRegex) {
-    if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
@@ -487,7 +487,7 @@ export function extractAndLoadChunksLazy(code: string[], matcher = DefaultExtrac
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
+    if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")
         filter = filters.byProps(filter);
