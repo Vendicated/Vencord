@@ -19,12 +19,32 @@ const regex = [
     /(hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\))/g
 ];
 
+enum RenderType {
+    BLOCK,
+    FOREGROUND,
+    BACKGROUND,
+}
+
 const settings = definePluginSettings({
-    isBackground: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Render colors as text background"
-    }
+    renderType: {
+        type: OptionType.SELECT,
+        description: "How to render colors",
+        options: [
+            {
+                label: "Block nearby",
+                value: RenderType.BLOCK,
+                default: true
+            },
+            {
+                label: "Text color",
+                value: RenderType.FOREGROUND,
+            },
+            {
+                label: "Background color",
+                value: RenderType.BACKGROUND
+            }
+        ]
+    },
 });
 
 
@@ -97,8 +117,10 @@ function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
                 if (!matches.includes(element))
                     return [...arr, element];
 
-                if (settings.store.isBackground)
+                if (settings.store.renderType === RenderType.BACKGROUND)
                     return [...arr, <span style={{ background: element }}>{element}</span>];
+                if (settings.store.renderType === RenderType.FOREGROUND)
+                    return [...arr, <span style={{ color: element }}>{element}</span>];
 
                 const styles = {
                     "--color": element
