@@ -64,6 +64,7 @@ export default definePlugin({
 });
 
 async function checkIfVirus(srcUrl: string) {
+    showToast("Loading...", Toasts.Type.MESSAGE);
     const { apiKey } = settings.store;
     if (apiKey == "") {
         showToast("Please inout a valid Api-Key.", Toasts.Type.FAILURE);
