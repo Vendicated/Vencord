@@ -61,7 +61,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "betterAutomod",
     authors: [Devs.iamme],
-    description: "echo automod logs in the automoded channel and make it possible to test your automod rules",
+    description: "echo AutoMod logs real time and let's you test your AutoMod rules",
     settings: settings,
     settingsAboutComponent: settingsAboutComponent,
     patches: [
