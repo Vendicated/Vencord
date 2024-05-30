@@ -23,18 +23,7 @@ export async function postAttachment(_: IpcMainInvokeEvent, url: string, apiKey:
     return new Promise((resolve, reject) => {
         const req = https.request(options, (res) => {
             if (res.statusCode != 200) {
-                if (res.statusCode == null) {
-                    reject(new Error(String("Something went wrong please try again."), { cause: { code: null } }));
-                }
-                else if (res.statusCode == 401) {
-                    reject(new Error(String("Please input a valid API-key."), { cause: { code: "AuthenticationRequiredError" } }));
-                }
-                else if (res.statusCode == 429) {
-                    reject(new Error(String("Your quota is exceeded, please try again later."), { cause: { code: "QuotaExceededError" } }));
-                }
-                else {
-                    reject(new Error(String("Something went wrong please try again." + res.statusCode)));
-                }
+                reject(handleStatusCode);
             }
             let responseData = '';
             res.on('data', (chunk) => {
@@ -66,18 +55,7 @@ export async function getUrlId(_: IpcMainInvokeEvent, id: string, apiKey: string
     return new Promise((resolve, reject) => {
         const req = https.request(options, (res) => {
             if (res.statusCode != 200) {
-                if (res.statusCode == null) {
-                    reject(new Error(String("Something went wrong please try again."), { cause: { code: null } }));
-                }
-                else if (res.statusCode == 401) {
-                    reject(new Error(String("Please input a valid API-key."), { cause: { code: "AuthenticationRequiredError" } }));
-                }
-                else if (res.statusCode == 429) {
-                    reject(new Error(String("Your quota is exceeded, please try again later."), { cause: { code: "QuotaExceededError" } }));
-                }
-                else {
-                    reject(new Error(String("Something went wrong please try again.")));
-                }
+                reject(handleStatusCode);
             }
             let responseData = '';
             res.on('data', (chunk) => {
@@ -90,4 +68,19 @@ export async function getUrlId(_: IpcMainInvokeEvent, id: string, apiKey: string
         req.on("error", reject);
         req.end();
     });
+}
+
+function handleStatusCode(code: undefined | number): Error {
+    if (code == null) {
+        return new Error(String("Something went wrong please try again."), { cause: { code: null } });
+    }
+    else if (code == 401) {
+        return new Error(String("Please input a valid API-key."), { cause: { code: "AuthenticationRequiredError" } });
+    }
+    else if (code == 429) {
+        return new Error(String("Your quota is exceeded, please try again later."), { cause: { code: "QuotaExceededError" } });
+    }
+    else {
+        return new Error(String("Something went wrong please try again."));
+    }
 }
