@@ -5,12 +5,10 @@
  */
 
 import { Link } from "@components/Link";
-import { findByPropsLazy } from "@webpack";
 import { Forms, Text, TextArea, useMemo, useState } from "@webpack/common";
 
 import { AutoModRule, MatchedRule, matchRules } from "./automod";
 
-const useAutomodRulesStore = findByPropsLazy("useAutomodRulesList");
 
 export function settingsAboutComponent() {
     return (<>
@@ -27,22 +25,18 @@ export function settingsAboutComponent() {
     </>);
 }
 
-export function TestInputBoxComponent({ guildId }: { guildId: string; }) {
-    const { rulesByTriggerType }: { rulesByTriggerType: Array<Array<AutoModRule>>; } = useAutomodRulesStore.useAutomodRulesList(guildId);
-    if (rulesByTriggerType.length === 0 || !rulesByTriggerType[0] || rulesByTriggerType[0].length === 0) return null;
+export function TestInputBoxComponent({ currentRules }: { currentRules: Array<AutoModRule>; }) {
     const [inputValue, setInputValue] = useState("");
     const [warningText, setWarningText] = useState("");
-    const currentRules: Array<AutoModRule> = rulesByTriggerType[0];
-
     useMemo(() => {
         if (!inputValue || !currentRules) return null;
-        const match: null | MatchedRule = currentRules ? matchRules(inputValue, currentRules) : null;
+        const match: null | MatchedRule = currentRules ? matchRules(inputValue.trim(), currentRules) : null;
         if (match !== null) {
             setWarningText(`Match: ${match.rule.name}, filter: ${JSON.stringify(match.filter)}`);
         } else {
             setWarningText("");
         }
-    }, [inputValue, currentRules]);
+    }, [inputValue]);
     return (
         <div>
             <Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>

@@ -23,13 +23,17 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { SelectedGuildStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
 import { Embed, Message } from "discord-types/general";
 
+import { AutoModRule } from "./automod";
 import { settingsAboutComponent, TestInputBoxComponent } from "./UI";
 
-const logger = new Logger("betterAutomod");
+const useAutomodRulesStore = findByPropsLazy("useAutomodRulesList");
 
+
+const logger = new Logger("betterAutomod");
+let currentGuild: string | null = null;
 
 interface EMessage extends Message {
     echoed: boolean;
@@ -76,7 +80,11 @@ export default definePlugin({
             predicate: () => settings.store.testBox
         }
     ],
-    renderInputBox: () => { return <TestInputBoxComponent guildId={SelectedGuildStore.getGuildId()} />; },
+    renderInputBox: () => {
+        const { rulesByTriggerType }: { rulesByTriggerType: AutoModRule[][]; } = useAutomodRulesStore.useAutomodRulesList(currentGuild);
+        if (rulesByTriggerType.length === 0 || !rulesByTriggerType[1] || rulesByTriggerType[1].length === 0) return null;
+        return <TestInputBoxComponent currentRules={rulesByTriggerType[1]} />;
+    },
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message }: IMessageCreate) {
             if (!settings.store.echoIt) return;
@@ -94,6 +102,10 @@ export default definePlugin({
                     sendBotMessage(field.value, message);
                 });
             });
+        },
+        async GUILD_SETTINGS_INIT({ guildId, section }: { section: string; guildId: string; }) {
+            if (section !== "GUILD_AUTOMOD") return;
+            currentGuild = guildId;
         }
     }
 });
