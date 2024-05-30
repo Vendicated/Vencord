@@ -282,7 +282,7 @@ page.on("pageerror", e => console.error("[Page Error]", e));
 
 await page.setBypassCSP(true);
 
-async function runtime(token: string) {
+async function reporterRuntime(token: string) {
     console.log("[PUP_DEBUG]", "Starting test...");
 
     try {
@@ -290,43 +290,7 @@ async function runtime(token: string) {
         Object.defineProperty(navigator, "languages", {
             get: function () {
                 return ["en-US", "en"];
-            },
-        });
-
-        // Monkey patch Logger to not log with custom css
-        // @ts-ignore
-        const originalLog = Vencord.Util.Logger.prototype._log;
-        // @ts-ignore
-        Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
-            if (level === "warn" || level === "error")
-                return console[level]("[Vencord]", this.name + ":", ...args);
-
-            return originalLog.call(this, level, levelColor, args);
-        };
-
-        // Force enable all plugins and patches
-        Vencord.Plugins.patches.length = 0;
-        Object.values(Vencord.Plugins.plugins).forEach(p => {
-            // Needs native server to run
-            if (p.name === "WebRichPresence (arRPC)") return;
-
-            Vencord.Settings.plugins[p.name].enabled = true;
-            p.patches?.forEach(patch => {
-                patch.plugin = p.name;
-                delete patch.predicate;
-                delete patch.group;
-
-                Vencord.Util.canonicalizeFind(patch);
-                if (!Array.isArray(patch.replacement)) {
-                    patch.replacement = [patch.replacement];
-                }
-
-                patch.replacement.forEach(r => {
-                    delete r.predicate;
-                });
-
-                Vencord.Plugins.patches.push(patch);
-            });
+            }
         });
 
         let wreq: typeof Vencord.Webpack.wreq;
@@ -343,7 +307,7 @@ async function runtime(token: string) {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        const LazyChunkRegex = canonicalizeMatch(/(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\)))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("[^)]+?"\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
@@ -353,8 +317,7 @@ async function runtime(token: string) {
             // the chunk containing the component
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIdsArray, rawChunkIdsSingle, entryPoint]) => {
-                const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Vencord.Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
 
                 if (chunkIds.length === 0) {
@@ -525,14 +488,14 @@ async function runtime(token: string) {
                 } else if (method === "extractAndLoadChunks") {
                     const [code, matcher] = args;
 
-                    const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) result = module.toString().match(canonicalizeMatch(matcher));
+                    result = await Vencord.Webpack.extractAndLoadChunks(code, matcher);
+                    if (result === false) result = null;
                 } else {
                     // @ts-ignore
                     result = Vencord.Webpack[method](...args);
                 }
 
-                if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
+                if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
             } catch (e) {
                 let logMessage = searchType;
                 if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
@@ -550,9 +513,10 @@ async function runtime(token: string) {
 }
 
 await page.evaluateOnNewDocument(`
-    ${readFileSync("./dist/browser.js", "utf-8")}
-
-    ;(${runtime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    if (location.host.endsWith("discord.com")) {
+        ${readFileSync("./dist/browser.js", "utf-8")};
+        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    }
 `);
 
 await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
