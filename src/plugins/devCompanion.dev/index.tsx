@@ -21,8 +21,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import definePlugin, { OptionType } from "@utils/types";
-import { cacheFind, filters, search } from "@webpack";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import { cacheFindAll, filters, search } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -201,22 +201,22 @@ function initWs(isManual = false) {
                     let results: any[];
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
-                            results = cacheFind(parsedArgs[0]);
+                            results = cacheFindAll(parsedArgs[0]);
                             break;
                         case "ByProps":
-                            results = cacheFind(filters.byProps(...parsedArgs));
+                            results = cacheFindAll(filters.byProps(...parsedArgs));
                             break;
                         case "Store":
-                            results = cacheFind(filters.byStoreName(parsedArgs[0]));
+                            results = cacheFindAll(filters.byStoreName(parsedArgs[0]));
                             break;
                         case "ByCode":
-                            results = cacheFind(filters.byCode(...parsedArgs));
+                            results = cacheFindAll(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
-                            results = cacheFind(filters.componentByCode(...parsedArgs));
+                            results = cacheFindAll(filters.componentByCode(...parsedArgs));
                             break;
                         default:
                             return reply("Unknown Find Type " + type);
@@ -243,6 +243,7 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
+    reporterTestable: ReporterTestable.None,
     settings,
 
     toolboxActions: {
