@@ -393,7 +393,7 @@ async function runtime(token: string) {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        const LazyChunkRegex = canonicalizeMatch(/(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\)))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("[^)]+?"\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
@@ -403,8 +403,7 @@ async function runtime(token: string) {
             // the chunk containing the component
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIdsArray, rawChunkIdsSingle, entryPoint]) => {
-                const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Vencord.Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
 
                 if (chunkIds.length === 0) {
@@ -543,14 +542,14 @@ async function runtime(token: string) {
                 } else if (method === "extractAndLoadChunks") {
                     const [code, matcher] = args;
 
-                    const module = Vencord.Webpack.findModuleFactory(...code);
-                    if (module) result = String(module).match(canonicalizeMatch(matcher));
+                    result = await Vencord.Webpack.extractAndLoadChunks(code, matcher);
+                    if (result === false) result = null;
                 } else {
                     // @ts-ignore
                     result = Vencord.Webpack[method](...args);
                 }
 
-                if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
+                if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
             } catch (e) {
                 let logMessage = searchType;
                 if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${String(args[0]).slice(0, 147)}...)`;
