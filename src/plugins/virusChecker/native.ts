@@ -23,7 +23,7 @@ export async function postAttachment(_: IpcMainInvokeEvent, url: string, apiKey:
     return new Promise((resolve, reject) => {
         const req = https.request(options, (res) => {
             if (res.statusCode != 200) {
-                reject(handleStatusCode);
+                reject(handleStatusCode(res.statusCode));
             }
             let responseData = '';
             res.on('data', (chunk) => {
@@ -55,7 +55,7 @@ export async function getUrlId(_: IpcMainInvokeEvent, id: string, apiKey: string
     return new Promise((resolve, reject) => {
         const req = https.request(options, (res) => {
             if (res.statusCode != 200) {
-                reject(handleStatusCode);
+                reject(handleStatusCode(res.statusCode));
             }
             let responseData = '';
             res.on('data', (chunk) => {
