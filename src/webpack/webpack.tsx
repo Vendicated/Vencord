@@ -629,15 +629,15 @@ export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAl
  */
 export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFindBulk);
 
-export const DefaultExtractAndLoadChunksRegex = /(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\))|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/;
-export const ChunkIdsRegex = /\("(.+?)"\)/g;
+export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("[^)]+?"\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/;
+export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 
 /**
  * Extract and load chunks using their entry point.
  *
  * @param code An array of all the code the module factory containing the lazy chunk loading must include
- * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the lazy chunk loading found in the module factory
- * @returns A promise that resolves when the chunks were loaded
+ * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
+ * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
 export async function extractAndLoadChunks(code: string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
     const module = findModuleFactory(...code);
@@ -645,7 +645,11 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
-        return;
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        if (IS_DEV && !devToolsOpen)
+            throw err;
+
+        return false;
     }
 
     const match = module.toString().match(canonicalizeMatch(matcher));
@@ -657,10 +661,10 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         if (IS_DEV && !devToolsOpen)
             throw err;
 
-        return;
+        return false;
     }
 
-    const [, rawChunkIdsArray, rawChunkIdsSingle, entryPointId] = match;
+    const [, rawChunkIds, entryPointId] = match;
     if (Number.isNaN(Number(entryPointId))) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
@@ -669,16 +673,27 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         if (IS_DEV && !devToolsOpen)
             throw err;
 
-        return;
+        return false;
     }
 
-    const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
     if (rawChunkIds) {
         const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
+    if (wreq.m[entryPointId] == null) {
+        const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
+        logger.warn(err, "Code:", code, "Matcher:", matcher);
+
+        // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+        if (IS_DEV && !devToolsOpen)
+            throw err;
+
+        return false;
+    }
+
     wreq(entryPointId);
+    return true;
 }
 
 /**

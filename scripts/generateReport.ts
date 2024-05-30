@@ -341,7 +341,7 @@ async function runtime(token: string) {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        const LazyChunkRegex = canonicalizeMatch(/(?:Promise\.all\(\[(\i\.\i\("[^)]+?"\)[^\]]+?)\]\)|(\i\.\i\("[^)]+?"\)))\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("[^)]+?"\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"([^)]+?)"\)\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
@@ -351,8 +351,7 @@ async function runtime(token: string) {
             // the chunk containing the component
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIdsArray, rawChunkIdsSingle, entryPoint]) => {
-                const rawChunkIds = rawChunkIdsArray ?? rawChunkIdsSingle;
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Vencord.Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
 
                 if (chunkIds.length === 0) {
@@ -503,8 +502,7 @@ async function runtime(token: string) {
             }
         }
 
-        // eslint-disable-next-line prefer-const
-        for (let [searchType, args] of Vencord.Webpack.webpackSearchHistory) {
+        await Promise.all(Vencord.Webpack.webpackSearchHistory.map(async ([searchType, args]) => {
             args = [...args];
 
             try {
@@ -520,9 +518,9 @@ async function runtime(token: string) {
                     case "extractAndLoadChunks": {
                         const [code, matcher] = args;
 
-                        const module = Vencord.Webpack.findModuleFactory(...code);
-                        if (module) {
-                            result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
+                        result = await Vencord.Webpack.extractAndLoadChunks(code, matcher);
+                        if (result === false) {
+                            result = null;
                         }
 
                         break;
@@ -592,7 +590,7 @@ async function runtime(token: string) {
 
                 console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
             }
-        }
+        }));
 
         setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
     } catch (e) {
