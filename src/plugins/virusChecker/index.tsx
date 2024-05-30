@@ -26,7 +26,6 @@ export default definePlugin({
     description: "Adds a button to attachments, allowing users to scan files via VirusTotal.",
     authors: [Devs.Karfy],
     settings,
-
     patches: [
         {
             find: "attachmentInner,children",
@@ -74,18 +73,19 @@ async function checkIfVirus(srcUrl: string) {
         let { data: { id } } = await Native.postAttachment(srcUrl, apiKey);
         try {
             let { meta: { url_info } } = await Native.getUrlId(id, apiKey);
-            let test2 = url_info.id
             VencordNative.native.openExternal(`https://www.virustotal.com/gui/url/${url_info.id}/detection`);
         }
         catch (e) {
-            let error = String(e.message).split("Error: ");
-            showToast(error[error.length - 1], Toasts.Type.FAILURE);
-            return;
-        }   
+            handlerError(e);
+        }
     }
     catch (e) {
-        let error = String(e.message).split("Error: ");
-        showToast(error[error.length - 1], Toasts.Type.FAILURE);
-        return;
+        handlerError(e);
     }
+}
+
+function handlerError(e: error) {
+    let error = String(e.message).split("Error: ");
+    showToast(error[error.length - 1], Toasts.Type.FAILURE);
+    return;
 }

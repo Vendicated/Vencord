@@ -5,13 +5,7 @@
  */
 
 import { IpcMainInvokeEvent } from "electron";
-import { IncomingMessage } from "http";
 import https from "https";
-import { request } from "https";
-import { stringify } from "querystring";
-
-
-
 
 export async function postAttachment(_: IpcMainInvokeEvent, url: string, apiKey: string) {
     const formData = `url=${encodeURIComponent(url)}`;
@@ -89,7 +83,6 @@ export async function getUrlId(_: IpcMainInvokeEvent, id: string, apiKey: string
             res.on('data', (chunk) => {
                 responseData += chunk;
             });
-
             res.on('end', () => {
                 resolve(JSON.parse(responseData));
             });
@@ -97,13 +90,4 @@ export async function getUrlId(_: IpcMainInvokeEvent, id: string, apiKey: string
         req.on("error", reject);
         req.end();
     });
-
-
-    //return await fetch(`https://www.virustotal.com/api/v3/analyses/${id}`, {
-    //    method: "GET",
-    //    headers: {
-    //        "Accept": "application/json",
-    //        "x-apikey": apiKey,
-    //    }
-    //}).then(res => res.json());
 }
