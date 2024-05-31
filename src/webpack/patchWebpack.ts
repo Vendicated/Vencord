@@ -70,13 +70,13 @@ define(Function.prototype, "m", {
             enumerable: false,
 
             set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
+                define(this, "p", { value: bundlePath });
+
                 if (bundlePath !== "/assets/") return;
 
                 logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
                 clearTimeout(setterTimeout);
-
-                define(this, "p", { value: bundlePath });
             }
         });
         // setImmediate to clear this property setter if this is not the main Webpack.
