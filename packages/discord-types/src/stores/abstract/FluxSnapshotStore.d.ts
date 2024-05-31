@@ -16,6 +16,7 @@ export interface FluxSnapshot<SnapshotData = any> {
 
 export type FluxSnapshotStoreAction = ExcludeAction<FluxAction, "CLEAR_CACHES" | "WRITE_CACHES">;
 
+// Original name: SnapshotStore
 export abstract class FluxSnapshotStore<
     Constructor extends GenericConstructor = GenericConstructor,
     SnapshotData = any,

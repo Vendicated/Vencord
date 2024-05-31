@@ -8,9 +8,9 @@ import type { Duration, Moment } from "moment";
 import type { SnakeCasedProperties } from "type-fest";
 
 import type { Nullish } from "../internal";
+import type { ApplicationIntegrationType } from "./ApplicationRecord";
 import type { ChannelRecord, ChannelType } from "./channels";
 import type { ImmutableRecord } from "./ImmutableRecord";
-import type { ApplicationIntegrationType } from "./UserProfile";
 import type { UserRecord } from "./UserRecord";
 
 export type MessageRecordOwnProperties = Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "attachments" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "codedLinks" | "colorString" | "components" | "content" | "customRenderedContent" | "editedTimestamp" | "embeds" | "flags" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentionEveryone" | "mentionRoles" | "mentioned" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "timestamp" | "tts" | "type" | "webhookId">;
@@ -18,7 +18,7 @@ export type MessageRecordOwnProperties = Pick<MessageRecord, "activity" | "activ
 export class MessageRecord<
     OwnProperties extends MessageRecordOwnProperties = MessageRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(messageFromServer: Record<string, any>); // TEMP
+    constructor(messageProperties: Record<string, any>); // TEMP
 
     addReaction(e?: any, t?: any, n?: any, r?: any): this; // TEMP
     addReactionBatch(e?: any, t?: any): any; // TEMP
@@ -183,8 +183,11 @@ export const enum ButtonStyle {
     PREMIUM = 6,
 }
 
-// TODO: Must have one of either `customId` or `url`, but never both.
-// If a button has `url` it must have the `Link` button style.
+/**
+ * @todo
+ * Must have one of either `customId` or `url`, but never both.
+ * If a button has `url` it must have the `Link` button style.
+ */
 export interface MessageButtonComponent {
     customId: string | undefined;
     disabled: boolean | undefined;
@@ -385,9 +388,12 @@ export interface MessageEmbedProvider {
     url: string | undefined;
 }
 
-// TODO: An embed thumbnail either:
-// has `height`, `placeholder`, `placeholderVersion`, `proxyURL`, `url`, and `width`
-// or has only `height`, `url`, and `width`.
+/**
+ * @todo
+ * An embed thumbnail either
+ * has `height`, `placeholder`, `placeholderVersion`, `proxyURL`, `url`, and `width`
+ * or has only `height`, `url`, and `width`.
+ */
 export interface MessageEmbedThumbnail {
     height: number;
     placeholder: string | undefined;
@@ -419,8 +425,11 @@ export const enum MessageEmbedType {
     VOICE_CHANNEL = "voice_channel",
 }
 
-// TODO: An embed video must have either `proxyURL` or `url`, and having both is possible.
-// It might not be possible for an embed video to have `proxyURL` without `url`, though.
+/**
+ * @todo
+ * An embed video must have either `proxyURL` or `url`, and having both is possible.
+ * It might not be possible for an embed video to have `proxyURL` without `url`, though.
+ */
 export interface MessageEmbedVideo {
     height: number;
     placeholder: string | undefined;
@@ -509,7 +518,8 @@ export interface InteractionMetadata {
     original_response_message_id?: string;
     triggering_interaction_metadata?: InteractionMetadata;
     type: InteractionTypes;
-    user: Record<string, any>; // TEMP: This is not a UserRecord, it's a user object from the API.
+    /** @todo This is not a UserRecord; it's a user object from the API. */
+    user: Record<string, any>;
 } // TEMP
 
 export interface ChannelMention {
@@ -639,7 +649,8 @@ export interface MessageSticker {
     sort_value?: number;
     tags: string;
     type: MetaStickerType;
-    user?: Record<string, any>; // TEMP: This is not a UserRecord, it's a user object from the API.
+    /** @todo This is not a UserRecord; it's a user object from the API. */
+    user?: Record<string, any>;
 }
 
 export const enum MessageTypes {

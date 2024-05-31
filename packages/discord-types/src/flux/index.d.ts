@@ -7,3 +7,4 @@
 export * from "./fluxActionHandlers";
 export * from "./fluxActions";
 export * from "./FluxDispatcher";
+export * from "./FluxEmitter";

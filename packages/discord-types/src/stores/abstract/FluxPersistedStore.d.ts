@@ -10,6 +10,7 @@ import type { FluxDispatcher } from "../../flux/FluxDispatcher";
 import type { GenericConstructor, Nullish } from "../../internal";
 import type { FluxStore } from "./FluxStore";
 
+// Original name: PersistedStore
 export abstract class FluxPersistedStore<
     Constructor extends GenericConstructor = GenericConstructor,
     State = any,

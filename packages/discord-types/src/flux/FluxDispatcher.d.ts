@@ -8,22 +8,6 @@ import type { Nullish } from "../internal";
 import type { FluxActionHandler, FluxActionHandlerMap, FluxActionHandlersGraph } from "./fluxActionHandlers";
 import type { ExtractAction, FluxAction, FluxActionLogger, FluxActionType } from "./fluxActions";
 
-export const enum FluxDispatchBand {
-    Early = 0,
-    Database = 1,
-    Default = 2,
-}
-
-export interface SentryUtils {
-    addBreadcrumb: (breadcrumb: {
-        category?: string | undefined;
-        data?: any;
-        level?: string | undefined;
-        message?: string | undefined;
-        type?: string | undefined;
-    }) => void;
-}
-
 /*
  * The only reason to make Dispatcher generic with a type parameter for the actions it handles would be to allow plugins
  * to create their own Flux stores with their own actions. However, this would require removing all contravariant properties
@@ -34,9 +18,10 @@ export interface SentryUtils {
  * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~398
  * stores use the same instance), implying that their type for Dispatcher is also not generic.
  */
+// Original name: Dispatcher
 export class FluxDispatcher {
     constructor(
-        defaultBand?: FluxDispatchBand | undefined /* = FluxDispatchBand.Early */,
+        defaultBand?: FluxDispatchBand | undefined /* = FluxDispatchBand.EARLY */,
         actionLogger?: FluxActionLogger | Nullish,
         sentryUtils?: SentryUtils | Nullish
     );
@@ -82,4 +67,22 @@ export class FluxDispatcher {
     _waitQueue: (() => void)[];
     actionLogger: FluxActionLogger;
     functionCache: FluxActionHandlerMap;
+}
+
+// Original name: DispatchBand
+// Enum keys made screaming snake case for consistency.
+export const enum FluxDispatchBand {
+    EARLY = 0,
+    DATABASE = 1,
+    DEFAULT = 2,
+}
+
+export interface SentryUtils {
+    addBreadcrumb: (breadcrumb: {
+        category?: string | undefined;
+        data?: any;
+        level?: string | undefined;
+        message?: string | undefined;
+        type?: string | undefined;
+    }) => void;
 }

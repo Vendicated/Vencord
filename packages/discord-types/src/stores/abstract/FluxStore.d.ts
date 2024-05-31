@@ -9,6 +9,7 @@ import type { FluxAction } from "../../flux/fluxActions";
 import type { FluxDispatchBand, FluxDispatcher } from "../../flux/FluxDispatcher";
 import type { Nullish } from "../../internal";
 
+// Original name: Store
 export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     constructor(
         dispatcher: FluxDispatcher,
@@ -36,7 +37,7 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     ): void;
     syncWith(
         stores: FluxStore[],
-        func: () => boolean | undefined,
+        func: FluxSyncWithFunction,
         timeout?: number | Nullish
     ): void;
     waitFor(...stores: FluxStore[]): void;
@@ -49,7 +50,7 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     _mustEmitChanges: ((action: Action) => boolean) | Nullish;
     _reactChangeCallbacks: FluxChangeListeners;
     _syncWiths: {
-        func: () => boolean | undefined;
+        func: FluxSyncWithFunction;
         store: FluxStore;
     }[];
     addChangeListener: FluxChangeListeners["add"];
@@ -59,8 +60,9 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     removeReactChangeListener: FluxChangeListeners["remove"];
 }
 
-export type FluxChangeListener = () => boolean;
+export type FluxSyncWithFunction = () => boolean | undefined;
 
+// Original name: ChangeListeners
 export class FluxChangeListeners {
     has(listener: FluxChangeListener): boolean;
     hasAny(): boolean;
@@ -74,3 +76,5 @@ export class FluxChangeListeners {
     listeners: Set<FluxChangeListener>;
     remove: (listener: FluxChangeListener) => void;
 }
+
+export type FluxChangeListener = () => boolean;

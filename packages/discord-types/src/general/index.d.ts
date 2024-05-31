@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+export * from "./ApplicationRecord";
 export * from "./ChannelMessages";
 export * from "./channels";
 export * from "./Clan";
+export * from "./CompanyRecord";
+export * from "./Draft";
 export * from "./GuildMember";
 export * from "./GuildMemberProfile";
 export * from "./GuildRecord";

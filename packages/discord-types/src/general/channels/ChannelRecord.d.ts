@@ -169,13 +169,6 @@ export const enum ChannelFlags {
     IS_JOIN_REQUEST_INTERVIEW_CHANNEL = 1 << 16,
 }
 
-export const enum ThreadMemberFlags {
-    HAS_INTERACTED = 1 << 0,
-    ALL_MESSAGES = 1 << 1,
-    ONLY_MENTIONS = 1 << 2,
-    NO_MESSAGES = 1 << 3,
-}
-
 export interface ThreadMember {
     flags: ThreadMemberFlags;
     joinTimestamp: string;
@@ -186,9 +179,15 @@ export interface ThreadMember {
     muted: boolean;
 }
 
-export const enum PermissionOverwriteType {
-    ROLE = 0,
-    MEMBER = 1,
+export const enum ThreadMemberFlags {
+    HAS_INTERACTED = 1 << 0,
+    ALL_MESSAGES = 1 << 1,
+    ONLY_MENTIONS = 1 << 2,
+    NO_MESSAGES = 1 << 3,
+}
+
+interface PermissionOverwriteMap {
+    [roleIdOrUserId: string]: PermissionOverwrite;
 }
 
 export interface PermissionOverwrite {
@@ -198,8 +197,9 @@ export interface PermissionOverwrite {
     type: PermissionOverwriteType;
 }
 
-interface PermissionOverwriteMap {
-    [roleIdOrUserId: string]: PermissionOverwrite;
+export const enum PermissionOverwriteType {
+    ROLE = 0,
+    MEMBER = 1,
 }
 
 export interface ChannelRecipient {
@@ -215,16 +215,16 @@ export interface ChannelRecipient {
     username: string;
 }
 
+export interface SafetyWarning {
+    dismiss_timestamp?: string | Nullish; // TEMP
+    type: SafetyWarningType;
+}
+
 // Original name: SafetyWarningTypes
 export const enum SafetyWarningType {
     STRANGER_DANGER = 1,
     INAPPROPRIATE_CONVERSATION_TIER_1 = 2,
     INAPPROPRIATE_CONVERSATION_TIER_2 = 3,
-}
-
-export interface SafetyWarning {
-    dismiss_timestamp?: string | Nullish; // TEMP
-    type: SafetyWarningType;
 }
 
 export interface ThreadMetadata {

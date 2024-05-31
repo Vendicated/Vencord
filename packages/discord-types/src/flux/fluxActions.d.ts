@@ -28,29 +28,7 @@ export type ExtractAction<Action extends FluxAction, ActionType extends Action["
             : never
         : never;
 
-export type FluxActionMetric<ActionType extends FluxActionType = FluxActionType>
-    = [storeName: string, actionType: ActionType, totalTime: number];
-
-export class FluxActionLog<Action extends FluxAction = FluxAction> {
-    constructor(actionType: Action["type"]);
-
-    get name(): Action["type"];
-    toJSON(): Pick<this, "action" | "createdAt" | "traces"> & {
-        created_at: FluxActionLog["createdAt"];
-    };
-
-    action: Action;
-    createdAt: Date;
-    error: Error | undefined;
-    id: number;
-    startTime: number;
-    totalTime: number;
-    traces: {
-        name: string;
-        time: number;
-    }[];
-}
-
+// Original name: ActionLogger
 export class FluxActionLogger extends EventEmitter {
     constructor(options?: { persist?: boolean | undefined; } | undefined);
 
@@ -69,6 +47,30 @@ export class FluxActionLogger extends EventEmitter {
 
     logs: FluxActionLog[];
     persist: boolean;
+}
+
+export type FluxActionMetric<ActionType extends FluxActionType = FluxActionType>
+    = [storeName: string, actionType: ActionType, totalTime: number];
+
+// Original name: ActionLog
+export class FluxActionLog<Action extends FluxAction = FluxAction> {
+    constructor(actionType: Action["type"]);
+
+    get name(): Action["type"];
+    toJSON(): Pick<this, "action" | "createdAt" | "traces"> & {
+        created_at: FluxActionLog["createdAt"];
+    };
+
+    action: Action;
+    createdAt: Date;
+    error: Error | undefined;
+    id: number;
+    startTime: number;
+    totalTime: number;
+    traces: {
+        name: string;
+        time: number;
+    }[];
 }
 
 /*

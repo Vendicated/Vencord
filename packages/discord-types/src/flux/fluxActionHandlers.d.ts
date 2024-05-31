@@ -36,6 +36,7 @@ type FluxOrderedActionHandlers<Action extends FluxAction = FluxAction> = {
     storeDidChange: FluxActionHandler<Action>;
 }[];
 
+// Original name: ActionHandlersGraph
 export class FluxActionHandlersGraph {
     _addToBand(dispatchToken: string, dispatchBand: FluxDispatchBand): void;
     _bandToken(dispatchBand: FluxDispatchBand): string;
