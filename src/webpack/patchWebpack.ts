@@ -211,16 +211,8 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
     const patchedBy = new Set<string>();
 
-    // Discords Webpack chunks for some ungodly reason contain random
-    // newlines. Cyn recommended this workaround and it seems to work fine,
-    // however this could potentially break code, so if anything goes weird,
-    // this is probably why.
-    // Additionally, `[actual newline]` is one less char than "\n", so if Discord
-    // ever targets newer browsers, the minifier could potentially use this trick and
-    // cause issues.
-    //
-    // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + String(factory).replaceAll("\n", "");
+    // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
+    let code: string = "0," + String(factory);
 
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
