@@ -17,7 +17,7 @@ const settings = definePluginSettings({
     apiKey: {
         type: OptionType.STRING,
         description: "Input your Hybrid Analysis API-Key",
-        default: "null"
+        default: ""
     },
 });
 
