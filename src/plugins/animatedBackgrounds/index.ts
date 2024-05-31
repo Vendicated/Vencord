@@ -9,7 +9,7 @@ import { OptionType} from "@utils/types";
 import definePlugin from "@utils/types";
 import './styles.css';
 import { Link } from "@components/Link";
-import {Forms,React} from "@webpack/common";
+import {Forms, ReactDOM, React, useEffect, useState} from "@webpack/common";
 
 export default definePlugin({
     name: "AnimatedBackgrounds",
@@ -24,40 +24,18 @@ export default definePlugin({
             restartNeeded: true,
         },
     },
+
     start() {
-        const appMount = document.querySelector('#app-mount.appMount_c99875');
+        const appMount = document.getElementById('app-mount');
         if (appMount) {
+            const newDiv = document.createElement('div');
             const source = Vencord.Settings.plugins.AnimatedBackgrounds.source;
+            appMount.appendChild(newDiv);
+            ReactDOM.render(<AnimatedBackgrounds />, newDiv);
             if (source.endsWith('.webp')) {
-                appMount.style.backgroundImage = `url(${source})`;
-            } else if (source.startsWith('https://youtu.be/')) {
-                try {
-                    const url = new URL(source);
-                    let videoId;
-                    if (url.hostname === 'youtu.be') {
-                        videoId = url.pathname.slice(1);
-                    } else {
-                        videoId = url.searchParams.get('v');
-                    }
-                    const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&vq=highres`;
-                    const iframe = this.createIframe(iframeSrc);
-                    appMount.appendChild(iframe);
-                } catch (error) {
-                }
+                appMount.style.setProperty('background-image', `url(${source})`, 'important');
             }
         }
-    },
-    createIframe(src) {
-        const container = document.createElement('div');
-        container.className = 'container';
-
-        const iframe = document.createElement('iframe');
-        iframe.className = 'iframe';
-        iframe.src = src;
-        iframe.allow = "autoplay; fullscreen; encrypted-media";
-
-        container.appendChild(iframe);
-        return container;
     },
 
     settingsAboutComponent: () => {
@@ -68,11 +46,42 @@ export default definePlugin({
                 </Forms.FormText>
                 <Forms.FormText>
                 <Forms.FormText>
-   <br /> Use any video, for example a downloaded Video from YT and convert it into a .webp file. It should look something like this: https://example.com/image.webp, or just any YouTube URL. Here is a good YouTube video example: <Link href="https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc">10h loop</Link>.
-</Forms.FormText>
+                    <br /> Use any video, for example a downloaded Video from YT and convert it into a .webp file. It should look something like this: https://example.com/image.webp, or just any YouTube URL. Here is a good YouTube video example: <Link href="https://youtu.be/Q7W4JISNmQk?si=kwLxgAAh9cQAQtYc">10h loop</Link>.
+                </Forms.FormText>
                 </Forms.FormText>
             </>
         );
     }
-
 });
+
+const AnimatedBackgrounds = () => {
+    const [source] = useState(Vencord.Settings.plugins.AnimatedBackgrounds.source);
+    const [, setVideoId] = useState('');
+    const [iframeSrc, setIframeSrc] = useState('');
+
+    useEffect(() => {
+        if (source.endsWith('.webp')) {
+            document.body.style.backgroundImage = `url(${source})`;
+        } else if (source.includes('https://youtu.be/')) {
+            try {
+                const url = new URL(source);
+                let videoId;
+                if (url.hostname === 'youtu.be') {
+                    videoId = url.pathname.slice(1);
+                } else {
+                    videoId = url.searchParams.get('v');
+                }
+                setVideoId(videoId);
+                setIframeSrc(`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&vq=highres`);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }, [source]);
+
+    return (
+        <div className='container'>
+            <iframe className='iframe' src={iframeSrc} allow="autoplay; fullscreen; encrypted-media" />
+        </div>
+    );
+};
