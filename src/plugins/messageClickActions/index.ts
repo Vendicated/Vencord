@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendBotMessage } from "@api/Commands";
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -56,6 +57,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Only do double click actions when shift/ctrl is held",
         default: false
+    },
+    sendUnpinNotification: {
+        type: OptionType.BOOLEAN,
+        description: "Send a bot message when a message is unpinned",
+        default: false
     }
 });
 
@@ -66,7 +72,20 @@ async function pinMessage(channel: any, message: any): Promise<void> {
 
 async function unpinMessage(channel: any, message: any): Promise<void> {
     if (!pinModule) return;
-    await pinModule.unpinMessage(channel, message.id);
+    try {
+        await pinModule.unpinMessage(channel, message.id);
+        if (settings.store.sendUnpinNotification) {
+            sendBotMessage(channel.id, {
+                content: "Successfully unpinned the message.",
+            });
+        }
+    } catch (error: any) {
+        if (settings.store.sendUnpinNotification) {
+            sendBotMessage(channel.id, {
+                content: "Failed to unpin the message :(",
+            });
+        }
+    }
 }
 
 export default definePlugin({
@@ -74,7 +93,6 @@ export default definePlugin({
     description: "Hold Backspace and click to delete, double click to edit/reply, ctrl+shift click to pin/unpin",
     authors: [Devs.Ven, Devs.Prism],
     dependencies: ["MessageEventsAPI"],
-
     settings,
 
     start() {
