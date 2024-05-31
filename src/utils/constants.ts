@@ -518,6 +518,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "verticalsync",
         id: 328165170536775680n
     },
+    jsh4d: {
+        name: "jsh",
+        id: 1241791492276621434n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
