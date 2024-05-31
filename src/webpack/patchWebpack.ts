@@ -190,6 +190,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
         return true;
     }
 };
+
 /**
  * Patches a module factory.
  *
