@@ -218,9 +218,11 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
         const patch = patches[i];
         if (patch.predicate && !patch.predicate()) continue;
 
+        // indexOf is faster than includes because it doesn't check if searchString is a RegExp
+        // https://github.com/moonlight-mod/moonlight/blob/53ae39d4010277f49f3b70bebbd27b9cbcdb1c8b/packages/core/src/patch.ts#L61
         const moduleMatches = typeof patch.find === "string"
-            ? code.includes(patch.find)
-            : patch.find.test(code);
+            ? code.indexOf(patch.find) !== -1
+            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
 
         if (!moduleMatches) continue;
 
