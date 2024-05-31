@@ -46,7 +46,7 @@ export const filters = {
             if (typeof m !== "function") return false;
             const s = Function.prototype.toString.call(m);
             for (const c of code) {
-                if (s.indexOf(c) === -1) return false;
+                if (!s.includes(c)) return false;
             }
             return true;
         };
@@ -476,7 +476,7 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
         const str = String(wreq.m[id]);
 
         for (const c of code) {
-            if (str.indexOf(c) === -1) continue outer;
+            if (!str.includes(c)) continue outer;
         }
         return id;
     }
@@ -729,7 +729,7 @@ export function search(...filters: Array<string | RegExp>) {
         const factory = factories[id];
         const factoryStr = String(factory);
         for (const filter of filters) {
-            if (typeof filter === "string" && factoryStr.indexOf(filter) === -1) continue outer;
+            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
             if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
         }
         results[id] = factory;
