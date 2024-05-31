@@ -20,8 +20,10 @@ import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
+import esbuild from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
+import { minify as minifyHtml } from "html-minifier-terser";
 import { join, relative } from "path";
 import { promisify } from "util";
 
@@ -161,21 +163,60 @@ export const gitRemotePlugin = {
 /**
  * @type {import("esbuild").Plugin}
  */
-export const fileIncludePlugin = {
-    name: "file-include-plugin",
+export const fileUrlPlugin = {
+    name: "file-uri-plugin",
     setup: build => {
-        const filter = /^~fileContent\/.+$/;
+        const filter = /^file:\/\/.+$/;
         build.onResolve({ filter }, args => ({
-            namespace: "include-file",
+            namespace: "file-uri",
             path: args.path,
             pluginData: {
-                path: join(args.resolveDir, args.path.slice("include-file/".length))
+                uri: args.path,
+                path: join(args.resolveDir, args.path.slice("file://".length).split("?")[0])
             }
         }));
-        build.onLoad({ filter, namespace: "include-file" }, async ({ pluginData: { path } }) => {
-            const [name, format] = path.split(";");
+        build.onLoad({ filter, namespace: "file-uri" }, async ({ pluginData: { path, uri } }) => {
+            const { searchParams } = new URL(uri);
+            const base64 = searchParams.has("base64");
+            const minify = isStandalone === "true" && searchParams.has("minify");
+            const noTrim = searchParams.get("trim") === "false";
+
+            const encoding = base64 ? "base64" : "utf-8";
+
+            let content;
+            if (!minify) {
+                content = await readFile(path, encoding);
+                if (!noTrim) content = content.trimEnd();
+            } else {
+                if (path.endsWith(".html")) {
+                    content = await minifyHtml(await readFile(path, "utf-8"), {
+                        collapseWhitespace: true,
+                        removeComments: true,
+                        minifyCSS: true,
+                        minifyJS: true,
+                        removeEmptyAttributes: true,
+                        removeRedundantAttributes: true,
+                        removeScriptTypeAttributes: true,
+                        removeStyleLinkTypeAttributes: true,
+                        useShortDoctype: true
+                    });
+                } else if (/[mc]?[jt]sx?$/.test(path)) {
+                    const res = await esbuild.build({
+                        entryPoints: [path],
+                        write: false,
+                        minify: true
+                    });
+                    content = res.outputFiles[0].text;
+                } else {
+                    throw new Error(`Don't know how to minify file type: ${path}`);
+                }
+
+                if (base64)
+                    content = Buffer.from(content).toString("base64");
+            }
+
             return {
-                contents: `export default ${JSON.stringify(await readFile(name, format ?? "utf-8"))}`
+                contents: `export default ${JSON.stringify(content)}`
             };
         });
     }
@@ -217,7 +258,7 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
-    plugins: [fileIncludePlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
+    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
