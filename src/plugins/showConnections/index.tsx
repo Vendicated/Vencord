@@ -182,7 +182,7 @@ export default definePlugin({
             }
         },
         {
-            find: "\"Profile Panel: user cannot be undefined\"",
+            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
