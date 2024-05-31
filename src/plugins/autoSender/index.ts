@@ -1,6 +1,6 @@
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, MessageActions } from "@webpack/common";
+import { MessageActions } from "@webpack/common";
 
 let enabled = false;
 let loop;
@@ -69,8 +69,8 @@ function onStop() {
 }
 
 export default definePlugin({
-    name: "Auto Sender",
-    description: "Send messages automaticaly to specifed channel",
+    name: "AutoSender",
+    description: "Send messages automatically to the specified channel",
     authors: [
         {
             id: 322076647589412864n,
