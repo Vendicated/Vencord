@@ -39,7 +39,6 @@ export default definePlugin({
                         navId="playback-speed"
                         onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
                         aria-label="Playback speed control"
-                        style={{ zIndex: 2 }}
                     >
                         <Menu.MenuGroup
                             label="Playback speed"
