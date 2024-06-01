@@ -47,9 +47,9 @@ const define: Define = (target, p, attributes) => {
 // because Discord bundled code is chunked.
 // As of the time of writing, only the main and sentry Webpack instances have this property, and they are the only ones we care about.
 
-// We use this setter to intercept when wreq.O is defined, and apply the patching in the modules factories (wreq.m).
+// We use this setter to intercept when wreq.O is defined, so we can patch the modules factories (wreq.m).
 // wreq.m is pre-populated with module factories, and is also populated via webpackGlobal.push
-// The sentry module also has their own Webpack with a pre-populated wreq.m, so this also patches the sentry module factories.
+// The sentry module also has their own Webpack with a pre-populated wreq.m, so this also patches those.
 // We wrap wreq.m with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
 
 // If this is the main Webpack, we also set up the internal references to WebpackRequire.
@@ -83,7 +83,7 @@ define(Function.prototype, "O", {
             }
         });
         // setImmediate to clear this property setter if this is not the main Webpack.
-        // If this is the main Webpack, wreq.m will always be set before the timeout runs.
+        // If this is the main Webpack, wreq.p will always be set before the timeout runs.
         const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
 
         // Patch the pre-populated factories
