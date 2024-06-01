@@ -35,7 +35,7 @@ const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
-const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
+const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const enum Spacing {
     COMPACT,
@@ -74,8 +74,8 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap(({ user, displayProfile }: { user: User, displayProfile; }) =>
-    <ConnectionsComponent id={user.id} theme={getTheme(user, displayProfile).profileTheme} />
+const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
+    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
 );
 
 const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
@@ -182,7 +182,7 @@ export default definePlugin({
             }
         },
         {
-            find: "\"Profile Panel: user cannot be undefined\"",
+            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,

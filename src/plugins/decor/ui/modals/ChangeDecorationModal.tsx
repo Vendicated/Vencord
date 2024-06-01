@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -18,16 +19,17 @@ import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "../../lib/utils/decoration";
-import { cl, requireAvatarDecorationModal } from "../";
+import { settings } from "../../settings";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { AvatarDecorationModalPreview } from "../components";
 import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
 import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
 import SectionedGridList from "../components/SectionedGridList";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
+import { openGuidelinesModal } from "./GuidelinesModal";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const DecorationModalStyles = findByPropsLazy("modalFooterShopButton");
 
 function usePresets() {
     const [presets, setPresets] = useState<Preset[]>([]);
@@ -83,7 +85,7 @@ function SectionHeader({ section }: { section: Section; }) {
     </div>;
 }
 
-export default function ChangeDecorationModal(props: any) {
+function ChangeDecorationModal(props: ModalProps) {
     // undefined = not trying, null = none, Decoration = selected
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
     const isTryingDecoration = typeof tryingDecoration !== "undefined";
@@ -116,6 +118,7 @@ export default function ChangeDecorationModal(props: any) {
     const data = [
         {
             title: "Your Decorations",
+            subtitle: "You can delete your own decorations by right clicking on them.",
             sectionKey: "ownDecorations",
             items: ["none", ...ownDecorations, "create"]
         },
@@ -148,60 +151,62 @@ export default function ChangeDecorationModal(props: any) {
             className={cl("change-decoration-modal-content")}
             scrollbarType="none"
         >
-            <SectionedGridList
-                renderItem={item => {
-                    if (typeof item === "string") {
-                        switch (item) {
-                            case "none":
-                                return <DecorationGridNone
-                                    className={cl("change-decoration-modal-decoration")}
-                                    isSelected={activeSelectedDecoration === null}
-                                    onSelect={() => setTryingDecoration(null)}
-                                />;
-                            case "create":
-                                return <Tooltip text="You already have a decoration pending review" shouldShow={hasDecorationPendingReview}>
-                                    {tooltipProps => <DecorationGridCreate
+            <ErrorBoundary>
+                <SectionedGridList
+                    renderItem={item => {
+                        if (typeof item === "string") {
+                            switch (item) {
+                                case "none":
+                                    return <DecorationGridNone
                                         className={cl("change-decoration-modal-decoration")}
+                                        isSelected={activeSelectedDecoration === null}
+                                        onSelect={() => setTryingDecoration(null)}
+                                    />;
+                                case "create":
+                                    return <Tooltip text="You already have a decoration pending review" shouldShow={hasDecorationPendingReview}>
+                                        {tooltipProps => <DecorationGridCreate
+                                            className={cl("change-decoration-modal-decoration")}
+                                            {...tooltipProps}
+                                            onSelect={!hasDecorationPendingReview ? (settings.store.agreedToGuidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
+                                        />}
+                                    </Tooltip>;
+                            }
+                        } else {
+                            return <Tooltip text={"Pending review"} shouldShow={item.reviewed === false}>
+                                {tooltipProps => (
+                                    <DecorDecorationGridDecoration
                                         {...tooltipProps}
-                                        onSelect={!hasDecorationPendingReview ? openCreateDecorationModal : () => { }}
-                                    />}
-                                </Tooltip>;
+                                        className={cl("change-decoration-modal-decoration")}
+                                        onSelect={item.reviewed !== false ? () => setTryingDecoration(item) : () => { }}
+                                        isSelected={activeSelectedDecoration?.hash === item.hash}
+                                        decoration={item}
+                                    />
+                                )}
+                            </Tooltip>;
                         }
-                    } else {
-                        return <Tooltip text={"Pending review"} shouldShow={item.reviewed === false}>
-                            {tooltipProps => (
-                                <DecorDecorationGridDecoration
-                                    {...tooltipProps}
-                                    className={cl("change-decoration-modal-decoration")}
-                                    onSelect={item.reviewed !== false ? () => setTryingDecoration(item) : () => { }}
-                                    isSelected={activeSelectedDecoration?.hash === item.hash}
-                                    decoration={item}
-                                />
-                            )}
-                        </Tooltip>;
-                    }
-                }}
-                getItemKey={item => typeof item === "string" ? item : item.hash}
-                getSectionKey={section => section.sectionKey}
-                renderSectionHeader={section => <SectionHeader section={section} />}
-                sections={data}
-            />
-            <div className={cl("change-decoration-modal-preview")}>
-                <AvatarDecorationModalPreview
-                    avatarDecorationOverride={avatarDecorationOverride}
-                    user={UserStore.getCurrentUser()}
+                    }}
+                    getItemKey={item => typeof item === "string" ? item : item.hash}
+                    getSectionKey={section => section.sectionKey}
+                    renderSectionHeader={section => <SectionHeader section={section} />}
+                    sections={data}
                 />
-                {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
-                {typeof activeSelectedDecoration === "object" &&
-                    <Text
-                        variant="text-sm/semibold"
-                        color="header-primary"
-                    >
-                        {activeSelectedDecoration?.alt}
-                    </Text>
-                }
-                {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
-            </div>
+                <div className={cl("change-decoration-modal-preview")}>
+                    <AvatarDecorationModalPreview
+                        avatarDecorationOverride={avatarDecorationOverride}
+                        user={UserStore.getCurrentUser()}
+                    />
+                    {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
+                    {typeof activeSelectedDecoration === "object" &&
+                        <Text
+                            variant="text-sm/semibold"
+                            color="header-primary"
+                        >
+                            {activeSelectedDecoration?.alt}
+                        </Text>
+                    }
+                    {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
+                </div>
+            </ErrorBoundary>
         </ModalContent>
         <ModalFooter className={classes(cl("change-decoration-modal-footer", cl("modal-footer")))}>
             <div className={cl("change-decoration-modal-footer-btn-container")}>

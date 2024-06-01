@@ -17,7 +17,7 @@
 */
 
 import { DraftType } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
 
@@ -41,8 +41,33 @@ export class FluxStore {
     __getLocalVars(): Record<string, any>;
 }
 
+export class FluxEmitter {
+    constructor();
+
+    changeSentinel: number;
+    changedStores: Set<FluxStore>;
+    isBatchEmitting: boolean;
+    isDispatching: boolean;
+    isPaused: boolean;
+    pauseTimer: NodeJS.Timeout | null;
+    reactChangedStores: Set<FluxStore>;
+
+    batched(batch: (...args: any[]) => void): void;
+    destroy(): void;
+    emit(): void;
+    emitNonReactOnce(): void;
+    emitReactOnce(): void;
+    getChangeSentinel(): number;
+    getIsPaused(): boolean;
+    injectBatchEmitChanges(batch: (...args: any[]) => void): void;
+    markChanged(store: FluxStore): void;
+    pause(): void;
+    resume(): void;
+}
+
 export interface Flux {
     Store: typeof FluxStore;
+    Emitter: FluxEmitter;
 }
 
 export class WindowStore extends FluxStore {
@@ -63,7 +88,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    url: string;
+    type: 1;
 }
 
 export interface UnicodeEmoji {
@@ -75,6 +100,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
+    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
@@ -172,3 +198,29 @@ export class DraftStore extends FluxStore {
     getThreadDraftWithParentMessageId?(arg: any): any;
     getThreadSettings(channelId: string): any | null;
 }
+
+export enum DraftType {
+    ChannelMessage,
+    ThreadSettings,
+    FirstThreadMessage,
+    ApplicationLauncherCommand,
+    Poll,
+    SlashCommand,
+}
+
+export class GuildStore extends FluxStore {
+    getGuild(guildId: string): Guild;
+    getGuildCount(): number;
+    getGuilds(): Record<string, Guild>;
+    getGuildIds(): string[];
+    getRole(guildId: string, roleId: string): Role;
+    getRoles(guildId: string): Record<string, Role>;
+    getAllGuildRoles(): Record<string, Record<string, Role>>;
+}
+
+export type useStateFromStores = <T>(
+    stores: t.FluxStore[],
+    mapper: () => T,
+    dependencies?: any,
+    isEqual?: (old: T, newer: T) => boolean
+) => T;

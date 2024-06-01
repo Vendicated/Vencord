@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/* eslint-disable no-fallthrough */
+
 // eslint-disable-next-line spaced-comment
 /// <reference types="../src/globals" />
 // eslint-disable-next-line spaced-comment
@@ -40,10 +42,11 @@ const browser = await pup.launch({
 
 const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
+await page.setBypassCSP(true);
 
-function maybeGetError(handle: JSHandle) {
-    return (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m.jsonValue());
+async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
+    return await (handle as JSHandle<Error>)?.getProperty("message")
+        .then(m => m?.jsonValue());
 }
 
 const report = {
@@ -59,6 +62,7 @@ const report = {
         error: string;
     }[],
     otherErrors: [] as string[],
+    ignoredErrors: [] as string[],
     badWebpackFinds: [] as string[]
 };
 
@@ -67,7 +71,8 @@ const IGNORED_DISCORD_ERRORS = [
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
     /\[GatewaySocket\].{0,110}Cannot access '/,
-    "search for 'name' in undefined"
+    "search for 'name' in undefined",
+    "Attempting to set fast connect zstd when unsupported"
 ] as Array<string | RegExp>;
 
 function toCodeBlock(s: string) {
@@ -105,15 +110,6 @@ async function printReport() {
 
     console.log();
 
-    const ignoredErrors = [] as string[];
-    report.otherErrors = report.otherErrors.filter(e => {
-        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
-            ignoredErrors.push(e);
-            return false;
-        }
-        return true;
-    });
-
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
@@ -122,7 +118,7 @@ async function printReport() {
     console.log();
 
     console.log("## Ignored Discord Errors");
-    ignoredErrors.forEach(e => {
+    report.ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -187,33 +183,39 @@ page.on("console", async e => {
     const level = e.type();
     const rawArgs = e.args();
 
-    const firstArg = await rawArgs[0]?.jsonValue();
-    if (firstArg === "[PUPPETEER_TEST_DONE_SIGNAL]") {
-        await browser.close();
-        await printReport();
-        process.exit();
+    async function getText() {
+        try {
+            return await Promise.all(
+                e.args().map(async a => {
+                    return await maybeGetError(a) || await a.jsonValue();
+                })
+            ).then(a => a.join(" ").trim());
+        } catch {
+            return e.text();
+        }
     }
+
+    const firstArg = await rawArgs[0]?.jsonValue();
 
     const isVencord = firstArg === "[Vencord]";
     const isDebug = firstArg === "[PUP_DEBUG]";
-    const isWebpackFindFail = firstArg === "[PUP_WEBPACK_FIND_FAIL]";
 
-    if (isWebpackFindFail) {
-        process.exitCode = 1;
-        report.badWebpackFinds.push(await rawArgs[1].jsonValue() as string);
-    }
-
+    outer:
     if (isVencord) {
-        const args = await Promise.all(e.args().map(a => a.jsonValue()));
+        try {
+            var args = await Promise.all(e.args().map(a => a.jsonValue()));
+        } catch {
+            break outer;
+        }
 
-        const [, tag, message] = args as Array<string>;
-        const cause = await maybeGetError(e.args()[3]);
+        const [, tag, message, otherMessage] = args as Array<string>;
 
         switch (tag) {
             case "WebpackInterceptor:":
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
+                console.error(await getText());
                 process.exitCode = 1;
 
                 const [, plugin, type, id, regex] = patchFailMatch;
@@ -222,7 +224,7 @@ page.on("console", async e => {
                     type,
                     id,
                     match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
-                    error: cause
+                    error: await maybeGetError(e.args()[3])
                 });
 
                 break;
@@ -230,248 +232,68 @@ page.on("console", async e => {
                 const failedToStartMatch = message.match(/Failed to start (.+)/);
                 if (!failedToStartMatch) break;
 
+                console.error(await getText());
                 process.exitCode = 1;
 
                 const [, name] = failedToStartMatch;
                 report.badStarts.push({
                     plugin: name,
-                    error: cause
+                    error: await maybeGetError(e.args()[3]) ?? "Unknown error"
                 });
 
                 break;
+            case "Reporter:":
+                console.error(await getText());
+
+                switch (message) {
+                    case "Webpack Find Fail:":
+                        process.exitCode = 1;
+                        report.badWebpackFinds.push(otherMessage);
+                        break;
+                    case "A fatal error occurred:":
+                        process.exit(1);
+                    case "Finished test":
+                        await browser.close();
+                        await printReport();
+                        process.exit();
+                }
         }
     }
 
     if (isDebug) {
-        console.error(e.text());
+        console.error(await getText());
     } else if (level === "error") {
-        const text = await Promise.all(
-            e.args().map(async a => {
-                try {
-                    return await maybeGetError(a) || await a.jsonValue();
-                } catch (e) {
-                    return a.toString();
-                }
-            })
-        ).then(a => a.join(" ").trim());
-
+        const text = await getText();
 
         if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
-            console.error("[Unexpected Error]", text);
-            report.otherErrors.push(text);
+            if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
+                report.ignoredErrors.push(text);
+            } else {
+                console.error("[Unexpected Error]", text);
+                report.otherErrors.push(text);
+            }
         }
     }
 });
 
-page.on("error", e => console.error("[Error]", e));
-page.on("pageerror", e => console.error("[Page Error]", e));
+page.on("error", e => console.error("[Error]", e.message));
+page.on("pageerror", e => console.error("[Page Error]", e.message));
 
-await page.setBypassCSP(true);
-
-function runTime(token: string) {
-    console.log("[PUP_DEBUG]", "Starting test...");
-
-    try {
-        // Spoof languages to not be suspicious
-        Object.defineProperty(navigator, "languages", {
-            get: function () {
-                return ["en-US", "en"];
-            },
-        });
-
-        // Monkey patch Logger to not log with custom css
-        // @ts-ignore
-        Vencord.Util.Logger.prototype._log = function (level, levelColor, args) {
-            if (level === "warn" || level === "error")
-                console[level]("[Vencord]", this.name + ":", ...args);
-        };
-
-        // Force enable all plugins and patches
-        Vencord.Plugins.patches.length = 0;
-        Object.values(Vencord.Plugins.plugins).forEach(p => {
-            // Needs native server to run
-            if (p.name === "WebRichPresence (arRPC)") return;
-
-            Vencord.Settings.plugins[p.name].enabled = true;
-            p.patches?.forEach(patch => {
-                patch.plugin = p.name;
-                delete patch.predicate;
-                delete patch.group;
-
-                if (!Array.isArray(patch.replacement))
-                    patch.replacement = [patch.replacement];
-
-                patch.replacement.forEach(r => {
-                    delete r.predicate;
-                });
-
-                Vencord.Plugins.patches.push(patch);
-            });
-        });
-
-        Vencord.Webpack.waitFor(
-            "loginToken",
-            m => {
-                console.log("[PUP_DEBUG]", "Logging in with token...");
-                m.loginToken(token);
-            }
-        );
-
-        // Force load all chunks
-        Vencord.Webpack.onceReady.then(() => setTimeout(async () => {
-            console.log("[PUP_DEBUG]", "Webpack is ready!");
-
-            const { wreq } = Vencord.Webpack;
-
-            console.log("[PUP_DEBUG]", "Loading all chunks...");
-
-            let chunks = null as Record<number, string[]> | null;
-            const sym = Symbol("Vencord.chunksExtract");
-
-            Object.defineProperty(Object.prototype, sym, {
-                get() {
-                    chunks = this;
-                },
-                set() { },
-                configurable: true,
-            });
-
-            await (wreq as any).el(sym);
-            delete Object.prototype[sym];
-
-            const validChunksEntryPoints = new Set<string>();
-            const validChunks = new Set<string>();
-            const invalidChunks = new Set<string>();
-
-            if (!chunks) throw new Error("Failed to get chunks");
-
-            for (const entryPoint in chunks) {
-                const chunkIds = chunks[entryPoint];
-                let invalidEntryPoint = false;
-
-                for (const id of chunkIds) {
-                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
-
-                    const isWasm = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
-
-                    if (isWasm) {
-                        invalidChunks.add(id);
-                        invalidEntryPoint = true;
-                        continue;
-                    }
-
-                    validChunks.add(id);
-                }
-
-                if (!invalidEntryPoint)
-                    validChunksEntryPoints.add(entryPoint);
-            }
-
-            for (const entryPoint of validChunksEntryPoints) {
-                try {
-                    // Loads all chunks required for an entry point
-                    await (wreq as any).el(entryPoint);
-                } catch (err) { }
-            }
-
-            // Matches "id" or id:
-            const chunkIdRegex = /(?:"(\d+?)")|(?:(\d+?):)/g;
-            const wreqU = wreq.u.toString();
-
-            const allChunks = [] as string[];
-            let currentMatch: RegExpExecArray | null;
-
-            while ((currentMatch = chunkIdRegex.exec(wreqU)) != null) {
-                const id = currentMatch[1] ?? currentMatch[2];
-                if (id == null) continue;
-
-                allChunks.push(id);
-            }
-
-            if (allChunks.length === 0) throw new Error("Failed to get all chunks");
-            const chunksLeft = allChunks.filter(id => {
-                return !(validChunks.has(id) || invalidChunks.has(id));
-            });
-
-            for (const id of chunksLeft) {
-                const isWasm = await fetch(wreq.p + wreq.u(id))
-                    .then(r => r.text())
-                    .then(t => t.includes(".module.wasm") || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
-
-                // Loads a chunk
-                if (!isWasm) await wreq.e(id as any);
-            }
-
-            // Make sure every chunk has finished loading
-            await new Promise(r => setTimeout(r, 1000));
-
-            for (const entryPoint of validChunksEntryPoints) {
-                try {
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-
-            console.log("[PUP_DEBUG]", "Finished loading all chunks!");
-
-            for (const patch of Vencord.Plugins.patches) {
-                if (!patch.all) {
-                    new Vencord.Util.Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
-                }
-            }
-
-            for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
-                let method = searchType;
-
-                if (searchType === "findComponent") method = "find";
-                if (searchType === "findExportedComponent") method = "findByProps";
-                if (searchType === "waitFor" || searchType === "waitForComponent" || searchType === "waitForStore") {
-                    if (typeof args[0] === "string") method = "findByProps";
-                    else method = "find";
-                }
-
-                try {
-                    let result: any;
-
-                    if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
-                        const [factory] = args;
-                        result = factory();
-                    } else if (method === "extractAndLoadChunks") {
-                        const [code, matcher] = args;
-
-                        const module = Vencord.Webpack.findModuleFactory(...code);
-                        if (module) result = module.toString().match(Vencord.Util.canonicalizeMatch(matcher));
-                    } else {
-                        // @ts-ignore
-                        result = Vencord.Webpack[method](...args);
-                    }
-
-                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
-                } catch (e) {
-                    let logMessage = searchType;
-                    if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
-                    else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
-
-                    console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
-                }
-            }
-
-            setTimeout(() => console.log("[PUPPETEER_TEST_DONE_SIGNAL]"), 1000);
-        }, 1000));
-    } catch (e) {
-        console.log("[PUP_DEBUG]", "A fatal error occurred:", e);
-        process.exit(1);
-    }
+async function reporterRuntime(token: string) {
+    Vencord.Webpack.waitFor(
+        "loginToken",
+        m => {
+            console.log("[PUP_DEBUG]", "Logging in with token...");
+            m.loginToken(token);
+        }
+    );
 }
 
 await page.evaluateOnNewDocument(`
-    ${readFileSync("./dist/browser.js", "utf-8")}
-
-    ;(${runTime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    if (location.host.endsWith("discord.com")) {
+        ${readFileSync("./dist/browser.js", "utf-8")};
+        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    }
 `);
 
 await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");

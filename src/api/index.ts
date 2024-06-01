@@ -17,6 +17,7 @@
 */
 
 import * as $Badges from "./Badges";
+import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
@@ -25,6 +26,7 @@ import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
+import * as $MessageUpdater from "./MessageUpdater";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
@@ -104,3 +106,13 @@ export const Notifications = $Notifications;
  * An api allowing you to patch and add/remove items to/from context menus
  */
 export const ContextMenu = $ContextMenu;
+
+/**
+ * An API allowing you to add buttons to the chat input
+ */
+export const ChatButtons = $ChatButtons;
+
+/**
+ * An API allowing you to update and re-render messages
+ */
+export const MessageUpdater = $MessageUpdater;

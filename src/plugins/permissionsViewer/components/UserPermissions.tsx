@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import ExpandableHeader from "@components/ExpandableHeader";
+import { ExpandableHeader } from "@components/ExpandableHeader";
 import { classes } from "@utils/misc";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
@@ -104,6 +104,7 @@ function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: G
                     guildMember.nick || UserStore.getUser(guildMember.userId).username
                 )
             }
+            onDropDownClick={state => settings.store.defaultPermissionsDropdownState = !state}
             defaultState={settings.store.defaultPermissionsDropdownState}
             buttons={[
                 (<Tooltip text={`Sorting by ${stns.permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
