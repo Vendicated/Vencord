@@ -88,7 +88,7 @@ define(Function.prototype, "O", {
 
         // Patch the pre-populated factories
         for (const id in this.m) {
-            if (updateExistingFactory(this.m, id, this.m[id])) {
+            if (updateExistingFactory(this.m, id, this.m[id], true)) {
                 continue;
             }
 
@@ -150,11 +150,14 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
  * @target The module factories where this new original factory is being set
  * @param id The id of the module
  * @param newFactory The new original factory
+ * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactoriesTarget
  * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
  */
-function updateExistingFactory(target: AnyWebpackRequire["m"], id: PropertyKey, newFactory: ModuleFactory) {
+function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: ModuleFactory, ignoreExistingInTarget: boolean = false) {
     let existingFactory: TypedPropertyDescriptor<PatchedModuleFactory> | undefined;
     for (const wreq of allWebpackInstances) {
+        if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
+
         if (Reflect.getOwnPropertyDescriptor(wreq.m, id) != null) {
             existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, id);
             break;
@@ -166,8 +169,8 @@ function updateExistingFactory(target: AnyWebpackRequire["m"], id: PropertyKey, 
         // So define the descriptor of it on this current Webpack instance, call Reflect.set with the new original,
         // and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
 
-        Reflect.defineProperty(target, id, existingFactory);
-        return Reflect.set(target, id, newFactory, target);
+        Reflect.defineProperty(moduleFactoriesTarget, id, existingFactory);
+        return Reflect.set(moduleFactoriesTarget, id, newFactory, moduleFactoriesTarget);
     }
 
     return false;
