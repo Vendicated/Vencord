@@ -249,6 +249,8 @@ page.on("console", async e => {
                     case "A fatal error occurred:":
                         process.exit(1);
                 }
+
+                break;
             case "Reporter:":
                 console.error(await getText());
 
