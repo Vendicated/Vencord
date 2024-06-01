@@ -242,16 +242,23 @@ page.on("console", async e => {
                 });
 
                 break;
+            case "LazyChunkLoader:":
+                console.error(await getText());
+
+                switch (message) {
+                    case "A fatal error occurred:":
+                        process.exit(1);
+                }
             case "Reporter:":
                 console.error(await getText());
 
                 switch (message) {
+                    case "A fatal error occurred:":
+                        process.exit(1);
                     case "Webpack Find Fail:":
                         process.exitCode = 1;
                         report.badWebpackFinds.push(otherMessage);
                         break;
-                    case "A fatal error occurred:":
-                        process.exit(1);
                     case "Finished test":
                         await browser.close();
                         await printReport();
