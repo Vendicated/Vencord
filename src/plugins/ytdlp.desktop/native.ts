@@ -197,7 +197,7 @@ async function remux({ file, videoTitle }: { file: string; videoTitle: string; }
         default:
             // Dynamically resize based on target bitrate
             const height = kilobits <= 100 ? 480 : kilobits <= 500 ? 720 : 1080;
-            baseArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`];
+            baseArgs = ["-i", p(file), "-b:v", `${~~(kilobits * 0.8)}k`, "-b:a", `${~~(kilobits * 0.2)}k`, "-maxrate", `${kilobits}k`, "-bufsize", "1M", "-y", "-filter:v", `scale=-1:${height}`];
             ext = "mp4";
             break;
         case "gif":
