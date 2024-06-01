@@ -12,7 +12,7 @@ type CanvasCustomProps = React.HTMLProps<HTMLCanvasElement> & {
 };
 
 
-const getCanvass = makeLazy(() => React.forwardRef<HTMLCanvasElement, CanvasCustomProps>(function Canvas(props, ref: React.ForwardedRef<HTMLCanvasElement>) {
+function Canvas(props, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const { draw, ...prop } = props;
 
     // ok waht ga hell is this fix for type warning/error
@@ -26,6 +26,6 @@ const getCanvass = makeLazy(() => React.forwardRef<HTMLCanvasElement, CanvasCust
         draw((context as unknown) as CanvasRenderingContext2D);
     }, [props, ref, draw]);
     return <canvas ref={ref} {...prop} />;
-}));
-
-export default getCanvass;
+}
+const loadCanvas = makeLazy(() => React.forwardRef<HTMLCanvasElement, CanvasCustomProps>(Canvas));
+export default { loadCanvas, Canvas };
