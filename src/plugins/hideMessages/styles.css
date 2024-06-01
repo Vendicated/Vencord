@@ -19,3 +19,9 @@
     display: flex;
     flex-direction: column;
 }
+
+.vc-hidden-modal-avatar {
+    aspect-ratio: 1/1;
+    height: 2rem;
+    border-radius: 99999px;
+}

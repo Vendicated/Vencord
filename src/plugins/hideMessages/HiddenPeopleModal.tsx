@@ -39,7 +39,7 @@ function UserElement({ userId, onClick }: UserElementProps) {
         <Flex className="vc-hidden-modal-list-item">
             <Flex className="vc-hidden-modal-list-user">
                 <img
-                    className="avatar__6337f"
+                    className="vc-hidden-modal-avatar"
                     loading="lazy"
                     src={user ? user.getAvatarURL() : ""}
                 />

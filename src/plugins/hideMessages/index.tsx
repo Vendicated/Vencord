@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs, openModal } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Menu, UserStore } from "@webpack/common";
@@ -16,7 +17,6 @@ import type { SVGProps } from "react";
 
 import { HiddenPeopleModal } from "./HiddenPeopleModal";
 import { STORE_KEY, userIds } from "./store";
-import styles from "./styles.css?managed";
 import { createIgnore, removeIgnore } from "./utils";
 
 
@@ -85,19 +85,33 @@ export default definePlugin({
                 match: /(\i)\.messageListItem,/,
                 replace: "$self.checkHidden(arguments[0]?.message)+$&"
             }
-        }
+        },
+        // TODO: remove notify in DMS and on mentions
+        // Thanks, noBlockedMessages
+        ...[
+            '="MessageStore",',
+            '"displayName","ReadStateStore")'
+        ].map(find => ({
+            find,
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isHidden(${props}.message))return;`
+                }
+            ]
+        }))
     ],
     async start() {
         const storedData: string[] | undefined = await DataStore.get(STORE_KEY);
-
-        enableStyle(styles);
-        (storedData || []).forEach(id => createIgnore(id));
+        (storedData || []).forEach(id => createIgnore(id, false));
     },
-    stop() {
-        disableStyle(styles);
+    isHidden(message: Message): boolean {
+        return userIds.includes(message.author.id);
     },
     checkHidden(message: Message): string {
-        if (userIds.includes(message.author.id)) {
+        if (this.isHidden(message)) {
+            message.blocked = true;
+            message.mentioned = false;
             return "vc-message-hidden ";
         }
 

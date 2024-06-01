@@ -13,13 +13,15 @@ export const removeIgnore = (userId: string) => {
     changeMessages(userId, "remove");
     DataStore.set(STORE_KEY, userIds);
 };
-export const createIgnore = (userId: string) => {
+export const createIgnore = (userId: string, write = true) => {
     if (!userIds.includes(userId))
         userIds.push(userId);
     changeMessages(userId, "add");
-    DataStore.set(STORE_KEY, userIds);
+    if (write)
+        DataStore.set(STORE_KEY, userIds);
 };
 
 export const changeMessages = (userId: string, action: "remove" | "add") => {
+    // DOM selectors are used because message component is memoized :(
     document.querySelectorAll(`li[data-author-id="${userId}"]`).forEach(m => m.classList[action]("vc-message-hidden"));
 };
