@@ -17,4 +17,4 @@
 */
 
 if (!IS_UPDATER_DISABLED)
-    import(IS_STANDALONE ? "./http" : "./git");
+    require(IS_STANDALONE ? "./http" : "./git");
