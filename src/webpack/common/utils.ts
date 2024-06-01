@@ -144,6 +144,7 @@ const persistFilter = filters.byCode("[zustand persist middleware]");
 export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
+export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByPropsLazy("resolveInvite");
 
