@@ -30,7 +30,7 @@ const settings = definePluginSettings({
     }
 });
 export default definePlugin({
-    name: "Hop On",
+    name: "HopOn",
     description: "Hop on Fortnite or Hop on bloons :3",
     authors: [Devs.ImLvna],
     settings,
