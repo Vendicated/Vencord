@@ -9,7 +9,7 @@ import { ModalProps } from "@utils/modal";
 import { findByCode, findByProps } from "@webpack";
 import { Clipboard, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
-import noteHandler from "../../noteHandler";
+import noteHandler from "../../NoteHandler";
 import { HolyNotes } from "../../types";
 
 

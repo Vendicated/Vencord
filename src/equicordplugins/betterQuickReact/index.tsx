@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./index.css";
+import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";

@@ -31,7 +31,7 @@ import { Message } from "discord-types/general";
 
 import { Popover as NoteButtonPopover, Popover } from "./components/icons/NoteButton";
 import { NoteModal } from "./components/modals/Notebook";
-import noteHandler, { noteHandlerCache } from "./noteHandler";
+import noteHandler, { noteHandlerCache } from "./NoteHandler";
 import { DataStoreToCache, HolyNoteStore } from "./utils";
 
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
