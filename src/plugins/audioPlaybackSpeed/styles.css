@@ -5,6 +5,6 @@
     color: var(--interactive-normal);
 }
 
-.vc-audio-playback-speed-icon:hover{
+.vc-audio-playback-speed-icon:hover {
     color: var(--interactive-active);
 }
