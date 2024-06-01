@@ -42,6 +42,17 @@ const settings = definePluginSettings({
         description: "When you come back to Discord, remain idle until you confirm you want to go online",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    resetIdleTimeout: {
+        description: "Reset the values of Idle timeout values to default on save",
+        type: OptionType.BOOLEAN,
+        default: false,
+        onChange: () => {
+            if (!settings.store.resetIdleTimeout) return;
+            settings.store.idleTimeout = 10;
+            settings.store.idleTimeoutValue = 10;
+            settings.store.resetIdleTimeout = false;
+        }
     }
 });
 
@@ -108,5 +119,5 @@ export default definePlugin({
     getIdleTimeout() { // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
         return idleTimeout === 0 ? Infinity : idleTimeout * 60000;
-    }
+    },
 });
