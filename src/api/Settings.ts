@@ -82,7 +82,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
-    eagerPatches: false,
+    eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,

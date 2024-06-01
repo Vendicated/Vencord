@@ -7,7 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { addPatch, patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -20,7 +20,24 @@ async function runReporter() {
         let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
         const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Vencord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(async () => {
+                loadLazyChunks().then(loadLazyChunksResolve);
+            }, 0);
+        };
+
         await loadLazyChunksDone;
 
         for (const patch of patches) {
