@@ -11,7 +11,6 @@ import { patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
-
 const ReporterLogger = new Logger("Reporter");
 
 async function runReporter() {
@@ -21,7 +20,7 @@ async function runReporter() {
         let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
         const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then(() => loadLazyChunksResolve()));
+        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
         await loadLazyChunksDone;
 
         for (const patch of patches) {
