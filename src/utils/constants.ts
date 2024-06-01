@@ -611,6 +611,10 @@ export const EquicordDevs = Object.freeze({
         name: "Combatmaster331",
         id: 790562534503612437n
     },
+    Megal: {
+        name: "Megal",
+        id: 387790666484285441n
+    },
     VISHNYA_NET_CHERESHNYA: {
         name: "Vishnya",
         id: 282541644484575233n,
