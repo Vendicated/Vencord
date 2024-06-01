@@ -44,7 +44,6 @@ const settings = Settings.plugins;
 
 export function isPluginEnabled(p: string) {
     return (
-        IS_REPORTER ||
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
         settings[p]?.enabled

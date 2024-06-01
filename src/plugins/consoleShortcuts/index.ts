@@ -25,6 +25,7 @@ import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
+import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
 
 const DESKTOP_ONLY = (f: string) => () => {
@@ -82,6 +83,7 @@ function makeShortcuts() {
         wpsearch: search,
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
+        loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
         find,
         findAll: findAll,
         findByProps,
