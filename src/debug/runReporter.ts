@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-import { patches } from "plugins";
+import { addPatch, patches } from "plugins";
 
 const ReporterLogger = new Logger("Reporter");
 
@@ -17,6 +18,48 @@ async function runReporter() {
     ReporterLogger.log("Starting test...");
 
     try {
+        // Enable eagerPatches to make all patches apply regardless of the module being required
+        Settings.eagerPatches = true;
+
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Vencord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(() => {
+                ReporterLogger.log("Loading all chunks...");
+
+                Webpack.factoryListeners.add(factory => {
+                    // setImmediate to avoid blocking the factory patching execution while checking for lazy chunks
+                    setTimeout(() => {
+                        let isResolved = false;
+                        searchAndLoadLazyChunks(String(factory))
+                            .then(() => isResolved = true)
+                            .catch(() => isResolved = true);
+
+                        chunksSearchPromises.push(() => isResolved);
+                    }, 0);
+                });
+
+                for (const factoryId in wreq.m) {
+                    let isResolved = false;
+                    searchAndLoadLazyChunks(String(wreq.m[factoryId]))
+                        .then(() => isResolved = true)
+                        .catch(() => isResolved = true);
+
+                    chunksSearchPromises.push(() => isResolved);
+                }
+            }, 0);
+        };
+
         const validChunks = new Set<string>();
         const invalidChunks = new Set<string>();
         const deferredRequires = new Set<string>();
@@ -71,7 +114,7 @@ async function runReporter() {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
@@ -83,7 +126,7 @@ async function runReporter() {
                         continue;
                     }
 
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                    if (wreq.m[entryPoint]) wreq(entryPoint);
                 } catch (err) {
                     console.error(err);
                 }
@@ -111,40 +154,18 @@ async function runReporter() {
             }, 0);
         }
 
-        Webpack.beforeInitListeners.add(async () => {
-            ReporterLogger.log("Loading all chunks...");
-
-            Webpack.factoryListeners.add(factory => {
-                let isResolved = false;
-                searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
-
-                chunksSearchPromises.push(() => isResolved);
-            });
-
-            // setImmediate to only search the initial factories after Discord initialized the app
-            // our beforeInitListeners are called before Discord initializes the app
-            setTimeout(() => {
-                for (const factoryId in wreq.m) {
-                    let isResolved = false;
-                    searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
-
-                    chunksSearchPromises.push(() => isResolved);
-                }
-            }, 0);
-        });
-
         await chunksSearchingDone;
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire as any);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const allChunks = [] as string[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of String(wreq.u).matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -165,8 +186,8 @@ async function runReporter() {
 
             // Loads and requires a chunk
             if (!isWasm) {
-                await wreq.e(id as any);
-                if (wreq.m[id]) wreq(id as any);
+                await wreq.e(id);
+                if (wreq.m[id]) wreq(id);
             }
         }));
 
@@ -244,7 +265,7 @@ async function runReporter() {
                     parsedArgs === args &&
                     ["waitFor", "find", "findComponent", "webpackDependantLazy", "webpackDependantLazyComponent"].includes(searchType)
                 ) {
-                    let filter = parsedArgs[0].toString();
+                    let filter = String(parsedArgs[0]);
                     if (filter.length > 150) {
                         filter = filter.slice(0, 147) + "...";
                     }
@@ -255,7 +276,7 @@ async function runReporter() {
                     if (parsedArgs[1] === Webpack.DefaultExtractAndLoadChunksRegex) {
                         regexStr = "DefaultExtractAndLoadChunksRegex";
                     } else {
-                        regexStr = parsedArgs[1].toString();
+                        regexStr = String(parsedArgs[1]);
                     }
 
                     logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${regexStr})`;
