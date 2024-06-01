@@ -169,16 +169,23 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
 }
 async function remux({ file, videoTitle }: { file: string; videoTitle: string; }, { ffmpegArgs, format, maxFileSize, gifQuality }: DownloadOptions) {
     const sourceExtension = file.split(".").pop();
-    if (!ffmpegAvailable) return { file, videoTitle, extension: sourceExtension };
+    if (!ffmpegAvailable) return log("Skipping remux, ffmpeg is unavailable."), { file, videoTitle, extension: sourceExtension };
 
     // We only really need to remux if
     // 1. The file is too big
     // 2. The file is in a format not supported by discord
     // 3. The user provided custom ffmpeg arguments
+    // 4. The target format is gif
     const acceptableFormats = ["mp3", "mp4", "webm"];
     const fileSize = fs.statSync(p(file)).size;
     const customArgs = ffmpegArgs?.filter(Boolean) || [];
-    if (acceptableFormats.includes(sourceExtension ?? "") && (!maxFileSize || fileSize <= maxFileSize) && !customArgs.length) return { file, videoTitle, extension: sourceExtension };
+
+    const isFormatAcceptable = acceptableFormats.includes(sourceExtension ?? "");
+    const isFileSizeAcceptable = (!maxFileSize || fileSize <= maxFileSize);
+    const hasCustomArgs = customArgs.length > 0;
+    const isGif = format === "gif";
+    if (isFormatAcceptable && isFileSizeAcceptable && !hasCustomArgs && !isGif)
+        return log("Skipping remux, file type and size are good, and no ffmpeg arguments were specified."), { file, videoTitle, extension: sourceExtension };
 
     const duration = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", p(file)]).toString());
     if (isNaN(duration)) throw "Failed to get video duration.";
