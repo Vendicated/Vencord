@@ -33,7 +33,7 @@ type ButtonComponent = {
     url?: string;
 };
 
-const Native = VencordNative.pluginHelpers.YtDlp as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.Ytdlp as PluginNative<typeof import("./native")>;
 const logger = new Logger("yt-dlp", "#ff0b01");
 
 const maxFileSize = () => {
