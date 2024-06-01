@@ -30,7 +30,7 @@ async function runReporter() {
         }, "Vencord Reporter");
 
         // @ts-ignore
-        Webpack._initReporter = function () {
+        Vencord.Webpack._initReporter = function () {
             // initReporter is called in the patched entry point of Discord
             // setImmediate to only start searching for lazy chunks after Discord initialized the app
             setTimeout(() => {
@@ -242,4 +242,5 @@ async function runReporter() {
     }
 }
 
-runReporter();
+// Run after the Vencord object has been created
+setTimeout(runReporter, 0);
