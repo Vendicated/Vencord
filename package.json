@@ -37,6 +37,7 @@
         "testTsc": "tsc --noEmit"
     },
     "dependencies": {
+        "@fluent/langneg": "^0.7.0",
         "@sapphi-red/web-noise-suppressor": "0.3.3",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",

@@ -16,6 +16,9 @@ importers:
 
   .:
     dependencies:
+      '@fluent/langneg':
+        specifier: ^0.7.0
+        version: 0.7.0
       '@sapphi-red/web-noise-suppressor':
         specifier: 0.3.3
         version: 0.3.3
@@ -384,6 +387,10 @@ packages:
   '@eslint/js@8.46.0':
     resolution: {integrity: sha512-a8TLtmPi8xzPkCbp/OGFUo5yhRkHM2Ko9kOWP4znJr0WAhWyThaw3PnwX4vOTWOAMsV2uRt32PPDcEz63esSaA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  '@fluent/langneg@0.7.0':
+    resolution: {integrity: sha512-StAM0vgsD1QK+nFikaKs9Rxe3JGNipiXrpmemNGwM4gWERBXPe9gjzsBoKjgBgq1Vyiy+xy/C652QIWY+MPyYw==}
+    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
 
   '@humanwhocodes/config-array@0.11.10':
     resolution: {integrity: sha512-KVVjQmNUepDVGXNuoRRdmmEjruj0KfiGSbS8LVc12LMsWDQzRXJ0qdhN8L8uUigKpfEHRhlaQFY0ib1tnUbNeQ==}
@@ -2660,6 +2667,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.46.0': {}
+
+  '@fluent/langneg@0.7.0': {}
 
   '@humanwhocodes/config-array@0.11.10':
     dependencies:
