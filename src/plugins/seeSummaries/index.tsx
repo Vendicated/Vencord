@@ -17,10 +17,20 @@ const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
         type: OptionType.SLIDER,
-        description: "The time in days before a summary is removed. Note that only up to 50 summaries are kept per channel",
+        description: "The time in days before a summary is removed.",
         markers: [1, 3, 5, 7, 10, 15, 20, 25, 30],
         stickToMarkers: false,
         default: 3,
+    },
+    maxSummaries: {
+        type: OptionType.SLIDER,
+        description: "The number of summaries to keep for each channel. Set to 0 to keep an unlimited amount of summaries.",
+        markers: [10, 25, 50, 100, 150, 200, 250, 500],
+        stickToMarkers: false,
+        default: 150,
+        onChange(newValue) {
+            settings.store.maxSummaries = Math.floor(newValue);
+        },
     }
 });
 
@@ -77,8 +87,8 @@ export default definePlugin({
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
                 summaries[data.channel_id] ? summaries[data.channel_id].unshift(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
-                if (summaries[data.channel_id].length > 50)
-                    summaries[data.channel_id] = summaries[data.channel_id].slice(0, 50);
+                if (summaries[data.channel_id].length > settings.store.maxSummaries)
+                    summaries[data.channel_id] = summaries[data.channel_id].slice(0, settings.store.maxSummaries);
 
                 return summaries;
             });
