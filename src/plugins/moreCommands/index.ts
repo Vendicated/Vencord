@@ -62,5 +62,54 @@ export default definePlugin({
                 content: mock(findOption(opts, "message", ""))
             }),
         },
+        {
+            name: "translate",
+            description: "Translates text using mymemory's API. (Note: 50000 character limit per day)",
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            options: [
+                {
+                    name: "to",
+                    description: "Language to translate to. (Make sure to use the short name, like ru, en, it, etc.)",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: true
+                },
+                {
+                    name: "from",
+                    description: "Language to translate from. (Make sure to use the short name, like ru, en, it, etc.)",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: true
+                },
+                {
+                    name: "text",
+                    description: "Text to translate.",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: true
+                },
+                {
+                    name: "send",
+                    description: "Sends the translation to the current channel if True.",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    required: false
+                }
+            ],
+            execute: async (args) => {
+                const channel_id = getCurrentChannel().id;
+                const toLang = findOption(args, "to");
+                const fromLang = findOption(args, "from")
+                const text = findOption(args, "text");
+                const send = findOption(args, "send");
+
+                try {
+                    const translatedText = await translateText(fromLang, toLang, text);
+                    if (send) {
+                        sendMessage(channel_id, { content: translatedText });
+                    } else {
+                        sendBotMessage(channel_id, { content: translatedText });
+                    }
+                } catch (error) {
+                    sendBotMessage(channel_id, { content: `Oh no! There was an error whilst translating the message. Error: ${error}` });
+                }
+            }
+        },
     ]
 });
