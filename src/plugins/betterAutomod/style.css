@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-.automod-test-box {
+.vc-ba-automod-test-box {
     margin-bottom: 0;
     margin-top: 5px;
     padding: 6px 10px;
     border-radius: 4px;
 }
 
-.automod-test-text-warning {
+.vc-ba-automod-test-text-warning {
     display: none;
     color: red;
     font-size: 14px;
     margin-top: 0;
 }
 
-.automod-test-header {
+.vc-ba-automod-test-header {
     flex-grow: 1;
     color: var(--header-primary);
 }

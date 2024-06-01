@@ -13,8 +13,8 @@ import { AutoModRule, MatchedRule, matchRules } from "./automod";
 export function settingsAboutComponent() {
     return (<>
         <Forms.FormTitle tag="h3">Description and How to use:</Forms.FormTitle>
-        <Forms.FormText style={{ fontSize: "14px" }}>
-            <Text>
+        <Forms.FormText>
+            <Text variant="heading-sm/normal">
                 This plugin allows you to test your AutoMod rules. Simply input a message into the box in the automod settings,
                 it will check if the message matches any of your rules.
                 <br />it echos automod logs to the automoded channel to do so:
@@ -39,9 +39,9 @@ export function TestInputBoxComponent({ currentRules }: { currentRules: Array<Au
     }, [inputValue]);
     return (
         <div>
-            <Text variant="heading-lg/normal" className="automod-test-header">Test AutoMod</Text>
+            <Text variant="heading-lg/normal" className="vc-ba-automod-test-header">Test AutoMod</Text>
             <TextArea
-                className="automod-test-box"
+                className="vc-ba-automod-test-box"
                 value={inputValue}
                 placeholder="Type something to test automod (Supports filters only)"
                 onChange={setInputValue}
@@ -49,7 +49,7 @@ export function TestInputBoxComponent({ currentRules }: { currentRules: Array<Au
             />
             <p
                 style={{ display: warningText ? "block" : "none" }}
-                className="automod-test-text-warning"
+                className="vc-ba-automod-test-text-warning"
             >
                 {warningText}
             </p>
