@@ -88,6 +88,10 @@ define(Function.prototype, "O", {
 
         // Patch the pre-populated factories
         for (const id in this.m) {
+            if (updateExistingFactory(this.m, id, this.m[id])) {
+                continue;
+            }
+
             defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, this.m[id]) : this.m[id]);
         }
 
@@ -140,6 +144,35 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
     }
 }
 
+/**
+ * Update a factory that exists in any Webpack instance with a new original factory.
+ *
+ * @target The module factories where this new original factory is being set
+ * @param id The id of the module
+ * @param newFactory The new original factory
+ * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
+ */
+function updateExistingFactory(target: AnyWebpackRequire["m"], id: PropertyKey, newFactory: ModuleFactory) {
+    let existingFactory: TypedPropertyDescriptor<PatchedModuleFactory> | undefined;
+    for (const wreq of allWebpackInstances) {
+        if (Reflect.getOwnPropertyDescriptor(wreq.m, id) != null) {
+            existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, id);
+            break;
+        }
+    }
+
+    if (existingFactory != null) {
+        // If existingFactory exists in any Webpack instance, its either wrapped in defineModuleFactoryGetter, or it has already been required.
+        // So define the descriptor of it on this current Webpack instance, call Reflect.set with the new original,
+        // and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
+
+        Reflect.defineProperty(target, id, existingFactory);
+        return Reflect.set(target, id, newFactory, target);
+    }
+
+    return false;
+}
+
 const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
     /*
     If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
@@ -163,23 +196,13 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
             return define(target, p, { value: newValue });
         }
 
-        const existingFactory = Reflect.get(target, p, receiver);
-
-        if (!Settings.eagerPatches) {
-            // If existingFactory exists, its either wrapped in defineModuleFactoryGetter, or it has already been required
-            // so call Reflect.set with the new original and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
-            if (existingFactory != null) {
-                return Reflect.set(target, p, newValue, receiver);
-            }
-
-            // eagerPatches are disabled, so the factory argument should be the original
-            defineModulesFactoryGetter(p, newValue);
+        if (updateExistingFactory(target, p, newValue)) {
             return true;
         }
 
-        // Check if this factory is already patched
-        if (existingFactory?.$$vencordOriginal != null) {
-            existingFactory.$$vencordOriginal = newValue;
+        if (!Settings.eagerPatches) {
+            // eagerPatches are disabled, so the factory argument should be the original
+            defineModulesFactoryGetter(p, newValue);
             return true;
         }
 
