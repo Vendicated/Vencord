@@ -60,11 +60,7 @@ define(Function.prototype, "O", {
         define(this, "O", { value: onChunksLoaded });
 
         const { stack } = new Error();
-        if (!stack?.includes("discord.com") && !stack?.includes("discordapp.com")) {
-            return;
-        }
-
-        if (this.m == null) {
+        if (this.m == null || !(stack?.includes("discord.com") || stack?.includes("discordapp.com"))) {
             return;
         }
 
