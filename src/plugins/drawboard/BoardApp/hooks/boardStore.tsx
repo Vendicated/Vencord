@@ -6,15 +6,12 @@
 
 import { React } from "@webpack/common";
 
-import { overlayState } from "./overlayStore";
-
-
 function createBoardStore<T>(init?: T) {
     if (!init) return;
     let store: T = init;
     const listeners = new Set<any>();
 
-    function useStore() {
+    function use() {
         const [, listener] = React.useState();
         React.useEffect(() => {
             listeners.add(listener);
@@ -23,18 +20,15 @@ function createBoardStore<T>(init?: T) {
         return store;
     }
 
-    function dispatch<T1 extends typeof init>(newStore: T1 extends T ? (x: T) => void : T) {
+    function set<T1 extends typeof init>(newStore: T1 extends T ? (x: T1) => T1 : T) {
         store = typeof newStore === "function" ? newStore(store) : newStore;
         listeners.forEach(l => l(store));
     }
 
-    function getStore(): T { return store; }
+    function get(): T { return store; }
 
-    return { dispatch, useStore, getStore };
+
+    return { get, set, use };
 }
 
 export const drawboardStore = createBoardStore<{ images: Array<{ url: string; }>; }>({ images: [] });
-export const overlayStore = createBoardStore<overlayState[]>([]);
-
-
-// lol?.dispatch({ ...lol.getStore(), images: [...lol.getStore().images, { url: "HAHAHAHA" }] });

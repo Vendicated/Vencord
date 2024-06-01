@@ -54,7 +54,6 @@ export type overlayImage = {
     id: number,
     node?: React.RefObject<HTMLCanvasElement>,
     value: {
-        // image?: HTMLImageElement;
         style: imageStyleDef,
         src: string;
     };
