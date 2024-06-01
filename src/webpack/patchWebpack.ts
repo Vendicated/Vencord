@@ -42,20 +42,25 @@ const define: Define = (target, p, attributes) => {
     });
 };
 
-// wreq.m is the Webpack object containing module factories.
-// We wrap it with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
-// If this is the main Webpack, we also set up the internal references to WebpackRequire.
+// wreq.O is the Webpack onChunksLoaded function.
+// It is pretty likely that all important Discord Webpack instances will have this property set,
+// because Discord bundled code is chunked.
+// As of the time of writing, only the main and sentry Webpack instances have this property, and they are the only ones we care about.
+
+// We use this setter to intercept when wreq.O is defined, and apply the patching in the modules factories (wreq.m).
 // wreq.m is pre-populated with module factories, and is also populated via webpackGlobal.push
 // The sentry module also has their own Webpack with a pre-populated wreq.m, so this also patches the sentry module factories.
-define(Function.prototype, "m", {
+// We wrap wreq.m with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
+
+// If this is the main Webpack, we also set up the internal references to WebpackRequire.
+define(Function.prototype, "O", {
     enumerable: false,
 
-    set(this: WebpackRequire, moduleFactories: PatchedModuleFactories) {
-        // When using React DevTools or other extensions, we may also catch their Webpack here.
-        // This ensures we actually got the right ones.
+    set(this: WebpackRequire, onChunksLoaded: WebpackRequire["O"]) {
+        define(this, "O", { value: onChunksLoaded });
+
         const { stack } = new Error();
-        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(moduleFactories)) {
-            define(this, "m", { value: moduleFactories });
+        if (this.m == null || !(stack?.includes("discord.com") || stack?.includes("discordapp.com"))) {
             return;
         }
 
@@ -81,24 +86,24 @@ define(Function.prototype, "m", {
         // If this is the main Webpack, wreq.m will always be set before the timeout runs.
         const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
 
-        define(moduleFactories, Symbol.toStringTag, {
+        // Patch the pre-populated factories
+        for (const id in this.m) {
+            defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, this.m[id]) : this.m[id]);
+        }
+
+        define(this.m, Symbol.toStringTag, {
             value: "ModuleFactories",
             enumerable: false
         });
 
         // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
-        const proxiedModuleFactories = new Proxy(moduleFactories, moduleFactoriesHandler);
+        const proxiedModuleFactories = new Proxy(this.m, moduleFactoriesHandler);
         /*
         If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
         Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
         */
 
         define(this, "m", { value: proxiedModuleFactories });
-
-        // Patch the pre-populated factories
-        for (const id in moduleFactories) {
-            defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, moduleFactories[id]) : moduleFactories[id]);
-        }
     }
 });
 
