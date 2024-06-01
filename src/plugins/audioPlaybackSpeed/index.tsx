@@ -66,7 +66,7 @@ export default definePlugin({
         {
             find: "ComponentActions.VOICE_MESSAGE_PLAYBACK_STARTED",
             replacement: {
-                match: /useCallback\(\(\)=>\{let \i=(\i).current;.{2300,2800}onVolumeShow:\i,onVolumeHide:\i\}\)/,
+                match: /useCallback\(\(\)=>\{let \i=(\i).current;.{2300,3000}onVolumeShow:\i,onVolumeHide:\i\}\)/,
                 replace: "$&,$self.playbackSpeedComponent($1)"
             }
         },
