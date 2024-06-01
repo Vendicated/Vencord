@@ -158,7 +158,7 @@ async function runReporter() {
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq(deferredRequire as any);
+            wreq(deferredRequire);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
