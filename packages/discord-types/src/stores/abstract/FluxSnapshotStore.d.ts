@@ -5,7 +5,7 @@
  */
 
 import type { FluxActionHandlerMap } from "../../flux/fluxActionHandlers";
-import type { ExcludeAction, FluxAction } from "../../flux/fluxActions";
+import type { ExcludeAction, ExtractAction, FluxAction } from "../../flux/fluxActions";
 import type { GenericConstructor } from "../../internal";
 import type { FluxStore } from "./FluxStore";
 
@@ -14,19 +14,21 @@ export interface FluxSnapshot<SnapshotData = any> {
     version: number;
 }
 
-export type FluxSnapshotStoreAction = ExcludeAction<FluxAction, "CLEAR_CACHES" | "WRITE_CACHES">;
+type CacheActionType = "CLEAR_CACHES" | "WRITE_CACHES";
+
+export type FluxSnapshotStoreAction = ExcludeAction<FluxAction, CacheActionType>;
 
 // Original name: SnapshotStore
 export abstract class FluxSnapshotStore<
     Constructor extends GenericConstructor = GenericConstructor,
-    SnapshotData = any,
+    SnapshotData = unknown,
     Action extends FluxSnapshotStoreAction = FluxSnapshotStoreAction
-> extends FluxStore<Action & Exclude<FluxAction, FluxSnapshotStoreAction>> {
+> extends FluxStore<Action & ExtractAction<FluxAction, CacheActionType>> {
     constructor(actionHandlers: FluxActionHandlerMap<Action>);
 
     static allStores: FluxSnapshotStore[];
     static clearAll(): void;
-    static displayName: string; // not actually defined on SnapshotStore's constructor, but all subclasses are required to have it
+    static displayName: string; // abstract
 
     clear(): void;
     getClass(): Constructor;

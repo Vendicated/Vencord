@@ -21,7 +21,7 @@ export abstract class FluxStore<Action extends FluxAction = FluxAction> {
     static displayName: string | undefined; // undefined on FluxStore's constructor
     static getAll(): FluxStore[];
     static initialize(): void;
-    static initialized: Promise<undefined>;
+    static initialized: Promise<void>;
 
     emitChange(): void;
     getDispatchToken(): string;

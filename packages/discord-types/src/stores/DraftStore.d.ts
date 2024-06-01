@@ -21,7 +21,6 @@ export class DraftStore<
     Action extends FluxAction = DraftStoreAction
 > extends FluxPersistedStore<Constructor, State, Action> {
     static displayName: "DraftStore";
-    static migrations: any; // TEMP
     static persistKey: "DraftStore";
 
     getDraft(channelId: string, draftType: DraftType): string;

@@ -18,6 +18,8 @@ export type ChannelRecord = GuildChannelRecord | PrivateChannelRecord | ThreadCh
 
 export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRecord | ForumChannelRecord;
 
+export type GuildSelectableChannelRecord = Exclude<GuildChannelRecord, GuildCategoryChannelRecord>;
+
 type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
 
 export type ChannelRecordOwnProperties<ChannelRecord extends ChannelRecordBase> = Pick<ChannelRecord, ChannelRecordOwnPropertyKeys>;

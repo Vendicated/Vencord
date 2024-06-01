@@ -17,15 +17,5 @@ export class WindowStore<Action extends FluxAction = WindowStoreAction> extends 
     isElementFullScreen(windowId?: string | undefined): boolean;
     isFocused(windowId?: string | undefined): boolean;
     isVisible(windowId?: string | undefined): boolean;
-    windowSize(windowId?: string | undefined): Window["windowSize"];
-}
-
-export interface Window {
-    focused: boolean;
-    isElementFullscreen: boolean;
-    visible: boolean;
-    windowSize: {
-        height: number;
-        width: number;
-    };
+    windowSize(windowId?: string | undefined): { height: number; width: number; };
 }
