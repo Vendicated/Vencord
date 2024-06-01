@@ -42,6 +42,10 @@ import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceDiscordLoaded } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
+if (IS_REPORTER) {
+    require("./debug/runReporter");
+}
+
 async function syncSettings() {
     // pre-check for local shared settings
     if (
