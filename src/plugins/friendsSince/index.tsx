@@ -36,7 +36,7 @@ export default definePlugin({
         {
             find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,\{userId:(\i)}\)/,
+                match: /\i.default,\{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },

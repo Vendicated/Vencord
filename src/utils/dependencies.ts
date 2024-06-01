@@ -20,7 +20,6 @@ import type StylusRenderer = require("stylus/lib/renderer");
 import type LessStatic from "less";
 
 import { makeLazy } from "./lazy";
-import { EXTENSION_BASE_URL } from "./web-metadata";
 
 /*
     Add dynamically loaded dependencies for plugins here.
@@ -69,15 +68,6 @@ export interface ApngFrameData {
     frames: ApngFrame[];
     playTime: number;
 }
-
-// On web (extensions), use extension uri as basepath (load files from extension)
-// On desktop (electron), load from cdn
-export const rnnoiseDist = IS_EXTENSION
-    ? new URL("/third-party/rnnoise", EXTENSION_BASE_URL).toString()
-    : "https://unpkg.com/@sapphi-red/web-noise-suppressor@0.3.3/dist";
-export const rnnoiseWasmSrc = (simd = false) => `${rnnoiseDist}/rnnoise${simd ? "_simd" : ""}.wasm`;
-export const rnnoiseWorkletSrc = `${rnnoiseDist}/rnnoise/workletProcessor.js`;
-
 
 // The below code is only used on the Desktop (electron) build of Vencord.
 // Browser (extension) builds do not contain these remote imports.
