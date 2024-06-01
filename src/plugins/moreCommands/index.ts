@@ -20,6 +20,38 @@ import { ApplicationCommandInputType, findOption, OptionalMessageOption, Require
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+const settings = definePluginSettings({
+    show_match: {
+        type: OptionType.BOOLEAN,
+        description: "Shows a match number (like 0.85) to other sources.",
+        default: false,
+        restartNeeded: false,
+    },
+});
+
+const translateText = async (sourceLang, targetLang, text) => {
+    try {
+        const url = `https://api.mymemory.translated.net/get?q=${text}&langpair=${sourceLang}|${targetLang}&de=translated-abuse@littlekai.co.uk`;
+        const response = await fetch(url);
+        const jsonResponse = await response.json();
+        
+        if (jsonResponse.responseStatus === 200) {
+            const translatedText = jsonResponse.responseData.translatedText;
+            const quotaFinished = jsonResponse.quotaFinished;
+            const match = jsonResponse.responseData.match || 0;
+
+            return {
+                translated: translatedText,
+                quotaFinished: quotaFinished,
+                match: match
+            };
+        } else {
+            throw new Error('Translation failed');
+        }
+    } catch (error) {
+        throw new Error(`Error: ${error}`);
+    }
+};
 
 function mock(input: string): string {
     let output = "";
@@ -34,6 +66,7 @@ export default definePlugin({
     description: "echo, lenny, mock",
     authors: [Devs.Arjix, Devs.echo, Devs.Samu],
     dependencies: ["CommandsAPI"],
+    settings.
     commands: [
         {
             name: "echo",
@@ -64,7 +97,7 @@ export default definePlugin({
         },
         {
             name: "translate",
-            description: "Translates text using mymemory's API. (Note: 50000 character limit per day)",
+            description: "Translates a message using deepl's API. (Make sure your API key is set in the plugin settings)",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
@@ -87,7 +120,7 @@ export default definePlugin({
                 },
                 {
                     name: "send",
-                    description: "Sends the translation to the current channel if True.",
+                    description: "Sends the translation to the current channel.",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
                 }
@@ -95,21 +128,25 @@ export default definePlugin({
             execute: async (args) => {
                 const channel_id = getCurrentChannel().id;
                 const toLang = findOption(args, "to");
-                const fromLang = findOption(args, "from")
+                const fromLang = findOption(args, "from");
                 const text = findOption(args, "text");
                 const send = findOption(args, "send");
 
                 try {
-                    const translatedText = await translateText(fromLang, toLang, text);
+                    const translationResult = await translateText(fromLang, toLang, text);
+                    
+                    if (translationResult.quotaFinished) {
+                        sendBotMessage(channel_id, { content: 'Oh no! Looks like you have ran out of quota for today. Please try again tomorrow or use from another IP.' });
+                    }
                     if (send) {
-                        sendMessage(channel_id, { content: translatedText });
+                        sendMessage(channel_id, { content: translationResult.translated });
                     } else {
-                        sendBotMessage(channel_id, { content: translatedText });
+                        sendBotMessage(channel_id, { content: translationResult.translated });
                     }
                 } catch (error) {
                     sendBotMessage(channel_id, { content: `Oh no! There was an error whilst translating the message. Error: ${error}` });
                 }
             }
-        },
+        }
     ]
 });
