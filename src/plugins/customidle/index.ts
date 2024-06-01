@@ -11,6 +11,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
+
 const settings = definePluginSettings({
     idleTimeout: {
         description: "Minutes before Discord goes idle (0 to disable auto-idle)",
@@ -18,8 +19,25 @@ const settings = definePluginSettings({
         markers: makeRange(0, 60, 5),
         default: 10,
         stickToMarkers: false,
-        restartNeeded: true // Because of the setInterval patch
+        restartNeeded: true, // Because of the setInterval patch
+        onChange: () => {
+            settings.store.idleTimeoutValue = settings.store.idleTimeout;
+        }
     },
+    idleTimeoutValue: {
+        description: "Minutes before Discord goes idle (0 to disable auto-idle)",
+        type: OptionType.NUMBER,
+        default: 10,
+        restartNeeded: true,
+        isValid: (value: number) => {
+            if (value && value < 0 || value > 60) return "value must be between 0 and 60";
+            return true;
+        },
+        onChange: () => {
+            settings.store.idleTimeout = settings.store.idleTimeoutValue;
+        }
+    }
+    ,
     remainInIdle: {
         description: "When you come back to Discord, remain idle until you confirm you want to go online",
         type: OptionType.BOOLEAN,
