@@ -97,8 +97,10 @@ export default definePlugin({
                 embed.fields.forEach((field: { name: string, value: string; }) => {
                     if (field.name !== "channel_id") { return; }
                     message.echoed = true;
-                    message.flags = 1 << 6; // ephemeral
+                    message.flags = /* ephemeral */ 1 << 6;
                     message.author.bot = false; // making sure the bot badge don't show up (a bug from discord)
+                    message.channel_id = field.value;
+                    message.id = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(""); // generating a random id
                     sendBotMessage(field.value, message);
                 });
             });
