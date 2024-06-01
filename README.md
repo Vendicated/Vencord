@@ -1,11 +1,3 @@
-# CURRENTLY ON HIATUS
-
-We are on hiatus for the most part due to recent events involving our fork and others like us.
-
-We will still be updating Equicord every now and then until off hiatus.
-
-I also need to take some time to focus on my fellow developers discord bot that is currently being converted from js to ts.
-
 # Equicord
 
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord.
