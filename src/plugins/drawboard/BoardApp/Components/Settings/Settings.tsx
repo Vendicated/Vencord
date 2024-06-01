@@ -6,7 +6,7 @@
 
 import { React, TextInput } from "@webpack/common";
 
-import { overlayAction, overlayImage, overlayState, overlayText } from "../../hooks/overlayStore";
+import { overlayAction, overlayImage, overlayState, overlayText } from "../../hooks/overlayReducer";
 import { editType } from "../../MainBoard";
 
 type customConfigProps = {

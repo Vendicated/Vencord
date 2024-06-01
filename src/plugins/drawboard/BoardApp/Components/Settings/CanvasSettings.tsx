@@ -78,6 +78,4 @@ const frameSize = (n: string): number => {
     return Math.min(Math.max(parseInt(n), 25), 4096);
 };
 
-
-
 export default CanvasSettings;
