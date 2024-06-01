@@ -112,7 +112,7 @@ export default definePlugin({
         { // Add new quest button
             find: 'tutorialId:"direct-messages"',
             replacement: {
-                match: /"discord-shop"\),/,
+                match: /"discord-shop"\)/,
                 replace: "$&,$self.QuestButtonComponent(),"
             }
         },

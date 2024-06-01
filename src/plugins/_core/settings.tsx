@@ -143,7 +143,7 @@ export default definePlugin({
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
-            IS_DEV && {
+            {
                 section: "VencordPatchHelper",
                 label: "Patch Helper",
                 element: PatchHelperTab,
