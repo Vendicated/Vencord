@@ -117,7 +117,7 @@ export default definePlugin({
         // Check if the current URL is whitelisted
         const { whitelist } = settings.store;
         const whiteListSplit = whitelist.split(",").map(item => item.trim());
-        if (whiteListSplit.some((hostname: string) => url.hostname.includes(hostname))) {
+        if (whiteListSplit.some((hostname: string) => url.hostname === hostname)) {
             return match;
         }
 
