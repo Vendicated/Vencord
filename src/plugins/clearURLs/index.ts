@@ -23,8 +23,9 @@ import {
     removePreEditListener,
     removePreSendListener
 } from "@api/MessageEvents";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 import { defaultRules } from "./defaultRules";
 
@@ -32,11 +33,20 @@ import { defaultRules } from "./defaultRules";
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 const reHasRegExpChar = RegExp(reRegExpChar.source);
 
+const settings = definePluginSettings({
+    whitelist: {
+        description: "Comma-separated list of URL hosts to whitelist, ex. amazon.com",
+        type: OptionType.STRING,
+        default: ""
+    },
+});
+
 export default definePlugin({
     name: "ClearURLs",
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd],
     dependencies: ["MessageEventsAPI"],
+    settings,
 
     escapeRegExp(str: string) {
         return (str && reHasRegExpChar.test(str))
@@ -101,6 +111,13 @@ export default definePlugin({
         // Cheap way to check if there are any search params
         if (url.searchParams.entries().next().done) {
             // If there are none, we don't need to modify anything
+            return match;
+        }
+
+        // Check if the current URL is whitelisted
+        const { whitelist } = settings.store;
+        const whiteListSplit = whitelist.split(",").map(item => item.trim());
+        if (whiteListSplit.some((hostname: string) => url.hostname.includes(hostname))) {
             return match;
         }
 
