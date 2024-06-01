@@ -67,10 +67,10 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "default.Messages.COLLECTIBLES_SHOP})]})",
+            find: "default.Messages.COLLECTIBLES_SHOP})]}",
             replacement: [{
-                match: "{className:en.title,children:er.default.Messages.COLLECTIBLES_SHOP}",
-                replace: "{className:en.title,children:[er.default.Messages.COLLECTIBLES_SHOP,$self.PreviewToggle()]}"
+                match: /(children:\i.default.Messages.COLLECTIBLES_SHOP)}/,
+                replace: "$&,$self.PreviewToggle()"
             }]
         }
     ],

@@ -26,7 +26,7 @@ export default definePlugin({
     authors: [EquicordDevs.Jaxx],
     patches: [
         {
-            find: ".displayName=\"SearchStore\";",
+            find: '"SearchStore",',
             replacement: {
                 match: /(\i)\.offset=null!==\((\i)=(\i)\.offset\)&&void 0!==(\i)\?(\i):0/i,
                 replace: (_, v, v1, query, v3, v4) => `$self.main(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
