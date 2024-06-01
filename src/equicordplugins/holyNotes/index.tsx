@@ -22,7 +22,6 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { EquicordDevs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -32,7 +31,7 @@ import { Message } from "discord-types/general";
 
 import { Popover as NoteButtonPopover, Popover } from "./components/icons/NoteButton";
 import { NoteModal } from "./components/modals/Notebook";
-import noteHandler, { noteHandlerCache } from "./NoteHandler";
+import noteHandler, { noteHandlerCache } from "./noteHandler";
 import { DataStoreToCache, HolyNoteStore } from "./utils";
 
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
@@ -71,7 +70,7 @@ function ToolBarHeader() {
 export default definePlugin({
     name: "HolyNotes",
     description: "Holy Notes allows you to save messages",
-    authors: [EquicordDevs.Wolfie],
+    authors: [{ id: 347096063569559553n, name: "wolfieeeeeeee" }],
     dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI"],
 
     patches: [
@@ -129,4 +128,3 @@ export default definePlugin({
         removeButton("HolyNotes");
     }
 });
-

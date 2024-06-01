@@ -48,6 +48,5 @@ export default definePlugin({
             case "web":
                 return { browser: "Chrome" };
         }
-
     }
 });

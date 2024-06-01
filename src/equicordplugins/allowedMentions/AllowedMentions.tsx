@@ -29,10 +29,6 @@ export interface AllowedMentions {
     };
 }
 
-export interface EditAttachments {
-    attachments: File[];
-}
-
 export interface AllowedMentionsProps {
     mentions: AllowedMentions,
     channel: Channel;
@@ -279,7 +275,7 @@ function Popout({
 
 export function AllowedMentionsBar({ mentions, channel, trailingSeparator }: AllowedMentionsProps) {
     const [users, setUsers] = useState(new Set(mentions.users));
-    const [roles, setRoles] = useState(new Set(mentions.users));
+    const [roles, setRoles] = useState(new Set(mentions.roles));
     const [everyone, setEveryone] = useState(mentions.parse.has("everyone"));
     const [allUsers, setAllUsers] = useState(users.size === mentions.meta.userIds.size);
     const [allRoles, setAllRoles] = useState(roles.size === mentions.meta.roleIds.size);

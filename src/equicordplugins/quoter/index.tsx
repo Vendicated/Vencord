@@ -36,16 +36,6 @@ const messagePatch: NavContextMenuPatchCallback = (children, { message }) => () 
     );
 };
 
-export default definePlugin({
-    name: "Quoter",
-    description: "Adds the ability to create a quote image from a message",
-    authors: [Devs.Samwich],
-    contextMenus: {
-        "message": messagePatch
-    }
-});
-
-
 export function QuoteIcon({
     height = 24,
     width = 24,
@@ -70,10 +60,8 @@ function sizeUpgrade(url) {
     return u.toString();
 }
 
-
 let preparingSentence: string[] = [];
 const lines: string[] = [];
-
 
 async function createQuoteImage(avatarUrl: string, name: string, quoteOld: string, grayScale: boolean): Promise<Blob> {
     const quote = removeCustomEmojis(quoteOld);
@@ -141,7 +129,6 @@ async function createQuoteImage(avatarUrl: string, name: string, quoteOld: strin
     return new Promise<Blob>(resolve => {
         canvas.toBlob(blob => {
             if (blob) {
-
                 resolve(blob);
             } else {
                 throw new Error("Failed to create Blob");
@@ -198,10 +185,8 @@ function QuoteModal(props: ModalProps) {
     useEffect(() => {
         grayscale = gray;
         GeneratePreview();
-
     }, [gray]);
     return (
-
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false}>
                 <Text color="header-primary" variant="heading-lg/semibold" tag="h1" style={{ flexGrow: 1 }}>
@@ -215,7 +200,6 @@ function QuoteModal(props: ModalProps) {
                 <Switch value={gray} onChange={setGray}>Grayscale</Switch>
                 <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => Export()} style={{ display: "inline-block", marginRight: "5px" }}>Export</Button>
                 <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => SendInChat(props.onClose)} style={{ display: "inline-block" }}>Send</Button>
-
             </ModalContent>
             <br></br>
         </ModalRoot>
@@ -223,16 +207,13 @@ function QuoteModal(props: ModalProps) {
 }
 
 async function SendInChat(onClose) {
-
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
     const preview = generateFileNamePreview(recentmessage.content);
     const imageName = `${preview} - ${recentmessage.author.username}`;
     const file = new File([image], `${imageName}.png`, { type: "image/png" });
     UploadHandler.promptToUpload([file], getCurrentChannel(), 0);
     onClose();
-
 }
-
 
 async function Export() {
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
@@ -246,22 +227,27 @@ async function Export() {
     link.remove();
 }
 
-
-
 async function GeneratePreview() {
     const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.author.username, recentmessage.content, grayscale);
     document.getElementById("quoterPreview")?.setAttribute("src", URL.createObjectURL(image));
 }
-
 
 function generateFileNamePreview(message) {
     const words = message.split(" ");
     let preview;
     if (words.length >= 6) {
         preview = words.slice(0, 6).join(" ");
-    }
-    else {
+    } else {
         preview = words.slice(0, words.length).join(" ");
     }
     return preview;
 }
+
+export default definePlugin({
+    name: "Quoter",
+    description: "Adds the ability to create a quote image from a message",
+    authors: [Devs.Samwich],
+    contextMenus: {
+        "message": messagePatch
+    }
+});

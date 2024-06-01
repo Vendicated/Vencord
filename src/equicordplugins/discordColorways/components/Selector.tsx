@@ -80,11 +80,11 @@ function SelectorContent({ children, isSettings }: { children: ReactNode, isSett
 export default function ({
     modalProps,
     isSettings,
-    onSelected
+    settings = { selectorType: "normal" }
 }: {
     modalProps: ModalProps,
     isSettings?: boolean,
-    onSelected?: (colorways: Colorway[]) => void;
+    settings?: { selectorType: "preview" | "multiple-selection" | "normal", previewSource?: string, onSelected?: (colorways: Colorway[]) => void; };
 }): JSX.Element | any {
     const [colorwayData, setColorwayData] = useState<SourceObject[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
@@ -97,6 +97,8 @@ export default function ({
     const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
     const [showLabelsInSelectorGridView, setShowLabelsInSelectorGridView] = useState<boolean>(false);
     const [showSortingMenu, setShowSotringMenu] = useState<boolean>(false);
+    const [selectedColorways, setSelectedColorways] = useState<Colorway[]>([]);
+    const [errorCode, setErrorCode] = useState<number>(0);
 
     const { item: radioBarItem, itemFilled: radioBarItemFilled } = findByProps("radioBar");
 
@@ -123,29 +125,44 @@ export default function ({
         setViewMode(await DataStore.get("selectorViewMode") as "list" | "grid");
         setShowLabelsInSelectorGridView(await DataStore.get("showLabelsInSelectorGridView") as boolean);
         setLoaderHeight("0px");
-        setCustomColorwayData((await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).map((colorSrc: { name: string, colorways: Colorway[], id?: string; }) => ({ type: "offline", source: colorSrc.name, colorways: colorSrc.colorways })));
 
-        const onlineSources: { name: string, url: string; }[] = await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[];
+        if (settings.previewSource) {
 
-        const responses: Response[] = await Promise.all(
-            onlineSources.map((source) =>
-                fetch(source.url, force ? { cache: "no-store" } : {})
-            )
-        );
+            const res: Response = await fetch(settings.previewSource);
 
-        setColorwayData(await Promise.all(
-            responses
-                .map((res, i) => ({ response: res, name: onlineSources[i].name }))
-                .map((res: { response: Response, name: string; }) =>
-                    res.response.json().then(dt => ({ colorways: dt.colorways as Colorway[], source: res.name, type: "online" })).catch(() => ({ colorways: [] as Colorway[], source: res.name, type: "online" }))
-                )) as { type: "online" | "offline" | "temporary", source: string, colorways: Colorway[]; }[]);
+            const dataPromise = res.json().then(data => data).catch(() => ({ colorways: [], errorCode: 1, errorMsg: "Colorway Source format is invalid" }));
+
+            const data = await dataPromise;
+
+            if (data.errorCode) {
+                setErrorCode(data.errorCode);
+            }
+
+            const colorwayList: Colorway[] = data.css ? data.css.map(customStore => customStore.colorways).flat() : data.colorways;
+
+            setColorwayData([{ colorways: colorwayList || [], source: res.url, type: "online" }] as { type: "online" | "offline" | "temporary", source: string, colorways: Colorway[]; }[]);
+
+        } else {
+            setCustomColorwayData((await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).map((colorSrc: { name: string, colorways: Colorway[], id?: string; }) => ({ type: "offline", source: colorSrc.name, colorways: colorSrc.colorways })));
+
+            const onlineSources: { name: string, url: string; }[] = await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[];
+
+            const responses: Response[] = await Promise.all(
+                onlineSources.map((source) =>
+                    fetch(source.url, force ? { cache: "no-store" } : {})
+                )
+            );
+
+            setColorwayData(await Promise.all(
+                responses
+                    .map((res, i) => ({ response: res, name: onlineSources[i].name }))
+                    .map((res: { response: Response, name: string; }) =>
+                        res.response.json().then(dt => ({ colorways: dt.colorways as Colorway[], source: res.name, type: "online" })).catch(() => ({ colorways: [] as Colorway[], source: res.name, type: "online" }))
+                    )) as { type: "online" | "offline" | "temporary", source: string, colorways: Colorway[]; }[]);
+        }
     }
 
-    useEffect(() => {
-        if (!searchValue) {
-            loadUI();
-        }
-    }, []);
+    useEffect(() => { loadUI(); }, [searchValue]);
 
     function ReloadPopout(onClose: () => void) {
         return (
@@ -227,131 +244,136 @@ export default function ({
     return (
         <SelectorContainer modalProps={modalProps} isSettings={isSettings}>
             <SelectorHeader isSettings={isSettings}>
-                <TextInput
-                    className="colorwaySelector-search"
-                    placeholder="Search for Colorways..."
-                    value={searchValue}
-                    onChange={setSearchValue}
-                />
-                <Tooltip text="Refresh Colorways...">
-                    {({ onMouseEnter, onMouseLeave }) => <Popout
-                        position="bottom"
-                        align="right"
-                        animation={Popout.Animation.NONE}
-                        shouldShow={showReloadMenu}
-                        onRequestClose={() => setShowReloadMenu(false)}
-                        renderPopout={() => ReloadPopout(() => setShowReloadMenu(false))}
-                    >
-                        {(_, { isShown }) => <Button
-                            innerClassName="colorwaysSettings-iconButtonInner"
-                            size={Button.Sizes.ICON}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.OUTLINED}
-                            style={{ marginLeft: "8px" }}
-                            id="colorway-refreshcolorway"
-                            onMouseEnter={isShown ? () => { } : onMouseEnter}
-                            onMouseLeave={isShown ? () => { } : onMouseLeave}
-                            onClick={() => {
-                                setLoaderHeight("2px");
-                                loadUI().then(() => setLoaderHeight("0px"));
-                            }}
-                            onContextMenu={() => { onMouseLeave(); setShowReloadMenu(!showReloadMenu); }}
+                {settings.selectorType !== "preview" ? <>
+                    <TextInput
+                        className="colorwaySelector-search"
+                        placeholder="Search for Colorways..."
+                        value={searchValue}
+                        onChange={setSearchValue}
+                    />
+                    <Tooltip text="Refresh Colorways...">
+                        {({ onMouseEnter, onMouseLeave }) => <Popout
+                            position="bottom"
+                            align="right"
+                            animation={Popout.Animation.NONE}
+                            shouldShow={showReloadMenu}
+                            onRequestClose={() => setShowReloadMenu(false)}
+                            renderPopout={() => ReloadPopout(() => setShowReloadMenu(false))}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                x="0px"
-                                y="0px"
-                                width="20"
-                                height="20"
-                                style={{ padding: "6px", boxSizing: "content-box" }}
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
+                            {(_, { isShown }) => <Button
+                                innerClassName="colorwaysSettings-iconButtonInner"
+                                size={Button.Sizes.ICON}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.OUTLINED}
+                                style={{ marginLeft: "8px" }}
+                                id="colorway-refreshcolorway"
+                                onMouseEnter={isShown ? () => { } : onMouseEnter}
+                                onMouseLeave={isShown ? () => { } : onMouseLeave}
+                                onClick={() => {
+                                    setLoaderHeight("2px");
+                                    loadUI().then(() => setLoaderHeight("0px"));
+                                }}
+                                onContextMenu={() => { onMouseLeave(); setShowReloadMenu(!showReloadMenu); }}
                             >
-                                <rect
-                                    y="0"
-                                    fill="none"
-                                    width="24"
-                                    height="24"
-                                />
-                                <path
-                                    d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
-                                />
-                                <path
-                                    d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
-                                />
-                            </svg>
-                        </Button>}
-                    </Popout>}
-                </Tooltip>
-                <Tooltip text="Create Colorway...">
-                    {({ onMouseEnter, onMouseLeave }) => <Button
-                        innerClassName="colorwaysSettings-iconButtonInner"
-                        size={Button.Sizes.ICON}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.OUTLINED}
-                        style={{ marginLeft: "8px" }}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        onClick={() => openModal((props) => <CreatorModal
-                            modalProps={props}
-                            loadUIProps={loadUI}
-                        />)}
-                    >
-                        <PlusIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
-                    </Button>}
-                </Tooltip>
-                <Tooltip text="Selector Options">
-                    {({ onMouseEnter, onMouseLeave }) => <Popout
-                        position="bottom"
-                        align="right"
-                        animation={Popout.Animation.NONE}
-                        shouldShow={showSortingMenu}
-                        onRequestClose={() => setShowSotringMenu(false)}
-                        renderPopout={() => SortingPopout(() => setShowSotringMenu(false))}
-                    >
-                        {(_, { isShown }) => <Button
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    x="0px"
+                                    y="0px"
+                                    width="20"
+                                    height="20"
+                                    style={{ padding: "6px", boxSizing: "content-box" }}
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                >
+                                    <rect
+                                        y="0"
+                                        fill="none"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    <path
+                                        d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
+                                    />
+                                    <path
+                                        d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
+                                    />
+                                </svg>
+                            </Button>}
+                        </Popout>}
+                    </Tooltip>
+                    <Tooltip text="Create Colorway...">
+                        {({ onMouseEnter, onMouseLeave }) => <Button
                             innerClassName="colorwaysSettings-iconButtonInner"
                             size={Button.Sizes.ICON}
                             color={Button.Colors.PRIMARY}
                             look={Button.Looks.OUTLINED}
                             style={{ marginLeft: "8px" }}
-                            onMouseEnter={isShown ? () => { } : onMouseEnter}
-                            onMouseLeave={isShown ? () => { } : onMouseLeave}
-                            onClick={() => { onMouseLeave(); setShowSotringMenu(!showSortingMenu); }}
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => openModal((props) => <CreatorModal
+                                modalProps={props}
+                                loadUIProps={loadUI}
+                            />)}
                         >
-                            <MoreIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
+                            <PlusIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
                         </Button>}
-                    </Popout>}
-                </Tooltip>
-                <Tooltip text="Open Color Stealer">
-                    {({ onMouseEnter, onMouseLeave }) => <Button
-                        innerClassName="colorwaysSettings-iconButtonInner"
-                        size={Button.Sizes.ICON}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.OUTLINED}
-                        style={{ marginLeft: "8px" }}
-                        id="colorway-opencolorstealer"
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        onClick={() => openModal((props) => <ColorPickerModal modalProps={props} />)}
-                    >
-                        <PalleteIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
-                    </Button>}
-                </Tooltip>
-                {isSettings ? <Select
-                    className={"colorwaySelector-sources " + ButtonLooks.OUTLINED + " colorwaySelector-sources_settings"}
-                    look={1}
-                    popoutClassName="colorwaySelector-sourceSelect"
-                    options={filters.map(filter => ({ label: filter.name, value: (filter.id as string) }))}
-                    select={value => setVisibleSources(value)}
-                    isSelected={value => visibleSources === value}
-                    serialize={String}
-                    popoutPosition="bottom" /> : <></>}
+                    </Tooltip>
+                    <Tooltip text="Selector Options">
+                        {({ onMouseEnter, onMouseLeave }) => <Popout
+                            position="bottom"
+                            align="right"
+                            animation={Popout.Animation.NONE}
+                            shouldShow={showSortingMenu}
+                            onRequestClose={() => setShowSotringMenu(false)}
+                            renderPopout={() => SortingPopout(() => setShowSotringMenu(false))}
+                        >
+                            {(_, { isShown }) => <Button
+                                innerClassName="colorwaysSettings-iconButtonInner"
+                                size={Button.Sizes.ICON}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.OUTLINED}
+                                style={{ marginLeft: "8px" }}
+                                onMouseEnter={isShown ? () => { } : onMouseEnter}
+                                onMouseLeave={isShown ? () => { } : onMouseLeave}
+                                onClick={() => { onMouseLeave(); setShowSotringMenu(!showSortingMenu); }}
+                            >
+                                <MoreIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
+                            </Button>}
+                        </Popout>}
+                    </Tooltip>
+                    <Tooltip text="Open Color Stealer">
+                        {({ onMouseEnter, onMouseLeave }) => <Button
+                            innerClassName="colorwaysSettings-iconButtonInner"
+                            size={Button.Sizes.ICON}
+                            color={Button.Colors.PRIMARY}
+                            look={Button.Looks.OUTLINED}
+                            style={{ marginLeft: "8px" }}
+                            id="colorway-opencolorstealer"
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => openModal((props) => <ColorPickerModal modalProps={props} />)}
+                        >
+                            <PalleteIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
+                        </Button>}
+                    </Tooltip>
+                    {isSettings ? <Select
+                        className={"colorwaySelector-sources " + ButtonLooks.OUTLINED + " colorwaySelector-sources_settings"}
+                        look={1}
+                        popoutClassName="colorwaySelector-sourceSelect"
+                        options={filters.map(filter => ({ label: filter.name, value: (filter.id as string) }))}
+                        select={value => setVisibleSources(value)}
+                        isSelected={value => visibleSources === value}
+                        serialize={String}
+                        popoutPosition="bottom" /> : <></>}
+                </> : <Text variant="heading-lg/semibold" tag="h1">
+                    Preview...
+                </Text>}
             </SelectorHeader>
             <SelectorContent isSettings={isSettings}>
                 <div className="colorwaysLoader-barContainer"><div className="colorwaysLoader-bar" style={{ height: loaderHeight }} /></div>
-                <ScrollerThin style={{ maxHeight: isSettings ? "unset" : "450px" }} className={"ColorwaySelectorWrapper " + (viewMode === "grid" ? "ColorwaySelectorWrapper-grid" : "ColorwaySelectorWrapper-list") + (showLabelsInSelectorGridView ? " colorwaySelector-gridWithLabels" : "")}>
-                    {activeColorwayObject.sourceType === "temporary" && <Tooltip text="Temporary Colorway">
+                {settings.selectorType === "multiple-selection" && <Forms.FormTitle>Available</Forms.FormTitle>}
+                <ScrollerThin style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : (isSettings ? "unset" : "450px") }} className={"ColorwaySelectorWrapper " + (viewMode === "grid" ? "ColorwaySelectorWrapper-grid" : "ColorwaySelectorWrapper-list") + (showLabelsInSelectorGridView ? " colorwaySelector-gridWithLabels" : "")}>
+                    {(activeColorwayObject.sourceType === "temporary" && settings.selectorType === "normal" && settings.selectorType === "normal") && <Tooltip text="Temporary Colorway">
                         {({ onMouseEnter, onMouseLeave }) => <div
                             className={viewMode === "grid" ? "discordColorway" : `${radioBarItem} ${radioBarItemFilled} discordColorway-listItem`}
                             id="colorway-Temporary"
@@ -407,7 +429,7 @@ export default function ({
                             </>}
                         </div>}
                     </Tooltip>}
-                    {getComputedStyle(document.body).getPropertyValue("--os-accent-color") && ["all", "official"].includes(visibleSources) && "auto".includes(searchValue.toLowerCase()) ? <Tooltip text="Auto">
+                    {getComputedStyle(document.body).getPropertyValue("--os-accent-color") && ["all", "official"].includes(visibleSources) && settings.selectorType === "normal" && "auto".includes(searchValue.toLowerCase()) ? <Tooltip text="Auto">
                         {({ onMouseEnter, onMouseLeave }) => <div
                             className={viewMode === "grid" ? "discordColorway" : `${radioBarItem} ${radioBarItemFilled} discordColorway-listItem`}
                             id="colorway-Auto"
@@ -476,6 +498,15 @@ export default function ({
                     >
                         No colorways...
                     </Forms.FormTitle> : <></>}
+                    {errorCode !== 0 && <Forms.FormTitle
+                        style={{
+                            marginBottom: 0,
+                            width: "100%",
+                            textAlign: "center"
+                        }}
+                    >
+                        {errorCode === 1 && "Error: Invalid Colorway Source Format. If this error persists, contact the source author to resolve the issue."}
+                    </Forms.FormTitle>}
                     {filters.map(filter => filter.id).includes(visibleSources) && (
                         filters
                             .filter(filter => filter.id === visibleSources)[0].sources
@@ -496,7 +527,7 @@ export default function ({
                                 }
                             })
                             .map((color: Colorway) => {
-                                var colors: Array<string> = color.colors || [
+                                const colors: string[] = color.colors || [
                                     "accent",
                                     "primary",
                                     "secondary",
@@ -513,45 +544,50 @@ export default function ({
                                                     onMouseLeave={viewMode === "grid" ? onMouseLeave : () => { }}
                                                     aria-checked={activeColorwayObject.id === color.name && activeColorwayObject.source === color.source}
                                                     onClick={async () => {
-                                                        const [
-                                                            onDemandWays,
-                                                            onDemandWaysTintedText,
-                                                            onDemandWaysDiscordSaturation,
-                                                            onDemandWaysOsAccentColor
-                                                        ] = await DataStore.getMany([
-                                                            "onDemandWays",
-                                                            "onDemandWaysTintedText",
-                                                            "onDemandWaysDiscordSaturation",
-                                                            "onDemandWaysOsAccentColor"
-                                                        ]);
-                                                        if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
-                                                            DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
-                                                            setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
-                                                            ColorwayCSS.remove();
-                                                        } else {
-                                                            if (onDemandWays) {
-                                                                const demandedColorway = !color.isGradient ? generateCss(
-                                                                    colorToHex(color.primary),
-                                                                    colorToHex(color.secondary),
-                                                                    colorToHex(color.tertiary),
-                                                                    colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent).slice(0, 6),
-                                                                    onDemandWaysTintedText,
-                                                                    onDemandWaysDiscordSaturation,
-                                                                    undefined,
-                                                                    color.name
-                                                                ) : gradientBase(colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
-                                                                ColorwayCSS.set(demandedColorway);
-                                                                setActiveColorwayObject({ id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
-                                                                DataStore.set("activeColorwayObject", { id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
+                                                        if (settings.selectorType === "normal") {
+                                                            const [
+                                                                onDemandWays,
+                                                                onDemandWaysTintedText,
+                                                                onDemandWaysDiscordSaturation,
+                                                                onDemandWaysOsAccentColor
+                                                            ] = await DataStore.getMany([
+                                                                "onDemandWays",
+                                                                "onDemandWaysTintedText",
+                                                                "onDemandWaysDiscordSaturation",
+                                                                "onDemandWaysOsAccentColor"
+                                                            ]);
+                                                            if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
+                                                                DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
+                                                                setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
+                                                                ColorwayCSS.remove();
                                                             } else {
-                                                                ColorwayCSS.set(color["dc-import"]);
-                                                                setActiveColorwayObject({ id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
-                                                                DataStore.set("activeColorwayObject", { id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
+                                                                if (onDemandWays) {
+                                                                    const demandedColorway = !color.isGradient ? generateCss(
+                                                                        colorToHex(color.primary),
+                                                                        colorToHex(color.secondary),
+                                                                        colorToHex(color.tertiary),
+                                                                        colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent).slice(0, 6),
+                                                                        onDemandWaysTintedText,
+                                                                        onDemandWaysDiscordSaturation,
+                                                                        undefined,
+                                                                        color.name
+                                                                    ) : gradientBase(colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
+                                                                    ColorwayCSS.set(demandedColorway);
+                                                                    setActiveColorwayObject({ id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
+                                                                    DataStore.set("activeColorwayObject", { id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
+                                                                } else {
+                                                                    ColorwayCSS.set(color["dc-import"]);
+                                                                    setActiveColorwayObject({ id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
+                                                                    DataStore.set("activeColorwayObject", { id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
+                                                                }
                                                             }
+                                                        }
+                                                        if (settings.selectorType === "multiple-selection") {
+                                                            setSelectedColorways([...selectedColorways, color]);
                                                         }
                                                     }}
                                                 >
-                                                    {viewMode === "list" && <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                                    {(viewMode === "list" && settings.selectorType === "normal") && <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
                                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
                                                         {activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                                                     </svg>}
@@ -568,11 +604,11 @@ export default function ({
                                                             }}
                                                         />}
                                                     </div>
-                                                    <div className="colorwaySelectionCircle">
+                                                    {settings.selectorType === "normal" && <div className="colorwaySelectionCircle">
                                                         {(activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && viewMode === "grid") && <SelectionCircle />}
-                                                    </div>
+                                                    </div>}
                                                     {(showLabelsInSelectorGridView || viewMode === "list") && <Text className={"colorwayLabel" + ((showLabelsInSelectorGridView && viewMode === "grid") ? " labelInGrid" : "")}>{color.name}</Text>}
-                                                    <div
+                                                    {settings.selectorType === "normal" && <div
                                                         className="colorwayInfoIconContainer"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -592,7 +628,7 @@ export default function ({
                                                         >
                                                             <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                                                         </svg>
-                                                    </div>
+                                                    </div>}
                                                     {viewMode === "list" && <>
                                                         <Tooltip text="Copy Colorway CSS">
                                                             {({ onMouseEnter, onMouseLeave }) => <Button
@@ -637,7 +673,7 @@ export default function ({
                                                                 <IDIcon width={20} height={20} />
                                                             </Button>}
                                                         </Tooltip>
-                                                        {color.sourceType === "offline" && <Tooltip text="Delete Colorway">
+                                                        {(color.sourceType === "offline" && settings.selectorType !== "preview") && <Tooltip text="Delete Colorway">
                                                             {({ onMouseEnter, onMouseLeave }) => <Button
                                                                 innerClassName="colorwaysSettings-iconButtonInner"
                                                                 size={Button.Sizes.ICON}
@@ -672,8 +708,102 @@ export default function ({
                             })
                     )}
                 </ScrollerThin>
+                {settings.selectorType === "multiple-selection" && <>
+                    <Forms.FormTitle style={{ marginTop: "8px" }}>Selected</Forms.FormTitle>
+                    <ScrollerThin style={{ maxHeight: "50%" }} className={"ColorwaySelectorWrapper " + (viewMode === "grid" ? "ColorwaySelectorWrapper-grid" : "ColorwaySelectorWrapper-list") + (showLabelsInSelectorGridView ? " colorwaySelector-gridWithLabels" : "")}>
+                        {selectedColorways.map((color: Colorway, i: number) => {
+                            const colors: string[] = color.colors || [
+                                "accent",
+                                "primary",
+                                "secondary",
+                                "tertiary",
+                            ];
+                            return <Tooltip text={color.name}>
+                                {({ onMouseEnter, onMouseLeave }) => {
+                                    return (
+                                        <div
+                                            className={viewMode === "grid" ? "discordColorway" : `${radioBarItem} ${radioBarItemFilled} discordColorway-listItem`}
+                                            id={"colorway-" + color.name}
+                                            onMouseEnter={viewMode === "grid" ? onMouseEnter : () => { }}
+                                            onMouseLeave={viewMode === "grid" ? onMouseLeave : () => { }}
+                                            aria-checked={activeColorwayObject.id === color.name && activeColorwayObject.source === color.source}
+                                            onClick={() => setSelectedColorways(selectedColorways.filter((colorway, ii) => ii !== i))}
+                                        >
+                                            {viewMode === "list" && <svg aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                                                {activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
+                                            </svg>}
+                                            <div className="discordColorwayPreviewColorContainer">
+                                                {!color.isGradient ? colors.map((colorItm) => <div
+                                                    className="discordColorwayPreviewColor"
+                                                    style={{
+                                                        backgroundColor: color[colorItm],
+                                                    }}
+                                                />) : <div
+                                                    className="discordColorwayPreviewColor"
+                                                    style={{
+                                                        background: `linear-gradient(${color.linearGradient})`,
+                                                    }}
+                                                />}
+                                            </div>
+                                            <div className="colorwaySelectionCircle">
+                                                {(activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && viewMode === "grid") && <SelectionCircle />}
+                                            </div>
+                                            {(showLabelsInSelectorGridView || viewMode === "list") && <Text className={"colorwayLabel" + ((showLabelsInSelectorGridView && viewMode === "grid") ? " labelInGrid" : "")}>{color.name}</Text>}
+                                            {viewMode === "list" && <>
+                                                <Tooltip text="Copy Colorway CSS">
+                                                    {({ onMouseEnter, onMouseLeave }) => <Button
+                                                        innerClassName="colorwaysSettings-iconButtonInner"
+                                                        size={Button.Sizes.ICON}
+                                                        color={Button.Colors.PRIMARY}
+                                                        look={Button.Looks.OUTLINED}
+                                                        onMouseEnter={onMouseEnter}
+                                                        onMouseLeave={onMouseLeave}
+                                                        onClick={async e => {
+                                                            e.stopPropagation();
+                                                            Clipboard.copy(color["dc-import"]);
+                                                            Toasts.show({
+                                                                message: "Copied Colorway CSS Successfully",
+                                                                type: 1,
+                                                                id: "copy-colorway-css-notify",
+                                                            });
+                                                        }}
+                                                    >
+                                                        <CodeIcon width={20} height={20} />
+                                                    </Button>}</Tooltip>
+                                                <Tooltip text="Copy Colorway ID">
+                                                    {({ onMouseEnter, onMouseLeave }) => <Button
+                                                        innerClassName="colorwaysSettings-iconButtonInner"
+                                                        size={Button.Sizes.ICON}
+                                                        color={Button.Colors.PRIMARY}
+                                                        look={Button.Looks.OUTLINED}
+                                                        onMouseEnter={onMouseEnter}
+                                                        onMouseLeave={onMouseLeave}
+                                                        onClick={async e => {
+                                                            e.stopPropagation();
+                                                            const colorwayIDArray = `${color.accent},${color.primary},${color.secondary},${color.tertiary}|n:${color.name}${color.preset ? `|p:${color.preset}` : ""}`;
+                                                            const colorwayID = stringToHex(colorwayIDArray);
+                                                            Clipboard.copy(colorwayID);
+                                                            Toasts.show({
+                                                                message: "Copied Colorway ID Successfully",
+                                                                type: 1,
+                                                                id: "copy-colorway-id-notify",
+                                                            });
+                                                        }}
+                                                    >
+                                                        <IDIcon width={20} height={20} />
+                                                    </Button>}
+                                                </Tooltip>
+                                            </>}
+                                        </div>
+                                    );
+                                }}
+                            </Tooltip>;
+                        })}
+                    </ScrollerThin>
+                </>}
             </SelectorContent>
-            {!isSettings ? <ModalFooter>
+            {(!isSettings && settings.selectorType !== "preview") ? <ModalFooter>
                 <Button
                     size={Button.Sizes.MEDIUM}
                     color={Button.Colors.PRIMARY}

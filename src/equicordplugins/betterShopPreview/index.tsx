@@ -27,7 +27,7 @@ const settings = definePluginSettings({
     default: {
         type: OptionType.BOOLEAN,
         description: "Enable avatar preview by default.",
-        default: false
+        default: true
     }
 });
 
@@ -61,18 +61,18 @@ const PreviewToggle = () => {
 };
 
 export default definePlugin({
-    name: "BetterShopPreview",
-    description: "Uses your avatar for avatar decoration previews in the Discord Shop.",
+    name: "Better Shop Preview",
+    description: "Uses your avatar for avatar decoration previews in the Discord Shop (without hovering).",
     authors: [EquicordDevs.Tolgchu],
     settings,
     patches: [
         {
             find: "default.Messages.COLLECTIBLES_SHOP})]})",
-            replacement: {
-                match: /(className:\i\.title,children:)(\i\.default\.Messages\.COLLECTIBLES_SHOP)/,
-                replace: "$1[$2,$self.PreviewToggle()]"
-            },
-        },
+            replacement: [{
+                match: "{className:en.title,children:er.default.Messages.COLLECTIBLES_SHOP}",
+                replace: "{className:en.title,children:[er.default.Messages.COLLECTIBLES_SHOP,$self.PreviewToggle()]}"
+            }]
+        }
     ],
     PreviewToggle,
     async start() {

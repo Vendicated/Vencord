@@ -1,5 +1,5 @@
+/* stylelint-disable property-no-vendor-prefix */
 [data-tab-id="ThemeLibrary"]::before {
-    /* stylelint-disable-next-line property-no-vendor-prefix */
     -webkit-mask: var(--si-widget) center/contain no-repeat !important;
     mask: var(--si-widget) center/contain no-repeat !important;
 }

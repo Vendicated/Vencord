@@ -18,7 +18,7 @@ import { AllowedMentions, AllowedMentionsBar, AllowedMentionsProps, AllowedMenti
 export default definePlugin({
     name: "AllowedMentions",
     authors: [Devs.arHSM, Devs.amia],
-    description: "Fine grained control over whom to ping when sending or editing a message.",
+    description: "Fine grained control over whom to ping when sending a message.",
     dependencies: ["MessageEventsAPI"],
     settings: definePluginSettings({
         pingEveryone: {
@@ -39,11 +39,11 @@ export default definePlugin({
     }),
     patches: [
         {
-            find: ".slateContainer)",
+            find: ".AnalyticEvents.APPLICATION_COMMAND_VALIDATION_FAILED,",
             replacement: [
                 // Pass type prop to slate wrapper
                 {
-                    match: /,children:\(0,\i.jsx\)\(\i.\i,{/,
+                    match: /className:\i\(\i,\i.slateContainer\),children:\(0,\i.jsx\)\(\i.\i,{/,
                     replace: "$& type: arguments[0].type,"
                 }
             ]
@@ -121,7 +121,7 @@ export default definePlugin({
                 // Fail creating forum if tooManyUsers or tooManyRoles
                 {
                     match: /applyChatRestrictions\)\(\{.+?channel:(\i)\}\);if\(!\i/,
-                    replace: "$& || !$self.validateForum($1.id)"
+                    replace: "$& && !$self.validateForum($1.id)"
                 }
             ]
         }
@@ -217,7 +217,7 @@ export default definePlugin({
     },
     validateForum(channelId: string) {
         const mentions = this.getAllowedMentions(channelId, true);
-        if (!isNonNullish(mentions)) return;
+        if (!isNonNullish(mentions)) return true;
 
         if (mentions.meta.tooManyUsers || mentions.meta.tooManyRoles) {
             this.tooManyAlert(mentions.meta.tooManyUsers, mentions.meta.tooManyRoles);

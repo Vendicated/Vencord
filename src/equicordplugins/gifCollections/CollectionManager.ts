@@ -109,4 +109,3 @@ export const deleteCollection = async (name: string): Promise<void> => {
 export const refreshCacheCollection = async (): Promise<void> => {
     cache_collections = await getCollections();
 };
-

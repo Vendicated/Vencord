@@ -8,13 +8,15 @@ import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import badges from "plugins/_api/badges";
+const roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
+const RoleIconComponent = findComponentByCodeLazy(".Messages.ROLE_ICON_ALT_TEXT");
+import "./styles.css";
 
-import badges from "../../plugins/_api/badges";
+import { User } from "discord-types/general";
+
 import settings from "./settings";
-
-let RoleIconComponent: React.ComponentType<any> = () => null;
-let roleIconClassName: string;
 
 const discordBadges: readonly [number, string, string][] = Object.freeze([
     [0, "Discord Staff", "5e74e9b61934fc1f67c65515d1f7e60d"],
@@ -31,7 +33,8 @@ const discordBadges: readonly [number, string, string][] = Object.freeze([
     [18, "Moderator Programs Alumni", "fee1624003e2fee35cb398e125dc479b"]
 ]);
 
-function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Element | null {
+function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.Element | null {
+
     switch (badge) {
         case "EquicordDonor":
             return (
@@ -51,7 +54,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                 <span style={{ order: settings.store.EquicordContributorPosition }}>
                     <RoleIconComponent
                         className={roleIconClassName}
-                        name={"Equicord Contributor"}
+                        name="Equicord Contributor"
                         size={20}
                         src={"https://i.imgur.com/UpcDwX0.png"}
                     />
@@ -60,7 +63,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
         case "VencordDonor":
             return (
                 <span style={{ order: settings.store.VencordDonorPosition }}>
-                    {badges.getDonorBadges(author.id)?.map((badge: any) => (
+                    {badges.getDonorBadges(author.id)?.map(badge => (
                         <RoleIconComponent
                             className={roleIconClassName}
                             name={badge.description}
@@ -75,7 +78,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                 <span style={{ order: settings.store.VencordContributorPosition }}>
                     <RoleIconComponent
                         className={roleIconClassName}
-                        name={"Vencord Contributor"}
+                        name="Vencord Contributor"
                         size={20}
                         src={"https://vencord.dev/assets/favicon.png"}
                     />
@@ -83,8 +86,9 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
             ) : null;
         case "DiscordProfile":
             const chatBadges = discordBadges
-                .filter((badge: any) => (author.flags || author.publicFlags) & (1 << badge[0]))
-                .map((badge: any) => (
+                .filter(badge => (author.flags || author.publicFlags) & (1 << badge[0]))
+                .map(badge => (
+
                     <RoleIconComponent
                         className={roleIconClassName}
                         name={badge[1]}
@@ -98,7 +102,7 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
                 </span>
             ) : null;
         case "DiscordNitro":
-            return author.premiumType > 0 ? (
+            return (author?.premiumType ?? 0) > 0 ? (
                 <span style={{ order: settings.store.DiscordNitroPosition }}>
                     <RoleIconComponent
                         className={roleIconClassName}
@@ -116,9 +120,10 @@ function CheckBadge({ badge, author }: { badge: string; author: any; }): JSX.Ele
     }
 }
 
-function ChatBadges({ author }: any) {
+function ChatBadges({ author }: { author: User; }) {
+
     return (
-        <span style={{ display: "inline-flex", marginLeft: 2, verticalAlign: "top" }}>
+        <span className="vc-sbic-badge-row">
             {settings.store.showEquicordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
             {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributer"} author={author} />}
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
@@ -134,22 +139,9 @@ export default definePlugin({
     authors: [Devs.Inbestigator, EquicordDevs.KrystalSkull],
     description: "Shows the message author's badges beside their name in chat.",
     dependencies: ["MessageDecorationsAPI"],
-    patches: [
-        {
-            find: "Messages.ROLE_ICON_ALT_TEXT",
-            replacement: {
-                match: /function\s+\w+?\(\w+?\)\s*{let\s+\w+?,\s*{className:.+}\)}/,
-                replace: "$self.RoleIconComponent=$&;$&",
-            }
-        }
-    ],
     settings,
-    set RoleIconComponent(component: any) {
-        RoleIconComponent = component;
-    },
     start: () => {
-        roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
-        addDecoration("vc-show-badges-in-chat", props => <ChatBadges author={props.message?.author} />);
+        addDecoration("vc-show-badges-in-chat", props => props.message?.author ? <ChatBadges author={props.message.author} /> : null);
     },
     stop: () => {
         removeDecoration("vc-show-badges-in-chat");

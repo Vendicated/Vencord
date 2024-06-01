@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "noAppsAllowed",
     description: "returns the bot's tag :skulk:",
-    authors: [EquicordDevs.kvba],
+    authors: [{ name: "kvba", id: 105170831130234880n }],
 
     patches: [
         {

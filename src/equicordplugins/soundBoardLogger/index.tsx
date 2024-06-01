@@ -21,7 +21,7 @@ export default definePlugin({
     name: "SoundBoardLogger",
     authors: [
         Devs.Moxxie,
-        EquicordDevs.fres,
+        EquicordDevs.Fres,
         Devs.echo,
         EquicordDevs.thororen
     ],

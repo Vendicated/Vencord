@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +30,8 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false,
         onChange: () => {
-            updateClassList("hoverToView", settings.store.hoverToView);
+            console.log(settings.store.hoverToView);
+            updateClassList("hover-to-view", settings.store.hoverToView);
         },
     },
     keybind: {
@@ -45,22 +46,22 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false,
         onChange: () => {
-            updateClassList("hideinstreamermode", settings.store.enableForStream);
+            console.log(settings.store.enableForStream);
+            updateClassList("hide-in-streamer-mode", settings.store.enableForStream);
         },
     },
 });
 
-migratePluginSettings("DoNotLeak", "Do Not Leak!");
 export default definePlugin({
-    name: "DoNotLeak",
+    name: "Do Not Leak!",
     description: "Hide all message contents and attachments when you're streaming or sharing your screen.",
     authors: [EquicordDevs.Perny],
     settings,
     start() {
         document.addEventListener("keyup", keyUpHandler);
         document.addEventListener("keydown", keyDownHandler);
-        updateClassList("hoverToView", settings.store.hoverToView);
-        updateClassList("hideinstreamermode", settings.store.enableForStream);
+        updateClassList("hover-to-view", settings.store.hoverToView);
+        updateClassList("hide-in-streamer-mode", settings.store.enableForStream);
         enableStyle(styles);
     },
     stop() {
@@ -72,18 +73,18 @@ export default definePlugin({
 
 function updateClassList(className, condition) {
     if (condition) {
-        document.body.classList.add(className);
+        document.body.classList.add(`vc-dnl-${className}`);
         return;
     }
-    document.body.classList.remove(className);
+    document.body.classList.remove(`vc-dnl-${className}`);
 }
 
 function keyUpHandler(e: KeyboardEvent) {
     if (e.key !== settings.store.keybind) return;
-    document.body.classList.remove("youcanleaknow");
+    updateClassList("show-messages", false);
 }
 
 function keyDownHandler(e: KeyboardEvent) {
     if (e.key !== settings.store.keybind) return;
-    document.body.classList.add("youcanleaknow");
+    updateClassList("show-messages", true);
 }

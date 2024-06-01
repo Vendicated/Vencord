@@ -9,7 +9,7 @@ import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import { ModalProps, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
@@ -112,28 +112,30 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 })();
 
 export const ColorwayCSS = {
-    get: () => document.getElementById("activeColorwayCSS")?.textContent || "",
+    get: () => document.getElementById("activeColorwayCSS")!.textContent || "",
     set: (e: string) => {
         if (!document.getElementById("activeColorwayCSS")) {
-            var activeColorwayCSS: HTMLStyleElement =
-                document.createElement("style");
-            activeColorwayCSS.id = "activeColorwayCSS";
-            activeColorwayCSS.textContent = e;
-            document.head.append(activeColorwayCSS);
+            document.head.append(Object.assign(document.createElement("style"), {
+                id: "activeColorwayCSS",
+                textContent: e
+            }));
         } else document.getElementById("activeColorwayCSS")!.textContent = e;
     },
     remove: () => document.getElementById("activeColorwayCSS")!.remove(),
 };
 
 export const versionData = {
-    pluginVersion: "5.7.0b1",
+    pluginVersion: "5.7.0",
     creatorVersion: "1.20",
 };
 
 export default definePlugin({
     name: "DiscordColorways",
     description: "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
-    authors: [EquicordDevs.DaBluLite, Devs.ImLvna],
+    authors: [{
+        name: "DaBluLite",
+        id: 582170007505731594n
+    }, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: versionData.pluginVersion,
     creatorVersion: versionData.creatorVersion,
@@ -368,31 +370,35 @@ export default definePlugin({
                                     </Button>
                                     <Button
                                         onClick={() => {
-                                            if (!hexToString(colorID).includes(",")) {
+                                            if (!colorID.includes(",")) {
                                                 throw new Error("Invalid Colorway ID");
                                             } else {
-                                                DataStore.set("activeColorwayObject", {
-                                                    id: "Temporary Colorway", css: generateCss(
-                                                        colorToHex(hexToString(colorID).split(/,#/)[1]),
-                                                        colorToHex(hexToString(colorID).split(/,#/)[2]),
-                                                        colorToHex(hexToString(colorID).split(/,#/)[3]),
-                                                        colorToHex(hexToString(colorID).split(/,#/)[0]),
-                                                        true,
-                                                        true,
-                                                        undefined,
-                                                        "Temporary Colorway"
-                                                    ), sourceType: "temporary", source: null
+                                                colorID.split("|").forEach((prop: string) => {
+                                                    if (prop.includes(",#")) {
+                                                        DataStore.set("activeColorwayObject", {
+                                                            id: "Temporary Colorway", css: generateCss(
+                                                                colorToHex(prop.split(/,#/)[1]),
+                                                                colorToHex(prop.split(/,#/)[2]),
+                                                                colorToHex(prop.split(/,#/)[3]),
+                                                                colorToHex(prop.split(/,#/)[0]),
+                                                                true,
+                                                                true,
+                                                                32,
+                                                                "Temporary Colorway"
+                                                            ), sourceType: "temporary", source: null
+                                                        });
+                                                        ColorwayCSS.set(generateCss(
+                                                            colorToHex(prop.split(/,#/)[1]),
+                                                            colorToHex(prop.split(/,#/)[2]),
+                                                            colorToHex(prop.split(/,#/)[3]),
+                                                            colorToHex(prop.split(/,#/)[0]),
+                                                            true,
+                                                            true,
+                                                            32,
+                                                            "Temporary Colorway"
+                                                        ));
+                                                    }
                                                 });
-                                                ColorwayCSS.set(generateCss(
-                                                    colorToHex(hexToString(colorID).split(/,#/)[1]),
-                                                    colorToHex(hexToString(colorID).split(/,#/)[2]),
-                                                    colorToHex(hexToString(colorID).split(/,#/)[3]),
-                                                    colorToHex(hexToString(colorID).split(/,#/)[0]),
-                                                    true,
-                                                    true,
-                                                    undefined,
-                                                    "Temporary Colorway"
-                                                ));
                                             }
                                         }}
                                         size={Button.Sizes.SMALL}

@@ -128,17 +128,6 @@ export default new (class NoteHandler {
         });
     };
 
-    public deleteEverything = async () => {
-        noteHandlerCache.clear();
-        await DeleteEntireStore();
-
-        Toasts.show({
-            id: Toasts.genId(),
-            message: "Successfully deleted all notes.",
-            type: Toasts.Type.SUCCESS,
-        });
-    };
-
     public deleteNotebook = async (notebookName: string) => {
         noteHandlerCache.delete(notebookName);
         deleteCacheFromDataStore(notebookName);
@@ -180,6 +169,17 @@ export default new (class NoteHandler {
             type: Toasts.Type.SUCCESS,
         });
 
+    };
+
+    public deleteEverything = async () => {
+        noteHandlerCache.clear();
+        await DeleteEntireStore();
+
+        Toasts.show({
+            id: Toasts.genId(),
+            message: "Successfully deleted all notes.",
+            type: Toasts.Type.SUCCESS,
+        });
     };
 
     public exportNotes = async () => {

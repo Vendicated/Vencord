@@ -16,10 +16,11 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
+import { saveFile } from "@utils/web";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, Clipboard, Forms, Text, TextInput, Toasts, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-import { ColorwayCSS } from "..";
+import { ColorwayCSS, versionData } from "..";
 import { generateCss, pureGradientBase } from "../css";
 import { Colorway } from "../types";
 import { colorToHex, stringToHex } from "../utils";
@@ -211,6 +212,43 @@ export default function ({
                         }}
                     >
                         Show CSS
+                    </Button>
+                    <Button
+                        color={Button.Colors.PRIMARY}
+                        size={Button.Sizes.MEDIUM}
+                        look={Button.Looks.OUTLINED}
+                        style={{ width: "100%" }}
+                        onClick={() => {
+                            if (!colorway["dc-import"].includes("@name")) {
+                                if (IS_DISCORD_DESKTOP) {
+                                    DiscordNative.fileManager.saveWithDialog(`/**
+                                    * @name ${colorway.name || "Colorway"}
+                                    * @version ${versionData.creatorVersion}
+                                    * @description Automatically generated Colorway.
+                                    * @author ${UserStore.getCurrentUser().username}
+                                    * @authorId ${UserStore.getCurrentUser().id}
+                                    */
+                                   ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`, `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`);
+                                } else {
+                                    saveFile(new File([`/**
+                                    * @name ${colorway.name || "Colorway"}
+                                    * @version ${versionData.creatorVersion}
+                                    * @description Automatically generated Colorway.
+                                    * @author ${UserStore.getCurrentUser().username}
+                                    * @authorId ${UserStore.getCurrentUser().id}
+                                    */
+                                   ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
+                                }
+                            } else {
+                                if (IS_DISCORD_DESKTOP) {
+                                    DiscordNative.fileManager.saveWithDialog(colorway["dc-import"], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`);
+                                } else {
+                                    saveFile(new File([colorway["dc-import"]], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
+                                }
+                            }
+                        }}
+                    >
+                        Download CSS
                     </Button>
                     <Button
                         color={Button.Colors.PRIMARY}

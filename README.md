@@ -83,7 +83,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ReplyPingControl by ant0n and MrDiamond
 - ScreenRecorder by AutumnVN
 - Search by JacobTm and thororen
-- SearchFix by jaxx
+- SearchFix by Jaxx
 - Sekai Stickers by MaiKokain
 - ServerProfilesToolbox by D3SOX
 - ShowBadgesInChat by Inbestigator and KrystalSkull

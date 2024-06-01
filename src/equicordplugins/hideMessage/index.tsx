@@ -160,5 +160,5 @@ export default definePlugin({
 
         style.remove();
         hiddenMessages.clear();
-    }
+    },
 });

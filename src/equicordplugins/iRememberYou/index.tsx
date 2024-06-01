@@ -8,19 +8,10 @@ import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { ExpandableHeader } from "@components/ExpandableHeader";
 import { Heart } from "@components/Heart";
-import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
 import definePlugin from "@utils/types";
-import {
-    Avatar, Button, ChannelStore,
-    Clickable, Flex, GuildMemberStore,
-    GuildStore,
-    MessageStore,
-    React,
-    Text, TextArea, TextInput, Tooltip,
-    UserStore
-} from "@webpack/common";
+import { Avatar, Button, ChannelStore, Clickable, Flex, GuildMemberStore, GuildStore, MessageStore, React, Text, TextArea, TextInput, Tooltip, UserStore, } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 interface IUserExtra {
@@ -44,7 +35,7 @@ interface GroupData {
 
 const constants = {
     pluginLabel: "IRememberYou",
-    pluginId: "irememberyou",
+    pluginId: "iremeberyou",
 
     DM: "dm",
     DataUIDescription:
@@ -368,10 +359,17 @@ class DataUI {
 }
 
 export default definePlugin({
-    name: "IRememberYou",
-    description: "Locally saves everyone you've been communicating with (including servers), in case of lose",
-    authors: [EquicordDevs.zoodogood],
+    name: constants.pluginLabel,
+    description:
+        "Locally saves everyone you've been communicating with (including servers), in case of lose",
+    authors: [
+        {
+            name: "zoodogood",
+            id: 921403577539387454n,
+        },
+    ],
     dependencies: ["MessageEventsAPI"],
+
     patches: [],
 
     async start() {

@@ -18,7 +18,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Auto close modal when done",
         default: true
-    },
+    }
 });
 
 const SekaiStickerChatButton: ChatBarButton = () => {

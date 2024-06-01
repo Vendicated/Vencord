@@ -23,7 +23,7 @@ import {
     useState,
 } from "@webpack/common";
 
-import { ColorPicker } from "..";
+import { ColorPicker, versionData } from "..";
 import { knownThemeVars } from "../constants";
 import { generateCss, getPreset, gradientPresetIds, PrimarySatDiffs, pureGradientBase } from "../css";
 import { Colorway } from "../types";
@@ -214,17 +214,23 @@ export default function ({
                             );
                         } else {
                             gradientPresetIds.includes(getPreset()[preset].id) ?
-                                customColorwayCSS = (getPreset(
-                                    primaryColor,
-                                    secondaryColor,
-                                    tertiaryColor,
-                                    accentColor
-                                )[preset].preset(discordSaturation) as { full: string; }).full : customColorwayCSS = (getPreset(
-                                    primaryColor,
-                                    secondaryColor,
-                                    tertiaryColor,
-                                    accentColor
-                                )[preset].preset(discordSaturation) as string);
+                                customColorwayCSS = `/**
+                                * @name ${colorwayName || "Colorway"}
+                                * @version ${versionData.creatorVersion}
+                                * @description Automatically generated Colorway.
+                                * @author ${UserStore.getCurrentUser().username}
+                                * @authorId ${UserStore.getCurrentUser().id}
+                                * @preset Gradient
+                                */
+                               ${(getPreset(primaryColor, secondaryColor, tertiaryColor, accentColor)[preset].preset(discordSaturation) as { full: string; }).full}` : customColorwayCSS = `/**
+                               * @name ${colorwayName || "Colorway"}
+                               * @version ${versionData.creatorVersion}
+                               * @description Automatically generated Colorway.
+                               * @author ${UserStore.getCurrentUser().username}
+                               * @authorId ${UserStore.getCurrentUser().id}
+                               * @preset ${getPreset()[preset].name}
+                               */
+                               ${(getPreset(primaryColor, secondaryColor, tertiaryColor, accentColor)[preset].preset(discordSaturation) as string)}`;
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway"),
@@ -243,7 +249,8 @@ export default function ({
                                 tertiaryColor,
                                 accentColor
                             )[preset].preset(discordSaturation) as { base: string; }).base : "",
-                            preset: getPreset()[preset].id
+                            preset: getPreset()[preset].id,
+                            creatorVersion: versionData.creatorVersion
                         };
                         openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
                             modalProps.onClose();

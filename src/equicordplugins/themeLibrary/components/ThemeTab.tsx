@@ -11,6 +11,7 @@ import { generateId } from "@api/Commands";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CodeBlock } from "@components/CodeBlock";
+import { ErrorCard } from "@components/ErrorCard";
 import { OpenExternalIcon } from "@components/Icons";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { proxyLazy } from "@utils/lazy";
@@ -160,229 +161,256 @@ function ThemeTab() {
                             fontSize: "1.5em",
                             color: "var(--text-muted)"
                         }}>Loading Themes...</div>
-                ) : (<>
-                    <div className={`${Margins.bottom8} ${Margins.top16}`}>
-                        <Forms.FormTitle tag="h2"
-                            style={{
-                                overflowWrap: "break-word",
-                                marginTop: 8,
-                            }}>
-                            Newest Additions
-                        </Forms.FormTitle>
+                ) : (
+                    <>
+                        <ErrorCard id="vc-themetab-warning">
+                            <Forms.FormTitle tag="h4">Want your theme removed?</Forms.FormTitle>
+                            <Forms.FormText className={Margins.top8}>
+                                If you want your theme(s) permanently removed, please open an issue on <a href="https://github.com/Faf4a/plugins/issues/new?labels=removal&projects=&template=request_removal.yml&title=Theme+Removal">GitHub <OpenExternalIcon height={16} width={16} /></a>
+                            </Forms.FormText>
+                        </ErrorCard >
+                        <div className={`${Margins.bottom8} ${Margins.top16}`}>
+                            <Forms.FormTitle tag="h2"
+                                style={{
+                                    overflowWrap: "break-word",
+                                    marginTop: 8,
+                                }}>
+                                Newest Additions
+                            </Forms.FormTitle>
 
-                        {themes.slice(0, 2).map((theme: Theme) => (
-                            <Card style={{
-                                padding: ".5rem",
-                                marginBottom: ".5em",
-                                marginTop: ".5em",
-                                display: "flex",
-                                flexDirection: "column",
-                                backgroundColor: "var(--background-secondary-alt)"
-                            }} key={theme.id}>
-                                <Forms.FormTitle tag="h2" style={{
-                                    overflowWrap: "break-word",
-                                    marginTop: 8,
-                                }}
-                                    className="vce-theme-text">
-                                    {theme.name}
-                                </Forms.FormTitle>
-                                <Forms.FormText className="vce-theme-text">
-                                    {theme.description}
-                                </Forms.FormText>
-                                <div className="vce-theme-info">
-                                    <div style={{
-                                        justifyContent: "flex-start",
-                                        flexDirection: "column"
-                                    }}>
-                                        {theme.tags && (
-                                            <Forms.FormText>
-                                                {theme.tags.map(tag => (
-                                                    <span className="vce-theme-info-tag">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </Forms.FormText>
-                                        )}
-                                        <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
-                                            {themeLinks.includes(API_TYPE(theme)) ? (
-                                                <Button
-                                                    onClick={() => {
-                                                        const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
-                                                        setThemeLinks(onlineThemeLinks);
-                                                        Vencord.Settings.themeLinks = onlineThemeLinks;
-                                                    }}
-                                                    size={Button.Sizes.MEDIUM}
-                                                    color={Button.Colors.RED}
-                                                    look={Button.Looks.FILLED}
-                                                    className={Margins.right8}
-                                                >
-                                                    Remove Theme
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    onClick={() => {
-                                                        const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
-                                                        setThemeLinks(onlineThemeLinks);
-                                                        Vencord.Settings.themeLinks = onlineThemeLinks;
-                                                    }}
-                                                    size={Button.Sizes.MEDIUM}
-                                                    color={Button.Colors.GREEN}
-                                                    look={Button.Looks.FILLED}
-                                                    className={Margins.right8}
-                                                >
-                                                    Add Theme
-                                                </Button>
+                            {themes.slice(0, 2).map((theme: Theme) => (
+                                <Card style={{
+                                    padding: ".5rem",
+                                    marginBottom: ".5em",
+                                    marginTop: ".5em",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    backgroundColor: "var(--background-secondary-alt)"
+                                }} key={theme.id}>
+                                    <Forms.FormTitle tag="h2" style={{
+                                        overflowWrap: "break-word",
+                                        marginTop: 8,
+                                    }}
+                                        className="vce-theme-text">
+                                        {theme.name}
+                                    </Forms.FormTitle>
+                                    <Forms.FormText className="vce-theme-text">
+                                        {theme.description}
+                                    </Forms.FormText>
+                                    <div className="vce-theme-info">
+                                        <div style={{
+                                            justifyContent: "flex-start",
+                                            flexDirection: "column"
+                                        }}>
+                                            {theme.tags && (
+                                                <Forms.FormText>
+                                                    {theme.tags.map(tag => (
+                                                        <span className="vce-theme-info-tag">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </Forms.FormText>
                                             )}
-                                            <Button
-                                                onClick={async () => {
-                                                    const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
-                                                    openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
-                                                }}
-                                                size={Button.Sizes.MEDIUM}
-                                                color={Button.Colors.BRAND}
-                                                look={Button.Looks.FILLED}
-                                            >
-                                                Theme Info
-                                            </Button>
-                                            <Button
-                                                onClick={() => VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""))}
-                                                size={Button.Sizes.MEDIUM}
-                                                color={Button.Colors.LINK}
-                                                look={Button.Looks.LINK}
-                                                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                                            >
-                                                View Source <OpenExternalIcon height={16} width={16} />
-                                            </Button>
+                                            <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
+                                                {themeLinks.includes(API_TYPE(theme)) ? (
+                                                    <Button
+                                                        onClick={() => {
+                                                            const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
+                                                            setThemeLinks(onlineThemeLinks);
+                                                            Vencord.Settings.themeLinks = onlineThemeLinks;
+                                                        }}
+                                                        size={Button.Sizes.MEDIUM}
+                                                        color={Button.Colors.RED}
+                                                        look={Button.Looks.FILLED}
+                                                        className={Margins.right8}
+                                                    >
+                                                        Remove Theme
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        onClick={() => {
+                                                            const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
+                                                            setThemeLinks(onlineThemeLinks);
+                                                            Vencord.Settings.themeLinks = onlineThemeLinks;
+                                                        }}
+                                                        size={Button.Sizes.MEDIUM}
+                                                        color={Button.Colors.GREEN}
+                                                        look={Button.Looks.FILLED}
+                                                        className={Margins.right8}
+                                                    >
+                                                        Add Theme
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    onClick={async () => {
+                                                        const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
+                                                        openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
+                                                    }}
+                                                    size={Button.Sizes.MEDIUM}
+                                                    color={Button.Colors.BRAND}
+                                                    look={Button.Looks.FILLED}
+                                                >
+                                                    Theme Info
+                                                </Button>
+                                                <Button
+                                                    onClick={() => {
+                                                        const content = atob(theme.content);
+                                                        const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
+                                                        const source = metadata.match(/@source\s+(.+)/)?.[1] || "";
+
+                                                        if (source) {
+                                                            VencordNative.native.openExternal(source);
+                                                        } else {
+                                                            VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""));
+                                                        }
+                                                    }}
+                                                    size={Button.Sizes.MEDIUM}
+                                                    color={Button.Colors.LINK}
+                                                    look={Button.Looks.LINK}
+                                                    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                                                >
+                                                    View Source <OpenExternalIcon height={16} width={16} />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                    <Forms.FormTitle tag="h2" style={{
-                        overflowWrap: "break-word",
-                        marginTop: 20,
-                    }}>
-                        Themes
-                    </Forms.FormTitle>
-                    <div className={cl("filter-controls")}>
-                        <TextInput value={searchValue.value} placeholder="Search for a theme..." onChange={onSearch} />
-                        <div className={InputStyles.inputWrapper}>
-                            <Select
-                                options={[
-                                    { label: "Show All", value: SearchStatus.ALL, default: true },
-                                    { label: "Show Themes", value: SearchStatus.THEME },
-                                    { label: "Show Snippets", value: SearchStatus.SNIPPET },
-                                    { label: "Show Enabled", value: SearchStatus.ENABLED },
-                                    { label: "Show Disabled", value: SearchStatus.DISABLED },
-                                    { label: "Show Dark", value: SearchStatus.DARK },
-                                    { label: "Show Light", value: SearchStatus.LIGHT },
-                                ]}
-                                serialize={String}
-                                select={onStatusChange}
-                                isSelected={v => v === searchValue.status}
-                                closeOnSelect={true}
-                            />
+                                </Card>
+                            ))}
                         </div>
-                    </div>
-                    <div>
-                        {filteredThemes.map((theme: Theme) => (
-                            <Card style={{
-                                padding: ".5rem",
-                                marginBottom: ".5em",
-                                marginTop: ".5em",
-                                display: "flex",
-                                flexDirection: "column",
-                                backgroundColor: "var(--background-secondary-alt)"
-                            }} key={theme.id}>
-                                <Forms.FormTitle tag="h2" style={{
-                                    overflowWrap: "break-word",
-                                    marginTop: 8,
-                                }}
-                                    className="vce-theme-text">
-                                    {theme.name}
-                                </Forms.FormTitle>
-                                <Forms.FormText className="vce-theme-text">
-                                    {theme.description}
-                                </Forms.FormText>
-                                <img
-                                    role="presentation"
-                                    src={theme.thumbnail_url}
-                                    loading="lazy"
-                                    alt={theme.name}
-                                    className="vce-theme-info-preview"
+                        <Forms.FormTitle tag="h2" style={{
+                            overflowWrap: "break-word",
+                            marginTop: 20,
+                        }}>
+                            Themes
+                        </Forms.FormTitle>
+                        <div className={cl("filter-controls")}>
+                            <TextInput value={searchValue.value} placeholder="Search for a theme..." onChange={onSearch} />
+                            <div className={InputStyles.inputWrapper}>
+                                <Select
+                                    options={[
+                                        { label: "Show All", value: SearchStatus.ALL, default: true },
+                                        { label: "Show Themes", value: SearchStatus.THEME },
+                                        { label: "Show Snippets", value: SearchStatus.SNIPPET },
+                                        { label: "Show Enabled", value: SearchStatus.ENABLED },
+                                        { label: "Show Disabled", value: SearchStatus.DISABLED },
+                                        { label: "Show Dark", value: SearchStatus.DARK },
+                                        { label: "Show Light", value: SearchStatus.LIGHT },
+                                    ]}
+                                    serialize={String}
+                                    select={onStatusChange}
+                                    isSelected={v => v === searchValue.status}
+                                    closeOnSelect={true}
                                 />
-                                <div className="vce-theme-info">
-                                    <div style={{
-                                        justifyContent: "flex-start",
-                                        flexDirection: "column"
-                                    }}>
-                                        {theme.tags && (
-                                            <Forms.FormText>
-                                                {theme.tags.map(tag => (
-                                                    <span className="vce-theme-info-tag">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </Forms.FormText>
-                                        )}
-                                        <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
-                                            {themeLinks.includes(API_TYPE(theme)) ? (
-                                                <Button
-                                                    onClick={() => {
-                                                        const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
-                                                        setThemeLinks(onlineThemeLinks);
-                                                        Vencord.Settings.themeLinks = onlineThemeLinks;
-                                                    }}
-                                                    size={Button.Sizes.MEDIUM}
-                                                    color={Button.Colors.RED}
-                                                    look={Button.Looks.FILLED}
-                                                    className={Margins.right8}
-                                                >
-                                                    Remove Theme
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    onClick={() => {
-                                                        const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
-                                                        setThemeLinks(onlineThemeLinks);
-                                                        Vencord.Settings.themeLinks = onlineThemeLinks;
-                                                    }}
-                                                    size={Button.Sizes.MEDIUM}
-                                                    color={Button.Colors.GREEN}
-                                                    look={Button.Looks.FILLED}
-                                                    className={Margins.right8}
-                                                >
-                                                    Add Theme
-                                                </Button>
+                            </div>
+                        </div>
+                        <div>
+                            {filteredThemes.map((theme: Theme) => (
+                                <Card style={{
+                                    padding: ".5rem",
+                                    marginBottom: ".5em",
+                                    marginTop: ".5em",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    backgroundColor: "var(--background-secondary-alt)"
+                                }} key={theme.id}>
+                                    <Forms.FormTitle tag="h2" style={{
+                                        overflowWrap: "break-word",
+                                        marginTop: 8,
+                                    }}
+                                        className="vce-theme-text">
+                                        {theme.name}
+                                    </Forms.FormTitle>
+                                    <Forms.FormText className="vce-theme-text">
+                                        {theme.description}
+                                    </Forms.FormText>
+                                    <img
+                                        role="presentation"
+                                        src={theme.thumbnail_url}
+                                        loading="lazy"
+                                        alt={theme.name}
+                                        className="vce-theme-info-preview"
+                                    />
+                                    <div className="vce-theme-info">
+                                        <div style={{
+                                            justifyContent: "flex-start",
+                                            flexDirection: "column"
+                                        }}>
+                                            {theme.tags && (
+                                                <Forms.FormText>
+                                                    {theme.tags.map(tag => (
+                                                        <span className="vce-theme-info-tag">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </Forms.FormText>
                                             )}
-                                            <Button
-                                                onClick={async () => {
-                                                    const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
-                                                    openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
-                                                }}
-                                                size={Button.Sizes.MEDIUM}
-                                                color={Button.Colors.BRAND}
-                                                look={Button.Looks.FILLED}
-                                            >
-                                                Theme Info
-                                            </Button>
-                                            <Button
-                                                onClick={() => VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""))}
-                                                size={Button.Sizes.MEDIUM}
-                                                color={Button.Colors.LINK}
-                                                look={Button.Looks.LINK}
-                                                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                                            >
-                                                View Source <OpenExternalIcon height={16} width={16} />
-                                            </Button>
+                                            <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
+                                                {themeLinks.includes(API_TYPE(theme)) ? (
+                                                    <Button
+                                                        onClick={() => {
+                                                            const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
+                                                            setThemeLinks(onlineThemeLinks);
+                                                            Vencord.Settings.themeLinks = onlineThemeLinks;
+                                                        }}
+                                                        size={Button.Sizes.MEDIUM}
+                                                        color={Button.Colors.RED}
+                                                        look={Button.Looks.FILLED}
+                                                        className={Margins.right8}
+                                                    >
+                                                        Remove Theme
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        onClick={() => {
+                                                            const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
+                                                            setThemeLinks(onlineThemeLinks);
+                                                            Vencord.Settings.themeLinks = onlineThemeLinks;
+                                                        }}
+                                                        size={Button.Sizes.MEDIUM}
+                                                        color={Button.Colors.GREEN}
+                                                        look={Button.Looks.FILLED}
+                                                        className={Margins.right8}
+                                                    >
+                                                        Add Theme
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    onClick={async () => {
+                                                        const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
+                                                        openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
+                                                    }}
+                                                    size={Button.Sizes.MEDIUM}
+                                                    color={Button.Colors.BRAND}
+                                                    look={Button.Looks.FILLED}
+                                                >
+                                                    Theme Info
+                                                </Button>
+                                                <Button
+                                                    onClick={() => {
+                                                        const content = atob(theme.content);
+                                                        const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
+                                                        const source = metadata.match(/@source\s+(.+)/)?.[1] || "";
+
+                                                        if (source) {
+                                                            VencordNative.native.openExternal(source);
+                                                        } else {
+                                                            VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""));
+                                                        }
+                                                    }}
+                                                    size={Button.Sizes.MEDIUM}
+                                                    color={Button.Colors.LINK}
+                                                    look={Button.Looks.LINK}
+                                                    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                                                >
+                                                    View Source <OpenExternalIcon height={16} width={16} />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                </>)}
+                                </Card>
+                            ))}
+                        </div>
+                    </>)}
             </>
         </div >
     );

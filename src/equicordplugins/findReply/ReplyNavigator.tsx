@@ -24,6 +24,7 @@ export default function ReplyNavigator({ replies }: { replies: Message[]; }) {
         setVisible(true);
     }, [replies]);
     React.useEffect(() => {
+        // https://stackoverflow.com/a/42234988
         function onMouseDown(event: MouseEvent) {
             if (ref.current && event.target instanceof Element && !ref.current.contains(event.target)) {
                 setVisible(false);
@@ -45,8 +46,7 @@ export default function ReplyNavigator({ replies }: { replies: Message[]; }) {
                 flexDirection: "row",
                 alignItems: "center",
                 paddingLeft: "1em",
-                paddingRight: "1em",
-                opacity: "80%"
+                paddingRight: "1em"
             }}>
                 <Paginator
                     className={"vc-findreply-paginator"}

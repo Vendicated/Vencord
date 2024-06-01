@@ -9,11 +9,22 @@ import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { SettingsTab } from "@components/VencordSettings/shared";
+import { getTheme, Theme } from "@utils/discord";
+import { openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { Button, ScrollerThin, Text, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { StoreItem } from "../../types";
-import { DownloadIcon } from "../Icons";
+import { DownloadIcon, PalleteIcon } from "../Icons";
+import Selector from "../Selector";
+
+const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
+const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
+
+function GithubIcon() {
+    const src = getTheme() === Theme.Light ? GithubIconLight : GithubIconDark;
+    return <img src={src} alt="GitHub" />;
+}
 
 export default function () {
     const [storeObject, setStoreObject] = useState<StoreItem[]>([]);
@@ -85,35 +96,52 @@ export default function () {
         </Flex>
         <ScrollerThin orientation="vertical" className="colorwaysSettings-sourceScroller">
             {storeObject.map((item: StoreItem) =>
-                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`}>
-                    <Flex flexDirection="column" style={{ gap: ".5rem" }}>
+                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+                    <Flex flexDirection="column" style={{ gap: ".5rem", marginBottom: "8px" }}>
                         <Text className="colorwaysSettings-colorwaySourceLabelHeader">
                             {item.name}
                         </Text>
                         <Text className="colorwaysSettings-colorwaySourceDesc">
                             {item.description}
                         </Text>
-                        <Link className="colorwaysSettings-colorwaySourceDesc" href={"https://github.com/" + item.authorGh}>by {item.authorGh}</Link>
+                        <Text className="colorwaysSettings-colorwaySourceDesc" style={{ opacity: ".8" }}>
+                            by {item.authorGh}
+                        </Text>
                     </Flex>
-                    <Button
-                        innerClassName="colorwaysSettings-iconButtonInner"
-                        size={Button.Sizes.ICON}
-                        color={colorwaySourceFiles.map(source => source.name).includes(item.name) ? Button.Colors.RED : Button.Colors.PRIMARY}
-                        look={Button.Looks.OUTLINED}
-                        onClick={async () => {
-                            if (colorwaySourceFiles.map(source => source.name).includes(item.name)) {
-                                const sourcesArr: { name: string, url: string; }[] = colorwaySourceFiles.filter(source => source.name !== item.name);
-                                DataStore.set("colorwaySourceFiles", sourcesArr);
-                                setColorwaySourceFiles(sourcesArr);
-                            } else {
-                                const sourcesArr: { name: string, url: string; }[] = [...colorwaySourceFiles, { name: item.name, url: item.url }];
-                                DataStore.set("colorwaySourceFiles", sourcesArr);
-                                setColorwaySourceFiles(sourcesArr);
-                            }
-                        }}
-                    >
-                        {colorwaySourceFiles.map(source => source.name).includes(item.name) ? <DeleteIcon width={20} height={20} /> : <DownloadIcon width={20} height={20} />}
-                    </Button>
+                    <Flex style={{ gap: "8px", alignItems: "center", width: "100%" }}>
+                        <Link href={"https://github.com/" + item.authorGh}><GithubIcon /></Link>
+                        <Button
+                            innerClassName="colorwaysSettings-iconButtonInner"
+                            size={Button.Sizes.SMALL}
+                            color={colorwaySourceFiles.map(source => source.name).includes(item.name) ? Button.Colors.RED : Button.Colors.PRIMARY}
+                            look={Button.Looks.OUTLINED}
+                            style={{ marginLeft: "auto" }}
+                            onClick={async () => {
+                                if (colorwaySourceFiles.map(source => source.name).includes(item.name)) {
+                                    const sourcesArr: { name: string, url: string; }[] = colorwaySourceFiles.filter(source => source.name !== item.name);
+                                    DataStore.set("colorwaySourceFiles", sourcesArr);
+                                    setColorwaySourceFiles(sourcesArr);
+                                } else {
+                                    const sourcesArr: { name: string, url: string; }[] = [...colorwaySourceFiles, { name: item.name, url: item.url }];
+                                    DataStore.set("colorwaySourceFiles", sourcesArr);
+                                    setColorwaySourceFiles(sourcesArr);
+                                }
+                            }}
+                        >
+                            {colorwaySourceFiles.map(source => source.name).includes(item.name) ? <><DeleteIcon width={14} height={14} /> Remove</> : <><DownloadIcon width={14} height={14} /> Add to Sources</>}
+                        </Button>
+                        <Button
+                            innerClassName="colorwaysSettings-iconButtonInner"
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.PRIMARY}
+                            look={Button.Looks.OUTLINED}
+                            onClick={async () => {
+                                openModal(props => <Selector modalProps={props} settings={{ selectorType: "preview", previewSource: item.url }} />);
+                            }}
+                        >
+                            <PalleteIcon width={14} height={14} />{" "}Preview
+                        </Button>
+                    </Flex>
                 </div> : <></>
             )}
         </ScrollerThin>

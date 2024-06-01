@@ -918,7 +918,7 @@
     gap: 5px;
     border-radius: 4px;
     box-sizing: border-box;
-    align-items: start;
+    align-items: center;
 }
 
 .discordColorway-listItem {

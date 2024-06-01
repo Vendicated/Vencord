@@ -18,7 +18,7 @@
 
 // Plugin idea by brainfreeze (668137937333911553) 😎
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -93,40 +93,29 @@ export default definePlugin({
     // need better description eh
     description: "Allows you to have collections of gifs",
     authors: [Devs.Aria],
-    contextMenus: {
-        "message": addCollectionContextMenuPatch
-    },
     patches: [
         {
             find: "renderCategoryExtras",
             replacement: [
                 // This patch adds the collections to the gif part yk
                 {
-                    match: /(render\(\){)(.{1,50}getItemGrid)/,
+                    match: /(\i\.render=function\(\){)(.{1,50}getItemGrid)/,
                     replace: "$1;$self.insertCollections(this);$2"
                 },
                 // Hides the gc: from the name gc:monkeh -> monkeh
-                // https://regex101.com/r/uEjLFq/1
                 {
-                    match: /(className:\w\.categoryName,children:)(\i)/,
-                    replace: "$1$self.hidePrefix($2),"
+                    match: /(\i\.renderCategoryExtras=function\((?<props>\i)\){)var (?<varName>\i)=\i\.name,/,
+                    replace: "$1var $<varName>=$self.hidePrefix($<props>),"
                 },
-            ]
-        },
-        {
-            find: "renderEmptyFavorite",
-            replacement: {
-                match: /render\(\){.{1,500}onClick:this\.handleClick,/,
-                replace: "$&onContextMenu: (e) => $self.collectionContextMenu(e, this),"
-            }
-        },
-        {
-            find: "renderHeaderContent()",
-            replacement: [
                 // Replaces this.props.resultItems with the collection.gifs
                 {
-                    match: /(renderContent\(\){)(.{1,50}resultItems)/,
-                    replace: "$1$self.renderContent(this);$2"
+                    match: /(\i\.renderContent=function\(\){)(.{1,50}resultItems)/,
+                    replace: "$1;$self.renderContent(this);$2"
+                },
+                // Delete context menu for collection
+                {
+                    match: /(\i\.render=function\(\){.{1,100}renderExtras.{1,200}onClick:this\.handleClick,)/,
+                    replace: "$1onContextMenu: (e) => $self.collectionContextMenu(e, this),"
                 },
             ]
         },
@@ -140,9 +129,9 @@ export default definePlugin({
         {
             find: "type:\"GIF_PICKER_QUERY\"",
             replacement: {
-                match: /(function \i\(.{1,10}\){)(.{1,100}.GIFS_SEARCH,query:)/,
+                match: /(function \i\((?<query>\i),\i\){.{1,200}dispatch\({type:"GIF_PICKER_QUERY".{1,20};)/,
                 replace:
-                    "$1if($self.shouldStopFetch(arguments[0])) return;$2"
+                    "$&if($self.shouldStopFetch($<query>)) return;"
             }
         },
     ],
@@ -152,8 +141,13 @@ export default definePlugin({
 
     start() {
         CollectionManager.refreshCacheCollection();
+
+        addContextMenuPatch("message", addCollectionContextMenuPatch);
     },
 
+    stop() {
+        removeContextMenuPatch("message", addCollectionContextMenuPatch);
+    },
     CollectionManager,
 
     oldTrendingCat: null as Category[] | null,
@@ -182,8 +176,8 @@ export default definePlugin({
 
     },
 
-    hidePrefix(name: string) {
-        return name.split(":").length > 1 ? name.replace(/.+?:/, "") : name;
+    hidePrefix(props: Category) {
+        return props.name.split(":").length > 1 ? props.name.replace(/.+?:/, "") : props.name;
     },
 
     insertCollections(instance: { props: Props; }) {
@@ -218,18 +212,13 @@ export default definePlugin({
                     onConfirm={() => { this.sillyInstance && this.sillyInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.name} />
             );
-        if (item?.id?.startsWith(GIF_ITEM_PREFIX)) {
-            ContextMenuApi.openContextMenu(e, () =>
+        if (item?.id?.startsWith(GIF_ITEM_PREFIX))
+            return ContextMenuApi.openContextMenu(e, () =>
                 <RemoveItemContextMenu
                     type="gif"
                     onConfirm={() => { this.sillyContentInstance && this.sillyContentInstance.forceUpdate(); }}
                     nameOrId={instance.props.item.id}
                 />);
-            instance.props.focused = false;
-            instance.forceUpdate();
-            this.sillyContentInstance && this.sillyContentInstance.forceUpdate();
-            return;
-        }
 
         const { src, url, height, width } = item;
         if (src && url && height != null && width != null && !item.id?.startsWith(GIF_ITEM_PREFIX))
@@ -361,5 +350,3 @@ function CreateCollectionModal({ gif, onClose, modalProps }: CreateCollectionMod
         </ModalRoot>
     );
 }
-
-

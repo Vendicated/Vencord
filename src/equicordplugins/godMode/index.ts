@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { PermissionStore } from "@webpack/common";
 
 export default definePlugin({
-    name: "GodMode",
+    name: "God Mode",
     description: "Get all permissions (client-side).",
     authors: [EquicordDevs.Tolgchu],
 

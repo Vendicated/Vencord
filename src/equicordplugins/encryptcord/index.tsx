@@ -142,7 +142,7 @@ export default definePlugin({
         {
             find: "executeMessageComponentInteraction:",
             replacement: {
-                match: /await \i\.HTTP\.post\({url:\i\.Endpoints\.INTERACTIONS,body:\i,timeout:/,
+                match: /await\s+l\.default\.post\({\s*url:\s*A\.Endpoints\.INTERACTIONS,\s*body:\s*C,\s*timeout:\s*3e3\s*},\s*t\s*=>\s*{\s*h\(T,\s*p,\s*f,\s*t\)\s*}\s*\)/,
                 replace: "await $self.joinGroup(C);$&"
             }
         }

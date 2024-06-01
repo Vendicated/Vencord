@@ -5,29 +5,50 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { GuildChannelStore, Menu, React, RestAPI, UserStore } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
+async function runSequential<T>(promises: Promise<T>[]): Promise<T[]> {
+    const results: T[] = [];
+
+    for (let i = 0; i < promises.length; i++) {
+        const promise = promises[i];
+        const result = await promise;
+        results.push(result);
+
+        if (i % settings.store.waitAfter === 0) {
+            await new Promise(resolve => setTimeout(resolve, settings.store.waitSeconds * 1000));
+        }
+    }
+
+    return results;
+}
+
 function sendPatch(channel: Channel, body: Record<string, any>, bypass = false) {
     const usersVoice = VoiceStateStore.getVoiceStatesForChannel(channel.id); // Get voice states by channel id
     const myId = UserStore.getCurrentUser().id; // Get my user id
 
+    const promises: Promise<any>[] = [];
     Object.keys(usersVoice).forEach((key, index) => {
         const userVoice = usersVoice[key];
 
         if (bypass || userVoice.userId !== myId) {
-            setTimeout(() => {
-                RestAPI.patch({
-                    url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
-                    body: body
-                });
-            }, index * 500);
+            promises.push(RestAPI.patch({
+                url: `/guilds/${channel.guild_id}/members/${userVoice.userId}`,
+                body: body
+            }));
         }
+    });
+
+    runSequential(promises).catch(error => {
+        console.error("VoiceChatUtilities failed to run", error);
     });
 }
 
@@ -120,12 +141,26 @@ const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }:
     );
 };
 
-
+const settings = definePluginSettings({
+    waitAfter: {
+        type: OptionType.SLIDER,
+        description: "Amount of API actions to perform before waiting (to avoid rate limits)",
+        default: 5,
+        markers: makeRange(1, 20),
+    },
+    waitSeconds: {
+        type: OptionType.SLIDER,
+        description: "Time to wait between each action (in seconds)",
+        default: 2,
+        markers: makeRange(1, 10, .5),
+    }
+});
 
 export default definePlugin({
     name: "VoiceChatUtilities",
     description: "This plugin allows you to perform multiple actions on an entire channel (move, mute, disconnect, etc.) (originally by dutake)",
     authors: [EquicordDevs.Dams, Devs.D3SOX],
+    settings,
     contextMenus: {
         "channel-context": VoiceChannelContext
     },

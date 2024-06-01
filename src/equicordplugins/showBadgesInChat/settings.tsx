@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { Text, useEffect, UserStore, useState } from "@webpack/common";
@@ -37,7 +35,7 @@ const settings = definePluginSettings({
     },
     showVencordDonor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Vencord Donor badges in chat.",
+        description: "Enable to show Vencord donor badges in chat.",
         hidden: true,
         default: true
     },
@@ -49,7 +47,7 @@ const settings = definePluginSettings({
     },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Vencord Contributor badges in chat.",
+        description: "Enable to show Vencord contributor badges in chat.",
         hidden: true,
         default: true
     },
@@ -171,22 +169,21 @@ const BadgeSettings = () => {
     return (
         <>
             <Text>Drag the badges to reorder them, you can click to enable/disable a specific badge type.</Text>
-            <div className="badge-settings">
-                <img style={{ width: "55px", height: "55px", borderRadius: "50%", marginRight: "15px" }} src={UserStore.getCurrentUser().getAvatarURL()}></img>
-                <Text style={{ fontSize: "22px", color: "white", marginRight: "7.5px" }}>{(UserStore.getCurrentUser() as any).globalName}</Text>
+            <div className="vc-sbic-badge-settings">
+                <img className="vc-sbic-settings-avatar" src={UserStore.getCurrentUser().getAvatarURL()}></img>
+                <Text className="vc-sbic-settings-username">{(UserStore.getCurrentUser() as any).globalName}</Text>
                 {images
                     .sort((a, b) => a.position - b.position)
                     .map((image, index) => (
                         <div
                             key={image.key}
-                            className={`image-container ${!image.shown ? "disabled" : ""}`}
+                            className={`vc-sbic-image-container ${!image.shown ? "vc-sbic-disabled" : ""}`}
                             onDragOver={e => handleDragOver(e)}
                             onDrop={e => handleDrop(e, index)}
                             onClick={() => toggleDisable(index)}
                         >
                             <img
                                 src={image.src}
-                                alt={image.title}
                                 draggable={image.shown}
                                 onDragStart={e => handleDragStart(e, index)}
                                 title={image.title}

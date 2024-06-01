@@ -20,7 +20,8 @@ export interface Colorway {
     sourceType?: "online" | "offline" | "temporary" | null,
     source?: string,
     linearGradient?: string,
-    preset?: string;
+    preset?: string,
+    creatorVersion: string;
 }
 
 export interface ColorPickerProps {
