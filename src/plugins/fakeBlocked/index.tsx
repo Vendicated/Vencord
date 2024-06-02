@@ -56,7 +56,7 @@ const OpenHiddenUsersModalComponent = () => {
         <Button onClick={() => openModal(props => {
             return <HiddenPeopleModal rootProps={props} />;
         })}>
-            Open a list of hidden users
+            Open a list of ignored users
         </Button>
     );
 };
@@ -70,8 +70,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "HideMessages",
-    description: "Hide messages without blocking!",
+    name: "FakeBlocked",
+    description: "Allows to locally block others without them knowing",
     authors: [Devs.Hen],
     settings,
     contextMenus: {
@@ -86,7 +86,13 @@ export default definePlugin({
                 replace: "$self.checkHidden(arguments[0]?.message)+$&"
             }
         },
-        // TODO: remove notify in DMS and on mentions
+        {
+            find: "shouldNotify:func",
+            replacement: {
+                match: /.MessageFlags.SUPPRESS_NOTIFICATIONS\)/,
+                replace: "$&||$self.isHidden(arguments[0])"
+            },
+        },
         // Thanks, noBlockedMessages
         ...[
             '="MessageStore",',
