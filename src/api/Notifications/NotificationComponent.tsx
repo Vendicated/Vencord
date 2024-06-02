@@ -113,7 +113,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             {timeout !== 0 && !permanent && (
                 <div
                     className="vc-notification-progressbar"
-                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-experiment)" }}
+                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-500)" }}
                 />
             )}
         </button>
