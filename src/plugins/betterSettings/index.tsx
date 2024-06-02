@@ -111,8 +111,8 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
-                replace: "(async ()=>$2)(),"
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                replace: "$&(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
         },

@@ -26,6 +26,7 @@ import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
+import * as $MessageUpdater from "./MessageUpdater";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
@@ -110,3 +111,8 @@ export const ContextMenu = $ContextMenu;
  * An API allowing you to add buttons to the chat input
  */
 export const ChatButtons = $ChatButtons;
+
+/**
+ * An API allowing you to update and re-render messages
+ */
+export const MessageUpdater = $MessageUpdater;
