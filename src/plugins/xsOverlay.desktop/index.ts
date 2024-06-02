@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
@@ -143,7 +143,9 @@ export default definePlugin({
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
     authors: [Devs.Nyako],
     tags: ["vr", "notify"],
+    reporterTestable: ReporterTestable.None,
     settings,
+
     flux: {
         CALL_UPDATE({ call }: { call: Call; }) {
             if (call?.ringing?.includes(UserStore.getCurrentUser().id) && settings.store.callNotifications) {
