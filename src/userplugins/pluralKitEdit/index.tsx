@@ -17,28 +17,15 @@
 */
 
 import { addButton, removeButton } from "@api/MessagePopover";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { copyWithToast } from "@utils/misc";
-import {
-    closeModal,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalRoot,
-    ModalSize,
-    openModal
-} from "@utils/modal";
-import definePlugin, { StartAt } from "@utils/types";
-import { Button, ChannelStore, FluxDispatcher, Forms, Text } from "@webpack/common";
-import { Message, User } from "discord-types/general";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { Message } from "discord-types/general";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { CheckedTextInput } from "@components/CheckedTextInput";
-import { EdgeIcon } from "../../plugins/betterSessions/components/icons";
-import { Member, PKAPI, Switch } from "pkapi.js";
-import { Badges } from "@api/index";
-import { BadgeUserArgs } from "@api/Badges";
+import { Member, PKAPI, System } from "pkapi.js";
 import { definePluginSettings } from "@api/Settings";
+import { DataStore } from "@api/index";
+import { findLazy } from "@webpack";
+import { RC } from "@webpack/types";
 
 const api = new PKAPI({
 });
@@ -48,16 +35,43 @@ function isPk(msg: Message) {
     return (msg && msg.applicationId === "466378653216014359")
 }
 
-const settings = definePluginSettings({
+const EditIcon = () => {
+    return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
+        <path fill={"currentColor"} d={"m13.96 5.46 4.58 4.58a1 1 0 0 0 1.42 0l1.38-1.38a2 2 0 0 0 0-2.82l-3.18-3.18a2 2 0 0 0-2.82 0l-1.38 1.38a1 1 0 0 0 0 1.42ZM2.11 20.16l.73-4.22a3 3 0 0 1 .83-1.61l7.87-7.87a1 1 0 0 1 1.42 0l4.58 4.58a1 1 0 0 1 0 1.42l-7.87 7.87a3 3 0 0 1-1.6.83l-4.23.73a1.5 1.5 0 0 1-1.73-1.73Z"}></path>
+    </svg>
+}
 
+const settings = definePluginSettings({
+    colorNames: {
+        type: OptionType.BOOLEAN,
+        description: "Display member colors in their names in chat",
+        default: false
+    },
+    displayMemberId: {
+        type: OptionType.BOOLEAN,
+        description: "Display member IDs in chat",
+        default: false
+    }
 });
+
+// I dont fully understand how to use datastores, if i used anything incorrectly please let me know
+const DATASTORE_KEY = "pk";
+
+let authors: Record<string, { messageIds: string[]; member: Member|string|undefined; system: System; }> = {};
+(async () => {
+    authors = await DataStore.get<Record<string, { name: string; messageIds: string[]; member: Member|string|undefined; system: System; }>>(DATASTORE_KEY) || {};
+})();
+
+let localMembers: string[] = [];
 
 
 export default definePlugin({
-    name: "Plural Kit Edit",
-    description: "Allows easier editing of pluralkit messages",
+    name: "Plural Kit",
+    description: "Pluralkit integration for Vencord",
+    // Ill add myself to the authors list in a later commit
     authors: [{ id: 553652308295155723n, name: "Scyye" }],
     startAt: StartAt.WebpackReady,
+    settings,
     patches: [
         {
             find: ".useCanSeeRemixBadge)",
@@ -68,73 +82,51 @@ export default definePlugin({
         },
     ],
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }) => {
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => {
+        const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
         try {
-            const user: User = userOverride ?? message.author;
-            let { username } = user;
-            username = (user as any).globalName || username;
+            const discordUsername = author.nick??author.displayName??author.username;
+            if (!isPk(message))
+                return <>{prefix}{discordUsername}</>
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
-            return <>{message.id}</>
-            return api.getMessage({message:message.id}).then((msg) => {
-                if (msg === undefined) {
-                    return <>{username}</>;
-                }
-                return <>{message.id}</>;
-            });
-            /*
-            if ((username === nick || isRepliedMessage) && !isPk(message))
-                return <>{prefix}{nick}</>;
+            let authorOfMessage = getAuthorOfMessage(message)
+            let color: string = "ffffff";
 
-            let fronters = await (await api.getSystem({ system: user.id })).getFronters();
-            if (fronters === undefined) {
-                return <>Error</>;
+            if (authorOfMessage?.member instanceof Member && settings.store.colorNames) {
+                color = authorOfMessage.member.color??color;
             }
-            return <>{prefix}{username} ({(fronters as Switch).members})</>*/
+            const member: Member = authorOfMessage?.member as Member;
+            return <span style={{
+                color: `#${color}`,
+            }}>{prefix}{member.display_name??member.name}{authorOfMessage.system.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
         } catch {
-            return <>{author?.nick}</>;
+            return <>{prefix}{author?.nick}</>;
         }
     },
 
     async start() {
+        DataStore.createStore(DATASTORE_KEY, DATASTORE_KEY);
+
         addButton("pk-edit", msg => {
             if (!msg) return null;
+            console.log(msg)
             if (!isPk(msg)) return null;
+            console.log(msg)
+
             const handleClick = () => {
                 replyToMessage(msg, false, true, "pk;edit " + msg.content);
             };
 
             return {
-                label: "Edit PluralKit",
+                label: "Edit",
                 icon: () => {
-                    return <EdgeIcon/>;
+                    return <EditIcon/>;
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: handleClick,
                 onContextMenu: (e) => {}
             };
-        });
-
-        const system = await api.getSystem({ system: "318902553024659456"});
-
-        if (system === undefined) {
-            console.log("1")
-            return;
-        }
-        // @ts-ignore
-        (await system.getFronters()).members.forEach((member:Member) => {
-            console.log(member)
-            Badges.addBadge({
-                key: "pk-badge-" + system.id + "-" + member.id,
-                image: member.avatar_url??undefined,
-                description: member.name,
-                link: "https://discord.com/users/" + member.id,
-                shouldShow(userInfo: BadgeUserArgs): boolean {
-                    return userInfo.user.id === "318902553024659456";
-                }
-            });
         });
     },
     stop() {
@@ -155,8 +147,19 @@ function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, co
     }
 }
 
-function getMessageLink(msg: Message) {
-    var guildId = ChannelStore.getChannel(msg.channel_id).getGuildId();
-
-    return `https://discord.com/channels/${guildId}/${msg.channel_id}/${msg.id}`;
+function getAuthorOfMessage(message: Message) {
+    let author;
+    if (authors[message.author.username]) {
+        author = authors[message.author.username];
+    }
+    if (!author) {
+        api.getMessage({ message: message.id }).then((msg) => {
+            authors[message.author.username] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
+            author = authors[message.author.username];
+        })
+    } else {
+        author.messageIds.push(message.id);
+    }
+    DataStore.set(DATASTORE_KEY, authors);
+    return author;
 }
