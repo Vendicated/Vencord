@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -42,7 +42,7 @@ function getGroupDMName(channel: Channel) {
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
-    authors: [Devs.amia],
+    authors: [Devs.amia, Devs.Sqaaakoi],
 
     patches: [
         {
@@ -58,9 +58,31 @@ export default definePlugin({
                 match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
                 replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs({user: $1, onClose: $2});"
             }
-        }
+        },
+        {
+            find: "Messages.USER_PROFILE_MUTUAL_GUILDS_PLACEHOLDER).with",
+            group: true,
+            replacement: [
+                {
+                    match: /(?<=let\{user:(\i),.{0,700})(?=return\(null!=)/,
+                    replace: "let vencordMutualGroupsCount=$self.useGDMCount($1.id);"
+                },
+                {
+                    match: /(?<=(\i\.push)\(\{section:\i\.UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}\}\)\)\}\))/,
+                    replace: ',$1({section:"MUTUAL_GDMS",text:vencordMutualGroupsCount})'
+                },
+                {
+                    match: /(?<=(\i)===\i\.UserProfileSections\.MUTUAL_GUILDS?.{0,150}\}\):)/,
+                    replace: '$1==="MUTUAL_GDMS"?$self.renderMutualGDMs(arguments[0]):'
+                },
+            ]
+        },
     ],
 
+    useGDMCount(userId: string) {
+        const state = useStateFromStores([ChannelStore], () => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(userId))).length;
+        return (state > 0 ? state + " " : "") + "Mutual Groups";
+    },
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
             <Clickable
