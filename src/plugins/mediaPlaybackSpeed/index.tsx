@@ -15,20 +15,20 @@ import { RefObject } from "react";
 
 import SpeedIcon from "./components/SpeedIcon";
 
-const cl = classNameFactory("vc-audio-playback-speed-");
+const cl = classNameFactory("vc-media-playback-speed-");
 
 const speeds = makeRange(0.25, 3.5, 0.25);
 
 export default definePlugin({
-    name: "AudioPlaybackSpeed",
-    description: "Adds an icon to change the playback speed of voice message and audio embeds",
+    name: "MediaPlaybackSpeed",
+    description: "Adds an icon to change the playback speed of media embeds",
     authors: [Devs.D3SOX],
 
-    playbackSpeedComponent(audioRef: RefObject<HTMLAudioElement>) {
+    playbackSpeedComponent(mediaRef: RefObject<HTMLMediaElement>) {
         const changeSpeed = (speed: number) => {
-            const audio = audioRef.current;
-            if (audio) {
-                audio.playbackRate = speed;
+            const media = mediaRef.current;
+            if (media) {
+                media.playbackRate = speed;
             }
         };
 
@@ -70,7 +70,7 @@ export default definePlugin({
                 replace: "$&,$self.playbackSpeedComponent($1)"
             }
         },
-        // audio embeds
+        // audio & video embeds
         {
             // need to pass media ref via props to make it easily accessible from inside controls
             find: "renderControls(){",
