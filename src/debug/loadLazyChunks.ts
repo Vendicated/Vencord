@@ -8,6 +8,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
+import { AnyModuleFactory, ModuleFactory } from "webpack";
 
 const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
 
@@ -109,21 +110,22 @@ export async function loadLazyChunks() {
             }, 0);
         }
 
-        Webpack.factoryListeners.add(factory => {
+        function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
             let isResolved = false;
-            searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
-
-            chunksSearchPromises.push(() => isResolved);
-        });
-
-        for (const factoryId in wreq.m) {
-            let isResolved = false;
-            searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
+            searchAndLoadLazyChunks(String(factory))
+                .then(() => isResolved = true)
+                .catch(() => isResolved = true);
 
             chunksSearchPromises.push(() => isResolved);
         }
 
+        Webpack.factoryListeners.add(factoryListener);
+        for (const factoryId in wreq.m) {
+            factoryListener(wreq.m[factoryId]);
+        }
+
         await chunksSearchingDone;
+        Webpack.factoryListeners.delete(factoryListener);
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {

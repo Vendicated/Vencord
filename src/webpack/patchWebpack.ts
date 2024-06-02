@@ -12,15 +12,7 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, factoryListeners, ModuleFactory, moduleListeners, waitForSubscriptions, WebpackRequire, wreq } from ".";
-
-type AnyWebpackRequire = Partial<WebpackRequire> & Pick<WebpackRequire, "m">;
-
-type PatchedModuleFactory = ModuleFactory & {
-    $$vencordOriginal?: ModuleFactory;
-};
-
-type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory>;
+import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, moduleListeners, PatchedModuleFactories, PatchedModuleFactory, waitForSubscriptions, WebpackRequire, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -56,7 +48,7 @@ const define: Define = (target, p, attributes) => {
 define(Function.prototype, "O", {
     enumerable: false,
 
-    set(this: WebpackRequire, onChunksLoaded: WebpackRequire["O"]) {
+    set(this: AnyWebpackRequire, onChunksLoaded: AnyWebpackRequire["O"]) {
         define(this, "O", { value: onChunksLoaded });
 
         const { stack } = new Error();
@@ -104,7 +96,7 @@ define(Function.prototype, "O", {
         const proxiedModuleFactories = new Proxy(this.m, moduleFactoriesHandler);
         /*
         If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
-        Reflect.setPrototypeOf(moduleFactories, new Proxy(moduleFactories, moduleFactoriesHandler));
+        define(this, "m", { value: Reflect.setPrototypeOf(this.m, new Proxy(this.m, moduleFactoriesHandler)) });
         */
 
         define(this, "m", { value: proxiedModuleFactories });
@@ -133,7 +125,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
 
                 return (factory = patchFactory(id, factory));
             },
-            set(v: ModuleFactory) {
+            set(v: AnyModuleFactory) {
                 if (factory.$$vencordOriginal != null) {
                     factory.$$vencordOriginal = v;
                 } else {
@@ -153,7 +145,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactoriesTarget
  * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
  */
-function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: ModuleFactory, ignoreExistingInTarget: boolean = false) {
+function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: AnyModuleFactory, ignoreExistingInTarget: boolean = false) {
     let existingFactory: TypedPropertyDescriptor<PatchedModuleFactory> | undefined;
     for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
@@ -228,7 +220,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
  * @param factory The original or patched module factory
  * @returns The wrapper for the patched module factory
  */
-function patchFactory(id: PropertyKey, factory: ModuleFactory) {
+function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
     const originalFactory = factory;
 
     for (const factoryListener of factoryListeners) {
@@ -347,7 +339,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
 
     // The patched factory wrapper, define it in an object to preserve the name after minification
     const patchedFactory: PatchedModuleFactory = {
-        PatchedFactory(...args: Parameters<ModuleFactory>) {
+        PatchedFactory(...args: Parameters<AnyModuleFactory>) {
             // Restore the original factory in all the module factories objects,
             // because we want to make sure the original factory is restored properly, no matter what is the Webpack instance
             for (const wreq of allWebpackInstances) {
@@ -370,7 +362,7 @@ function patchFactory(id: PropertyKey, factory: ModuleFactory) {
                             `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
                             ")"
                         );
-                        _initWebpack(require);
+                        _initWebpack(require as WebpackRequire);
                     } else if (IS_DEV) {
                         logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                     }

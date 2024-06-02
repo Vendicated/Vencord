@@ -13,7 +13,7 @@ import { AnyObject } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { GenericStore } from "./common";
-import { ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -90,7 +90,7 @@ export type ModCallbackFnWithId = (module: ModuleExports, id: PropertyKey) => vo
 
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
 export const moduleListeners = new Set<ModCallbackFnWithId>();
-export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
