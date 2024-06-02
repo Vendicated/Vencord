@@ -27,7 +27,8 @@ jobs:
 
             - name: Move packages/discord-types to root
               run: |
-                  mv packages/discord-types .
+                  shopt -s dotglob
+                  mv packages/discord-types/* .
                   rm -rf packages
 
             - name: Install dependencies
