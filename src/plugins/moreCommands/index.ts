@@ -18,7 +18,8 @@
 
 import { ApplicationCommandInputType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { definePluginSettings, OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     show_match: {
@@ -49,11 +50,11 @@ const translateText = async (sourceLang, targetLang, text) => {
             throw new Error('Translation failed');
         }
     } catch (error) {
-        throw new Error(`Error: ${error}`);
+        throw new Error(`Error: ${error.message}`);
     }
 };
 
-function mock(input: string): string {
+function mock(input) {
     let output = "";
     for (let i = 0; i < input.length; i++) {
         output += i % 2 ? input[i].toUpperCase() : input[i].toLowerCase();
@@ -63,10 +64,10 @@ function mock(input: string): string {
 
 export default definePlugin({
     name: "MoreCommands",
-    description: "echo, lenny, mock",
+    description: "echo, lenny, mock, translate",
     authors: [Devs.Arjix, Devs.echo, Devs.Samu],
     dependencies: ["CommandsAPI"],
-    settings.
+    settings,
     commands: [
         {
             name: "echo",
@@ -97,18 +98,18 @@ export default definePlugin({
         },
         {
             name: "translate",
-            description: "Translates a message using deepl's API. (Make sure your API key is set in the plugin settings)",
+            description: "Translates a message using the MyMemory API.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
                     name: "to",
-                    description: "Language to translate to. (Make sure to use the short name, like ru, en, it, etc.)",
+                    description: "Language to translate to. (Use short names like ru, en, it, etc.)",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
                 {
                     name: "from",
-                    description: "Language to translate from. (Make sure to use the short name, like ru, en, it, etc.)",
+                    description: "Language to translate from. (Use short names like ru, en, it, etc.)",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
@@ -125,26 +126,34 @@ export default definePlugin({
                     required: false
                 }
             ],
-            execute: async (args) => {
-                const channel_id = getCurrentChannel().id;
-                const toLang = findOption(args, "to");
-                const fromLang = findOption(args, "from");
-                const text = findOption(args, "text");
-                const send = findOption(args, "send");
+            execute: async (opts, ctx) => {
+                const channel_id = ctx.channel.id;
+                const toLang = findOption(opts, "to");
+                const fromLang = findOption(opts, "from");
+                const text = findOption(opts, "text");
+                const send = findOption(opts, "send");
+                const showMatch = settings.store.show_match
 
                 try {
                     const translationResult = await translateText(fromLang, toLang, text);
                     
                     if (translationResult.quotaFinished) {
-                        sendBotMessage(channel_id, { content: 'Oh no! Looks like you have ran out of quota for today. Please try again tomorrow or use from another IP.' });
+                        sendBotMessage(channel_id, { content: 'Oh no! Looks like you have run out of quota for today. Please try again tomorrow or use from another IP.' });
+                        return;
                     }
+
+                    let translatedMessage = translationResult.translated;
+                    if (showMatch) {
+                        translatedMessage += `\nMatch: ${translationResult.match}`;
+                    }
+
                     if (send) {
-                        sendMessage(channel_id, { content: translationResult.translated });
+                        sendMessage(channel_id, { content: translatedMessage });
                     } else {
-                        sendBotMessage(channel_id, { content: translationResult.translated });
+                        sendBotMessage(channel_id, { content: translatedMessage });
                     }
                 } catch (error) {
-                    sendBotMessage(channel_id, { content: `Oh no! There was an error whilst translating the message. Error: ${error}` });
+                    sendBotMessage(channel_id, { content: `Oh no! There was an error whilst translating the message. Error: ${error.message}` });
                 }
             }
         }
