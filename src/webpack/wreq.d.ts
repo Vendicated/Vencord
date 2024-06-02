@@ -53,7 +53,7 @@ export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: Prop
     j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
 };
 
-export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
+export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
     m: Record<PropertyKey, ModuleFactory>;
     /** The module cache, where all modules which have been WebpackRequire'd are stored */
@@ -182,3 +182,19 @@ export type WebpackRequire = ((moduleId: PropertyKey) => Module) & {
     /** Document baseURI or WebWorker location.href */
     b: string;
 };
+
+// Utility section for Vencord
+
+export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m" | "O">> & Pick<WebpackRequire, "O"> & {
+    /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
+    m: Record<PropertyKey, AnyModuleFactory>;
+};
+
+/** exports can be anything, however initially it is always an empty object */
+export type AnyModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void;
+
+export type PatchedModuleFactory = AnyModuleFactory & {
+    $$vencordOriginal?: AnyModuleFactory;
+};
+
+export type PatchedModuleFactories = Record<PropertyKey, PatchedModuleFactory>;

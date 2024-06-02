@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 
 import { traceFunction } from "../debug/Tracer";
-import { ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -72,7 +72,7 @@ export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
-export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
