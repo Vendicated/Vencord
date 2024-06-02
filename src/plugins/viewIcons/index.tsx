@@ -191,6 +191,13 @@ export default definePlugin({
                 replace: "{src:$1,onClick:()=>$self.openImage($1)"
             }
         },
+        {
+            find: ".UserProfileTypes.FULL_SIZE,hasProfileEffect:",
+            replacement: {
+                match: /\{src:(\i)(?=,avatarDecoration)/,
+                replace: "{src:$1,onClick:()=>$self.openImage($1)"
+            }
+        },
         // Banners
         {
             find: ".NITRO_BANNER,",
@@ -201,6 +208,13 @@ export default definePlugin({
                     // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
                     'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
+        },
+        {
+            find: /overrideBannerSrc:\i,profileType:/,
+            replacement: {
+                match: /style:\{(?=backgroundImage:(null!=\i)\?"url\("\.concat\((\i),)/,
+                replace: 'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
+            },
         },
         // User DMs "User Profile" popup in the right
         {
