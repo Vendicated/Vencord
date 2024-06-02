@@ -210,6 +210,14 @@ export default definePlugin({
                 replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
             }
         },
+        {
+            find: ".canUsePremiumProfileCustomization,{avatarSrc:",
+            replacement: {
+                match: /(?<="div",{)\.\.\.\i,children:\(0,\i\.jsx\)\(\i,{src:(\i)/,
+                replace: "style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},$&"
+
+            }
+        },
         // Group DMs top small & large icon
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
