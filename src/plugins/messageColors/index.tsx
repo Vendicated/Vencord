@@ -8,53 +8,13 @@ import "./styles.css";
 
 import { addChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 import type { Message } from "discord-types/general";
 
 import { ColorPickerChatButton } from "./ColorPicker";
-import { COLOR_PICKER_DATA_KEY, regex, savedColors } from "./constants";
-
-enum RenderType {
-    BLOCK,
-    FOREGROUND,
-    BACKGROUND,
-    NONE
-}
-
-const settings = definePluginSettings({
-    colorPicker: {
-        type: OptionType.BOOLEAN,
-        description: "Enable color picker",
-        default: true,
-        restartNeeded: true
-    },
-    renderType: {
-        type: OptionType.SELECT,
-        description: "How to render colors",
-        options: [
-            {
-                label: "Text color",
-                value: RenderType.FOREGROUND,
-                default: true,
-            },
-            {
-                label: "Block nearby",
-                value: RenderType.BLOCK,
-            },
-            {
-                label: "Background color",
-                value: RenderType.BACKGROUND
-            },
-            {
-                label: "Disabled",
-                value: RenderType.NONE
-            }
-        ]
-    },
-});
+import { COLOR_PICKER_DATA_KEY, ColorType, regex, RenderType, savedColors, settings } from "./constants";
 
 export default definePlugin({
     authors: [Devs.hen],
@@ -69,6 +29,12 @@ export default definePlugin({
         }
     }],
     async start() {
+        regex.push({
+            reg: settings.store.isHexRequired ?
+                /(#(?:[0-9a-fA-F]{3}){1,2})/g : /(#?(?:[0-9a-fA-F]{3}){1,2})/g,
+            type: ColorType.HEX
+        });
+
         if (!settings.store.colorPicker) return;
 
         addChatBarButton("vc-color-picker", ColorPickerChatButton);
@@ -107,17 +73,29 @@ export default definePlugin({
         if (![0, 19].includes(message.type)) return originalChildren;
 
         let hasColor = false;
-        for (const reg of regex) {
+        for (const { reg } of regex) {
             if (reg.test(message.content)) {
                 hasColor = true;
                 break;
             }
         }
+
         if (!hasColor) return originalChildren;
 
         return <ColoredMessage ch={originalChildren} />;
     }
 });
+
+function parseColor(str: string, type: ColorType): string {
+    switch (type) {
+        case ColorType.RGB:
+            return str;
+        case ColorType.HEX:
+            return str[0] === "#" ? str : `#${str}`;
+        case ColorType.HSL:
+            return str;
+    }
+}
 
 function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
     let result: (string | React.ReactElement)[] = [];
@@ -139,7 +117,7 @@ function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
 
     // Dynamic react element creation is a pain
     // I could just make inplace replace without this :(
-    for (const reg of regex) {
+    for (const { reg, type } of regex) {
         let temp: typeof result = [];
         for (const chunk of result) {
             if (typeof chunk !== "string") {
@@ -158,14 +136,15 @@ function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
 
                 if (!matches.includes(element))
                     return [...arr, element];
+                const color = parseColor(element, type);
 
                 if (settings.store.renderType === RenderType.BACKGROUND)
-                    return [...arr, <span style={{ background: element }}>{element}</span>];
+                    return [...arr, <span style={{ background: color }}>{element}</span>];
                 if (settings.store.renderType === RenderType.FOREGROUND)
-                    return [...arr, <span style={{ color: element }}>{element}</span>];
+                    return [...arr, <span style={{ color: color }}>{element}</span>];
 
                 const styles = {
-                    "--color": element
+                    "--color": color
                 } as React.CSSProperties;
 
                 return [...arr, element, <span className="vc-color-block" style={styles}></span>];
