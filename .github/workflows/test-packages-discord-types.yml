@@ -1,0 +1,38 @@
+name: Test packages/discord-types
+on:
+    pull_request:
+        paths:
+            - packages/discord-types/**
+    push:
+        paths:
+            - packages/discord-types/**
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  sparse-checkout: packages/discord-types
+                  sparse-checkout-cone-mode: false
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ^20.11.0
+                  cache: pnpm
+
+            - name: Move packages/discord-types to root
+              run: |
+                  mv packages/discord-types .
+                  rm -rf packages
+
+            - name: Install dependencies
+              run: pnpm install --no-frozen-lockfile
+
+            - name: Check for TypeScript errors and lint
+              run: pnpm test

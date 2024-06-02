@@ -7,6 +7,7 @@
 import type { SnakeCasedProperties } from "type-fest";
 
 import type { Nullish } from "../../internal";
+import type { PermissionOverwriteMap } from "../Permissions";
 import type { AvatarDecorationData, UserClanData, UserFlags } from "../UserRecord";
 import type { ForumChannelRecord, GuildForumChannelRecord, GuildMediaChannelRecord } from "./ForumChannelRecord";
 import type { GuildCategoryChannelRecord, GuildDirectoryChannelRecord, GuildTextualChannelRecord } from "./GuildTextualChannelRecord";
@@ -186,22 +187,6 @@ export const enum ThreadMemberFlags {
     ALL_MESSAGES = 1 << 1,
     ONLY_MENTIONS = 1 << 2,
     NO_MESSAGES = 1 << 3,
-}
-
-interface PermissionOverwriteMap {
-    [roleIdOrUserId: string]: PermissionOverwrite;
-}
-
-export interface PermissionOverwrite {
-    allow: /* Permissions */ bigint;
-    deny: /* Permissions */ bigint;
-    id: string;
-    type: PermissionOverwriteType;
-}
-
-export const enum PermissionOverwriteType {
-    ROLE = 0,
-    MEMBER = 1,
 }
 
 export interface ChannelRecipient {

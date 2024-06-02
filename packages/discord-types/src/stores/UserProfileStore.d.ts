@@ -11,6 +11,7 @@ import type { UserProfile } from "../general/UserProfile";
 import type { UserRecord } from "../general/UserRecord";
 import type { GenericConstructor, Nullish } from "../internal";
 import type { FluxSnapshot, FluxSnapshotStore } from "./abstract/FluxSnapshotStore";
+import type { StatusType } from "./PresenceStore";
 
 export interface UserProfileStoreSnapshotData {
     profile: UserProfile | undefined;
@@ -46,15 +47,4 @@ export class UserProfileStore<
     takeSnapshot(): FluxSnapshot<UserProfileStoreSnapshotData>;
 
     loadCache: () => void;
-}
-
-// Original name: StatusTypes
-export const enum StatusType {
-    DND = "dnd",
-    IDLE = "idle",
-    INVISIBLE = "invisible",
-    OFFLINE = "offline",
-    ONLINE = "online",
-    STREAMING = "streaming",
-    UNKNOWN = "unknown",
 }

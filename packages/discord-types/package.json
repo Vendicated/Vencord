@@ -10,6 +10,12 @@
         "directory": "packages/discord-types"
     },
     "files": ["src"],
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "test": "tsc --noEmit && eslint .",
+        "test-ts": "tsc --noEmit"
+    },
     "sideEffects": false,
     "types": "./src/index.d.ts",
     "dependencies": {
