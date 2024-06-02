@@ -113,7 +113,7 @@ export default definePlugin({
             find: 'tutorialId:"direct-messages"',
             replacement: {
                 match: /"discord-shop"\)/,
-                replace: "$&,$self.QuestButtonComponent(),"
+                replace: "$&&&$self.QuestButtonComponent(),"
             }
         },
         { // Add new route
