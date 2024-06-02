@@ -73,8 +73,9 @@ export default definePlugin({
             find: '"placeholder-channel-id"',
             replacement: [
                 // Remove the special logic for channels we don't have access to
+                // FIXME Remove variable matcher from threadsIds when it hits stable
                 {
-                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\i}}/,
+                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:(?:\[\]|\i)}}/,
                     replace: ""
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
@@ -89,8 +90,8 @@ export default definePlugin({
                 },
                 // Remove permission checking for getRenderLevel function
                 {
-                    match: /(?<=getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
-                    replace: " "
+                    match: /(getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
+                    replace: (_, rest) => `${rest} `
                 }
             ]
         },
@@ -159,8 +160,8 @@ export default definePlugin({
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
-                    match: /(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
-                    replace: (_, channel, muted) => `${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
+                    match: /{channel:(\i),name:\i,muted:(\i).+?;/,
+                    replace: (m, channel, muted) => `${m}${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
@@ -186,8 +187,8 @@ export default definePlugin({
                 {
                     // Hide unreads
                     predicate: () => settings.store.hideUnreads === true,
-                    match: /(?<={channel:(\i),name:\i,.+?unread:(\i).+?;)/,
-                    replace: (_, channel, unread) => `${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
+                    match: /{channel:(\i),name:\i,.+?unread:(\i).+?;/,
+                    replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
                 }
             ]
         },
@@ -436,7 +437,7 @@ export default definePlugin({
             },
         },
         {
-            find: ".shouldCloseDefaultModals",
+            find: 'className:"channelMention",children',
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
                 match: /(?<=getChannel\(\i\);if\(null!=(\i))(?=.{0,100}?selectVoiceChannel)/,

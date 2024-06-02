@@ -17,6 +17,7 @@
 */
 
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
@@ -28,7 +29,6 @@ import {
     Button,
     ChannelStore,
     Constants,
-    FluxDispatcher,
     GuildStore,
     IconUtils,
     MessageStore,
@@ -227,10 +227,8 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     const accessories = [] as (JSX.Element | null)[];
 
-    let match = null as RegExpMatchArray | null;
-    while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, channelID, messageID] = match;
-        if (embeddedBy.includes(messageID)) {
+    for (const [_, channelID, messageID] of message.content!.matchAll(messageLinkRegex)) {
+        if (embeddedBy.includes(messageID) || embeddedBy.length > 2) {
             continue;
         }
 
@@ -252,15 +250,9 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             if (linkedMessage) {
                 messageCache.set(messageID, { message: linkedMessage, fetched: true });
             } else {
-                const msg = { ...message } as any;
-                delete msg.embeds;
-                delete msg.interaction;
 
                 messageFetchQueue.unshift(() => fetchMessage(channelID, messageID)
-                    .then(m => m && FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message: msg
-                    }))
+                    .then(m => m && updateMessage(message.channel_id, message.id))
                 );
                 continue;
             }
@@ -369,7 +361,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI"],
 
     settings,
 
