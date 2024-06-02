@@ -61,9 +61,6 @@ export default definePlugin({
     name: "EnhancedAMWin",
     description: 'Replaces AMWin-RP\'s "Playing Apple Music" status with the "Listening" status.',
     authors: [Devs.Chloe],
-    start() {
-        logger.debug("Plugin started");
-    },
 
     patches: [
         {
