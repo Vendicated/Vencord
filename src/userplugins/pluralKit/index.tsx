@@ -16,30 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
+import { definePluginSettings } from "@api/Settings";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { ChannelStore, FluxDispatcher } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { insertTextIntoChatInputBox } from "@utils/discord";
 import { Member, PKAPI, System } from "pkapi.js";
-import { definePluginSettings } from "@api/Settings";
-import { DataStore } from "@api/index";
-import { findLazy } from "@webpack";
-import { RC } from "@webpack/types";
 
 const api = new PKAPI({
 });
 
 function isPk(msg: Message) {
     // If the message is null, early return
-    return (msg && msg.applicationId === "466378653216014359")
+    return (msg && msg.applicationId === "466378653216014359");
 }
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
         <path fill={"currentColor"} d={"m13.96 5.46 4.58 4.58a1 1 0 0 0 1.42 0l1.38-1.38a2 2 0 0 0 0-2.82l-3.18-3.18a2 2 0 0 0-2.82 0l-1.38 1.38a1 1 0 0 0 0 1.42ZM2.11 20.16l.73-4.22a3 3 0 0 1 .83-1.61l7.87-7.87a1 1 0 0 1 1.42 0l4.58 4.58a1 1 0 0 1 0 1.42l-7.87 7.87a3 3 0 0 1-1.6.83l-4.23.73a1.5 1.5 0 0 1-1.73-1.73Z"}></path>
-    </svg>
-}
+    </svg>;
+};
 
 const settings = definePluginSettings({
     colorNames: {
@@ -62,14 +60,14 @@ let authors: Record<string, { messageIds: string[]; member: Member|string|undefi
     authors = await DataStore.get<Record<string, { name: string; messageIds: string[]; member: Member|string|undefined; system: System; }>>(DATASTORE_KEY) || {};
 })();
 
-let localMembers: string[] = [];
-
 
 export default definePlugin({
     name: "Plural Kit",
     description: "Pluralkit integration for Vencord",
-    // Ill add myself to the authors list in a later commit
-    authors: [{ id: 553652308295155723n, name: "Scyye" }],
+    authors: [{
+        name: "Scyye",
+        id: 553652308295155723n
+    }],
     startAt: StartAt.WebpackReady,
     settings,
     patches: [
@@ -87,9 +85,9 @@ export default definePlugin({
         try {
             const discordUsername = author.nick??author.displayName??author.username;
             if (!isPk(message))
-                return <>{prefix}{discordUsername}</>
+                return <>{prefix}{discordUsername}</>;
 
-            let authorOfMessage = getAuthorOfMessage(message)
+            const authorOfMessage = getAuthorOfMessage(message);
             let color: string = "ffffff";
 
             if (authorOfMessage?.member instanceof Member && settings.store.colorNames) {
@@ -98,7 +96,7 @@ export default definePlugin({
             const member: Member = authorOfMessage?.member as Member;
             return <span style={{
                 color: `#${color}`,
-            }}>{prefix}{member.display_name??member.name}{authorOfMessage.system.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
+            }}>{prefix}{member.display_name??member.name}{authorOfMessage.system?.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
         } catch {
             return <>{prefix}{author?.nick}</>;
         }
@@ -109,9 +107,9 @@ export default definePlugin({
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            console.log(msg)
+            console.log(msg);
             if (!isPk(msg)) return null;
-            console.log(msg)
+            console.log(msg);
 
             const handleClick = () => {
                 replyToMessage(msg, false, true, "pk;edit " + msg.content);
@@ -125,7 +123,7 @@ export default definePlugin({
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: handleClick,
-                onContextMenu: (e) => {}
+                onContextMenu: _ => {}
             };
         });
     },
@@ -148,18 +146,15 @@ function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, co
 }
 
 function getAuthorOfMessage(message: Message) {
-    let author;
     if (authors[message.author.username]) {
-        author = authors[message.author.username];
+        authors[message.author.username].messageIds.push(message.id);
+        return authors[message.author.username];
     }
-    if (!author) {
-        api.getMessage({ message: message.id }).then((msg) => {
-            authors[message.author.username] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
-            author = authors[message.author.username];
-        })
-    } else {
-        author.messageIds.push(message.id);
-    }
+
+    api.getMessage({ message: message.id }).then(msg => {
+        authors[message.author.username] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
+    });
+
     DataStore.set(DATASTORE_KEY, authors);
-    return author;
+    return authors[message.author.username];
 }
