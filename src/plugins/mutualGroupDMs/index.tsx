@@ -83,7 +83,7 @@ export default definePlugin({
     useGDMCount(userId: string) {
         const state = useStateFromStores([ChannelStore], () => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(userId))).length;
         const label = "Mutual Group";
-        return state > 0 ? pluralise(state, label) : label + "s";
+        return state > 0 ? pluralise(state, label) : `No ${label}s`;
     },
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
