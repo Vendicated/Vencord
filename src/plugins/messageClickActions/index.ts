@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendBotMessage } from "@api/Commands";
 import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -25,6 +26,7 @@ import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@we
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+const pinModule = findByPropsLazy("pinMessage", "unpinMessage");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -46,28 +48,66 @@ const settings = definePluginSettings({
         description: "Enable double click to reply",
         default: true
     },
+    enableCtrlShiftClickToPinUnpin: {
+        type: OptionType.BOOLEAN,
+        description: "Enable Ctrl+Shift click to pin/unpin messages",
+        default: true
+    },
     requireModifier: {
         type: OptionType.BOOLEAN,
         description: "Only do double click actions when shift/ctrl is held",
         default: false
+    },
+    sendUnpinNotification: {
+        type: OptionType.BOOLEAN,
+        description: "Send a bot message when a message is unpinned",
+        default: false
     }
 });
 
+async function pinMessage(channel: any, message: any): Promise<void> {
+    if (!pinModule) return;
+    await pinModule.pinMessage(channel, message.id);
+}
+
+async function unpinMessage(channel: any, message: any): Promise<void> {
+    if (!pinModule) return;
+    try {
+        await pinModule.unpinMessage(channel, message.id);
+        if (settings.store.sendUnpinNotification) {
+            sendBotMessage(channel.id, {
+                content: "Successfully unpinned the message.",
+            });
+        }
+    } catch (error: any) {
+        if (settings.store.sendUnpinNotification) {
+            sendBotMessage(channel.id, {
+                content: "Failed to unpin the message :(",
+            });
+        }
+    }
+}
+
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit/reply",
-    authors: [Devs.Ven],
+    description: "Hold Backspace and click to delete, double click to edit/reply, ctrl+shift click to pin/unpin",
+    authors: [Devs.Ven, Devs.Prism],
     dependencies: ["MessageEventsAPI"],
-
     settings,
 
     start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg: any, channel, event) => {
+        this.onClick = addClickListener((msg: any, channel: any, event: MouseEvent) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
-            if (!isDeletePressed) {
+
+            if (settings.store.enableCtrlShiftClickToPinUnpin && event.ctrlKey && event.shiftKey) {
+                if (msg.pinned) unpinMessage(channel, msg);
+                else pinMessage(channel, msg);
+                event.preventDefault();
+            }
+            else if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
                 if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
@@ -75,15 +115,12 @@ export default definePlugin({
 
                 if (isMe) {
                     if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
-
                     MessageActions.startEditMessage(channel.id, msg.id, msg.content);
                     event.preventDefault();
                 } else {
                     if (!settings.store.enableDoubleClickToReply) return;
-
                     const EPHEMERAL = 64;
                     if (msg.hasFlag(EPHEMERAL)) return;
-
                     const isShiftPress = event.shiftKey && !settings.store.requireModifier;
                     const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
                     const shouldMention = Vencord.Plugins.isPluginEnabled("NoReplyMention")
