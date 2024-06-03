@@ -18,10 +18,9 @@
 
 import "./style.css";
 
-import { sendBotMessage } from "@api/Commands";
+import { generateId, sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Embed, Message } from "discord-types/general";
@@ -31,8 +30,6 @@ import { settingsAboutComponent, TestInputBoxComponent } from "./UI";
 
 const useAutomodRulesStore = findByPropsLazy("useAutomodRulesList");
 
-
-const logger = new Logger("betterAutomod");
 let currentGuild: string | null = null;
 
 interface EMessage extends Message {
@@ -90,18 +87,21 @@ export default definePlugin({
             if (!settings.store.echoIt) return;
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
-            if (message?.echoed) return;
             if (message.type !== 24) return; // automod embed
+            if (message?.echoed) return;
+
             message.embeds.forEach((embed: Embed) => {
                 if (embed.type !== "auto_moderation_message") { return; }
                 embed.fields.forEach((field: { name: string, value: string; }) => {
                     if (field.name !== "channel_id") { return; }
                     message.echoed = true;
-                    message.flags = /* ephemeral */ 1 << 6;
-                    message.author.bot = false; // making sure the bot badge don't show up (a bug from discord)
-                    message.channel_id = field.value;
-                    message.id = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(""); // generating a random id
-                    sendBotMessage(field.value, message);
+                    sendBotMessage(field.value, {
+                        ...message,
+                        bot: false,
+                        flags: /* ephemeral */ 1 << 6,
+                        channel_id: field.value,
+                        id: generateId(),
+                    });
                 });
             });
         },
@@ -111,3 +111,4 @@ export default definePlugin({
         }
     }
 });
+
