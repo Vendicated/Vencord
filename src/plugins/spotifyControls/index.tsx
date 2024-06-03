@@ -77,6 +77,13 @@ export default definePlugin({
                 match: /repeat:"off"!==(.{1,3}),/,
                 replace: "actual_repeat:$1,$&"
             }
+        },
+        {
+            find: 'P.SpotifyResourceTypes.TRACK',
+            replacement: {
+                match: /\(0,M\.isNotNullish\)\(e\.id\)&&/,
+                replace: ""
+            }
         }
     ],
 
