@@ -81,7 +81,7 @@ export default definePlugin({
         {
             find: 'P.SpotifyResourceTypes.TRACK',
             replacement: {
-                match: /\(0,M\.isNotNullish\)\(e\.id\)&&/,
+                match: /\(0,(.{1,2})\.isNotNullish\)\((.{1,2})\.id\)&&/,
                 replace: ""
             }
         }
