@@ -5,57 +5,66 @@
  */
 
 import type { ExtractAction, FluxAction } from "../flux/fluxActions";
+import type { Activity } from "../general/Activity";
+import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
 export type PresenceStoreAction = ExtractAction<FluxAction, "ACTIVITY_METADATA_UPDATE" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBER_REMOVE" | "OVERLAY_INITIALIZE" | "PRESENCES_REPLACE" | "PRESENCE_UPDATES" | "SELF_PRESENCE_STORE_UPDATE" | "THREAD_MEMBERS_UPDATE" | "THREAD_MEMBER_LIST_UPDATE">;
 
-// Does not extend PersistedStore.
 export class PresenceStore<Action extends FluxAction = PresenceStoreAction> extends FluxStore<Action> {
     static displayName: "PresenceStore";
 
-    findActivity(e?: any, t?: any): any; // TEMP
-    getActivities(e?: any): any; // TEMP
-    getActivityMetadata(e?: any): any; // TEMP
-    getAllApplicationActivities(e?: any): any; // TEMP
-    getApplicationActivity(e?: any, t?: any): any; // TEMP
-    getClientStatus(userId: string): Partial<Record<ClientType, StatusType>> | undefined;
+    findActivity<T extends Activity>(
+        userId: string,
+        predicate: (
+            value: Activity,
+            index: number,
+            array: Activity[]
+        ) => value is T,
+        guildId?: string | Nullish /* = null */
+    ): T | undefined;
+    findActivity(
+        userId: string,
+        predicate: (
+            value: Activity,
+            index: number,
+            array: Activity[]
+        ) => unknown,
+        guildId?: string | Nullish /* = null */
+    ): Activity | undefined;
+    getActivities(userId: string, guildId?: string | Nullish /* = null */): Activity[];
+    getActivityMetadata(userId: string): Record<string, unknown> | undefined;
+    getAllApplicationActivities(applicationId?: Activity["application_id"]): {
+        activity: Activity;
+        userId: string;
+    }[];
+    getApplicationActivity(
+        userId: string,
+        applicationId?: Activity["application_id"],
+        guildId?: string | Nullish /* = null */
+    ): Activity | undefined;
+    getClientStatus(userId: string): ClientStatusMap | undefined;
     getLastOnlineTimestamp(userId: string): number | undefined;
-    getPrimaryActivity(e?: any): any; // TEMP
+    getPrimaryActivity(userId: string, guildId?: string | Nullish /* = null */): Activity | undefined;
     getState(): {
-        activities: any; // TEMP
-        activityMetadata: any; // TEMP
-        clientStatuses: any; // TEMP
-        lastOnlineTimestamps: any; // TEMP
-        presencesForGuilds: any; // TEMP
-        statuses: any; // TEMP
-    }; // TEMP
-    getStatus(e?: any): any; // TEMP
+        activities: { [userId: string]: Activity[]; };
+        activityMetadata: { [userId: string]: Record<string, unknown>; };
+        clientStatuses: { [userId: string]: ClientStatusMap; };
+        lastOnlineTimestamps: { [userId: string]: number; };
+        presencesForGuilds: { [userId: string]: { [guildId: string]: GuildPresence; }; };
+        statuses: { [userId: string]: StatusType; };
+    };
+    getStatus(
+        userId: string,
+        guildId?: string | Nullish /* = null */,
+        defaultStatus?: StatusType | undefined /* = StatusType.OFFLINE */
+    ): StatusType;
     getUserIds(): string[];
     isMobileOnline(userId: string): boolean;
-    setCurrentUserOnConnectionOpen(e?: any, t?: any): any; // TEMP
+    setCurrentUserOnConnectionOpen(status: StatusType, activities: Activity[]): void;
 }
 
-/** @todo Might have more properties. */
-export interface Activity {
-    application_id: any; // TEMP
-    assets: any; // TEMP
-    buttons: any; // TEMP
-    created_at: any; // TEMP
-    details: any; // TEMP
-    emoji: any; // TEMP
-    flags: any; // TEMP
-    id: any; // TEMP
-    name: any; // TEMP
-    party: any; // TEMP
-    platform: any; // TEMP
-    session_id: any; // TEMP
-    state: any; // TEMP
-    supported_platforms: any; // TEMP
-    sync_id: any; // TEMP
-    timestamps: any; // TEMP
-    type: any; // TEMP
-    url: any; // TEMP
-}
+export type ClientStatusMap = Partial<Record<ClientType, StatusType>>;
 
 // Original name: ClientTypes
 export const enum ClientType {
@@ -74,4 +83,11 @@ export const enum StatusType {
     ONLINE = "online",
     STREAMING = "streaming",
     UNKNOWN = "unknown",
+}
+
+export interface GuildPresence {
+    activities: Activity[];
+    clientStatus: ClientStatusMap;
+    status: StatusType;
+    timestamp: number;
 }
