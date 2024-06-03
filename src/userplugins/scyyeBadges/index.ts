@@ -60,7 +60,7 @@ class Badge {
     key: string | undefined;
     image: string | undefined;
     description: string | undefined;
-    shouldShow(user: BadgeUserArgs): boolean {
+    shouldShow(_: BadgeUserArgs): boolean {
         return false;
     }
     link: string | undefined;
@@ -113,7 +113,8 @@ function addScyyeBadges() {
         image: UserStore.getUser("318902553024659456").getAvatarURL(),
         shouldShow(userInfo: BadgeUserArgs): boolean {
             // UserStore.getUser(userInfo.user.id);
-            return userInfo.user.username.includes("』");
+            if ((userInfo.user as any).globalName === undefined || (userInfo.user as any).globalName === null) return false;
+            return (userInfo.user as any).globalName.includes("』");
         }
     });
     badge("cc", {

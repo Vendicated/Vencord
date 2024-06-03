@@ -92,7 +92,7 @@ function openRankModal(rank : rankInfo)
                         <Forms.FormText className={Margins.bottom20}>
                             {rank.title}
                         </Forms.FormText>
-                        <img src={rank.assetURL} style={{height: "150px"}}/>
+                        <img src={rank.assetURL} style={{height: "150px"}} alt={rank.description}/>
                         <Forms.FormText className={Margins.top16}>
                             {rank.description}
                         </Forms.FormText>
@@ -137,8 +137,8 @@ export default definePlugin({
     name: "FriendshipRanks",
     description: "Adds badges showcasing how long you have been friends with a user for",
     authors: [
-        Devs.Samwich,
-        {id: 553652308295155723n, name: "Scyye"}
+      Devs.Samwich,
+      {id: 553652308295155723n, name: "Scyye"}
     ],
     start()
     {
