@@ -10,7 +10,7 @@ import { classNameFactory } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, React, Tooltip } from "@webpack/common";
 import { RefObject } from "react";
 
 import SpeedIcon from "./components/SpeedIcon";
@@ -33,31 +33,38 @@ export default definePlugin({
         };
 
         return (
-            <button className={cl("icon")} onClick={e => {
-                ContextMenuApi.openContextMenu(e, () =>
-                    <Menu.Menu
-                        navId="playback-speed"
-                        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                        aria-label="Playback speed control"
-                    >
-                        <Menu.MenuGroup
-                            label="Playback speed"
-                        >
-                            {speeds.map(speed => (
-                                <Menu.MenuItem
-                                    key={speed}
-                                    id={"speed-" + speed}
-                                    label={`${speed}x`}
-                                    action={() => changeSpeed(speed)}
-                                />
-                            ))}
-                        </Menu.MenuGroup>
-
-                    </Menu.Menu>
-                );
-            }}>
-                <SpeedIcon />
-            </button>
+            <Tooltip text="Playback speed">
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <button
+                        className={cl("icon")}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        onClick={e => {
+                            ContextMenuApi.openContextMenu(e, () =>
+                                <Menu.Menu
+                                    navId="playback-speed"
+                                    onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                                    aria-label="Playback speed control"
+                                >
+                                    <Menu.MenuGroup
+                                        label="Playback speed"
+                                    >
+                                        {speeds.map(speed => (
+                                            <Menu.MenuItem
+                                                key={speed}
+                                                id={"speed-" + speed}
+                                                label={`${speed}x`}
+                                                action={() => changeSpeed(speed)}
+                                            />
+                                        ))}
+                                    </Menu.MenuGroup>
+                                </Menu.Menu>
+                            );
+                        }}>
+                        <SpeedIcon/>
+                    </button>
+                )}
+            </Tooltip>
         );
     },
 
