@@ -19,7 +19,8 @@
 import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import { Badges } from "@api/index";
 import definePlugin from "@utils/types";
-import { GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildChannelStore, GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
+import { GuildMember } from "discord-types/general";
 import React from "react";
 
 var registered: ProfileBadge[] = [];
