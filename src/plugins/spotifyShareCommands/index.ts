@@ -93,7 +93,7 @@ export default definePlugin({
                 }
                 // Note: Due to how Discord handles commands, we need to manually create and send the message
                 sendMessage(ctx.channel.id, {
-                    content: `https://open.spotify.com/track/${track.id}`
+                    content: `[${track.name}](https://open.spotify.com/track/${track.id})`
                 });
             }
         },
@@ -111,7 +111,7 @@ export default definePlugin({
                     return;
                 }
                 sendMessage(ctx.channel.id, {
-                    content: `https://open.spotify.com/album/${track.album.id}`
+                    content: `[${track.album.name}](https://open.spotify.com/album/${track.album.id})`
                 });
             }
         },
