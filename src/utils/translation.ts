@@ -80,8 +80,10 @@ function getByPath(key: string, object: any) {
     }
 }
 
+type Translation = string | ({ [rule in Intl.LDMLPluralRule]?: string } & { other: string; });
+
 // translation retrieval function
-function _t(key: string, bundle: any): string {
+function _t(key: string, bundle: any): Translation {
     const translation = getByPath(key, bundle);
 
     if (!translation) {
@@ -98,14 +100,27 @@ function _t(key: string, bundle: any): string {
 /**
  * Translates a key. Soft-fails and returns the key if it is not valid.
  * @param key The key to translate.
- * @param variables The variables to interpolate into the resultant string.
+ * @param variables The variables to interpolate into the resultant string. If dealing with plurals, `count` must be set.
  * @returns A translated string.
  */
 export function $t(key: string, variables?: Record<string, any>): string {
     const translation = _t(key, loadedLocale);
 
-    if (!variables) return translation;
-    return format(translation, variables);
-}
+    if (typeof translation !== "string") {
+        if (!variables || !variables.count) throw new Error(`translation key ${key} is an object (requires plurality?)`);
 
-$t("vencord.hello");
+        if (variables.count) {
+            const pluralTag = new Intl.PluralRules(bestLocale).select(variables.count);
+
+            if (translation[pluralTag]) {
+                return format(translation[pluralTag]!, variables);
+            } else {
+                return format(translation.other, variables);
+            }
+        }
+    }
+
+    if (!variables) return translation as string;
+
+    return format(translation as string, variables);
+}

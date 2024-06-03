@@ -1,3 +1,7 @@
 {
-    "hello": "Hello {name}!"
+    "hello": "Hello {name}!",
+    "plural": {
+        "one": "One thing.",
+        "other": "{count} things."
+    }
 }
