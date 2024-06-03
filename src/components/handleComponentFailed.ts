@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { $t } from "@utils/translation";
 import { maybePromptToUpdate } from "@utils/updater";
 
 export function handleComponentFailed() {
     maybePromptToUpdate(
-        "Uh Oh! Failed to render this Page." +
-        " However, there is an update available that might fix it." +
-        " Would you like to update and restart now?"
+        $t("vencord.components.componentFailed")
     );
 }

@@ -24,5 +24,6 @@
     "i18n-ally.localesPaths": ["./translations"],
     "i18n-ally.sourceLanguage": "en",
     "i18n-ally.extract.keygenStyle": "camelCase",
-    "i18n-ally.sortKeys": true
+    "i18n-ally.sortKeys": true,
+    "i18n-ally.keystyle": "nested"
 }
