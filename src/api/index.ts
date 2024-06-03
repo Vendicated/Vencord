@@ -27,6 +27,7 @@ import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
+import * as $MessageUpdater from "./MessageUpdater";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 import * as $ServerList from "./ServerList";
