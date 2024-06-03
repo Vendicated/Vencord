@@ -106,7 +106,7 @@ const DefaultSettings: Settings = {
     }
 };
 
-const settings = VencordNative.settings.get();
+const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
@@ -129,7 +129,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 
         if (path === "plugins" && key in plugins)
             return target[key] = {
-                enabled: plugins[key].required ?? plugins[key].enabledByDefault ?? false
+                enabled: IS_REPORTER ?? plugins[key].required ?? plugins[key].enabledByDefault ?? false
             };
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -156,12 +156,14 @@ export const SettingsStore = new SettingsStoreClass(settings, {
     }
 });
 
-SettingsStore.addGlobalChangeListener((_, path) => {
-    SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-    localStorage.Vencord_settingsDirty = true;
-    saveSettingsOnFrequentAction();
-    VencordNative.settings.set(SettingsStore.plain, path);
-});
+if (!IS_REPORTER) {
+    SettingsStore.addGlobalChangeListener((_, path) => {
+        SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+        VencordNative.settings.set(SettingsStore.plain, path);
+    });
+}
 
 /**
  * Same as {@link Settings} but unproxied. You should treat this as readonly,

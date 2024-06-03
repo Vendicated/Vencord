@@ -19,7 +19,7 @@
 import { popNotice, showNotice } from "@api/Notices";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
@@ -41,6 +41,7 @@ export default definePlugin({
     name: "WebRichPresence (arRPC)",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
+    reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent: () => (
         <>

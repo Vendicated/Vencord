@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, isDev, VERSION } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -33,22 +33,23 @@ const commonOptions = {
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
     format: "iife",
-    external: ["plugins", "git-hash", "/assets/*"],
+    external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
         ...commonOpts.plugins,
     ],
     target: ["esnext"],
     define: {
-        IS_WEB: "true",
-        IS_EXTENSION: "false",
-        IS_STANDALONE: "true",
-        IS_DEV: JSON.stringify(isDev),
-        IS_DISCORD_DESKTOP: "false",
-        IS_VESKTOP: "false",
-        IS_UPDATER_DISABLED: "true",
+        IS_WEB: true,
+        IS_EXTENSION: false,
+        IS_STANDALONE: true,
+        IS_DEV,
+        IS_REPORTER,
+        IS_DISCORD_DESKTOP: false,
+        IS_VESKTOP: false,
+        IS_UPDATER_DISABLED: true,
         VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP,
+        BUILD_TIMESTAMP
     }
 };
 
@@ -87,16 +88,16 @@ await Promise.all(
         esbuild.build({
             ...commonOptions,
             outfile: "dist/browser.js",
-            footer: { js: "//# sourceURL=VencordWeb" },
+            footer: { js: "//# sourceURL=VencordWeb" }
         }),
         esbuild.build({
             ...commonOptions,
             outfile: "dist/extension.js",
             define: {
                 ...commonOptions?.define,
-                IS_EXTENSION: "true",
+                IS_EXTENSION: true,
             },
-            footer: { js: "//# sourceURL=VencordWeb" },
+            footer: { js: "//# sourceURL=VencordWeb" }
         }),
         esbuild.build({
             ...commonOptions,
@@ -112,7 +113,7 @@ await Promise.all(
             footer: {
                 // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
                 js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
-            },
+            }
         })
     ]
 );
@@ -165,7 +166,7 @@ async function buildExtension(target, files) {
                 f.startsWith("manifest") ? "manifest.json" : f,
                 content
             ];
-        }))),
+        })))
     };
 
     await rm(target, { recursive: true, force: true });
@@ -192,14 +193,19 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
     return appendFile("dist/Vencord.user.js", cssRuntime);
 });
 
-await Promise.all([
-    appendCssRuntime,
-    buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
-    buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
-]);
+if (!process.argv.includes("--skip-extension")) {
+    await Promise.all([
+        appendCssRuntime,
+        buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
+        buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
+    ]);
 
-Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
-console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+    Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
+    console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
 
-Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
-console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+    Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
+    console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+
+} else {
+    await appendCssRuntime;
+}

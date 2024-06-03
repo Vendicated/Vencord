@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
 
 const PORT = 8485;
@@ -243,6 +243,7 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven],
+    reporterTestable: ReporterTestable.None,
     settings,
 
     toolboxActions: {

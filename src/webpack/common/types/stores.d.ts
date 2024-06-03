@@ -41,8 +41,33 @@ export class FluxStore {
     __getLocalVars(): Record<string, any>;
 }
 
+export class FluxEmitter {
+    constructor();
+
+    changeSentinel: number;
+    changedStores: Set<FluxStore>;
+    isBatchEmitting: boolean;
+    isDispatching: boolean;
+    isPaused: boolean;
+    pauseTimer: NodeJS.Timeout | null;
+    reactChangedStores: Set<FluxStore>;
+
+    batched(batch: (...args: any[]) => void): void;
+    destroy(): void;
+    emit(): void;
+    emitNonReactOnce(): void;
+    emitReactOnce(): void;
+    getChangeSentinel(): number;
+    getIsPaused(): boolean;
+    injectBatchEmitChanges(batch: (...args: any[]) => void): void;
+    markChanged(store: FluxStore): void;
+    pause(): void;
+    resume(): void;
+}
+
 export interface Flux {
     Store: typeof FluxStore;
+    Emitter: FluxEmitter;
 }
 
 export class WindowStore extends FluxStore {
@@ -63,7 +88,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    type: "GUILD_EMOJI";
+    type: 1;
 }
 
 export interface UnicodeEmoji {
@@ -75,7 +100,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
-    type: "UNICODE";
+    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;

@@ -182,8 +182,8 @@ export default definePlugin({
 
             // add dearrow button
             {
-                match: /children:\[(?=null!=\i\?\i\.renderSuppressButton)/,
-                replace: "children:[$self.renderButton(this),",
+                match: /children:\[(?=null!=\i\?(\i)\.renderSuppressButton)/,
+                replace: "children:[$self.renderButton($1),",
                 predicate: () => !settings.store.hideButton
             }
         ]

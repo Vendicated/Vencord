@@ -38,7 +38,7 @@ declare module "~git-remote" {
     export default remote;
 }
 
-declare module "~fileContent/*" {
+declare module "file://*" {
     const content: string;
     export default content;
 }

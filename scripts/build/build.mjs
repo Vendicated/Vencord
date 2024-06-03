@@ -21,19 +21,21 @@ import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, existsAsync, globPlugins, isDev, isStandalone, updaterDisabled, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, VERSION, watch } from "./common.mjs";
 
 const defines = {
-    IS_STANDALONE: isStandalone,
-    IS_DEV: JSON.stringify(isDev),
-    IS_UPDATER_DISABLED: updaterDisabled,
+    IS_STANDALONE,
+    IS_DEV,
+    IS_REPORTER,
+    IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP,
+    BUILD_TIMESTAMP
 };
-if (defines.IS_STANDALONE === "false")
-    // If this is a local build (not standalone), optimise
+
+if (defines.IS_STANDALONE === false)
+    // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
 
@@ -46,7 +48,7 @@ const nodeCommonOpts = {
     platform: "node",
     target: ["esnext"],
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
-    define: defines,
+    define: defines
 };
 
 const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
@@ -73,13 +75,13 @@ const globNativesPlugin = {
             let i = 0;
             for (const dir of pluginDirs) {
                 const dirPath = join("src", dir);
-                if (!await existsAsync(dirPath)) continue;
+                if (!await exists(dirPath)) continue;
                 const plugins = await readdir(dirPath);
                 for (const p of plugins) {
                     const nativePath = join(dirPath, p, "native.ts");
                     const indexNativePath = join(dirPath, p, "native/index.ts");
 
-                    if (!(await existsAsync(nativePath)) && !(await existsAsync(indexNativePath)))
+                    if (!(await exists(nativePath)) && !(await exists(indexNativePath)))
                         continue;
 
                     const nameParts = p.split(".");

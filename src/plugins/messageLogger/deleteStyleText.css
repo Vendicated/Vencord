@@ -3,6 +3,11 @@
     color: var(--status-danger, #f04747) !important;
 }
 
+/* Markdown title highlighting */
+.messagelogger-deleted [class*="contents"] :is(h1, h2, h3) {
+    color: var(--status-danger, #f04747) !important;
+}
+
 /* Bot "thinking" text highlighting */
 .messagelogger-deleted [class*="colorStandard"] {
     color: var(--status-danger, #f04747) !important;

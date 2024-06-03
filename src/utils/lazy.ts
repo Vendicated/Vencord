@@ -35,8 +35,8 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 
 const handler: ProxyHandler<any> = {};
 
-const kGET = Symbol.for("vencord.lazy.get");
-const kCACHE = Symbol.for("vencord.lazy.cached");
+export const SYM_LAZY_GET = Symbol.for("vencord.lazy.get");
+export const SYM_LAZY_CACHED = Symbol.for("vencord.lazy.cached");
 
 for (const method of [
     "apply",
@@ -53,11 +53,11 @@ for (const method of [
     "setPrototypeOf"
 ]) {
     handler[method] =
-        (target: any, ...args: any[]) => Reflect[method](target[kGET](), ...args);
+        (target: any, ...args: any[]) => Reflect[method](target[SYM_LAZY_GET](), ...args);
 }
 
 handler.ownKeys = target => {
-    const v = target[kGET]();
+    const v = target[SYM_LAZY_GET]();
     const keys = Reflect.ownKeys(v);
     for (const key of unconfigurable) {
         if (!keys.includes(key)) keys.push(key);
@@ -69,7 +69,7 @@ handler.getOwnPropertyDescriptor = (target, p) => {
     if (typeof p === "string" && unconfigurable.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
 
-    const descriptor = Reflect.getOwnPropertyDescriptor(target[kGET](), p);
+    const descriptor = Reflect.getOwnPropertyDescriptor(target[SYM_LAZY_GET](), p);
 
     if (descriptor) Object.defineProperty(target, p, descriptor);
     return descriptor;
@@ -92,31 +92,34 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
 
     let tries = 0;
     const proxyDummy = Object.assign(function () { }, {
-        [kCACHE]: void 0 as T | undefined,
-        [kGET]() {
-            if (!proxyDummy[kCACHE] && attempts > tries++) {
-                proxyDummy[kCACHE] = factory();
-                if (!proxyDummy[kCACHE] && attempts === tries)
+        [SYM_LAZY_CACHED]: void 0 as T | undefined,
+        [SYM_LAZY_GET]() {
+            if (!proxyDummy[SYM_LAZY_CACHED] && attempts > tries++) {
+                proxyDummy[SYM_LAZY_CACHED] = factory();
+                if (!proxyDummy[SYM_LAZY_CACHED] && attempts === tries)
                     console.error("Lazy factory failed:", factory);
             }
-            return proxyDummy[kCACHE];
+            return proxyDummy[SYM_LAZY_CACHED];
         }
     });
 
     return new Proxy(proxyDummy, {
         ...handler,
         get(target, p, receiver) {
+            if (p === SYM_LAZY_CACHED || p === SYM_LAZY_GET)
+                return Reflect.get(target, p, receiver);
+
             // if we're still in the same tick, it means the lazy was immediately used.
             // thus, we lazy proxy the get access to make things like destructuring work as expected
             // meow here will also be a lazy
             // `const { meow } = findByPropsLazy("meow");`
             if (!isChild && isSameTick)
                 return proxyLazy(
-                    () => Reflect.get(target[kGET](), p, receiver),
+                    () => Reflect.get(target[SYM_LAZY_GET](), p, receiver),
                     attempts,
                     true
                 );
-            const lazyTarget = target[kGET]();
+            const lazyTarget = target[SYM_LAZY_GET]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
                 return Reflect.get(lazyTarget, p, receiver);
             }
