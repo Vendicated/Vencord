@@ -7,12 +7,11 @@
         "strict": true,
 
         "module": "Node16",
-        "types": ["events"],
+        "types": ["events", "lodash"],
 
         "noEmit": true,
 
         "lib": [
-            "DOM",
             "ES2019",
             "ES2020.BigInt",
             "ES2020.Date",

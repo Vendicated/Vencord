@@ -11,6 +11,8 @@ export * from "./channels";
 export * from "./Clan";
 export * from "./CompanyRecord";
 export * from "./Draft";
+export * from "./emojis";
+export * from "./Frecency";
 export * from "./GuildMember";
 export * from "./GuildMemberProfile";
 export * from "./GuildRecord";

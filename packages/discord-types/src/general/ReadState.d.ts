@@ -57,12 +57,12 @@ export class ReadState {
     rebuildChannelState(e?: any, t?: any, n?: any): void; // TEMP
     recalculateFlags(): ReadStateFlags | undefined;
     recordLastViewedTime(): void;
-    serialize(e?: any): any; // TEMP
+    serialize(e?: any): SerializedReadState; // TEMP
     shouldDeleteReadState(e?: any): boolean;
     syncThreadSettings(): boolean;
     takeSnapshot(): ReadStateSnapshot;
-    get unreadCount(): any; // TEMP
-    set unreadCount(e: any); // TEMP
+    get unreadCount(): number;
+    set unreadCount(count: number); // TEMP
 
     _ackMessageId: string | number | null;
     _ackMessageTimestamp: number;

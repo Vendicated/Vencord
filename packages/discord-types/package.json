@@ -20,6 +20,7 @@
     "types": "./src/index.d.ts",
     "dependencies": {
         "@types/events": "~3.0.3",
+        "@types/lodash": "~4.17.4",
         "dependency-graph": "0.9.0",
         "moment": "2.22.2",
         "type-fest": "^4.18.3"
@@ -33,6 +34,6 @@
         "eslint-plugin-simple-import-sort": "^12.1.0",
         "eslint-plugin-unicorn": "^53.0.0",
         "typescript": "^5.4.5",
-        "typescript-eslint": "^8.0.0-alpha.25"
+        "typescript-eslint": "^8.0.0-alpha.26"
     }
 }

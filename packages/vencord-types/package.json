@@ -1,28 +1,33 @@
 {
     "name": "@vencord/types",
-    "private": false,
     "version": "0.1.3",
     "description": "",
-    "types": "index.d.ts",
+    "license": "GPL-3.0-or-later",
+    "author": "Vencord",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Vendicated/Vencord.git",
+        "directory": "packages/vencord-types"
+    },
     "scripts": {
         "prepublishOnly": "tsx ./prepare.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "keywords": [],
-    "author": "Vencord",
-    "license": "GPL-3.0",
+    "sideEffects": false,
+    "types": "./index.d.ts",
+    "dependencies": {
+        "@types/lodash": "~4.17.4",
+        "@types/node": "^18.19.33",
+        "@types/react": "~18.2.21",
+        "@types/react-dom": "~18.2.7",
+        "@vencord/discord-types": "workspace:^",
+        "discord-types": "^1.3.26",
+        "standalone-electron-types": "^1.0.0",
+        "type-fest": "^4.18.3"
+    },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "fs-extra": "^11.2.0",
-        "tsx": "^3.12.6"
-    },
-    "dependencies": {
-        "@types/lodash": "^4.14.191",
-        "@types/node": "^18.11.18",
-        "@types/react": "^18.2.0",
-        "@types/react-dom": "^18.0.10",
-        "discord-types": "^1.3.26",
-        "standalone-electron-types": "^1.0.0",
-        "type-fest": "^3.5.3"
+        "tsx": "^4.11.2"
     }
 }
