@@ -62,6 +62,7 @@ const report = {
         error: string;
     }[],
     otherErrors: [] as string[],
+    ignoredErrors: [] as string[],
     badWebpackFinds: [] as string[]
 };
 
@@ -109,15 +110,6 @@ async function printReport() {
 
     console.log();
 
-    const ignoredErrors = [] as string[];
-    report.otherErrors = report.otherErrors.filter(e => {
-        if (IGNORED_DISCORD_ERRORS.some(regex => e.match(regex))) {
-            ignoredErrors.push(e);
-            return false;
-        }
-        return true;
-    });
-
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
@@ -126,7 +118,7 @@ async function printReport() {
     console.log();
 
     console.log("## Ignored Discord Errors");
-    ignoredErrors.forEach(e => {
+    report.ignoredErrors.forEach(e => {
         console.log(`- ${toCodeBlock(e)}`);
     });
 
@@ -223,7 +215,7 @@ page.on("console", async e => {
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
-                console.log(await getText());
+                console.error(await getText());
                 process.exitCode = 1;
 
                 const [, plugin, type, id, regex] = patchFailMatch;
@@ -240,7 +232,7 @@ page.on("console", async e => {
                 const failedToStartMatch = message.match(/Failed to start (.+)/);
                 if (!failedToStartMatch) break;
 
-                console.log(await getText());
+                console.error(await getText());
                 process.exitCode = 1;
 
                 const [, name] = failedToStartMatch;
@@ -251,7 +243,7 @@ page.on("console", async e => {
 
                 break;
             case "Reporter:":
-                console.log(await getText());
+                console.error(await getText());
 
                 switch (message) {
                     case "Webpack Find Fail:":
@@ -269,19 +261,23 @@ page.on("console", async e => {
     }
 
     if (isDebug) {
-        console.log(await getText());
+        console.error(await getText());
     } else if (level === "error") {
         const text = await getText();
 
         if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
-            console.error("[Unexpected Error]", text);
-            report.otherErrors.push(text);
+            if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
+                report.ignoredErrors.push(text);
+            } else {
+                console.error("[Unexpected Error]", text);
+                report.otherErrors.push(text);
+            }
         }
     }
 });
 
-page.on("error", e => console.error("[Error]", e));
-page.on("pageerror", e => console.error("[Page Error]", e));
+page.on("error", e => console.error("[Error]", e.message));
+page.on("pageerror", e => console.error("[Page Error]", e.message));
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
