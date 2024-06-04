@@ -59,8 +59,8 @@ const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
-    	? "Console"
-    	: platform[0].toUpperCase() + platform.slice(1);
+        ? "Console"
+        : platform[0].toUpperCase() + platform.slice(1);
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
