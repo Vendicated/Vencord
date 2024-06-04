@@ -1,34 +1,22 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import styles from "./style.css?managed";
+import { getStyle } from "./style";
+
+let [styles, Classes]: [string, object] = ["", {}];
 
 const settings = definePluginSettings({
     hoverToView: {
         type: OptionType.BOOLEAN,
         description: "When hovering over a message, show the contents.",
         default: false,
-        restartNeeded: false,
         onChange: () => {
             console.log(settings.store.hoverToView);
             updateClassList("hover-to-view", settings.store.hoverToView);
@@ -44,10 +32,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Blur all messages in streamer mode.",
         default: false,
-        restartNeeded: false,
         onChange: () => {
             console.log(settings.store.enableForStream);
-            updateClassList("hide-in-streamer-mode", settings.store.enableForStream);
+            updateClassList(
+                "hide-in-streamer-mode",
+                settings.store.enableForStream
+            );
         },
     },
 });
@@ -58,16 +48,25 @@ export default definePlugin({
     authors: [EquicordDevs.Perny],
     settings,
     start() {
+        [styles, Classes] = getStyle();
+
+        const style = document.createElement("style");
+        style.setAttribute("id", "vc-dont-leak-style");
+        style.innerHTML = styles;
+        document.head.appendChild(style);
+
         document.addEventListener("keyup", keyUpHandler);
         document.addEventListener("keydown", keyDownHandler);
         updateClassList("hover-to-view", settings.store.hoverToView);
-        updateClassList("hide-in-streamer-mode", settings.store.enableForStream);
-        enableStyle(styles);
+        updateClassList(
+            "hide-in-streamer-mode",
+            settings.store.enableForStream
+        );
     },
     stop() {
         document.removeEventListener("keyup", keyUpHandler);
         document.removeEventListener("keydown", keyDownHandler);
-        disableStyle(styles);
+        document.getElementById("vc-dont-leak-style")?.remove();
     },
 });
 
