@@ -58,13 +58,9 @@ type Platform = keyof typeof Icons;
 const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
-    let tooltip;
-
-    if (platform !== "embedded") {
-        tooltip = platform[0].toUpperCase() + platform.slice(1);
-    } else {
-        tooltip = "Console";
-    }
+    const tooltip = platform === "embedded"
+    	? "Console"
+    	: platform[0].toUpperCase() + platform.slice(1);
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
