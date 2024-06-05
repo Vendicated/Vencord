@@ -79,9 +79,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'P.SpotifyResourceTypes.TRACK',
+            find: 'artists.filter',
             replacement: {
-                match: /\(0,(.{1,2})\.isNotNullish\)\((.{1,2})\.id\)&&/,
+                match: /\(0,(\i)\.isNotNullish\)\((\i)\.id\)&&/,
                 replace: ""
             }
         }
