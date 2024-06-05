@@ -12,7 +12,7 @@ import { Modals,ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Flex, Forms, RelationshipStore } from "@webpack/common";
 
-import { bestiesIcon, bloomingIcon, burningIcon, royalIcon, sproutIcon, starIcon } from "./icons";
+import { bestiesIcon, bloomingIcon, burningIcon, fighterIcon, royalIcon, sproutIcon, starIcon } from "./icons";
 
 interface rankInfo
 {
@@ -52,6 +52,12 @@ const ranks : rankInfo[] =
         description: "Your friendship has reached terminal velocity (3 Months)",
         requirement: 90,
         assetSVG: burningIcon
+    },
+    {
+        title: "Fighter",
+        description: "Your friendship is strong (6 Months)",
+        requirement: 182.5,
+        assetSVG: fighterIcon
     },
     {
         title: "Star",
