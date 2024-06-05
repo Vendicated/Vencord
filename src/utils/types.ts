@@ -86,6 +86,10 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
+     * Whether this plugin should be hidden from the user
+     */
+    hidden?: boolean;
+    /**
      * Whether this plugin should be enabled by default, but can be disabled
      */
     enabledByDefault?: boolean;
