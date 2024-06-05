@@ -6,13 +6,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusic as PluginNative<typeof import("./native")>;
-
-const logger = new Logger("AppleMusicRichPresence");
 
 interface ActivityAssets {
     large_image?: string;
@@ -171,8 +168,9 @@ function getImageAsset(type: AssetImageType, data: TrackData) {
 
 export default definePlugin({
     name: "AppleMusicRichPresence",
-    description: "Discord rich presence for your Apple Music! (macOS only)",
+    description: "Discord rich presence for your Apple Music!",
     authors: [Devs.RyanCaoDev],
+    hidden: !navigator.platform.startsWith("Mac"),
 
     settingsAboutComponent() {
         return <>
