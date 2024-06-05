@@ -17,12 +17,20 @@ const settings = definePluginSettings({
             {
                 label: "Desktop",
                 value: "desktop",
-                default: true
+                default: true,
             },
             {
                 label: "Web",
-                value: "web"
-            }
+                value: "web",
+            },
+            {
+                label: "Mobile",
+                value: "mobile",
+            },
+            {
+                label: "Embedded (Console)",
+                value: "embedded",
+            },
         ]
     }
 });
@@ -47,6 +55,11 @@ export default definePlugin({
                 return { browser: "Discord Client" };
             case "web":
                 return { browser: "Chrome" };
+            case "mobile":
+                return { browser: "Discord iOS" };
+            case "embedded":
+                return { browser: "Discord Embedded" };
         }
+
     }
 });
