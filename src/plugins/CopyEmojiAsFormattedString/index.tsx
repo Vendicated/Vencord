@@ -24,33 +24,26 @@ interface Target {
     firstChild: HTMLImageElement;
 }
 
-function removeCountingPostfix(name: string): string {
-    return name.replace(/~\d+$/, "");
-}
-
-function getEmojiFormattedString(target: Target, copyUnicode: boolean): string {
+function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
     const { id: emojiId, name: emojiName } = target.dataset;
 
     if (!emojiId) {
-        return (
-            (copyUnicode && convertNameToSurrogate(emojiName)) ||
-            `:${emojiName}:`
-        );
+        return copyUnicode
+            ? convertNameToSurrogate(emojiName))
+            : `:${emojiName}:`;
     }
 
     const extension = target?.firstChild.src.match(
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 
-    return extension === "gif"
-        ? `<a:${removeCountingPostfix(emojiName)}:${emojiId}>`
-        : `<:${removeCountingPostfix(emojiName)}:${emojiId}>`;
+    return `<${extension === "gif" ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
 }
 
 const settings = definePluginSettings({
     copyUnicode: {
         type: OptionType.BOOLEAN,
-        description: "Copy the Unicode symbol instead of the name for standard emojis (👽)",
+        description: "Copy the raw unicode character instead of :name: for default emojis (👽)",
         default: true,
     },
 });
@@ -59,22 +52,20 @@ export default definePlugin({
     name: "CopyEmojiMarkdown",
     description: "Allows you to copy emojis as formatted string (<:blobcatcozy:1026533070955872337>)",
     authors: [Devs.HappyEnderman, Devs.Vishnya],
-    settings: settings,
+    settings,
+
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target }) {
             if (target.dataset.type !== "emoji") return;
 
             children.push(
                 <Menu.MenuItem
-                    id="vc-copy-formatted-string"
-                    label="Copy as formatted string"
+                    id="vc-copy-emoji-markdown"
+                    label="Copy Emoji Markdown"
                     action={() => {
                         copyWithToast(
-                            getEmojiFormattedString(
-                                target,
-                                settings.store.copyUnicode
-                            ),
-                            "Success! Copied to clipboard as formatted string."
+                            getEmojiMarkdown(target, settings.store.copyUnicode),
+                            "Success! Copied emoji markdown."
                         );
                     }}
                 />
