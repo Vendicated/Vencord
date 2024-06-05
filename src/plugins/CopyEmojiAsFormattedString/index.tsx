@@ -29,7 +29,7 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
 
     if (!emojiId) {
         return copyUnicode
-            ? convertNameToSurrogate(emojiName))
+            ? convertNameToSurrogate(emojiName)
             : `:${emojiName}:`;
     }
 
