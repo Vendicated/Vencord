@@ -17,13 +17,13 @@
     "types": "./index.d.ts",
     "dependencies": {
         "@types/lodash": "~4.17.4",
-        "@types/node": "^18.19.33",
-        "@types/react": "~18.2.21",
-        "@types/react-dom": "~18.2.7",
+        "@types/node": "^18.19.34",
+        "@types/react": "~18.2.79",
+        "@types/react-dom": "~18.2.24",
         "@vencord/discord-types": "workspace:^",
         "discord-types": "^1.3.26",
         "standalone-electron-types": "^1.0.0",
-        "type-fest": "^4.18.3"
+        "type-fest": "^4.19.0"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

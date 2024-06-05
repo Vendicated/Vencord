@@ -117,7 +117,7 @@ export default tseslint.config(
             "@typescript-eslint/prefer-enum-initializers": "error",
             "@typescript-eslint/prefer-function-type": "error",
             "@typescript-eslint/triple-slash-reference": "error",
-            "@typescript-eslint/unified-signatures": "error",
+            "@typescript-eslint/unified-signatures": ["error", { ignoreDifferentlyNamedParameters: true }],
             "import/extensions": "error",
             "import/first": "error",
             "import/newline-after-import": ["error", { considerComments: true }],

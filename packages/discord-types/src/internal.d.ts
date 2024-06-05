@@ -12,3 +12,7 @@ export type GenericConstructor = new (...args: any[]) => unknown;
 
 /** @internal */
 export type Nullish = null | undefined;
+
+/** @internal */
+export type Overwrite<Destination extends object, Source extends object>
+    = Omit<Destination, keyof Source> & Source;

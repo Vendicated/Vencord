@@ -76,6 +76,6 @@ export class PermissionStore<Action extends FluxAction = PermissionStoreAction> 
     isRoleHigher(guild: GuildRecord, roleA: Role, roleB: Role): boolean;
 }
 
-interface BasicPermissionsObject {
+export interface BasicPermissionsObject {
     basicPermissions: bigint;
 }
