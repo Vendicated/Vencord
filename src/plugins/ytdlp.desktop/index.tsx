@@ -133,7 +133,7 @@ async function openDependencyModal() {
 const settings = definePluginSettings({
     showProgress: {
         type: OptionType.BOOLEAN,
-        description: "Send a Clyde message with the download progress.",
+        description: "Send a Clyde message with the download progress. Warning: hiding progress will also hide the \"Cancel download\" button.",
         default: true,
     },
     showFfmpegWarning: {
