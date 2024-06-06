@@ -79,7 +79,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'artists.filter',
+            find: "artists.filter",
             replacement: {
                 match: /\(0,(\i)\.isNotNullish\)\((\i)\.id\)&&/,
                 replace: ""
