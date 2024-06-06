@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -24,7 +25,7 @@ export default definePlugin({
     description: "Adds an icon to change the playback speed of media embeds",
     authors: [Devs.D3SOX],
 
-    playbackSpeedComponent(mediaRef: RefObject<HTMLMediaElement>) {
+    playbackSpeedComponent: ErrorBoundary.wrap((mediaRef: RefObject<HTMLMediaElement>) => {
         const changeSpeed = (speed: number) => {
             const media = mediaRef.current;
             if (media) {
@@ -36,7 +37,7 @@ export default definePlugin({
             <Tooltip text="Playback speed">
                 {tooltipProps => (
                     <button
-                    	{...tooltipProps}
+                        {...tooltipProps}
                         className={cl("icon")}
                         onClick={e => {
                             ContextMenuApi.openContextMenu(e, () =>
@@ -65,7 +66,7 @@ export default definePlugin({
                 )}
             </Tooltip>
         );
-    },
+    }),
 
     patches: [
         // voice message embeds
