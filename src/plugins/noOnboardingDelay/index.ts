@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: "Messages.ONBOARDING_COVER_WELCOME_SUBTITLE",
             replacement: {
-                match: /setTimeout\(\(\)=>{(\i)\(\)\},3e3\)/,
-                replace: "$1()"
+                match: "3e3",
+                replace: "0"
             },
         },
     ],
