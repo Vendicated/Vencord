@@ -64,10 +64,6 @@ export default definePlugin({
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},bannerSrc:)/,
-                    replace: "$1.bannerSrc=$self.useBannerHook($1);"
-                },
-                {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
                     replace: "&&$self.shouldShowBadge(arguments[0])$&"
                 }
@@ -75,16 +71,18 @@ export default definePlugin({
         },
         {
             find: /overrideBannerSrc:\i,overrideBannerWidth:/,
-            replacement: [
-                {
-                    match: /(\i)\.premiumType/,
-                    replace: "$self.premiumHook($1)||$&"
-                },
-                {
-                    match: /function \i\((\i)\)\{/,
-                    replace: "$&$1.overrideBannerSrc=$self.useBannerHook($1);"
-                }
-            ]
+            replacement: {
+                match: /(\i)\.premiumType/,
+                replace: "$self.premiumHook($1)||$&"
+            }
+        },
+        {
+            find: "BannerLoadingStatus:function",
+            replacement: {
+                match: /void 0:\i.getPreviewBanner\(\i,\i,\i\)/,
+                replace: "$&||$self.useBannerHook(arguments[0])"
+
+            }
         },
         {
             find: "\"data-selenium-video-tile\":",
@@ -119,9 +117,9 @@ export default definePlugin({
         }
     },
 
-    useBannerHook({ displayProfile, user }: any) {
+    useBannerHook({ displayProfile }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
-        if (this.userHasBackground(user.id)) return this.getImageUrl(user.id);
+        if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
     premiumHook({ userId }: any) {
