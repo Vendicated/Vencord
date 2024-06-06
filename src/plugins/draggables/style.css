@@ -1,0 +1,17 @@
+.dragging-indicator::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 4px;
+    right: 0;
+    left: 2px;
+    height: 40px;
+    max-width: 4px;
+    background-color: var(--green-360);
+    border-radius: 2px;
+}
+
+.dragging-wrapper {
+    inset: 0;
+    flex-direction: row;
+}
