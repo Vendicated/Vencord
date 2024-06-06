@@ -157,10 +157,10 @@ export async function loadLazyChunks() {
 
             // Loads and requires a chunk
             if (!isWorkerAsset) {
-                await wreq.e(id as any);
+                await wreq.e(id);
                 // Technically, the id of the chunk does not match the entry point
                 // But, still try it because we have no way to get the actual entry point
-                if (wreq.m[id]) wreq(id as any);
+                if (wreq.m[id]) wreq(id);
             }
         }));
 
