@@ -65,13 +65,27 @@ const settings = definePluginSettings({
     }
 });
 
-async function pinMessage(channel: any, message: any): Promise<void> {
-    if (!pinModule) return;
+type Channel = {
+    id: string;
+    guild_id?: string;
+};
+
+type Message = {
+    id: string;
+    author: {
+        id: string;
+    };
+    content: string;
+    pinned: boolean;
+    deleted: boolean;
+    hasFlag: (flag: number) => boolean;
+};
+
+async function pinMessage(channel: Channel, message: Message) {
     await pinModule.pinMessage(channel, message.id);
 }
 
-async function unpinMessage(channel: any, message: any): Promise<void> {
-    if (!pinModule) return;
+async function unpinMessage(channel: Channel, message: Message) {
     try {
         await pinModule.unpinMessage(channel, message.id);
         if (settings.store.sendUnpinNotification) {
@@ -99,7 +113,7 @@ export default definePlugin({
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg: any, channel: any, event: MouseEvent) => {
+        this.onClick = addClickListener((msg: any, channel, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
 
             if (settings.store.enableCtrlShiftClickToPinUnpin && event.ctrlKey && event.shiftKey) {
@@ -136,7 +150,7 @@ export default definePlugin({
                     });
                 }
             } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
-                if (msg.deleted) {
+                if (msg && !msg.deleted) { // we dont need uncaught promis
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
                         channelId: channel.id,
