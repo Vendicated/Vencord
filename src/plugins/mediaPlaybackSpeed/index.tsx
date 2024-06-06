@@ -42,7 +42,7 @@ export default definePlugin({
                         onClick={e => {
                             ContextMenuApi.openContextMenu(e, () =>
                                 <Menu.Menu
-                                    navId="playback-speed"
+                                    navId="vc-playback-speed"
                                     onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
                                     aria-label="Playback speed control"
                                 >
