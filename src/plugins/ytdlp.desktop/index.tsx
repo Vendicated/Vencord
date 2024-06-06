@@ -62,6 +62,19 @@ function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
     }
 }
 
+const CancelButton = [{
+    components: [{
+        customId: "yt-dlp-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
+        emoji: {
+            name: "⚪",
+            animated: "yt-dlp-stop-download"
+        },
+        label: "Cancel download",
+        id: "0,0",
+        style: 4,
+        type: 2,
+    }], id: "0", type: 1
+}];
 async function sendProgress(channelId: string, promise: Promise<{
     buffer: Buffer;
     title: string;
@@ -70,22 +83,14 @@ async function sendProgress(channelId: string, promise: Promise<{
     error: string;
     logs: string;
 }>) {
-    if (!settings.store.showProgress) return await promise;
+    if (!settings.store.showProgress) {
+        sendBotMessage(channelId, {
+            components: CancelButton
+        });
+        return await promise;
+    }
     const clydeMessage = sendBotMessage(channelId, {
-        content: "Downloading video...",
-        components: [{
-            components: [{
-                customId: "yt-dlp-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
-                emoji: {
-                    name: "⚪",
-                    animated: "yt-dlp-stop-download"
-                },
-                label: "Cancel download",
-                id: "0,0",
-                style: 4,
-                type: 2,
-            }], id: "0", type: 1
-        }]
+        components: CancelButton
     });
     const updateMessage = (stdout: string, append?: string) => {
         const text = stdout.toString();
@@ -133,7 +138,7 @@ async function openDependencyModal() {
 const settings = definePluginSettings({
     showProgress: {
         type: OptionType.BOOLEAN,
-        description: "Send a Clyde message with the download progress. Warning: hiding progress will also hide the \"Cancel download\" button.",
+        description: "Send a Clyde message with the download progress.",
         default: true,
     },
     showFfmpegWarning: {
