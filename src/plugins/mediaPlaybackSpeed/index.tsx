@@ -25,48 +25,50 @@ export default definePlugin({
     description: "Adds an icon to change the playback speed of media embeds",
     authors: [Devs.D3SOX],
 
-    playbackSpeedComponent: ErrorBoundary.wrap((mediaRef: RefObject<HTMLMediaElement>) => {
+    playbackSpeedComponent: (mediaRef: RefObject<HTMLMediaElement> | undefined) => {
         const changeSpeed = (speed: number) => {
-            const media = mediaRef.current;
+            const media = mediaRef?.current;
             if (media) {
                 media.playbackRate = speed;
             }
         };
 
         return (
-            <Tooltip text="Playback speed">
-                {tooltipProps => (
-                    <button
-                        {...tooltipProps}
-                        className={cl("icon")}
-                        onClick={e => {
-                            ContextMenuApi.openContextMenu(e, () =>
-                                <Menu.Menu
-                                    navId="vc-playback-speed"
-                                    onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                                    aria-label="Playback speed control"
-                                >
-                                    <Menu.MenuGroup
-                                        label="Playback speed"
+            <ErrorBoundary noop>
+                <Tooltip text="Playback speed">
+                    {tooltipProps => (
+                        <button
+                            {...tooltipProps}
+                            className={cl("icon")}
+                            onClick={e => {
+                                ContextMenuApi.openContextMenu(e, () =>
+                                    <Menu.Menu
+                                        navId="vc-playback-speed"
+                                        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                                        aria-label="Playback speed control"
                                     >
-                                        {speeds.map(speed => (
-                                            <Menu.MenuItem
-                                                key={speed}
-                                                id={"speed-" + speed}
-                                                label={`${speed}x`}
-                                                action={() => changeSpeed(speed)}
-                                            />
-                                        ))}
-                                    </Menu.MenuGroup>
-                                </Menu.Menu>
-                            );
-                        }}>
-                        <SpeedIcon/>
-                    </button>
-                )}
-            </Tooltip>
+                                        <Menu.MenuGroup
+                                            label="Playback speed"
+                                        >
+                                            {speeds.map(speed => (
+                                                <Menu.MenuItem
+                                                    key={speed}
+                                                    id={"speed-" + speed}
+                                                    label={`${speed}x`}
+                                                    action={() => changeSpeed(speed)}
+                                                />
+                                            ))}
+                                        </Menu.MenuGroup>
+                                    </Menu.Menu>
+                                );
+                            }}>
+                            <SpeedIcon/>
+                        </button>
+                    )}
+                </Tooltip>
+            </ErrorBoundary>
         );
-    }),
+    },
 
     patches: [
         // voice message embeds
