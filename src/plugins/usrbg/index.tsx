@@ -64,7 +64,7 @@ export default definePlugin({
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},bannerSrc:)/,
+                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,bannerSrc:)/,
                     replace: "$1.bannerSrc=$self.useBannerHook($1);"
                 },
                 {
@@ -73,19 +73,23 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: /profileType:\i,overrideBannerSrc:\i/,
+        ...[/profileType:\i,pendingBanner:\i/, /profileType:\i,overrideBannerSrc:\i/].map(find => ({
+            find,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},overrideBannerSrc:)/,
+                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,overrideBannerSrc:)/,
                     replace: "$1.overrideBannerSrc=$self.useBannerHook($1);"
+                },
+                {
+                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,pendingBanner:)/,
+                    replace: "$1.pendingBanner=$self.useBannerHook($1);"
                 }
             ]
-        },
+        })),
         {
             find: "\"data-selenium-video-tile\":",
             predicate: () => settings.store.voiceBackground,
