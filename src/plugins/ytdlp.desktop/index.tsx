@@ -4,15 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./ytdlp.css";
+
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
+import { Button, DraftType, FluxDispatcher, Forms, UploadHandler, UploadManager, UserStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { DependencyModal } from "./DependencyModal";
@@ -137,6 +140,23 @@ async function openDependencyModal() {
 }
 
 const settings = definePluginSettings({
+    supportedWebsites: {
+        description: "See the link for a list of supported websites.",
+        type: OptionType.COMPONENT,
+        default: "none",
+        component: () => (
+            <>
+                <Forms.FormText>
+                    <Link href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" className="ytdlp-link">
+                        <Button role="link" style={{ width: "100%" }}>
+                            Click to see supported websites.
+                        </Button>
+                    </Link>
+                </Forms.FormText>
+                <Forms.FormDivider />
+            </>
+        )
+    },
     showProgress: {
         type: OptionType.BOOLEAN,
         description: "Send a Clyde message with the download progress.",
@@ -172,7 +192,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "yt-dlp",
-    description: "Download and send videos with yt-dlp.",
+    description: "Download and send videos with yt-dlp from YouTube, Twitter, Reddit and more.",
     authors: [Devs.Colorman],
     dependencies: ["CommandsAPI"],
     settings,

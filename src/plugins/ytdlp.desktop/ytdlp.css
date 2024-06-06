@@ -1,0 +1,9 @@
+/* Only way to make on:hover styles */
+
+.ytdlp-link {
+    text-decoration: none !important;
+}
+
+.ytdlp-link:hover {
+    text-decoration: none !important;
+}
