@@ -74,28 +74,28 @@ export default definePlugin({
             ]
         },
         {
-            find: /profileType:\i,overrideBannerSrc:\i/,
+            find: /overrideBannerSrc:\i,overrideBannerWidth:/,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,overrideBannerSrc:)/,
-                    replace: "$1.overrideBannerSrc=$self.useBannerHook($1);"
+                    match: /function \i\((\i)\)\{/,
+                    replace: "$&$1.overrideBannerSrc=$self.useBannerHook($1);"
                 }
             ]
         },
         {
-            find: /profileType:\i,pendingBanner:\i/,
+            find: /pendingBanner:\i,overrideBannerWidth:/,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,pendingBanner:)/,
-                    replace: "$1.pendingBanner=$self.useBannerHook($1);"
+                    match: /function \i\((\i)\)\{/,
+                    replace: "$&$1.pendingBanner=$self.useBannerHook($1);"
                 }
             ]
         },
