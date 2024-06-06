@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-function SpeedIcon() {
+export default function SpeedIcon() {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -17,5 +17,3 @@ function SpeedIcon() {
         </svg>
     );
 }
-
-export default SpeedIcon;
