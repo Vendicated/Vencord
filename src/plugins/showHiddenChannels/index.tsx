@@ -73,8 +73,9 @@ export default definePlugin({
             find: '"placeholder-channel-id"',
             replacement: [
                 // Remove the special logic for channels we don't have access to
+                // FIXME Remove variable matcher from threadsIds when it hits stable
                 {
-                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\i}}/,
+                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:(?:\[\]|\i)}}/,
                     replace: ""
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
