@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
@@ -23,6 +24,8 @@ import { Margins } from "@utils/margins";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
+
+import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
 
@@ -58,8 +61,19 @@ export default definePlugin({
                 match: 'title:"Experiments",children:[',
                 replace: "$&$self.WarningCard(),"
             }
+        },
+        // change top right chat toolbar button from the help one to the dev one
+        {
+            find: "toolbar:function",
+            replacement: {
+                match: /\i\.isStaff\(\)/,
+                replace: "true"
+            }
         }
     ],
+
+    start: () => enableStyle(hideBugReport),
+    stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");
