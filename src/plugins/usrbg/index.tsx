@@ -74,7 +74,7 @@ export default definePlugin({
             ]
         },
         {
-            find: /overrideBannerSrc:\i,profileType:/,
+            find: /profileType:\i,overrideBannerSrc:\i/,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
