@@ -33,9 +33,8 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BypassDND by Inbestigator
 - CleanChannelName by AutumnVN
 - ColorMessage by Kyuuhachi
-- CopyEmojiAsFormattedString (CopyEmojiAsString) by HAPPY_ENDERMAN and VISHNYA_NET_CHERESHNYA
 - CopyUserMention by Cortex and castdrian
-- CustomAppIcons by HAPPY_ENDERMAN and SerStars
+- CustomAppIcons by Happy Enderman and SerStars
 - CustomScreenShare by KawaiianPizza
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny

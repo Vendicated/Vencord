@@ -599,14 +599,6 @@ export const EquicordDevs = Object.freeze({
         name: "krystalskullofficial",
         id: 929208515883569182n
     },
-    puv: {
-        name: "puv",
-        id: 469441552251355137n
-    },
-    HAPPY_ENDERMAN: {
-        name: "Happy enderman",
-        id: 1083437693347827764n
-    },
     SerStars: {
         name: "SerStars",
         id: 861631850681729045n
@@ -626,10 +618,6 @@ export const EquicordDevs = Object.freeze({
     Megal: {
         name: "Megal",
         id: 387790666484285441n
-    },
-    VISHNYA_NET_CHERESHNYA: {
-        name: "Vishnya",
-        id: 282541644484575233n,
     },
     Cortex: {
         name: "Cortex",
@@ -674,10 +662,6 @@ export const EquicordDevs = Object.freeze({
     Fafa: {
         name: "Fafa",
         id: 428188716641812481n,
-    },
-    ANIKEIPS: {
-        name: "AniKeiPS",
-        id: 472052944582213634n
     },
 } satisfies Record<string, Dev>);
 

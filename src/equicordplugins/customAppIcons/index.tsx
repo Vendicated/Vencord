@@ -17,7 +17,7 @@
 */
 
 import { Link } from "@components/Link";
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { localStorage } from "@utils/localStorage";
 import { closeAllModals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -51,7 +51,7 @@ function removeAppIcon() {
 export default definePlugin({
     name: "CustomAppIcons",
     description: "Add/upload custom (In-)App Icons.",
-    authors: [EquicordDevs.HAPPY_ENDERMAN, EquicordDevs.SerStars],
+    authors: [Devs.HappyEnderman, EquicordDevs.SerStars],
     patches: [
         {
             find: ".PremiumUpsellTypes.APP_ICON_UPSELL",
@@ -100,12 +100,12 @@ export default definePlugin({
             <><Forms.FormTitle>
                 <Forms.FormTitle>How to use?</Forms.FormTitle>
             </Forms.FormTitle>
-            <Forms.FormText>
-                <Forms.FormText>Go to <Link href="/settings/appearance" onClick={e => { e.preventDefault(); closeAllModals(); FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Appearance" }); }}>Appearance Settings</Link> tab.</Forms.FormText>
-                <Forms.FormText>Scroll down to "In-app Icons" and click on "Preview App Icon".</Forms.FormText>
-                <Forms.FormText>And upload your own custom icon!</Forms.FormText>
-                <Forms.FormText>You can only use links when you are uploading your Custom Icon.</Forms.FormText>
-            </Forms.FormText></>
+                <Forms.FormText>
+                    <Forms.FormText>Go to <Link href="/settings/appearance" onClick={e => { e.preventDefault(); closeAllModals(); FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Appearance" }); }}>Appearance Settings</Link> tab.</Forms.FormText>
+                    <Forms.FormText>Scroll down to "In-app Icons" and click on "Preview App Icon".</Forms.FormText>
+                    <Forms.FormText>And upload your own custom icon!</Forms.FormText>
+                    <Forms.FormText>You can only use links when you are uploading your Custom Icon.</Forms.FormText>
+                </Forms.FormText></>
         );
     }
 });

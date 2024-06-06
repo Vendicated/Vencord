@@ -55,7 +55,7 @@ export default definePlugin({
     name: "SupportHelper",
     required: true,
     description: "Helps us provide support to you",
-    authors: [Devs.Ven, EquicordDevs.thororen, EquicordDevs.coolesding],
+    authors: [Devs.Ven, EquicordDevs.thororen],
     dependencies: ["CommandsAPI"],
 
     patches: [{
