@@ -34,11 +34,10 @@ export default definePlugin({
 
         return (
             <Tooltip text="Playback speed">
-                {({ onMouseEnter, onMouseLeave }) => (
+                {tooltipProps => (
                     <button
+                    	{...tooltipProps}
                         className={cl("icon")}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
                         onClick={e => {
                             ContextMenuApi.openContextMenu(e, () =>
                                 <Menu.Menu
