@@ -1,0 +1,7 @@
+.customFolderDefaultIcon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--custom-folder-item-guild-icon-size);
+    height: var(--custom-folder-item-guild-icon-size);
+}
