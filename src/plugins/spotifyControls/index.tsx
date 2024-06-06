@@ -77,6 +77,13 @@ export default definePlugin({
                 match: /repeat:"off"!==(.{1,3}),/,
                 replace: "actual_repeat:$1,$&"
             }
+        },
+        {
+            find: "artists.filter",
+            replacement: {
+                match: /\(0,(\i)\.isNotNullish\)\((\i)\.id\)&&/,
+                replace: ""
+            }
         }
     ],
 
