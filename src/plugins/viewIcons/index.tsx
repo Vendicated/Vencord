@@ -192,7 +192,7 @@ export default definePlugin({
             }
         })),
         // Banners
-        ...[".NITRO_BANNER,", /overrideBannerSrc:\i,profileType:/].map(find => ({
+        ...[".NITRO_BANNER,", /overrideBannerSrc:\i,overrideBannerWidth:/].map(find => ({
             find,
             replacement: {
                 // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
