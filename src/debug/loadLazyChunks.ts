@@ -47,11 +47,11 @@ export async function loadLazyChunks() {
                 for (const id of chunkIds) {
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWasm = await fetch(wreq.p + wreq.u(id))
+                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
-                        .then(t => (IS_WEB && t.includes(".module.wasm")) || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+                        .then(t => t.includes("importScripts("));
 
-                    if (isWasm && IS_WEB) {
+                    if (isWorkerAsset) {
                         invalidChunks.add(id);
                         invalidChunkGroup = true;
                         continue;
@@ -149,13 +149,15 @@ export async function loadLazyChunks() {
         });
 
         await Promise.all(chunksLeft.map(async id => {
-            const isWasm = await fetch(wreq.p + wreq.u(id))
+            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
-                .then(t => (IS_WEB && t.includes(".module.wasm")) || !t.includes("(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push"));
+                .then(t => t.includes("importScripts("));
 
             // Loads and requires a chunk
-            if (!isWasm) {
+            if (!isWorkerAsset) {
                 await wreq.e(id as any);
+                // Technically, the id of the chunk does not match the entry point
+                // But, still try it because we have no way to get the actual entry point
                 if (wreq.m[id]) wreq(id as any);
             }
         }));
