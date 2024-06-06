@@ -261,8 +261,9 @@ export default function PluginSettings() {
         plugins = [];
         requiredPlugins = [];
 
+        const showApi = searchValue.value === "API";
         for (const p of sortedPlugins) {
-            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+            if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
                 continue;
 
             if (!pluginFilter(p)) continue;
