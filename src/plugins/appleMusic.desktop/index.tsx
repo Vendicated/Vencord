@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusic as PluginNative<typeof import("./native")>;
@@ -171,6 +171,7 @@ export default definePlugin({
     description: "Discord rich presence for your Apple Music!",
     authors: [Devs.RyanCaoDev],
     hidden: !navigator.platform.startsWith("Mac"),
+    reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent() {
         return <>
