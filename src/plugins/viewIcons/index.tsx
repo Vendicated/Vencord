@@ -184,16 +184,16 @@ export default definePlugin({
 
     patches: [
         // Profiles Modal pfp
-        {
-            find: "User Profile Modal - Context Menu",
+        ...["User Profile Modal - Context Menu", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
+            find,
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
                 replace: "{src:$1,onClick:()=>$self.openImage($1)"
             }
-        },
+        })),
         // Banners
-        {
-            find: ".NITRO_BANNER,",
+        ...[".NITRO_BANNER,", /overrideBannerSrc:\i,overrideBannerWidth:/].map(find => ({
+            find,
             replacement: {
                 // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
                 match: /style:\{(?=backgroundImage:(null!=\i)\?"url\("\.concat\((\i),)/,
@@ -201,13 +201,21 @@ export default definePlugin({
                     // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
                     'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
-        },
+        })),
         // User DMs "User Profile" popup in the right
         {
             find: ".avatarPositionPanel",
             replacement: {
                 match: /(avatarWrapperNonUserBot.{0,50})onClick:(\i\|\|\i)\?void 0(?<=,avatarSrc:(\i).+?)/,
                 replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
+            }
+        },
+        {
+            find: ".canUsePremiumProfileCustomization,{avatarSrc:",
+            replacement: {
+                match: /children:\(0,\i\.jsx\)\(\i,{src:(\i)/,
+                replace: "style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},$&"
+
             }
         },
         // Group DMs top small & large icon
