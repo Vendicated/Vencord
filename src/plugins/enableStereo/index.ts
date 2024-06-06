@@ -16,7 +16,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "EnableStereo",
-    description: "Enables Stereo in Voice Calls. Note: Requires restart after every change. Noise supression Krisp and Echo Cancelation must be disabled for it to work correctly.",
+    description: "Enables Stereo in Voice Calls. Note: Requires restart after every change. Noise suppression Krisp and Echo Cancelation must be disabled for it to work correctly.",
     authors: [Devs.Rattles],
     settings,
 
