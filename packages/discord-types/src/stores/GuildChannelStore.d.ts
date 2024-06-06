@@ -20,7 +20,7 @@ export class GuildChannelStore<Action extends FluxAction = GuildChannelStoreActi
     getChannels(guildId?: string | Nullish): GuildChannels;
     getDefaultChannel<SearchVocal extends boolean | undefined = undefined>(
         guild: string,
-        searchVocal?: SearchVocal, /* = false */
+        searchVocal?: SearchVocal /* = false */,
         permissions?: /* Permissions */ bigint | undefined /* = Permissions.VIEW_CHANNEL */
     ): GuildChannelFromSearchVocal<SearchVocal>;
     getDirectoryChannelIds(guildId: string): string[];
@@ -46,7 +46,7 @@ export class GuildChannelStore<Action extends FluxAction = GuildChannelStoreActi
     getSelectableChannels(guildId: string): GuildChannel<GuildSelectableChannelRecord>[];
     getSFWDefaultChannel<SearchVocal extends boolean | undefined = undefined>(
         guild: string,
-        searchVocal?: SearchVocal, /* = false */
+        searchVocal?: SearchVocal /* = false */,
         permissions?: /* Permissions */ bigint | undefined /* = Permissions.VIEW_CHANNEL */
     ): GuildChannelFromSearchVocal<SearchVocal>;
     getTextChannelNameDisambiguations(guildId?: string | Nullish): {

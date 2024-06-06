@@ -6,7 +6,6 @@
 
 export * from "./Activity";
 export * from "./ApplicationRecord";
-export * from "./ChannelMessages";
 export * from "./channels";
 export * from "./Clan";
 export * from "./CompanyRecord";
@@ -17,7 +16,7 @@ export * from "./GuildMember";
 export * from "./GuildMemberProfile";
 export * from "./GuildRecord";
 export * from "./ImmutableRecord";
-export * from "./MessageRecord";
+export * from "./messages";
 export * from "./misc";
 export * from "./ReadState";
 export * from "./Role";

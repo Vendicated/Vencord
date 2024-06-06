@@ -14,5 +14,8 @@ export type GenericConstructor = new (...args: any[]) => unknown;
 export type Nullish = null | undefined;
 
 /** @internal */
+export type Optional<T extends object, U = undefined> = { [Key in keyof T]?: T[Key] | U; };
+
+/** @internal */
 export type Overwrite<Destination extends object, Source extends object>
     = Omit<Destination, keyof Source> & Source;

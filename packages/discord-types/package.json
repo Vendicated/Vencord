@@ -34,6 +34,6 @@
         "eslint-plugin-simple-import-sort": "^12.1.0",
         "eslint-plugin-unicorn": "^53.0.0",
         "typescript": "^5.4.5",
-        "typescript-eslint": "^8.0.0-alpha.27"
+        "typescript-eslint": "^8.0.0-alpha.28"
     }
 }

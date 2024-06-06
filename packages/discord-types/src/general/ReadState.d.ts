@@ -9,41 +9,41 @@ import type { BasicPermissionsObject } from "../stores/PermissionStore";
 import type { GuildChannelRecord } from "./channels/ChannelRecord";
 
 export class ReadState<Type extends ReadStateType = ReadStateType> {
-    constructor(channelId: string, type?: ChannelIdType | undefined);
-    constructor(userId: string, type: UserIdType);
-    constructor(guildId: string, type: GuildIdType);
+    constructor(channelId: string, type?: ChannelIdReadStateType | undefined);
+    constructor(userId: string, type: UserIdReadStateType);
+    constructor(guildId: string, type: GuildIdReadStateType);
 
     static _guildReadStateSentinels: { [guildId: string]: { unreadsSentinel: number; }; };
     static _mentionChannels: Set<string>;
-    static _readStates: { [T in ChannelIdType]?: { [channelId: string]: ReadState<T>; }; }
-        & { [T in UserIdType]?: { [userId: string]: ReadState<T>; }; }
-        & { [T in GuildIdType]?: { [guildId: string]: ReadState<T>; }; };
-    static clear<T extends ChannelIdType | undefined>(channelId: string, type?: T): boolean;
-    static clear<T extends UserIdType>(userId: string, type: T): boolean;
-    static clear<T extends GuildIdType>(guildId: string, type: T): boolean;
+    static _readStates: { [T in ChannelIdReadStateType]?: { [channelId: string]: ReadState<T>; }; }
+        & { [T in UserIdReadStateType]?: { [userId: string]: ReadState<T>; }; }
+        & { [T in GuildIdReadStateType]?: { [guildId: string]: ReadState<T>; }; };
+    static clear<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): boolean;
+    static clear<T extends UserIdReadStateType>(userId: string, type: T): boolean;
+    static clear<T extends GuildIdReadStateType>(guildId: string, type: T): boolean;
     static clearAll(): void;
     static forEach(callback: (value: ReadState) => unknown): void;
-    static get<T extends ChannelIdType | undefined>(channelId: string, type?: T): ReadState<ChannelIdType>;
-    static get<T extends UserIdType>(userId: string, type: T): ReadState<T>;
-    static get<T extends GuildIdType>(guildId: string, type: T): ReadState<T>;
+    static get<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): ReadState<ChannelIdReadStateType>;
+    static get<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T>;
+    static get<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T>;
     static getGuildSentinels(guildId: string): typeof ReadState["_guildReadStateSentinels"];
-    static getIfExists<T extends ChannelIdType | undefined>(channelId: string, type?: T): ReadState<ChannelIdType> | undefined;
-    static getIfExists<T extends UserIdType>(userId: string, type: T): ReadState<T> | undefined;
-    static getIfExists<T extends GuildIdType>(guildId: string, type: T): ReadState<T> | undefined;
+    static getIfExists<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): ReadState<ChannelIdReadStateType> | undefined;
+    static getIfExists<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T> | undefined;
+    static getIfExists<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T> | undefined;
     static getMentionChannelIds(): string[];
-    static getValue<T extends ChannelIdType | undefined, GetterReturn, DefaultValue = undefined>(
+    static getValue<T extends ChannelIdReadStateType | undefined, GetterReturn, DefaultValue = undefined>(
         channelId: string,
         type: T,
-        getter: (readState: ReadState<ChannelIdType> | undefined) => GetterReturn,
+        getter: (readState: ReadState<ChannelIdReadStateType> | undefined) => GetterReturn,
         defaultValue?: DefaultValue
     ): GetterReturn | DefaultValue;
-    static getValue<T extends UserIdType, GetterReturn, DefaultValue = undefined>(
+    static getValue<T extends UserIdReadStateType, GetterReturn, DefaultValue = undefined>(
         userId: string,
         type: T,
         getter: (readState: ReadState<T> | undefined) => GetterReturn,
         defaultValue?: DefaultValue
     ): GetterReturn | DefaultValue;
-    static getValue<T extends GuildIdType, GetterReturn, DefaultValue = undefined>(
+    static getValue<T extends GuildIdReadStateType, GetterReturn, DefaultValue = undefined>(
         guildId: string,
         type: T,
         getter: (readState: ReadState<T> | undefined) => GetterReturn,
@@ -59,13 +59,13 @@ export class ReadState<Type extends ReadStateType = ReadStateType> {
         isExplicitUserAction?: boolean | undefined
     ): boolean;
     ack(options: {
-        force?: boolean | undefined; /* = false */
-        immediate?: boolean | undefined; /* = false */
-        isExplicitUserAction?: boolean | undefined; /* = false */
-        local?: boolean | undefined; /* = false */
-        location?: { section: string; }; /* = { section: AnalyticsSections.CHANNEL } */
-        messageId?: string | Nullish; /* = this.lastMessageId */
-        trackAnalytics?: boolean | undefined; /* = true */
+        force?: boolean | undefined /* = false */;
+        immediate?: boolean | undefined /* = false */;
+        isExplicitUserAction?: boolean | undefined /* = false */;
+        local?: boolean | undefined /* = false */;
+        location?: { section: string; } /* = { section: AnalyticsSections.CHANNEL } */;
+        messageId?: string | Nullish /* = this.lastMessageId */;
+        trackAnalytics?: boolean | undefined /* = true */;
     }): boolean;
     get ackMessageId(): this["_ackMessageId"];
     set ackMessageId(messageId: this["_ackMessageId"]);
@@ -119,7 +119,7 @@ export class ReadState<Type extends ReadStateType = ReadStateType> {
     get oldestUnreadTimestamp(): number;
     rebuildChannelState(
         ackMessageId?: string | Nullish,
-        resetMentionCount?: boolean | undefined, /* = false */
+        resetMentionCount?: boolean | undefined /* = false */,
         newMentionCount?: number | Nullish
     ): void;
     recalculateFlags(): ReadStateFlags | undefined;
@@ -210,6 +210,12 @@ export const enum ReadStateFlags {
     IS_THREAD = 1 << 1,
 }
 
+export type ChannelIdReadStateType = ReadStateType.CHANNEL;
+
+export type UserIdReadStateType = ReadStateType.NOTIFICATION_CENTER | ReadStateType.MESSAGE_REQUESTS;
+
+export type GuildIdReadStateType = ReadStateType.GUILD_EVENT | ReadStateType.GUILD_HOME | ReadStateType.GUILD_ONBOARDING_QUESTION;
+
 // Original name: ReadStateTypes
 export const enum ReadStateType {
     CHANNEL = 0,
@@ -220,10 +226,4 @@ export const enum ReadStateType {
     MESSAGE_REQUESTS = 5,
 }
 
-type ChannelIdType = ReadStateType.CHANNEL;
-
-type UserIdType = ReadStateType.NOTIFICATION_CENTER | ReadStateType.MESSAGE_REQUESTS;
-
-type GuildIdType = ReadStateType.GUILD_EVENT | ReadStateType.GUILD_HOME | ReadStateType.GUILD_ONBOARDING_QUESTION;
-
-type GuildIdFromReadStateType<Type extends ReadStateType> = Type extends UserIdType ? null : string;
+type GuildIdFromReadStateType<Type extends ReadStateType> = Type extends UserIdReadStateType ? null : string;

@@ -33,9 +33,9 @@ export interface ActivityAssets {
     small_text?: string;
 }
 
-export type ActivityEmoji = ActivityCustomEmoji | ActivityUnicodeEmoji;
+export type ActivityEmoji = ActivityGuildEmoji | ActivityUnicodeEmoji;
 
-export interface ActivityCustomEmoji {
+export interface ActivityGuildEmoji {
     animated: boolean;
     id: string;
     name: string;
