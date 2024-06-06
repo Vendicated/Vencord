@@ -107,7 +107,7 @@ async function metadata(options: DownloadOptions) {
     const metadata = JSON.parse(await ytdlp(["-J", options.url, "--no-warnings"]));
     if (metadata.is_live) throw "Live streams are not supported.";
     stdout_global = "";
-    return { videoTitle: metadata.title || "video" };
+    return { videoTitle: `${metadata.title || "video"} (${metadata.id})` };
 }
 function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, format }: DownloadOptions) {
     const HAS_LIMIT = !!maxFileSize;
@@ -157,7 +157,7 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
         ? usrFormat === "video"
             ? ["--remux-video", "webm>webm/mp4"]
             : usrFormat === "audio"
-                ? ["--remux-audio", "mp3"]
+                ? ["--remux-audio", "mp3"] // @ TODO THIS DOESNT EXIST
                 : []
         : [];
     const customArgs = ytdlpArgs?.filter(Boolean) || [];
