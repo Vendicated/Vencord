@@ -286,7 +286,14 @@ page.on("console", async e => {
 });
 
 page.on("error", e => console.error("[Error]", e.message));
-page.on("pageerror", e => console.error("[Page Error]", e.message));
+page.on("pageerror", e => {
+    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
+        console.error("[Page Error]", e.message);
+        report.otherErrors.push(e.message);
+    } else {
+        report.ignoredErrors.push(e.message);
+    }
+});
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
