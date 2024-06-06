@@ -90,6 +90,7 @@ async function sendProgress(channelId: string, promise: Promise<{
         return await promise;
     }
     const clydeMessage = sendBotMessage(channelId, {
+        content: "Downloading video...",
         components: CancelButton
     });
     const updateMessage = (stdout: string, append?: string) => {
