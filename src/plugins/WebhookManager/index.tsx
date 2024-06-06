@@ -128,7 +128,7 @@ export default definePlugin({
                     required: false
                 }
             ],
-            execute: async (option, ctx) => {
+            async execute(option, ctx) {
 
                 const webhookUrl = findOption(option, "url");
                 const webhookMessage = findOption(option, "message");
