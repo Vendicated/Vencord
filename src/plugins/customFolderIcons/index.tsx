@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { showNotification } from "@api/Notifications";
 import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
@@ -164,5 +165,9 @@ function makeContextItem(a: folderProp) {
     );
 }
 function handleUpdateError(e: any) {
-    throw e;
+    showNotification({
+        title: "CustomFolderIcons: Error",
+        body: "An error has occurred. Check the console for more info."
+    });
+    console.error(e);
 }
