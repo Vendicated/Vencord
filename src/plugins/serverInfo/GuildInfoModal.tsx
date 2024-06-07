@@ -20,10 +20,10 @@ const FriendRow = findExportedComponentLazy("FriendRow");
 
 const cl = classNameFactory("vc-gp-");
 
-export function openGuildProfileModal(guild: Guild) {
+export function openGuildInfoModal(guild: Guild) {
     openModal(props =>
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <GuildProfileModal guild={guild} />
+            <GuildInfoModal guild={guild} />
         </ModalRoot>
     );
 }
@@ -53,7 +53,7 @@ function renderTimestamp(timestamp: number) {
     );
 }
 
-function GuildProfileModal({ guild }: GuildProps) {
+function GuildInfoModal({ guild }: GuildProps) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
 
