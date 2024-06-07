@@ -70,7 +70,7 @@ export default definePlugin({
             ]
         },
         {
-            find: /overrideBannerSrc:\i,overrideBannerWidth:/,
+            find: "=!1,canUsePremiumCustomization:",
             replacement: {
                 match: /(\i)\.premiumType/,
                 replace: "$self.premiumHook($1)||$&"
