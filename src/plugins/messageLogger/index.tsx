@@ -119,10 +119,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                     });
                     toClearEditHistory.forEach(message => {
                         message.editHistory = [];
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_UPDATE",
-                            message: message,
-                        });
+                        updateMessage(channel.id, message.id)
                     });
                 }
             }
