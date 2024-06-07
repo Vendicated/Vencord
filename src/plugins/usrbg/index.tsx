@@ -87,7 +87,7 @@ export default definePlugin({
             ]
         },
         {
-            find: /pendingBanner:\i,overrideBannerWidth:/,
+            find: /profileType:\i,pendingBanner:/,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
