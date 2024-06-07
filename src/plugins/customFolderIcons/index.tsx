@@ -82,7 +82,6 @@ const setFolderUrl = async (a: folderProp, url: string) => {
     DataStore.get<folderMap>(DATA_STORE_NAME).then(v => {
         v = v ?? {} as folderMap;
         v[a.folderId] = {
-            // type: url.endsWith("svg") ? ICON_TYPE.SVG:ICON_TYPE.PNG,
             url: url,
         };
         DataStore.set(DATA_STORE_NAME, v).then(() => { d = v; }).catch(e => {
