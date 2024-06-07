@@ -74,15 +74,15 @@ export default definePlugin({
             ]
         },
         {
-            find: /overrideBannerSrc:\i,profileType:/,
+            find: /overrideBannerSrc:\i,overrideBannerWidth:/,
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
                     replace: "$self.premiumHook($1)||$&"
                 },
                 {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},overrideBannerSrc:)/,
-                    replace: "$1.overrideBannerSrc=$self.useBannerHook($1);"
+                    match: /function \i\((\i)\)\{/,
+                    replace: "$&$1.overrideBannerSrc=$self.useBannerHook($1);"
                 }
             ]
         },
