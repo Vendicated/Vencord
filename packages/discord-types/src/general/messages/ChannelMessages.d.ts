@@ -6,7 +6,7 @@
 
 import type { Nullish, Optional } from "../../internal";
 import type { MessageCache } from "./MessageCache";
-import type { MessageRecord } from "./MessageRecord";
+import type { MessageProperties, MessageRecord } from "./MessageRecord";
 
 export type ChannelMessagesOwnProperties = Pick<ChannelMessages, "_after" | "_array" | "_before" | "_map" | "cached" | "channelId" | "error" | "focusTargetId" | "hasFetched" | "hasMoreAfter" | "hasMoreBefore" | "jumped" | "jumpedToPresent" | "jumpFlash" | "jumpReturnTargetId" | "jumpSequenceId" | "jumpTargetId" | "jumpTargetOffset" | "jumpType" | "loadingMore" | "ready" | "revealedMessageId">;
 
@@ -95,7 +95,7 @@ export class ChannelMessages {
     jumpToPresent(countFromPresent: number): ChannelMessages;
     last(): MessageRecord | undefined;
     get length(): number;
-    loadComplete(messageProperties: Record<string, any>): ChannelMessages; // TEMP
+    loadComplete(messageProperties: MessageProperties): ChannelMessages;
     loadFromCache(isBefore: boolean, extractCount: number): ChannelMessages;
     loadStart(jumpConfig?: {
         messageId?: string | Nullish;
@@ -114,7 +114,7 @@ export class ChannelMessages {
     ): ChannelMessages;
     mergeDelta(
         messages?: MessageRecord[] | undefined /* = [] */,
-        messageProperties?: Record<string, any>[] | undefined /* = [] */, // TEMP
+        messageProperties?: MessageProperties[] | undefined /* = [] */,
         excludedMessageIds?: string[] /* = [] */
     ): ChannelMessages;
     mutate(
@@ -123,10 +123,10 @@ export class ChannelMessages {
         deep?: boolean | undefined /* = false */
     ): ChannelMessages;
     receiveMessage(
-        messageProperties: Record<string, any>, // TEMP
+        messageProperties: MessageProperties,
         truncateTop?: boolean | undefined /* = true */
     ): ChannelMessages | this;
-    receivePushNotification(messageProperties: Record<string, any>): ChannelMessages | this; // TEMP
+    receivePushNotification(messageProperties: MessageProperties): ChannelMessages | this;
     reduce(
         callback: (
             previousValue: MessageRecord,

@@ -159,6 +159,7 @@ export default tseslint.config(
             }],
             "import/no-default-export": "error",
             "import/no-unused-modules": "error",
+            "no-restricted-globals": ["error", "_", "JSX", "React"],
             "no-restricted-syntax": [
                 "error",
                 "ImportDeclaration[importKind=value]",

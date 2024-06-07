@@ -123,8 +123,8 @@ importers:
         specifier: ^3.1.2
         version: 3.1.2
       tsx:
-        specifier: ^4.11.2
-        version: 4.11.2
+        specifier: ^4.13.0
+        version: 4.13.0
       type-fest:
         specifier: ^4.19.0
         version: 4.19.0
@@ -146,6 +146,9 @@ importers:
       '@types/lodash':
         specifier: ~4.17.4
         version: 4.17.4
+      '@types/react':
+        specifier: ~18.2.79
+        version: 18.2.79
       dependency-graph:
         specifier: 0.9.0
         version: 0.9.0
@@ -218,8 +221,8 @@ importers:
         specifier: ^11.2.0
         version: 11.2.0
       tsx:
-        specifier: ^4.11.2
-        version: 4.11.2
+        specifier: ^4.13.0
+        version: 4.13.0
 
 packages:
 
@@ -2664,8 +2667,8 @@ packages:
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
-  tsx@4.11.2:
-    resolution: {integrity: sha512-V5DL5v1BuItjsQ2FN9+4OjR7n5cr8hSgN+VGmm/fd2/0cgQdBIWHcQ3bFYm/5ZTmyxkTDBUIaRuW2divgfPe0A==}
+  tsx@4.13.0:
+    resolution: {integrity: sha512-kNY70P2aLMdVBii1Err5ENxDhQ6Vz2PbQGX68DcvzY2/PWK5NLBO6vI7lPr1/2xG3IKSt2MN+KOAyWDQSRlbCA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -5505,7 +5508,7 @@ snapshots:
 
   tslib@2.6.2: {}
 
-  tsx@4.11.2:
+  tsx@4.13.0:
     dependencies:
       esbuild: 0.20.2
       get-tsconfig: 4.7.5

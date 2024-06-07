@@ -7,3 +7,5 @@
 export * from "./ChannelMessages";
 export * from "./MessageCache";
 export * from "./MessageRecord";
+export * from "./MessageSnapshotRecord";
+export * from "./MinimalMessageRecord";

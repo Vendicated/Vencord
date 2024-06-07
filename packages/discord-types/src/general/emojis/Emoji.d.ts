@@ -8,21 +8,6 @@ import type { Nullish } from "../../internal";
 
 export type Emoji = UnicodeEmoji | GuildEmoji;
 
-export interface GuildEmoji {
-    allNamesString: string;
-    animated: boolean;
-    available: boolean;
-    guildId: string;
-    id: string;
-    managed: false;
-    name: string;
-    originalName?: string;
-    /** False for emoticons. */
-    require_colons: boolean;
-    roles: string[];
-    type: EmojiType.GUILD;
-}
-
 // Original name: Emoji
 export class UnicodeEmoji {
     constructor(emojiObject: UnicodeEmojiObject | UnicodeEmojiObjectDiversityChild);
@@ -69,6 +54,21 @@ export interface UnicodeEmojiObjectDiversityChild extends Pick<UnicodeEmojiObjec
     diversity: [string, string?];
     hasDiversityParent?: boolean;
     hasMultiDiversityParent?: boolean;
+}
+
+export interface GuildEmoji {
+    allNamesString: string;
+    animated: boolean;
+    available: boolean;
+    guildId: string;
+    id: string;
+    managed: false;
+    name: string;
+    originalName?: string;
+    /** False for emoticons. */
+    require_colons: boolean;
+    roles: string[];
+    type: EmojiType.GUILD;
 }
 
 // Original name: EmojiTypes

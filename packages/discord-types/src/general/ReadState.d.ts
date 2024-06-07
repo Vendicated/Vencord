@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Nullish, Overwrite } from "../internal";
+import type { Nullish, Optional } from "../internal";
 import type { BasicPermissionsObject } from "../stores/PermissionStore";
 import type { GuildChannelRecord } from "./channels/ChannelRecord";
 
@@ -75,18 +75,10 @@ export class ReadState<Type extends ReadStateType = ReadStateType> {
     canTrackUnreads(): boolean;
     clearOutgoingAck(): void;
     delete(remote?: boolean | undefined): void;
-    deserializeForOverlay(serlizedReadState: Overwrite<SerializedReadState<false, Type>, {
+    deserializeForOverlay(serlizedReadState: Optional<SerializedReadState<false, Type>, Nullish, "_isJoinedThread" | "estimated" | "_isActiveThread" | "isManualAck" | "_isThread" | "loadedMessages" | "oldestUnreadMessageIdStale" | "type"> & {
         _isActiveJoinedThread?: boolean | Nullish;
-        _isJoinedThread?: boolean | Nullish;
         _unreadCount?: number | Nullish;
-        estimated?: boolean | Nullish;
-        isActiveThread?: boolean | Nullish;
-        isManualAck?: boolean | Nullish;
-        isThread?: boolean | Nullish;
-        loadedMessages?: boolean | Nullish;
-        oldestUnreadMessageIdStale?: boolean | Nullish;
-        type?: ReadStateType | Nullish;
-    }>): void;
+    }): void;
     getAckTimestamp(): number;
     getGuildChannelUnreadState(
         guildChannel: BasicPermissionsObject | GuildChannelRecord,

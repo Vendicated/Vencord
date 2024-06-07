@@ -33,15 +33,15 @@ export interface ActivityAssets {
     small_text?: string;
 }
 
-export type ActivityEmoji = ActivityGuildEmoji | ActivityUnicodeEmoji;
+export type ActivityEmoji = ActivityUnicodeEmoji | ActivityGuildEmoji;
+
+export interface ActivityUnicodeEmoji {
+    name: string;
+}
 
 export interface ActivityGuildEmoji {
     animated: boolean;
     id: string;
-    name: string;
-}
-
-export interface ActivityUnicodeEmoji {
     name: string;
 }
 

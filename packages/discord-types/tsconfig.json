@@ -7,7 +7,7 @@
         "strict": true,
 
         "module": "Node16",
-        "types": ["events", "lodash"],
+        "types": ["events", "lodash", "react"],
 
         "noEmit": true,
 
