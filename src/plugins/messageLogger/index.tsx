@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
@@ -100,10 +100,11 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
     const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
     if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
 
-    children.push(
+    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
+    group.push(
         <Menu.MenuItem
             id="vc-ml-clear-channel"
-            label="Clear MessageLogger History"
+            label="Clear Message Log"
             color="danger"
             action={() => {
                 messages.forEach(msg => {
