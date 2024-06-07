@@ -87,7 +87,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "_.QuestContent.QUEST_BADGE",
+            find: 'action:"HOVER_BADGE"}),(0,',
             replacement: [
                 {
                     match: /(?<=href:(\i)\.link.{20,60})src:/,
@@ -98,16 +98,12 @@ export default definePlugin({
                     replace: "children:$1.component ? () => $self.renderBadgeComponent($1) :"
                 },
                 {
-                    match: /}=\i,{/,
-                    replace: ",VcUser:VcUser$&"
+                    match: /(?<=badges:(\i).{50,180}Context\)\(\);)/,
+                    replace: "let VcUser=$1.pop();"
                 },
                 {
                     match: /href:(\i)\.link/,
                     replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, VcUser) }),$&"
-                },
-                {
-                    match: /(?=;return.{40,140}(.{1})\.map)/,
-                    replace: ";$1.unshift(...Vencord.Api.Badges._getBadges(VcUser))"
                 }
             ]
         },
@@ -117,14 +113,14 @@ export default definePlugin({
             // and we need it for the custom onClicks
             replacement: [
                 {
-                    match: /=\(0,\i\.default\)\((\i)\);/,
+                    match: /(\i)=\(0,\i\.default\)\((\i)\);/,
                     // this $1 user has userId instead of id
                     // and i didnt feel like adding more types idk
-                    replace: "$&let VcUser=Vencord.Webpack.Common.UserStore.getUser($1.userId);"
+                    replace: "$&let VcUser={user:Vencord.Webpack.Common.UserStore.getUser($2.userId)};$1.unshift(...Vencord.Api.Badges._getBadges(VcUser));"
                 },
                 {
-                    match: /badges:\i,/,
-                    replace: "$&VcUser:{user:VcUser},"
+                    match: /badges:\i/,
+                    replace: "$&.concat(VcUser)"
                 }
             ]
         },
