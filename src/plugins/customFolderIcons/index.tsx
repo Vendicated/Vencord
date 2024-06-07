@@ -4,29 +4,26 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./style.css";
-
 import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Menu, TextInput } from "@webpack/common";
 const DATA_STORE_NAME = "CFI_DATA";
-enum ICON_TYPE {
-    PNG,
-    SVG
-}
 interface folderIcon{
-    type: ICON_TYPE,
-    url: string
+    url: string,
 }
-interface config {
-    [key: string]: folderIcon
+interface folderMap {
+    [key: string]: folderIcon | undefined
 }
-let d: config;
+interface folderProp {
+    folderId: string;
+    folderColor: number;
+}
+let d: folderMap;
 export default definePlugin({
     start: async ()=>{
-        d = await DataStore.get(DATA_STORE_NAME) || {} as config;
+        d = await DataStore.get(DATA_STORE_NAME) || {} as folderMap;
     },
     name: "_customFolderIcons",
     description: "customize folder icons with any png",
@@ -37,15 +34,15 @@ export default definePlugin({
         {
             find: ".expandedFolderIconWrapper",
             replacement: {
-                match: /(return.{0,80}expandedFolderIconWrapper.*,)\(0,..jsxs\)\(.*]}\)/,
-                replace: "$1$self.test(e)"
+                match: /(return.{0,80}expandedFolderIconWrapper.*,)(\(0,..jsxs\)\(.*]}\))/,
+                replace: "$1$self.shouldReplace(e)?$self.replace(e):$2"
             }
         }
     ],
     contextMenus: {
-        "guild-context": (c, a) => {
+        "guild-context": (c, a: folderProp) => {
             if(!("folderId" in a)) return;
-            c.push(makeContextItem(a.folderId));
+            c.push(makeContextItem(a));
         }
     },
     commands: [
@@ -53,68 +50,52 @@ export default definePlugin({
             name: "test",
             description: "test command for some wack shit",
             execute: async () => {
-                console.log("asd");
             }
         }
     ],
-    test(e){
-        console.log(e);
-        if(d && e.folderNode.id in d){
-            switch(d[e.folderNode.id].type){
-                case ICON_TYPE.PNG:
-                    return (
-                        <img src={d[e.folderNode.id].url} width={"100%"} height={"100%"} />
-                    );
-                case ICON_TYPE.SVG:
-                    return null;
-            }
+    shouldReplace(e: any){
+        return d && e.folderNode.id in d && d[e.folderNode.id] && d[e.folderNode.id]?.url;
+    },
+    replace(e: any){
+        if(d && d[e.folderNode.id]){
+            return (
+                <img src={d[e.folderNode.id]!.url} width={"100%"} height={"100%"}
+                    style={{
+                        backgroundColor: int2rgba(e.folderNode.color, .4)
+                    }}
+                />
+            );
         }
-        // TODO: when using the default set the color properly
-        return(
-            <div className="customFolderDefaultIcon">
-                <svg
-                    aria-hidden="true"
-                    role="img"
-                    fill="white"
-                    width={24}
-                    height={24}
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        d="M2 5a3 3 0 0 1 3-3h3.93a2 2 0 0 1 1.66.9L12 5h7a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5Z"/>
-                </svg>
-            </div>
-        );
     }
 });
-const setFolderUrl = async (id: string, url: string) => {
-    console.log(id, url);
-    DataStore.get<config>(DATA_STORE_NAME).then(v => {
-        if(v){
-            v[id] = {
-                type: ICON_TYPE.PNG,
-                url: url
-            };
-            DataStore.set(DATA_STORE_NAME, v).then(() => { d = v; }).catch(e => {
-                handleUpdateError(e);
-            });
-        }else{
-            v = {};
-            v[id] = {
-                type: ICON_TYPE.PNG,
-                url: url
-            };
-            DataStore.set(DATA_STORE_NAME, v).then(() => { d = v; }).catch(e => {
-                handleUpdateError(e);
-            });
-        }
+/**
+    * @param i RGB value
+    * @param a alpha bewteen zero and 1
+    */
+const int2rgba = (i: number, a: number = 1)=>{
+    const b = i & 0xFF,
+        g = (i & 0xFF00) >>> 8,
+        r = (i & 0xFF0000) >>> 16;
+    return `rgba(${[r,g,b].join(",")},${a})`;
+};
+const setFolderUrl = async (a: folderProp, url: string) => {
+    DataStore.get<folderMap>(DATA_STORE_NAME).then(v => {
+        v = v ?? {} as folderMap;
+        v[a.folderId] = {
+            // type: url.endsWith("svg") ? ICON_TYPE.SVG:ICON_TYPE.PNG,
+            url: url,
+        };
+        DataStore.set(DATA_STORE_NAME, v).then(() => { d = v; }).catch(e => {
+            handleUpdateError(e);
+        });
     }
     )
         .catch(e => {
             handleUpdateError(e);
         });
 };
-function ImageModal(a: { folderId: string }){
+
+function ImageModal(folderData: folderProp){
     let v = "";
     return(
         <>
@@ -126,23 +107,34 @@ function ImageModal(a: { folderId: string }){
             >
             </TextInput>
             <Button onClick={() => {
-                setFolderUrl(a.folderId, v);
+                setFolderUrl(folderData, v);
                 closeModal("custom-folder-icon");
             }}
             >
                 Set With Url
             </Button>
+            <hr />
+            <Button onClick={() => {
+                DataStore.get(DATA_STORE_NAME).then(v => {
+                    if(!v) return;
+                    v[folderData.folderId] = undefined;
+                    d = v;
+                });
+                closeModal("custom-folder-icon");
+            }}>
+                Unset
+            </Button>
+            <hr />
         </>
     );
 }
-function makeContextItem(id: string) {
+function makeContextItem(a: folderProp) {
     return (
         <Menu.MenuItem
             id="custom-folder-icons"
             key="custom-folder-icons"
             label="Change Icon"
             action={() => {
-                console.log("menu clicked");
                 openModalLazy(async () => {
                     return props => (
                         <ModalRoot {...props}>
@@ -154,8 +146,15 @@ function makeContextItem(id: string) {
                                 </div>
                             </ModalHeader>
                             <ModalContent>
-                                <ImageModal folderId={id}/>
+                                <ImageModal folderId={a.folderId} folderColor={a.folderColor}/>
                             </ModalContent>
+                            <div style={{
+                                color: "white",
+                                margin: "2.5%",
+                                marginTop: "1%"
+                            }}>
+                                You might have to hover the folder after setting in order for it to refresh.
+                            </div>
                         </ModalRoot>
                     );
                 },
