@@ -24,7 +24,7 @@ interface folderProp {
 let folderData: folderStoredData;
 export default definePlugin({
     start: async ()=>{
-        folderData = await DataStore.get(DATA_STORE_NAME) || {} as folderStoredData;
+        folderData = await DataStore.get(DATA_STORE_NAME).catch(e => handleUpdateError(e)) || {} as folderStoredData;
     },
     name: "CustomFolderIcons",
     description: "Customize folder icons with any png",
@@ -57,7 +57,7 @@ export default definePlugin({
             return (
                 <img src={folderData[props.folderNode.id]!.url} width={"100%"} height={"100%"}
                     style={{
-                        backgroundColor: int2rgba(props.folderNode.color, .4)
+                        backgroundColor: int2rgba(props.folderNode.color, .4),
                     }}
                 />
             );
@@ -90,7 +90,7 @@ const setFolderUrl = async (props: folderProp, url: string) => {
         });
 };
 
-function ImageModal(folderData: folderProp){
+function ImageModal(folderProps: folderProp){
     let data = "";
     return(
         <>
@@ -102,7 +102,7 @@ function ImageModal(folderData: folderProp){
             >
             </TextInput>
             <Button onClick={() => {
-                setFolderUrl(folderData, data);
+                setFolderUrl(folderProps, data);
                 closeModal("custom-folder-icon");
             }}
             >
@@ -110,11 +110,13 @@ function ImageModal(folderData: folderProp){
             </Button>
             <hr />
             <Button onClick={() => {
-                DataStore.get(DATA_STORE_NAME).then(v => {
-                    if(!v) return;
-                    v[folderData.folderId] = undefined;
-                    folderData = v;
-                });
+                DataStore.get(DATA_STORE_NAME).then(data => {
+                    if(!data) return;
+                    data[folderProps.folderId] = undefined;
+                    DataStore.set(DATA_STORE_NAME, data).then(() => {
+                        folderData = data;
+                    }).catch(e => handleUpdateError(e));
+                }).catch(e => handleUpdateError(e));
                 closeModal("custom-folder-icon");
             }}>
                 Unset
