@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showNotification } from "@api/Notifications";
 import { DataStore } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -14,20 +14,20 @@ const DATA_STORE_NAME = "CFI_DATA";
 interface folderIcon{
     url: string,
 }
-interface folderMap {
+interface folderStoredData {
     [key: string]: folderIcon | undefined
 }
 interface folderProp {
     folderId: string;
     folderColor: number;
 }
-let d: folderMap;
+let folderData: folderStoredData;
 export default definePlugin({
     start: async ()=>{
-        d = await DataStore.get(DATA_STORE_NAME) || {} as folderMap;
+        folderData = await DataStore.get(DATA_STORE_NAME) || {} as folderStoredData;
     },
-    name: "_customFolderIcons",
-    description: "customize folder icons with any png",
+    name: "CustomFolderIcons",
+    description: "Customize folder icons with any png",
     authors: [
         Devs.sadan
     ],
@@ -36,33 +36,28 @@ export default definePlugin({
             find: ".expandedFolderIconWrapper",
             replacement: {
                 match: /(return.{0,80}expandedFolderIconWrapper.*,)(\(0,..jsxs\)\(.*]}\))/,
-                replace: "$1$self.shouldReplace(e)?$self.replace(e):$2"
+                replace: "$1$self.shouldReplace(arguments[0])?$self.replace(arguments[0]):$2"
             }
         }
     ],
     contextMenus: {
-        "guild-context": (c, a: folderProp) => {
-            if(!("folderId" in a)) return;
-            c.push(makeContextItem(a));
+        "guild-context": (menuItems, props: folderProp) => {
+            if(!("folderId" in props)) return;
+            menuItems.push(makeContextItem(props));
         }
     },
-    commands: [
-        {
-            name: "test",
-            description: "test command for some wack shit",
-            execute: async () => {
-            }
-        }
-    ],
-    shouldReplace(e: any){
-        return d && e.folderNode.id in d && d[e.folderNode.id] && d[e.folderNode.id]?.url;
+    shouldReplace(props: any){
+        return folderData
+            && props.folderNode.id in folderData
+            && folderData[props.folderNode.id]
+            && folderData[props.folderNode.id]?.url;
     },
-    replace(e: any){
-        if(d && d[e.folderNode.id]){
+    replace(props: any){
+        if(folderData && folderData[props.folderNode.id]){
             return (
-                <img src={d[e.folderNode.id]!.url} width={"100%"} height={"100%"}
+                <img src={folderData[props.folderNode.id]!.url} width={"100%"} height={"100%"}
                     style={{
-                        backgroundColor: int2rgba(e.folderNode.color, .4)
+                        backgroundColor: int2rgba(props.folderNode.color, .4)
                     }}
                 />
             );
@@ -70,22 +65,22 @@ export default definePlugin({
     }
 });
 /**
-    * @param i RGB value
-    * @param a alpha bewteen zero and 1
+    * @param rgbVal RGB value
+    * @param alpha alpha bewteen zero and 1
     */
-const int2rgba = (i: number, a: number = 1)=>{
-    const b = i & 0xFF,
-        g = (i & 0xFF00) >>> 8,
-        r = (i & 0xFF0000) >>> 16;
-    return `rgba(${[r,g,b].join(",")},${a})`;
+const int2rgba = (rgbVal: number, alpha: number = 1)=>{
+    const b = rgbVal & 0xFF,
+        g = (rgbVal & 0xFF00) >>> 8,
+        r = (rgbVal & 0xFF0000) >>> 16;
+    return `rgba(${[r,g,b].join(",")},${alpha})`;
 };
-const setFolderUrl = async (a: folderProp, url: string) => {
-    DataStore.get<folderMap>(DATA_STORE_NAME).then(v => {
-        v = v ?? {} as folderMap;
-        v[a.folderId] = {
+const setFolderUrl = async (props: folderProp, url: string) => {
+    DataStore.get<folderStoredData>(DATA_STORE_NAME).then(data => {
+        data = data ?? {} as folderStoredData;
+        data[props.folderId] = {
             url: url,
         };
-        DataStore.set(DATA_STORE_NAME, v).then(() => { d = v; }).catch(e => {
+        DataStore.set(DATA_STORE_NAME, data).then(() => { folderData = data; }).catch(e => {
             handleUpdateError(e);
         });
     }
@@ -96,18 +91,18 @@ const setFolderUrl = async (a: folderProp, url: string) => {
 };
 
 function ImageModal(folderData: folderProp){
-    let v = "";
+    let data = "";
     return(
         <>
             <hr />
-            <TextInput onChange={(val,n) => {
-                v = val;
+            <TextInput onChange={(val, n) => {
+                data = val;
             }}
             placeholder="https://example.com/image.png"
             >
             </TextInput>
             <Button onClick={() => {
-                setFolderUrl(folderData, v);
+                setFolderUrl(folderData, data);
                 closeModal("custom-folder-icon");
             }}
             >
@@ -118,7 +113,7 @@ function ImageModal(folderData: folderProp){
                 DataStore.get(DATA_STORE_NAME).then(v => {
                     if(!v) return;
                     v[folderData.folderId] = undefined;
-                    d = v;
+                    folderData = v;
                 });
                 closeModal("custom-folder-icon");
             }}>
