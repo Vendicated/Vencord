@@ -85,7 +85,49 @@ export default definePlugin({
                     replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, arguments[0]) }),$&"
                 }
             ]
-        }
+        },
+        {
+            find: "_.QuestContent.QUEST_BADGE",
+            replacement: [
+                {
+                    match: /(?<=href:(\i)\.link.{20,60})src:/,
+                    replace: "...$1.props,$&$1.image??"
+                },
+                {
+                    match: /(?<=(\i)\.description.{20,55})children:/,
+                    replace: "children:$1.component ? () => $self.renderBadgeComponent($1) :"
+                },
+                {
+                    match: /}=\i,{/,
+                    replace: ",VcUser:VcUser$&"
+                },
+                {
+                    match: /href:(\i)\.link/,
+                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, VcUser) }),$&"
+                },
+                {
+                    match: /(?=;return.{40,140}(.{1})\.map)/,
+                    replace: ";$1.unshift(...Vencord.Api.Badges._getBadges(VcUser))"
+                }
+            ]
+        },
+        {
+            find: ".UserProfileTypes.PANEL]:14",
+            // Since the badge component doesnt get the user object,
+            // and we need it for the custom onClicks
+            replacement: [
+                {
+                    match: /=\(0,\i\.default\)\((\i)\);/,
+                    // this $1 user has userId instead of id
+                    // and i didnt feel like adding more types idk
+                    replace: "$&let VcUser=Vencord.Webpack.Common.UserStore.getUser($1.userId);"
+                },
+                {
+                    match: /badges:\i,/,
+                    replace: "$&VcUser:{user:VcUser},"
+                }
+            ]
+        },
     ],
 
     toolboxActions: {
