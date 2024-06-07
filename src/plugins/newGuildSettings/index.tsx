@@ -16,10 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { Menu } from "@webpack/common";
+import { Guild } from "discord-types/general";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
@@ -68,12 +72,50 @@ const settings = definePluginSettings({
     }
 });
 
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
+    if (!guild) return;
+
+    children.push(
+        <Menu.MenuItem
+            label="Apply NewGuildSettings"
+            id="vc-newguildsettings-apply"
+            icon={CogWheel}
+            action={() => handleSettings(guild.id)}
+        />
+    );
+};
+
+function handleSettings(guildId: string | null) {
+    if (guildId === "@me" || guildId === "null" || guildId == null) return;
+    updateGuildNotificationSettings(guildId,
+        {
+            muted: settings.store.guild,
+            suppress_everyone: settings.store.everyone,
+            suppress_roles: settings.store.role,
+            mute_scheduled_events: settings.store.events,
+            notify_highlights: settings.store.highlights ? 1 : 0
+        });
+    if (settings.store.messages !== 3) {
+        updateGuildNotificationSettings(guildId,
+            {
+                message_notifications: settings.store.messages,
+            });
+    }
+    if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
+        toggleShowAllChannels(guildId);
+    }
+}
+
+
 migratePluginSettings("NewGuildSettings", "MuteNewGuild");
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["MuteNewGuild", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
+    contextMenus: {
+        "guild-context": guildPopoutPatch,
+    },
     patches: [
         {
             find: ",acceptInvite(",
@@ -91,25 +133,5 @@ export default definePlugin({
         }
     ],
     settings,
-
-    handleMute(guildId: string | null) {
-        if (guildId === "@me" || guildId === "null" || guildId == null) return;
-        updateGuildNotificationSettings(guildId,
-            {
-                muted: settings.store.guild,
-                suppress_everyone: settings.store.everyone,
-                suppress_roles: settings.store.role,
-                mute_scheduled_events: settings.store.events,
-                notify_highlights: settings.store.highlights ? 1 : 0
-            });
-        if (settings.store.messages !== 3) {
-            updateGuildNotificationSettings(guildId,
-                {
-                    message_notifications: settings.store.messages,
-                });
-        }
-        if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
-            toggleShowAllChannels(guildId);
-        }
-    }
+    handleMute: handleSettings
 });
