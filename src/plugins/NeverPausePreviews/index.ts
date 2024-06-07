@@ -34,7 +34,7 @@ export default definePlugin({
         {   //in-call player patch #1 (keep stream playing)
             find: "VideoStreamFit:",
             replacement: {
-                match: /paused:.{1,2}}\)/,
+                match: /paused:\i}\)/,
                 replace: "paused:false})"
             }
         },
