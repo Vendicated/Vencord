@@ -27,8 +27,8 @@ export default definePlugin({
         {   //picture-in-picture player patch
             find: "streamerPaused()",
             replacement: {
-                match: /return (.{0,120})&&!.{1,2}}/,
-                replace: "return $1&&false}"
+                match: /return null![^}]+/,
+                replace: "return false"
             }
         },
         {   //in-call player patch #1 (keep stream playing)
@@ -41,8 +41,8 @@ export default definePlugin({
         {   //in-call player patch #2 (disable "your stream is still running" text overlay)
             find: "let{mainText:",
             replacement: {
-                match: /let{.{0,120};/,
-                replace: "return;"
+                match: /let{[^;]+/,
+                replace: "return"
             }
         }
     ],
