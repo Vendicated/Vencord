@@ -146,7 +146,7 @@ export default definePlugin({
                     if (webhookProfilePic === "")
                         webhookProfilePic = undefined;
 
-                    Native.executeWebhook("" + webhookUrl, {
+                    Native.executeWebhook(webhookUrl, {
                         content: webhookMessage,
                         username: webhookUsername,
                         avatar_url: webhookProfilePic,
