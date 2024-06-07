@@ -20,7 +20,7 @@ export default definePlugin({
         {   //in-call player patch #1 (keep stream playing)
             find: /videoComponent:.{1,2},className:/,
             replacement: {
-                match: "paused:p})",
+                match: /paused:.{1,2}}\)/,
                 replace: "paused:false})"
             }
         },
