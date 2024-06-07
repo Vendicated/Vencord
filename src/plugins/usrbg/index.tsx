@@ -79,8 +79,8 @@ export default definePlugin({
         {
             find: "BannerLoadingStatus:function",
             replacement: {
-                match: /void 0:\i.getPreviewBanner\(\i,\i,\i\)/,
-                replace: "$&||$self.useBannerHook(arguments[0])"
+                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
+                replace: "$self.useBannerHook(arguments[0])||$&"
 
             }
         },
