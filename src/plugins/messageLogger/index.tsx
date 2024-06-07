@@ -19,6 +19,7 @@
 import "./messageLogger.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -90,7 +91,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-	if (!channel) return;
+    if (!channel) return;
     const messages: Array<any> = MessageStore.getMessages(channel.id)?._array;
     if (!messages) return;
 
@@ -119,7 +120,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                     });
                     toClearEditHistory.forEach(message => {
                         message.editHistory = [];
-                        updateMessage(channel.id, message.id)
+                        updateMessage(channel.id, message.id);
                     });
                 }
             }
