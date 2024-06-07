@@ -106,8 +106,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
     const group = findGroupChildrenByChildId("mark-channel-read", children);
     group?.push(
         (<Menu.MenuItem
-            id="ml-clear-channel"
-            key="ml-clear-channel"
+            id="vc-ml-clear-channel"
             label="Clear Message Log History"
             color="danger"
             action={
