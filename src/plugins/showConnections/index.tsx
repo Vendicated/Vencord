@@ -180,7 +180,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: !1 })"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: false })"
             }
         },
         {
@@ -195,7 +195,7 @@ export default definePlugin({
             find: "autoFocusNote:!0})",
             replacement: {
                 match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, compactSpacing: !0 })"
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, compactSpacing: true })"
             }
         }
     ],
