@@ -13,7 +13,7 @@ const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
-    authors: [Devs.Byron],
+    authors: [Devs.Byeoon],
     dependencies: ["CommandsAPI"],
     commands: [
         {
