@@ -5,7 +5,7 @@
  */
 
 import { negotiateLanguages } from "@fluent/langneg";
-import { FluxDispatcher, i18n } from "@webpack/common";
+import { FluxDispatcher, i18n, React } from "@webpack/common";
 
 import translations from "~translations";
 
@@ -123,4 +123,38 @@ export function $t(key: string, variables?: Record<string, any>): string {
     if (!variables) return translation as string;
 
     return format(translation as string, variables);
+}
+
+interface TranslateProps {
+    /** The key to translate. */
+    i18nKey: string;
+    /** The variables to interpolate into the resultant string. If dealing with plurals, `count` must be set. */
+    variables?: Record<string, any>;
+    /** The component(s) to interpolate into the resultant string. */
+    children: JSX.Element | JSX.Element[];
+}
+
+/**
+ * A translation component. Follows the same rules as {@link $t}, but lets you add components to strings.
+ * @param param0 Component props.
+ */
+export function Translate({ i18nKey, variables, children: trueChildren }: TranslateProps): JSX.Element {
+    const children = [trueChildren].flat();
+
+    const translation = $t(i18nKey, variables);
+
+    const parts = translation.split(/(<\d+>.*?<\/\d+>)/g);
+
+    const finalChildren = parts.map((part, index) => {
+        const match = part.match(/<(\d+)>(.*?)<\/\d+>/);
+
+        if (match) {
+            const childIndex = parseInt(match[1], 10);
+            return React.cloneElement(children[childIndex], { key: index }, match[2]);
+        }
+
+        return part;
+    });
+
+    return <>{finalChildren}</>;
 }

@@ -5,6 +5,15 @@
       "error": "An error occurred while rendering this Component. More info can be found below and in your console.",
       "ohNo": "Oh no!"
     },
+    "pluginSettings": {
+      "contributorModal": {
+        "contributed": {
+            "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
+            "one": "This person has <0>contributed</0> to one plugin!",
+            "other": "This person has <0>contributed</0> to {count} plugins!"
+        }
+      }
+    },
     "vencordSettings": {
       "addonCard": {
         "new": "NEW"
