@@ -44,7 +44,7 @@ const settings = definePluginSettings({
     reactorsList: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show role colors in the reacters list",
+        description: "Show role colors in the reactors list",
         restartNeeded: true
     }
 });
