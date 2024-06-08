@@ -114,12 +114,6 @@ export default definePlugin({
                     required: false
                 },
                 {
-                    name: "tts",
-                    description: "Send with TTS",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    required: false
-                },
-                {
                     name: "avatar-url",
                     description: "Send with a custom profile picture. You must input a valid image URL.",
                     type: ApplicationCommandOptionType.STRING,
@@ -127,7 +121,7 @@ export default definePlugin({
                 },
                 {
                     name: "raw",
-                    description: "Send message as raw JSON",
+                    description: "Send message as raw JSON.",
                     type: ApplicationCommandOptionType.BOOLEAN,
                     required: false
                 }
