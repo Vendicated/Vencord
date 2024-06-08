@@ -41,7 +41,7 @@ const settings = definePluginSettings({
         description: "Show role colors in the voice chat user list",
         restartNeeded: true
     },
-    reactersList: {
+    reactorsList: {
         type: OptionType.BOOLEAN,
         default: true,
         description: "Show role colors in the reacters list",
