@@ -6,11 +6,9 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
-const WMLogger = new Logger("WebhookManager");
 
 export default definePlugin({
     name: "WebhookManager",
@@ -32,12 +30,12 @@ export default definePlugin({
             ],
             execute: async (option, ctx) => {
                 try {
-                    await fetch(findOption(option, "url"), {
-                    	method: "DELETE"
-                  	});
+                    await fetch(findOption(option, "url", ""), {
+                        method: "DELETE"
+                    });
                     sendBotMessage(ctx.channel.id, {
-                    	content: "The webhook has deleted successfully."
-                  	});
+                        content: "The webhook has deleted successfully."
+                    });
                 }
                 catch (error) {
                     sendBotMessage(ctx.channel.id, {
@@ -59,36 +57,37 @@ export default definePlugin({
                 }
             ],
             execute: async (option, ctx) => {
-                const webhookUrl = findOption(option, "url");
-                await fetch("" + webhookUrl).then(response => response.json())
-                    .then(response => {
-                        WMLogger.info(JSON.stringify(response));
-                        sendBotMessage(ctx.channel.id, {
-                            content: `This webhook was created by ${response.user?.name}.`,
-                            embeds: [
-                                {
-                                    title: "Webhook Information",
-                                    color: "1323",
-                                    // @ts-ignore
-                                    author: {
-                                        name: response.name,
-                                        url: ""
-                                    },
-                                    thumbnail: {
-                                        url: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
-                                        proxyURL: `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`,
-                                        height: 128,
-                                        width: 128
-                                    },
-                                    description: `
-                                Webhook ID: ${response.id}
-                                Webhook Token: ${response.token}
-                                Webhook Type: ${response.type}
-                                Channel ID: ${response.channel_id}
-                                Server ID: ${response.guild_id}`
-                                }]
-                        });
-                    });
+                const webhookUrl = findOption(option, "url", "");
+                const { user, avatar, name, id, token, type, channel_id, guild_id }
+                    = await fetch(webhookUrl).then(res => res.json());
+
+                sendBotMessage(ctx.channel.id, {
+                    content: `This webhook was created by ${user?.name}.`,
+                    embeds: [
+                        {
+                            title: "Webhook Information",
+                            color: "1323",
+                            // @ts-ignore
+                            author: {
+                                name,
+                                url: ""
+                            },
+                            thumbnail: {
+                                url: `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`,
+                                proxyURL: `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`,
+                                height: 128,
+                                width: 128
+                            },
+                            description: `
+                                Webhook ID: ${id}
+                                Webhook Token: ${token}
+                                Webhook Type: ${type}
+                                Channel ID: ${channel_id}
+                                Server ID: ${guild_id}
+                            `
+                        }
+                    ]
+                });
             }
         },
         {
@@ -103,8 +102,8 @@ export default definePlugin({
                     required: true
                 },
                 {
-                    name: "message",
-                    description: "The message you want to send",
+                    name: "content",
+                    description: "The message content you want to send",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
                 },
@@ -121,7 +120,7 @@ export default definePlugin({
                     required: false
                 },
                 {
-                    name: "pfp",
+                    name: "avatar-url",
                     description: "Send with a custom profile picture. You must input a valid image URL.",
                     type: ApplicationCommandOptionType.STRING,
                     required: false
@@ -134,27 +133,20 @@ export default definePlugin({
                 }
             ],
             async execute(option, ctx) {
+                const webhookUrl = findOption(option, "url", "");
+                const content = findOption(option, "content", "");
+                const avatarUrl = findOption<string>(option, "avatar-url");
+                const username = findOption<string>(option, "username");
 
-                const webhookUrl = findOption(option, "url");
-                const webhookMessage = findOption(option, "message");
-                let webhookProfilePic = findOption(option, "pfp");
-                let webhookUsername = findOption(option, "username");
                 if (findOption(option, "raw")) {
-                    Native.executeWebhook("" + webhookUrl, {
-                        webhookMessage
-                    });
-                }
-                else {
-                    if (webhookUsername === "")
-                        webhookUsername = undefined;
-
-                    if (webhookProfilePic === "")
-                        webhookProfilePic = undefined;
-
                     Native.executeWebhook(webhookUrl, {
-                        content: webhookMessage,
-                        username: webhookUsername,
-                        avatar_url: webhookProfilePic,
+                        webhookMessage: content
+                    });
+                } else {
+                    Native.executeWebhook(webhookUrl, {
+                        content: content,
+                        username: username,
+                        avatar_url: avatarUrl,
                         tts: findOption(option, "tts"),
                     });
                 }
