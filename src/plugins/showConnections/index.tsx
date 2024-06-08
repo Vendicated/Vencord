@@ -31,7 +31,6 @@ import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
@@ -92,7 +91,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
         return null;
 
     return (
-        <Section>
+        <div>
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -107,7 +106,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             }}>
                 {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
             </Flex>
-        </Section>
+        </div>
     );
 }
 
