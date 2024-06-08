@@ -130,9 +130,9 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} wantMargin={false} />,
+    component: p => <PlatformIndicator {...p} user={UserStore.getUser(p.userId)} wantMargin={false} />,
     position: BadgePosition.START,
-    shouldShow: userInfo => !!Object.keys(getStatus(userInfo.user.id) ?? {}).length,
+    shouldShow: userInfo => !!Object.keys(getStatus(userInfo.userId) ?? {}).length,
     key: "indicator"
 };
 
