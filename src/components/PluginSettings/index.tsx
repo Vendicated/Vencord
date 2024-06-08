@@ -69,7 +69,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button color={Button.Colors.YELLOW} onClick={() => location.reload()}>
+                    <Button onClick={() => location.reload()}>
                         Restart
                     </Button>
                 </>
