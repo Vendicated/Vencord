@@ -147,7 +147,7 @@ export default definePlugin({
             [MessageStore],
             () => MessageStore.getMessage(channelId, messageId) as MLMessage,
             null,
-            (oldMsg, newMsg) => oldMsg.editHistory === newMsg.editHistory
+            (oldMsg, newMsg) => oldMsg?.editHistory === newMsg?.editHistory
         );
 
         return (
