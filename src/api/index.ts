@@ -114,11 +114,6 @@ export const ContextMenu = $ContextMenu;
 export const ChatButtons = $ChatButtons;
 
 /**
- * An API allowing you to add panels to the expression picker
- */
-export const ExpressionPickerTabs = $ExpressionPickerTabs;
-
-/**
  * An API allowing you to update and re-render messages
  */
 export const MessageUpdater = $MessageUpdater;
