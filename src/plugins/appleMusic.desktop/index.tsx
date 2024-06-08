@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusic as PluginNative<typeof import("./native")>;
@@ -68,6 +68,7 @@ export interface TrackData {
 const enum AssetImageType {
     Album = "Album",
     Artist = "Artist",
+    Disabled = "Disabled"
 }
 
 const applicationId = "1239490006054207550";
@@ -126,7 +127,8 @@ const settings = definePluginSettings({
         description: "Activity assets large image type",
         options: [
             { label: "Album artwork", value: AssetImageType.Album, default: true },
-            { label: "Artist artwork", value: AssetImageType.Artist }
+            { label: "Artist artwork", value: AssetImageType.Artist },
+            { label: "Disabled", value: AssetImageType.Disabled }
         ],
     },
     largeTextString: {
@@ -139,7 +141,8 @@ const settings = definePluginSettings({
         description: "Activity assets small image type",
         options: [
             { label: "Album artwork", value: AssetImageType.Album },
-            { label: "Artist artwork", value: AssetImageType.Artist, default: true }
+            { label: "Artist artwork", value: AssetImageType.Artist, default: true },
+            { label: "Disabled", value: AssetImageType.Disabled }
         ],
     },
     smallTextString: {
@@ -171,6 +174,7 @@ export default definePlugin({
     description: "Discord rich presence for your Apple Music!",
     authors: [Devs.RyanCaoDev],
     hidden: !navigator.platform.startsWith("Mac"),
+    reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent() {
         return <>
@@ -206,12 +210,17 @@ export default definePlugin({
             getImageAsset(settings.store.smallImageType, trackData)
         ]);
 
-        const assets: ActivityAssets = {
-            large_image: largeImageAsset,
-            large_text: customFormat(settings.store.largeTextString, trackData),
-            small_image: smallImageAsset,
-            small_text: customFormat(settings.store.smallTextString, trackData),
-        };
+        const assets: ActivityAssets = {};
+
+        if (settings.store.largeImageType !== AssetImageType.Disabled) {
+            assets.large_image = largeImageAsset;
+            assets.large_text = customFormat(settings.store.largeTextString, trackData);
+        }
+
+        if (settings.store.smallImageType !== AssetImageType.Disabled) {
+            assets.small_image = smallImageAsset;
+            assets.small_text = customFormat(settings.store.smallTextString, trackData);
+        }
 
         const buttons: ActivityButton[] = [];
 
