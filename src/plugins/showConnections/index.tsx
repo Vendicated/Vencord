@@ -192,8 +192,8 @@ export default definePlugin({
         {
             find: "autoFocusNote:!0})",
             replacement: {
-                match: /(?<=(\i)\.bio.{90,130}user:(\i),current).{20,50}{autoFocusNote:!1}\)}\)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $2, displayProfile: $1 })"
+                match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],
