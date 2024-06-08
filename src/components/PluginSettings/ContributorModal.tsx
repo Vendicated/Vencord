@@ -108,9 +108,11 @@ function ContributorModal({ user }: { user: User; }) {
                 </div>
             </div>
 
-            <Translate i18nKey="vencord.components.pluginSettings.contributorModal.contributed" variables={{ count: plugins.length }}>
-                <Link href="https://vencord.dev/source" />
-            </Translate>
+            <Forms.FormText>
+                <Translate i18nKey="vencord.components.pluginSettings.contributorModal.contributed" variables={{ count: plugins.length }}>
+                    <Link href="https://vencord.dev/source" />
+                </Translate>
+            </Forms.FormText>
 
             {!!plugins.length && (
                 <div className={cl("plugins")}>

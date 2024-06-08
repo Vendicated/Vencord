@@ -1,3 +1,13 @@
 {
-    "hello": "Hallo {name}!"
+    "components": {
+        "pluginSettings": {
+            "contributorModal": {
+                "contributed": {
+                    "zero": "Diese Person hat keine Plugins erstellt. Sie haben wahrscheinlich auf andere Weise <0>zu Vencord beigetragen</0>!",
+                    "one": "Diese Person hat zu einem Plugin <0>beigetragen</0>!",
+                    "other": "Diese Person hat zu {count} Plugins <0>beigetragen</0>!"
+                }
+            }
+        }
+    }
 }

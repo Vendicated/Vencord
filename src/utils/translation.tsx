@@ -5,28 +5,31 @@
  */
 
 import { negotiateLanguages } from "@fluent/langneg";
-import { FluxDispatcher, i18n, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import translations from "~translations";
 
+import { localStorage } from "./localStorage";
 import { Logger } from "./Logger";
 
 const logger = new Logger("Translations", "#7bc876");
 
 let loadedLocale: Record<string, any>;
 
-let lastDiscordLocale = i18n.getLocale();
+let lastDiscordLocale: string = localStorage.getItem("vcLocale")!;
 let bestLocale: string;
 
-FluxDispatcher.subscribe("USER_SETTINGS_PROTO_UPDATE", ({ settings }) => {
-    if (settings.proto.localization.locale.value !== lastDiscordLocale) {
-        lastDiscordLocale = settings.proto.localization.locale.value;
+export function setLocale(locale: string) {
+    if (locale === lastDiscordLocale) return;
 
-        reloadLocale();
-    }
-});
+    localStorage.setItem("vcLocale", locale);
 
-reloadLocale();
+    lastDiscordLocale = locale;
+
+    reloadLocale();
+}
+
+if (lastDiscordLocale) reloadLocale();
 
 function reloadLocale() {
     // finds the best locale based on the available ones
