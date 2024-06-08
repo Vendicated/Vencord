@@ -85,19 +85,6 @@ export default definePlugin({
             }
         },
         {
-            find: /profileType:\i,pendingBanner:/,
-            replacement: [
-                {
-                    match: /(\i)\.premiumType/,
-                    replace: "$self.premiumHook($1)||$&"
-                },
-                {
-                    match: /function \i\((\i)\)\{/,
-                    replace: "$&$1.pendingBanner=$self.useBannerHook($1);"
-                }
-            ]
-        },
-        {
             find: "\"data-selenium-video-tile\":",
             predicate: () => settings.store.voiceBackground,
             replacement: [

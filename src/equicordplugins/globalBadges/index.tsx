@@ -20,7 +20,6 @@ import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges"
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, Tooltip } from "@webpack/common";
-import { User } from "discord-types/general";
 
 type CustomBadge = string | {
     name: string;
@@ -67,9 +66,9 @@ const BadgeComponent = ({ name, img }: { name: string, img: string; }) => {
     );
 };
 
-const GlobalBadges = ({ user }: { user: User; }) => {
+const GlobalBadges = ({ userId }: { userId: string; }) => {
     const [badges, setBadges] = React.useState<BadgeCache["badges"]>({});
-    React.useEffect(() => setBadges(fetchBadges(user.id) ?? {}), [user.id]);
+    React.useEffect(() => setBadges(fetchBadges(userId) ?? {}), [userId]);
 
     if (!badges) return null;
     const globalBadges: JSX.Element[] = [];
@@ -104,7 +103,7 @@ const GlobalBadges = ({ user }: { user: User; }) => {
 const Badge: ProfileBadge = {
     component: b => <GlobalBadges {...b} />,
     position: BadgePosition.START,
-    shouldShow: userInfo => !!Object.keys(fetchBadges(userInfo.user.id) ?? {}).length,
+    shouldShow: userInfo => !!Object.keys(fetchBadges(userInfo.userId) ?? {}).length,
     key: "GlobalBadges"
 };
 

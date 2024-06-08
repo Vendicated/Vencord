@@ -31,6 +31,7 @@ import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/rJDRtUB.png";
@@ -39,8 +40,8 @@ const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    shouldShow: ({ user }) => isPluginDev(user.id),
-    onClick: (_, { user }) => openContributorModal(user)
+    shouldShow: ({ userId }) => isPluginDev(userId),
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
 const EquicordContributorBadge: ProfileBadge = {
@@ -53,7 +54,7 @@ const EquicordContributorBadge: ProfileBadge = {
             transform: "scale(0.9)" // The image is a bit too big compared to default badges
         }
     },
-    shouldShow: ({ user }) => isEquicordPluginDev(user.id),
+    shouldShow: ({ userId }) => isEquicordPluginDev(userId),
     link: "https://github.com/Equicord/Equicord"
 };
 
@@ -91,7 +92,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /&&(\i)\.push\(\{id:"premium".+?\}\);/,
-                    replace: "$&$1.unshift(...Vencord.Api.Badges._getBadges(arguments[0]));",
+                    replace: "$&$1.unshift(...$self.getBadges(arguments[0]));",
                 },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
@@ -107,7 +108,7 @@ export default definePlugin({
                 // conditionally override their onClick with badge.onClick if it exists
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, arguments[0]) }),$&"
+                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, $1) }),$&"
                 }
             ]
         },
@@ -122,11 +123,10 @@ export default definePlugin({
         },
         {
             find: ".description,delay:",
-            group: true,
             replacement: [
                 {
                     match: /...(\i)\}=\(0,\i\.useUserProfileAnalyticsContext\)\(\);/,
-                    replace: "$& const VencordProps=$self.getProps($1); arguments[0].badges.unshift(...$self.getBadges($1));"
+                    replace: "$&arguments[0].badges?.unshift(...$self.getBadges($1));"
                 },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
@@ -136,34 +136,16 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=text:(\i)\.description,.{0,50})children:/,
-                    replace: "children:$1.component ? $self.renderBadgeComponent({ ...VencordProps, ...$1 }) :"
+                    replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, VencordProps) }),$&"
+                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, $1) }),$&"
                 }
             ]
         }
     ],
-
-    getProps(props: Record<string, any>) {
-        try {
-            return { ...props, user: UserStore.getUser(props.userId) };
-        } catch {
-            return props;
-        }
-    },
-
-    getBadges(props: { userId: string; guildId: string; }) {
-        try {
-            const { guildId, userId } = props;
-            return _getBadges({ guildId, user: UserStore.getUser(userId) });
-        } catch (e) {
-            new Logger("BadgeAPI#hasBadges").error(e);
-            return [];
-        }
-    },
 
     toolboxActions: {
         async "Refetch Badges"() {
@@ -180,6 +162,17 @@ export default definePlugin({
         Vencord.Api.Badges.addBadge(ContributorBadge);
         Vencord.Api.Badges.addBadge(EquicordContributorBadge);
         await loadAllBadges();
+    },
+
+    getBadges(props: { userId: string; user?: User; guildId: string; }) {
+        try {
+            props.userId ??= props.user?.id!;
+
+            return _getBadges(props);
+        } catch (e) {
+            new Logger("BadgeAPI#hasBadges").error(e);
+            return [];
+        }
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
