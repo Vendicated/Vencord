@@ -74,15 +74,15 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
+const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile, compactSpacing; }) =>
+    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} compactSpacing={props.compactSpacing} />
 );
 
 const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
     <ConnectionsComponent id={id} theme={ThemeStore.theme} />
 );
 
-function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
+function ConnectionsComponent({ id, theme, compactSpacing }: { id: string, theme: string, compactSpacing?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -91,8 +91,10 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     if (!connections?.length)
         return null;
 
+    const Container = compactSpacing ? "div" : Section;
+
     return (
-        <Section>
+        <Container>
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -107,7 +109,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             }}>
                 {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
             </Flex>
-        </Section>
+        </Container>
     );
 }
 
@@ -178,7 +180,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: false })"
             }
         },
         {
@@ -187,6 +189,13 @@ export default definePlugin({
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
                 replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
+            }
+        },
+        {
+            find: "autoFocusNote:!0})",
+            replacement: {
+                match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, compactSpacing: true })"
             }
         }
     ],
