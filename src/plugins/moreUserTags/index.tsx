@@ -200,7 +200,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,",
+            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,",
             replacement: [
                 // make the tag show the right text
                 {
