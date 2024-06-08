@@ -25,12 +25,13 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Text, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
+const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
 const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
@@ -73,15 +74,15 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
+const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile, useDiv; }) =>
+    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} useDiv={props.useDiv} />
 );
 
 const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
     <ConnectionsComponent id={id} theme={ThemeStore.theme} />
 );
 
-function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
+function ConnectionsComponent({ id, theme, useDiv }: { id: string, theme: string, useDiv?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -90,8 +91,10 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     if (!connections?.length)
         return null;
 
+    const Container = useDiv ? "div" : Section;
+
     return (
-        <div>
+        <Container>
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -106,7 +109,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             }}>
                 {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
             </Flex>
-        </div>
+        </Container>
     );
 }
 
@@ -177,7 +180,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, useDiv: !1 })"
             }
         },
         {
@@ -192,7 +195,7 @@ export default definePlugin({
             find: "autoFocusNote:!0})",
             replacement: {
                 match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, useDiv: !0 })"
             }
         }
     ],
