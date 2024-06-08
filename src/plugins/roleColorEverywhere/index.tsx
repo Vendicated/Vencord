@@ -40,8 +40,15 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the voice chat user list",
         restartNeeded: true
+    },
+    reactorsList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the reactors list",
+        restartNeeded: true
     }
 });
+
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -99,6 +106,14 @@ export default definePlugin({
                 }
             ],
             predicate: () => settings.store.voiceUsers,
+        },
+        {
+            find: ".reactorDefault",
+            replacement: {
+                match: /\.openUserContextMenu\)\((\i),(\i),\i\).{0,250}tag:"strong"/,
+                replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
+            },
+            predicate: () => settings.store.reactorsList,
         }
     ],
     settings,
