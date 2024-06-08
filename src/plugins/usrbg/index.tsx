@@ -61,11 +61,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\i)\.premiumType/,
-                    replace: "$self.premiumHook($1)||$&"
-                },
-                {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.+?,bannerSrc:)/,
-                    replace: "$1.bannerSrc=$self.useBannerHook($1);"
+                    replace: "$self.patchPremiumType($1)||$&"
                 },
                 {
                     match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
@@ -74,17 +70,19 @@ export default definePlugin({
             ]
         },
         {
-            find: /overrideBannerSrc:\i,overrideBannerWidth:/,
-            replacement: [
-                {
-                    match: /(\i)\.premiumType/,
-                    replace: "$self.premiumHook($1)||$&"
-                },
-                {
-                    match: /function \i\((\i)\)\{/,
-                    replace: "$&$1.overrideBannerSrc=$self.useBannerHook($1);"
-                }
-            ]
+            find: "=!1,canUsePremiumCustomization:",
+            replacement: {
+                match: /(\i)\.premiumType/,
+                replace: "$self.patchPremiumType($1)||$&"
+            }
+        },
+        {
+            find: "BannerLoadingStatus:function",
+            replacement: {
+                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
+                replace: "$self.patchBannerUrl(arguments[0])||$&"
+
+            }
         },
         {
             find: /profileType:\i,pendingBanner:/,
@@ -105,7 +103,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
-                    replace: "$1.style=$self.voiceBackgroundHook($1);"
+                    replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
         }
@@ -119,7 +117,7 @@ export default definePlugin({
         );
     },
 
-    voiceBackgroundHook({ className, participantUserId }: any) {
+    getVoiceBackgroundStyles({ className, participantUserId }: any) {
         if (className.includes("tile_")) {
             if (this.userHasBackground(participantUserId)) {
                 return {
@@ -132,12 +130,12 @@ export default definePlugin({
         }
     },
 
-    useBannerHook({ displayProfile, user }: any) {
+    patchBannerUrl({ displayProfile }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
-        if (this.userHasBackground(user.id)) return this.getImageUrl(user.id);
+        if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
-    premiumHook({ userId }: any) {
+    patchPremiumType({ userId }: any) {
         if (this.userHasBackground(userId)) return 2;
     },
 

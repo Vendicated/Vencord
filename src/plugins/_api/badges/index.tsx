@@ -18,18 +18,19 @@
 
 import "./fixBadgeOverflow.css";
 
-import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Forms, Toasts } from "@webpack/common";
+import { Forms, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/rJDRtUB.png";
@@ -109,8 +110,60 @@ export default definePlugin({
                     replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, arguments[0]) }),$&"
                 }
             ]
+        },
+
+        /* new profiles */
+        {
+            find: ".PANEL]:14",
+            replacement: {
+                match: /(?<=\i=\(0,\i\.default\)\(\i\);)return 0===\i.length/,
+                replace: "$& && $self.getBadges(arguments[0]?.displayProfile).length===0"
+            }
+        },
+        {
+            find: ".description,delay:",
+            group: true,
+            replacement: [
+                {
+                    match: /...(\i)\}=\(0,\i\.useUserProfileAnalyticsContext\)\(\);/,
+                    replace: "$& const VencordProps=$self.getProps($1); arguments[0].badges.unshift(...$self.getBadges($1));"
+                },
+                {
+                    // alt: "", aria-hidden: false, src: originalSrc
+                    match: /alt:" ","aria-hidden":!0,src:(?=.{0,20}(\i)\.icon)/,
+                    // ...badge.props, ..., src: badge.image ?? ...
+                    replace: "...$1.props,$& $1.image??"
+                },
+                {
+                    match: /(?<=text:(\i)\.description,.{0,50})children:/,
+                    replace: "children:$1.component ? $self.renderBadgeComponent({ ...VencordProps, ...$1 }) :"
+                },
+                // conditionally override their onClick with badge.onClick if it exists
+                {
+                    match: /href:(\i)\.link/,
+                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, VencordProps) }),$&"
+                }
+            ]
         }
     ],
+
+    getProps(props: Record<string, any>) {
+        try {
+            return { ...props, user: UserStore.getUser(props.userId) };
+        } catch {
+            return props;
+        }
+    },
+
+    getBadges(props: { userId: string; guildId: string; }) {
+        try {
+            const { guildId, userId } = props;
+            return _getBadges({ guildId, user: UserStore.getUser(userId) });
+        } catch (e) {
+            new Logger("BadgeAPI#hasBadges").error(e);
+            return [];
+        }
+    },
 
     toolboxActions: {
         async "Refetch Badges"() {
