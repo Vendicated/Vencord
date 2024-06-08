@@ -157,7 +157,7 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
         ? usrFormat === "video"
             ? ["--remux-video", "webm>webm/mp4"]
             : usrFormat === "audio"
-                ? ["--remux-audio", "mp3"] // @ TODO THIS DOESNT EXIST
+                ? ["--extract-audio", "--audio-format", "mp3"]
                 : []
         : [];
     const customArgs = ytdlpArgs?.filter(Boolean) || [];
