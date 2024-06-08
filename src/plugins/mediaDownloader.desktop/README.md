@@ -1,6 +1,6 @@
-# yt-dlp
+# MediaDownloader
 
-This plugin adds a new `/yt-dlp` command. This command downloads a video from a given url, and creates a video attachment, ready to send.
+This plugin adds a new `/download` command. This command downloads a video from a given url, and creates a video attachment, ready to send.
 
 ![](https://github.com/Vendicated/Vencord/assets/18369995/4b396740-f128-41f9-9392-90ff7bc2a104)
 
@@ -14,7 +14,7 @@ Ffmpeg is also required to use the Gif format, as they are not supported nativel
 
 ## Usage
 
-The plugin adds a single application command, activated by typing `/yt-dlp`. It has the following parameters.
+The plugin adds a single application command, activated by typing `/download`. It has the following parameters.
 
 | name          | required | description                                                                                                                                                                                                                                                                       |
 | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
