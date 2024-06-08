@@ -188,6 +188,13 @@ export default definePlugin({
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
                 replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
             }
+        },
+        {
+            find: "autoFocusNote:!0})",
+            replacement: {
+                match: /(?<=(\i)\.bio.{90,130}user:(\i),current).{20,50}{autoFocusNote:!1}\)}\)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $2, displayProfile: $1 })"
+            }
         }
     ],
     settings,
