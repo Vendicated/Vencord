@@ -60,6 +60,7 @@ export class PresenceStore<Action extends FluxAction = PresenceStoreAction> exte
         defaultStatus?: StatusType | undefined /* = StatusType.OFFLINE */
     ): StatusType;
     getUserIds(): string[];
+    initialize(): void;
     isMobileOnline(userId: string): boolean;
     setCurrentUserOnConnectionOpen(status: StatusType, activities: Activity[]): void;
 }

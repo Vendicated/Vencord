@@ -10,8 +10,10 @@ import type { ChannelRecipient, ChannelRecordBase, ChannelType } from "./Channel
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
 export abstract class PrivateChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
+    /** @todo */
     static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord;
     static sortRecipients(recipients: ChannelRecipient[] | Nullish, channelId: string): string[];
 

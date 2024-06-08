@@ -24,7 +24,7 @@
         "@types/react": "~18.2.79",
         "dependency-graph": "0.9.0",
         "moment": "2.22.2",
-        "type-fest": "^4.19.0"
+        "type-fest": "^4.20.0"
     },
     "devDependencies": {
         "@eslint-types/unicorn": "^52.0.0",

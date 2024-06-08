@@ -8,9 +8,11 @@ import type { Defined, Nullish } from "../../internal";
 import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
 
 export class UnknownChannelRecord extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): UnknownChannelRecord; // TEMP
+    /** @todo */
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): UnknownChannelRecord;
 
     application_id: ChannelRecordBase["application_id"];
     appliedTags: ChannelRecordBase["appliedTags"];

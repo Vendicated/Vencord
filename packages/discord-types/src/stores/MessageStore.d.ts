@@ -5,6 +5,8 @@
  */
 
 import type { ExtractAction, FluxAction } from "../flux/fluxActions";
+import type { ChannelMessages } from "../general/messages/ChannelMessages";
+import type { MessageRecord } from "../general/messages/MessageRecord";
 import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
@@ -13,19 +15,19 @@ export type MessageStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC_CHAN
 export class MessageStore<Action extends FluxAction = MessageStoreAction> extends FluxStore<Action> {
     static displayName: "MessageStore";
 
-    focusedMessageId(e?: any): any; // TEMP
-    getLastCommandMessage(e?: any): any; // TEMP
-    getLastEditableMessage(e?: any): any; // TEMP
-    getLastMessage(e?: any): any; // TEMP
-    getLastNonCurrentUserMessage(e?: any): any; // TEMP
-    getMessage(e?: any, t?: any): any; // TEMP
-    getMessages(guildId?: string | Nullish): any; // TEMP
-    hasCurrentUserSentMessage(e?: any): any; // TEMP
-    hasCurrentUserSentMessageSinceAppStart(): any; // TEMP
-    hasPresent(e?: any): any; // TEMP
+    focusedMessageId(channelId: string): string | undefined;
+    getLastCommandMessage(channelId: string): MessageRecord | undefined;
+    getLastEditableMessage(channelId: string): MessageRecord | undefined;
+    getLastMessage(channelId: string): MessageRecord | undefined;
+    getLastNonCurrentUserMessage(channelId: string): MessageRecord | undefined;
+    getMessage(channelId: string, messageId: string): MessageRecord | undefined;
+    getMessages(channelId: string): ChannelMessages;
+    hasCurrentUserSentMessage(channelId: string): boolean;
+    hasCurrentUserSentMessageSinceAppStart(): boolean;
+    hasPresent(channelId: string): boolean;
     initialize(): void;
-    isLoadingMessages(e?: any): any; // TEMP
-    isReady(e?: any): any; // TEMP
-    jumpedMessageId(e?: any): any; // TEMP
-    whenReady(e?: any, t?: any): any; // TEMP
+    isLoadingMessages(channelId: string): boolean;
+    isReady(channelId: string): boolean;
+    jumpedMessageId(channelId: string): string | Nullish;
+    whenReady(channelId: string, callback: () => void): void;
 }

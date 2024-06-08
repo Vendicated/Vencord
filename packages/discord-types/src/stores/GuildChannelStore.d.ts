@@ -57,6 +57,7 @@ export class GuildChannelStore<Action extends FluxAction = GuildChannelStoreActi
     hasChannels(guildId: string): boolean;
     hasElevatedPermissions(guildId: string): boolean;
     hasSelectableChannel(guildId: string, channelId: string): boolean;
+    initialize(): void;
 }
 
 export interface GuildChannels {
@@ -64,7 +65,8 @@ export interface GuildChannels {
     [GuildChannelType.CATEGORY]: GuildChannel<GuildCategoryChannelRecord>[];
     [GuildChannelType.SELECTABLE]: GuildChannel<GuildSelectableChannelRecord>[];
     [GuildChannelType.VOCAL]: GuildChannel<GuildVocalChannelRecord>[];
-    id: string; // guildId
+    /** The ID of the guild. */
+    id: string;
 }
 
 // Does not actually exist.

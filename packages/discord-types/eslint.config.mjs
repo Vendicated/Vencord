@@ -114,7 +114,6 @@ export default tseslint.config(
                 varsIgnorePattern: "^_"
             }],
             "@typescript-eslint/no-useless-empty-export": "error",
-            "@typescript-eslint/prefer-enum-initializers": "error",
             "@typescript-eslint/prefer-function-type": "error",
             "@typescript-eslint/triple-slash-reference": "error",
             "@typescript-eslint/unified-signatures": ["error", { ignoreDifferentlyNamedParameters: true }],
@@ -143,6 +142,7 @@ export default tseslint.config(
     {
         files: ["src/**/*.ts"],
         rules: {
+            "@typescript-eslint/prefer-enum-initializers": "error",
             "headers/header-format": ["error", {
                 source: "string",
                 content: [

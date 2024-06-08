@@ -13,7 +13,8 @@ export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorat
 export class UserRecord<
     OwnProperties extends UserRecordOwnProperties = UserRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(userPropertiesOrUserFromServer: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(userPropertiesOrUserFromServer: Record<string, any>);
 
     addGuildAvatarHash(guildId: string, avatarHash: string): this;
     get avatarDecoration(): AvatarDecorationData | null;

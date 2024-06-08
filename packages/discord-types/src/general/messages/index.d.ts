@@ -5,6 +5,7 @@
  */
 
 export * from "./ChannelMessages";
+export * from "./InteractionRecord";
 export * from "./MessageCache";
 export * from "./MessageRecord";
 export * from "./MessageSnapshotRecord";

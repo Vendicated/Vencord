@@ -9,19 +9,19 @@ import type { ReactNode } from "react";
 import type { SnakeCasedProperties } from "type-fest";
 
 import type { Nullish, Optional } from "../../internal";
+import type { ApplicationCommand, ApplicationCommandType } from "../ApplicationCommand";
 import type { ApplicationIntegrationType } from "../ApplicationRecord";
 import type { ChannelRecord, ChannelType } from "../channels/ChannelRecord";
-import type { ImmutableRecord } from "../ImmutableRecord";
 import type { UserRecord } from "../UserRecord";
+import type { InteractionRecord, InteractionType } from "./InteractionRecord";
 import type { MessageSnapshotRecord } from "./MessageSnapshotRecord";
 import type { MessageFlags, MinimalMessageRecord, MinimalMessageRecordOwnProperties } from "./MinimalMessageRecord";
 
 export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "codedLinks" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentionEveryone" | "mentionRoles" | "mentioned" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "tts" | "webhookId">;
 
 export type MessageProperties = Optional<MessageRecordOwnProperties, Nullish, "author" | "channel_id" | "id" | "customRenderedContent" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
-    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "stickerItems" | "changelogId">, Nullish>>
-    & ({ gift_info?: MessageRecordOwnProperties["giftInfo"] | Nullish; giftInfo: MessageRecordOwnProperties["giftInfo"]; }
-    | { gift_info: MessageRecordOwnProperties["giftInfo"]; giftInfo?: MessageRecordOwnProperties["giftInfo"] | Nullish; });
+    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "stickerItems" | "changelogId">, Nullish>>
+    & Partial<Pick<MessageRecordOwnProperties, "giftInfo">>;
 
 export class MessageRecord<
     OwnProperties extends MessageRecordOwnProperties = MessageRecordOwnProperties
@@ -54,6 +54,7 @@ export class MessageRecord<
     removeReactionsForEmoji(emoji: MessageReactionEmoji): this;
     toJS(): OwnProperties & SnakeCasedProperties<Pick<OwnProperties, "editedTimestamp" | "mentionEveryone" | "webhookId">>;
     userHasReactedWithEmoji(emoji: MessageReactionEmoji, burst?: boolean | undefined /* = false */): boolean;
+
     activity: MessageActivity | null;
     activityInstance: { id: string; } | null;
     /** @todo This is not an ApplicationRecord; it's an application object from the API. */
@@ -71,9 +72,9 @@ export class MessageRecord<
     giftInfo: MessageGiftInfo | undefined;
     id: string;
     interaction: InteractionRecord | null;
-    interactionData: InteractionData | null;
+    interactionData: MessageInteractionData | null;
     interactionError: string | null;
-    interactionMetadata: InteractionMetadata | null;
+    interactionMetadata: MessageInteractionMetadata | null;
     isSearchHit: boolean;
     isUnsupported: boolean;
     loggingName: string | null;
@@ -82,6 +83,7 @@ export class MessageRecord<
     mentionEveryone: boolean;
     mentionRoles: string[];
     mentions: string[];
+    /** Only present for MessageRecords with type MessageType.REPLY or MessageType.THREAD_STARTER_MESSAGE. */
     messageReference: MessageReference | null;
     messageSnapshots: MessageSnapshotRecord[];
     nick: string | undefined;
@@ -144,51 +146,27 @@ export interface MessageCustomRenderedContent {
     hasSpoilerEmbeds: boolean;
 }
 
+/** @todo Some properties may either not be nullable or not be optional. */
 export interface MessageGiftInfo {
-    emoji?: string | null; // TEMP
-    sound?: string | null; // TEMP
-} // TEMP
-
-export class InteractionRecord extends ImmutableRecord {
-    constructor(interaction: Record<string, any>); // TEMP
-
-    static createFromServer(interactionFromServer: Record<string, any>): InteractionRecord; // TEMP
-
-    displayName: string;
-    id: string;
-    name: string;
-    type: InteractionType;
-    user: UserRecord;
+    emoji?: MessageReactionEmoji | null;
+    /** @todo May have more properties. */
+    sound?: { id: string; } | null;
 }
 
-export interface InteractionData {
-    application_command: any; // TEMP
-    guild_id: any; // TEMP
-    id: any; // TEMP
-    name: any; // TEMP
-    options: any; // TEMP
-    type: any; // TEMP
-    version: any; // TEMP
-} // TEMP
+export interface MessageInteractionData extends Pick<ApplicationCommand<ApplicationCommandType.CHAT>, "id" | "name" | "options" | "type"> {
+    /** @todo May not be nullable or optional. */
+    application_command?: ApplicationCommand<ApplicationCommandType.CHAT> | null;
+}
 
-export interface InteractionMetadata {
+export interface MessageInteractionMetadata {
     authorizing_integration_owners: Partial<Record<ApplicationIntegrationType, string>>;
     id: string;
     interacted_message_id?: string;
     original_response_message_id?: string;
-    triggering_interaction_metadata?: InteractionMetadata;
+    triggering_interaction_metadata?: MessageInteractionMetadata;
     type: InteractionType;
     /** @todo This is not a UserRecord; it's a user object from the API. */
     user: Record<string, any>;
-} // TEMP
-
-// Original name: InteractionTypes
-export const enum InteractionType {
-    PING = 1,
-    APPLICATION_COMMAND = 2,
-    MESSAGE_COMPONENT = 3,
-    APPLICATION_COMMAND_AUTOCOMPLETE = 4,
-    MODAL_SUBMIT = 5,
 }
 
 export interface ChannelMention {
@@ -204,13 +182,6 @@ export interface MessageReference {
     message_id?: string;
 }
 
-// Original name: PollLayoutTypes
-export const enum PollLayoutType {
-    UNKNOWN = 0,
-    DEFAULT = 1,
-    IMAGE_ONLY_ANSWERS = 2,
-}
-
 export interface MessagePoll {
     allow_multiselect: boolean;
     answers: MessagePollAnswer[];
@@ -223,6 +194,13 @@ export interface MessagePoll {
 export interface MessagePollAnswer {
     answer_id: number;
     poll_media: MessagePollMedia;
+}
+
+// Original name: PollLayoutTypes
+export const enum PollLayoutType {
+    UNKNOWN = 0,
+    DEFAULT = 1,
+    IMAGE_ONLY_ANSWERS = 2,
 }
 
 export interface MessagePollMedia {
@@ -241,27 +219,39 @@ export interface MessagePollAnswerCount {
     me_voted: boolean;
 }
 
+/** @todo May have more properties. Some properties may either not be nullable or not be optional. */
 export interface MessagePurchaseNotification {
-    guild_product_purchase: {
-        listing_id?: string | null; // TEMP
-        product_name?: string | null; // TEMP
-    }; // TEMP
+    guild_product_purchase?: {
+        listing_id?: string | null;
+        product_name?: string | null;
+    } | null;
     type: PurchaseNotificationType;
-} // TEMP
+}
 
 export const enum PurchaseNotificationType {
     GUILD_PRODUCT = 0,
 }
 
-export interface MessageReaction {
-    burst_colors: string[];
+export type MessageReaction = MessageNonVoteReaction | MessageVoteReaction;
+
+export interface MessageReactionBase {
     burst_count: number;
     count: number;
     count_details: MessageReactionCountDetails;
     emoji: MessageReactionEmoji;
     me: boolean;
     me_burst: boolean;
-    me_vote?: boolean;
+}
+
+export interface MessageNonVoteReaction extends MessageReactionBase {
+    burst_colors: string[];
+    burst_me?: boolean;
+    count_details: MessageNonVoteReactionCountDetails;
+}
+
+export interface MessageVoteReaction extends MessageReactionBase {
+    count_details: MessageVoteReactionCountDetails;
+    me_vote: boolean;
 }
 
 export type MessageReactionEmoji = MessageReactionUnicodeEmoji | MessageReactionGuildEmoji;
@@ -278,10 +268,15 @@ export interface MessageReactionGuildEmoji {
     name: string;
 }
 
-export interface MessageReactionCountDetails {
+export type MessageReactionCountDetails = MessageNonVoteReactionCountDetails | MessageVoteReactionCountDetails;
+
+export interface MessageNonVoteReactionCountDetails {
     burst: number;
     normal: number;
-    vote?: number;
+}
+
+export interface MessageVoteReactionCountDetails {
+    vote: number;
 }
 
 // Original name: ReactionTypes
@@ -292,11 +287,11 @@ export const enum ReactionType {
 }
 
 export interface MessageRoleSubscriptionData {
-    is_renewal?: boolean | null; // TEMP
-    role_subscription_listing_id?: string | null; // TEMP
-    tier_name?: string | null; // TEMP
-    total_months_subscribed?: number | null; // TEMP
-} // TEMP
+    is_renewal: boolean;
+    role_subscription_listing_id: string;
+    tier_name: string;
+    total_months_subscribed: number;
+}
 
 export const enum MessageStates {
     SEND_FAILED = "SEND_FAILED",

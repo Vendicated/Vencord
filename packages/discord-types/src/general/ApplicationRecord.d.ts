@@ -15,9 +15,11 @@ export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" |
 export class ApplicationRecord<
     OwnProperties extends ApplicationRecordOwnProperties = ApplicationRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(applicationProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(applicationProperties: Record<string, any>);
 
-    static createFromServer(applicationFromServer: Record<string, any>): ApplicationRecord; // TEMP
+    /** @todo */
+    static createFromServer(applicationFromServer: Record<string, any>): ApplicationRecord;
     static supportsOutOfProcessOverlay(overlayMethods?: ApplicationOverlayMethodFlags | Nullish): boolean;
 
     get destinationSkuId(): string | undefined;
@@ -168,9 +170,7 @@ export const enum OAuth2Scope {
 }
 
 export interface ApplicationInstallParams {
-    /**
-     * Permissions serialized as a string.
-     */
+    /** Permissions serialized as a string. */
     permissions: string;
     scopes: OAuth2Scope[];
 }

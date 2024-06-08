@@ -10,9 +10,11 @@ import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
 export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
 
 export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildTextualChannelRecord; // TEMP
+    /** @todo */
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildTextualChannelRecord;
 
     application_id: undefined;
     appliedTags?: undefined;
@@ -33,7 +35,8 @@ export abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
-    memberListId: ChannelRecordBase["memberListId"]; // TEMP
+    /** @todo May only be nullish. */
+    memberListId: ChannelRecordBase["memberListId"];
     messageCount?: undefined;
     nicks?: undefined;
     nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
@@ -69,9 +72,9 @@ export class GuildCategoryChannelRecord extends GuildTextualChannelRecordBase {
     defaultThreadRateLimitPerUser: undefined;
     lastMessageId: undefined;
     lastPinTimestamp: undefined;
-    memberListId: undefined; // TEMP
+    memberListId: undefined;
     parent_id: Nullish;
-    themeColor: undefined; // TEMP
+    themeColor: undefined;
     topic_: undefined;
     type: ChannelType.GUILD_CATEGORY;
 }
@@ -82,8 +85,8 @@ export class GuildAnnouncementChannelRecord extends GuildTextualChannelRecordBas
 
 export class GuildStoreChannelRecord extends GuildTextualChannelRecordBase {
     type: ChannelType.GUILD_STORE;
-} // TEMP
+}
 
 export class GuildDirectoryChannelRecord extends GuildTextualChannelRecordBase {
     type: ChannelType.GUILD_DIRECTORY;
-} // TEMP
+}

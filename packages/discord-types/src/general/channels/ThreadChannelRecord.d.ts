@@ -10,9 +10,11 @@ import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
 type ThreadChannelType = ChannelType.ANNOUNCEMENT_THREAD | ChannelType.PUBLIC_THREAD | ChannelType.PRIVATE_THREAD;
 
 export class ThreadChannelRecord<ChannelType extends ThreadChannelType = ThreadChannelType> extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ThreadChannelRecord; // TEMP
+    /** @todo */
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ThreadChannelRecord;
 
     application_id?: undefined;
     appliedTags: Defined<ChannelRecordBase["appliedTags"]>;

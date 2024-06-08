@@ -73,6 +73,7 @@ export class PermissionStore<Action extends FluxAction = PermissionStoreAction> 
     getGuildPermissions(guild: GuildRecord): /* Permissions */ bigint;
     getGuildVersion(guildId: string): number;
     getHighestRole(guild: GuildRecord): Role;
+    initialize(): void;
     isRoleHigher(guild: GuildRecord, roleA: Role, roleB: Role): boolean;
 }
 

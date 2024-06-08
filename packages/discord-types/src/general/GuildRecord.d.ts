@@ -15,7 +15,8 @@ export type GuildRecordOwnProperties = Pick<GuildRecord, "afkChannelId" | "afkTi
 export class GuildRecord<
     OwnProperties extends GuildRecordOwnProperties = GuildRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    constructor(guildProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(guildProperties: Record<string, any>);
 
     get acronym(): string;
     canHaveRaidActivityAlerts(): boolean;

@@ -10,9 +10,11 @@ import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
 export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildVocalChannelRecord; // TEMP
+    /** @todo */
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildVocalChannelRecord;
 
     application_id: undefined;
     appliedTags?: undefined;
@@ -33,11 +35,13 @@ export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
-    memberListId: ChannelRecordBase["memberListId"]; // TEMP
+    /** @todo May only be nullish. */
+    memberListId: ChannelRecordBase["memberListId"];
     messageCount?: undefined;
     nicks?: undefined;
     nsfw_: Defined<ChannelRecordBase["nsfw_"]>;
-    originChannelId: ChannelRecordBase["originChannelId"]; // TEMP
+    /** @todo May only be nullish. */
+    originChannelId: ChannelRecordBase["originChannelId"];
     ownerId?: undefined;
     parent_id: ChannelRecordBase["parent_id"];
     parentChannelThreadType?: undefined;
@@ -49,7 +53,7 @@ export abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
     rtcRegion: Defined<ChannelRecordBase["rtcRegion"]>;
     safetyWarnings?: undefined;
     template?: undefined;
-    themeColor: Nullish; // TEMP
+    themeColor: Nullish;
     threadMetadata?: undefined;
     topic_: Nullish;
     totalMessageSent?: undefined;

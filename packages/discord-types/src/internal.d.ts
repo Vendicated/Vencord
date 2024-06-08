@@ -14,9 +14,8 @@ type IsOptional<T extends object, Key extends keyof T, True, False>
     = T extends Record<Key, T[Key]> ? False : True;
 
 /** @internal */
-export type MergeUnion<T extends object, U extends Partial<Record<keyof T, unknown>>>
-    = Pick<T, Exclude<keyof T, keyof U>>
-    & Pick<U, Exclude<keyof U, keyof T>>
+export type MergeUnion<T extends object, U extends object>
+    = Pick<T, Exclude<keyof T, keyof U>> & Pick<U, Exclude<keyof U, keyof T>>
     & { [Key in keyof T & keyof U as IsOptional<T, Key, never, Key> & IsOptional<U, Key, never, Key>]: T[Key] | U[Key]; }
     & { [Key in keyof T & keyof U as IsOptional<T, Key, Key, never> | IsOptional<U, Key, Key, never>]?: T[Key] | U[Key]; };
 

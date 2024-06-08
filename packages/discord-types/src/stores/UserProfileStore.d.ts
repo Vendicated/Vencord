@@ -31,7 +31,8 @@ export class UserProfileStore<
     getGuildMemberProfile(userId: string, guildId?: string | Nullish): GuildMemberProfile | Nullish;
     getIsAccessibilityTooltipViewed(): boolean;
     getMutualFriends(userId: string): {
-        key: string; // userId
+        /** The ID of the user. */
+        key: string;
         status: StatusType;
         user: UserRecord;
     }[] | undefined;
@@ -41,6 +42,7 @@ export class UserProfileStore<
         nick: string | null;
     }[] | undefined;
     getUserProfile<FetchFailed extends boolean = boolean>(userId: string): UserProfile<FetchFailed> | undefined;
+    initialize(): void;
     isFetchingFriends(userId: string): boolean;
     isFetchingProfile(userId: string): boolean;
     get isSubmitting(): boolean;

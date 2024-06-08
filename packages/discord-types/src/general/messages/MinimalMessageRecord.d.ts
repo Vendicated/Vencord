@@ -58,38 +58,44 @@ export const enum MessageAttachmentFlags {
     CONTAINS_EXPLICIT_MEDIA = 1 << 4,
 }
 
-export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageStringSelectComponent | MessageTextInputComponent | MessageUserSelectComponent | MessageRoleSelectComponent | MessageMentionableSelectComponent | MessageChannelSelectComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
+export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageSelectComponent | MessageTextInputComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
 
-export interface MessageActionRowComponent {
-    components: Exclude<MessageComponent, MessageActionRowComponent>[];
+export interface MessageComponentBase {
     id: string;
+    type: MessageComponentType;
+}
+
+export interface MessageActionRowComponent extends MessageComponentBase {
+    components: Exclude<MessageComponent, MessageActionRowComponent>[];
     type: MessageComponentType.ACTION_ROW;
 }
 
-/**
- * @todo
- * Must have one of either `customId` or `url`, but never both.
- * If a button has `url` it must have the `Link` button style.
- */
-export interface MessageButtonComponent {
+export type MessageButtonComponent = MessageNonLinkButtonComponent | MessageLinkButtonComponent;
+
+export interface MessageButtonComponentBase extends MessageComponentBase {
     customId: string | undefined;
     disabled: boolean | undefined;
     emoji: MessageComponentEmoji | undefined;
-    id: string;
     label: string | undefined;
-    style: ButtonStyle;
+    style: MessageButtonComponentStyle;
     type: MessageComponentType.BUTTON;
     url: string | undefined;
 }
 
-export interface MessageComponentEmoji {
-    animated: boolean | undefined;
-    id: string | undefined;
-    name: string | undefined;
-    src: string | undefined;
+export interface MessageNonLinkButtonComponent extends MessageButtonComponentBase {
+    customId: string;
+    style: Exclude<MessageButtonComponentStyle, MessageButtonComponentStyle.LINK>;
+    url: undefined;
 }
 
-export const enum ButtonStyle {
+export interface MessageLinkButtonComponent extends MessageButtonComponentBase {
+    customId: undefined;
+    style: MessageButtonComponentStyle.LINK;
+    url: string;
+}
+
+// Original name: ButtonStyle
+export const enum MessageButtonComponentStyle {
     PRIMARY = 1,
     SECONDARY = 2,
     SUCCESS = 3,
@@ -98,7 +104,25 @@ export const enum ButtonStyle {
     PREMIUM = 6,
 }
 
-export interface SelectMenuOption<OptionType extends SelectOptionType = SelectOptionType> {
+export type MessageSelectComponent = MessageStringSelectComponent | MessageSnowflakeSelectComponent;
+
+export interface MessageSelectComponentBase extends MessageComponentBase {
+    customId: string;
+    disabled: boolean | undefined;
+    maxValues: number | undefined;
+    minValues: number | undefined;
+    placeholder: string;
+    type: MessageComponentType.STRING_SELECT | MessageComponentType.USER_SELECT | MessageComponentType.ROLE_SELECT | MessageComponentType.MENTIONABLE_SELECT | MessageComponentType.CHANNEL_SELECT;
+}
+
+export interface MessageStringSelectComponent extends MessageSelectComponentBase {
+    options: MessageSelectComponentMenuOption<MessageSelectComponentOptionType.STRING>[];
+    type: MessageComponentType.STRING_SELECT;
+}
+
+export interface MessageSelectComponentMenuOption<
+    OptionType extends MessageSelectComponentOptionType = MessageSelectComponentOptionType
+> {
     default: boolean | undefined;
     description: string | undefined;
     emoji: MessageComponentEmoji | undefined;
@@ -107,18 +131,8 @@ export interface SelectMenuOption<OptionType extends SelectOptionType = SelectOp
     value: string;
 }
 
-export interface MessageStringSelectComponent {
-    customId: string;
-    disabled: boolean | undefined;
-    id: string;
-    maxValues: number | undefined;
-    minValues: number | undefined;
-    options: SelectMenuOption<SelectOptionType.STRING>[];
-    placeholder: string;
-    type: MessageComponentType.STRING_SELECT;
-}
-
-export const enum SelectOptionType {
+// Original name: SelectOptionType
+export const enum MessageSelectComponentOptionType {
     STRING = 1,
     USER = 2,
     ROLE = 3,
@@ -126,119 +140,105 @@ export const enum SelectOptionType {
     GUILD = 5,
 }
 
-export const enum TextComponentStyle {
-    SMALL = 1,
-    PARAGRAPH = 2,
+export type MessageSnowflakeSelectComponent = MessageUserSelectComponent | MessageRoleSelectComponent | MessageMentionableSelectComponent | MessageChannelSelectComponent;
+
+export interface MessageSnowflakeSelectComponentBase extends MessageSelectComponentBase {
+    defaultValues: MessageSelectComponentDefaultValue[];
+    type: MessageComponentType.USER_SELECT | MessageComponentType.ROLE_SELECT | MessageComponentType.MENTIONABLE_SELECT | MessageComponentType.CHANNEL_SELECT;
 }
 
-export interface MessageTextInputComponent {
-    customId: string;
-    disabled: boolean | undefined;
-    id: string;
-    label: string;
-    maxLength: number | undefined;
-    minLength: number | undefined;
-    placeholder: string | undefined;
-    required: boolean;
-    style: TextComponentStyle;
-    type: MessageComponentType.INPUT_TEXT;
-    value: string | undefined;
-}
-
-export interface MessageUserSelectComponent {
-    customId: string;
-    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueType.USER>[];
-    disabled: boolean | undefined;
-    id: string;
-    maxValues: number | undefined;
-    minValues: number | undefined;
-    placeholder: string;
+export interface MessageUserSelectComponent extends MessageSnowflakeSelectComponentBase {
+    defaultValues: MessageSelectComponentDefaultValue<MessageSelectComponentDefaultValueType.USER>[];
     type: MessageComponentType.USER_SELECT;
 }
 
-export interface MessageRoleSelectComponent {
-    customId: string;
-    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueType.ROLE>[];
-    disabled: boolean | undefined;
-    id: string;
-    maxValues: number | undefined;
-    minValues: number | undefined;
-    placeholder: string;
+export interface MessageRoleSelectComponent extends MessageSnowflakeSelectComponentBase {
+    defaultValues: MessageSelectComponentDefaultValue<MessageSelectComponentDefaultValueType.ROLE>[];
     type: MessageComponentType.ROLE_SELECT;
 }
 
-export interface MessageMentionableSelectComponent {
-    customId: string;
-    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueType.ROLE | SnowflakeSelectDefaultValueType.USER>[];
-    disabled: boolean | undefined;
-    id: string;
-    maxValues: number | undefined;
-    minValues: number | undefined;
-    placeholder: string;
+export interface MessageMentionableSelectComponent extends MessageSnowflakeSelectComponentBase {
+    defaultValues: MessageSelectComponentDefaultValue<MessageSelectComponentDefaultValueType.ROLE | MessageSelectComponentDefaultValueType.USER>[];
     type: MessageComponentType.MENTIONABLE_SELECT;
 }
 
-export interface MessageChannelSelectComponent {
+export interface MessageChannelSelectComponent extends MessageSnowflakeSelectComponentBase {
     channelTypes: ChannelType[] | undefined;
-    customId: string;
-    defaultValues: SelectMenuDefaultValue<SnowflakeSelectDefaultValueType.CHANNEL>[];
-    disabled: boolean | undefined;
-    id: string;
-    maxValues: number | undefined;
-    minValues: number | undefined;
-    placeholder: string;
+    defaultValues: MessageSelectComponentDefaultValue<MessageSelectComponentDefaultValueType.CHANNEL>[];
     type: MessageComponentType.CHANNEL_SELECT;
 }
 
-export interface SelectMenuDefaultValue<DefaultValueType extends SnowflakeSelectDefaultValueType = SnowflakeSelectDefaultValueType> {
+export interface MessageSelectComponentDefaultValue<
+    DefaultValueType extends MessageSelectComponentDefaultValueType = MessageSelectComponentDefaultValueType
+> {
     id: string;
     type: DefaultValueType;
 }
 
 // Original name: SnowflakeSelectDefaultValueTypes
-export const enum SnowflakeSelectDefaultValueType {
+export const enum MessageSelectComponentDefaultValueType {
     CHANNEL = "channel",
     ROLE = "role",
     USER = "user",
 }
 
-export interface MessageTextComponent {
+export interface MessageTextInputComponent extends MessageComponentBase {
+    customId: string;
+    disabled: boolean | undefined;
+    label: string;
+    maxLength: number | undefined;
+    minLength: number | undefined;
+    placeholder: string | undefined;
+    required: boolean;
+    style: MessageTextInputComponentStyle;
+    type: MessageComponentType.INPUT_TEXT;
+    value: string | undefined;
+}
+
+// Original name: TextComponentStyle
+export const enum MessageTextInputComponentStyle {
+    SMALL = 1,
+    PARAGRAPH = 2,
+}
+
+export interface MessageTextComponent extends MessageComponentBase {
+    /** @todo May not be undefined. */
     content: string | undefined;
-    id: string;
     type: MessageComponentType.TEXT;
 }
 
-export interface MediaItem {
+export interface MessageMediaGalleryComponent extends MessageComponentBase {
+    items: {
+        /** @todo May not be undefined. */
+        description: string | undefined;
+        media: MessageMediaGalleryComponentItem;
+        /** @todo May not be undefined. */
+        spoiler: boolean | undefined;
+    }[];
+    type: MessageComponentType.MEDIA_GALLERY;
+}
+export interface MessageMediaGalleryComponentItem {
     contentScanMetadata: {
-        contentScanFlags: ContentScanFlags | undefined;
+        contentScanFlags: ContentScanFlags;
+        /** @todo May not be undefined. */
         version: number | undefined;
     } | undefined;
-    contentType: string | undefined;
-    height: number | Nullish;
+    contentType: string;
+    height: number;
     placeholder: string | undefined;
+    /** @todo May not be undefined. */
     placeholderVersion: number | undefined;
     proxyUrl: string;
     url: string;
-    width: number | Nullish;
+    width: number;
 }
 
 export const enum ContentScanFlags {
     EXPLICIT = 1,
 }
 
-export interface MessageMediaGalleryComponent {
-    id: string;
-    items: {
-        description: string | undefined;
-        media: MediaItem;
-        spoiler: boolean;
-    }[];
-    type: MessageComponentType.MEDIA_GALLERY;
-}
-
-export interface MessageSeparatorComponent {
+export interface MessageSeparatorComponent extends MessageComponentBase {
     divider: boolean;
-    id: string;
     spacing: SeparatorSpacingSize;
     type: MessageComponentType.SEPARATOR;
 }
@@ -246,6 +246,22 @@ export interface MessageSeparatorComponent {
 export const enum SeparatorSpacingSize {
     SMALL = 1,
     LARGE = 2,
+}
+
+export type MessageComponentEmoji = MessageComponentUnicodeEmoji | MessageComponentGuildEmoji;
+
+export interface MessageComponentUnicodeEmoji {
+    animated: false | undefined;
+    id: undefined;
+    name: string;
+    src: undefined;
+}
+
+export interface MessageComponentGuildEmoji {
+    animated: boolean | undefined;
+    id: string;
+    name: string;
+    src: string | undefined;
 }
 
 // Original name: ComponentType
@@ -264,9 +280,10 @@ export const enum MessageComponentType {
     SEPARATOR = 14,
 }
 
-export interface MessageEmbed {
+export type MessageEmbed = {
     author?: MessageEmbedAuthor;
     color?: string;
+    /** @todo May not be undefined. */
     contentScanVersion: number | undefined;
     fields: MessageEmbedField[];
     flags: MessageEmbedFlags | undefined;
@@ -281,8 +298,11 @@ export interface MessageEmbed {
     timestamp?: Moment;
     type: MessageEmbedType | undefined;
     url: string | undefined;
-    video?: MessageEmbedVideo;
-}
+} & ({} | {
+    provider: MessageEmbedProvider;
+    thumbnail: MessageEmbedThumbnail;
+    video: MessageEmbedVideo;
+});
 
 export interface MessageEmbedAuthor {
     iconProxyURL: string | undefined;
@@ -308,12 +328,14 @@ export interface MessageEmbedFooter {
 }
 
 export interface MessageEmbedImage {
-    height: number | undefined;
+    /** Always greater than 0. */
+    height: number;
     placeholder: string | undefined;
     placeholderVersion: number | undefined;
     proxyURL: string | undefined;
     url: string;
-    width: number | undefined;
+    /** Always greater than 0. */
+    width: number;
 }
 
 export interface MessageEmbedProvider {
@@ -321,20 +343,17 @@ export interface MessageEmbedProvider {
     url: string | undefined;
 }
 
-/**
- * @todo
- * An embed thumbnail either
- * has `height`, `placeholder`, `placeholderVersion`, `proxyURL`, `url`, and `width`
- * or has only `height`, `url`, and `width`.
- */
-export interface MessageEmbedThumbnail {
+export type MessageEmbedThumbnail = {
+    /** Always greater than 0. */
     height: number;
+    url: string;
+    /** Always greater than 0. */
+    width: number;
+} & ({} | {
     placeholder: string | undefined;
     placeholderVersion: number | undefined;
     proxyURL: string | undefined;
-    url: string;
-    width: number;
-}
+});
 
 // Original name: MessageEmbedTypes
 export const enum MessageEmbedType {
@@ -358,19 +377,20 @@ export const enum MessageEmbedType {
     VOICE_CHANNEL = "voice_channel",
 }
 
-/**
- * @todo
- * An embed video must have either `proxyURL` or `url`, and having both is possible.
- * It might not be possible for an embed video to have `proxyURL` without `url`, though.
- */
-export interface MessageEmbedVideo {
+export type MessageEmbedVideo = {
+    /** Always greater than 0. */
     height: number;
     placeholder: string | undefined;
     placeholderVersion: number | undefined;
-    proxyURL: string | undefined;
-    url: string | undefined;
+    /** Always greater than 0. */
     width: number;
-}
+} & ({
+    proxyURL: string;
+    url: string | undefined;
+} | {
+    proxyURL: string | undefined;
+    url: string;
+});
 
 export const enum MessageFlags {
     CROSSPOSTED = 1 << 0,

@@ -60,7 +60,7 @@ importers:
         specifier: ~18.2.79
         version: 18.2.79
       '@types/react-dom':
-        specifier: ~18.2.24
+        specifier: ~18.2.25
         version: 18.2.25
       '@types/yazl':
         specifier: ^2.4.2
@@ -123,11 +123,11 @@ importers:
         specifier: ^3.1.2
         version: 3.1.2
       tsx:
-        specifier: ^4.13.0
-        version: 4.13.0
+        specifier: ^4.13.3
+        version: 4.13.3
       type-fest:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.20.0
+        version: 4.20.0
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -156,8 +156,8 @@ importers:
         specifier: 2.22.2
         version: 2.22.2
       type-fest:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.20.0
+        version: 4.20.0
     devDependencies:
       '@eslint-types/unicorn':
         specifier: ^52.0.0
@@ -199,7 +199,7 @@ importers:
         specifier: ~18.2.79
         version: 18.2.79
       '@types/react-dom':
-        specifier: ~18.2.24
+        specifier: ~18.2.25
         version: 18.2.25
       '@vencord/discord-types':
         specifier: workspace:^
@@ -211,8 +211,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       type-fest:
-        specifier: ^4.19.0
-        version: 4.19.0
+        specifier: ^4.20.0
+        version: 4.20.0
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -221,8 +221,8 @@ importers:
         specifier: ^11.2.0
         version: 11.2.0
       tsx:
-        specifier: ^4.13.0
-        version: 4.13.0
+        specifier: ^4.13.3
+        version: 4.13.3
 
 packages:
 
@@ -2667,8 +2667,8 @@ packages:
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
-  tsx@4.13.0:
-    resolution: {integrity: sha512-kNY70P2aLMdVBii1Err5ENxDhQ6Vz2PbQGX68DcvzY2/PWK5NLBO6vI7lPr1/2xG3IKSt2MN+KOAyWDQSRlbCA==}
+  tsx@4.13.3:
+    resolution: {integrity: sha512-FTAJJLQCMiIbt78kD5qhLjHIR5NOQDKC63wcdelWRDBE+d1xSrXYhXq4DzejnC2tGhFZHpDy2Ika0Ugf7sK8gA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -2692,8 +2692,8 @@ packages:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
 
-  type-fest@4.19.0:
-    resolution: {integrity: sha512-CN2l+hWACRiejlnr68vY0/7734Kzu+9+TOslUXbSCQ1ruY9XIHDBSceVXCcHm/oXrdzhtLMMdJEKfemf1yXiZQ==}
+  type-fest@4.20.0:
+    resolution: {integrity: sha512-MBh+PHUHHisjXf4tlx0CFWoMdjx8zCMLJHOjnV1prABYZFHqtFOyauCIK2/7w4oIfwkF8iNhLtnJEfVY2vn3iw==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.2:
@@ -5508,7 +5508,7 @@ snapshots:
 
   tslib@2.6.2: {}
 
-  tsx@4.13.0:
+  tsx@4.13.3:
     dependencies:
       esbuild: 0.20.2
       get-tsconfig: 4.7.5
@@ -5527,7 +5527,7 @@ snapshots:
 
   type-fest@0.8.1: {}
 
-  type-fest@4.19.0: {}
+  type-fest@4.20.0: {}
 
   typed-array-buffer@1.0.2:
     dependencies:

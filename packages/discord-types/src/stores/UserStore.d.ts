@@ -35,9 +35,13 @@ export class UserStore<
     getUsers(): { [userId: string]: UserRecord; };
     getUserStoreVersion(): number;
     handleLoadCache(cache: {
-        initialGuildChannels: any[]; // TEMP
-        privateChannels: any[]; // TEMP
-        users: any[] | Nullish; // TEMP
+        /** @todo */
+        initialGuildChannels: any[];
+        /** @todo */
+        privateChannels: any[];
+        /** @todo */
+        users: any[] | Nullish;
     }): void;
+    initialize(): void;
     takeSnapshot(): FluxSnapshot<UserStoreSnapshotData>;
 }

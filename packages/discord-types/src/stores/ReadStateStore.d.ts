@@ -48,6 +48,7 @@ export class ReadStateStore<Action extends FluxAction = ReadStateStoreAction> ex
     hasTrackedUnread(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     hasUnread(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     hasUnreadPins(channelId: string): boolean;
+    initialize(): void;
     isEstimated(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     isForumPostUnread(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     isNewForumThread(forumThreadId: string, forumId: string, guild?: GuildRecord | Nullish): boolean;

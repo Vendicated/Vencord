@@ -28,7 +28,8 @@ export abstract class FluxSnapshotStore<
 
     static allStores: FluxSnapshotStore[];
     static clearAll(): void;
-    static displayName: string; // abstract
+    /** Not present on FluxSnapshotStore's constructor. */
+    static displayName: string;
 
     clear(): void;
     getClass(): Constructor;

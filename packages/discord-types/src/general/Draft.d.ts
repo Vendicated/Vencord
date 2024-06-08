@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// The other DraftTypes are either not handled by DraftStore or not yet implemented.
+/** @todo It seems that the other DraftTypes are either not handled by DraftStore or not yet implemented. */
 export type Draft<Type extends DraftType = DraftType>
     = Type extends DraftType.CHANNEL_MESSAGE | DraftType.FIRST_THREAD_MESSAGE ? DraftMessage
         : Type extends DraftType.THREAD_SETTINGS ? DraftThreadSettings
@@ -36,7 +36,8 @@ export interface DraftForumThreadSettings {
 
 export interface DraftNonForumThreadSettings {
     isPrivate: boolean;
-    location?: any; // TEMP
+    /** @todo */
+    location?: any;
     parentChannelId: string;
     parentMessageId: string | undefined;
     timestamp: number;

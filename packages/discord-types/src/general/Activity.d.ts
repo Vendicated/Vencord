@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/** @todo Might have more properties. */
+/** @todo May have more properties. */
 export interface Activity {
     application_id?: string | number;
     assets?: ActivityAssets;

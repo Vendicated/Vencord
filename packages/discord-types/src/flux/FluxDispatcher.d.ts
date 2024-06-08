@@ -8,16 +8,6 @@ import type { Nullish } from "../internal";
 import type { FluxActionHandler, FluxActionHandlerMap, FluxActionHandlersGraph } from "./fluxActionHandlers";
 import type { ExtractAction, FluxAction, FluxActionLogger, FluxActionType } from "./fluxActions";
 
-/*
- * The only reason to make Dispatcher generic with a type parameter for the actions it handles would be to allow plugins
- * to create their own Flux stores with their own actions. However, this would require removing all contravariant properties
- * from Dispatcher so that plugins could create stores with their own Dispatcher instances. This would be required, since
- * the alternative option, allowing plugins to use the main Dispatcher instance, would require removing type information for
- * Discord's actions from Dispatcher, and would introduce the potential for action type name conflicts. Both of these
- * options would harm the main use case of these types. Furthermore, there are other state management libraries bundled with
- * Discord that plugins can use (e.g., Redux, Zustand), and Discord seems to only use one Dispatcher instance (all ~398
- * stores use the same instance), implying that their type for Dispatcher is also not generic.
- */
 // Original name: Dispatcher
 export class FluxDispatcher {
     constructor(

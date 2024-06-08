@@ -26,7 +26,8 @@ type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availabl
 export type ChannelRecordOwnProperties<ChannelRecord extends ChannelRecordBase> = Pick<ChannelRecord, ChannelRecordOwnPropertyKeys>;
 
 export abstract class ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
     get accessPermissions(): /* Permissions */ bigint;
     get bitrate(): number;
@@ -37,27 +38,27 @@ export abstract class ChannelRecordBase {
     getDefaultSortOrder(): ThreadSortOrder;
     getGuildId(): this["guild_id"];
     hasFlag(flag: ChannelFlags): boolean;
-    isActiveThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isActiveThread(): boolean;
     isAnnouncementThread(): this is ThreadChannelRecord<ChannelType.ANNOUNCEMENT_THREAD>;
-    isArchivedLockedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
-    isArchivedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isArchivedLockedThread(): boolean;
+    isArchivedThread(): boolean;
     isBroadcastChannel(): boolean;
     isCategory(): this is GuildCategoryChannelRecord;
     isDirectory(): this is GuildDirectoryChannelRecord;
     isDM(): this is DMChannelRecord;
     isForumChannel(): this is GuildForumChannelRecord;
     isForumLikeChannel(): this is ForumChannelRecord;
-    isForumPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isForumPost(): boolean;
     isGroupDM(): this is GroupDMChannelRecord;
     isGuildStageVoice(): this is GuildStageVoiceChannelRecord;
     isGuildVocal(): this is GuildVocalChannelRecord;
     isGuildVocalOrThread(): this is GuildVocalChannelRecord | ThreadChannelRecord<ChannelType.PUBLIC_THREAD | ChannelType.PRIVATE_THREAD>;
     isGuildVoice(): this is GuildVoiceChannelRecord;
     isListenModeCapable(): this is GuildStageVoiceChannelRecord;
-    isLockedThread(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isLockedThread(): boolean;
     isManaged(): boolean;
     isMediaChannel(): this is GuildMediaChannelRecord;
-    isMediaPost(): boolean; // requires https://github.com/microsoft/TypeScript/issues/15048
+    isMediaPost(): boolean;
     isMultiUserDM(): this is GroupDMChannelRecord;
     isNSFW(): boolean;
     isOwner(userId: string): boolean;
@@ -203,7 +204,8 @@ export interface ChannelRecipient {
 }
 
 export interface SafetyWarning {
-    dismiss_timestamp?: string | Nullish; // TEMP
+    /** @todo May not be null or optional. */
+    dismiss_timestamp?: string | null;
     type: SafetyWarningType;
 }
 

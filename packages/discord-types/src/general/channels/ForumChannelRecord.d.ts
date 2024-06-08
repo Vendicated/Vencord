@@ -10,9 +10,11 @@ import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
 export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
 
 export abstract class ForumChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: Record<string, any>); // TEMP
+    /** @todo */
+    constructor(channelProperties: Record<string, any>);
 
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ForumChannelRecord; // TEMP
+    /** @todo */
+    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ForumChannelRecord;
 
     application_id?: undefined;
     appliedTags?: undefined;
@@ -33,7 +35,8 @@ export abstract class ForumChannelRecordBase extends ChannelRecordBase {
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
-    memberListId: ChannelRecordBase["memberListId"]; // TEMP
+    /** @todo May only be nullish. */
+    memberListId: ChannelRecordBase["memberListId"];
     messageCount?: undefined;
     nicks?: undefined;
     nsfw_: Defined<ChannelRecordBase["nsfw_"]>;

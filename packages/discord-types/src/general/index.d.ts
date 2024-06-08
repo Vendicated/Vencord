@@ -5,6 +5,7 @@
  */
 
 export * from "./Activity";
+export * from "./ApplicationCommand";
 export * from "./ApplicationRecord";
 export * from "./channels";
 export * from "./Clan";

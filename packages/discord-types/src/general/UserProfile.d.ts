@@ -22,7 +22,8 @@ export interface UserProfileFetchSucceeded {
     connectedAccounts: ProfileConnectedAccountData[];
     lastFetched: number;
     legacyUsername: string | Nullish;
-    popoutAnimationParticleType: any /* |  Nullish */; // TEMP
+    /** @todo Does not seem to be implemented. */
+    popoutAnimationParticleType: any /* |  Nullish */;
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
     premiumType: UserPremiumType | Nullish;

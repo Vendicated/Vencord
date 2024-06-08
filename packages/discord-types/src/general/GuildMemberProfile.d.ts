@@ -13,7 +13,8 @@ export interface GuildMemberProfile {
     banner: string | Nullish;
     bio: string | undefined;
     guildId: string;
-    popoutAnimationParticleType: any /* | Nullish */; // TEMP
+    /** @todo Does not seem to be implemented. */
+    popoutAnimationParticleType: any /* | Nullish */;
     profileEffectId: string | undefined;
     pronouns: string;
     themeColors: ProfileThemeColors | Nullish;

@@ -17,19 +17,22 @@ export class ChannelStore<Action extends FluxAction = ChannelStoreAction> extend
     static displayName: "ChannelStore";
 
     getAllThreadsForParent(channelId: string): ThreadChannelRecord[];
-    getBasicChannel(channelId?: string | Nullish): ChannelRecord | null; // TEMP
+    /** @todo May not return a ChannelRecord. */
+    getBasicChannel(channelId?: string | Nullish): ChannelRecord | null;
     getChannel(channelId?: string | Nullish): ChannelRecord | undefined;
     getChannelIds(guildId?: string | Nullish): string[];
     getDebugInfo(): {
         guildSizes: string[];
         loadedGuildIds: string[];
-        pendingGuildLoads: any[]; // TEMP
+        /** @todo */
+        pendingGuildLoads: any[];
     };
     getDMFromUserId(userId?: string | Nullish): string | undefined;
     getDMUserIds(): string[];
     getGuildChannelsVersion(guildId: string): number;
     getInitialOverlayState(): { [channelId: string]: ChannelRecord; };
-    getMutableBasicGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; }; // TEMP
+    /** @todo The returned object may not have ChannelRecords. */
+    getMutableBasicGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; };
     getMutableDMsByUserIds(): { [userId: string]: string; };
     getMutableGuildChannelsForGuild(guildId: string): { [channelId: string]: GuildChannelRecord; };
     getMutablePrivateChannels(): { [channelId: string]: PrivateChannelRecord; };

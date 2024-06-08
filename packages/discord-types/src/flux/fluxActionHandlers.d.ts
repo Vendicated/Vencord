@@ -26,13 +26,15 @@ export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
 interface FluxActionHandlersGraphNode {
     actionHandler: FluxActionHandlerMap;
     band: FluxDispatchBand;
-    name: string; // storeName
+    /** Name of a store. */
+    name: string;
     storeDidChange: FluxActionHandler;
 }
 
 type FluxOrderedActionHandlers<Action extends FluxAction = FluxAction> = {
     actionHandler: FluxActionHandler<Action>;
-    name: string; // storeName
+    /** Name of a store. */
+    name: string;
     storeDidChange: FluxActionHandler<Action>;
 }[];
 
