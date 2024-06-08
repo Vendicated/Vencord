@@ -74,15 +74,15 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile, useDiv; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} useDiv={props.useDiv} />
+const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile, compactSpacing; }) =>
+    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} compactSpacing={props.compactSpacing} />
 );
 
 const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
     <ConnectionsComponent id={id} theme={ThemeStore.theme} />
 );
 
-function ConnectionsComponent({ id, theme, useDiv }: { id: string, theme: string, useDiv?: boolean; }) {
+function ConnectionsComponent({ id, theme, compactSpacing }: { id: string, theme: string, compactSpacing?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -91,7 +91,7 @@ function ConnectionsComponent({ id, theme, useDiv }: { id: string, theme: string
     if (!connections?.length)
         return null;
 
-    const Container = useDiv ? "div" : Section;
+    const Container = compactSpacing ? "div" : Section;
 
     return (
         <Container>
@@ -180,7 +180,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, useDiv: !1 })"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: !1 })"
             }
         },
         {
@@ -195,7 +195,7 @@ export default definePlugin({
             find: "autoFocusNote:!0})",
             replacement: {
                 match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, useDiv: !0 })"
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, compactSpacing: !0 })"
             }
         }
     ],
