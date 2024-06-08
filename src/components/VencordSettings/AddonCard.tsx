@@ -68,7 +68,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             >
                                 {name}
                             </div>
-                        </div>{isNew && <Badge text={$t("vencord.components.vencordSettings.addonCard.new")} color="#ED4245" />}
+                        </div>{isNew && <Badge text={$t("vencord.new")} color="#ED4245" />}
                     </Text>
                     {!!author && (
                         <Text variant="text-md/normal" className={cl("author")}>

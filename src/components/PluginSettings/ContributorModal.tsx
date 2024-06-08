@@ -13,7 +13,7 @@ import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { Translate } from "@utils/translation";
+import { $t, Translate } from "@utils/translation";
 import { Forms, MaskedLink, showToast, Tooltip, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -74,8 +74,6 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
-
     return (
         <>
             <div className={cl("header")}>
@@ -109,7 +107,7 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             <Forms.FormText>
-                <Translate i18nKey="vencord.components.pluginSettings.contributorModal.contributed" variables={{ count: plugins.length }}>
+                <Translate i18nKey="vencord.pluginContributed" variables={{ count: plugins.length }}>
                     <Link href="https://vencord.dev/source" />
                 </Translate>
             </Forms.FormText>
@@ -121,7 +119,7 @@ function ContributorModal({ user }: { user: User; }) {
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            onRestartNeeded={() => showToast($t("vencord.pluginRestart"))}
                         />
                     )}
                 </div>

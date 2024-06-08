@@ -37,12 +37,12 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export function copyWithToast(text: string, toastMessage?: string) {
-    toastMessage ??= $t("vencord.utils.misc.clipboard.copied");
+    toastMessage ??= $t("vencord.copiedToClipboard");
 
     if (Clipboard.SUPPORTS_COPY) {
         Clipboard.copy(text);
     } else {
-        toastMessage = $t("vencord.utils.misc.clipboard.noSupport");
+        toastMessage = $t("vencord.clipboardNotSupported");
     }
     Toasts.show({
         message: toastMessage,

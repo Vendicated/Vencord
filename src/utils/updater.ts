@@ -71,7 +71,7 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
         const isOutdated = await checkForUpdates();
         if (isOutdated) {
             const wantsUpdate = confirm(confirmMessage);
-            if (wantsUpdate && isNewer) return alert($t("vencord.utils.updater.gitNewer"));
+            if (wantsUpdate && isNewer) return alert($t("vencord.gitCopyNewer"));
             if (wantsUpdate) {
                 await update();
                 relaunch();
@@ -79,6 +79,6 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
         }
     } catch (err) {
         UpdateLogger.error(err);
-        alert($t("vencord.utils.updater.failed"));
+        alert($t("vencord.updaterRepeatFailed"));
     }
 }

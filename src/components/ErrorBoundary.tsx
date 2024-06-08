@@ -86,11 +86,11 @@ const ErrorBoundary = LazyComponent(() => {
                     {...this.state}
                 />;
 
-            const msg = this.props.message || $t("vencord.components.errorBoundary.error");
+            const msg = this.props.message || $t("vencord.errorBoundaryDescription");
 
             return (
                 <ErrorCard style={{ overflow: "hidden" }}>
-                    <h1>{$t("vencord.components.errorBoundary.ohNo")}</h1>
+                    <h1>{$t("vencord.ohNo")}</h1>
                     <p>{msg}</p>
                     <code>
                         {this.state.message}

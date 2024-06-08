@@ -33,6 +33,7 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
+import { $t } from "@utils/translation";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
@@ -272,7 +273,7 @@ export default function PluginSettings() {
 
             if (isRequired) {
                 const tooltipText = p.required
-                    ? "This plugin is required for Vencord to function."
+                    ? $t("vencord.requiredPlugin")
                     : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
                 requiredPlugins.push(

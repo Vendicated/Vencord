@@ -1,78 +1,58 @@
 {
-  "components": {
-    "componentFailed": "Uh Oh! Failed to render this Page. However, there is an update available that might fix it. Would you like to update and restart now?",
-    "errorBoundary": {
-      "error": "An error occurred while rendering this Component. More info can be found below and in your console.",
-      "ohNo": "Oh no!"
+    "ohNo": "Oh no!",
+    "errorBoundaryDescription": "An error occurred while rendering this Component. More info can be found below and in your console.",
+    "failureUpdate": "Uh Oh! Failed to render this Page. However, there is an update available that might fix it. Would you like to update and restart now?",
+    "pluginRestart": "Restart to apply changes!",
+    "requiredPlugin": "This plugin is required for Vencord to function.",
+    "new": "NEW",
+    "pluginContributed": {
+        "one": "This person has <0>contributed</0> to one plugin!",
+        "other": "This person has <0>contributed</0> to {count} plugins!",
+        "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!"
     },
-    "pluginSettings": {
-      "contributorModal": {
-        "contributed": {
-            "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
-            "one": "This person has <0>contributed</0> to one plugin!",
-            "other": "This person has <0>contributed</0> to {count} plugins!"
-        }
-      }
+    "update": {
+        "available": "A Vencord update is available!",
+        "clickToRestart": "Click here to restart",
+        "clickToView": "Click here to view the update",
+        "updated": "Vencord has been updated!"
     },
-    "vencordSettings": {
-      "addonCard": {
-        "new": "NEW"
-      }
-    }
-  },
-  "update": {
-    "available": "A Vencord update is available!",
-    "clickToRestart": "Click here to restart",
-    "clickToView": "Click here to view the update",
-    "updated": "Vencord has been updated!"
-  },
-  "utils": {
+    "cloudIntegrations": "Cloud Integrations",
+    "cloudSettings": "Cloud Settings",
     "cloud": {
-      "integrations": {
-        "enabled": "Cloud integrations enabled!",
-        "reauthenticate": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
-        "setupFailure": {
-          "generic": "Setup failed ({error}).",
-          "missingSecret": "Setup failed (no secret returned?).",
-          "oauth": "Setup failed (couldn't retrieve OAuth configuration)."
+        "integrations": {
+            "enabled": "Cloud integrations enabled!",
+            "reauthenticate": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
+            "setupFailure": {
+                "generic": "Setup failed ({error}).",
+                "missingSecret": "Setup failed (no secret returned?).",
+                "oauth": "Setup failed (couldn't retrieve OAuth configuration)."
+            }
         },
-        "title": "Cloud Integrations"
-      },
-      "settings": {
-        "deleteError": {
-          "api": "Could not delete settings (API returned {status}).",
-          "generic": "Could not delete settings ({error})."
-        },
-        "deleted": "Settings deleted from cloud!",
-        "localNewer": "Your local settings are newer than the cloud ones.",
-        "nothingOnline": "There are no settings in the cloud.",
-        "syncErrorDown": {
-          "api": "Could not synchronize settings from the cloud (API returned {status}).",
-          "generic": "Could not synchronize settings from the cloud ({error})."
-        },
-        "syncErrorUp": {
-          "api": "Could not synchronize settings to the cloud (API returned {status}).",
-          "generic": "Could not synchronize settings to the cloud ({error})."
-        },
-        "syncSuccess": "Synchronized settings to the cloud!",
-        "title": "Cloud Settings",
-        "upToDate": "Your settings are up to date.",
-        "updated": "Your settings have been updated! Click here to restart to fully apply changes!"
-      }
+        "settings": {
+            "deleteError": {
+                "api": "Could not delete settings (API returned {status}).",
+                "generic": "Could not delete settings ({error})."
+            },
+            "deleted": "Settings deleted from cloud!",
+            "localNewer": "Your local settings are newer than the cloud ones.",
+            "nothingOnline": "There are no settings in the cloud.",
+            "syncErrorDown": {
+                "api": "Could not synchronize settings from the cloud (API returned {status}).",
+                "generic": "Could not synchronize settings from the cloud ({error})."
+            },
+            "syncErrorUp": {
+                "api": "Could not synchronize settings to the cloud (API returned {status}).",
+                "generic": "Could not synchronize settings to the cloud ({error})."
+            },
+            "syncSuccess": "Synchronized settings to the cloud!",
+            "upToDate": "Your settings are up to date.",
+            "updated": "Your settings have been updated! Click here to restart to fully apply changes!"
+        }
     },
-    "misc": {
-      "clipboard": {
-        "copied": "Copied to clipboard!",
-        "noSupport": "Your browser does not support copying to clipboard"
-      }
-    },
-    "settingsSync": {
-      "failedToImport": "Failed to import settings: {error}",
-      "imported": "Settings successfully imported. Restart to apply changes!"
-    },
-    "updater": {
-      "failed": "That also failed :( Try updating or re-installing with the installer!",
-      "gitNewer": "Your local copy has more recent commits. Please stash or reset them."
-    }
-  }
+    "copiedToClipboard": "Copied to clipboard!",
+    "clipboardNotSupported": "Your browser does not support copying to clipboard",
+    "failedToImport": "Failed to import settings: {error}",
+    "importedSettings": "Settings successfully imported. Restart to apply changes!",
+    "updaterRepeatFailed": "That also failed :( Try updating or re-installing with the installer!",
+    "gitCopyNewer": "Your local copy has more recent commits. Please stash or reset them."
 }

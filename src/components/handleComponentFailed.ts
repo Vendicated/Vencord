@@ -21,6 +21,6 @@ import { maybePromptToUpdate } from "@utils/updater";
 
 export function handleComponentFailed() {
     maybePromptToUpdate(
-        $t("vencord.components.componentFailed")
+        $t("vencord.failureUpdate")
     );
 }
