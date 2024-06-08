@@ -30,13 +30,13 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>yt-dlp: Missing dependencies</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>MediaDownloader: Missing dependencies</Text>
                 <ModalCloseButton onClick={() => closeModal(key)} />
             </ModalHeader>
             <ModalContent>
                 <div style={{ padding: "16px 0" }}>
                     <Text variant="text-md/normal" >
-                        The yt-dlp plugin requires a working version of yt-dlp to be installed on your system. For extra features such as higher quality videos and gifs, you can also optionally install ffmpeg.
+                        The MediaDownloader plugin requires a working version of yt-dlp to be installed on your system. For extra features such as higher quality videos and gifs, you can also optionally install ffmpeg.
                         <br /><br />
                         If you don't know how to install yt-dlp or ffmpeg, check the installation guides below (if you <i>do</i> know how to install it, make sure it's in your PATH).
                         <br /><br />

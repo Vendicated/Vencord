@@ -1,9 +1,9 @@
 /* Only way to make on:hover styles */
 
-.ytdlp-link {
+.media-downloader-link {
     text-decoration: none !important;
 }
 
-.ytdlp-link:hover {
+.media-downloader-link:hover {
     text-decoration: none !important;
 }

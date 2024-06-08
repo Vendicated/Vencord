@@ -40,8 +40,8 @@ const cleanVideoFiles = () => {
 };
 const appendOut = (data: string) => ( // Makes carriage return (\r) work
     (stdout_global += data), (stdout_global = stdout_global.replace(/^.*\r([^\n])/gm, "$1")));
-const log = (...data: string[]) => (console.log(`[Plugin:yt-dlp] ${data.join(" ")}`), logs_global += `[Plugin:yt-dlp] ${data.join(" ")}\n`);
-const error = (...data: string[]) => console.error(`[Plugin:yt-dlp] [ERROR] ${data.join(" ")}`);
+const log = (...data: string[]) => (console.log(`[Plugin:MediaDownloader] ${data.join(" ")}`), logs_global += `[Plugin:MediaDownloader] ${data.join(" ")}\n`);
+const error = (...data: string[]) => console.error(`[Plugin:MediaDownloader] [ERROR] ${data.join(" ")}`);
 
 function ytdlp(args: string[]): Promise<string> {
     log(`Executing yt-dlp with args: ["${args.map(a => a.replace('"', '\\"')).join('", "')}"]`);
@@ -88,7 +88,7 @@ function ffmpeg(args: string[]): Promise<string> {
 }
 
 export async function start(_: IpcMainInvokeEvent, _workdir: string | undefined) {
-    _workdir ||= fs.mkdtempSync(path.join(os.tmpdir(), "vencord_ytdlp_"));
+    _workdir ||= fs.mkdtempSync(path.join(os.tmpdir(), "vencord_mediaDownloader_"));
     if (!fs.existsSync(_workdir)) fs.mkdirSync(_workdir, { recursive: true });
     workdir = _workdir;
     log("Using workdir: ", workdir);

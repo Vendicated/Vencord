@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./ytdlp.css";
+import "./mediaDownloader.css";
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
@@ -36,8 +36,8 @@ type ButtonComponent = {
     url?: string;
 };
 
-const Native = VencordNative.pluginHelpers.Ytdlp as PluginNative<typeof import("./native")>;
-const logger = new Logger("yt-dlp", "#ff0b01");
+const Native = VencordNative.pluginHelpers.MediaDownloader as PluginNative<typeof import("./native")>;
+const logger = new Logger("MediaDownloader", "#ff0b01");
 
 const maxFileSize = () => {
     const premiumType = (UserStore.getCurrentUser().premiumType ?? 0);
@@ -67,10 +67,10 @@ function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
 
 const CancelButton = [{
     components: [{
-        customId: "yt-dlp-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
+        customId: "media-downloader-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
         emoji: {
             name: "⚪",
-            animated: "yt-dlp-stop-download"
+            animated: "media-downloader-stop-download"
         },
         label: "Cancel download",
         id: "0,0",
@@ -147,7 +147,7 @@ const settings = definePluginSettings({
         component: () => (
             <>
                 <Forms.FormText>
-                    <Link href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" className="ytdlp-link">
+                    <Link href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" className="media-downloader-link">
                         <Button role="link" style={{ width: "100%" }}>
                             Click to see supported websites.
                         </Button>
@@ -191,15 +191,15 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "yt-dlp",
-    description: "Download and send videos with yt-dlp from YouTube, Twitter, Reddit and more.",
+    name: "MediaDownloader",
+    description: "Download and send videos with from YouTube, Twitter, Reddit and more.",
     authors: [Devs.Colorman],
     dependencies: ["CommandsAPI"],
     settings,
     commands: [{
         inputType: ApplicationCommandInputType.BUILT_IN,
-        name: "yt-dlp",
-        description: "Download and send videos with yt-dlp",
+        name: "download",
+        description: "Download and send videos, audio or gifs.",
         options: [{
             name: "url",
             description: "The URL of any video supported by yt-dlp.",
@@ -268,21 +268,21 @@ export default definePlugin({
         }
     ],
     handleButtonClick: (buttonComponent: ButtonComponent) => {
-        if (!(buttonComponent.emoji?.animated === "yt-dlp-stop-download")) return;
+        if (!(buttonComponent.emoji?.animated === "media-downloader-stop-download")) return;
         Native.interrupt();
     },
     start: async () => {
         await Native.checkytdlp();
         await Native.checkffmpeg();
 
-        const videoDir = await DataStore.get<string>("yt-dlp-video-dir");
+        const videoDir = await DataStore.get<string>("media-downloader-video-dir");
         const newVideoDir = await Native.start(videoDir);
-        await DataStore.set("yt-dlp-video-dir", newVideoDir);
+        await DataStore.set("media-downloader-video-dir", newVideoDir);
     },
     stop: async () => {
         // Clean up the temp files
         await Native.stop();
-        await DataStore.del("yt-dlp-video-dir");
+        await DataStore.del("media-downloader-video-dir");
     }
 });
 
