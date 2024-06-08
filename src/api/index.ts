@@ -14,13 +14,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 import * as $Badges from "./Badges";
 import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
+import * as $ExpressionPickerTabs from "./ExpressionPickerTabs";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -116,3 +117,8 @@ export const ChatButtons = $ChatButtons;
  * An API allowing you to update and re-render messages
  */
 export const MessageUpdater = $MessageUpdater;
+
+/**
+ * An API allowing you to add panels to the expression picker
+ */
+export const ExpressionPickerTabs = $ExpressionPickerTabs;
