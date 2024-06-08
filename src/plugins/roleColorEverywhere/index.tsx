@@ -110,10 +110,10 @@ export default definePlugin({
         {
             find: ".reactorDefault",
             replacement: {
-                match: /\.openUserContextMenu\)\((\i),(\i),\i\).*?tag:"strong"/,
+                match: /\.openUserContextMenu\)\((\i),(\i),\i\).{0,250}tag:"strong"/,
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
-            predicate: () => settings.store.reactersList,
+            predicate: () => settings.store.reactorsList,
         }
     ],
     settings,
