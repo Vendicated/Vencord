@@ -110,7 +110,8 @@ export function $t(key: string, variables?: Record<string, any>): string {
         if (!variables || !variables.count) throw new Error(`translation key ${key} is an object (requires plurality?)`);
 
         if (variables.count) {
-            const pluralTag = new Intl.PluralRules(bestLocale).select(variables.count);
+            const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
+                new Intl.PluralRules(bestLocale).select(variables.count);
 
             if (translation[pluralTag]) {
                 return format(translation[pluralTag]!, variables);
