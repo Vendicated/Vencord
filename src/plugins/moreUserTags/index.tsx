@@ -56,7 +56,7 @@ const PermissionUtil = findByProps("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 
