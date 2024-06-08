@@ -78,6 +78,7 @@
 
 .vc-plugins-restart-card button {
     margin-top: 0.5em;
+    background: var(--info-warning-foreground) !important;
 }
 
 .vc-plugins-info-button svg:not(:hover, :focus) {
