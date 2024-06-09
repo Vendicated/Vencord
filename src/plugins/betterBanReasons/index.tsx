@@ -61,7 +61,7 @@ const settings = definePluginSettings({
         default: [],
         component: ReasonsComponent,
     },
-    otherOptionDefault: {
+    textInputDefault: {
         type: OptionType.BOOLEAN,
         description: 'Shows a text input instead of a select menu by default. (Equivalent to clicking the "Other" option)'
     }
@@ -94,7 +94,7 @@ export default definePlugin({
         ));
     },
     isOtherDefault() {
-        return settings.store.otherOptionDefault ? 1 : 0;
+        return settings.store.textInputDefault ? 1 : 0;
     },
     settings,
 });
