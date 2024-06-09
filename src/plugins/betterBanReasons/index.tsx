@@ -95,7 +95,7 @@ export default definePlugin({
                 replace: "=$self.getReasons()"
             },
             {
-                match: /useState\(0\)/g,
+                match: /useState\(0\)/,
                 replace: "useState($self.isOtherDefault())"
             }]
         }
