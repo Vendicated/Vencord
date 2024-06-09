@@ -186,7 +186,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 296776625432035328n,
     },
     TheSun: {
-        name: "sunnie",
+        name: "ActuallyTheSun",
         id: 406028027768733696n
     },
     axyie: {
