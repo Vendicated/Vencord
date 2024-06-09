@@ -40,6 +40,10 @@ function getGroupDMName(channel: Channel) {
             .join(", ");
 }
 
+function useGroupDMs(userId: string) {
+    return useStateFromStores([ChannelStore], () => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(userId)));
+}
+
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
@@ -85,12 +89,12 @@ export default definePlugin({
     ],
 
     useGDMCount(userId: string) {
-        const state = useStateFromStores([ChannelStore], () => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(userId))).length;
+        const state = useGroupDMs(userId).length;
         const label = "Mutual Group";
         return state > 0 ? pluralise(state, label) : `No ${label}s`;
     },
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
-        const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
+        const entries = useGroupDMs(user.id).map(c => (
             <Clickable
                 className={ProfileListClasses.listRow}
                 onClick={() => {
