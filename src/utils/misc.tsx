@@ -24,7 +24,7 @@ import { DevsById } from "./constants";
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined | false>) {
+export function classes(...classes: Array<string | null | undefined>) {
     return classes.filter(Boolean).join(" ");
 }
 

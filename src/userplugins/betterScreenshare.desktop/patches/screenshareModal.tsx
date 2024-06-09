@@ -69,6 +69,11 @@ export function replacedScreenshareModalSettingsContentType(oldType: (...args: a
     return oldTypeResult;
 }
 
+export function getQuality() {
+    const { framerate, height } = Settings.plugins[PluginInfo.PLUGIN_NAME].stores.ScreenshareStore.currentProfile;
+    return { framerate, height };
+}
+
 export function replacedScreenshareModalComponent(oldComponent: (...args: any[]) => any, thisContext: any, functionArguments: any) {
     const oldComponentResult = Reflect.apply(oldComponent, thisContext, functionArguments);
 

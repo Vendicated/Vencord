@@ -24,7 +24,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
-import { replacedScreenshareModalComponent } from "./patches";
+import { getQuality, replacedScreenshareModalComponent } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
 const settings = definePluginSettings({
@@ -48,12 +48,36 @@ export default definePlugin({
                 match: /(function .{1,2}\(.{1,2}\){)(.{1,40}(?=selectGuild).+?(?:]}\)}\)))(})/,
                 replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"
             }
+        },
+        {
+            find: "setGoLiveSource(e,t){if(null==e)",
+            replacement: {
+                match: /setGoLiveSource\(e,t\)\{(if\(null==e\))/,
+                replace: "setGoLiveSource(e,t){if(e!=null){e.quality.frameRate=$self.getQuality().framerate;e.quality.resolution=$self.getQuality().height}$1"
+            }
+        },
+        {
+            find: "\"remoteSinkWantsPixelCount\",\"remoteSinkWantsMaxFramerate\"",
+            replacement: {
+                match: /(\i)=15e3/, // disable discord idle fps reduction
+                replace: (_, g1) => `${g1}=15e8`
+            }
+        },
+        {
+            find: "updateRemoteWantsFramerate(){",
+            replacement: {
+                match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
+                replace: match => `${match}return;`
+            }
         }
     ],
     replacedScreenshareModalComponent: replacedScreenshareModalComponent,
+    getQuality: getQuality,
+    
     start(): void {
         initScreenshareStore();
         initScreenshareAudioStore();
+        this.getQuality = getQuality;
         this.screensharePatcher = new ScreensharePatcher().patch();
         this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
         addSettingsPanelButton({

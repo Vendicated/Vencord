@@ -51,8 +51,6 @@ export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", 
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const ReactDnd = findByPropsLazy("useDrop", "DndProvider");
-
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
@@ -151,5 +149,3 @@ export const UserProfileActions = findByPropsLazy("openUserProfileModal", "close
 export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
-
-export const { ackChannel } = findByPropsLazy("ackChannel");

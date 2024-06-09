@@ -8,13 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
-
 import { cooldown, denormalize, normalize } from "./utils";
 
 const settings = definePluginSettings({
     maxFPS: {
         description: "Max FPS for the range slider",
-        default: 75,
+        default: 144,
         type: OptionType.COMPONENT,
         component: (props: any) => {
             const [value, setValue] = useState(settings.store.maxFPS);
@@ -70,10 +69,12 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CustomScreenShare",
     description: "Stream any resolution and any FPS!",
-    authors: [{
-        name: "KawaiianPizza",
-        id: 501000986735673347n
-    }],
+    authors: [
+        {
+            name: "KawaiianPizza",
+            id: 501000986735673347n
+        }
+    ],
     settingsAboutComponent: () => (
         <Forms.FormSection>
             <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
@@ -122,7 +123,7 @@ export default definePlugin({
             find: "updateRemoteWantsFramerate(){",
             replacement: {
                 match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
-                replace: match => `${match}return;`
+                replace: (match) => `${match}return;`
             }
         },
         {
@@ -136,7 +137,7 @@ export default definePlugin({
             find: "ApplicationStreamResolutionButtonsWithSuffixLabel.map",
             replacement: {
                 match: /stream-settings-resolution-.+?children:\[/,
-                replace: match => `${match}$self.settings.store.bitrates?$self.BitrateGroup():null,`
+                replace: (match) => `${match}$self.settings.store.bitrates?$self.BitrateGroup():null,`
             }
         }
     ],
@@ -144,10 +145,10 @@ export default definePlugin({
         const [value, setValue] = useState(group === "fps" ? fps : res);
         const { maxFPS, maxResolution, roundValues } = settings.store;
 
-        const maxValue = group === "fps" ? maxFPS : maxResolution,
+        let maxValue = group === "fps" ? maxFPS : maxResolution,
             minValue = group === "fps" ? 1 : 22; // 0 FPS freezes (obviously) and anything less than 22p doesn't work
 
-        const onChange = (number: number) => {
+        let onChange = (number: number) => {
             let tmp = denormalize(number, minValue, maxValue);
             if (roundValues)
                 tmp = Math.round(tmp);
@@ -174,7 +175,7 @@ export default definePlugin({
     BitrateSlider(name: "target" | "min" | "max") {
         const [bitrate, setBitrate] = useState(this.settings.store[name + "Bitrate"]);
         const { minBitrate, maxBitrate } = settings.store;
-        const onChange = (number: number) => {
+        let onChange = (number: number) => {
             const tmp = denormalize(number, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate);
             setBitrate(tmp);
             this.settings.store[name + "Bitrate"] = Math.round(tmp);
@@ -202,3 +203,5 @@ export default definePlugin({
         return maxBitrate;
     }
 });
+
+
