@@ -9,16 +9,16 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput } from "@webpack/common";
-
-const defaultReasons = [
-    "Suspicious or spam account",
-    "Compromised or spam account",
-    "Breaking server rules",
-];
+import { Button, Forms, i18n, TextInput } from "@webpack/common";
 
 function ReasonsComponent() {
     const { reasons } = settings.use(["reasons"]);
+    const defaultReasons = [
+        i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
+        i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
+        i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
+    ];
+    if (!reasons) settings.store.reasons = defaultReasons;
 
     return (
         <Forms.FormSection title="Reasons">
@@ -75,7 +75,6 @@ const settings = definePluginSettings({
     reasons: {
         description: "Your custom reasons",
         type: OptionType.COMPONENT,
-        default: defaultReasons,
         component: ReasonsComponent,
     },
 });
