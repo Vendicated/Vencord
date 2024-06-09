@@ -65,8 +65,12 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=let\{user:(\i),.{0,700})(?=return\(null!=)/,
-                    replace: "let vencordMutualGroupsCount=$self.useGDMCount($1.id);"
+                    match: /(?<=let\{user:(\i),.{0,20}=\i)/,
+                    replace: ",vencordUser=$1"
+                },
+                {
+                    match: /(?=return\(null!=)/,
+                    replace: "let vencordMutualGroupsCount=$self.useGDMCount(vencordUser.id);"
                 },
                 {
                     match: /(?<=(\i\.push)\(\{section:\i\.UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}\}\)\)\}\))/,
