@@ -66,12 +66,16 @@ export default definePlugin({
                     replace: "$1emoji.category==='FAVORITES'?drag:$2,collected:collected,",
                 },
                 {
+                    match: /(function\((?:\i,?)+\){let [{a-zA-Z,:_]*,)(\.\.\.\i})/,
+                    replace: "$1collected,$2",
+                },
+                {
                     match: /(\(0,\i.jsx\)\(\i.default)/,
-                    replace: "arguments[0].collected.isDragging?$self.dragItem():$1",
+                    replace: "collected.isDragging?$self.dragItem():$1",
                 },
                 {
                     match: /\[(\i\.emojiItemSelected)\]/,
-                    replace: "[arguments[0].collected.isDragging?'':$1]",
+                    replace: "[collected.isDragging?'':$1]",
                 },
             ],
         },
