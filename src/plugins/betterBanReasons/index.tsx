@@ -13,12 +13,6 @@ import { Button, Forms, i18n, TextInput } from "@webpack/common";
 
 function ReasonsComponent() {
     const { reasons } = settings.use(["reasons"]);
-    const defaultReasons = [
-        i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
-        i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
-        i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
-    ];
-    if (!reasons) settings.store.reasons = defaultReasons;
 
     return (
         <Forms.FormSection title="Reasons">
@@ -48,25 +42,14 @@ function ReasonsComponent() {
                     </Button>
                 </div>
             ))}
-            <div
-                className="vc-bbr-reason-wrapper"
+            <Button
+                onClick={() => {
+                    reasons.push("");
+                    settings.store.reasons = [...reasons];
+                }}
             >
-                <Button
-                    onClick={() => {
-                        reasons.push("");
-                        settings.store.reasons = [...reasons];
-                    }}
-                >
-                    Add new
-                </Button>
-                <Button
-                    color={Button.Colors.TRANSPARENT}
-                    onClick={() => {
-                        settings.store.reasons = defaultReasons;
-                    }}
-                >
-                    Reset
-                </Button></div>
+                Add new
+            </Button>
         </Forms.FormSection>
     );
 }
@@ -101,7 +84,11 @@ export default definePlugin({
         }
     ],
     getReasons() {
-        return settings.store.reasons.map(reason => (
+        return (settings.store.reasons.length() ? settings.store.reasons : [
+            i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
+            i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
+            i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
+        ]).map((reason: string) => (
             { name: reason, value: reason }
         ));
     },
