@@ -154,7 +154,7 @@ const patchMessageContextMenu = (
         children,
         `<${
             reactionEmojiObject.animated ? "a" : ""
-        }:${reactionEmojiName}:${emojiId}>`
+        }:${reactionEmojiName.replace(/~\d+$/, "")}:${emojiId}>`
     );
 };
 
