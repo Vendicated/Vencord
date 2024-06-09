@@ -136,11 +136,17 @@ export function $t(key: string, variables?: Record<string, any>): string {
     //    description: $t("clientTheme.description")
     // }
     // and any future accesses of the description prop will result in an up to date translation
-    return {
-        __proto__: String.prototype,
-        valueOf: getter,
-        toString: getter
-    } as unknown as string;
+    const descriptor = {
+        configurable: true,
+        enumerable: false,
+        writable: false,
+        value: getter
+    };
+
+    return Object.create(String.prototype, {
+        toString: descriptor,
+        valueOf: descriptor
+    });
 }
 
 interface TranslateProps {
