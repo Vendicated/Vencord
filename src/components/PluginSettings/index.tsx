@@ -33,7 +33,6 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { lowercaseify } from "@utils/text";
 import { $t } from "@utils/translation";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -154,7 +153,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     return (
         <AddonCard
             name={plugin.name}
-            description={$t(`${lowercaseify(plugin.name)}.description`)}
+            description={plugin.description}
             isNew={isNew}
             enabled={isEnabled()}
             setEnabled={toggleEnabled}

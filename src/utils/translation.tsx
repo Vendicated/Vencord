@@ -107,26 +107,40 @@ function _t(key: string, bundle: any): Translation {
  * @returns A translated string.
  */
 export function $t(key: string, variables?: Record<string, any>): string {
-    const translation = _t(key, loadedLocale);
+    const getter = (): string => {
+        const translation = _t(key, loadedLocale);
 
-    if (typeof translation !== "string") {
-        if (!variables || !variables.count) throw new Error(`translation key ${key} is an object (requires plurality?)`);
+        if (typeof translation !== "string") {
+            if (!variables || !variables.count) throw new Error(`translation key ${key} is an object (requires plurality?)`);
 
-        if (variables.count) {
-            const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
-                new Intl.PluralRules(bestLocale).select(variables.count);
+            if (variables.count) {
+                const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
+                    new Intl.PluralRules(bestLocale).select(variables.count);
 
-            if (translation[pluralTag]) {
-                return format(translation[pluralTag]!, variables);
-            } else {
-                return format(translation.other, variables);
+                if (translation[pluralTag]) {
+                    return format(translation[pluralTag]!, variables);
+                } else {
+                    return format(translation.other, variables);
+                }
             }
         }
-    }
 
-    if (!variables) return translation as string;
+        if (!variables) return translation as string;
 
-    return format(translation as string, variables);
+        return format(translation as string, variables);
+    };
+
+    // top level support hax (thank you vee!!)
+    // tl;dr: this lets you use $t at the top level in objects by simulating a string, a la:
+    // {
+    //    description: $t("clientTheme.description")
+    // }
+    // and any future accesses of the description prop will result in an up to date translation
+    return {
+        __proto__: String.prototype,
+        valueOf: getter,
+        toString: getter
+    } as unknown as string;
 }
 
 interface TranslateProps {

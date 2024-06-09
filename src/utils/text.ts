@@ -37,8 +37,6 @@ export const wordsToPascal = (words: string[]) =>
 export const wordsToTitle = (words: string[]) =>
     words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 
-export const lowercaseify = (text: string) => text[0].toLowerCase() + text.slice(1);
-
 const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
 type Units = typeof units[number];
 
