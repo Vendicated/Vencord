@@ -24,6 +24,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { $t } from "@utils/translation";
 import { OptionType, Plugin } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
@@ -129,7 +130,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     function renderSettings() {
         if (!hasSettings || !plugin.options) {
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+            return <Forms.FormText>{$t("vencord.noSettings")}</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
                 if (setting.hidden) return null;
@@ -227,7 +228,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 )}
                 <Forms.FormSection className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
+                    <Forms.FormTitle tag="h3">{$t("vencord.settings")}</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
@@ -242,7 +243,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         >
                             Cancel
                         </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                        <Tooltip text={$t("vencord.settingsErrors")} shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
                                     size={Button.Sizes.SMALL}
@@ -252,12 +253,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onMouseLeave={onMouseLeave}
                                     disabled={!canSubmit()}
                                 >
-                                    Save & Close
+                                    {$t("vencord.saveAndClose")}
                                 </Button>
                             )}
                         </Tooltip>
                     </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
+                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>{$t("vencord.settingsSaveError", { saveError })}</Text>}
                 </Flex>
             </ModalFooter>}
         </ModalRoot>

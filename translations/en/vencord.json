@@ -1,58 +1,130 @@
 {
-    "ohNo": "Oh no!",
-    "errorBoundaryDescription": "An error occurred while rendering this Component. More info can be found below and in your console.",
-    "failureUpdate": "Uh Oh! Failed to render this Page. However, there is an update available that might fix it. Would you like to update and restart now?",
-    "pluginRestart": "Restart to apply changes!",
-    "requiredPlugin": "This plugin is required for Vencord to function.",
-    "new": "NEW",
-    "pluginContributed": {
-        "one": "This person has <0>contributed</0> to one plugin!",
-        "other": "This person has <0>contributed</0> to {count} plugins!",
-        "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!"
+  "areYouSure": "Are you sure?",
+  "backupAndRestore": {
+    "customQuickcss": "Custom QuickCSS",
+    "description": "You can import and export your Vencord settings as a JSON file. This allows you to easily transfer your settings to another device, or recover your settings after reinstalling Vencord or Discord.",
+    "exportContains": "Settings Export contains:",
+    "exportSettings": "Export Settings",
+    "importSettings": "Import Settings",
+    "importWarning": "Importing a settings file will overwrite your current settings.",
+    "pluginSettings": "Plugin Settings",
+    "themeLinks": "Theme Links"
+  },
+  "clipboardNotSupported": "Your browser does not support copying to clipboard",
+  "cloud": {
+    "integrations": {
+      "authorizationNote": "This will request authorization if you have not yet set up cloud integrations.",
+      "backendNote": "Which backend to use when using cloud integrations.",
+      "backendUrl": "Backend URL",
+      "description": "Vencord comes with a cloud integration that adds goodies like settings sync across devices. It <0>respects your privacy</0>, and the <1>source code</1> is AGPL 3.0 licensed so you can host it yourself.",
+      "enable": "Enable Cloud Integrations",
+      "enabled": "Cloud integrations enabled!",
+      "eraseAllData": "Erase All Data",
+      "eraseError": "Could not erase all data (API returned {status}), please contact support.",
+      "eraseIt": "Erase it!",
+      "eraseSuccess": "Successfully erased all data.",
+      "eraseWarning": "Once your data is erased, we cannot recover it. There's no going back!",
+      "reauthenticate": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
+      "setupFailure": {
+        "generic": "Setup failed ({error}).",
+        "missingSecret": "Setup failed (no secret returned?).",
+        "oauth": "Setup failed (couldn't retrieve OAuth configuration)."
+      }
     },
-    "update": {
-        "available": "A Vencord update is available!",
-        "clickToRestart": "Click here to restart",
-        "clickToView": "Click here to view the update",
-        "updated": "Vencord has been updated!"
-    },
-    "cloudIntegrations": "Cloud Integrations",
-    "cloudSettings": "Cloud Settings",
-    "cloud": {
-        "integrations": {
-            "enabled": "Cloud integrations enabled!",
-            "reauthenticate": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
-            "setupFailure": {
-                "generic": "Setup failed ({error}).",
-                "missingSecret": "Setup failed (no secret returned?).",
-                "oauth": "Setup failed (couldn't retrieve OAuth configuration)."
-            }
-        },
-        "settings": {
-            "deleteError": {
-                "api": "Could not delete settings (API returned {status}).",
-                "generic": "Could not delete settings ({error})."
-            },
-            "deleted": "Settings deleted from cloud!",
-            "localNewer": "Your local settings are newer than the cloud ones.",
-            "nothingOnline": "There are no settings in the cloud.",
-            "syncErrorDown": {
-                "api": "Could not synchronize settings from the cloud (API returned {status}).",
-                "generic": "Could not synchronize settings from the cloud ({error})."
-            },
-            "syncErrorUp": {
-                "api": "Could not synchronize settings to the cloud (API returned {status}).",
-                "generic": "Could not synchronize settings to the cloud ({error})."
-            },
-            "syncSuccess": "Synchronized settings to the cloud!",
-            "upToDate": "Your settings are up to date.",
-            "updated": "Your settings have been updated! Click here to restart to fully apply changes!"
-        }
-    },
-    "copiedToClipboard": "Copied to clipboard!",
-    "clipboardNotSupported": "Your browser does not support copying to clipboard",
-    "failedToImport": "Failed to import settings: {error}",
-    "importedSettings": "Settings successfully imported. Restart to apply changes!",
-    "updaterRepeatFailed": "That also failed :( Try updating or re-installing with the installer!",
-    "gitCopyNewer": "Your local copy has more recent commits. Please stash or reset them."
+    "settings": {
+      "deleteCloudSettings": "Delete Cloud Settings",
+      "deleteError": {
+        "api": "Could not delete settings (API returned {status}).",
+        "generic": "Could not delete settings ({error})."
+      },
+      "deleted": "Settings deleted from cloud!",
+      "description": "Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with minimal effort.",
+      "localNewer": "Your local settings are newer than the cloud ones.",
+      "nothingOnline": "There are no settings in the cloud.",
+      "overwriteWarning": "This will overwrite your local settings with the ones on the cloud. Use wisely!",
+      "syncErrorDown": {
+        "api": "Could not synchronize settings from the cloud (API returned {status}).",
+        "generic": "Could not synchronize settings from the cloud ({error})."
+      },
+      "syncErrorUp": {
+        "api": "Could not synchronize settings to the cloud (API returned {status}).",
+        "generic": "Could not synchronize settings to the cloud ({error})."
+      },
+      "syncFromCloud": "Sync from Cloud",
+      "syncSuccess": "Synchronized settings to the cloud!",
+      "syncToCloud": "Sync to Cloud",
+      "upToDate": "Your settings are up to date.",
+      "updated": "Your settings have been updated! Click here to restart to fully apply changes!"
+    }
+  },
+  "cloudIntegrations": "Cloud Integrations",
+  "cloudSettings": "Cloud Settings",
+  "copiedToClipboard": "Copied to clipboard!",
+  "errorBoundaryDescription": "An error occurred while rendering this Component. More info can be found below and in your console.",
+  "failedToImport": "Failed to import settings: {error}",
+  "failureUpdate": "Uh Oh! Failed to render this Page. However, there is an update available that might fix it. Would you like to update and restart now?",
+  "gitCopyNewer": "Your local copy has more recent commits. Please stash or reset them.",
+  "importedSettings": "Settings successfully imported. Restart to apply changes!",
+  "nevermind": "Nevermind",
+  "new": "NEW",
+  "noSearchResults": "No plugins meet search criteria.",
+  "noSettings": "There are no settings for this plugin.",
+  "ohNo": "Oh no!",
+  "pluginContributed": {
+    "one": "This person has <0>contributed</0> to one plugin!",
+    "other": "This person has <0>contributed</0> to {count} plugins!",
+    "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!"
+  },
+  "pluginFilters": "Filters",
+  "pluginHeader": {
+    "cogWheel": "Plugins with a cog wheel have settings you can modify!",
+    "iconInformation": "Press the cog wheel or info icon to get more info on a plugin.",
+    "managementHeader": "Plugin Management",
+    "reloadDescription": "Restart now to apply new plugins and their settings",
+    "reloadHeader": "Restart required!",
+    "restart": "Restart"
+  },
+  "pluginRequiredBy": "This plugin is required by:",
+  "pluginRestart": "Restart to apply changes!",
+  "plugins": "Plugins",
+  "pluginsNeedRestart": "The following plugins require a restart:",
+  "requiredPlugin": "This plugin is required for Vencord to function.",
+  "requiredPlugins": "Required Plugins",
+  "restartLater": "Later!",
+  "restartNow": "Restart now",
+  "restartRequired": "Restart required",
+  "saveAndClose": "Save & Close",
+  "search": {
+    "all": "Show All",
+    "disabled": "Show Disabled",
+    "enabled": "Show Enabled",
+    "new": "Show New",
+    "placeholder": "Search for a plugin..."
+  },
+  "settings": "Settings",
+  "settingsErrors": "You must fix all errors before saving",
+  "settingsSaveError": "Error while saving: {saveError}",
+  "settingsSync": "Settings Sync",
+  "themes": {
+    "betterDiscord": "BetterDiscord Themes",
+    "betterDiscordNote": "If using the BD site, click on \"Download\" and place the downloaded .theme.css file into your themes folder.",
+    "editQuickCss": "Edit QuickCSS",
+    "findThemes": "Find Themes:",
+    "loadMissing": "Load missing Themes",
+    "local": "Local Themes",
+    "oneLinkPerLine": "One link per line.",
+    "online": "Online Themes",
+    "openFolder": "Open Themes Folder",
+    "pasteLinks": "Paste links to css files here",
+    "upload": "Upload Theme",
+    "useDirect": "Make sure to use direct links to files (raw or github.io)!"
+  },
+  "update": {
+    "available": "A Vencord update is available!",
+    "clickToRestart": "Click here to restart",
+    "clickToView": "Click here to view the update",
+    "updated": "Vencord has been updated!"
+  },
+  "updaterRepeatFailed": "That also failed :( Try updating or re-installing with the installer!",
+  "warning": "Warning"
 }

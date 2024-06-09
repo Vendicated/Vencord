@@ -10,6 +10,7 @@ usageMatchRegex:
 
 refactorTemplates:
     - "$t(\"$1\")"
+    - "{$t(\"$1\")}"
     - "<Translate i18nKey=\"$1\" />"
 
 monopoly: true
