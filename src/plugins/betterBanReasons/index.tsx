@@ -87,10 +87,10 @@ export default definePlugin({
             },
         },
     ],
-    getReasons: (): { name: string; value: string; }[] => {
-        return settings.store.reasons.map((reason: string) => {
-            return { name: reason, value: reason };
-        });
+    getReasons() {
+    	return settings.store.reasons.map(reason => (
+            { name: reason, value: reason }
+        ));
     },
     settings,
 });
