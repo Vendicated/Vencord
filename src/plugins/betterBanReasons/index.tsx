@@ -58,6 +58,7 @@ const settings = definePluginSettings({
     reasons: {
         description: "Your custom reasons",
         type: OptionType.COMPONENT,
+        default: [],
         component: ReasonsComponent,
     },
     otherOptionDefault: {
@@ -84,7 +85,7 @@ export default definePlugin({
         }
     ],
     getReasons() {
-        return (settings.store.reasons.length() ? settings.store.reasons : [
+        return (settings.store.reasons.length ? settings.store.reasons : [
             i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
             i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
             i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
