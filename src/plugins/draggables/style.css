@@ -1,17 +1,18 @@
-.dragging-indicator::before {
+.vc-dragging-indicator::before {
     content: "";
     position: absolute;
     z-index: 1;
     top: 4px;
     right: 0;
     left: 2px;
-    height: 40px;
-    max-width: 4px;
+    height: calc(100% - (var(--custom-emoji-picker-constants-emoji-container-padding-vertical) * 2)) ;
+    width: 4px;
+    transform: translateX(-4px);
     background-color: var(--green-360);
     border-radius: 2px;
 }
 
-.dragging-wrapper {
+.vc-dragging-wrapper {
     inset: 0;
     flex-direction: row;
 }
