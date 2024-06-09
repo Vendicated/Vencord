@@ -25,7 +25,7 @@ function ReasonsComponent() {
                         padding: 0,
                         paddingBottom: "0.5rem",
                         gap: "0.5rem",
-                        gridTemplateColumns: "auto",
+                        gridTemplateColumns: "6fr 1fr",
                     }}
                 >
                     <TextInput
