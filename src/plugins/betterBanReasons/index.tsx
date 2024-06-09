@@ -77,6 +77,10 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: ReasonsComponent,
     },
+    otherOptionDefault: {
+        type: OptionType.BOOLEAN,
+        description: 'Shows a text input instead of a select menu by default. (Equivalent to clicking the "Other" option)'
+    }
 });
 
 export default definePlugin({
@@ -86,16 +90,23 @@ export default definePlugin({
     patches: [
         {
             find: "default.Messages.BAN_MULTIPLE_CONFIRM_TITLE",
-            replacement: {
-                match: /=\[([^\\]*?)\]/,
+            replacement: [{
+                match: /=\[[^]*?\]/,
                 replace: "=$self.getReasons()"
-            }
+            },
+            {
+                match: /useState\(0\)/g,
+                replace: "useState($self.isOtherDefault())"
+            }]
         }
     ],
     getReasons() {
         return settings.store.reasons.map(reason => (
             { name: reason, value: reason }
         ));
+    },
+    isOtherDefault() {
+        return settings.store.otherOptionDefault ? 1 : 0;
     },
     settings,
 });
