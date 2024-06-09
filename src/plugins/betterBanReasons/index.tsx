@@ -10,11 +10,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput, useEffect, useState } from "@webpack/common";
 
 function ReasonsComponent() {
-    const [reasons, setReasons] = useState(settings.store.reasons as string[]);
-
-    useEffect(() => {
-        settings.store.reasons = reasons;
-    }, [reasons]);
+	const { reasons } = settings.use(["reasons"]);
 
     return (
         <Forms.FormSection title="Reasons">
