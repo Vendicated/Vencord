@@ -64,13 +64,17 @@ export default definePlugin({
             find: "Messages.USER_PROFILE_MUTUAL_GUILDS_PLACEHOLDER).with",
             group: true,
             replacement: [
+                // {
+                //     match: /let\{user:(\i),.{0,20}=\i/,
+                //     replace: "$&,vencordMutualGroupsTabLabel=$self.useGDMCount($1.id)"
+                // },
+                // {
+                //     match: /(?<=(\i\.push)\(\{section:\i\.UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}\}\)\)\}\))/,
+                //     replace: ',$1({section:"MUTUAL_GDMS",text:vencordMutualGroupsTabLabel})'
+                // },
                 {
-                    match: /(?<=let\{user:(\i),.{0,700})(?=return\(null!=)/,
-                    replace: "let vencordMutualGroupsCount=$self.useGDMCount($1.id);"
-                },
-                {
-                    match: /(?<=(\i\.push)\(\{section:\i\.UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}\}\)\)\}\))/,
-                    replace: ',$1({section:"MUTUAL_GDMS",text:vencordMutualGroupsCount})'
+                    match: /(user:(\i),.+?=\i,)(.+?)(\i\.push)(.+?UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}}\)\)}\))/,
+                    replace: '$1vencordMutualGroupsTabLabel=$self.useGDMCount($2.id),$3$5,$4({section:"MUTUAL_GDMS",text:vencordMutualGroupsTabLabel})'
                 },
                 {
                     match: /(?<=(\i)===\i\.UserProfileSections\.MUTUAL_GUILDS?.{0,150}\}\):)/,
