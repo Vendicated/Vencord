@@ -139,8 +139,8 @@ export default definePlugin({
             return () => cancelAnimationFrame(frame);
         }, [collected, ref]);
         return (
-            <div className={`${dndCls.wrapper} dragging-wrapper`} aria-hidden="true">
-                <div className={`${dndCls.target} ${collected.isOver ? "dragging-indicator" : ""}`}
+            <div className={`${dndCls.wrapper} vc-dragging-wrapper`} aria-hidden="true">
+                <div className={`${dndCls.target} ${collected.isOver ? "vc-dragging-indicator" : ""}`}
                     ref={e => {
                         ref.current = e;
                         drop(e);
