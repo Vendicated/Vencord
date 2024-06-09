@@ -4,59 +4,69 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, Forms, TextInput } from "@webpack/common";
+
+const defaultReasons = [
+    "Suspicious or spam account",
+    "Compromised or spam account",
+    "Breaking server rules",
+];
 
 function ReasonsComponent() {
-	const { reasons } = settings.use(["reasons"]);
+    const { reasons } = settings.use(["reasons"]);
 
     return (
         <Forms.FormSection title="Reasons">
-            {reasons.map((reason, index) => (
+            {reasons.map((reason: string, index: number) => (
                 <div
-                    style={{
-                        display: "grid",
-                        padding: 0,
-                        paddingBottom: "0.5rem",
-                        gap: "0.5rem",
-                        gridTemplateColumns: "6fr 1fr",
-                    }}
+                    className="vc-bbr-reason-wrapper"
                 >
                     <TextInput
-                        style={{ flex: 1 }}
                         type="text"
                         key={index}
                         value={reason}
-                        onChange={(value: string) => {
-                            reasons[index] = value;
-                            setReasons([...reasons]);
+                        onChange={(v: string) => {
+                            reasons[index] = v;
+                            settings.store.reasons = [...reasons];
                         }}
                         placeholder="Reason"
                     />
                     <Button
                         color={Button.Colors.RED}
-                        style={{ height: "100%" }}
-                        size={Button.Sizes.MIN}
+                        className="vc-bbr-remove-button"
                         onClick={() => {
                             reasons.splice(index, 1);
-                            setReasons([...reasons]);
+                            settings.store.reasons = [...reasons];
                         }}
                     >
                         Remove
                     </Button>
                 </div>
             ))}
-            <Button
-                size={Button.Sizes.SMALL}
-                onClick={() => {
-                    reasons.push("");
-                    setReasons([...reasons]);
-                }}
+            <div
+                className="vc-bbr-reason-wrapper"
             >
-                Add new
-            </Button>
+                <Button
+                    onClick={() => {
+                        reasons.push("");
+                        settings.store.reasons = [...reasons];
+                    }}
+                >
+                    Add new
+                </Button>
+                <Button
+                    color={Button.Colors.TRANSPARENT}
+                    onClick={() => {
+                        settings.store.reasons = defaultReasons;
+                    }}
+                >
+                    Reset
+                </Button></div>
         </Forms.FormSection>
     );
 }
@@ -65,11 +75,7 @@ const settings = definePluginSettings({
     reasons: {
         description: "Your custom reasons",
         type: OptionType.COMPONENT,
-        default: [
-            "Suspicious or spam account",
-            "Compromised or spam account",
-            "Breaking server rules",
-        ],
+        default: defaultReasons,
         component: ReasonsComponent,
     },
 });
@@ -80,15 +86,15 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: 'username:"@".concat(_.default.getName',
+            find: "default.Messages.BAN_MULTIPLE_CONFIRM_TITLE",
             replacement: {
-                match: /U=\[([\s\S]*?)\]/,
-                replace: "U=$self.getReasons()",
-            },
-        },
+                match: /=\[([^\\]*?)\]/,
+                replace: "=$self.getReasons()"
+            }
+        }
     ],
     getReasons() {
-    	return settings.store.reasons.map(reason => (
+        return settings.store.reasons.map(reason => (
             { name: reason, value: reason }
         ));
     },
