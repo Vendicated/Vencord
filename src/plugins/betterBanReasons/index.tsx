@@ -79,7 +79,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "CustomBanReasons",
+    name: "BetterBanReasons",
     description: "Create custom reasons to use in the Discord ban modal.",
     authors: [Devs.Inbestigator],
     patches: [
