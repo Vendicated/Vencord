@@ -60,6 +60,7 @@ export default definePlugin({
         // FIXME: remove once change merged to stable
         {
             find: "Messages.ACTIVITY_SETTINGS",
+            noWarn: true,
             replacement: {
                 get match() {
                     switch (Settings.plugins.Settings.settingsLocation) {
