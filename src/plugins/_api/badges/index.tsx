@@ -117,17 +117,13 @@ export default definePlugin({
         {
             find: ".PANEL]:14",
             replacement: {
-                match: /(?<=\i=\(0,\i\.default\)\(\i\);)return 0===\i.length/,
-                replace: "$& && $self.getBadges(arguments[0]?.displayProfile).length===0"
+                match: /(?<=(\i)=\(0,\i\.default\)\(\i\);)return 0===\i.length\?/,
+                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
             }
         },
         {
             find: ".description,delay:",
             replacement: [
-                {
-                    match: /...(\i)\}=\(0,\i\.useUserProfileAnalyticsContext\)\(\);/,
-                    replace: "$&arguments[0].badges?.unshift(...$self.getBadges($1));"
-                },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
                     match: /alt:" ","aria-hidden":!0,src:(?=.{0,20}(\i)\.icon)/,
