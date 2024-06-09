@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { $t } from "@utils/translation";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
@@ -112,7 +113,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ClientTheme",
     authors: [Devs.F53, Devs.Nuckyz],
-    description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
+    description: $t("clientTheme.description"),
     settings,
 
     startAt: StartAt.DOMContentLoaded,
