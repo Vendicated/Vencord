@@ -9,3 +9,11 @@
     gap: 0.25em;
     align-items: center;
 }
+
+.vc-sc-connection-name {
+    word-break: break-all;
+}
+
+.vc-sc-tooltip svg {
+    min-width: 16px;
+}
