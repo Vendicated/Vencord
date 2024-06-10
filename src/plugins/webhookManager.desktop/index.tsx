@@ -5,10 +5,22 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
+
+// TODO: Create Modal
+function webhookMessageModal(props: ModalProps) {
+    return (
+        <ModalRoot>
+            {...props}
+            size={ModalSize.MEDIUM}
+        </ModalRoot>
+    );
+}
+
 
 export default definePlugin({
     name: "WebhookManager",
