@@ -74,15 +74,28 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
+const profilePopoutComponent = ErrorBoundary.wrap(
+    (props: { user: User; displayProfile?: any; simplified?: boolean; }) => (
+        <ConnectionsComponent
+            {...props}
+            id={props.user.id}
+            theme={getProfileThemeProps(props).theme}
+        />
+    ),
+    { noop: true }
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
-    <ConnectionsComponent id={id} theme={ThemeStore.theme} />
+const profilePanelComponent = ErrorBoundary.wrap(
+    (props: { id: string; simplified?: boolean; }) => (
+        <ConnectionsComponent
+            {...props}
+            theme={ThemeStore.theme}
+        />
+    ),
+    { noop: true }
 );
 
-function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
+function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: string, simplified?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -90,6 +103,19 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const connections: Connection[] = profile.connectedAccounts;
     if (!connections?.length)
         return null;
+
+    const connectionsContainer = (
+        <Flex style={{
+            marginTop: !simplified ? "8px" : undefined,
+            gap: getSpacingPx(settings.store.iconSpacing),
+            flexWrap: "wrap"
+        }}>
+            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+        </Flex>
+    );
+
+    if (simplified)
+        return connectionsContainer;
 
     return (
         <Section>
@@ -100,13 +126,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             >
                 Connections
             </Text>
-            <Flex style={{
-                marginTop: "8px",
-                gap: getSpacingPx(settings.store.iconSpacing),
-                flexWrap: "wrap"
-            }}>
-                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-            </Flex>
+            {connectionsContainer}
         </Section>
     );
 }
@@ -132,7 +152,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
         <Tooltip
             text={
                 <span className="vc-sc-tooltip">
-                    {connection.name}
+                    <span className="vc-sc-connection-name">{connection.name}</span>
                     {connection.verified && <VerifiedIcon />}
                     <TooltipIcon height={16} width={16} />
                 </span>
@@ -187,6 +207,13 @@ export default definePlugin({
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
                 replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
+            }
+        },
+        {
+            find: "autoFocusNote:!0})",
+            replacement: {
+                match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
             }
         }
     ],
