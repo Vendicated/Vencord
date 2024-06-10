@@ -7,7 +7,7 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
-import { ModalRoot, ModalSize, ModalProps, ModalContent } from "@utils/modal";
+import { ModalContent, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 
