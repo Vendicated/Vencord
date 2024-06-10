@@ -23,6 +23,7 @@ import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { useRef, UserSettingsActionCreators } from "@webpack/common";
 
+const { UserSettingsDelay } = findByPropsLazy("UserSettingsDelay", "MAX_FAVORITES");
 const { useDrag, useDrop } = findByPropsLazy("useDrag", "useDrop");
 const { useLayoutEffect } = findByPropsLazy("useLayoutEffect", "useEffect");
 const imgCls = findByPropsLazy("image", "imageLoading");
@@ -54,8 +55,8 @@ export default definePlugin({
                     replace: "$1,style:{position:'relative'}}",
                 },
                 {
-                    match: /(\(0,\i\.jsx\)\(\i,{ref:.*?isFavoriteEmojiWithoutFetchingLatest\((\i)\).*?inNitroLockedSection:\i}\))/,
-                    replace: "[$1,emoji.category==='FAVORITES'?$self.wrapper($2):undefined]",
+                    match: /(\(0,\i\.jsx\)\(\i,{ref:.*?inNitroLockedSection:\i}\))/,
+                    replace: "[$1,$self.wrapper(emoji)]",
                 },
                 {
                     match: /(\[\i,\i\]=\i\.useState\(""\))/,
@@ -92,9 +93,12 @@ export default definePlugin({
             }),
             [e.descriptor],);
     },
-    drop(emoji: EmojiData) {
+    drop({ emoji, category }: EmojiDescriptor) {
         return useDrop(() => ({
             accept: "emoji",
+            canDrop() {
+                return category == "FAVORITES";
+            },
             collect: monitor => ({
                 canDrop: !!monitor.canDrop(),
                 isOver: !!monitor.isOver(),
@@ -125,10 +129,11 @@ export default definePlugin({
             <span className={imgCls.imageLoading} style={{ backgroundSize: "40px", height: "40px", width: "40px", display: "block" }} />
         );
     },
-    wrapper(emoji: EmojiData) {
+    wrapper(emoji: EmojiDescriptor) {
         const [collected, drop] = this.drop(emoji);
         const ref: React.MutableRefObject<null | HTMLElement> = useRef(null);
         useLayoutEffect(() => {
+            if (emoji.category !== "FAVORITES") { return; }
             const frame = requestAnimationFrame(() => {
                 if (!ref.current) {
                     return;
@@ -142,6 +147,7 @@ export default definePlugin({
             );
             return () => cancelAnimationFrame(frame);
         }, [collected, ref]);
+        if (emoji.category !== "FAVORITES") { return; }
         return (
             <div className={`${dndCls.wrapper} vc-dragging-wrapper`} aria-hidden="true">
                 <div className={`${dndCls.target} ${collected.isOver ? "vc-dragging-indicator" : ""}`}
