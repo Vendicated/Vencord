@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import {
+    findGroupChildrenByChildId,
+    NavContextMenuPatchCallback
+} from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -72,20 +75,21 @@ const settings = definePluginSettings({
     }
 });
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
+const contextMenuPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
 
-    children.push(
+    const group = findGroupChildrenByChildId("privacy", children);
+    group?.push(
         <Menu.MenuItem
             label="Apply NewGuildSettings"
             id="vc-newguildsettings-apply"
             icon={CogWheel}
-            action={() => handleSettings(guild.id)}
+            action={() => applyDefaultSettings(guild.id)}
         />
     );
 };
 
-function handleSettings(guildId: string | null) {
+function applyDefaultSettings(guildId: string | null) {
     if (guildId === "@me" || guildId === "null" || guildId == null) return;
     updateGuildNotificationSettings(guildId,
         {
@@ -114,24 +118,25 @@ export default definePlugin({
     tags: ["MuteNewGuild", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
     contextMenus: {
-        "guild-context": guildPopoutPatch,
+        "guild-context": contextMenuPatch,
+        "guild-header-popout": contextMenuPatch
     },
     patches: [
         {
             find: ",acceptInvite(",
             replacement: {
                 match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!==.+?;/,
-                replace: (m, guildId) => `${m}$self.handleMute(${guildId});`
+                replace: (m, guildId) => `${m}$self.applyDefaultSettings(${guildId});`
             }
         },
         {
             find: "{joinGuild:",
             replacement: {
                 match: /guildId:(\i),lurker:(\i).{0,20}}\)\);/,
-                replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.handleMute(${guildId});`
+                replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.applyDefaultSettings(${guildId});`
             }
         }
     ],
     settings,
-    handleMute: handleSettings
+    applyDefaultSettings
 });
