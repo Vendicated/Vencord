@@ -70,13 +70,6 @@ export default definePlugin({
             ]
         },
         {
-            find: "=!1,canUsePremiumCustomization:",
-            replacement: {
-                match: /(\i)\.premiumType/,
-                replace: "$self.patchPremiumType($1)||$&"
-            }
-        },
-        {
             find: "BannerLoadingStatus:function",
             replacement: {
                 match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
