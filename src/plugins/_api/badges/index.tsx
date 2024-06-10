@@ -48,14 +48,8 @@ const EquicordContributorBadge: ProfileBadge = {
     description: "Equicord Contributor",
     image: EQUICORD_CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    props: {
-        style: {
-            borderRadius: "50%",
-            transform: "scale(0.9)" // The image is a bit too big compared to default badges
-        }
-    },
     shouldShow: ({ userId }) => isEquicordPluginDev(userId),
-    link: "https://github.com/Equicord/Equicord"
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;

@@ -17,9 +17,13 @@
 */
 
 import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
+import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
+import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Tooltip } from "@webpack/common";
+import { Forms, React, Tooltip, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 type CustomBadge = string | {
     name: string;
@@ -31,6 +35,8 @@ interface BadgeCache {
     badges: { [mod: string]: CustomBadge[]; };
     expires: number;
 }
+
+let badgeImages;
 
 // const API_URL = "https://clientmodbadges-api.herokuapp.com/";
 const API_URL = "https://globalbadges.suncord.rest/";
@@ -72,6 +78,7 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
 
     if (!badges) return null;
     const globalBadges: JSX.Element[] = [];
+    const badgeModal: JSX.Element[] = [];
 
     Object.keys(badges).forEach(mod => {
         if (mod.toLowerCase() === "vencord") return;
@@ -90,11 +97,17 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
             const prefix = showPrefix() ? mod : "";
             if (!badge.custom) badge.name = `${prefix} ${cleanName.charAt(0).toUpperCase() + cleanName.slice(1)}`;
             globalBadges.push(<BadgeComponent name={badge.name} img={badge.badge} />);
+            badgeModal.push(<BadgeModalComponent name={badge.name} img={badge.badge} />);
         });
     });
+    badgeImages = badgeModal;
 
     return (
-        <div className="vc-global-badges" style={{ alignItems: "center", display: "flex" }}>
+        <div
+            className="vc-global-badges"
+            style={{ alignItems: "center", display: "flex" }}
+            onClick={_ => openBadgeModal(UserStore.getUser(userId))}
+        >
             {globalBadges}
         </div>
     );
@@ -133,3 +146,69 @@ export default definePlugin({
         }
     }
 });
+
+/*
+Badge duping fix for modal lines below
+L39 the value for everything below
+L81 for not reusing globalbadges const
+L100 for the size of the badges
+L103 actual dupe fix
+L109 is when clicking the badge open the modal
+Everything below is related to the badge modal
+*/
+const cl = classNameFactory("vc-badges-modal-");
+
+const BadgeModalComponent = ({ name, img }: { name: string, img: string; }) => {
+    return (
+        <Tooltip text={name} >
+            {(tooltipProps: any) => (
+                <img
+                    {...tooltipProps}
+                    src={img}
+                    style={{ width: "50px", height: "50px", margin: "2px 2px" }}
+                />
+            )}
+        </Tooltip>
+    );
+};
+
+function BadgeModal({ user }: { user: User; }) {
+    return (
+        <>
+            <div className={cl("header")}>
+                <img
+                    className={cl("avatar")}
+                    src={user.getAvatarURL(void 0, 512, true)}
+                    alt=""
+                />
+                <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+            </div>
+            {badgeImages.length ? (
+                <Forms.FormText>
+                    This person has {badgeImages.length} global badges.
+                </Forms.FormText>
+            ) : (
+                <Forms.FormText>
+                    This person has no global badges.
+                </Forms.FormText>
+            )}
+            {!!badgeImages.length && (
+                <div className={cl("badges")}>
+                    {badgeImages}
+                </div>
+            )}
+        </>
+    );
+}
+
+function openBadgeModal(user: User) {
+    openModal(modalprops =>
+        <ModalRoot {...modalprops}>
+            <ErrorBoundary>
+                <ModalContent className={cl("root")}>
+                    <BadgeModal user={user} />
+                </ModalContent>
+            </ErrorBoundary>
+        </ModalRoot>
+    );
+}
