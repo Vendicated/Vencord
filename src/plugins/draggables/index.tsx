@@ -116,7 +116,7 @@ export default definePlugin({
                     e.emojis.splice(sourceIndex, 1);
                     e.emojis.splice(finalIndex, 0, this.source);
                 }
-                FrecencyUserSettingsActionCreators.updateAsync("favoriteEmojis", update.bind({ source, target }));
+                FrecencyUserSettingsActionCreators.updateAsync("favoriteEmojis", update.bind({ source, target }), UserSettingsDelay.INFREQUENT_USER_ACTION);
             }
         }), [emoji]);
     },
