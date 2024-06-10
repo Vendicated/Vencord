@@ -156,7 +156,7 @@ L103 actual dupe fix
 L109 is when clicking the badge open the modal
 Everything below is related to the badge modal
 */
-const cl = classNameFactory("vc-badges-modal-");
+const cl = classNameFactory("vc-author-modal-");
 
 const BadgeModalComponent = ({ name, img }: { name: string, img: string; }) => {
     return (
