@@ -97,7 +97,7 @@ export default definePlugin({
         return useDrop(() => ({
             accept: "emoji",
             canDrop() {
-                return category == "FAVORITES";
+                return category === "FAVORITES";
             },
             collect: monitor => ({
                 canDrop: !!monitor.canDrop(),
