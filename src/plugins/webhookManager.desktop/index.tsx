@@ -6,20 +6,43 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
-import { ModalContent, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { Margins } from "@utils/margins";
+import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal, openModalLazy } from "@utils/modal";
+import { Button, Forms, React, TextInput } from "@webpack/common";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 
 // TODO: Create Modal and add stuff
-function webhookMessageModal(props: ModalProps) {
-    return (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalContent className="wm-send-webhook">
-
-            </ModalContent>
-        </ModalRoot>
-    );
+function WebhookMessageModal(props: ModalProps) {
+    return <ModalRoot {...props} size={ModalSize.MEDIUM} className={"wm-send-webhook"} >
+        <ModalContent className="wm-send-webhook-content">
+            <Forms.FormTitle className={Margins.top20}>Webhook Message</Forms.FormTitle>
+            <TextInput
+                placeholder={"Hello World!"}
+                onChange={v => {
+                    // content = value;
+                }}
+            />
+            <Forms.FormTitle className={Margins.top20}>Webhook Username</Forms.FormTitle>
+            <TextInput
+                placeholder={"byeoon"}
+                onChange={v => {
+                    // content = value;
+                }}
+            />
+            <Forms.FormTitle className={Margins.top20}>Webhook Avatar URL</Forms.FormTitle>
+            <TextInput
+                placeholder={"https://cdn.discordapp.com/emojis/1221015075922513990.png"}
+                onChange={v => {
+                    // content = value;
+                }}
+            />
+            <Button
+                onClick={() => { }}
+            >Send Webhook</Button>
+        </ModalContent>
+    </ModalRoot >;
 }
 
 
@@ -113,30 +136,6 @@ export default definePlugin({
                     description: "The URL of the webhook",
                     type: ApplicationCommandOptionType.STRING,
                     required: true
-                },
-                {
-                    name: "content",
-                    description: "The message content you want to send",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: true
-                },
-                {
-                    name: "username",
-                    description: "Send with a custom username",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: false
-                },
-                {
-                    name: "avatar-url",
-                    description: "Send with a custom profile picture. You must input a valid image URL.",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: false
-                },
-                {
-                    name: "raw",
-                    description: "Send message as raw JSON.",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    required: false
                 }
             ],
             async execute(option, ctx) {
@@ -144,6 +143,8 @@ export default definePlugin({
                 const content = findOption(option, "content", "");
                 const avatarUrl = findOption<string>(option, "avatar-url");
                 const username = findOption<string>(option, "username");
+
+                openModal(props => <WebhookMessageModal {...props} />);
 
                 if (findOption(option, "raw")) {
                     Native.executeWebhook(webhookUrl, {
