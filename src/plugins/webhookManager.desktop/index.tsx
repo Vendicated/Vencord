@@ -7,39 +7,53 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal, openModalLazy } from "@utils/modal";
+import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
+let url, message, username, avatar_url = "";
 
-// TODO: Create Modal and add stuff
+// TODO: fix webhooks not sending, fix probable undefined when null issue, add sending as raw again (wanted to make it a checkbox but i cant find checkbox)
 function WebhookMessageModal(props: ModalProps) {
     return <ModalRoot {...props} size={ModalSize.MEDIUM} className={"wm-send-webhook"} >
         <ModalContent className="wm-send-webhook-content">
+            <Forms.FormTitle className={Margins.top20}>Webhook URL</Forms.FormTitle>
+            <TextInput
+                placeholder={"https://discord.com/api/webhooks/1235349630980722698/QQv06cMyTurEIU8nQsZRQMKxdmnnN6FA8Eaa9zbDqGwqeeACx9UAS6CcnVt7B3v8r8t2"}
+                onChange={v => {
+                    v = url;
+                }}
+            />
             <Forms.FormTitle className={Margins.top20}>Webhook Message</Forms.FormTitle>
             <TextInput
                 placeholder={"Hello World!"}
                 onChange={v => {
-                    // content = value;
+                    v = message;
                 }}
             />
             <Forms.FormTitle className={Margins.top20}>Webhook Username</Forms.FormTitle>
             <TextInput
                 placeholder={"byeoon"}
                 onChange={v => {
-                    // content = value;
+                    v = username;
                 }}
             />
             <Forms.FormTitle className={Margins.top20}>Webhook Avatar URL</Forms.FormTitle>
             <TextInput
                 placeholder={"https://cdn.discordapp.com/emojis/1221015075922513990.png"}
                 onChange={v => {
-                    // content = value;
+                    v = avatar_url;
                 }}
             />
             <Button
-                onClick={() => { }}
+                onClick={() => {
+                    Native.executeWebhook(url, {
+                        content: message,
+                        username: username,
+                        avatar_url: avatar_url
+                    });
+                }}
             >Send Webhook</Button>
         </ModalContent>
     </ModalRoot >;
@@ -130,33 +144,8 @@ export default definePlugin({
             name: "webhook send",
             description: "Send a message through a webhook.",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "url",
-                    description: "The URL of the webhook",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: true
-                }
-            ],
-            async execute(option, ctx) {
-                const webhookUrl = findOption(option, "url", "");
-                const content = findOption(option, "content", "");
-                const avatarUrl = findOption<string>(option, "avatar-url");
-                const username = findOption<string>(option, "username");
-
+            async execute(_, ctx) {
                 openModal(props => <WebhookMessageModal {...props} />);
-
-                if (findOption(option, "raw")) {
-                    Native.executeWebhook(webhookUrl, {
-                        webhookMessage: content
-                    });
-                } else {
-                    Native.executeWebhook(webhookUrl, {
-                        content: content,
-                        username: username,
-                        avatar_url: avatarUrl
-                    });
-                }
                 sendBotMessage(ctx.channel.id, {
                     content: "Your webhook message has been executed."
                 });
