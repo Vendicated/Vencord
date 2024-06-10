@@ -5,7 +5,7 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
+import { ModalRoot, ModalSize } from "@utils/modal";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 
