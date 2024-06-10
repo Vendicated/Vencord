@@ -13,7 +13,7 @@ const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof
 export default definePlugin({
     name: "WebhookManager",
     description: "Manage your webhooks easily; delete, send messages, get detailed info and more.",
-    authors: [Devs.Byeoon],
+    authors: [Devs.Byeoon, Devs.Ven],
     dependencies: ["CommandsAPI"],
     commands: [
         {
@@ -140,8 +140,7 @@ export default definePlugin({
                     Native.executeWebhook(webhookUrl, {
                         content: content,
                         username: username,
-                        avatar_url: avatarUrl,
-                        tts: findOption(option, "tts"),
+                        avatar_url: avatarUrl
                     });
                 }
                 sendBotMessage(ctx.channel.id, {
