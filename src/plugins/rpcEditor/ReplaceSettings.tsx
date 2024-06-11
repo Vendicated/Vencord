@@ -8,9 +8,9 @@ import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { Card, Forms, React, Select, SnowflakeUtils, Switch } from "@webpack/common";
+import { Card, Forms, PresenceStore, React, Select, SnowflakeUtils, Switch, UserStore } from "@webpack/common";
 
-import { ActivityType, AppIdSetting, makeEmptyAppId } from ".";
+import { Activity, ActivityType, AppIdSetting, makeEmptyAppId } from ".";
 
 interface SettingsProps {
     appIds: AppIdSetting[];
@@ -48,20 +48,23 @@ function isValidSnowflake(v: string) {
 }
 
 export function ReplaceTutorial() {
+    const activities: Activity[] = PresenceStore.getActivities(UserStore.getCurrentUser().id);
+    console.log(activities);
     return (
         <>
-            <Forms.FormTitle tag="h3">How to get an Application ID</Forms.FormTitle>
+            <Forms.FormTitle tag="h3">IDs of currently running activities</Forms.FormTitle>
+            {
+                activities.length === 0 ? <Forms.FormText>No running activities</Forms.FormText> : activities.map(activity => { return activity.flags !== 48 ? <Forms.FormText>{activity.name}: {activity.application_id}</Forms.FormText> : null; /* hide spotify */ })
+            }
+            <Forms.FormTitle tag="h3" style={{ marginTop: "7px" }}>Available variables</Forms.FormTitle>
             <Forms.FormText>
-                The method of getting an app's id will differ depending on what app it is. If the source code is available you can most likely find it inside the app's repository.
+                In all fields, you can put in variables that'll automatically be replaced by their content:
+                <pre style={{ fontFamily: "monospace" }}>
+                    :name:, :details:, :state:
+                    <br />
+                    :large_image::large_text:, :small_image:, :small_text:
+                </pre>
             </Forms.FormText>
-            <Forms.FormText>
-                Another method is to start the app in question, then open Discord's console and look for a log from RPCServer saying something like
-                <code>"cmd: 'SET_ACTIVITY'"</code> with your app's name somewhere inside
-            </Forms.FormText>
-
-            <Forms.FormTitle tag="h3" style={{ color: "var(--text-danger)", textAlign: "center" }}>
-                Note: ActivityTypes other than Playing will only show timestamps on Mobile. It's a Discord issue.
-            </Forms.FormTitle>
         </>
     );
 }
@@ -98,7 +101,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                             className={Margins.bottom16}
                             hideBorder={true}
                         >
-                            {setting.appName}
+                            Enable editing of {setting.appName}
                         </Switch>
                         <Forms.FormTitle>Application ID</Forms.FormTitle>
                         <CheckedTextInput
@@ -107,7 +110,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                 onChange(v, i, "appId");
                             }}
                             validate={v =>
-                                !v || isValidSnowflake(v) || "Invalid appId, must be a snowflake"
+                                !v || isValidSnowflake(v) || "Invalid application ID"
                             }
                         />
                         {setting.activityType === ActivityType.STREAMING &&
@@ -118,7 +121,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                     onChange={async v => {
                                         onChange(v, i, "streamUrl");
                                     }}
-                                    validate={st => !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(st) && "Only Twitch and Youtube urls will work." || true}
+                                    validate={st => !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(st) && "Only Twitch and Youtube URLs will work." || true}
                                 />
                             </>}
                         <Forms.FormTitle>New activity type</Forms.FormTitle>

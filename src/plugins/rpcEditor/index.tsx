@@ -39,6 +39,7 @@ export interface Activity {
         button_urls?: Array<string>;
     };
     type: number;
+    flags: number;
 }
 
 interface ActivityAssets {
