@@ -20,7 +20,7 @@ import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import { BigIntLiteral, CallExpression, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, LiteralExpression, NamedDeclaration, Node, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
 
@@ -90,6 +90,44 @@ function parseDevs() {
     throw new Error("Could not find Devs constant");
 }
 
+function isTranslationExpression(node: Node): node is CallExpression {
+    if (!isCallExpression(node)) return false;
+
+    const literal = node.expression as LiteralExpression;
+
+    if (literal.text !== "$t") return false;
+
+    return true;
+}
+
+async function getTranslation(node: Node): Promise<string | null> {
+    if (!isTranslationExpression(node)) return null;
+
+    const translationString = node.arguments[0];
+
+    if (!isStringLiteral(translationString)) return null;
+
+    const splitPath = translationString.text.split(".");
+    const namespace = splitPath.shift();
+    const path = splitPath.join(".");
+
+    // load the namespace
+    const bundle = JSON.parse(
+        await readFile(`./translations/en/${namespace}.json`, "utf-8")
+    );
+
+    function getByPath(key: string, object: any) {
+        try {
+            return key.split(".").reduce((obj, key) => obj[key], object);
+        } catch {
+            // errors if the object doesn't contain the key
+            return undefined;
+        }
+    }
+
+    return getByPath(path, bundle);
+}
+
 async function parseFile(fileName: string) {
     const file = createSourceFile(fileName, await readFile(fileName, "utf8"), ScriptTarget.Latest);
 
@@ -120,9 +158,15 @@ async function parseFile(fileName: string) {
 
             switch (key) {
                 case "name":
-                case "description":
                     if (!isStringLiteral(value)) throw fail(`${key} is not a string literal`);
                     data[key] = value.text;
+                    break;
+                case "description":
+                    if (isStringLiteral(value))
+                        data[key] = value.text;
+                    else if (isTranslationExpression(value))
+                        data[key] = (await getTranslation(value))!;
+                    else throw fail(`${key} is not a string literal or a translation function call`);
                     break;
                 case "patches":
                     data.hasPatches = true;
