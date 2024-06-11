@@ -1,4 +1,19 @@
 {
+  "colorDescription": "Color your Discord client theme will be based around. Light mode isn't supported",
   "description": "Recreation of the old client theme experiment. Add a color to your Discord client theme",
-  "edit": "Edit ClientTheme"
+  "disableNitroTheme": "Disable Nitro Theme",
+  "edit": "Edit ClientTheme",
+  "resetButton": "Reset Theme Color",
+  "resetColorDescription": "Reset Theme Color",
+  "settingsDescription": "Add a color to your Discord client theme",
+  "settingsTitle": "Theme Color",
+  "switchToOpposite": {
+    "dark": "Switch to dark mode",
+    "light": "Switch to light mode"
+  },
+  "warningTitle": "Warning, your theme won't look good:",
+  "warnings": {
+    "badContrast": "Selected color won't contrast well with text",
+    "nitro": "Nitro themes aren't supported"
+  }
 }
