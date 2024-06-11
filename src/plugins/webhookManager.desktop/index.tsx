@@ -8,7 +8,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
@@ -26,6 +26,11 @@ function WebhookMessageModal(props: ModalProps) {
                     console.log(url); // why the FUCK is it undefined.
                 }}
             />
+            <Switch
+                key="wm-raw"
+                value={ }
+                onChange={v => { }} // maybe switch? don't use shitcode where i make an int and set it to 2 and then check if the int is 2 thats too much shitcode.
+            >Send as Raw JSON</Switch>
             <Forms.FormTitle className={Margins.top20}>Webhook Message</Forms.FormTitle>
             <TextInput
                 placeholder={"Hello World!"}
