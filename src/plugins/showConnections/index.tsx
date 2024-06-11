@@ -118,7 +118,7 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
         return connectionsContainer;
 
     return (
-        <Container>
+        <Section>
             <Text
                 tag="h2"
                 variant="eyebrow"
@@ -198,7 +198,7 @@ export default definePlugin({
             find: "{isUsingGuildBio:null!==(",
             replacement: {
                 match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: false })"
+                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
             }
         },
         {
