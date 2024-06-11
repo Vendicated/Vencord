@@ -1,0 +1,15 @@
+.vc-user-notes-modal-root {
+    max-height: 65vh;
+    min-height: 65vh;
+    min-width: 50vw;
+    max-width: 50vw;
+}
+
+.vc-user-notes-modal-content {
+    height: 100%;
+    padding: 16px;
+}
+
+.vc-user-notes-modal-content * {
+    height: 100%;
+}
