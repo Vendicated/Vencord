@@ -26,6 +26,7 @@ export default definePluginSettings({
 			"Transfer existing Discord notes into this plugin's data",
         component: () =>
             <Button onClick={() => {
+                // didn't find better way to get current user notes :))
                 fetch("https://discord.com/api/v9/users/@me/notes", {
                     method: "GET",
                     headers: {
