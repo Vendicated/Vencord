@@ -33,7 +33,7 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { $t } from "@utils/translation";
+import { t } from "@utils/translation";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
@@ -66,19 +66,19 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
         <Card className={cl("info-card", { "restart-card": required })}>
             {required ? (
                 <>
-                    <Forms.FormTitle tag="h5">{$t("vencord.pluginHeader.reloadHeader")}</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">{t("vencord.pluginHeader.reloadHeader")}</Forms.FormTitle>
                     <Forms.FormText className={cl("dep-text")}>
-                        {$t("vencord.pluginHeader.reloadDescription")}
+                        {t("vencord.pluginHeader.reloadDescription")}
                     </Forms.FormText>
                     <Button onClick={() => location.reload()}>
-                        {$t("vencord.pluginHeader.restart")}
+                        {t("vencord.pluginHeader.restart")}
                     </Button>
                 </>
             ) : (
                 <>
-                    <Forms.FormTitle tag="h5">{$t("vencord.pluginHeader.managementHeader")}</Forms.FormTitle>
-                    <Forms.FormText>{$t("vencord.pluginHeader.iconInformation")}</Forms.FormText>
-                    <Forms.FormText>{$t("vencord.pluginHeader.cogWheel")}</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{t("vencord.pluginHeader.managementHeader")}</Forms.FormTitle>
+                    <Forms.FormText>{t("vencord.pluginHeader.iconInformation")}</Forms.FormText>
+                    <Forms.FormText>{t("vencord.pluginHeader.cogWheel")}</Forms.FormText>
                 </>
             )}
         </Card>
@@ -184,7 +184,7 @@ export default function PluginSettings() {
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
-            title: $t("vencord.restartRequired"),
+            title: t("vencord.restartRequired"),
             body: (
                 <>
                     <p>$t("vencord.pluginsNeedRestart")</p>
@@ -196,8 +196,8 @@ export default function PluginSettings() {
                     ))}</div>
                 </>
             ),
-            confirmText: $t("vencord.restartNow"),
-            cancelText: $t("vencord.restartLater"),
+            confirmText: t("vencord.restartNow"),
+            cancelText: t("vencord.restartLater"),
             onConfirm: () => location.reload()
         }));
     }, []);
@@ -273,7 +273,7 @@ export default function PluginSettings() {
 
             if (isRequired) {
                 const tooltipText = p.required
-                    ? $t("vencord.requiredPlugin")
+                    ? t("vencord.requiredPlugin")
                     : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
                 requiredPlugins.push(
@@ -303,7 +303,7 @@ export default function PluginSettings() {
 
         }
     } else {
-        plugins = requiredPlugins = <Text variant="text-md/normal">{$t("vencord.noSearchResults")}</Text>;
+        plugins = requiredPlugins = <Text variant="text-md/normal">{t("vencord.noSearchResults")}</Text>;
     }
 
     return (
@@ -311,18 +311,18 @@ export default function PluginSettings() {
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                {$t("vencord.pluginFilters")}
+                {t("vencord.pluginFilters")}
             </Forms.FormTitle>
 
             <div className={cl("filter-controls")}>
-                <TextInput autoFocus value={searchValue.value} placeholder={$t("vencord.search.placeholder")} onChange={onSearch} className={Margins.bottom20} />
+                <TextInput autoFocus value={searchValue.value} placeholder={t("vencord.search.placeholder")} onChange={onSearch} className={Margins.bottom20} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         options={[
-                            { label: $t("vencord.search.all"), value: SearchStatus.ALL, default: true },
-                            { label: $t("vencord.search.enabled"), value: SearchStatus.ENABLED },
-                            { label: $t("vencord.search.disabled"), value: SearchStatus.DISABLED },
-                            { label: $t("vencord.search.new"), value: SearchStatus.NEW }
+                            { label: t("vencord.search.all"), value: SearchStatus.ALL, default: true },
+                            { label: t("vencord.search.enabled"), value: SearchStatus.ENABLED },
+                            { label: t("vencord.search.disabled"), value: SearchStatus.DISABLED },
+                            { label: t("vencord.search.new"), value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}
@@ -332,7 +332,7 @@ export default function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.top20}>{$t("vencord.plugins")}</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>{t("vencord.plugins")}</Forms.FormTitle>
 
             <div className={cl("grid")}>
                 {plugins}
@@ -341,7 +341,7 @@ export default function PluginSettings() {
             <Forms.FormDivider className={Margins.top20} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                {$t("vencord.requiredPlugins")}
+                {t("vencord.requiredPlugins")}
             </Forms.FormTitle>
             <div className={cl("grid")}>
                 {requiredPlugins}
@@ -353,7 +353,7 @@ export default function PluginSettings() {
 function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
-            <Forms.FormText>{$t("vencord.pluginRequiredBy")}</Forms.FormText>
+            <Forms.FormText>{t("vencord.pluginRequiredBy")}</Forms.FormText>
             {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );

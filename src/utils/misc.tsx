@@ -19,7 +19,7 @@
 import { Clipboard, Toasts } from "@webpack/common";
 
 import { DevsById } from "./constants";
-import { $t } from "./translation";
+import { t } from "./translation";
 
 /**
  * Calls .join(" ") on the arguments
@@ -37,12 +37,12 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export function copyWithToast(text: string, toastMessage?: string) {
-    toastMessage ??= $t("vencord.copiedToClipboard");
+    toastMessage ??= t("vencord.copiedToClipboard");
 
     if (Clipboard.SUPPORTS_COPY) {
         Clipboard.copy(text);
     } else {
-        toastMessage = $t("vencord.clipboardNotSupported");
+        toastMessage = t("vencord.clipboardNotSupported");
     }
     Toasts.show({
         message: toastMessage,

@@ -29,7 +29,7 @@ import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { $t } from "@utils/translation";
+import { t } from "@utils/translation";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
@@ -203,17 +203,17 @@ function ThemesTab() {
         return (
             <>
                 <Card className="vc-settings-card">
-                    <Forms.FormTitle tag="h5">{$t("vencord.themes.findThemes")}</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">{t("vencord.themes.findThemes")}</Forms.FormTitle>
                     <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                         <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
-                            {$t("vencord.themes.betterDiscord")}
+                            {t("vencord.themes.betterDiscord")}
                         </Link>
                         <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                     </div>
-                    <Forms.FormText>{$t("vencord.themes.betterDiscordNote")}</Forms.FormText>
+                    <Forms.FormText>{t("vencord.themes.betterDiscordNote")}</Forms.FormText>
                 </Card>
 
-                <Forms.FormSection title={$t("vencord.themes.local")}>
+                <Forms.FormSection title={t("vencord.themes.local")}>
                     <Card className="vc-settings-quick-actions-card">
                         <>
                             {IS_WEB ?
@@ -222,7 +222,7 @@ function ThemesTab() {
                                         size={Button.Sizes.SMALL}
                                         disabled={themeDirPending}
                                     >
-                                        {$t("vencord.themes.upload")}
+                                        {t("vencord.themes.upload")}
                                         <FileInput
                                             ref={fileInputRef}
                                             onChange={onFileUpload}
@@ -236,20 +236,20 @@ function ThemesTab() {
                                         size={Button.Sizes.SMALL}
                                         disabled={themeDirPending}
                                     >
-                                        {$t("vencord.themes.openFolder")}
+                                        {t("vencord.themes.openFolder")}
                                     </Button>
                                 )}
                             <Button
                                 onClick={refreshLocalThemes}
                                 size={Button.Sizes.SMALL}
                             >
-                                {$t("vencord.themes.loadMissing")}
+                                {t("vencord.themes.loadMissing")}
                             </Button>
                             <Button
                                 onClick={() => VencordNative.quickCss.openEditor()}
                                 size={Button.Sizes.SMALL}
                             >
-                                {$t("vencord.themes.editQuickCss")}
+                                {t("vencord.themes.editQuickCss")}
                             </Button>
 
                             {Vencord.Settings.plugins.ClientTheme.enabled && (
@@ -263,7 +263,7 @@ function ThemesTab() {
                                     ))}
                                     size={Button.Sizes.SMALL}
                                 >
-                                    {$t("clientTheme.edit")}
+                                    {t("clientTheme.edit")}
                                 </Button>
                             )}
                         </>
@@ -304,12 +304,12 @@ function ThemesTab() {
         return (
             <>
                 <Card className="vc-settings-card vc-text-selectable">
-                    <Forms.FormTitle tag="h5">{$t("vencord.themes.pasteLinks")}</Forms.FormTitle>
-                    <Forms.FormText>{$t("vencord.themes.oneLinkPerLine")}</Forms.FormText>
-                    <Forms.FormText>{$t("vencord.themes.useDirect")}</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{t("vencord.themes.pasteLinks")}</Forms.FormTitle>
+                    <Forms.FormText>{t("vencord.themes.oneLinkPerLine")}</Forms.FormText>
+                    <Forms.FormText>{t("vencord.themes.useDirect")}</Forms.FormText>
                 </Card>
 
-                <Forms.FormSection title={$t("vencord.themes.online")} tag="h5">
+                <Forms.FormSection title={t("vencord.themes.online")} tag="h5">
                     <TextArea
                         value={themeText}
                         onChange={setThemeText}
@@ -338,13 +338,13 @@ function ThemesTab() {
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.LOCAL}
                 >
-                    {$t("vencord.themes.local")}
+                    {t("vencord.themes.local")}
                 </TabBar.Item>
                 <TabBar.Item
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.ONLINE}
                 >
-                    {$t("vencord.themes.online")}
+                    {t("vencord.themes.online")}
                 </TabBar.Item>
             </TabBar>
 

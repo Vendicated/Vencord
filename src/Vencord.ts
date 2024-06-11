@@ -38,7 +38,7 @@ import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
-import { $t } from "./utils/translation";
+import { t } from "./utils/translation";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
@@ -55,8 +55,8 @@ async function syncSettings() {
     ) {
         // show a notification letting them know and tell them how to fix it
         showNotification({
-            title: $t("vencord.cloudIntegrations"),
-            body: $t("vencord.cloud.integrations.reauthenticate"),
+            title: t("vencord.cloudIntegrations"),
+            body: t("vencord.cloud.integrations.reauthenticate"),
             color: "var(--yellow-360)",
             onClick: () => SettingsRouter.open("VencordCloud")
         });
@@ -76,8 +76,8 @@ async function syncSettings() {
             // there was an error to notify the user, but besides that we only want to show one notification instead of all
             // of the possible ones it has (such as when your settings are newer).
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.updated"),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.updated"),
                 color: "var(--green-360)",
                 onClick: relaunch
             });
@@ -100,8 +100,8 @@ async function init() {
                 await update();
                 if (Settings.autoUpdateNotification)
                     setTimeout(() => showNotification({
-                        title: $t("vencord.update.updated"),
-                        body: $t("vencord.update.clickToRestart"),
+                        title: t("vencord.update.updated"),
+                        body: t("vencord.update.clickToRestart"),
                         permanent: true,
                         noPersist: true,
                         onClick: relaunch
@@ -110,8 +110,8 @@ async function init() {
             }
 
             setTimeout(() => showNotification({
-                title: $t("vencord.update.available"),
-                body: $t("vencord.update.clickToView"),
+                title: t("vencord.update.available"),
+                body: t("vencord.update.clickToView"),
                 permanent: true,
                 noPersist: true,
                 onClick: openUpdaterModal!

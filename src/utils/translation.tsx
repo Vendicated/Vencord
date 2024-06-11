@@ -100,7 +100,7 @@ function _t(key: string, bundle: any): Translation {
  * @param variables The variables to interpolate into the resultant string. If dealing with plurals, `count` must be set.
  * @returns A translated string.
  */
-export function $t(key: string, variables?: Record<string, any>): string {
+export function t(key: string, variables?: Record<string, any>): string {
     const getter = (): string => {
         const translation = _t(key, loadedLocale);
 
@@ -153,13 +153,13 @@ interface TranslateProps {
 }
 
 /**
- * A translation component. Follows the same rules as {@link $t}, but lets you add components to strings.
+ * A translation component. Follows the same rules as {@link t}, but lets you add components to strings.
  * @param param0 Component props.
  */
 export function Translate({ i18nKey, variables, children: trueChildren }: TranslateProps): JSX.Element {
     const children = [trueChildren].flat();
 
-    const translation = $t(i18nKey, variables);
+    const translation = t(i18nKey, variables);
 
     const parts = translation.split(/(<\d+>.*?<\/\d+>)/g);
 

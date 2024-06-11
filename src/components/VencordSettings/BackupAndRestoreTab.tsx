@@ -20,7 +20,7 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
-import { $t } from "@utils/translation";
+import { t } from "@utils/translation";
 import { Button, Card, Text } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
@@ -30,19 +30,19 @@ function BackupRestoreTab() {
         <SettingsTab title="Backup & Restore">
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
                 <Flex flexDirection="column">
-                    <strong>{$t("vencord.warning")}</strong>
-                    <span>{$t("vencord.backupAndRestore.importWarning")}</span>
+                    <strong>{t("vencord.warning")}</strong>
+                    <span>{t("vencord.backupAndRestore.importWarning")}</span>
                 </Flex>
             </Card>
             <Text variant="text-md/normal" className={Margins.bottom8}>
-                {$t("vencord.backupAndRestore.description")}
+                {t("vencord.backupAndRestore.description")}
             </Text>
             <Text variant="text-md/normal" className={Margins.bottom8}>
-                {$t("vencord.backupAndRestore.exportContains")}
+                {t("vencord.backupAndRestore.exportContains")}
                 <ul>
-                    <li>&mdash; {$t("vencord.backupAndRestore.customQuickcss")}</li>
-                    <li>&mdash; {$t("vencord.backupAndRestore.themeLinks")}</li>
-                    <li>&mdash; {$t("vencord.backupAndRestore.pluginSettings")}</li>
+                    <li>&mdash; {t("vencord.backupAndRestore.customQuickcss")}</li>
+                    <li>&mdash; {t("vencord.backupAndRestore.themeLinks")}</li>
+                    <li>&mdash; {t("vencord.backupAndRestore.pluginSettings")}</li>
                 </ul>
             </Text>
             <Flex>
@@ -50,13 +50,13 @@ function BackupRestoreTab() {
                     onClick={() => uploadSettingsBackup()}
                     size={Button.Sizes.SMALL}
                 >
-                    {$t("vencord.backupAndRestore.importSettings")}
+                    {t("vencord.backupAndRestore.importSettings")}
                 </Button>
                 <Button
                     onClick={downloadSettingsBackup}
                     size={Button.Sizes.SMALL}
                 >
-                    {$t("vencord.backupAndRestore.exportSettings")}
+                    {t("vencord.backupAndRestore.exportSettings")}
                 </Button>
             </Flex>
         </SettingsTab>

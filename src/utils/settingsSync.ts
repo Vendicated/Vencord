@@ -24,7 +24,7 @@ import { deflateSync, inflateSync } from "fflate";
 import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
 import { relaunch } from "./native";
-import { $t } from "./translation";
+import { t } from "./translation";
 import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
@@ -69,10 +69,10 @@ const toast = (type: number, message: string) =>
     });
 
 const toastSuccess = () =>
-    toast(Toasts.Type.SUCCESS, $t("vencord.importedSettings"));
+    toast(Toasts.Type.SUCCESS, t("vencord.importedSettings"));
 
 const toastFailure = (err: any) =>
-    toast(Toasts.Type.FAILURE, $t("vencord.failedToImport", { error: String(err) }));
+    toast(Toasts.Type.FAILURE, t("vencord.failedToImport", { error: String(err) }));
 
 export async function uploadSettingsBackup(showToast = true): Promise<void> {
     if (IS_DISCORD_DESKTOP) {
@@ -129,8 +129,8 @@ export async function putCloudSettings(manual?: boolean) {
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync up, API returned ${res.status}`);
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.syncErrorUp.api", { status: res.status.toString() }),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.syncErrorUp.api", { status: res.status.toString() }),
                 color: "var(--red-360)"
             });
             return;
@@ -144,16 +144,16 @@ export async function putCloudSettings(manual?: boolean) {
 
         if (manual) {
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.syncSuccess"),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.syncSuccess"),
                 noPersist: true,
             });
         }
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync up", e);
         showNotification({
-            title: $t("vencord.cloudSettings"),
-            body: $t("vencord.cloud.settings.syncErrorUp.generic", { error: e.toString() }),
+            title: t("vencord.cloudSettings"),
+            body: t("vencord.cloud.settings.syncErrorUp.generic", { error: e.toString() }),
             color: "var(--red-360)"
         });
     }
@@ -174,8 +174,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             cloudSettingsLogger.info("No settings on the cloud");
             if (shouldNotify)
                 showNotification({
-                    title: $t("vencord.cloudSettings"),
-                    body: $t("vencord.cloud.settings.nothingOnline"),
+                    title: t("vencord.cloudSettings"),
+                    body: t("vencord.cloud.settings.nothingOnline"),
                     noPersist: true
                 });
             return false;
@@ -185,8 +185,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             cloudSettingsLogger.info("Settings up to date");
             if (shouldNotify)
                 showNotification({
-                    title: $t("vencord.cloudSettings"),
-                    body: $t("vencord.cloud.settings.upToDate"),
+                    title: t("vencord.cloudSettings"),
+                    body: t("vencord.cloud.settings.upToDate"),
                     noPersist: true
                 });
             return false;
@@ -195,8 +195,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to sync down, API returned ${res.status}`);
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.syncErrorDown.api", { status: res.status.toString() }),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.syncErrorDown.api", { status: res.status.toString() }),
                 color: "var(--red-360)"
             });
             return false;
@@ -209,8 +209,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         if (!force && written < localWritten) {
             if (shouldNotify)
                 showNotification({
-                    title: $t("vencord.cloudSettings"),
-                    body: $t("vencord.cloud.settings.localNewer"),
+                    title: t("vencord.cloudSettings"),
+                    body: t("vencord.cloud.settings.localNewer"),
                     noPersist: true,
                 });
             return;
@@ -228,8 +228,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
         cloudSettingsLogger.info("Settings loaded from cloud successfully");
         if (shouldNotify)
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.updated"),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.updated"),
                 color: "var(--green-360)",
                 onClick: IS_WEB ? () => location.reload() : relaunch,
                 noPersist: true
@@ -239,8 +239,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to sync down", e);
         showNotification({
-            title: $t("vencord.cloudSettings"),
-            body: $t("vencord.cloud.settings.syncErrorDown.generic", { error: e.toString() }),
+            title: t("vencord.cloudSettings"),
+            body: t("vencord.cloud.settings.syncErrorDown.generic", { error: e.toString() }),
             color: "var(--red-360)"
         });
 
@@ -258,8 +258,8 @@ export async function deleteCloudSettings() {
         if (!res.ok) {
             cloudSettingsLogger.error(`Failed to delete, API returned ${res.status}`);
             showNotification({
-                title: $t("vencord.cloudSettings"),
-                body: $t("vencord.cloud.settings.deleteError.api", { error: res.status.toString() }),
+                title: t("vencord.cloudSettings"),
+                body: t("vencord.cloud.settings.deleteError.api", { error: res.status.toString() }),
                 color: "var(--red-360)"
             });
             return;
@@ -267,15 +267,15 @@ export async function deleteCloudSettings() {
 
         cloudSettingsLogger.info("Settings deleted from cloud successfully");
         showNotification({
-            title: $t("vencord.cloudSettings"),
-            body: $t("vencord.cloud.settings.deleted"),
+            title: t("vencord.cloudSettings"),
+            body: t("vencord.cloud.settings.deleted"),
             color: "var(--green-360)"
         });
     } catch (e: any) {
         cloudSettingsLogger.error("Failed to delete", e);
         showNotification({
-            title: $t("vencord.cloudSettings"),
-            body: $t("vencord.cloud.settings.deleteError.generic", { error: e.toString() }),
+            title: t("vencord.cloudSettings"),
+            body: t("vencord.cloud.settings.deleteError.generic", { error: e.toString() }),
             color: "var(--red-360)"
         });
     }

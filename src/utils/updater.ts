@@ -20,7 +20,7 @@ import gitHash from "~git-hash";
 
 import { Logger } from "./Logger";
 import { relaunch } from "./native";
-import { $t } from "./translation";
+import { t } from "./translation";
 import { IpcRes } from "./types";
 
 export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
@@ -71,7 +71,7 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
         const isOutdated = await checkForUpdates();
         if (isOutdated) {
             const wantsUpdate = confirm(confirmMessage);
-            if (wantsUpdate && isNewer) return alert($t("vencord.gitCopyNewer"));
+            if (wantsUpdate && isNewer) return alert(t("vencord.gitCopyNewer"));
             if (wantsUpdate) {
                 await update();
                 relaunch();
@@ -79,6 +79,6 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
         }
     } catch (err) {
         UpdateLogger.error(err);
-        alert($t("vencord.updaterRepeatFailed"));
+        alert(t("vencord.updaterRepeatFailed"));
     }
 }

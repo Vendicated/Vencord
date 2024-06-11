@@ -95,7 +95,7 @@ function isTranslationExpression(node: Node): node is CallExpression {
 
     const literal = node.expression as LiteralExpression;
 
-    if (literal.text !== "$t") return false;
+    if (literal.text !== "t") return false;
 
     return true;
 }

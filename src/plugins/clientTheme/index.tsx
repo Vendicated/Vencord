@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { $t } from "@utils/translation";
+import { t } from "@utils/translation";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
@@ -113,7 +113,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ClientTheme",
     authors: [Devs.F53, Devs.Nuckyz],
-    description: $t("clientTheme.description"),
+    description: t("clientTheme.description"),
     settings,
 
     startAt: StartAt.DOMContentLoaded,

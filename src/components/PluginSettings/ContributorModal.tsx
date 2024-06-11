@@ -13,7 +13,7 @@ import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { $t, Translate } from "@utils/translation";
+import { t, Translate } from "@utils/translation";
 import { Forms, MaskedLink, showToast, Tooltip, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -119,7 +119,7 @@ function ContributorModal({ user }: { user: User; }) {
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast($t("vencord.pluginRestart"))}
+                            onRestartNeeded={() => showToast(t("vencord.pluginRestart"))}
                         />
                     )}
                 </div>

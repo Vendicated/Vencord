@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { $t } from "@utils/translation";
+import { t } from "@utils/translation";
 import { maybePromptToUpdate } from "@utils/updater";
 
 export function handleComponentFailed() {
     maybePromptToUpdate(
-        $t("vencord.failureUpdate")
+        t("vencord.failureUpdate")
     );
 }
