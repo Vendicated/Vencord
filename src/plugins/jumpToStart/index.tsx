@@ -36,6 +36,7 @@ export default definePlugin({
     contextMenus:
     {
         "channel-context": MenuPatch,
-        "user-context": MenuPatch
+        "user-context": MenuPatch,
+        "thread-context": MenuPatch
     }
 });
