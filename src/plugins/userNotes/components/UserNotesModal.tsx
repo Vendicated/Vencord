@@ -23,8 +23,6 @@ export function UserNotesModal({ modalProps, close, user, userNotes }: {
 }) {
     const [value, setValue] = useState(userNotes);
 
-    console.log(user);
-
     return (
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>

@@ -30,7 +30,7 @@ export default definePluginSettings({
                 fetch("https://discord.com/api/v9/users/@me/notes", {
                     method: "GET",
                     headers: {
-                        Authorization: `${token.getToken()}`
+                        Authorization: token.getToken(),
                     }
                 }).then(async r => {
                     r.json().then(resularUsersNotes => {
