@@ -116,16 +116,10 @@ async function getTranslation(node: Node): Promise<string | null> {
         await readFile(`./translations/en/${namespace}.json`, "utf-8")
     );
 
-    function getByPath(key: string, object: any) {
-        try {
-            return key.split(".").reduce((obj, key) => obj[key], object);
-        } catch {
-            // errors if the object doesn't contain the key
-            return undefined;
-        }
-    }
+    const dotProp = (key: string, object: any) =>
+        key.split(".").reduce((obj, key) => obj?.[key], object);
 
-    return getByPath(path, bundle);
+    return dotProp(path, bundle);
 }
 
 async function parseFile(fileName: string) {

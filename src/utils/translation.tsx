@@ -74,20 +74,14 @@ function format(source: string, variables: Record<string, any>) {
 }
 
 // converts a dot-notation path to an object value
-function getByPath(key: string, object: any) {
-    try {
-        return key.split(".").reduce((obj, key) => obj[key], object);
-    } catch {
-        // errors if the object doesn't contain the key
-        return undefined;
-    }
-}
+const dotProp = (key: string, object: any) =>
+    key.split(".").reduce((obj, key) => obj?.[key], object);
 
 type Translation = string | ({ [rule in Intl.LDMLPluralRule]?: string } & { other: string; });
 
 // translation retrieval function
 function _t(key: string, bundle: any): Translation {
-    const translation = getByPath(key, bundle);
+    const translation = dotProp(key, bundle);
 
     if (!translation) {
         if (bundle !== translations.en) {
