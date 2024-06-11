@@ -17,10 +17,16 @@ const APP_IDS_KEY = "ReplaceActivityType_appids";
 export type AppIdSetting = {
     appName: string;
     appId: string;
-    swapNameAndDetails: boolean;
-    activityType: ActivityType;
-    streamUrl: string;
     enabled: boolean;
+    newActivityType: ActivityType;
+    newName: string,
+    newDetails: string,
+    newState: string,
+    newLargeImageUrl: string,
+    newLargeImageText: string,
+    newSmallImageUrl: string,
+    newSmallImageText: string;
+    newStreamUrl: string;
 };
 
 export interface Activity {
@@ -58,12 +64,18 @@ export const enum ActivityType {
 }
 
 export const makeEmptyAppId: () => AppIdSetting = () => ({
-    appId: "",
     appName: "Unknown",
-    streamUrl: "",
-    swapNameAndDetails: false,
-    activityType: ActivityType.PLAYING,
-    enabled: true
+    appId: "",
+    enabled: true,
+    newActivityType: ActivityType.PLAYING,
+    newName: "",
+    newDetails: "",
+    newState: "",
+    newLargeImageUrl: "",
+    newLargeImageText: "",
+    newSmallImageUrl: "",
+    newSmallImageText: "",
+    newStreamUrl: "",
 });
 
 let appIds = [makeEmptyAppId()];
@@ -112,16 +124,10 @@ export default definePlugin({
         console.log(activity);
         appIds.forEach(app => {
             if (app.enabled && app.appId === activity.application_id) {
-                activity.type = app.activityType;
+                activity.type = app.newActivityType;
 
-                if (app.activityType === ActivityType.STREAMING && app.streamUrl) {
-                    activity.url = app.streamUrl;
-                }
-
-                if (app.swapNameAndDetails) {
-                    const media = activity.details;
-                    activity.details = activity.name;
-                    activity.name = media;
+                if (app.newActivityType === ActivityType.STREAMING && app.newStreamUrl) {
+                    activity.url = app.newStreamUrl;
                 }
 
             }

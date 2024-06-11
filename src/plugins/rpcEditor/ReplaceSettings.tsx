@@ -62,7 +62,7 @@ export function ReplaceTutorial() {
                 <pre style={{ fontFamily: "monospace" }}>
                     :name:, :details:, :state:
                     <br />
-                    :large_image::large_text:, :small_image:, :small_text:
+                    :large_image:, :large_text:, :small_image:, :small_text:
                 </pre>
             </Forms.FormText>
         </>
@@ -93,16 +93,19 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
             {
                 appIds.map((setting, i) =>
                     <Card style={{ padding: "1em 1em 0" }}>
-                        <Switch
-                            value={setting.enabled}
-                            onChange={value => {
-                                onChange(value, i, "enabled");
-                            }}
-                            className={Margins.bottom16}
-                            hideBorder={true}
-                        >
-                            Enable editing of {setting.appName}
-                        </Switch>
+                        {
+                            setting.appName !== "Unknown" ?
+                                <Switch
+                                    value={setting.enabled}
+                                    onChange={value => {
+                                        onChange(value, i, "enabled");
+                                    }}
+                                    className={Margins.bottom8}
+                                    hideBorder={true}
+                                >
+                                    Edit the {setting.appName} app
+                                </Switch> : <Forms.FormTitle tag="h3" className={Margins.bottom8}>Add new application</Forms.FormTitle>
+                        }
                         <Forms.FormTitle>Application ID</Forms.FormTitle>
                         <CheckedTextInput
                             value={setting.appId}
@@ -113,43 +116,27 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                 !v || isValidSnowflake(v) || "Invalid application ID"
                             }
                         />
-                        {setting.activityType === ActivityType.STREAMING &&
-                            <>
-                                <Forms.FormTitle>Stream URL</Forms.FormTitle>
-                                <CheckedTextInput
-                                    value={setting.streamUrl}
-                                    onChange={async v => {
-                                        onChange(v, i, "streamUrl");
-                                    }}
-                                    validate={st => !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(st) && "Only Twitch and Youtube URLs will work." || true}
-                                />
-                            </>}
-                        <Forms.FormTitle>New activity type</Forms.FormTitle>
-                        <Select
-                            options={[
-                                { label: "Playing", value: ActivityType.PLAYING },
-                                { label: "Watching", value: ActivityType.WATCHING },
-                                { label: "Listening", value: ActivityType.LISTENING },
-                                { label: "Competing", value: ActivityType.COMPETING },
-                                { label: "Streaming", value: ActivityType.STREAMING }
-                            ]}
-                            select={value => {
-                                onChange(value, i, "activityType");
-                            }}
-                            className={Margins.bottom16}
-                            isSelected={value => setting.activityType === value}
-                            serialize={identity}
-                        />
-                        <Switch
-                            value={setting.swapNameAndDetails}
-                            onChange={value => {
-                                onChange(value, i, "swapNameAndDetails");
-                            }}
-                            className={Margins.bottom16}
-                            hideBorder={true}
-                        >
-                            Swap presence name and details
-                        </Switch>
+                        {
+                            setting.appName !== "Unknown" ?
+                                <>
+                                    <Forms.FormTitle className={Margins.top8}>New activity type</Forms.FormTitle>
+                                    <Select
+                                        options={[
+                                            { label: "Playing", value: ActivityType.PLAYING },
+                                            { label: "Watching", value: ActivityType.WATCHING },
+                                            { label: "Listening", value: ActivityType.LISTENING },
+                                            { label: "Competing", value: ActivityType.COMPETING },
+                                            { label: "Streaming", value: ActivityType.STREAMING }
+                                        ]}
+                                        select={value => {
+                                            onChange(value, i, "activityType");
+                                        }}
+                                        className={Margins.top8}
+                                        isSelected={value => setting.newActivityType === value}
+                                        serialize={identity}
+                                    />
+                                </> : null
+                        }
                     </Card>
                 )
             }
