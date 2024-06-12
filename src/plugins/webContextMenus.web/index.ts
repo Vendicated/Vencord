@@ -200,6 +200,28 @@ export default definePlugin({
                 match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
                 replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
             }
+        },
+        {
+            find: ".Messages.SEARCH_WITH_GOOGLE",
+            replacement: {
+                match: /\i\.isPlatformEmbedded/,
+                replace: "true"
+            }
+        },
+        {
+            find: "⌘C",
+            replacement: {
+                match: /\i\.isPlatformEmbedded/,
+                replace: "true"
+            }
+        },
+        // Automod add filter words
+        {
+            find: "({contextMenu:!0}),",
+            replacement: {
+                match: /\i\.isPlatformEmbedded/,
+                replace: "true"
+            }
         }
     ],
 
