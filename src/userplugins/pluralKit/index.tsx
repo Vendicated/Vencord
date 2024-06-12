@@ -21,15 +21,16 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { ChannelStore, FluxDispatcher } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { ChannelStore, FluxDispatcher, UserStore } from "@webpack/common";
+import { Message, ReactionEmoji } from "discord-types/general";
 import { Member, PKAPI, System } from "pkapi.js";
+import { DeleteIcon } from "@components/Icons";
+import { findByPropsLazy } from "@webpack";
 
 const api = new PKAPI({
 });
 
 function isPk(msg: Message) {
-    // If the message is null, early return
     return (msg && msg.applicationId === "466378653216014359");
 }
 
@@ -59,6 +60,8 @@ let authors: Record<string, { messageIds: string[]; member: Member|string|undefi
 (async () => {
     authors = await DataStore.get<Record<string, { name: string; messageIds: string[]; member: Member|string|undefined; system: System; }>>(DATASTORE_KEY) || {};
 })();
+
+const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
 
 export default definePlugin({
@@ -107,9 +110,7 @@ export default definePlugin({
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            console.log(msg);
             if (!isPk(msg)) return null;
-            console.log(msg);
 
             const handleClick = () => {
                 replyToMessage(msg, false, true, "pk;edit " + msg.content);
@@ -126,6 +127,34 @@ export default definePlugin({
                 onContextMenu: _ => {}
             };
         });
+
+        addButton("pk-delete", msg => {
+            if (!msg) return null;
+            if (!isPk(msg)) return null;
+
+            const handleClick = async () => {
+                ReactionManager.addReaction(
+                    msg.channel_id,
+                    msg.id,
+                    {
+                        id: undefined,
+                        name: "❌",
+                        animated: false
+                    }
+                );
+            }
+
+            return {
+                label: "Delete",
+                icon: () => {
+                    return <DeleteIcon/>;
+                },
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: handleClick,
+                onContextMenu: _ => {}
+            };
+        })
     },
     stop() {
         removeButton("pk-edit");
