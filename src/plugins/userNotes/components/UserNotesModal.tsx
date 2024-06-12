@@ -12,6 +12,7 @@ import { Button, Text, TextArea, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { getUserNotes, saveUserNotes } from "../data";
+import settings from "../settings";
 
 const cl = classNameFactory("vc-user-notes-modal-");
 
@@ -35,6 +36,7 @@ export function UserNotesModal({ modalProps, close, user, userNotes }: {
                     placeholder="Click to add a note"
                     value={value}
                     onChange={setValue}
+                    spellCheck={!settings.store.disableSpellCheck}
                 />
             </div>
             <ModalFooter className={cl("footer")}>

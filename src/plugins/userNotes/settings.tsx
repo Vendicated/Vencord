@@ -27,6 +27,11 @@ export default definePluginSettings({
         default: true,
         restartNeeded: true,
     },
+    disableSpellCheck: {
+        type: OptionType.BOOLEAN,
+        description: 'Disable "Spellcheck" in notes',
+        default: false,
+    },
     transferExistingNotes: {
         type: OptionType.COMPONENT,
         description:
