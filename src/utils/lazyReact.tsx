@@ -6,6 +6,10 @@
 
 import { makeLazy } from "./lazy";
 
+export type LazyComponentType<T extends object = {}> = React.ComponentType<T> & Record<PropertyKey, any>;
+
+export const SYM_LAZY_COMPONENT_INNER = Symbol.for("vencord.lazyComponent.inner");
+
 /**
  * A lazy component. The factory method is called on first render.
  *
@@ -13,10 +17,10 @@ import { makeLazy } from "./lazy";
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponent<T extends object = any>(factory: () => React.ComponentType<T>, attempts = 5) {
+export function LazyComponent<T extends object = {}>(factory: () => LazyComponentType<T>, attempts = 5) {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
-    let InnerComponent = null as React.ComponentType<T> | null;
+    let InnerComponent = null as LazyComponentType<T> | null;
 
     let lazyFailedLogged = false;
     const LazyComponent = (props: T) => {
@@ -39,5 +43,7 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         return InnerComponent && <InnerComponent {...props} />;
     };
 
-    return LazyComponent as React.ComponentType<T>;
+    LazyComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
+
+    return LazyComponent as LazyComponentType<T>;
 }

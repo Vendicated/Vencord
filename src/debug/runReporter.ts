@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import * as Webpack from "@webpack";
@@ -81,8 +82,8 @@ async function runReporter() {
                                 result = findResult[SYM_PROXY_INNER_VALUE];
                             }
 
-                            if (findResult.$$vencordInner != null) {
-                                result = findResult.$$vencordInner();
+                            if (findResult[SYM_LAZY_COMPONENT_INNER] != null) {
+                                result = findResult[SYM_LAZY_COMPONENT_INNER]();
                             }
                         }
 

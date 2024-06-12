@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { LazyComponentType } from "@utils/lazyReact";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findComponentByCode } from "@webpack";
@@ -56,7 +57,7 @@ const PermissionUtil = findByProps("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,") as React.ComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,") as LazyComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 
