@@ -9,7 +9,7 @@ import "./styles.css";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, UserStore } from "@webpack/common";
+import { Button, Menu, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { openUserNotesModal } from "./components/UserNotesModal";
@@ -18,7 +18,7 @@ import settings from "./settings";
 const patchUserContext: NavContextMenuPatchCallback = (children, { user }: {
 	user: User;
 }) => {
-    if (!user || user.id === UserStore.getCurrentUser().id) return;
+    if (!user) return;
 
     const contextGroup = findGroupChildrenByChildId("note", children);
 
@@ -47,8 +47,34 @@ export default definePlugin({
     name: "UserNotes",
     description: "Allows you to write unlimited notes for users. Unlike Discord, which restricts note saving to a maximum of 500 users and removes older notes when this limit is exceeded.",
     authors: [Devs.Vishnya],
-
     settings,
+    patches: [
+        {
+            predicate: () => {
+                return settings.store.replaceRegularNotes;
+            },
+            find: ".default.Messages.NOTE_PLACEHOLDER,",
+            replacement: {
+                match: /componentDidMount\(\)\{if.{0,250}\}render\(\)\{.{0,300}\.Messages\.LOADING_NOTE.{0,300}\}constructor/,
+                replace: "componentDidMount(){}render(){return $self.notesSectionRender(this.props.userId)}constructor"
+            }
+        }
+    ],
+
+    notesSectionRender: (userId: string) => {
+        const user = UserStore.getUser(userId);
+
+        return <Button
+            className={"vc-user-notes-profile-button"}
+            color={Button.Colors.PRIMARY}
+            size={Button.Sizes.NONE}
+            onClick={() => {
+                openUserNotesModal(user);
+            }}
+        >
+			Open Notes
+        </Button>;
+    },
 
     contextMenus: {
         "user-context": patchUserContext,

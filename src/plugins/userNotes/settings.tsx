@@ -18,7 +18,14 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         description:
 			'Removes the regular "Add Note"/"Edit Note" button from the user context menu',
-        default: false,
+        default: true,
+    },
+    replaceRegularNotes: {
+        type: OptionType.BOOLEAN,
+        description:
+			'Replace the regular "Notes" section by button to open notes from plugin',
+        default: true,
+        restartNeeded: true,
     },
     transferExistingNotes: {
         type: OptionType.COMPONENT,
