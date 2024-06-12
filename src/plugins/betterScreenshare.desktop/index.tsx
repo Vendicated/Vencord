@@ -69,7 +69,7 @@ export default new class Plugin implements PluginDef {
                 find: "updateRemoteWantsFramerate(){",
                 replacement: {
                     match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
-                    replace: match => `${match}return;`
+                    replace: match => `${match}return $self.getQuality().framerate;`
                 }
             },
             {
