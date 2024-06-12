@@ -139,39 +139,6 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
 };
 
 /**
- * Define the getter for returning the patched version of the module factory.
- *
- * If eagerPatches is enabled, the factory argument should already be the patched version, else it will be the original
- * and only be patched when accessed for the first time.
- *
- * @param id The id of the module
- * @param factory The original or patched module factory
- */
-function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
-    // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
-    // have the patched version
-    for (const wreq of allWebpackInstances) {
-        define(wreq.m, id, {
-            get() {
-                // $$vencordOriginal means the factory is already patched
-                if (factory.$$vencordOriginal != null) {
-                    return factory;
-                }
-
-                return (factory = patchFactory(id, factory));
-            },
-            set(v: AnyModuleFactory) {
-                if (factory.$$vencordOriginal != null) {
-                    factory.$$vencordOriginal = v;
-                } else {
-                    factory = v;
-                }
-            }
-        });
-    }
-}
-
-/**
  * Update a factory that exists in any Webpack instance with a new original factory.
  *
  * @target The module factories where this new original factory is being set
@@ -215,6 +182,39 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
         } catch (err) {
             logger.error("Error in Webpack factory listener:\n", err, factoryListener);
         }
+    }
+}
+
+/**
+ * Define the getter for returning the patched version of the module factory.
+ *
+ * If eagerPatches is enabled, the factory argument should already be the patched version, else it will be the original
+ * and only be patched when accessed for the first time.
+ *
+ * @param id The id of the module
+ * @param factory The original or patched module factory
+ */
+function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
+    // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
+    // have the patched version
+    for (const wreq of allWebpackInstances) {
+        define(wreq.m, id, {
+            get() {
+                // $$vencordOriginal means the factory is already patched
+                if (factory.$$vencordOriginal != null) {
+                    return factory;
+                }
+
+                return (factory = patchFactory(id, factory));
+            },
+            set(v: AnyModuleFactory) {
+                if (factory.$$vencordOriginal != null) {
+                    factory.$$vencordOriginal = v;
+                } else {
+                    factory = v;
+                }
+            }
+        });
     }
 }
 
