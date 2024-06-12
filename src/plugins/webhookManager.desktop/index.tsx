@@ -13,6 +13,7 @@ import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 let url, message, username, avatarUrl = "";
+let jsonMode = false;
 
 // TODO: fix webhooks not sending, fix probable undefined when null issue, add sending as raw again (wanted to make it a checkbox but i cant find checkbox)
 function WebhookMessageModal(props: ModalProps) {
@@ -26,11 +27,6 @@ function WebhookMessageModal(props: ModalProps) {
                     console.log(url); // why the FUCK is it undefined.
                 }}
             />
-            <Switch
-                key="wm-raw"
-                value={ }
-                onChange={v => { }} // maybe switch? don't use shitcode where i make an int and set it to 2 and then check if the int is 2 thats too much shitcode.
-            >Send as Raw JSON</Switch>
             <Forms.FormTitle className={Margins.top20}>Webhook Message</Forms.FormTitle>
             <TextInput
                 placeholder={"Hello World!"}
@@ -38,6 +34,14 @@ function WebhookMessageModal(props: ModalProps) {
                     v = message;
                 }}
             />
+            <Switch
+                key="wm-raw"
+                value={jsonMode}
+                onChange={v => {
+                    v = jsonMode;
+                    console.log("hi");
+                }} // maybe switch? don't use shitcode where i make an int and set it to 2 and then check if the int is 2 thats too much shitcode.
+            >Send as Raw JSON</Switch>
             <Forms.FormTitle className={Margins.top20}>Webhook Username</Forms.FormTitle>
             <TextInput
                 placeholder={"byeoon"}
