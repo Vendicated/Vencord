@@ -71,7 +71,21 @@ export default new class Plugin implements PluginDef {
                     match: /updateRemoteWantsFramerate\(\)\{/, // disable discord mute fps reduction
                     replace: match => `${match}return;`
                 }
-            }
+            },
+            {
+                find: "getApplicationFramerate:function(){",
+                replacement: {
+                    match: /getApplicationFramerate:function\(\)\{return .{1,2}\}/,
+                    replace: "getApplicationFramerate:function(){return function(){return $self.getQuality().framerate;}}"
+                }
+            },
+            {
+                find: "getApplicationResolution:function(){",
+                replacement: {
+                    match: /getApplicationResolution:function\(\)\{return .{1,2}\}/,
+                    replace: "getApplicationResolution:function(){return function(){return $self.getQuality().height;}}"
+                }
+            },
         ];
         this.settings = definePluginSettings({
             hideDefaultSettings: {
