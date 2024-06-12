@@ -5,7 +5,7 @@
  */
 
 import { makeLazy, proxyLazy } from "@utils/lazy";
-import { LazyComponent } from "@utils/lazyReact";
+import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { ProxyInner, proxyInner, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
@@ -196,13 +196,13 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (mod: any) => an
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: any) => React.ComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function findComponent<T extends object = {}>(filter: FilterFn, parse: (component: any) => LazyComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof parse !== "function")
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
 
-    let InnerComponent = null as React.ComponentType<T> | null;
+    let InnerComponent = null as LazyComponentType<T> | null;
 
     let findFailedLogged = false;
     const WrapperComponent = (props: T) => {
@@ -214,23 +214,21 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         return InnerComponent && <InnerComponent {...props} />;
     };
 
+    WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
+
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v);
         InnerComponent = parsedComponent;
         Object.assign(WrapperComponent, parsedComponent);
     }, { isIndirect: true });
 
-    if (IS_REPORTER) {
-        WrapperComponent.$$vencordInner = () => InnerComponent;
-
-        if (!isIndirect) {
-            webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
-        }
+    if (IS_REPORTER && !isIndirect) {
+        webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
     }
 
     if (InnerComponent !== null) return InnerComponent;
 
-    return WrapperComponent as React.ComponentType<T>;
+    return WrapperComponent as LazyComponentType<T>;
 }
 
 /**
@@ -243,13 +241,13 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<T extends object = any>(...props: string[] | [...string[], (component: any) => React.ComponentType<T>]) {
-    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: any) => React.ComponentType<T>;
+export function findExportedComponent<T extends object = {}>(...props: string[] | [...string[], (component: any) => LazyComponentType<T>]) {
+    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: any) => LazyComponentType<T>;
     const newProps = props as string[];
 
     const filter = filters.byProps(...newProps);
 
-    let InnerComponent = null as React.ComponentType<T> | null;
+    let InnerComponent = null as LazyComponentType<T> | null;
 
     let findFailedLogged = false;
     const WrapperComponent = (props: T) => {
@@ -261,6 +259,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
         return InnerComponent && <InnerComponent {...props} />;
     };
 
+    WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
 
     waitFor(filter, (v: any) => {
         const parsedComponent = parse(v[newProps[0]]);
@@ -269,13 +268,12 @@ export function findExportedComponent<T extends object = any>(...props: string[]
     }, { isIndirect: true });
 
     if (IS_REPORTER) {
-        WrapperComponent.$$vencordInner = () => InnerComponent;
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
 
     if (InnerComponent !== null) return InnerComponent;
 
-    return WrapperComponent as React.ComponentType<T>;
+    return WrapperComponent as LazyComponentType<T>;
 }
 
 /**
@@ -288,8 +286,8 @@ export function findExportedComponent<T extends object = any>(...props: string[]
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<T extends object = any>(...code: string[] | [...string[], (component: any) => React.ComponentType<T>]) {
-    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: any) => React.ComponentType<T>;
+export function findComponentByCode<T extends object = {}>(...code: string[] | [...string[], (component: any) => LazyComponentType<T>]) {
+    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: any) => LazyComponentType<T>;
     const newCode = code as string[];
 
     const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
@@ -518,7 +516,7 @@ export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?:
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
+export function webpackDependantLazyComponent<T extends object = {}>(factory: () => any, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
