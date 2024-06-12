@@ -378,9 +378,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    UlyssesZhan: {
+        name: "UlyssesZhan",
+        id: 586808226058862623n
+    },
     ant0n: {
         name: "ant0n",
         id: 145224646868860928n
+    },
+    Board: {
+        name: "BoardTM",
+        id: 285475344817848320n,
     },
     philipbry: {
         name: "philipbry",
@@ -434,6 +442,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Elvyra",
         id: 708275751816003615n,
     },
+    HappyEnderman: {
+        name: "Happy enderman",
+        id: 1083437693347827764n
+    },
+    Vishnya: {
+        name: "Vishnya",
+        id: 282541644484575233n
+    },
     Inbestigator: {
         name: "Inbestigator",
         id: 761777382041714690n
@@ -441,6 +457,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     newwares: {
         name: "newwares",
         id: 421405303951851520n
+    },
+    JohnyTheCarrot: {
+        name: "JohnyTheCarrot",
+        id: 132819036282159104n
     },
     puv: {
         name: "puv",
@@ -505,10 +525,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     nyx: {
         name: "verticalsync",
         id: 328165170536775680n
-    },
-    hen: {
-        id: 279266228151779329n,
-        name: "Hen"
     },
 } satisfies Record<string, Dev>);
 
