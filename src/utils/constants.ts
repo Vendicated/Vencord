@@ -40,7 +40,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 0n,
     },
     Ven: {
-        name: "Vendicated",
+        name: "Vee",
         id: 343383572805058560n
     },
     Arjix: {
@@ -329,7 +329,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 305288513941667851n
     },
     ImLvna: {
-        name: "Luna <3",
+        name: "lillith <3",
         id: 799319081723232267n
     },
     rad: {

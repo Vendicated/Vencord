@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
-import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
+import { extractAndLoadChunksLazy, filters, find, findComponentByCode, findComponentByCodeLazy, LazyComponentWebpack } from "@webpack";
 import { Button, Forms, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
@@ -31,7 +31,12 @@ interface ColorPickerWithSwatchesProps {
 }
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>("presets,", "customColor:");
+// FIXME: Replace with the following when it reaches stable
+// const ColorPickerWithSwatches = findExportedComponentLazy<ColorPickerWithSwatchesProps>("ColorPicker", "CustomColorPicker");
+const ColorPickerWithSwatches = LazyComponentWebpack<ColorPickerWithSwatchesProps>(() =>
+    find(filters.byProps("ColorPicker", "CustomColorPicker"), { isIndirect: true })?.ColorPicker ||
+    findComponentByCode("presets,", "customColor:")
+);
 
 export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\).{0,50}"UserSettings"/);
 
