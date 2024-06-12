@@ -210,9 +210,9 @@ export default definePlugin({
             }
         },
         {
-            find: "autoFocusNote:!0})",
+            find: ".UserProfileTypes.BITE_SIZE,onOpenProfile",
             replacement: {
-                match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
             }
         }
