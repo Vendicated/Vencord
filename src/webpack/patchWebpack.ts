@@ -170,7 +170,8 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
 }
 
 /**
- * Notify all factory listeners
+ * Notify all factory listeners.
+ *
  * @param factory The original factory to notify for
  */
 function notifyFactoryListeners(factory: AnyModuleFactory) {
