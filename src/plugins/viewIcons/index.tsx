@@ -184,7 +184,7 @@ export default definePlugin({
 
     patches: [
         // Profiles Modal pfp
-        ...["User Profile Modal - Context Menu", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
+        ...[".UserProfileTypes.MODAL,hasProfileEffect", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
             find,
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
