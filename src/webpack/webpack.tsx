@@ -204,7 +204,7 @@ export function find<T = AnyObject>(filter: FilterFn, callback: (module: ModuleE
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponent<T extends object = {}>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof parse !== "function")
@@ -249,7 +249,7 @@ export function findComponent<T extends object = {}>(filter: FilterFn, parse: (c
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<T extends object = {}>(...props: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
+export function findExportedComponent<T extends object = any>(...props: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
     const newProps = props as string[];
 
@@ -294,7 +294,7 @@ export function findExportedComponent<T extends object = {}>(...props: string[] 
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<T extends object = {}>(...code: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
+export function findComponentByCode<T extends object = any>(...code: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
     const newCode = code as string[];
 
@@ -524,7 +524,7 @@ export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?:
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function webpackDependantLazyComponent<T extends object = {}>(factory: () => any, attempts?: number) {
+export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
