@@ -104,6 +104,40 @@ define(Function.prototype, "O", {
     }
 });
 
+const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
+    /*
+    If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
+    and that requires defining additional traps for keeping the object working
+
+    // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
+    // to avoid Reflect.get having no effect and causing a stack overflow
+    get: (target, p, receiver) => {
+        return undefined;
+    },
+    // Same thing as get
+    has: (target, p) => {
+        return false;
+    }
+    */
+
+    // The set trap for patching or defining getters for the module factories when new module factories are loaded
+    set: (target, p, newValue, receiver) => {
+        // If the property is not a number, we are not dealing with a module factory
+        if (Number.isNaN(Number(p))) {
+            return define(target, p, { value: newValue });
+        }
+
+        if (updateExistingFactory(target, p, newValue)) {
+            return true;
+        }
+
+        notifyFactoryListeners(newValue);
+        defineModulesFactoryGetter(p, Settings.eagerPatches ? patchFactory(p, newValue) : newValue);
+
+        return true;
+    }
+};
+
 /**
  * Define the getter for returning the patched version of the module factory.
  *
@@ -183,40 +217,6 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
         }
     }
 }
-
-const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
-    /*
-    If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
-    and that requires defining additional traps for keeping the object working
-
-    // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
-    // to avoid Reflect.get having no effect and causing a stack overflow
-    get: (target, p, receiver) => {
-        return undefined;
-    },
-    // Same thing as get
-    has: (target, p) => {
-        return false;
-    }
-    */
-
-    // The set trap for patching or defining getters for the module factories when new module factories are loaded
-    set: (target, p, newValue, receiver) => {
-        // If the property is not a number, we are not dealing with a module factory
-        if (Number.isNaN(Number(p))) {
-            return define(target, p, { value: newValue });
-        }
-
-        if (updateExistingFactory(target, p, newValue)) {
-            return true;
-        }
-
-        notifyFactoryListeners(newValue);
-        defineModulesFactoryGetter(p, Settings.eagerPatches ? patchFactory(p, newValue) : newValue);
-
-        return true;
-    }
-};
 
 /**
  * Patches a module factory.
