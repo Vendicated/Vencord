@@ -16,18 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
+
+const settings = definePluginSettings({
+    toolbarDevMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
+        default: false,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "Experiments",
@@ -39,6 +49,8 @@ export default definePlugin({
         Devs.BanTheNons,
         Devs.Nuckyz
     ],
+
+    settings,
 
     patches: [
         {
@@ -68,6 +80,16 @@ export default definePlugin({
             replacement: {
                 match: /\i\.isStaff\(\)/,
                 replace: "true"
+            },
+            predicate: () => settings.store.toolbarDevMenu
+        },
+
+        // makes the Favourites Server experiment allow favouriting DMs and threads
+        {
+            find: "useCanFavoriteChannel",
+            replacement: {
+                match: /!\(\i\.isDM\(\)\|\|\i\.isThread\(\)\)/,
+                replace: "true",
             }
         }
     ],
