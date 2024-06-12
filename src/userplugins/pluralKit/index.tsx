@@ -19,13 +19,13 @@
 import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
+import { DeleteIcon } from "@components/Icons";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { ChannelStore, FluxDispatcher, UserStore } from "@webpack/common";
-import { Message, ReactionEmoji } from "discord-types/general";
-import { Member, PKAPI, System } from "pkapi.js";
-import { DeleteIcon } from "@components/Icons";
 import { findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { Message } from "discord-types/general";
+import { Member, PKAPI, System } from "pkapi.js";
 
 const api = new PKAPI({
 });
