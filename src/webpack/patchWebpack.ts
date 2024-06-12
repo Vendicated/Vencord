@@ -84,6 +84,7 @@ define(Function.prototype, "O", {
                 continue;
             }
 
+            notifyFactoryListeners(this.m[id]);
             defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, this.m[id]) : this.m[id]);
         }
 
@@ -168,6 +169,20 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
     return false;
 }
 
+/**
+ * Notify all factory listeners
+ * @param factory The original factory to notify for
+ */
+function notifyFactoryListeners(factory: AnyModuleFactory) {
+    for (const factoryListener of factoryListeners) {
+        try {
+            factoryListener(factory);
+        } catch (err) {
+            logger.error("Error in Webpack factory listener:\n", err, factoryListener);
+        }
+    }
+}
+
 const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
     /*
     If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
@@ -195,18 +210,8 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
             return true;
         }
 
-        if (!Settings.eagerPatches) {
-            // eagerPatches are disabled, so the factory argument should be the original
-            defineModulesFactoryGetter(p, newValue);
-            return true;
-        }
-
-        const patchedFactory = patchFactory(p, newValue);
-
-        // If multiple Webpack instances exist, when new a new module is loaded, it will be set in all the module factories objects.
-        // Because patches are only executed once, we need to set the patched version in all of them, to avoid the Webpack instance
-        // that uses the factory to contain the original factory instead of the patched, in case it was set first in another instance
-        defineModulesFactoryGetter(p, patchedFactory);
+        notifyFactoryListeners(newValue);
+        defineModulesFactoryGetter(p, Settings.eagerPatches ? patchFactory(p, newValue) : newValue);
 
         return true;
     }
@@ -222,14 +227,6 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
  */
 function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
     const originalFactory = factory;
-
-    for (const factoryListener of factoryListeners) {
-        try {
-            factoryListener(originalFactory);
-        } catch (err) {
-            logger.error("Error in Webpack factory listener:\n", err, factoryListener);
-        }
-    }
 
     const patchedBy = new Set<string>();
 
