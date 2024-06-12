@@ -338,7 +338,7 @@ export default definePlugin({
                 {
                     // Call our function to decide whether the embed should be ignored or not
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\((\i)=>{)/,
+                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\(\(?(\i)(?:,\i\))?=>{)/,
                     replace: (_, rest1, message, rest2, embed) => `${rest1}const fakeNitroMessage=${message};${rest2}if($self.shouldIgnoreEmbed(${embed},fakeNitroMessage))return null;`
                 },
                 {
