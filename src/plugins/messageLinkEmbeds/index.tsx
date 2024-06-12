@@ -280,6 +280,8 @@ function getChannelLabelAndIconUrl(channel: Channel) {
 }
 
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
+    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+
     const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
@@ -304,6 +306,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                         message={message}
                         channel={channel}
                         subscribeToComponentDispatch={false}
+                        compact={compact}
                     />
                 </div>
             )}
