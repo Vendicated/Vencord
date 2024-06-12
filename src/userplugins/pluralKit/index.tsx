@@ -142,7 +142,7 @@ export default definePlugin({
                         animated: false
                     }
                 );
-            }
+            };
 
             return {
                 label: "Delete",
@@ -154,7 +154,7 @@ export default definePlugin({
                 onClick: handleClick,
                 onContextMenu: _ => {}
             };
-        })
+        });
     },
     stop() {
         removeButton("pk-edit");
