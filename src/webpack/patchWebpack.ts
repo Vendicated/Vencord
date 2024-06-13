@@ -209,6 +209,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
             },
             set(v: AnyModuleFactory) {
                 if (factory.$$vencordOriginal != null) {
+                    factory.toString = v.toString.bind(v);
                     factory.$$vencordOriginal = v;
                 } else {
                     factory = v;
@@ -367,7 +368,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                 }
 
                 if (IS_DEV) {
-                    return originalFactory.apply(this, args);
+                    return patchedFactory.$$vencordOriginal?.apply(this, args);
                 }
             }
 
@@ -377,15 +378,19 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                 factoryReturn = factory.apply(this, args);
             } catch (err) {
                 // Just re-throw Discord errors
-                if (factory === originalFactory) throw err;
+                if (factory === originalFactory) {
+                    throw err;
+                }
 
                 logger.error("Error in patched module factory", err);
-                return originalFactory.apply(this, args);
+                return patchedFactory.$$vencordOriginal?.apply(this, args);
             }
 
             // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
             exports = module?.exports;
-            if (exports == null) return factoryReturn;
+            if (exports == null) {
+                return factoryReturn;
+            }
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
