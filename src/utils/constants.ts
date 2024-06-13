@@ -38,7 +38,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 0n,
     },
     Ven: {
-        name: "Vendicated",
+        name: "Vee",
         id: 343383572805058560n
     },
     Arjix: {
@@ -186,7 +186,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 296776625432035328n,
     },
     TheSun: {
-        name: "ActuallyTheSun",
+        name: "sunnie",
         id: 406028027768733696n
     },
     axyie: {
@@ -327,7 +327,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 305288513941667851n
     },
     ImLvna: {
-        name: "Luna <3",
+        name: "lillith <3",
         id: 799319081723232267n
     },
     rad: {
@@ -402,6 +402,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "maisy",
         id: 257109471589957632n,
     },
+    Lexi: {
+        name: "Lexi",
+        id: 506101469787717658n
+    },
     Mopi: {
         name: "Mopi",
         id: 1022189106614243350n
@@ -441,6 +445,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Elvyra: {
         name: "Elvyra",
         id: 708275751816003615n,
+    },
+    HappyEnderman: {
+        name: "Happy enderman",
+        id: 1083437693347827764n
+    },
+    Vishnya: {
+        name: "Vishnya",
+        id: 282541644484575233n
     },
     Inbestigator: {
         name: "Inbestigator",
@@ -518,6 +530,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "verticalsync",
         id: 328165170536775680n
     },
+    nekohaxx: {
+        name: "nekohaxx",
+        id: 1176270221628153886n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
