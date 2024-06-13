@@ -43,7 +43,13 @@ export default function ActivityTooltip({ activity, application, user, cl }: Rea
         return icon?.image.src;
     }, [activity]);
     const timestamps = useMemo(() => getValidTimestamps(activity), [activity]);
-    const startTime = useMemo(() => getValidStartTimeStamp(activity), [activity]);
+    let startTime = useMemo(() => getValidStartTimeStamp(activity), [activity]);
+
+    startTime = Number(String(startTime).slice(0, -3));
+
+    if (Number.isNaN(startTime)) {
+        startTime = 9999999999;
+    }
 
     const hasDetails = activity.details ?? activity.state;
     return (

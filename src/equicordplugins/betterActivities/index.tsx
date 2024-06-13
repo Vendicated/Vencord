@@ -255,7 +255,7 @@ export default definePlugin({
         },
         {
             // Show all activities in the profile panel
-            find: "Profile Panel: user cannot be undefined",
+            find: /.UserProfileTypes.PANEL,themeOverride:\i\i/,
             replacement: {
                 match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{activity:.+?,user:\i,channelId:\i.id,)/,
                 replace: "$self.showAllActivitiesComponent"
