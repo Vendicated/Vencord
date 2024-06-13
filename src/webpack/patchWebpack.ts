@@ -339,8 +339,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
     // The patched factory wrapper, define it in an object to preserve the name after minification
     const patchedFactory: PatchedModuleFactory = {
         PatchedFactory(...args: Parameters<AnyModuleFactory>) {
-            // Restore the original factory in all the module factories objects,
-            // because we want to make sure the original factory is restored properly, no matter what is the Webpack instance
+            // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
             for (const wreq of allWebpackInstances) {
                 define(wreq.m, id, { value: patchedFactory.$$vencordOriginal });
             }
