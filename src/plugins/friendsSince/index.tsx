@@ -36,7 +36,7 @@ export default definePlugin({
         {
             find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,\{userId:(\i)}\)/,
+                match: /\i.default,\{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
@@ -52,6 +52,8 @@ export default definePlugin({
 
     getFriendSince(userId: string) {
         try {
+            if (!RelationshipStore.isFriend(userId)) return null;
+
             return RelationshipStore.getSince(userId);
         } catch (err) {
             new Logger("FriendsSince").error(err);
@@ -60,6 +62,8 @@ export default definePlugin({
     },
 
     friendsSince: ErrorBoundary.wrap(({ userId, textClassName }: { userId: string; textClassName?: string; }) => {
+        if (!RelationshipStore.isFriend(userId)) return null;
+
         const friendsSince = RelationshipStore.getSince(userId);
         if (!friendsSince) return null;
 
