@@ -185,11 +185,11 @@ function BadgeModal({ user }: { user: User; }) {
             </div>
             {badgeImages.length ? (
                 <Forms.FormText>
-                    This person has {badgeImages.length} global badges.
+                    {user.username} has {badgeImages.length} global badges.
                 </Forms.FormText>
             ) : (
                 <Forms.FormText>
-                    This person has no global badges.
+                    {user.username} has no global badges.
                 </Forms.FormText>
             )}
             {!!badgeImages.length && (
