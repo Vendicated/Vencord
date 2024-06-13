@@ -18,7 +18,7 @@
 
 import "./style.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -87,7 +87,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             break;
         }
         default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
+            tooltipText = Vencord.Plugins.isPluginEnabled("TypingTweaks")
                 ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
                 : i18n.Messages.SEVERAL_USERS_TYPING;
             break;

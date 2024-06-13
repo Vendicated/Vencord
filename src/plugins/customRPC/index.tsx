@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -258,7 +258,7 @@ const settings = definePluginSettings({
 
 function onChange() {
     setRpc(true);
-    if (Settings.plugins.CustomRPC.enabled) setRpc();
+    if (Vencord.Plugins.isPluginEnabled("CustomRPC")) setRpc();
 }
 
 function isStreamLinkDisabled() {

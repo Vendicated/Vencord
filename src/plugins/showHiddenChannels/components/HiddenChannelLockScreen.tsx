@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { formatDuration } from "@utils/text";
 import { findByProps, findComponentByCode } from "@webpack";
@@ -157,7 +156,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
             });
         }
 
-        if (Settings.plugins.PermissionsViewer.enabled) {
+        if (Vencord.Plugins.isPluginEnabled("PermissionsViewer")) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
@@ -274,7 +273,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 <div className="shc-lock-screen-allowed-users-and-roles-container">
                     <div className="shc-lock-screen-allowed-users-and-roles-container-title">
-                        {Settings.plugins.PermissionsViewer.enabled && (
+                        {Vencord.Plugins.isPluginEnabled("PermissionsViewer") && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button

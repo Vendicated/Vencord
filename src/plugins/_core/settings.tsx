@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
 import CloudTab from "@components/VencordSettings/CloudTab";
 import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
@@ -33,11 +33,27 @@ import gitHash from "~git-hash";
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
 
+const settings = definePluginSettings({
+    settingsLocation: {
+        type: OptionType.SELECT,
+        description: "Where to put the Vencord settings section",
+        options: [
+            { label: "At the very top", value: "top" },
+            { label: "Above the Nitro section", value: "aboveNitro", default: true },
+            { label: "Below the Nitro section", value: "belowNitro" },
+            { label: "Above Activity Settings", value: "aboveActivity" },
+            { label: "Below Activity Settings", value: "belowActivity" },
+            { label: "At the very bottom", value: "bottom" },
+        ]
+    }
+});
+
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
     authors: [Devs.Ven, Devs.Megu],
     required: true,
+    settings,
 
     patches: [
         {
@@ -63,7 +79,7 @@ export default definePlugin({
             noWarn: true,
             replacement: {
                 get match() {
-                    switch (Settings.plugins.Settings.settingsLocation) {
+                    switch (settings.store.settingsLocation) {
                         case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
                         case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
                         case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
@@ -158,12 +174,12 @@ export default definePlugin({
         ].filter(Boolean);
     },
 
-    isRightSpot({ header, settings }: { header?: string; settings?: string[]; }) {
-        const firstChild = settings?.[0];
+    isRightSpot({ header, settingsChilds }: { header?: string; settingsChilds?: string[]; }) {
+        const firstChild = settingsChilds?.[0];
         // lowest two elements... sanity backup
         if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
 
-        const { settingsLocation } = Settings.plugins.Settings;
+        const { settingsLocation } = settings.store;
 
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
@@ -201,21 +217,6 @@ export default definePlugin({
 
             return elements;
         };
-    },
-
-    options: {
-        settingsLocation: {
-            type: OptionType.SELECT,
-            description: "Where to put the Vencord settings section",
-            options: [
-                { label: "At the very top", value: "top" },
-                { label: "Above the Nitro section", value: "aboveNitro", default: true },
-                { label: "Below the Nitro section", value: "belowNitro" },
-                { label: "Above Activity Settings", value: "aboveActivity" },
-                { label: "Below Activity Settings", value: "belowActivity" },
-                { label: "At the very bottom", value: "bottom" },
-            ]
-        },
     },
 
     get electronVersion() {

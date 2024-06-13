@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { proxyLazy } from "@utils/lazy";
 import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
+
+// Avoid circular dependency
+const { settings } = proxyLazy(() => require(".")) as typeof import(".");
 
 export interface Track {
     id: string;
@@ -88,7 +91,7 @@ export const SpotifyStore = webpackDependantLazy(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = settings.store.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
