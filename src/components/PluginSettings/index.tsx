@@ -40,7 +40,7 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 import Plugins from "~plugins";
 
 // Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
+const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins")) as typeof import("../../plugins");
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");

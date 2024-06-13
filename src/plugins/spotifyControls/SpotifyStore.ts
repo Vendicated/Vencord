@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { proxyLazy } from "@utils/lazy";
 import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
-import { settings } from ".";
+const { settings } = proxyLazy(() => require(".")) as typeof import(".");
 
 export interface Track {
     id: string;
