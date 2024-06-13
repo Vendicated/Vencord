@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { findByProps } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
@@ -42,25 +43,25 @@ const VoiceStateStore = findByProps("getVoiceStatesForChannel", "getCurrentClien
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
+function speak(text: string, mergedSettings: typeof settings.store = settings.store) {
     if (!text) return;
 
     const speech = new SpeechSynthesisUtterance(text);
-    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
+    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === mergedSettings.voice);
     if (!voice) {
-        new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
+        new Logger("VcNarrator").error(`Voice "${mergedSettings.voice}" not found. Resetting to default.`);
         voice = speechSynthesis.getVoices().find(v => v.default);
-        settings.voice = voice?.voiceURI;
+        mergedSettings.voice = voice?.voiceURI as string;
         if (!voice) return; // This should never happen
     }
-    speech.voice = voice!;
-    speech.volume = settings.volume;
-    speech.rate = settings.rate;
+    speech.voice = voice;
+    speech.volume = mergedSettings.volume;
+    speech.rate = mergedSettings.rate;
     speechSynthesis.speak(speech);
 }
 
 function clean(str: string) {
-    const replacer = Settings.plugins.VcNarrator.latinOnly
+    const replacer = settings.store.latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
         : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
 
@@ -143,19 +144,91 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 }
 */
 
-function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+function playSample(tempSettings: typeof settings.store, type: string) {
+    const mergedSettings = Object.assign({}, settings.store, tempSettings);
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
-    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
+    speak(formatText(mergedSettings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), mergedSettings);
 }
+
+const settings = definePluginSettings({
+    voice: {
+        type: OptionType.SELECT,
+        description: "Narrator Voice",
+        options: proxyLazy(() => window.speechSynthesis?.getVoices().map(v => ({
+            label: v.name,
+            value: v.voiceURI,
+            default: v.default
+        })) ?? [])
+    },
+    volume: {
+        type: OptionType.SLIDER,
+        description: "Narrator Volume",
+        default: 1,
+        markers: [0, 0.25, 0.5, 0.75, 1],
+        stickToMarkers: false
+    },
+    rate: {
+        type: OptionType.SLIDER,
+        description: "Narrator Speed",
+        default: 1,
+        markers: [0.1, 0.5, 1, 2, 5, 10],
+        stickToMarkers: false
+    },
+    sayOwnName: {
+        description: "Say own name",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    latinOnly: {
+        description: "Strip non latin characters from names before saying them",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    joinMessage: {
+        type: OptionType.STRING,
+        description: "Join Message",
+        default: "{{USER}} joined"
+    },
+    leaveMessage: {
+        type: OptionType.STRING,
+        description: "Leave Message",
+        default: "{{USER}} left"
+    },
+    moveMessage: {
+        type: OptionType.STRING,
+        description: "Move Message",
+        default: "{{USER}} moved to {{CHANNEL}}"
+    },
+    muteMessage: {
+        type: OptionType.STRING,
+        description: "Mute Message (only self for now)",
+        default: "{{USER}} Muted"
+    },
+    unmuteMessage: {
+        type: OptionType.STRING,
+        description: "Unmute Message (only self for now)",
+        default: "{{USER}} unmuted"
+    },
+    deafenMessage: {
+        type: OptionType.STRING,
+        description: "Deafen Message (only self for now)",
+        default: "{{USER}} deafened"
+    },
+    undeafenMessage: {
+        type: OptionType.STRING,
+        description: "Undeafen Message (only self for now)",
+        default: "{{USER}} undeafened"
+    }
+});
 
 export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
     reporterTestable: ReporterTestable.None,
+    settings,
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
@@ -176,8 +249,8 @@ export default definePlugin({
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
 
-                const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
+                const template = settings.store[type + "Message"];
+                const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
                 const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
                 const channel = ChannelStore.getChannel(id).name;
@@ -194,7 +267,7 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
+            speak(formatText(settings.store[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         },
 
         AUDIO_TOGGLE_SELF_DEAF() {
@@ -203,7 +276,7 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
+            speak(formatText(settings.store[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         }
     },
 
@@ -217,81 +290,6 @@ export default definePlugin({
 
     },
 
-    optionsCache: null as Record<string, PluginOptionsItem> | null,
-
-    get options() {
-        return this.optionsCache ??= {
-            voice: {
-                type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: window.speechSynthesis?.getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
-                })) ?? []
-            },
-            volume: {
-                type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
-                stickToMarkers: false
-            },
-            rate: {
-                type: OptionType.SLIDER,
-                description: "Narrator Speed",
-                default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false
-            },
-            sayOwnName: {
-                description: "Say own name",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            latinOnly: {
-                description: "Strip non latin characters from names before saying them",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            joinMessage: {
-                type: OptionType.STRING,
-                description: "Join Message",
-                default: "{{USER}} joined"
-            },
-            leaveMessage: {
-                type: OptionType.STRING,
-                description: "Leave Message",
-                default: "{{USER}} left"
-            },
-            moveMessage: {
-                type: OptionType.STRING,
-                description: "Move Message",
-                default: "{{USER}} moved to {{CHANNEL}}"
-            },
-            muteMessage: {
-                type: OptionType.STRING,
-                description: "Mute Message (only self for now)",
-                default: "{{USER}} Muted"
-            },
-            unmuteMessage: {
-                type: OptionType.STRING,
-                description: "Unmute Message (only self for now)",
-                default: "{{USER}} unmuted"
-            },
-            deafenMessage: {
-                type: OptionType.STRING,
-                description: "Deafen Message (only self for now)",
-                default: "{{USER}} deafened"
-            },
-            undeafenMessage: {
-                type: OptionType.STRING,
-                description: "Undeafen Message (only self for now)",
-                default: "{{USER}} undeafened"
-            }
-        };
-    },
-
     settingsAboutComponent({ tempSettings: s }) {
         const [hasVoices, hasEnglishVoices] = useMemo(() => {
             const voices = speechSynthesis.getVoices();
@@ -299,7 +297,7 @@ export default definePlugin({
         }, []);
 
         const types = useMemo(
-            () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+            () => Object.keys(settings.def).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
             [],
         );
 
@@ -335,7 +333,7 @@ export default definePlugin({
                             className={"vc-narrator-buttons"}
                         >
                             {types.map(t => (
-                                <Button key={t} onClick={() => playSample(s, t)}>
+                                <Button key={t} onClick={() => playSample(s as typeof settings.store, t)}>
                                     {wordsToTitle([t])}
                                 </Button>
                             ))}

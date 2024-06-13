@@ -18,7 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -60,7 +60,7 @@ function createTagCommand(tag: Tag) {
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
+            if (settings.store.clyde) sendBotMessage(ctx.channel.id, {
                 content: `${EMOTE} The tag **${tag.name}** has been sent!`
             });
             return { content: tag.message.replaceAll("\\n", "\n") };
@@ -69,19 +69,21 @@ function createTagCommand(tag: Tag) {
     }, "CustomTags");
 }
 
+const settings = definePluginSettings({
+    clyde: {
+        name: "Clyde message on send",
+        description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command.",
     authors: [Devs.Luna],
-    options: {
-        clyde: {
-            name: "Clyde message on send",
-            description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
-            type: OptionType.BOOLEAN,
-            default: true
-        }
-    },
+    settings,
+
     dependencies: ["CommandsAPI"],
 
     async start() {

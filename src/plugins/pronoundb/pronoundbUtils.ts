@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { debounce } from "@shared/debounce";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { getCurrentChannel } from "@utils/discord";
@@ -147,11 +146,11 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     }
 }
 
-export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
+export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[]; }): string {
     if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
     // PronounDB returns an empty set instead of {sets: {en: ["unspecified"]}}.
     const pronouns = pronounSet.en;
-    const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
+    const { pronounsFormat } = settings.store;
 
     if (pronouns.length === 1) {
         // For capitalized pronouns or special codes (any, ask, avoid), we always return the normal (capitalized) string
