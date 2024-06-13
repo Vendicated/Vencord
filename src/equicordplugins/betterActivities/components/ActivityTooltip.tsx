@@ -43,13 +43,7 @@ export default function ActivityTooltip({ activity, application, user, cl }: Rea
         return icon?.image.src;
     }, [activity]);
     const timestamps = useMemo(() => getValidTimestamps(activity), [activity]);
-    let startTime = useMemo(() => getValidStartTimeStamp(activity), [activity]);
-
-    startTime = Number(String(startTime).slice(0, -3));
-
-    if (Number.isNaN(startTime)) {
-        startTime = 9999999999;
-    }
+    const startTime = useMemo(() => getValidStartTimeStamp(activity), [activity]);
 
     const hasDetails = activity.details ?? activity.state;
     return (
@@ -63,7 +57,7 @@ export default function ActivityTooltip({ activity, application, user, cl }: Rea
                     <div>{activity.state}</div>
                     {!timestamps && startTime &&
                         <div className={cl("activity-time-bar")}>
-                            {formatElapsedTime(moment(startTime), moment())}
+                            {formatElapsedTime(moment(startTime / 1000), moment())}
                         </div>
                     }
                 </div>
