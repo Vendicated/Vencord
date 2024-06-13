@@ -20,6 +20,7 @@ import { proxyLazy } from "@utils/lazy";
 import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
+// Avoid circular dependency
 const { settings } = proxyLazy(() => require(".")) as typeof import(".");
 
 export interface Track {
