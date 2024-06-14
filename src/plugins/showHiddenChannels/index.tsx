@@ -74,7 +74,7 @@ export default definePlugin({
             replacement: [
                 // Remove the special logic for channels we don't have access to
                 {
-                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\i}}/,
+                    match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
                     replace: ""
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
