@@ -67,7 +67,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "default.Messages.COLLECTIBLES_SHOP})]}",
+            find: ".Messages.COLLECTIBLES_SHOP})]}",
             replacement: [{
                 match: /(children:\i.default.Messages.COLLECTIBLES_SHOP)}/,
                 replace: "$&,$self.PreviewToggle()"
