@@ -1,8 +1,32 @@
+/* User Profile */
+.vc-user-notes-profile-container {
+    height: 50px;
+    display: grid;
+    grid-template-columns: auto min-content;
+    gap: 4px;
+}
+
+.vc-user-notes-profile-text-area {
+    height: 50px;
+    padding: 5px !important;
+    font-size: 14px;
+}
+
 .vc-user-notes-profile-button {
-    width: 100%;
+    width: 36px;
+    height: 50px;
+}
+
+.vc-user-notes-profile-button div {
+    overflow: visible !important;
     height: 32px;
 }
 
+.vc-user-notes-profile-button svg {
+    scale: 1.2;
+}
+
+/* User Notes Modal */
 .vc-user-notes-modal-root {
     max-height: 65vh;
     min-height: 65vh;
@@ -17,4 +41,220 @@
 
 .vc-user-notes-modal-content * {
     height: 100%;
+}
+
+/* Open "Notes Data" toolbox button */
+.vc-notes-toolbox-button svg {
+    color: var(--interactive-normal);
+}
+
+/* Part of Notes Modal Data. css linter is awesome */
+.vc-user-notes-data-modal-user-actions * svg {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.vc-notes-toolbox-button:hover svg,
+.vc-notes-toolbox-button[class*="selected"] svg {
+    color: var(--interactive-active);
+}
+
+/* Notes Data Modal */
+.vc-user-notes-data-modal-root {
+    min-height: 75vh;
+    max-height: 75vh;
+    min-width: 70vw;
+    max-width: 70vw;
+}
+
+.vc-user-notes-data-modal-header-text {
+    white-space: nowrap;
+    width: fit-content;
+    margin-right: 16px;
+}
+
+.vc-user-notes-data-modal-header-input {
+    width: 100%;
+    margin-right: 16px;
+}
+
+.vc-user-notes-data-modal-content-container {
+    overflow: hidden;
+    height: 100%;
+}
+
+.vc-user-notes-data-modal-content {
+    padding-bottom: 16px;
+    height: 100%;
+}
+
+.vc-user-notes-data-modal-content div[aria-hidden="true"] {
+    display: none;
+}
+
+.vc-user-notes-data-modal-content-inner {
+    padding-top: 16px;
+    height: fit-content;
+}
+
+.vc-user-notes-data-modal-user-actions * {
+    width: 32px;
+    height: 32px;
+}
+
+.vc-user-notes-data-modal-content-inner > *:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.vc-user-notes-data-modal-load-more {
+    margin-top: 16px;
+    width: 100%;
+    height: 32px;
+}
+
+.vc-user-notes-data-modal-no-notes {
+    display: grid;
+    place-content: center;
+    height: 100%;
+}
+
+.vc-user-notes-data-modal-user {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: var(--background-secondary);
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.vc-user-notes-data-modal-user:hover:not(
+:has(
+    .vc-user-notes-data-modal-user-text-area:hover,
+    .vc-user-notes-data-modal-user-actions:hover
+)
+) {
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-user-notes-data-modal-user-avatar {
+    aspect-ratio: 1 / 1;
+    margin: 12px;
+}
+
+.vc-user-notes-data-modal-user-info {
+    min-width: 50px;
+    max-width: 275px;
+    width: 100%;
+}
+
+.vc-user-notes-data-modal-user-info > div {
+    /* width: 100%; */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.vc-user-notes-data-modal-user-info-name {
+    color: #fff;
+}
+
+.vc-user-notes-data-modal-user-info-id {
+    color: #989898;
+}
+
+.vc-user-notes-data-modal-user-notes-container {
+    display: grid;
+    grid-template-columns: calc(100% - 86px) min-content;
+    align-items: center;
+    justify-content: flex-end;
+    flex-grow: 1;
+    padding-right: 8px;
+    gap: 8px;
+}
+
+.vc-user-notes-data-modal-user-actions * div:has(svg) {
+    width: 32px !important;
+    height: 32px !important;
+    overflow: visible !important;
+}
+
+.vc-user-notes-data-modal-user-notes-container
+*
+div:has(.vc-user-notes-data-modal-user-text-area) {
+    height: 67px;
+}
+
+.vc-user-notes-data-modal-user-text-area {
+    width: 100%;
+    height: 100%;
+}
+
+.vc-user-notes-data-modal-user-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    gap: 3px;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    box-sizing: border-box;
+}
+
+/* Loading Spinner */
+.vc-user-notes-data-modal-loading-container {
+    /* aspect-ratio: 1 / 1; */
+    width: 56px;
+    height: 56px;
+    margin: 12px;
+}
+
+.vc-user-notes-data-modal-loading {
+    width: 56px;
+    height: 56px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    position: relative;
+    animation: vc-user-notes-pulse 1s linear infinite;
+}
+
+.vc-user-notes-data-modal-loading::after {
+    content: "";
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: vc-user-notes-scale-up 1s linear infinite;
+}
+
+@keyframes vc-user-notes-scale-up {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+
+    60%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes vc-user-notes-pulse {
+    0%,
+    60%,
+    100% {
+        transform: scale(0.9);
+    }
+
+    80% {
+        transform: scale(1.1);
+    }
 }
