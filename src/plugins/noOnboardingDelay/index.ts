@@ -16,5 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-if (!IS_UPDATER_DISABLED)
-    require(IS_STANDALONE ? "./http" : "./git");
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+
+export default definePlugin({
+    name: "NoOnboardingDelay",
+    description: "Skips the slow and annoying onboarding delay",
+    authors: [Devs.nekohaxx],
+    patches: [
+        {
+            find: "Messages.ONBOARDING_COVER_WELCOME_SUBTITLE",
+            replacement: {
+                match: "3e3",
+                replace: "0"
+            },
+        },
+    ],
+});
