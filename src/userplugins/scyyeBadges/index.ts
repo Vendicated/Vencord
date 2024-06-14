@@ -19,8 +19,8 @@
 import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import { Badges } from "@api/index";
 import definePlugin from "@utils/types";
-import { ChannelStore, GuildChannelStore, GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
-import { GuildMember } from "discord-types/general";
+import { GuildMemberStore, GuildStore, UserStore } from "@webpack/common";
+import { User } from "discord-types/general/index.js";
 import React from "react";
 
 var registered: ProfileBadge[] = [];
@@ -94,7 +94,7 @@ function addScyyeBadges() {
         description: "Scyye",
         image: "https://i.imgur.com/u8fTrP9.png",
         shouldShow(userInfo: BadgeUserArgs): boolean {
-            return userInfo.user.id==="553652308295155723";
+            return userInfo.userId==="553652308295155723";
         }
     });
     badge("scyye_dms", {
@@ -103,7 +103,7 @@ function addScyyeBadges() {
         description: "In my DM server",
         image: GuildStore.getGuild("1116093904266211358").getIconURL(500, true),
         shouldShow(userInfo: BadgeUserArgs): boolean {
-            return GuildMemberStore.isMember("1116093904266211358", userInfo.user.id);
+            return GuildMemberStore.isMember("1116093904266211358", userInfo.userId);
         }
     });
     badge("root", {
@@ -112,9 +112,8 @@ function addScyyeBadges() {
         description: "Root",
         image: UserStore.getUser("318902553024659456").getAvatarURL(),
         shouldShow(userInfo: BadgeUserArgs): boolean {
-            // UserStore.getUser(userInfo.user.id);
-            if ((userInfo.user as any).globalName === undefined || (userInfo.user as any).globalName === null) return false;
-            return (userInfo.user as any).globalName.includes("』");
+            const user: User = UserStore.getUser(userInfo.userId);
+            return (user.globalName??user.username).includes("』");
         }
     });
     badge("cc", {
@@ -123,8 +122,8 @@ function addScyyeBadges() {
         description: "Card Creator",
         image: "https://cdn.discordapp.com/role-icons/945402769525858355/e95ef5364010c2ff97e3dcce45b9aa80.webp?size=24&quality=lossless",
         shouldShow(userInfo: BadgeUserArgs): boolean {
-            return GuildMemberStore.isMember("844974450927730738", userInfo.user.id)
-            && GuildMemberStore.getMember("844974450927730738", userInfo.user.id).roles.includes("945402769525858355");
+            return GuildMemberStore.isMember("844974450927730738", userInfo.userId)
+            && GuildMemberStore.getMember("844974450927730738", userInfo.userId).roles.includes("945402769525858355");
         }
     });
 }
