@@ -15,7 +15,7 @@ import {
 
 const NotesStore = createStore("UserNotesData", "UserNotesStore");
 
-const usersNotes = new Map<string, string>();
+export const usersNotes = new Map<string, string>();
 
 const cacheUsersNotes = async () => {
     entries(NotesStore).then(usersNotesDB => {
@@ -41,6 +41,12 @@ export const saveUserNotes = async (userId: string, userNotes: string) => {
     }
 };
 
+export const deleteUserNotes = async (userId: string) => {
+    if (!usersNotes.get(userId)) return;
+
+    usersNotes.delete(userId);
+    await del(userId, NotesStore);
+};
 export const clearUserNotes = async () => {
     usersNotes.clear();
     await clear(NotesStore);

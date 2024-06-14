@@ -17,20 +17,31 @@ export default definePluginSettings({
     removeRegularButton: {
         type: OptionType.BOOLEAN,
         description:
-			'Removes the regular "Add Note"/"Edit Note" button from the user context menu',
+            'Removes the regular "Add Note"/"Edit Note" button from the user context menu',
         default: true,
     },
     replaceRegularNotes: {
         type: OptionType.BOOLEAN,
         description:
-			'Replace the regular "Notes" section by button to open notes from plugin',
+            'Replace the regular "Notes" section by button to open notes from plugin',
         default: true,
+        restartNeeded: true,
+    },
+    disableSpellCheck: {
+        type: OptionType.BOOLEAN,
+        description: 'Disable "Spellcheck" in notes',
+        default: false,
+    },
+    addNotesDataToolBar: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: 'Add "Open Notes Data" button to toolbar',
         restartNeeded: true,
     },
     transferExistingNotes: {
         type: OptionType.COMPONENT,
         description:
-			"Transfer existing Discord notes into this plugin's data",
+            "Transfer existing Discord notes into this plugin's data",
         component: () =>
             <Button onClick={() => {
                 // didn't find better way to get current user notes :))
@@ -50,7 +61,7 @@ export default definePluginSettings({
                     showToast("Unable to retrieve regular Discord notes", 2);
                 });
             }}>
-				Transfer existing regular notes from Discord
+                Transfer existing regular notes from Discord
             </Button>
     },
     clearNotes: {
@@ -71,7 +82,7 @@ export default definePluginSettings({
                     },
                 })}
             >
-				Clear Plugin's Notes
+                Clear Plugin's Notes
             </Button>
     },
 });
