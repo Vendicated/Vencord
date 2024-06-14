@@ -131,6 +131,7 @@ export default definePlugin({
         addButton("pk-delete", msg => {
             if (!msg) return null;
             if (!isPk(msg)) return null;
+            // if (PermissionStore.can("MANAGE_MESSAGES", msg.channel_id)) return null;
 
             const handleClick = async () => {
                 ReactionManager.addReaction(
