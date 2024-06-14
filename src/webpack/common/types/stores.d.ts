@@ -39,6 +39,8 @@ export class FluxStore {
     registerActionHandlers: GenericFunction;
     syncWith: GenericFunction;
     waitFor: GenericFunction;
+
+    static getAll(): FluxStore[];
 }
 
 export class FluxEmitter {
