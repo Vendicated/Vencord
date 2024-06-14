@@ -16,18 +16,19 @@ import settings from "../settings";
 
 const cl = classNameFactory("vc-user-notes-modal-");
 
-export function UserNotesModal({ modalProps, close, user, userNotes }: {
-	modalProps: ModalProps;
-	close(): void;
-	user: User;
-	userNotes: string;
+export function UserNotesModal({ modalProps, close, user, userNotes, saveCallback }: {
+    modalProps: ModalProps;
+    close(): void;
+    user: User | string;
+    userNotes: string;
+    saveCallback?(): void;
 }) {
     const [value, setValue] = useState(userNotes);
 
     return (
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notes: {user.username}</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notes: {typeof user === "string" ? user : user.username}</Text>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
             <div className={cl("content")}>
@@ -43,24 +44,26 @@ export function UserNotesModal({ modalProps, close, user, userNotes }: {
                 <Button
                     color={Button.Colors.GREEN}
                     onClick={() => {
-                        saveUserNotes(user.id, value);
+                        saveUserNotes(typeof user === "string" ? user : user.id, value);
                         close();
+                        saveCallback?.();
                     }}
                 >
-					Save
+                    Save
                 </Button>
             </ModalFooter>
         </ModalRoot>
     );
 }
 
-export const openUserNotesModal = async (user: User) => {
+export const openUserNotesModal = async (user: User | string, saveCallback?: () => void) => {
     const key = openModal(modalProps => (
         <UserNotesModal
             modalProps={modalProps}
             close={() => closeModal(key)}
             user={user}
-            userNotes={getUserNotes(user.id) ?? ""}
+            userNotes={getUserNotes(typeof user === "string" ? user : user.id) ?? ""}
+            saveCallback={saveCallback}
         />
     ));
 };
