@@ -20,7 +20,7 @@ export default definePlugin({
             }
         },
         {
-            find: "BackdropStyles:function(){",
+            find: "{BackdropStyles:function(){",
             replacement: {
                 match: /\?0:300/,
                 replace: "?0:0",
