@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+
+import { Devs } from "../../userplugins/consts";
 
 export default definePlugin({
     name: "NoOnboardingDelay",
     description: "Skips the slow and annoying onboarding delay",
-    authors: [Devs.nekohaxx],
+    authors: [Devs.Scyye],
     patches: [
         {
             find: "Messages.ONBOARDING_COVER_WELCOME_SUBTITLE",
