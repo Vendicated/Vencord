@@ -23,7 +23,7 @@ import { DeleteIcon } from "@components/Icons";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, PermissionStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { Member, PKAPI, System } from "pkapi.js";
 
@@ -56,13 +56,15 @@ const settings = definePluginSettings({
 // I dont fully understand how to use datastores, if i used anything incorrectly please let me know
 const DATASTORE_KEY = "pk";
 
-let authors: Record<string, { messageIds: string[]; member: Member|string|undefined; system: System; }> = {};
-(async () => {
-    authors = await DataStore.get<Record<string, { name: string; messageIds: string[]; member: Member|string|undefined; system: System; }>>(DATASTORE_KEY) || {};
-})();
+interface Author {
+    messageIds: string[];
+    member: Member|string|undefined;
+    system: System;
+}
+
+let authors: Record<string, Author> = {};
 
 const ReactionManager = findByPropsLazy("addReaction", "getReactors");
-
 
 export default definePlugin({
     name: "Plural Kit",
@@ -106,15 +108,10 @@ export default definePlugin({
     },
 
     async start() {
-        DataStore.createStore(DATASTORE_KEY, DATASTORE_KEY);
-
+        authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
         addButton("pk-edit", msg => {
             if (!msg) return null;
             if (!isPk(msg)) return null;
-
-            const handleClick = () => {
-                replyToMessage(msg, false, true, "pk;edit " + msg.content);
-            };
 
             return {
                 label: "Edit",
@@ -123,7 +120,7 @@ export default definePlugin({
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: handleClick,
+                onClick: () => replyToMessage(msg, false, true, "pk;edit " + msg.content),
                 onContextMenu: _ => {}
             };
         });
@@ -131,19 +128,6 @@ export default definePlugin({
         addButton("pk-delete", msg => {
             if (!msg) return null;
             if (!isPk(msg)) return null;
-            // if (PermissionStore.can("MANAGE_MESSAGES", msg.channel_id)) return null;
-
-            const handleClick = async () => {
-                ReactionManager.addReaction(
-                    msg.channel_id,
-                    msg.id,
-                    {
-                        id: undefined,
-                        name: "❌",
-                        animated: false
-                    }
-                );
-            };
 
             return {
                 label: "Delete",
@@ -152,7 +136,7 @@ export default definePlugin({
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: handleClick,
+                onClick: async () => deleteMessage(msg),
                 onContextMenu: _ => {}
             };
         });
@@ -175,16 +159,40 @@ function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, co
     }
 }
 
+function deleteMessage(msg: Message) {
+    if (PermissionStore.can("MANAGE_MESSAGES", msg.channel_id)) {
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_DELETE",
+            channelId: msg.channel_id,
+            message: msg.id
+        });
+    } else {
+        ReactionManager.addReaction(
+            msg.channel_id,
+            msg.id,
+            {
+                id: undefined,
+                name: "❌",
+                animated: false
+            }
+        );
+    }
+}
+
+function generateAuthorData(message: Message) {
+    return `${message.author.username}##${message.author.avatar}`;
+}
+
 function getAuthorOfMessage(message: Message) {
-    if (authors[message.author.username]) {
-        authors[message.author.username].messageIds.push(message.id);
-        return authors[message.author.username];
+    if (authors[generateAuthorData(message)]) {
+        authors[generateAuthorData(message)].messageIds.push(message.id);
+        return authors[generateAuthorData(message)];
     }
 
     api.getMessage({ message: message.id }).then(msg => {
-        authors[message.author.username] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
+        authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
     });
 
     DataStore.set(DATASTORE_KEY, authors);
-    return authors[message.author.username];
+    return authors[generateAuthorData(message)];
 }
