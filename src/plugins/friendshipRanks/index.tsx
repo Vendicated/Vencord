@@ -131,9 +131,9 @@ function getBadgesToApply()
             component: () => getBadgeComponent(rank),
             shouldShow: (info : BadgeUserArgs) =>
             {
-                if(!RelationshipStore.isFriend(info.user.id)) { return false; }
+                if(!RelationshipStore.isFriend(info.userId)) { return false; }
 
-                const days = daysSince(RelationshipStore.getSince(info.user.id));
+                const days = daysSince(RelationshipStore.getSince(info.userId));
 
                 if(self[index + 1] == null)
                 {
