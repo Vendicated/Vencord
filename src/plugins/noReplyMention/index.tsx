@@ -43,6 +43,26 @@ const settings = definePluginSettings({
             },
         ],
     },
+    channelList: {
+        description: "List of channels to allow or exempt pings for (separated by commas or spaces)",
+        type: OptionType.STRING,
+        default: "1234567890123445,1234567890123445",
+    },
+    shouldPingListedChannels: {
+        description: "Channel Behaviour",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Never ping in listed channels",
+                value: false,
+            },
+            {
+                label: "Always ping in listed channels",
+                value: true,
+                default: true,
+            }
+        ]
+    },
     inverseShiftReply: {
         description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
         type: OptionType.BOOLEAN,
@@ -53,13 +73,21 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed],
+    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed, Devs.goodbee],
     settings,
 
     shouldMention(message: Message, isHoldingShift: boolean) {
         const isListed = settings.store.userList.includes(message.author.id);
         const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
-        return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
+
+        const isInListedChannel = settings.store.channelList.includes(message.channel_id);
+        const isExemptChannel = settings.store.shouldPingListedChannels ? isInListedChannel : !isInListedChannel;
+
+        if(isInListedChannel) {
+            return settings.store.inverseShiftReply ? isHoldingShift !== isExemptChannel : !isHoldingShift && isExemptChannel;
+        } else {
+            return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
+        }
     },
 
     patches: [
