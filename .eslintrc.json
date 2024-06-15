@@ -116,7 +116,6 @@
             }],
             "patterns": [{
                 "group": ["discord-types/*"],
-                "importNamePattern": "^(?!WebpackInstance$)",
                 "message": "Use @vencord/discord-types instead."
             }]
         }],

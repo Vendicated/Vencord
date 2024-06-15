@@ -21,6 +21,7 @@ import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 // Can be removed when #2485 gets merged.
+// eslint-disable-next-line no-restricted-imports
 import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
 
 interface WebpackInstance extends Omit<$WebpackInstance, "m"> {

@@ -21,6 +21,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import type { PatchReplacement } from "@utils/types";
 // Can be removed when #2485 gets merged.
+// eslint-disable-next-line no-restricted-imports
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
