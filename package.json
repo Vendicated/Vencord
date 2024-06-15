@@ -76,7 +76,7 @@
         "stylelint-config-standard": "^33.0.0",
         "ts-patch": "^3.2.0",
         "tsx": "^4.15.5",
-        "type-fest": "^4.20.0",
+        "type-fest": "^4.20.1",
         "typescript": "^5.4.5",
         "typescript-transform-paths": "^3.4.7",
         "zip-local": "^0.3.5"
