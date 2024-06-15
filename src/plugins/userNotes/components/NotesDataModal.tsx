@@ -12,7 +12,7 @@ import {
 } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { filters, find } from "@webpack";
-import { Avatar, Button, ContextMenuApi, Menu, React, RelationshipStore, Select, Text, TextArea, TextInput, useCallback, useMemo, useReducer, UserStore, UserUtils, useState } from "@webpack/common";
+import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, RelationshipStore, Select, Text, TextArea, TextInput, useCallback, useMemo, useReducer, UserStore, UserUtils, useState } from "@webpack/common";
 
 import { deleteUserNotes, saveUserNotes, usersNotes as usersNotesMap } from "../data";
 import settings from "../settings";
@@ -316,8 +316,17 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                         data={"Delete"}
                         color={Button.Colors.RED}
                         onClick={() => {
-                            deleteUserNotes(userId);
-                            refreshNotesData();
+                            Alerts.show({
+                                title: "Delete Notes",
+                                body: `Are you sure you want to delete notes for ${pending ? userId : `${userInfo!.globalName} (${userId})`}?`,
+                                confirmColor: Button.Colors.RED,
+                                confirmText: "Delete",
+                                cancelText: "Cancel",
+                                onConfirm: () => {
+                                    deleteUserNotes(userId);
+                                    refreshNotesData();
+                                },
+                            });
                         }}
                     >
                         <DeleteIcon />
