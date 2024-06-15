@@ -83,7 +83,7 @@ export default definePlugin({
         const isInListedChannel = settings.store.channelList.includes(message.channel_id);
         const isExemptChannel = settings.store.shouldPingListedChannels ? isInListedChannel : !isInListedChannel;
 
-        if(isInListedChannel) {
+        if (isInListedChannel) {
             return settings.store.inverseShiftReply ? isHoldingShift !== isExemptChannel : !isHoldingShift && isExemptChannel;
         } else {
             return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
