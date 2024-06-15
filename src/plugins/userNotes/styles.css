@@ -78,6 +78,11 @@
     margin-right: 16px;
 }
 
+.vc-user-notes-data-modal-header-user-type {
+    min-width: 160px;
+    margin-right: 16px;
+}
+
 .vc-user-notes-data-modal-content-container {
     overflow: hidden;
     height: 100%;
@@ -200,6 +205,46 @@ div:has(.vc-user-notes-data-modal-user-text-area) {
     aspect-ratio: 1 / 1;
     height: auto;
     box-sizing: border-box;
+    overflow: visible !important;
+}
+
+.vc-user-notes-data-modal-user-actions > button::before {
+    position: fixed;
+    display: block;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(130%);
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 6px;
+    content: attr(data);
+    background-color: var(--background-floating);
+    box-shadow: var(--elevation-high);
+    color: var(--text-normal);
+    text-align: center;
+    font-size: 14px;
+    line-height: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.vc-user-notes-data-modal-user-actions > button::after {
+    position: absolute;
+    display: block;
+    z-index: 1;
+    opacity: 0;
+    top: 110%;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 10px solid var(--background-floating);
+    content: "";
+    pointer-events: none;
+}
+
+.vc-user-notes-data-modal-user-actions > button:hover::before,
+.vc-user-notes-data-modal-user-actions > button:hover::after {
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
 }
 
 /* Loading Spinner */

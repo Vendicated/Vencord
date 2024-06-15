@@ -5,13 +5,14 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { openPrivateChannel, openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import {
     closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, openModal
 } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { filters, find } from "@webpack";
-import { Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, TextInput, useCallback, useMemo, useReducer, useRef, UserStore, UserUtils, useState } from "@webpack/common";
+import { Avatar, Button, ContextMenuApi, Menu, React, RelationshipStore, Select, Text, TextArea, TextInput, useCallback, useMemo, useReducer, UserStore, UserUtils, useState } from "@webpack/common";
 
 import { deleteUserNotes, saveUserNotes, usersNotes as usersNotesMap } from "../data";
 import settings from "../settings";
@@ -20,33 +21,69 @@ import { openUserNotesModal } from "./UserNotesModal";
 
 const cl = classNameFactory("vc-user-notes-data-modal-");
 
+const enum SearchStatus {
+    ALL,
+    FRIENDS,
+    BLOCKED,
+}
+
 export function NotesDataModal({ modalProps, close }: {
     modalProps: ModalProps;
     close(): void;
 }) {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [visibleNotesNum, setVisibleNotesNum] = useState(10);
-    const contentRef = useRef<HTMLDivElement | null>(null);
+    const [searchValue, setSearchValue] = React.useState({ query: "", status: SearchStatus.ALL });
 
-    const loadMore = useCallback(() => {
-        setVisibleNotesNum(prevNum => prevNum + 10);
-    }, []);
+    const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, query }));
+    const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const [usersNotesData, refreshNotesData] = useReducer(() => {
         return Array.from(usersNotesMap);
     }, Array.from(usersNotesMap));
 
     const filteredNotes = useMemo(() => {
-        if (searchQuery === "") {
+        const { query, status } = searchValue;
+
+        if (query === "" && status === SearchStatus.ALL) {
             return usersNotesData;
         }
 
         return usersNotesData
-            .filter(([userId, userNotes]) =>
-                userId.includes(searchQuery) ||
-                userNotes.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-    }, [usersNotesData, searchQuery]);
+            .filter(([userId, userNotes]) => {
+                return (
+                    status === SearchStatus.FRIENDS ?
+                        RelationshipStore.isFriend(userId) &&
+                        (
+                            query === "" ||
+                            (
+                                userId.includes(query) ||
+                                userNotes.toLowerCase().includes(query.toLowerCase())
+                            )
+                        )
+                        :
+                        status === SearchStatus.BLOCKED ?
+                            RelationshipStore.isBlocked(userId) &&
+                            (
+                                query === "" ||
+                                (
+                                    userId.includes(query) ||
+                                    userNotes.toLowerCase().includes(query.toLowerCase())
+                                )
+                            )
+                            :
+                            query === "" ||
+                            (
+                                userId.includes(query) ||
+                                userNotes.toLowerCase().includes(query.toLowerCase())
+                            )
+                );
+            });
+    }, [usersNotesData, searchValue]);
+
+    const [visibleNotesNum, setVisibleNotesNum] = useState(10);
+
+    const loadMore = useCallback(() => {
+        setVisibleNotesNum(prevNum => prevNum + 10);
+    }, []);
 
     const visibleNotes = filteredNotes.slice(0, visibleNotesNum);
 
@@ -56,11 +93,24 @@ export function NotesDataModal({ modalProps, close }: {
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>
                 <Text className={cl("header-text")} variant="heading-lg/semibold">Notes Data</Text>
-                <TextInput className={cl("header-input")} value={searchQuery} onChange={e => setSearchQuery(e)} placeholder="Filter Notes (ID/Notes)" />
+                <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Notes)" />
+                <div className={cl("header-user-type")}>
+                    <Select
+                        options={[
+                            { label: "Show All", value: SearchStatus.ALL, default: true },
+                            { label: "Show Friends", value: SearchStatus.FRIENDS },
+                            { label: "Show Blocked", value: SearchStatus.BLOCKED },
+                        ]}
+                        serialize={String}
+                        select={onStatusChange}
+                        isSelected={v => v === searchValue.status}
+                        closeOnSelect={true}
+                    />
+                </div>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
             {
-                <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0" }} className={cl("content-container")} ref={contentRef}>
+                <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0" }} className={cl("content-container")}>
                     {
                         modalProps.transitionState === 1 &&
                         <ModalContent className={cl("content")}>
@@ -137,7 +187,8 @@ const IconButton = LazyComponent(() => {
 
 type UserInfo = {
     id: string;
-    name: string;
+    globalName: string;
+    username: string;
     avatar: string;
 };
 
@@ -151,7 +202,8 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
 
         return {
             id: userId,
-            name: user.username,
+            globalName: (user as any).globalName ?? user.username,
+            username: user.username,
             avatar: user.getAvatarURL(void 0, void 0, false),
         } as UserInfo;
     });
@@ -161,7 +213,8 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
 
     userInfo ??= {
         id: userId,
-        name: pending ? "Loading..." : "Unable to load",
+        globalName: pending ? "Loading..." : "Unable to load",
+        username: pending ? "Loading..." : "Unable to load",
         avatar: "https://discord.com/assets/0048cbfdd0b3ef186d22.png",
     } as const;
 
@@ -178,6 +231,16 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                         aria-label="User Notes Data"
                     >
                         <Menu.MenuItem
+                            id={cl("open-user-profile")}
+                            label="Open User Profile"
+                            action={() => openUserProfile(userId)}
+                        />
+                        <Menu.MenuItem
+                            id={cl("open-user-chat")}
+                            label="Open User Chat"
+                            action={() => openPrivateChannel(userId)}
+                        />
+                        <Menu.MenuItem
                             id={cl("copy-user-id")}
                             label="Copy ID"
                             action={() => copyWithToast(userInfo!.id)}
@@ -187,9 +250,14 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                             (
                                 <>
                                     <Menu.MenuItem
-                                        id={cl("copy-user-name")}
-                                        label="Copy UserName"
-                                        action={() => copyWithToast(userInfo!.name)}
+                                        id={cl("copy-user-globalname")}
+                                        label="Copy Global Name"
+                                        action={() => copyWithToast(userInfo!.globalName)}
+                                    />
+                                    <Menu.MenuItem
+                                        id={cl("copy-user-username")}
+                                        label="Copy Username"
+                                        action={() => copyWithToast(userInfo!.username)}
                                     />
                                     <Menu.MenuItem
                                         id={cl("copy-user-avatar")}
@@ -217,7 +285,8 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                     />
             }
             <div className={cl("user-info")}>
-                <Text className={cl("user-info-name")} variant="text-lg/bold">{userInfo.name}</Text>
+                <Text className={cl("user-info-globalname")} variant="text-lg/bold">{userInfo.globalName}</Text>
+                <Text className={cl("user-info-username")} variant="text-md/normal">{userInfo.username}</Text>
                 <Text className={cl("user-info-id")} variant="text-md/normal">{userInfo.id}</Text>
             </div>
             <div className={cl("user-notes-container")}>
@@ -230,7 +299,9 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                 />
                 <div className={cl("user-actions")}>
                     <Button
+                        className={cl("user-actions-save")}
                         size={Button.Sizes.NONE}
+                        data={"Save"}
                         color={Button.Colors.GREEN}
                         onClick={() => {
                             saveUserNotes(userId, userNotes);
@@ -240,7 +311,9 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                         <SaveIcon />
                     </Button>
                     <Button
+                        className={cl("user-actions-delete")}
                         size={Button.Sizes.NONE}
+                        data={"Delete"}
                         color={Button.Colors.RED}
                         onClick={() => {
                             deleteUserNotes(userId);
@@ -250,14 +323,18 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                         <DeleteIcon />
                     </Button>
                     <Button
+                        className={cl("user-actions-refresh")}
                         size={Button.Sizes.NONE}
+                        data={"Refresh"}
                         color={Button.Colors.LINK}
                         onClick={() => setUserNotes(userNotesArg)}
                     >
                         <RefreshIcon />
                     </Button>
                     <Button
+                        className={cl("user-actions-popup")}
                         size={Button.Sizes.NONE}
+                        data={"Open Full View"}
                         color={Button.Colors.PRIMARY}
                         disabled={pending}
                         onClick={async () => {
