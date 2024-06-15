@@ -162,8 +162,12 @@
     white-space: nowrap;
 }
 
-.vc-user-notes-data-modal-user-info-name {
+.vc-user-notes-data-modal-user-info-globalname {
     color: #fff;
+}
+
+.vc-user-notes-data-modal-user-info-username {
+    color: #d3d3d3;
 }
 
 .vc-user-notes-data-modal-user-info-id {
