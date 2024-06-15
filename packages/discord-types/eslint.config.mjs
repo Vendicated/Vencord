@@ -1,13 +1,15 @@
 import stylistic from "@stylistic/eslint-plugin";
+import checkFile from "eslint-plugin-check-file";
 import eslintPluginHeaders from "eslint-plugin-headers";
 import eslintPluginImport from "eslint-plugin-import-x";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
+import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
     {
-        files: ["**/*.mjs", "**/*.ts"],
+        files: ["**/*.?(c|m)[jt]s?(x)"],
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
@@ -19,10 +21,12 @@ export default tseslint.config(
         plugins: {
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
+            "check-file": checkFile,
             headers: eslintPluginHeaders,
             import: eslintPluginImport,
             "simple-import-sort": simpleImportSort,
             unicorn: eslintPluginUnicorn,
+            "unused-imports": unusedImports,
         },
         rules: {
             "@stylistic/array-bracket-newline": ["error", "consistent"],
@@ -49,7 +53,7 @@ export default tseslint.config(
             "@stylistic/no-extra-semi": "error",
             "@stylistic/no-floating-decimal": "error",
             "@stylistic/no-multi-spaces": "error",
-            "@stylistic/no-multiple-empty-lines": ["error", { max: 2, maxBOF: 0, maxEOF: 0 }],
+            "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 0 }],
             "@stylistic/no-trailing-spaces": "error",
             "@stylistic/no-whitespace-before-property": "error",
             "@stylistic/object-curly-newline": "error",
@@ -94,7 +98,10 @@ export default tseslint.config(
                 }
             }],
             "@typescript-eslint/method-signature-style": "error",
-            "@typescript-eslint/naming-convention": ["error", { selector: "typeLike", format: ["PascalCase"] }],
+            "@typescript-eslint/naming-convention": ["error", {
+                selector: "typeLike",
+                format: ["PascalCase"]
+            }],
             "@typescript-eslint/no-duplicate-enum-values": "error",
             "@typescript-eslint/no-duplicate-type-constituents": "error",
             "@typescript-eslint/no-empty-interface": "error",
@@ -107,23 +114,19 @@ export default tseslint.config(
             "@typescript-eslint/no-unnecessary-type-arguments": "error",
             "@typescript-eslint/no-unnecessary-type-constraint": "error",
             "@typescript-eslint/no-unsafe-declaration-merging": "error",
-            "@typescript-eslint/no-unused-vars": ["error", {
-                args: "all",
-                argsIgnorePattern: "^_",
-                destructuredArrayIgnorePattern: "^_",
-                varsIgnorePattern: "^_"
-            }],
             "@typescript-eslint/no-useless-empty-export": "error",
             "@typescript-eslint/prefer-function-type": "error",
             "@typescript-eslint/triple-slash-reference": "error",
             "@typescript-eslint/unified-signatures": ["error", { ignoreDifferentlyNamedParameters: true }],
+            "check-file/filename-naming-convention": ["error", { "**/*.{mjs,ts}": "+([.0-9A-Za-z])" }],
+            "check-file/folder-naming-convention": ["error", { "**/": "CAMEL_CASE" }],
             "import/extensions": "error",
             "import/first": "error",
             "import/newline-after-import": ["error", { considerComments: true }],
             "import/no-absolute-path": "error",
             "import/no-duplicates": "error",
             "import/no-empty-named-blocks": "error",
-            "import/no-extraneous-dependencies": "error",
+            "import/no-extraneous-dependencies": ["error", { includeTypes: true }],
             "import/no-relative-packages": "error",
             "import/no-self-import": "error",
             "import/no-unassigned-import": "error",
@@ -131,18 +134,25 @@ export default tseslint.config(
             "simple-import-sort/exports": "error",
             "simple-import-sort/imports": ["error", { groups: [["^[^.]"]] }],
             "unicorn/escape-case": "error",
-            "unicorn/filename-case": ["error", { cases: { camelCase: true, pascalCase: true } }],
             "unicorn/no-hex-escape": "error",
             "unicorn/no-zero-fractions": "error",
             "unicorn/number-literal-case": "error",
             "unicorn/numeric-separators-style": ["error", { number: { minimumDigits: 0 } }],
             "unicorn/prefer-export-from": ["error", { ignoreUsedVariables: true }],
+            "unused-imports/no-unused-imports": "error",
+            "unused-imports/no-unused-vars": ["error", {
+                args: "all",
+                argsIgnorePattern: "^_",
+                destructuredArrayIgnorePattern: "^_",
+                varsIgnorePattern: "^_"
+            }],
         }
     },
     {
-        files: ["src/**/*.ts"],
+        files: ["src/**/*"],
         rules: {
             "@typescript-eslint/prefer-enum-initializers": "error",
+            "check-file/filename-blocklist": ["error", { "!**/!(*.d).ts": "!(*.d).ts" }],
             "headers/header-format": ["error", {
                 source: "string",
                 content: [
@@ -158,13 +168,25 @@ export default tseslint.config(
                 }
             }],
             "import/no-default-export": "error",
-            "import/no-unused-modules": "error",
+            "import/no-extraneous-dependencies": ["error", {
+                devDependencies: false,
+                includeTypes: true
+            }],
+            "import/no-unassigned-import": "error",
             "no-restricted-globals": ["error", "_", "JSX", "React"],
             "no-restricted-syntax": [
                 "error",
-                "ImportDeclaration[importKind=value]",
-                "TSEnumDeclaration[const=false]",
+                ":expression:not([declare=true] *, [type=/^TS/] *, ExportAllDeclaration *, ImportDeclaration *)",
+                "ObjectPattern.params",
+                "TSEnumDeclaration:matches([const=true], [declare=true])",
             ],
+        }
+    },
+    {
+        // https://github.com/import-js/eslint-plugin-import/issues/2414
+        files: ["src/**/!(index.ts)"],
+        rules: {
+            "import/no-unused-modules": ["error", { missingExports: true }],
         }
     },
 );

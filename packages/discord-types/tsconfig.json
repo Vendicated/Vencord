@@ -11,6 +11,8 @@
 
         "noEmit": true,
 
+        "isolatedModules": true,
+
         "lib": [
             "ES2019",
             "ES2020.BigInt",
