@@ -211,11 +211,6 @@ div:has(.vc-user-notes-data-modal-user-text-area) {
     overflow: visible !important;
 }
 
-.vc-user-notes-data-modal-user-actions > button {
-    overflow: visible;
-    position: relative;
-}
-
 .vc-user-notes-data-modal-user-actions > button::before {
     position: absolute;
     display: block;
