@@ -22,7 +22,7 @@ import { UserActionCreators } from "@webpack/common";
 
 import settings from "./settings";
 import type { ChannelDeleteAction, GuildDeleteAction, RelationshipRemoveAction } from "./types";
-import { deleteGroupDM, deleteGuild, getGroupDM, getGuild, notify } from "./utils";
+import { deleteGroupDM, deleteGuild, getGroupDM, getGuild, GuildAvailabilityStore, notify } from "./utils";
 
 let manuallyRemovedFriend: string | undefined;
 let manuallyRemovedGuild: string | undefined;
@@ -63,7 +63,7 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
 
 export function onGuildDelete({ guild: { id, unavailable } }: GuildDeleteAction) {
     if (!settings.store.servers) return;
-    if (unavailable) return;
+    if (unavailable || GuildAvailabilityStore.isUnavailable(id)) return;
 
     if (manuallyRemovedGuild === id) {
         deleteGuild(id);

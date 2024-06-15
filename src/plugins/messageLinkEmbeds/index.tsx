@@ -287,7 +287,9 @@ function getChannelLabelAndIconUrl(channel: ChannelRecord) {
 }
 
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps) {
-    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id)!.recipients?.[0])!;
+    const compact = UserSettings.MessageDisplayCompact!.useSetting();
+
+    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id)!.recipients?.[0]);
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
@@ -299,7 +301,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps) {
                 author: {
                     name: <Text variant="text-xs/medium" tag="span">
                         <span>{channelLabel} - </span>
-                        {MarkupUtils.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
+                        {MarkupUtils.parse(channel.isDM() ? `<@${dmReceiver?.id ?? ""}>` : `<#${channel.id}>`)}
                     </Text>,
                     iconProxyURL: iconUrl
                 }
@@ -311,6 +313,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps) {
                         message={message}
                         channel={channel}
                         subscribeToComponentDispatch={false}
+                        compact={compact}
                     />
                 </div>
             )}

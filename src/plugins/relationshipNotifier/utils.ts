@@ -19,11 +19,19 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { RelationshipType } from "@vencord/discord-types";
+import { type FluxStore, RelationshipType } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, IconUtils, RelationshipStore, UserActionCreators, UserStore } from "@webpack/common";
 
 import settings from "./settings";
 import type { SimpleGroupDMChannel, SimpleGuild } from "./types";
+
+export const GuildAvailabilityStore: FluxStore & {
+    totalGuilds: number;
+    totalUnavailableGuilds: number;
+    unavailableGuilds: string[];
+    isUnavailable(guildId: string): boolean;
+} = findStoreLazy("GuildAvailabilityStore");
 
 const guilds = new Map<string, SimpleGuild>();
 const groupDMs = new Map<string, SimpleGroupDMChannel>();
@@ -52,15 +60,15 @@ export async function syncAndRunChecks() {
 
     if (settings.store.offlineRemovals) {
         if (settings.store.groups && oldGroupDMs?.size) {
-            for (const [userId, { name, iconURL }] of oldGroupDMs) {
-                if (!groupDMs.has(userId))
+            for (const [channelId, { name, iconURL }] of oldGroupDMs) {
+                if (!groupDMs.has(channelId))
                     notify(`You are no longer in the group ${name}.`, iconURL);
             }
         }
 
         if (settings.store.servers && oldGuilds?.size) {
-            for (const [userId, { name, iconURL }] of oldGuilds) {
-                if (!guilds.has(userId))
+            for (const [guildId, { name, iconURL }] of oldGuilds) {
+                if (!guilds.has(guildId) && !GuildAvailabilityStore.isUnavailable(guildId))
                     notify(`You are no longer in the server ${name}.`, iconURL);
             }
         }
@@ -112,9 +120,7 @@ export function notify(text: string, icon?: string, onClick?: () => void) {
     });
 }
 
-export function getGuild(guildId: string) {
-    return guilds.get(guildId);
-}
+export const getGuild = (guildId: string) => guilds.get(guildId);
 
 export function deleteGuild(guildId: string) {
     guilds.delete(guildId);
@@ -138,9 +144,7 @@ export async function syncGuilds() {
     await DataStore.set(guildsKey(), guilds);
 }
 
-export function getGroupDM(channelId: string) {
-    return groupDMs.get(channelId);
-}
+export const getGroupDM = (channelId: string) => groupDMs.get(channelId);
 
 export function deleteGroupDM(channelId: string) {
     groupDMs.delete(channelId);

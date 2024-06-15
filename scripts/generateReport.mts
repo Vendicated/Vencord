@@ -77,9 +77,11 @@ const IGNORED_DISCORD_ERRORS: (RegExp | string)[] = [
     "Attempting to set fast connect zstd when unsupported"
 ];
 
-function toCodeBlock(s: string) {
+function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
-    return "```" + s + " ```";
+
+    const indentationStr = Array(!isDiscord ? indentation : 0).fill(" ").join("");
+    return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${indentationStr}\`\`\``;
 }
 
 async function printReport() {
@@ -93,35 +95,35 @@ async function printReport() {
     report.badPatches.forEach(p => {
         console.log(`- ${p.plugin} (${p.type})`);
         console.log(`  - ID: \`${p.id}\``);
-        console.log(`  - Match: ${toCodeBlock(p.match)}`);
-        if (p.error) console.log(`  - Error: ${toCodeBlock(p.error)}`);
+        console.log(`  - Match: ${toCodeBlock(p.match, "  - Match: ".length)}`);
+        if (p.error) console.log(`  - Error: ${toCodeBlock(p.error, "  - Error: ".length)}`);
     });
 
     console.log();
 
     console.log("## Bad Webpack Finds");
-    report.badWebpackFinds.forEach(p => { console.log("- " + p); });
+    report.badWebpackFinds.forEach(p => { console.log("- " + toCodeBlock(p, "- ".length)); });
 
     console.log();
 
     console.log("## Bad Starts");
     report.badStarts.forEach(p => {
         console.log(`- ${p.plugin}`);
-        console.log(`  - Error: ${toCodeBlock(p.error)}`);
+        console.log(`  - Error: ${toCodeBlock(p.error, "  - Error: ".length)}`);
     });
 
     console.log();
 
     console.log("## Discord Errors");
     report.otherErrors.forEach(e => {
-        console.log(`- ${toCodeBlock(e)}`);
+        console.log(`- ${toCodeBlock(e, "- ".length)}`);
     });
 
     console.log();
 
     console.log("## Ignored Discord Errors");
     report.ignoredErrors.forEach(e => {
-        console.log(`- ${toCodeBlock(e)}`);
+        console.log(`- ${toCodeBlock(e, "- ".length)}`);
     });
 
     console.log();
@@ -143,16 +145,16 @@ async function printReport() {
                             const lines = [
                                 `**__${p.plugin} (${p.type}):__**`,
                                 `ID: \`${p.id}\``,
-                                `Match: ${toCodeBlock(p.match)}`
+                                `Match: ${toCodeBlock(p.match, "Match: ".length, true)}`
                             ];
-                            if (p.error) lines.push(`Error: ${toCodeBlock(p.error)}`);
+                            if (p.error) lines.push(`Error: ${toCodeBlock(p.error, "Error: ".length, true)}`);
                             return lines.join("\n");
                         }).join("\n\n") || "None",
                         color: report.badPatches.length ? 0xff0000 : 0x00ff00
                     },
                     {
                         title: "Bad Webpack Finds",
-                        description: report.badWebpackFinds.map(toCodeBlock).join("\n") || "None",
+                        description: report.badWebpackFinds.map(f => toCodeBlock(f, 0, true)).join("\n") || "None",
                         color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
                     },
                     {
@@ -160,7 +162,7 @@ async function printReport() {
                         description: report.badStarts.map(p => {
                             const lines = [
                                 `**__${p.plugin}:__**`,
-                                toCodeBlock(p.error)
+                                toCodeBlock(p.error, 0, true)
                             ];
                             return lines.join("\n");
                         }
@@ -169,7 +171,7 @@ async function printReport() {
                     },
                     {
                         title: "Discord Errors",
-                        description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n")) : "None",
+                        description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n"), 0, true) : "None",
                         color: report.otherErrors.length ? 0xff0000 : 0x00ff00
                     }
                 ]
