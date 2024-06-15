@@ -17,14 +17,75 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
+import type { MessageAttachment, StickerItem, UserFlags, UserPremiumType } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { MessageActions, SnowflakeUtils } from "@webpack/common";
-import { Message } from "discord-types/general";
-import type { PartialDeep } from "type-fest";
+import { MessageActionCreators, SnowflakeUtils } from "@webpack/common";
+// eslint-disable-next-line no-restricted-imports
+import type { EmbedJSON as $EmbedJSON, MessageJSON as $MessageJSON } from "discord-types/general";
+import type { LiteralToPrimitive, PartialDeep } from "type-fest";
 
-import { Argument } from "./types";
+import type { Argument } from "./types";
 
-const MessageCreator = findByPropsLazy("createBotMessage");
+export interface UserJSON {
+    accent_color?: number | null;
+    avatar: string | null;
+    avatar_decoration_data?: {
+        asset: string;
+        sku_id: string;
+    };
+    banner?: string | null;
+    bot?: boolean;
+    discriminator: string;
+    email?: string | null;
+    flags?: UserFlags;
+    global_name: string | null;
+    id: string;
+    locale?: string;
+    mfa_enabled?: boolean;
+    system?: boolean;
+    premium_type?: UserPremiumType | 0;
+    public_flags?: UserFlags;
+    username: string;
+    verified?: boolean;
+}
+
+export interface EmbedJSON extends Omit<$EmbedJSON, "color"> {
+    color?: number;
+    fields?: {
+        inline?: boolean
+        name: string;
+        value: string;
+    }[];
+    image?: {
+        height?: number;
+        proxy_url?: string;
+        url: string;
+        width?: number;
+    }
+    footer?: {
+        icon_url?: string;
+        proxy_icon_url?: string;
+        text: string;
+    };
+    timestamp?: string;
+}
+
+export interface MessageJSON extends Omit<$MessageJSON, "author" | "attachments" | "embeds"> {
+    author: UserJSON;
+    attachments: MessageAttachment[];
+    embeds: EmbedJSON[];
+    sticker_items?: StickerItem[];
+}
+
+const MessageCreator: {
+    createBotMessage: (partialMessageRecord: {
+        channelId: string;
+        content: string;
+        embeds?: EmbedJSON[] | null | undefined;
+        loggingName?: string | null | undefined;
+        messageId?: string | null | undefined;
+    }) => MessageJSON;
+} = findByPropsLazy("createBotMessage");
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
@@ -32,16 +93,15 @@ export function generateId() {
 
 /**
  * Send a message as Clyde
- * @param {string} channelId ID of channel to send message to
- * @param {Message} message Message to send
- * @returns {Message}
+ * @param channelId ID of the channel to send the message to
+ * @param message The message to send
  */
-export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
-    const botMessage = MessageCreator.createBotMessage({ channelId, content: "", embeds: [] });
+export function sendBotMessage(channelId: string, message: PartialDeep<MessageJSON, { recurseIntoArrays: true; }>) {
+    const botMessage = MessageCreator.createBotMessage({ channelId, content: "" });
 
-    MessageActions.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    MessageActionCreators.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
-    return message as Message;
+    return message as MessageJSON;
 }
 
 /**
@@ -51,8 +111,8 @@ export function sendBotMessage(channelId: string, message: PartialDeep<Message>)
  * @param fallbackValue Fallback value in case this option wasn't passed
  * @returns Value
  */
-export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
-export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
-export function findOption(args: Argument[], name: string, fallbackValue?: any) {
-    return (args.find(a => a.name === name)?.value || fallbackValue) as any;
+export function findOption<T>(args: Argument[], name: string, fallbackValue: T): LiteralToPrimitive<T>;
+export function findOption<T>(args: Argument[], name: string): T | undefined;
+export function findOption(args: Argument[], name: string, fallbackValue?: unknown) {
+    return args.find(a => a.name === name)?.value || fallbackValue;
 }

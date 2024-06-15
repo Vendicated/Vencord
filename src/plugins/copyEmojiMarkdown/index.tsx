@@ -33,7 +33,7 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
             : `:${emojiName}:`;
     }
 
-    const extension = target?.firstChild.src.match(
+    const extension = target.firstChild.src.match(
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 

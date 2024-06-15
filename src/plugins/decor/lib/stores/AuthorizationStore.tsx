@@ -35,13 +35,17 @@ const indexedDBStorage = {
 };
 
 // TODO: Move switching accounts subscription inside the store?
-export const useAuthorizationStore = proxyLazy(() => zustandCreate(
+export const useAuthorizationStore: {
+    (): AuthorizationState;
+    getState: () => AuthorizationState;
+    subscribe: (handler: (state: AuthorizationState) => void) => () => void;
+} = proxyLazy(() => zustandCreate(
     zustandPersist(
-        (set: any, get: any) => ({
+        (set: any, get: any): AuthorizationState => ({
             token: null,
             tokens: {},
-            init: () => { set({ token: get().tokens[UserStore.getCurrentUser().id] ?? null }); },
-            setToken: (token: string) => set({ token, tokens: { ...get().tokens, [UserStore.getCurrentUser().id]: token } }),
+            init: () => { set({ token: get().tokens[UserStore.getCurrentUser()!.id] ?? null }); },
+            setToken: (token: string) => set({ token, tokens: { ...get().tokens, [UserStore.getCurrentUser()!.id]: token } }),
             remove: (id: string) => {
                 const { tokens, init } = get();
                 const newTokens = { ...tokens };
@@ -50,8 +54,8 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
 
                 init();
             },
-            async authorize() {
-                return new Promise((resolve, reject) => openModal(props =>
+            authorize: async () => new Promise((resolve, reject) => {
+                openModal(props => (
                     <OAuth2AuthorizeModal
                         {...props}
                         scopes={["identify"]}
@@ -67,13 +71,13 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
 
                                 const req = await fetch(url);
 
-                                if (req?.ok) {
+                                if (req.ok) {
                                     const token = await req.text();
                                     get().setToken(token);
                                 } else {
                                     throw new Error("Request not OK");
                                 }
-                                resolve(void 0);
+                                resolve(undefined);
                             } catch (e) {
                                 if (e instanceof Error) {
                                     showToast(`Failed to authorize: ${e.message}`, Toasts.Type.FAILURE);
@@ -82,20 +86,20 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                                 }
                             }
                         }}
-                    />, {
+                    />
+                ), {
                     onCloseCallback() {
                         reject(new Error("Authorization cancelled"));
                     },
-                }
-                ));
-            },
+                });
+            }),
             isAuthorized: () => !!get().token,
-        } as AuthorizationState),
+        }),
         {
             name: "decor-auth",
             getStorage: () => indexedDBStorage,
-            partialize: state => ({ tokens: state.tokens }),
-            onRehydrateStorage: () => state => state?.init()
+            partialize: (state: AuthorizationState) => ({ tokens: state.tokens }),
+            onRehydrateStorage: () => (state?: AuthorizationState) => state?.init()
         }
     )
 ));

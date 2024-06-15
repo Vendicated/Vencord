@@ -23,7 +23,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
+const UserPopoutSectionCssClasses: Record<string, string> = findByPropsLazy("section", "lastSection");
 
 export default definePlugin({
     name: "BetterNotesBox",
@@ -36,7 +36,7 @@ export default definePlugin({
             all: true,
             // Some modules match the find but the replacement is returned untouched
             noWarn: true,
-            predicate: () => Vencord.Settings.plugins.BetterNotesBox.hide,
+            predicate: () => Vencord.Settings.plugins.BetterNotesBox!.hide,
             replacement: {
                 match: /hideNote:.+?(?=([,}].*?\)))/g,
                 replace: (m, rest) => {
@@ -76,7 +76,7 @@ export default definePlugin({
         noSpellCheck: {
             type: OptionType.BOOLEAN,
             description: "Disable spellcheck in notes",
-            disabled: () => Settings.plugins.BetterNotesBox.hide,
+            disabled: () => Settings.plugins.BetterNotesBox!.hide,
             default: false
         }
     },

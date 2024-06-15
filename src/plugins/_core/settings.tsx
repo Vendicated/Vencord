@@ -26,7 +26,8 @@ import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { i18n, React } from "@webpack/common";
+import { i18n } from "@webpack/common";
+import type { ComponentType, PropsWithChildren } from "react";
 
 import gitHash from "~git-hash";
 
@@ -62,7 +63,7 @@ export default definePlugin({
             find: "Messages.ACTIVITY_SETTINGS",
             replacement: {
                 get match() {
-                    switch (Settings.plugins.Settings.settingsLocation) {
+                    switch (Settings.plugins.Settings!.settingsLocation) {
                         case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
                         case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
                         case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
@@ -162,14 +163,14 @@ export default definePlugin({
         // lowest two elements... sanity backup
         if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
 
-        const { settingsLocation } = Settings.plugins.Settings;
+        const { settingsLocation } = Settings.plugins.Settings!;
 
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
 
         if (!header) return;
 
-        const names = {
+        const names: Record<string, string> = {
             top: i18n.Messages.USER_SETTINGS,
             aboveNitro: i18n.Messages.BILLING_SETTINGS,
             belowNitro: i18n.Messages.APP_SETTINGS,
@@ -255,7 +256,7 @@ export default definePlugin({
         return "\n" + this.getInfoRows().join("\n");
     },
 
-    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+    makeInfoElements(Component: ComponentType<PropsWithChildren>, props: PropsWithChildren) {
         return this.getInfoRows().map((text, i) =>
             <Component key={i} {...props}>{text}</Component>
         );

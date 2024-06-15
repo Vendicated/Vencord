@@ -18,7 +18,7 @@
 
 import "./fixBadgeOverflow.css";
 
-import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, type BadgeUserArgs, type ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -30,25 +30,25 @@ import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import type { UserRecord } from "@vencord/discord-types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 
-const ContributorBadge: ProfileBadge = {
+const ContributorBadge = {
     description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
-    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
-};
+    onClick(_, { userId }) { openContributorModal(UserStore.getUser(userId)!); }
+} satisfies ProfileBadge;
 
-let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let DonorBadges: { [userId: string]: Record<"tooltip" | "badge", string>[]; } = {};
 
 async function loadBadges(noCache = false) {
     DonorBadges = {};
 
-    const init = {} as RequestInit;
+    const init: RequestInit = {};
     if (noCache)
         init.cache = "no-cache";
 
@@ -139,11 +139,17 @@ export default definePlugin({
         await loadBadges();
     },
 
-    getBadges(props: { userId: string; user?: User; guildId: string; }) {
+    getBadges(props: { userId?: string; user?: UserRecord; guildId: string; }) {
         try {
-            props.userId ??= props.user?.id!;
+            if (!props.userId) {
+                if (!props.user) return [];
+                props.userId = props.user.id;
+            }
 
-            return _getBadges(props);
+            return _getBadges({
+                userId: props.userId,
+                guildId: props.guildId
+            });
         } catch (e) {
             new Logger("BadgeAPI#hasBadges").error(e);
             return [];

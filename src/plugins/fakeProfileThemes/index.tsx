@@ -26,14 +26,12 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRecord } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
+import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import type { ReactNode } from "react";
+// @ts-ignore
 import virtualMerge from "virtual-merge";
-
-interface UserProfile extends User {
-    themeColors?: Array<number>;
-}
 
 interface Colors {
     primary: number;
@@ -49,13 +47,11 @@ function encode(primary: number, accent: number): string {
         .map(x => String.fromCodePoint(x! + 0xe0000))
         .join("");
 
-    return (padding || "") + " " + encoded;
+    return padding + " " + encoded;
 }
 
 // Courtesy of Cynthia.
-function decode(bio: string): Array<number> | null {
-    if (bio == null) return null;
-
+function decode(bio: string) {
     const colorString = bio.match(
         /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
     );
@@ -68,7 +64,7 @@ function decode(bio: string): Array<number> | null {
             .split(",")
             .map(x => parseInt(x.replace("#", "0x"), 16));
 
-        return colors;
+        return colors as ProfileThemeColors;
     } else {
         return null;
     }
@@ -87,10 +83,10 @@ const settings = definePluginSettings({
 
 interface ColorPickerProps {
     color: number | null;
-    label: React.ReactElement;
+    label: ReactNode;
     showEyeDropper?: boolean;
     suggestedColors?: string[];
-    onChange(value: number | null): void;
+    onChange: (value: number) => void;
 }
 
 // I can't be bothered to figure out the semantics of this component. The
@@ -98,8 +94,8 @@ interface ColorPickerProps {
 // all required. If anyone who wants to use this component stumbles across this
 // code, you'll have to do the research yourself.
 interface ProfileModalProps {
-    user: User;
-    pendingThemeColors: [number, number];
+    user: UserRecord;
+    pendingThemeColors: ProfileThemeColors;
     onAvatarChange: () => void;
     onBannerChange: () => void;
     canUsePremiumCustomization: boolean;
@@ -135,7 +131,7 @@ export default definePlugin({
     ],
     settingsAboutComponent: () => {
         const existingColors = decode(
-            UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
+            UserProfileStore.getUserProfile(UserStore.getCurrentUser()!.id)!.bio
         ) ?? [0, 0];
         const [color1, setColor1] = useState(existingColors[0]);
         const [color2, setColor2] = useState(existingColors[1]);
@@ -176,7 +172,7 @@ export default definePlugin({
                                         Primary
                                     </Text>
                                 }
-                                onChange={(color: number) => {
+                                onChange={color => {
                                     setColor1(color);
                                 }}
                             />
@@ -190,7 +186,7 @@ export default definePlugin({
                                         Accent
                                     </Text>
                                 }
-                                onChange={(color: number) => {
+                                onChange={color => {
                                     setColor2(color);
                                 }}
                             />
@@ -212,7 +208,7 @@ export default definePlugin({
                     <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
                     <div className="vc-fpt-preview">
                         <ProfileModal
-                            user={UserStore.getCurrentUser()}
+                            user={UserStore.getCurrentUser()!}
                             pendingThemeColors={[color1, color2]}
                             onAvatarChange={() => { }}
                             onBannerChange={() => { }}
@@ -226,30 +222,33 @@ export default definePlugin({
             </Forms.FormSection>);
     },
     settings,
-    colorDecodeHook(user: UserProfile) {
-        if (user) {
+    colorDecodeHook(profile?: UserProfile<false>) {
+        if (profile) {
             // don't replace colors if already set with nitro
-            if (settings.store.nitroFirst && user.themeColors) return user;
-            const colors = decode(user.bio);
+            if (settings.store.nitroFirst && profile.themeColors) return profile;
+            const colors = decode(profile.bio);
             if (colors) {
-                return virtualMerge(user, {
-                    premiumType: 2,
+                return virtualMerge(profile, {
+                    premiumType: UserPremiumType.TIER_2,
                     themeColors: colors
                 });
             }
         }
-        return user;
+        return profile;
     },
     addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
-        return <Button
-            onClick={() => {
-                const colorString = encode(primary, accent);
-                copyWithToast(colorString);
-            }}
-            color={Button.Colors.PRIMARY}
-            size={Button.Sizes.XLARGE}
-            className={Margins.left16}
-        >Copy 3y3
-        </Button >;
+        return (
+            <Button
+                onClick={() => {
+                    const colorString = encode(primary, accent);
+                    copyWithToast(colorString);
+                }}
+                color={Button.Colors.PRIMARY}
+                size={Button.Sizes.XLARGE}
+                className={Margins.left16}
+            >
+                Copy 3y3
+            </Button >
+        );
     }, { noop: true }),
 });

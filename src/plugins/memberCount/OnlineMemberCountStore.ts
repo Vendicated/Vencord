@@ -7,34 +7,35 @@
 import { proxyLazy } from "@utils/lazy";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { Flux, FluxDispatcher, GuildChannelStore, PrivateChannelsStore } from "@webpack/common";
+import { type ExtractAction, type FluxAction, StatusType } from "@vencord/discord-types";
+import { ChannelActionCreators, Flux, FluxDispatcher, GuildChannelStore } from "@webpack/common";
 
 export const OnlineMemberCountStore = proxyLazy(() => {
     const preloadQueue = new Queue();
 
     const onlineMemberMap = new Map<string, number>();
 
-    class OnlineMemberCountStore extends Flux.Store {
+    type OnlineMemberCountStoreAction = ExtractAction<FluxAction, "GUILD_MEMBER_LIST_UPDATE" | "ONLINE_GUILD_MEMBER_COUNT_UPDATE">;
+
+    class OnlineMemberCountStore extends Flux.Store<OnlineMemberCountStoreAction> {
         getCount(guildId: string) {
             return onlineMemberMap.get(guildId);
         }
 
         async _ensureCount(guildId: string) {
-            if (onlineMemberMap.has(guildId)) return;
-
-            await PrivateChannelsStore.preload(guildId, GuildChannelStore.getDefaultChannel(guildId).id);
+            if (!onlineMemberMap.has(guildId))
+                await ChannelActionCreators.preload(guildId, GuildChannelStore.getDefaultChannel(guildId)!.id);
         }
 
         ensureCount(guildId: string) {
-            if (onlineMemberMap.has(guildId)) return;
-
-            preloadQueue.push(() =>
-                this._ensureCount(guildId)
-                    .then(
-                        () => sleep(200),
-                        () => sleep(200)
-                    )
-            );
+            if (!onlineMemberMap.has(guildId))
+                preloadQueue.push(() =>
+                    this._ensureCount(guildId)
+                        .then(
+                            () => sleep(200),
+                            () => sleep(200)
+                        )
+                );
         }
     }
 
@@ -42,7 +43,7 @@ export const OnlineMemberCountStore = proxyLazy(() => {
         GUILD_MEMBER_LIST_UPDATE({ guildId, groups }: { guildId: string, groups: { count: number; id: string; }[]; }) {
             onlineMemberMap.set(
                 guildId,
-                groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0)
+                groups.reduce((total, curr) => total + (curr.id === StatusType.OFFLINE ? 0 : curr.count), 0)
             );
         },
         ONLINE_GUILD_MEMBER_COUNT_UPDATE({ guildId, count }) {

@@ -8,7 +8,7 @@ import { app } from "electron";
 import { readFile } from "fs/promises";
 import { basename, normalize } from "path";
 
-export async function readRecording(_, filePath: string) {
+export async function readRecording(_: any, filePath: string) {
     filePath = normalize(filePath);
     const filename = basename(filePath);
     const discordBaseDirWithTrailingSlash = normalize(app.getPath("userData") + "/");

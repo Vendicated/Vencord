@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel, User } from "discord-types/general/index.js";
+import type { ChannelRecord, UserRecord } from "@vencord/discord-types";
+import type { JSX } from "react";
 
 interface DecoratorProps {
     activities: any[];
-    channel: Channel;
+    channel: ChannelRecord;
     /**
      * Only for DM members
      */
@@ -28,14 +29,14 @@ interface DecoratorProps {
     /**
      * Only for server members
      */
-    currentUser?: User;
+    currentUser?: UserRecord;
     guildId?: string;
     isMobile: boolean;
     isOwner?: boolean;
     isTyping: boolean;
     selected: boolean;
     status: string;
-    user: User;
+    user: UserRecord;
     [key: string]: any;
 }
 export type Decorator = (props: DecoratorProps) => JSX.Element | null;

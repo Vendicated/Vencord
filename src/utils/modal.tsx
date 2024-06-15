@@ -118,7 +118,7 @@ export type ImageModal = ComponentType<{
     shouldHideMediaOptions?: boolean;
 }>;
 
-export const ImageModal = findExportedComponentLazy("ImageModal") as ImageModal;
+export const ImageModal: ImageModal = findExportedComponentLazy("ImageModal");
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
@@ -126,7 +126,8 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-const ModalAPI = findByPropsLazy("openModalLazy");
+// zustand store
+const ModalsStore = findByPropsLazy("openModalLazy", "useModalsStore");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.
@@ -134,7 +135,7 @@ const ModalAPI = findByPropsLazy("openModalLazy");
  * You should use the Modal components exported by this file
  */
 export function openModalLazy(render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }): Promise<string> {
-    return ModalAPI.openModalLazy(render, options);
+    return ModalsStore.openModalLazy(render, options);
 }
 
 /**
@@ -142,19 +143,19 @@ export function openModalLazy(render: () => Promise<RenderFunction>, options?: M
  * You should use the Modal components exported by this file
  */
 export function openModal(render: RenderFunction, options?: ModalOptions, contextKey?: string): string {
-    return ModalAPI.openModal(render, options, contextKey);
+    return ModalsStore.openModal(render, options, contextKey);
 }
 
 /**
  * Close a modal by its key
  */
 export function closeModal(modalKey: string, contextKey?: string): void {
-    return ModalAPI.closeModal(modalKey, contextKey);
+    return ModalsStore.closeModal(modalKey, contextKey);
 }
 
 /**
  * Close all open modals
  */
 export function closeAllModals(): void {
-    return ModalAPI.closeAllModals();
+    return ModalsStore.closeAllModals();
 }

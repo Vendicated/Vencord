@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel, Message } from "discord-types/general/index.js";
+import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
+import type { JSX } from "react";
 
 interface DecorationProps {
     author: {
@@ -29,7 +30,7 @@ interface DecorationProps {
         colorRoleName: string;
         colorString: string;
     };
-    channel: Channel;
+    channel: ChannelRecord;
     compact: boolean;
     decorations: {
         /**
@@ -41,7 +42,7 @@ interface DecorationProps {
          */
         1: JSX.Element[];
     };
-    message: Message;
+    message: MessageRecord;
     [key: string]: any;
 }
 export type Decoration = (props: DecorationProps) => JSX.Element | null;

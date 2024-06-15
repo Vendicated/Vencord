@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { IShikiTheme } from "@vap/shiki";
+import type { IShikiTheme } from "@vap/shiki";
 
 export const SHIKI_REPO = "shikijs/shiki";
 export const SHIKI_REPO_COMMIT = "0b28ad8ccfbf2615f2d9d38ea8255416b8ac3043";

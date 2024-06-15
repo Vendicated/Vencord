@@ -7,7 +7,7 @@
 import { proxyLazy } from "@utils/lazy";
 import { UserStore, zustandCreate } from "@webpack/common";
 
-import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
+import { type Decoration, deleteDecoration, getUserDecoration, getUserDecorations, type NewDecoration, setUserDecoration } from "../api";
 import { decorationToAsset } from "../utils/decoration";
 import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
@@ -17,11 +17,15 @@ interface UserDecorationsState {
     fetch: () => Promise<void>;
     delete: (decoration: Decoration | string) => Promise<void>;
     create: (decoration: NewDecoration) => Promise<void>;
-    select: (decoration: Decoration | null) => Promise<void>;
+    select: (decoration: Decoration | null) => void;
     clear: () => void;
 }
 
-export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate((set: any, get: any) => ({
+export const useCurrentUserDecorationsStore: {
+    (): UserDecorationsState;
+    getState: () => UserDecorationsState;
+    subscribe: (handler: (state: UserDecorationsState) => void) => () => void;
+} = proxyLazy(() => zustandCreate((set: any, get: any): UserDecorationsState => ({
     decorations: [],
     selectedDecoration: null,
     async fetch() {
@@ -40,17 +44,17 @@ export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate((set
 
         const { selectedDecoration, decorations } = get();
         const newState = {
-            decorations: decorations.filter(d => d.hash !== hash),
+            decorations: decorations.filter((d: any) => d.hash !== hash),
             selectedDecoration: selectedDecoration?.hash === hash ? null : selectedDecoration
         };
 
         set(newState);
     },
-    async select(decoration: Decoration | null) {
+    select(decoration: Decoration | null) {
         if (get().selectedDecoration === decoration) return;
         set({ selectedDecoration: decoration });
         setUserDecoration(decoration);
-        useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToAsset(decoration) : null);
+        useUsersDecorationsStore.getState().set(UserStore.getCurrentUser()!.id, decoration ? decorationToAsset(decoration) : null);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })
-} as UserDecorationsState)));
+})));

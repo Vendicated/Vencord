@@ -65,7 +65,7 @@ async function fetchUpdates() {
     if (hash === gitHash)
         return false;
 
-    data.assets.forEach(({ name, browser_download_url }) => {
+    data.assets.forEach(({ name, browser_download_url }: any) => {
         if (VENCORD_FILES.some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }

@@ -18,8 +18,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import { wordsToTitle } from "@utils/text";
-import { GuildStore, i18n, Parser } from "@webpack/common";
-import { Guild, GuildMember, Role } from "discord-types/general";
+import type { GuildMember, GuildRecord, Role } from "@vencord/discord-types";
+import { GuildStore, i18n, MarkupUtils } from "@webpack/common";
 import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from ".";
@@ -32,14 +32,14 @@ function formatPermissionWithoutMatchingString(permission: string) {
 }
 
 // because discord is unable to be consistent with their names
-const PermissionKeyMap = {
+const PermissionKeyMap: Record<string, string> = {
     MANAGE_GUILD: "MANAGE_SERVER",
     MANAGE_GUILD_EXPRESSIONS: "MANAGE_EXPRESSIONS",
     CREATE_GUILD_EXPRESSIONS: "CREATE_EXPRESSIONS",
     MODERATE_MEMBERS: "MODERATE_MEMBER", // HELLOOOO ??????
     STREAM: "VIDEO",
     SEND_VOICE_MESSAGES: "ROLE_PERMISSIONS_SEND_VOICE_MESSAGE",
-} as const;
+};
 
 export function getPermissionString(permission: string) {
     permission = PermissionKeyMap[permission] || permission;
@@ -58,20 +58,20 @@ export function getPermissionDescription(permission: string): ReactNode {
     else if (permission !== "STREAM")
         permission = PermissionKeyMap[permission] || permission;
 
-    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] as any;
+    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`];
     if (msg?.hasMarkdown)
-        return Parser.parse(msg.message);
+        return MarkupUtils.parse(msg.message);
 
     if (typeof msg === "string") return msg;
 
     return "";
 }
 
-export function getSortedRoles({ id }: Guild, member: GuildMember) {
+export function getSortedRoles({ id }: GuildRecord, member: GuildMember) {
     const roles = GuildStore.getRoles(id);
 
     return [...member.roles, id]
-        .map(id => roles[id])
+        .map(id => roles[id]!)
         .sort((a, b) => b.position - a.position);
 }
 
@@ -90,10 +90,11 @@ export function sortPermissionOverwrites<T extends { id: string; type: number; }
     const roles = GuildStore.getRoles(guildId);
 
     return overwrites.sort((a, b) => {
-        if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
+        if (a.type !== PermissionType.Role || b.type !== PermissionType.Role)
+            return 0;
 
-        const roleA = roles[a.id];
-        const roleB = roles[b.id];
+        const roleA = roles[a.id]!;
+        const roleB = roles[b.id]!;
 
         return roleB.position - roleA.position;
     });

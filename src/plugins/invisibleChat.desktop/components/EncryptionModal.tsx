@@ -21,19 +21,19 @@ import {
     ModalContent,
     ModalFooter,
     ModalHeader,
-    ModalProps,
+    type ModalProps,
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { Button, Forms, Switch, TextInput, useState } from "@webpack/common";
 
 import { encrypt } from "../index";
 
 function EncModal(props: ModalProps) {
-    const [secret, setSecret] = React.useState("");
-    const [cover, setCover] = React.useState("");
-    const [password, setPassword] = React.useState("password");
-    const [noCover, setNoCover] = React.useState(false);
+    const [secret, setSecret] = useState("");
+    const [cover, setCover] = useState("");
+    const [password, setPassword] = useState("password");
+    const [noCover, setNoCover] = useState(false);
 
     const isValid = secret && (noCover || (cover && cover.trim().split(" ").length > 1));
 
@@ -46,30 +46,22 @@ function EncModal(props: ModalProps) {
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Secret</Forms.FormTitle>
                 <TextInput
-                    onChange={(e: string) => {
-                        setSecret(e);
-                    }}
+                    onChange={setSecret}
                 />
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Forms.FormTitle>
                 <TextInput
                     disabled={noCover}
-                    onChange={(e: string) => {
-                        setCover(e);
-                    }}
+                    onChange={setCover}
                 />
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     defaultValue={"password"}
-                    onChange={(e: string) => {
-                        setPassword(e);
-                    }}
+                    onChange={setPassword}
                 />
                 <Switch
                     value={noCover}
-                    onChange={(e: boolean) => {
-                        setNoCover(e);
-                    }}
+                    onChange={setNoCover}
                 >
                     Don't use a Cover
                 </Switch>
@@ -83,11 +75,10 @@ function EncModal(props: ModalProps) {
                         if (!isValid) return;
                         const encrypted = encrypt(secret, password, noCover ? "d d" : cover);
                         const toSend = noCover ? encrypted.replaceAll("d", "") : encrypted;
-                        if (!toSend) return;
-
-                        insertTextIntoChatInputBox(toSend);
-
-                        props.onClose();
+                        if (toSend) {
+                            insertTextIntoChatInputBox(toSend);
+                            props.onClose();
+                        }
                     }}
                 >
                     Send
@@ -107,6 +98,6 @@ function EncModal(props: ModalProps) {
     );
 }
 
-export function buildEncModal(): any {
+export function buildEncModal() {
     openModal(props => <EncModal {...props} />);
 }

@@ -5,17 +5,15 @@
  */
 
 import { findByPropsLazy } from "@webpack";
-import { Parser } from "@webpack/common";
+import { MarkupUtils } from "@webpack/common";
 
-const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
+const CodeContainerClasses: Record<string, string> = findByPropsLazy("markup", "codeContainer");
 
 /**
  * Renders code in a Discord codeblock
  */
-export function CodeBlock(props: { content?: string, lang: string; }) {
-    return (
-        <div className={CodeContainerClasses.markup}>
-            {Parser.defaultRules.codeBlock.react(props, null, {})}
-        </div>
-    );
-}
+export const CodeBlock = (props: { content?: string, lang: string; }) => (
+    <div className={CodeContainerClasses.markup}>
+        {MarkupUtils.defaultRules.codeBlock!.react(props, null, {})}
+    </div>
+);

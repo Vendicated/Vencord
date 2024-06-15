@@ -23,16 +23,16 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const RpcUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
+const RPCHelpers = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
-    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0]!;
 }
 
-const apps: any = {};
+const apps: Record<string, any> = {};
 async function lookupApp(applicationId: string): Promise<string> {
-    const socket: any = {};
-    await RpcUtils.fetchApplicationsRPC(socket, applicationId);
+    const socket: Record<string, any> = {};
+    await RPCHelpers.fetchApplicationsRPC(socket, applicationId);
     return socket.application;
 }
 
@@ -58,8 +58,10 @@ export default definePlugin({
         const { activity } = data;
         const assets = activity?.assets;
 
-        if (assets?.large_image) assets.large_image = await lookupAsset(activity.application_id, assets.large_image);
-        if (assets?.small_image) assets.small_image = await lookupAsset(activity.application_id, assets.small_image);
+        if (assets?.large_image)
+            assets.large_image = await lookupAsset(activity.application_id, assets.large_image);
+        if (assets?.small_image)
+            assets.small_image = await lookupAsset(activity.application_id, assets.small_image);
 
         if (activity) {
             const appId = activity.application_id;
@@ -76,12 +78,15 @@ export default definePlugin({
         // ArmCord comes with its own arRPC implementation, so this plugin just confuses users
         if ("armcord" in window) return;
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
         ws.onmessage = this.handleEvent;
 
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
+        const connectionSuccessful = await new Promise(res => {
+            setTimeout(() => { res(ws.readyState === WebSocket.OPEN); }, 1000); // check if open after 1s
+        });
         if (!connectionSuccessful) {
             showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
                 popNotice();
@@ -103,6 +108,7 @@ export default definePlugin({
 
     stop() {
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null }); // clear status
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ws?.close(); // close WebSocket
     }
 });

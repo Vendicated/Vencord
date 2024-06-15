@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, Toasts } from "@webpack/common";
+import { ClipboardUtils, Toasts } from "@webpack/common";
 
 import { DevsById } from "./constants";
 
@@ -24,20 +24,17 @@ import { DevsById } from "./constants";
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined>) {
-    return classes.filter(Boolean).join(" ");
-}
+export const classes = (...classes: (string | false | null | undefined)[]) =>
+    classes.filter(Boolean).join(" ");
 
 /**
  * Returns a promise that resolves after the specified amount of time
  */
-export function sleep(ms: number): Promise<void> {
-    return new Promise(r => setTimeout(r, ms));
-}
+export const sleep = (ms: number) => new Promise<void>(r => { setTimeout(r, ms); });
 
 export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(text);
+    if (ClipboardUtils.SUPPORTS_COPY) {
+        ClipboardUtils.copy(text);
     } else {
         toastMessage = "Your browser does not support copying to clipboard";
     }
@@ -80,13 +77,13 @@ export function parseUrl(urlString: string): URL | null {
 /**
  * Checks whether an element is on screen
  */
-export const checkIntersecting = (el: Element) => {
+export function checkIntersecting(el: Element) {
     const elementBox = el.getBoundingClientRect();
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
-};
+}
 
-export function identity<T>(value: T): T {
+export function identity<T>(value: T) {
     return value;
 }
 

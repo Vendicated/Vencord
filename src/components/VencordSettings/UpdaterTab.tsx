@@ -22,17 +22,18 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
+import { AlertActionCreators, Button, Card, Forms, MarkupUtils, Switch, Toasts, useEffect, useState } from "@webpack/common";
+import type { Dispatch, SetStateAction } from "react";
 
 import gitHash from "~git-hash";
 
 import { handleSettingsTabError, SettingsTab, wrapTab } from "./shared";
 
-function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
+function withDispatcher(dispatcher: Dispatch<SetStateAction<boolean>>, action: () => any) {
     return async () => {
         dispatcher(true);
         try {
@@ -57,11 +58,11 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
                 err = "An unknown error occurred. See the console for more info.";
             }
 
-            Alerts.show({
+            AlertActionCreators.show({
                 title: "Oops!",
                 body: (
                     <ErrorCard>
-                        {err.split("\n").map(line => <div>{Parser.parse(line)}</div>)}
+                        {err.split("\n").map(line => <div>{MarkupUtils.parse(line)}</div>)}
                     </ErrorCard>
                 )
             });
@@ -77,40 +78,40 @@ interface CommonProps {
     repoPending: boolean;
 }
 
-function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
-    return <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
+const HashLink = ({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) => (
+    <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
         {hash}
-    </Link>;
-}
+    </Link>
+);
 
-function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
-    return (
-        <Card style={{ padding: "0 0.5em" }}>
-            {updates.map(({ hash, author, message }) => (
-                <div style={{
-                    marginTop: "0.5em",
-                    marginBottom: "0.5em"
-                }}>
-                    <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
-                    <span style={{
-                        marginLeft: "0.5em",
-                        color: "var(--text-normal)"
-                    }}>{message} - {author}</span>
-                </div>
-            ))}
-        </Card>
-    );
-}
+const Changes = ({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) => (
+    <Card style={{ padding: "0 0.5em" }}>
+        {updates.map(({ hash, author, message }) => (
+            <div style={{
+                marginTop: "0.5em",
+                marginBottom: "0.5em"
+            }}>
+                <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
+                <span style={{
+                    marginLeft: "0.5em",
+                    color: "var(--text-normal)"
+                }}>{message} - {author}</span>
+            </div>
+        ))}
+    </Card>
+);
 
 function Updatable(props: CommonProps) {
-    const [updates, setUpdates] = React.useState(changes);
-    const [isChecking, setIsChecking] = React.useState(false);
-    const [isUpdating, setIsUpdating] = React.useState(false);
+    const [updates, setUpdates] = useState(changes);
+    const [isChecking, setIsChecking] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const isOutdated = (updates?.length ?? 0) > 0;
 
     return (
         <>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {!updates && updateError ? (
                 <>
                     <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
@@ -134,7 +135,7 @@ function Updatable(props: CommonProps) {
                         if (await update()) {
                             setUpdates([]);
                             await new Promise<void>(r => {
-                                Alerts.show({
+                                AlertActionCreators.show({
                                     title: "Update Success!",
                                     body: "Successfully updated. Restart now to apply the changes?",
                                     confirmText: "Restart",
@@ -178,23 +179,21 @@ function Updatable(props: CommonProps) {
     );
 }
 
-function Newer(props: CommonProps) {
-    return (
-        <>
-            <Forms.FormText className={Margins.bottom8}>
-                Your local copy has more recent commits. Please stash or reset them.
-            </Forms.FormText>
-            <Changes {...props} updates={changes} />
-        </>
-    );
-}
+const Newer = (props: CommonProps) => (
+    <>
+        <Forms.FormText className={Margins.bottom8}>
+            Your local copy has more recent commits. Please stash or reset them.
+        </Forms.FormText>
+        <Changes {...props} updates={changes} />
+    </>
+);
 
 function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (err)
             UpdateLogger.error("Failed to retrieve repo", err);
     }, [err]);
@@ -209,14 +208,14 @@ function Updater() {
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.autoUpdate}
-                onChange={(v: boolean) => settings.autoUpdate = v}
+                onChange={(v: boolean) => { settings.autoUpdate = v; }}
                 note="Automatically update Vencord without confirmation prompt"
             >
                 Automatically update
             </Switch>
             <Switch
                 value={settings.autoUpdateNotification}
-                onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                onChange={(v: boolean) => { settings.autoUpdateNotification = v; }}
                 note="Shows a notification when Vencord automatically updates"
                 disabled={!settings.autoUpdate}
             >

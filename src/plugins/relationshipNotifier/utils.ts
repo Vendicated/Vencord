@@ -19,77 +19,80 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
+import { RelationshipType } from "@vencord/discord-types";
+import { ChannelStore, GuildMemberStore, GuildStore, IconUtils, RelationshipStore, UserActionCreators, UserStore } from "@webpack/common";
 
 import settings from "./settings";
-import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+import type { SimpleGroupDMChannel, SimpleGuild } from "./types";
 
 const guilds = new Map<string, SimpleGuild>();
-const groups = new Map<string, SimpleGroupChannel>();
+const groupDMs = new Map<string, SimpleGroupDMChannel>();
 const friends = {
     friends: [] as string[],
     requests: [] as string[]
 };
 
-const guildsKey = () => `relationship-notifier-guilds-${UserStore.getCurrentUser().id}`;
-const groupsKey = () => `relationship-notifier-groups-${UserStore.getCurrentUser().id}`;
-const friendsKey = () => `relationship-notifier-friends-${UserStore.getCurrentUser().id}`;
+const guildsKey = () => `relationship-notifier-guilds-${UserStore.getCurrentUser()!.id}`;
+const groupDMsKey = () => `relationship-notifier-groups-${UserStore.getCurrentUser()!.id}`;
+const friendsKey = () => `relationship-notifier-friends-${UserStore.getCurrentUser()!.id}`;
 
-async function runMigrations() {
+function runMigrations() {
     DataStore.delMany(["relationship-notifier-guilds", "relationship-notifier-groups", "relationship-notifier-friends"]);
 }
 
 export async function syncAndRunChecks() {
-    await runMigrations();
-    const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
+    runMigrations();
+    const [oldGuilds, oldGroupDMs, oldFriends] = await DataStore.getMany([
         guildsKey(),
-        groupsKey(),
+        groupDMsKey(),
         friendsKey()
-    ]) as [Map<string, SimpleGuild> | undefined, Map<string, SimpleGroupChannel> | undefined, Record<"friends" | "requests", string[]> | undefined];
+    ]) as [Map<string, SimpleGuild> | undefined, Map<string, SimpleGroupDMChannel> | undefined, Record<"friends" | "requests", string[]> | undefined];
 
     await Promise.all([syncGuilds(), syncGroups(), syncFriends()]);
 
     if (settings.store.offlineRemovals) {
-        if (settings.store.groups && oldGroups?.size) {
-            for (const [id, group] of oldGroups) {
-                if (!groups.has(id))
-                    notify(`You are no longer in the group ${group.name}.`, group.iconURL);
+        if (settings.store.groups && oldGroupDMs?.size) {
+            for (const [userId, { name, iconURL }] of oldGroupDMs) {
+                if (!groupDMs.has(userId))
+                    notify(`You are no longer in the group ${name}.`, iconURL);
             }
         }
 
         if (settings.store.servers && oldGuilds?.size) {
-            for (const [id, guild] of oldGuilds) {
-                if (!guilds.has(id))
-                    notify(`You are no longer in the server ${guild.name}.`, guild.iconURL);
+            for (const [userId, { name, iconURL }] of oldGuilds) {
+                if (!guilds.has(userId))
+                    notify(`You are no longer in the server ${name}.`, iconURL);
             }
         }
 
         if (settings.store.friends && oldFriends?.friends.length) {
-            for (const id of oldFriends.friends) {
-                if (friends.friends.includes(id)) continue;
+            for (const userId of oldFriends.friends) {
+                if (friends.friends.includes(userId)) continue;
 
-                const user = await UserUtils.getUser(id).catch(() => void 0);
+                const user = await UserActionCreators.getUser(userId).catch(() => undefined);
                 if (user)
                     notify(
                         `You are no longer friends with ${getUniqueUsername(user)}.`,
-                        user.getAvatarURL(undefined, undefined, false),
+                        user.getAvatarURL(),
                         () => openUserProfile(user.id)
                     );
             }
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (settings.store.friendRequestCancels && oldFriends?.requests?.length) {
-            for (const id of oldFriends.requests) {
+            for (const userId of oldFriends.requests) {
                 if (
-                    friends.requests.includes(id) ||
-                    [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.OUTGOING_REQUEST].includes(RelationshipStore.getRelationshipType(id))
+                    friends.requests.includes(userId)
+                    || [RelationshipType.FRIEND, RelationshipType.BLOCKED, RelationshipType.PENDING_OUTGOING]
+                        .includes(RelationshipStore.getRelationshipType(userId))
                 ) continue;
 
-                const user = await UserUtils.getUser(id).catch(() => void 0);
+                const user = await UserActionCreators.getUser(userId).catch(() => undefined);
                 if (user)
                     notify(
                         `Friend request from ${getUniqueUsername(user)} has been revoked.`,
-                        user.getAvatarURL(undefined, undefined, false),
+                        user.getAvatarURL(),
                         () => openUserProfile(user.id)
                     );
             }
@@ -99,7 +102,7 @@ export async function syncAndRunChecks() {
 
 export function notify(text: string, icon?: string, onClick?: () => void) {
     if (settings.store.notices)
-        Notices.showNotice(text, "OK", () => Notices.popNotice());
+        Notices.showNotice(text, "OK", () => { Notices.popNotice(); });
 
     showNotification({
         title: "Relationship Notifier",
@@ -109,66 +112,73 @@ export function notify(text: string, icon?: string, onClick?: () => void) {
     });
 }
 
-export function getGuild(id: string) {
-    return guilds.get(id);
+export function getGuild(guildId: string) {
+    return guilds.get(guildId);
 }
 
-export function deleteGuild(id: string) {
-    guilds.delete(id);
+export function deleteGuild(guildId: string) {
+    guilds.delete(guildId);
     syncGuilds();
 }
 
 export async function syncGuilds() {
     guilds.clear();
 
-    const me = UserStore.getCurrentUser().id;
-    for (const [id, { name, icon }] of Object.entries(GuildStore.getGuilds())) {
-        if (GuildMemberStore.isMember(id, me))
+    const meId = UserStore.getCurrentUser()!.id;
+    for (const guild of Object.values(GuildStore.getGuilds())) {
+        const { id, name } = guild;
+        if (GuildMemberStore.isMember(id, meId))
             guilds.set(id, {
                 id,
                 name,
-                iconURL: icon && `https://cdn.discordapp.com/icons/${id}/${icon}.png`
+                iconURL: guild.getIconURL()
             });
     }
+
     await DataStore.set(guildsKey(), guilds);
 }
 
-export function getGroup(id: string) {
-    return groups.get(id);
+export function getGroupDM(channelId: string) {
+    return groupDMs.get(channelId);
 }
 
-export function deleteGroup(id: string) {
-    groups.delete(id);
+export function deleteGroupDM(channelId: string) {
+    groupDMs.delete(channelId);
     syncGroups();
 }
 
 export async function syncGroups() {
-    groups.clear();
+    groupDMs.clear();
 
-    for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
-        if (type === ChannelType.GROUP_DM)
-            groups.set(id, {
+    for (const channel of Object.values(ChannelStore.getMutablePrivateChannels())) {
+        const { icon, id, name, rawRecipients } = channel;
+        if (channel.isGroupDM())
+            groupDMs.set(id, {
                 id,
                 name: name || rawRecipients.map(r => r.username).join(", "),
-                iconURL: icon && `https://cdn.discordapp.com/channel-icons/${id}/${icon}.png`
+                iconURL: IconUtils.getChannelIconURL({
+                    id: id,
+                    icon: icon,
+                    applicationId: channel.getApplicationId()
+                })
             });
     }
 
-    await DataStore.set(groupsKey(), groups);
+    await DataStore.set(groupDMsKey(), groupDMs);
 }
 
 export async function syncFriends() {
     friends.friends = [];
     friends.requests = [];
 
-    const relationShips = RelationshipStore.getRelationships();
-    for (const id in relationShips) {
-        switch (relationShips[id]) {
+    const relationships = RelationshipStore.getRelationships();
+    for (const userId in relationships) {
+        switch (relationships[userId]) {
             case RelationshipType.FRIEND:
-                friends.friends.push(id);
+                friends.friends.push(userId);
                 break;
-            case RelationshipType.INCOMING_REQUEST:
-                friends.requests.push(id);
+            case RelationshipType.PENDING_INCOMING:
+                friends.requests.push(userId);
                 break;
         }
     }

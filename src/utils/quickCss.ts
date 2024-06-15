@@ -19,8 +19,8 @@
 import { Settings, SettingsStore } from "@api/Settings";
 
 
-let style: HTMLStyleElement;
-let themesStyle: HTMLStyleElement;
+let style: HTMLStyleElement | undefined;
+let themesStyle: HTMLStyleElement | undefined;
 
 function createStyle(id: string) {
     const style = document.createElement("style");
@@ -44,9 +44,9 @@ export async function toggle(isEnabled: boolean) {
         if (isEnabled) {
             style = createStyle("vencord-custom-css");
             VencordNative.quickCss.addChangeListener(css => {
-                style.textContent = css;
+                style!.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
-                style.disabled = !Settings.useQuickCss;
+                style!.disabled = !Settings.useQuickCss;
             });
             style.textContent = await VencordNative.quickCss.get();
         }

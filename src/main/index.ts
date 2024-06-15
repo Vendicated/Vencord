@@ -58,8 +58,8 @@ if (IS_VESKTOP || !IS_VANILLA) {
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
-                    .then(() => console.info("[Vencord] Installed React Developer Tools"))
-                    .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
+                    .then(() => { console.info("[Vencord] Installed React Developer Tools"); })
+                    .catch(err => { console.error("[Vencord] Failed to install React Developer Tools", err); });
         } catch { }
 
 
@@ -83,6 +83,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
         };
         const stringifyPolicy = (policy: PolicyResult): string =>
             Object.entries(policy)
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 .filter(([, values]) => values?.length)
                 .map(directive => directive.flat().join(" "))
                 .join("; ");
@@ -91,11 +92,11 @@ if (IS_VESKTOP || !IS_VANILLA) {
             const header = findHeader(headers, "content-security-policy");
 
             if (header) {
-                const csp = parsePolicy(headers[header][0]);
+                const csp = parsePolicy(headers[header]![0]!);
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
                     csp[directive] ??= [];
-                    csp[directive].push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
+                    csp[directive]!.push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
                 }
 
                 // TODO: Restrict this to only imported packages with fixed version.

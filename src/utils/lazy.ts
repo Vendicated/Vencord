@@ -51,8 +51,9 @@ for (const method of [
     "preventExtensions",
     "set",
     "setPrototypeOf"
-]) {
+] as const) {
     handler[method] =
+        // @ts-ignore
         (target: any, ...args: any[]) => Reflect[method](target[SYM_LAZY_GET](), ...args);
 }
 
@@ -92,7 +93,7 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
 
     let tries = 0;
     const proxyDummy = Object.assign(function () { }, {
-        [SYM_LAZY_CACHED]: void 0 as T | undefined,
+        [SYM_LAZY_CACHED]: undefined as T | undefined,
         [SYM_LAZY_GET]() {
             if (!proxyDummy[SYM_LAZY_CACHED] && attempts > tries++) {
                 proxyDummy[SYM_LAZY_CACHED] = factory();
@@ -125,5 +126,5 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
             }
             throw new Error("proxyLazy called on a primitive value");
         }
-    }) as any;
+    });
 }

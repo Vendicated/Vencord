@@ -26,27 +26,24 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { Forms, Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
 
-export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
-    return (
-        <Forms.FormSection>
-            <Text
-                variant="heading-lg/semibold"
-                tag="h2"
-                className={Margins.bottom16}
-            >
-                {title}
-            </Text>
+export const SettingsTab = ({ title, children }: PropsWithChildren<{ title: string; }>) => (
+    <Forms.FormSection>
+        <Text
+            variant="heading-lg/semibold"
+            tag="h2"
+            className={Margins.bottom16}
+        >
+            {title}
+        </Text>
 
-            {children}
-        </Forms.FormSection>
-    );
-}
+        {children}
+    </Forms.FormSection>
+);
 
 export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
-export function wrapTab(component: ComponentType<any>, tab: string) {
-    return ErrorBoundary.wrap(component, {
+export const wrapTab = (component: ComponentType<any>, tab: string) =>
+    ErrorBoundary.wrap(component, {
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
         onError: handleSettingsTabError,
     });
-}

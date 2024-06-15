@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { FluxPersistedStore, FluxSnapshotStore } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, i18n, useMemo } from "@webpack/common";
 
@@ -31,20 +32,20 @@ enum FolderIconDisplay {
 }
 
 const { GuildsTree } = findByPropsLazy("GuildsTree");
-const SortedGuildStore = findStoreLazy("SortedGuildStore");
-export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
-const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
+const SortedGuildStore: FluxSnapshotStore & Record<string, any> = findStoreLazy("SortedGuildStore");
+export const ExpandedGuildFolderStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ExpandedGuildFolderStore");
+const GuildActionCreators = findByPropsLazy("move", "toggleGuildFolderExpand");
 
-let lastGuildId = null as string | null;
+let lastGuildId: string | null = null;
 let dispatchingFoldersClose = false;
 
-function getGuildFolder(id: string) {
-    return SortedGuildStore.getGuildFolders().find(folder => folder.guildIds.includes(id));
+function getGuildFolder(guildId: string) {
+    return SortedGuildStore.getGuildFolders().find((folder: any) => folder.guildIds.includes(guildId));
 }
 
 function closeFolders() {
     for (const id of ExpandedGuildFolderStore.getExpandedFolders())
-        FolderUtils.toggleGuildFolderExpand(id);
+        GuildActionCreators.toggleGuildFolderExpand(id);
 }
 
 export const settings = definePluginSettings({
@@ -226,7 +227,7 @@ export default definePlugin({
 
                 if (guildFolder?.folderId) {
                     if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
-                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                        GuildActionCreators.toggleGuildFolderExpand(guildFolder.folderId);
                     }
                 } else if (settings.store.closeAllFolders) {
                     closeFolders();
@@ -243,7 +244,7 @@ export default definePlugin({
 
                     if (expandedFolders.size > 1) {
                         for (const id of expandedFolders) if (id !== data.folderId)
-                            FolderUtils.toggleGuildFolderExpand(id);
+                            GuildActionCreators.toggleGuildFolderExpand(id);
                     }
 
                     dispatchingFoldersClose = false;
@@ -258,7 +259,7 @@ export default definePlugin({
 
             const newTree = new GuildsTree();
             // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
-            newTree.root.children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
+            newTree.root.children = originalTree.root.children.filter((guildOrFolder: any) => expandedFolderIds.has(guildOrFolder.id));
             // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
             newTree.nodes = Object.fromEntries(
                 Object.entries(originalTree.nodes)
@@ -270,7 +271,7 @@ export default definePlugin({
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
-        return child => {
+        return (child: any) => {
             if (isBetterFolders) {
                 return child?.props?.["aria-label"] === i18n.Messages.SERVERS;
             }
@@ -279,7 +280,7 @@ export default definePlugin({
     },
 
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
-        return child => {
+        return (child: any) => {
             if (isBetterFolders) {
                 return child?.props?.onScroll != null;
             }
@@ -302,7 +303,7 @@ export default definePlugin({
         }
     },
 
-    FolderSideBar: guildsBarProps => <FolderSideBar {...guildsBarProps} />,
+    FolderSideBar: (guildsBarProps: any) => <FolderSideBar {...guildsBarProps} />,
 
     closeFolders
 });

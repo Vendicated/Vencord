@@ -57,10 +57,10 @@ export function stripBOM(fileContent: string) {
 export function getThemeInfo(css: string, fileName: string): UserThemeHeader {
     if (!css) return makeHeader(fileName);
 
-    const block = css.split("/**", 2)?.[1]?.split("*/", 1)?.[0];
+    const block = css.split("/**", 2)[1]?.split("*/", 1)?.[0];
     if (!block) return makeHeader(fileName);
 
-    const header: Partial<UserThemeHeader> = {};
+    const header: Partial<UserThemeHeader> & Record<string, string> = {};
     let field = "";
     let accum = "";
     for (const line of block.split(splitRegex)) {

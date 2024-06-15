@@ -10,7 +10,7 @@ import { openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import { showToast, Toasts, UserStore } from "@webpack/common";
 
-import { ReviewDBAuth } from "./entities";
+import type { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
 
@@ -24,7 +24,8 @@ export async function initAuth() {
 
 export async function getAuth(): Promise<ReviewDBAuth | undefined> {
     const auth = await DataStore.get(DATA_STORE_KEY);
-    return auth?.[UserStore.getCurrentUser()?.id];
+    const me = UserStore.getCurrentUser();
+    if (me) return auth?.[me.id];
 }
 
 export async function getToken() {
@@ -35,7 +36,7 @@ export async function getToken() {
 export async function updateAuth(newAuth: ReviewDBAuth) {
     return DataStore.update(DATA_STORE_KEY, auth => {
         auth ??= {};
-        Auth = auth[UserStore.getCurrentUser().id] ??= {};
+        Auth = auth[UserStore.getCurrentUser()!.id] ??= {};
 
         if (newAuth.token) Auth.token = newAuth.token;
         if (newAuth.user) Auth.user = newAuth.user;
@@ -44,7 +45,7 @@ export async function updateAuth(newAuth: ReviewDBAuth) {
     });
 }
 
-export function authorize(callback?: any) {
+export function authorize() {
     openModal(props =>
         <OAuth2AuthorizeModal
             {...props}
@@ -71,9 +72,8 @@ export function authorize(callback?: any) {
                     const { token } = await res.json();
                     updateAuth({ token });
                     showToast("Successfully logged in!", Toasts.Type.SUCCESS);
-                    callback?.();
                 } catch (e) {
-                    new Logger("ReviewDB").error("Failed to authorize", e);
+                    new Logger("ReviewDB").error("Failed to authorize: ", e);
                 }
             }}
         />

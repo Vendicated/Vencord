@@ -24,7 +24,7 @@ import definePlugin from "@utils/types";
 function mock(input: string): string {
     let output = "";
     for (let i = 0; i < input.length; i++) {
-        output += i % 2 ? input[i].toUpperCase() : input[i].toLowerCase();
+        output += i % 2 ? input[i]!.toUpperCase() : input[i]!.toLowerCase();
     }
     return output;
 }

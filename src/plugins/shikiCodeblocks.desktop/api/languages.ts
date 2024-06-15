@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ILanguageRegistration } from "@vap/shiki";
+import type { ILanguageRegistration } from "@vap/shiki";
 
 export const VPC_REPO = "Vap0r1ze/vapcord";
 export const VPC_REPO_COMMIT = "88a7032a59cca40da170926651b08201ea3b965a";
@@ -34,6 +34,7 @@ export interface Language {
     aliases?: string[];
     custom?: boolean;
 }
+
 export interface LanguageJson {
     name: string;
     id: string;
@@ -45,7 +46,7 @@ export interface LanguageJson {
 
 export const languages: Record<string, Language> = {};
 
-export const loadLanguages = async () => {
+export async function loadLanguages() {
     const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.json());
     const loadedLanguages = Object.fromEntries(
         langsJson.map(lang => [lang.id, {
@@ -54,14 +55,16 @@ export const loadLanguages = async () => {
         }])
     );
     Object.assign(languages, loadedLanguages);
-};
+}
 
-export const getGrammar = (lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> => {
-    if (lang.grammar) return Promise.resolve(lang.grammar);
+export function getGrammar(lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> {
+    if (lang.grammar)
+        return Promise.resolve(lang.grammar);
     return fetch(lang.grammarUrl).then(res => res.json());
-};
+}
 
 const aliasCache = new Map<string, Language>();
+
 export function resolveLang(idOrAlias: string) {
     if (Object.prototype.hasOwnProperty.call(languages, idOrAlias)) return languages[idOrAlias];
 

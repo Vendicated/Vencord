@@ -18,18 +18,19 @@
 
 import "./styles.css";
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
+import { type ChannelRecord, type FluxStore, MessageFlags, MessageType } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
-import { ComponentType } from "react";
+import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActionCreators, Permissions, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import type { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
@@ -37,9 +38,9 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUtils = findByPropsLazy("CloudUpload");
-const PendingReplyStore = findStoreLazy("PendingReplyStore");
-const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
+const { CloudUpload } = findByPropsLazy("CloudUpload");
+const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
+const OptionClasses: Record<string, string> = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
@@ -48,8 +49,12 @@ export type VoiceRecorder = ComponentType<{
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
-const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
+const ctxMenuPatch = ((children, { channel }: { channel: ChannelRecord; }) => {
+    if (
+        !channel.isPrivate()
+        && !(PermissionStore.can(Permissions.SEND_VOICE_MESSAGES, channel)
+        && PermissionStore.can(Permissions.SEND_MESSAGES, channel))
+    ) return;
 
     children.push(
         <Menu.MenuItem
@@ -60,10 +65,10 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                     <div className={OptionClasses.optionName}>Send voice message</div>
                 </div>
             }
-            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
+            action={() => { openModal(modalProps => <Modal modalProps={modalProps} />); }}
         />
     );
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "VoiceMessages",
@@ -79,6 +84,7 @@ type AudioMetadata = {
     waveform: string,
     duration: number,
 };
+
 const EMPTY_META: AudioMetadata = {
     waveform: "AAAAAAAAAAAA",
     duration: 1,
@@ -89,7 +95,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
     const reply = PendingReplyStore.getPendingReply(channelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
-    const upload = new CloudUtils.CloudUpload({
+    const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isClip: false,
         isThumbnail: false,
@@ -100,12 +106,12 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
         RestAPI.post({
             url: Constants.Endpoints.MESSAGES(channelId),
             body: {
-                flags: 1 << 13,
+                flags: MessageFlags.IS_VOICE_MESSAGE,
                 channel_id: channelId,
                 content: "",
                 nonce: SnowflakeUtils.fromTimestamp(Date.now()),
                 sticker_ids: [],
-                type: 0,
+                type: MessageType.DEFAULT,
                 attachments: [{
                     id: "0",
                     filename: upload.filename,
@@ -113,11 +119,13 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
+                message_reference: reply
+                    ? MessageActionCreators.getSendMessageOptionsForReply(reply)?.messageReference
+                    : null,
             }
         });
     });
-    upload.on("error", () => showToast("Failed to upload voice message", Toasts.Type.FAILURE));
+    upload.on("error", () => { showToast("Failed to upload voice message", Toasts.Type.FAILURE); });
 
     upload.upload();
 }
@@ -159,7 +167,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             let squares = 0;
             for (let sampleOffset = 0; sampleOffset < samplesPerBin; sampleOffset++) {
                 const sampleIdx = binIdx * samplesPerBin + sampleOffset;
-                squares += channelData[sampleIdx] ** 2;
+                squares += channelData[sampleIdx]! ** 2;
             }
             bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
         }
@@ -167,7 +175,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         // Normalize bins with easing
         const maxBin = Math.max(...bins);
         const ratio = 1 + (0xFF / maxBin - 1) * Math.min(1, 100 * (maxBin / 0xFF) ** 3);
-        for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i] * ratio));
+        for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i]! * ratio));
 
         return {
             waveform: window.btoa(String.fromCharCode(...bins)),

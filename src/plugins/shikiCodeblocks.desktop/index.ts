@@ -53,13 +53,13 @@ export default definePlugin({
             }
         }
     ],
-    start: async () => {
+    async start() {
         if (settings.store.useDevIcon !== DeviconSetting.Disabled)
             enableStyle(deviconStyle);
 
         await shiki.init(settings.store.customTheme || settings.store.theme);
     },
-    stop: () => {
+    stop() {
         shiki.destroy();
         clearStyles();
     },
@@ -73,11 +73,10 @@ export default definePlugin({
     // exports
     shiki,
     createHighlighter,
-    renderHighlighter: ({ lang, content }: { lang: string; content: string; }) => {
-        return createHighlighter({
+    renderHighlighter: ({ lang, content }: { lang?: string; content: string; }) =>
+        createHighlighter({
             lang: lang?.toLowerCase(),
             content,
             isPreview: false,
-        });
-    },
+        }),
 });

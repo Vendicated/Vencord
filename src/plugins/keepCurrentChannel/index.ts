@@ -19,14 +19,14 @@
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
+import { ChannelStore, RouterUtils, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
-export interface LogoutEvent {
+export interface LogoutAction {
     type: "LOGOUT";
     isSwitchingAccount: boolean;
 }
 
-interface ChannelSelectEvent {
+interface ChannelSelectAction {
     type: "CHANNEL_SELECT";
     channelId: string | null;
     guildId: string | null;
@@ -41,8 +41,8 @@ let isSwitchingAccount = false;
 let previousCache: PreviousChannel | undefined;
 
 function attemptToNavigateToChannel(guildId: string | null, channelId: string) {
-    if (!ChannelStore.hasChannel(channelId)) return;
-    NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}`);
+    if (ChannelStore.hasChannel(channelId))
+        RouterUtils.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}`);
 }
 
 export default definePlugin({
@@ -51,26 +51,26 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
 
     flux: {
-        LOGOUT(e: LogoutEvent) {
-            ({ isSwitchingAccount } = e);
+        LOGOUT(action: LogoutAction) {
+            ({ isSwitchingAccount } = action);
         },
 
         CONNECTION_OPEN() {
-            if (!isSwitchingAccount) return;
-            isSwitchingAccount = false;
-
-            if (previousCache?.channelId)
-                attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            if (isSwitchingAccount) {
+                isSwitchingAccount = false;
+                if (previousCache?.channelId)
+                    attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            }
         },
 
-        async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectEvent) {
-            if (isSwitchingAccount) return;
-
-            previousCache = {
-                guildId,
-                channelId
-            };
-            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+        async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectAction) {
+            if (!isSwitchingAccount) {
+                previousCache = {
+                    guildId,
+                    channelId
+                };
+                await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+            }
         }
     },
 

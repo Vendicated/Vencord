@@ -41,7 +41,7 @@ export interface Menu {
 
         color?: string;
         render?: ComponentType<any>;
-        onChildrenScroll?: Function;
+        onChildrenScroll?: (...args: unknown[]) => unknown;
         childRowHeight?: number;
         listClassName?: string;
         disabled?: boolean;
@@ -88,4 +88,3 @@ export interface ContextMenuApi {
         options?: { enableSpellCheck?: boolean; }
     ): void;
 }
-

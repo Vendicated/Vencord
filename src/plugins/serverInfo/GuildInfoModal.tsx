@@ -11,21 +11,21 @@ import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
+import { GuildChannelType, type GuildRecord, type UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
-import { Guild, User } from "discord-types/general";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, MarkupUtils, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserActionCreators, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
+const IconClasses: Record<string, string> = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findExportedComponentLazy("FriendRow");
 
 const cl = classNameFactory("vc-gp-");
 
-export function openGuildInfoModal(guild: Guild) {
-    openModal(props =>
+export function openGuildInfoModal(guild: GuildRecord) {
+    openModal(props => (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <GuildInfoModal guild={guild} />
         </ModalRoot>
-    );
+    ));
 }
 
 const enum Tabs {
@@ -35,7 +35,7 @@ const enum Tabs {
 }
 
 interface GuildProps {
-    guild: Guild;
+    guild: GuildRecord;
 }
 
 interface RelationshipProps extends GuildProps {
@@ -80,7 +80,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
-                    onClick={() => openImageModal(bannerUrl)}
+                    onClick={() => { openImageModal(bannerUrl); }}
                 />
             )}
 
@@ -89,7 +89,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                     ? <img
                         src={iconUrl}
                         alt=""
-                        onClick={() => openImageModal(iconUrl)}
+                        onClick={() => { openImageModal(iconUrl); }}
                     />
                     : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
                 }
@@ -137,47 +137,44 @@ function GuildInfoModal({ guild }: GuildProps) {
 }
 
 
-function Owner(guildId: string, owner: User) {
-    const guildAvatar = GuildMemberStore.getMember(guildId, owner.id)?.avatar;
-    const ownerAvatarUrl =
-        guildAvatar
-            ? IconUtils.getGuildMemberAvatarURLSimple({
-                userId: owner!.id,
-                avatar: guildAvatar,
-                guildId,
-                canAnimate: true
-            })
-            : IconUtils.getUserAvatarURL(owner, true);
+function Owner(guildId: string, owner: UserRecord) {
+    const ownerAvatarUrl = owner.getAvatarURL(guildId, undefined, true);
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
-            {Parser.parse(`<@${owner.id}>`)}
+            <img src={ownerAvatarUrl} alt="" onClick={() => { openImageModal(ownerAvatarUrl); }} />
+            {MarkupUtils.parse(`<@${owner.id}>`)}
         </div>
     );
 }
 
-function ServerInfoTab({ guild }: GuildProps) {
-    const [owner] = useAwaiter(() => UserUtils.getUser(guild.ownerId), {
-        deps: [guild.ownerId],
-        fallbackValue: null
-    });
+const VerificationLevelName = ["None", "Low", "Medium", "High", "Highest"];
 
-    const Fields = {
+function ServerInfoTab({ guild }: GuildProps) {
+    const owner = guild.ownerId
+        ? useAwaiter(() => UserActionCreators.getUser(guild.ownerId!), {
+            deps: [guild.ownerId],
+            fallbackValue: null
+        })[0]
+        : null;
+
+    const guildChannels = GuildChannelStore.getChannels(guild.id);
+
+    const fields = {
         "Server Owner": owner ? Owner(guild.id, owner) : "Loading...",
         "Created At": renderTimestamp(SnowflakeUtils.extractTimestamp(guild.id)),
-        "Joined At": guild.joinedAt ? renderTimestamp(guild.joinedAt.getTime()) : "-", // Not available in lurked guild
+        "Joined At": renderTimestamp(guild.joinedAt.getTime()),
         "Vanity Link": guild.vanityURLCode ? (<a>{`discord.gg/${guild.vanityURLCode}`}</a>) : "-", // Making the anchor href valid would cause Discord to reload
         "Preferred Locale": guild.preferredLocale || "-",
-        "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
-        "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
-        "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
+        "Verification Level": VerificationLevelName[guild.verificationLevel] ?? "?",
+        "Nitro Boosts": `${guild.premiumSubscriberCount} (Level ${guild.premiumTier})`,
+        "Channels": guildChannels[GuildChannelType.SELECTABLE].length + guildChannels[GuildChannelType.VOCAL].length, // exclude channel categories
         "Roles": Object.keys(GuildStore.getRoles(guild.id)).length - 1, // - @everyone
     };
 
     return (
         <div className={cl("info")}>
-            {Object.entries(Fields).map(([name, node]) =>
+            {Object.entries(fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
                     <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
                     {typeof node === "string" ? <span>{node}</span> : node}
@@ -192,19 +189,20 @@ function FriendsTab({ guild, setCount }: RelationshipProps) {
 }
 
 function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
-    const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
-    return UserList("blocked", guild, blockedIds, setCount);
+    const blockedUserIds = Object.keys(RelationshipStore.getRelationships())
+        .filter(userId => RelationshipStore.isBlocked(userId));
+    return UserList("blocked", guild, blockedUserIds, setCount);
 }
 
-function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setCount: (count: number) => void) {
-    const missing = [] as string[];
-    const members = [] as string[];
+function UserList(type: "friends" | "blocked", guild: GuildRecord, userIds: string[], setCount: (count: number) => void) {
+    const members: string[] = [];
+    const missing: string[] = [];
 
-    for (const id of ids) {
-        if (GuildMemberStore.isMember(guild.id, id))
-            members.push(id);
+    for (const userId of userIds) {
+        if (GuildMemberStore.isMember(guild.id, userId))
+            members.push(userId);
         else
-            missing.push(id);
+            missing.push(userId);
     }
 
     // Used for side effects (rerender on member request success)
@@ -212,7 +210,7 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
         [GuildMemberStore],
         () => GuildMemberStore.getMemberIds(guild.id),
         null,
-        (old, curr) => old.length === curr.length
+        (prev, curr) => prev.length === curr.length
     );
 
     useEffect(() => {
@@ -226,15 +224,15 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
         }
     }, []);
 
-    useEffect(() => setCount(members.length), [members.length]);
+    useEffect(() => { setCount(members.length); }, [members.length]);
 
     return (
         <ScrollerThin fade className={cl("scroller")}>
-            {members.map(id =>
+            {members.map(userId =>
                 <FriendRow
-                    user={UserStore.getUser(id)}
-                    status={PresenceStore.getStatus(id) || "offline"}
-                    onSelect={() => openUserProfile(id)}
+                    user={UserStore.getUser(userId)}
+                    status={PresenceStore.getStatus(userId)}
+                    onSelect={() => { openUserProfile(userId); }}
                     onContextMenu={() => { }}
                 />
             )}

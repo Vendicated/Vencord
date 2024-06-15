@@ -16,31 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Clipboard, Menu } from "@webpack/common";
-import type { Channel, User } from "discord-types/general";
+import type { ChannelRecord, UserRecord } from "@vencord/discord-types";
+import { ClipboardUtils, Menu } from "@webpack/common";
 
 interface UserContextProps {
-    channel: Channel;
+    channel: ChannelRecord;
     guildId?: string;
-    user: User;
+    user?: UserRecord;
 }
 
-const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
-    if (!user) return;
-
-    children.push(
-        <Menu.MenuItem
-            id="vc-copy-user-url"
-            label="Copy User URL"
-            action={() => Clipboard.copy(`<https://discord.com/users/${user.id}>`)}
-            icon={LinkIcon}
-        />
-    );
-};
+const UserContextMenuPatch = ((children, { user }: UserContextProps) => {
+    if (user)
+        children.push(
+            <Menu.MenuItem
+                id="vc-copy-user-url"
+                label="Copy User URL"
+                action={() => { ClipboardUtils.copy(`<https://discord.com/users/${user.id}>`); }}
+                icon={LinkIcon}
+            />
+        );
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "CopyUserURLs",

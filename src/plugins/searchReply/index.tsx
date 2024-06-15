@@ -16,23 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ReplyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, i18n, Menu, PermissionsBits, PermissionStore, SelectedChannelStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { ChannelStore, i18n, Menu, Permissions, PermissionStore, SelectedChannelStore } from "@webpack/common";
+import type { MouseEvent } from "react";
 
+const MessageUtils = findByPropsLazy("replyToMessage");
 
-const messageUtils = findByPropsLazy("replyToMessage");
-
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+const messageContextMenuPatch = ((children, { message }: { message: MessageRecord; }) => {
     // make sure the message is in the selected channel
     if (SelectedChannelStore.getChannelId() !== message.channel_id) return;
-    const channel = ChannelStore.getChannel(message?.channel_id);
+    const channel = ChannelStore.getChannel(message.channel_id);
     if (!channel) return;
-    if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+    if (!channel.isPrivate() && !PermissionStore.can(Permissions.SEND_MESSAGES, channel)) return;
 
     // dms and group chats
     const dmGroup = findGroupChildrenByChildId("pin", children);
@@ -43,7 +43,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
+                action={(e: MouseEvent) => { MessageUtils.replyToMessage(channel, message, e); }}
             />
         ));
         return;
@@ -57,12 +57,12 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: React.MouseEvent) => messageUtils.replyToMessage(channel, message, e)}
+                action={(e: MouseEvent) => { MessageUtils.replyToMessage(channel, message, e); }}
             />
         ));
         return;
     }
-};
+}) satisfies NavContextMenuPatchCallback;
 
 
 export default definePlugin({

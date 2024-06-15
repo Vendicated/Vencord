@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel } from "discord-types/general";
+import type { ChannelRecord } from "@vencord/discord-types";
 
-export interface ChannelDelete {
+export interface ChannelDeleteAction {
     type: "CHANNEL_DELETE";
-    channel: Channel;
+    channel: ChannelRecord;
 }
 
-export interface GuildDelete {
+export interface GuildDeleteAction {
     type: "GUILD_DELETE";
     guild: {
         id: string;
@@ -31,7 +31,7 @@ export interface GuildDelete {
     };
 }
 
-export interface RelationshipRemove {
+export interface RelationshipRemoveAction {
     type: "RELATIONSHIP_REMOVE";
     relationship: {
         id: string;
@@ -40,7 +40,7 @@ export interface RelationshipRemove {
     };
 }
 
-export interface SimpleGroupChannel {
+export interface SimpleGroupDMChannel {
     id: string;
     name: string;
     iconURL?: string;
@@ -50,15 +50,4 @@ export interface SimpleGuild {
     id: string;
     name: string;
     iconURL?: string;
-}
-
-export const enum ChannelType {
-    GROUP_DM = 3,
-}
-
-export const enum RelationshipType {
-    FRIEND = 1,
-    BLOCKED = 2,
-    INCOMING_REQUEST = 3,
-    OUTGOING_REQUEST = 4,
 }

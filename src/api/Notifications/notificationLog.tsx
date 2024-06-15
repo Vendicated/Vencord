@@ -19,9 +19,9 @@
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { AlertActionCreators, Button, Forms, Text, Timestamp, useEffect, useReducer, useRef, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -33,12 +33,9 @@ interface PersistentNotificationData extends Pick<NotificationData, "title" | "b
     id: string;
 }
 
-const KEY = "notification-log";
+const DATA_KEY = "notification-log";
 
-const getLog = async () => {
-    const log = await DataStore.get(KEY) as PersistentNotificationData[] | undefined;
-    return log ?? [];
-};
+const getLog = async () => (await DataStore.get<PersistentNotificationData[]>(DATA_KEY)) ?? [];
 
 const cl = classNameFactory("vc-notification-log-");
 const signals = new Set<DispatchWithoutAction>();
@@ -49,7 +46,7 @@ export async function persistNotification(notification: NotificationData) {
     const limit = Settings.notifications.logLimit;
     if (limit === 0) return;
 
-    await DataStore.update(KEY, (old: PersistentNotificationData[] | undefined) => {
+    await DataStore.update(DATA_KEY, (old: PersistentNotificationData[] | undefined) => {
         const log = old ?? [];
 
         // Omit stuff we don't need
@@ -70,7 +67,7 @@ export async function persistNotification(notification: NotificationData) {
         return log;
     });
 
-    signals.forEach(x => x());
+    signals.forEach(x => { x(); });
 }
 
 export async function deleteNotification(timestamp: number) {
@@ -79,8 +76,8 @@ export async function deleteNotification(timestamp: number) {
     if (index === -1) return;
 
     log.splice(index, 1);
-    await DataStore.set(KEY, log);
-    signals.forEach(x => x());
+    await DataStore.set(DATA_KEY, log);
+    signals.forEach(x => { x(); });
 }
 
 export function useLogs() {
@@ -88,7 +85,7 @@ export function useLogs() {
 
     useEffect(() => {
         signals.add(setSignal);
-        return () => void signals.delete(setSignal);
+        return () => { signals.delete(setSignal); };
     }, []);
 
     const [log, _, pending] = useAwaiter(getLog, {
@@ -101,7 +98,7 @@ export function useLogs() {
 
 function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     const [removing, setRemoving] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const div = ref.current!;
@@ -173,12 +170,12 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                 <Button
                     disabled={log.length === 0}
                     onClick={() => {
-                        Alerts.show({
+                        AlertActionCreators.show({
                             title: "Are you sure?",
                             body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
                             async onConfirm() {
-                                await DataStore.set(KEY, []);
-                                signals.forEach(x => x());
+                                await DataStore.set(DATA_KEY, []);
+                                signals.forEach(x => { x(); });
                             },
                             confirmText: "Do it!",
                             confirmColor: "vc-notification-log-danger-btn",
@@ -197,7 +194,7 @@ export function openNotificationLogModal() {
     const key = openModal(modalProps => (
         <LogModal
             modalProps={modalProps}
-            close={() => closeModal(key)}
+            close={() => { closeModal(key); }}
         />
     ));
 }

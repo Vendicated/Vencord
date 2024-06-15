@@ -17,18 +17,18 @@
 */
 
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { PluginOptionBoolean } from "@utils/types";
-import { Forms, React, Switch } from "@webpack/common";
+import type { PluginOptionBoolean } from "@utils/types";
+import { Forms, Switch, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import type { ISettingElementProps } from ".";
 
 export function SettingBooleanComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
 
-    const [state, setState] = React.useState(def ?? false);
-    const [error, setError] = React.useState<string | null>(null);
+    const [state, setState] = useState(def ?? false);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 

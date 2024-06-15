@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Command } from "@api/Commands";
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { FluxEvents } from "@webpack/types";
-import { Promisable } from "type-fest";
+import type { Command } from "@api/Commands";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { FluxActionHandlerMap } from "@vencord/discord-types";
+import type { ComponentType, JSX } from "react";
+import type { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
@@ -42,7 +43,7 @@ export interface Patch {
     /** A string or RegExp which is only include/matched in the module code you wish to patch. Prefer only using a RegExp if a simple string test is not enough */
     find: string | RegExp;
     /** The replacement(s) for the module being patched */
-    replacement: PatchReplacement | PatchReplacement[];
+    replacement: PatchReplacement | [PatchReplacement, ...PatchReplacement[]];
     /** Whether this patch should apply to multiple modules */
     all?: boolean;
     /** Do not warn if this patch did no changes */
@@ -55,7 +56,7 @@ export interface Patch {
 
 export interface PluginAuthor {
     name: string;
-    id: BigInt;
+    id: bigint;
 }
 
 export interface Plugin extends PluginDef {
@@ -121,15 +122,13 @@ export interface PluginDef {
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType<{
+    settingsAboutComponent?: ComponentType<{
         tempSettings?: Record<string, any>;
     }>;
     /**
-     * Allows you to subscribe to Flux events
+     * Allows you to subscribe to Flux actions
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void;
-    };
+    flux?: Partial<FluxActionHandlerMap>;
     /**
      * Allows you to manipulate context menus
      */
@@ -156,7 +155,7 @@ export const enum ReporterTestable {
     None = 1 << 1,
     Start = 1 << 2,
     Patches = 1 << 3,
-    FluxEvents = 1 << 4
+    FluxActions = 1 << 4
 }
 
 export const enum OptionType {
@@ -226,7 +225,7 @@ export interface PluginSettingNumberDef {
 }
 export interface PluginSettingBigIntDef {
     type: OptionType.BIGINT;
-    default?: BigInt;
+    default?: bigint;
 }
 export interface PluginSettingBooleanDef {
     type: OptionType.BOOLEAN;
@@ -287,7 +286,7 @@ export interface PluginSettingComponentDef {
 /** Maps a `PluginSettingDef` to its value type */
 type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
     O extends PluginSettingNumberDef ? number :
-    O extends PluginSettingBigIntDef ? BigInt :
+    O extends PluginSettingBigIntDef ? bigint :
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
@@ -304,8 +303,8 @@ type SettingsStore<D extends SettingsDefinition> = {
 /** An instance of defined plugin settings */
 export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
-    Checks extends SettingsChecks<Def> = {},
-    PrivateSettings extends object = {}
+    Checks extends SettingsChecks<Def> = SettingsChecks<Def>,
+    PrivateSettings extends object = object
 > {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
@@ -313,7 +312,7 @@ export interface DefinedSettings<
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevent settings
      */
-    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
+    use: <F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]) => Pick<SettingsStore<Def> & PrivateSettings, F>;
     /** Definitions of each setting */
     def: Def;
     /** Setting methods with return values that could rely on other settings */
@@ -324,7 +323,7 @@ export interface DefinedSettings<
      */
     pluginName: string;
 
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
+    withPrivateSettings: <T extends object>() => DefinedSettings<Def, Checks, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
@@ -344,7 +343,7 @@ export type PluginOptionsItem =
     | PluginOptionSlider
     | PluginOptionComponent;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
+export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | bigint>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;

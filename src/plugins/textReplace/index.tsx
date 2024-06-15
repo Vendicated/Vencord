@@ -80,7 +80,7 @@ function stringToRegex(str: string) {
     const match = str.match(/^(\/)?(.+?)(?:\/([gimsuy]*))?$/); // Regex to match regex
     return match
         ? new RegExp(
-            match[2], // Pattern
+            match[2]!, // Pattern
             match[3]
                 ?.split("") // Remove duplicate flags
                 .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
@@ -115,7 +115,9 @@ function Input({ initialValue, onChange, placeholder }: {
             value={value}
             onChange={setValue}
             spellCheck={false}
-            onBlur={() => value !== initialValue && onChange(value)}
+            onBlur={() => {
+                if (value !== initialValue) onChange(value);
+            }}
         />
     );
 }
@@ -131,14 +133,18 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         update();
     }
 
-    async function onChange(e: string, index: number, key: string) {
+    async function onChange(e: string, index: number, key: keyof Rule) {
         if (index === rulesArray.length - 1)
             rulesArray.push(makeEmptyRule());
 
-        rulesArray[index][key] = e;
+        rulesArray[index]![key] = e;
 
-        if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1)
-            rulesArray.splice(index, 1);
+        if (
+            rulesArray[index]!.find === ""
+            && rulesArray[index]!.replace === ""
+            && rulesArray[index]!.onlyIfIncludes === ""
+            && index !== rulesArray.length - 1
+        ) rulesArray.splice(index, 1);
 
         await DataStore.set(rulesKey, rulesArray);
         update();
@@ -156,22 +162,22 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
                                     <Input
                                         placeholder="Find"
                                         initialValue={rule.find}
-                                        onChange={e => onChange(e, index, "find")}
+                                        onChange={e => { onChange(e, index, "find"); }}
                                     />
                                     <Input
                                         placeholder="Replace"
                                         initialValue={rule.replace}
-                                        onChange={e => onChange(e, index, "replace")}
+                                        onChange={e => { onChange(e, index, "replace"); }}
                                     />
                                     <Input
                                         placeholder="Only if includes"
                                         initialValue={rule.onlyIfIncludes}
-                                        onChange={e => onChange(e, index, "onlyIfIncludes")}
+                                        onChange={e => { onChange(e, index, "onlyIfIncludes"); }}
                                     />
                                 </Flex>
                                 <Button
                                     size={Button.Sizes.MIN}
-                                    onClick={() => onClickRemove(index)}
+                                    onClick={() => { onClickRemove(index); }}
                                     style={{
                                         background: "none",
                                         color: "var(--status-danger)",
@@ -211,31 +217,26 @@ function applyRules(content: string): string {
     if (content.length === 0)
         return content;
 
-    if (stringRules) {
-        for (const rule of stringRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+    for (const rule of stringRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+    }
+
+    for (const rule of regexRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+
+        try {
+            const regex = stringToRegex(rule.find);
+            content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
+        } catch (e) {
+            new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
         }
     }
 
-    if (regexRules) {
-        for (const rule of regexRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
-
-            try {
-                const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
-            } catch (e) {
-                new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-            }
-        }
-    }
-
-    content = content.trim();
-    return content;
+    return content.trim();
 }
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";

@@ -18,9 +18,10 @@
 
 import type { IThemedToken } from "@vap/shiki";
 import { hljs } from "@webpack/common";
+import type { JSX } from "react";
 
 import { cl } from "../utils/misc";
-import { ThemeBase } from "./Highlighter";
+import type { ThemeBase } from "./Highlighter";
 
 export interface CodeProps {
     theme: ThemeBase;
@@ -30,14 +31,14 @@ export interface CodeProps {
     tokens: IThemedToken[][] | null;
 }
 
-export const Code = ({
+export function Code({
     theme,
     useHljs,
     lang,
     content,
     tokens,
-}: CodeProps) => {
-    let lines!: JSX.Element[];
+}: CodeProps) {
+    let lines: JSX.Element[];
 
     if (useHljs) {
         try {
@@ -53,7 +54,7 @@ export const Code = ({
             tokens ??
             content
                 .split("\n")
-                .map(line => [{ color: theme.plainColor, content: line } as IThemedToken]);
+                .map<[IThemedToken]>(line => [{ color: theme.plainColor, content: line }]);
 
         lines = renderTokens.map(line => {
             // [Cynthia] this makes it so when you highlight the codeblock
@@ -90,4 +91,4 @@ export const Code = ({
     ));
 
     return <table className={cl("table")}>{...codeTableRows}</table>;
-};
+}

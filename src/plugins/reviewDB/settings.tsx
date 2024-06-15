@@ -29,7 +29,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Authorize with ReviewDB",
         component: () => (
-            <Button onClick={() => authorize()}>
+            <Button onClick={() => { authorize(); }}>
                 Authorize with ReviewDB
             </Button>
         )

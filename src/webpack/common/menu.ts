@@ -20,6 +20,7 @@
 import { findByPropsLazy, waitFor } from "../webpack";
 import type * as t from "./types/menu";
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export let Menu = {} as t.Menu;
 
 waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);

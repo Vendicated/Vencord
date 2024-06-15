@@ -17,6 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
+import type { JSX } from "react";
 
 const logger = new Logger("ServerListAPI");
 
@@ -25,23 +26,23 @@ export const enum ServerListRenderPosition {
     In,
 }
 
-const renderFunctionsAbove = new Set<Function>();
-const renderFunctionsIn = new Set<Function>();
+const renderFunctionsAbove = new Set<(...args: unknown[]) => any>();
+const renderFunctionsIn = new Set<(...args: unknown[]) => any>();
 
 function getRenderFunctions(position: ServerListRenderPosition) {
     return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
 }
 
-export function addServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
+export function addServerListElement(position: ServerListRenderPosition, renderFunction: (...args: unknown[]) => any) {
     getRenderFunctions(position).add(renderFunction);
 }
 
-export function removeServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
+export function removeServerListElement(position: ServerListRenderPosition, renderFunction: (...args: unknown[]) => any) {
     getRenderFunctions(position).delete(renderFunction);
 }
 
 export const renderAll = (position: ServerListRenderPosition) => {
-    const ret: Array<JSX.Element> = [];
+    const ret: JSX.Element[] = [];
 
     for (const renderFunction of getRenderFunctions(position)) {
         try {

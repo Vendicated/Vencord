@@ -21,18 +21,20 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
+import { Constants, RestAPI, Tooltip, useState } from "@webpack/common";
+import type { ComponentType } from "react";
 
 import { RenameButton } from "./components/RenameButton";
-import { Session, SessionInfo } from "./types";
-import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+import type { Session, SessionInfo } from "./types";
+import { fetchNamesFromDataStore, getDefaultName, GetOSColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
-const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
+const AuthSessionsStore: FluxStore & Record<string, any> = findStoreLazy("AuthSessionsStore");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
-const SessionIconClasses = findByPropsLazy("sessionIcon");
+const TimestampClasses: Record<string, string> = findByPropsLazy("timestampTooltip", "blockquoteContainer");
+const SessionIconClasses: Record<string, string> = findByPropsLazy("sessionIcon");
 
 const BlobMask = findExportedComponentLazy("BlobMask");
 
@@ -92,8 +94,8 @@ export default definePlugin({
     renderName: ErrorBoundary.wrap(({ session }: SessionInfo) => {
         const savedSession = savedSessionsCache.get(session.id_hash);
 
-        const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
-        const [title, setTitle] = state;
+        const state = useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
+        const [title, _setTitle] = state;
 
         // Show a "NEW" badge if the session is seen for the first time
         return (
@@ -127,7 +129,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: React.ComponentType<any>; }) => {
+    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (
@@ -158,7 +160,7 @@ export default definePlugin({
             >
                 <div
                     className={SessionIconClasses.sessionIcon}
-                    style={{ backgroundColor: GetOsColor(session.client_info.os) }}
+                    style={{ backgroundColor: GetOSColor(session.client_info.os) }}
                 >
                     <DeviceIcon width={28} height={28} />
                 </div>
@@ -188,7 +190,7 @@ export default definePlugin({
 
     flux: {
         USER_SETTINGS_ACCOUNT_RESET_AND_CLOSE_FORM() {
-            const lastFetchedHashes: string[] = AuthSessionsStore.getSessions().map((session: SessionInfo["session"]) => session.id_hash);
+            const lastFetchedHashes: string[] = AuthSessionsStore.getSessions().map((session: Session) => session.id_hash);
 
             // Add new sessions to cache
             lastFetchedHashes.forEach(idHash => {

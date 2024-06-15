@@ -20,18 +20,18 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher, UserStore } from "@webpack/common";
 
-interface StreamEvent {
+interface StreamAction {
+    type: "STREAM_CREATE" | "STREAM_DELETE";
     streamKey: string;
 }
 
-function toggleStreamerMode({ streamKey }: StreamEvent, value: boolean) {
-    if (!streamKey.endsWith(UserStore.getCurrentUser().id)) return;
-
-    FluxDispatcher.dispatch({
-        type: "STREAMER_MODE_UPDATE",
-        key: "enabled",
-        value
-    });
+function toggleStreamerMode({ streamKey }: StreamAction, value: boolean) {
+    if (streamKey.endsWith(UserStore.getCurrentUser()!.id))
+        FluxDispatcher.dispatch({
+            type: "STREAMER_MODE_UPDATE",
+            key: "enabled",
+            value
+        });
 }
 
 export default definePlugin({
@@ -39,7 +39,7 @@ export default definePlugin({
     description: "Automatically enables streamer mode when you start streaming in Discord",
     authors: [Devs.Kodarru],
     flux: {
-        STREAM_CREATE: d => toggleStreamerMode(d, true),
-        STREAM_DELETE: d => toggleStreamerMode(d, false)
+        STREAM_CREATE(a) { toggleStreamerMode(a, true); },
+        STREAM_DELETE(a) { toggleStreamerMode(a, false); }
     }
 });

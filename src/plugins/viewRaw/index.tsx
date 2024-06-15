@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
@@ -27,23 +27,27 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { Button, ChannelStore, Forms, i18n, Menu, Text } from "@webpack/common";
-import { Message } from "discord-types/general";
+import type { MouseEvent } from "react";
 
+const CopyIcon = () => (
+    <svg
+        width="18"
+        height="18"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+    >
+        <path d="M12.9297 3.25007c-.1954-.19746-.5143-.19781-.7101-.00079l-.645.64896c-.1935.19473-.1938.50909-.0007.70421l4.9946 5.04579c.1929.19485.1929.50866 0 .70346l-4.9946 5.0458c-.1931.1952-.1928.5095.0007.7042l.645.649c.1958.197.5147.1967.7101-.0008l6.3307-6.3982c.1928-.1949.1928-.50856 0-.70338l-6.3307-6.39825ZM8.42616 4.60245c.19314-.19512.19282-.50948-.00071-.70421l-.64498-.64896c-.19581-.19702-.51469-.19667-.71006.00079L.739669 9.64832c-.192769.19482-.192768.50848 0 .70338l6.330741 6.3982c.19537.1975.51424.1978.71006.0008l.64498-.649c.19353-.1947.19385-.509.00071-.7042l-4.99461-5.0458c-.19286-.1948-.19286-.50861 0-.70346l4.99461-5.04579Z" />
+    </svg>
+);
 
-const CopyIcon = () => {
-    return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
-        <path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z" />
-        <path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z" />
-    </svg>;
-};
+const sortObject = <T extends object>(obj: T): T =>
+    Object.fromEntries(Object.entries(obj).sort(([k1], [k2]) => k1.localeCompare(k2))) as T;
 
-function sortObject<T extends object>(obj: T): T {
-    return Object.fromEntries(Object.entries(obj).sort(([k1], [k2]) => k1.localeCompare(k2))) as T;
-}
-
-function cleanMessage(msg: Message) {
-    const clone = sortObject(JSON.parse(JSON.stringify(msg)));
+function cleanMessage(message: MessageRecord) {
+    const clone = sortObject(JSON.parse(JSON.stringify(message)));
     for (const key of [
         "email",
         "phone",
@@ -52,10 +56,9 @@ function cleanMessage(msg: Message) {
     ]) delete clone.author[key];
 
     // message logger added properties
-    const cloneAny = clone as any;
-    delete cloneAny.editHistory;
-    delete cloneAny.deleted;
-    cloneAny.attachments?.forEach(a => delete a.deleted);
+    delete clone.editHistory;
+    delete clone.deleted;
+    clone.attachments?.forEach((a: any) => { delete a.deleted; });
 
     return clone;
 }
@@ -66,7 +69,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
                     <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
-                    <ModalCloseButton onClick={() => closeModal(key)} />
+                    <ModalCloseButton onClick={() => { closeModal(key); }} />
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
@@ -84,11 +87,11 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                 </ModalContent >
                 <ModalFooter>
                     <Flex cellSpacing={10}>
-                        <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
+                        <Button onClick={() => { copyWithToast(json, `${type} data copied to clipboard!`); }}>
                             Copy {type} JSON
                         </Button>
                         {!!msgContent && (
-                            <Button onClick={() => copyWithToast(msgContent, "Content copied to clipboard!")}>
+                            <Button onClick={() => { copyWithToast(msgContent, "Content copied to clipboard!"); }}>
                                 Copy Raw Content
                             </Button>
                         )}
@@ -99,11 +102,11 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
     ));
 }
 
-function openViewRawModalMessage(msg: Message) {
-    msg = cleanMessage(msg);
-    const msgJson = JSON.stringify(msg, null, 4);
+function openViewRawModalMessage(message: MessageRecord) {
+    message = cleanMessage(message);
+    const messageJSON = JSON.stringify(message, null, 4);
 
-    return openViewRawModal(msgJson, "Message", msg.content);
+    openViewRawModal(messageJSON, "Message", message.content);
 }
 
 const settings = definePluginSettings({
@@ -136,7 +139,7 @@ function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenu
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
+                action={() => { openViewRawModal(JSON.stringify(value, null, 4), name); }}
                 icon={CopyIcon}
             />
         );
@@ -156,26 +159,26 @@ export default definePlugin({
     },
 
     start() {
-        addButton("ViewRaw", msg => {
-            const handleClick = () => {
+        addButton("ViewRaw", message => {
+            function handleClick() {
                 if (settings.store.clickMethod === "Right") {
-                    copyWithToast(msg.content);
+                    copyWithToast(message.content);
                 } else {
-                    openViewRawModalMessage(msg);
+                    openViewRawModalMessage(message);
                 }
-            };
+            }
 
-            const handleContextMenu = e => {
+            function handleContextMenu(event: MouseEvent<HTMLButtonElement>) {
                 if (settings.store.clickMethod === "Left") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    copyWithToast(msg.content);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    copyWithToast(message.content);
                 } else {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openViewRawModalMessage(msg);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openViewRawModalMessage(message);
                 }
-            };
+            }
 
             const label = settings.store.clickMethod === "Right"
                 ? "Copy Raw (Left Click) / View Raw (Right Click)"
@@ -184,8 +187,8 @@ export default definePlugin({
             return {
                 label,
                 icon: CopyIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
+                message,
+                channel: ChannelStore.getChannel(message.channel_id)!,
                 onClick: handleClick,
                 onContextMenu: handleContextMenu
             };

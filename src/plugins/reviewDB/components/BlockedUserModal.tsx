@@ -10,28 +10,31 @@ import { useAwaiter } from "@utils/react";
 import { Forms, Tooltip, useState } from "@webpack/common";
 
 import { Auth } from "../auth";
-import { ReviewDBUser } from "../entities";
+import type { ReviewDBUser } from "../entities";
 import { fetchBlocks, unblockUser } from "../reviewDbApi";
 import { cl } from "../utils";
 
-function UnblockButton(props: { onClick?(): void; }) {
-    return (
-        <Tooltip text="Unblock user">
-            {tooltipProps => (
-                <div
-                    {...tooltipProps}
-                    role="button"
-                    onClick={props.onClick}
-                    className={cl("block-modal-unblock")}
+const UnblockButton = (props: { onClick?(): void; }) => (
+    <Tooltip text="Unblock user">
+        {tooltipProps => (
+            <div
+                {...tooltipProps}
+                role="button"
+                onClick={props.onClick}
+                className={cl("block-modal-unblock")}
+            >
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 -960 960 960"
+                    fill="var(--status-danger)"
                 >
-                    <svg height="20" viewBox="0 -960 960 960" width="20" fill="var(--status-danger)">
-                        <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448Z" />
-                    </svg>
-                </div>
-            )}
-        </Tooltip>
-    );
-}
+                    <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448Z" />
+                </svg>
+            </div>
+        )}
+    </Tooltip>
+);
 
 function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: boolean; setIsBusy(v: boolean): void; }) {
     const [gone, setGone] = useState(false);
@@ -59,14 +62,14 @@ function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: 
 function Modal() {
     const [isBusy, setIsBusy] = useState(false);
     const [blocks, error, pending] = useAwaiter(fetchBlocks, {
-        onError: e => new Logger("ReviewDB").error("Failed to fetch blocks", e),
+        onError: e => { new Logger("ReviewDB").error("Failed to fetch blocks: ", e); },
         fallbackValue: [],
     });
 
     if (pending)
         return null;
     if (error)
-        return <Forms.FormText>Failed to fetch blocks: ${String(error)}</Forms.FormText>;
+        return <Forms.FormText>Failed to fetch blocks: {error.toString()}</Forms.FormText>;
     if (!blocks.length)
         return <Forms.FormText>No blocked users.</Forms.FormText>;
 

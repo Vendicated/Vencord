@@ -16,24 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { UserJSON } from "@api/Commands";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
+import type { ProfileBadge, UserFlags as $UserFlags } from "@vencord/discord-types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
-import { type ComponentType, type ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 
-// LYING to the type checker here
-const UserFlags = Constants.UserFlags as Record<string, number>;
+const { UserFlags }: { UserFlags: typeof $UserFlags; } = Constants;
 const badges: Record<string, ProfileBadge> = {
     active_developer: { id: "active_developer", description: "Active Developer", icon: "6bdc42827a38498929a4920da12695d9", link: "https://support-dev.discord.com/hc/en-us/articles/10113997751447" },
     bug_hunter_level_1: { id: "bug_hunter_level_1", description: "Discord Bug Hunter", icon: "2717692c7dca7289b35297368a940dd0", link: "https://support.discord.com/hc/en-us/articles/360046057772-Discord-Bugs" },
     bug_hunter_level_2: { id: "bug_hunter_level_2", description: "Discord Bug Hunter", icon: "848f79194d4be5ff5f81505cbd0ce1e6", link: "https://support.discord.com/hc/en-us/articles/360046057772-Discord-Bugs" },
     certified_moderator: { id: "certified_moderator", description: "Moderator Programs Alumni", icon: "fee1624003e2fee35cb398e125dc479b", link: "https://discord.com/safety" },
     discord_employee: { id: "staff", description: "Discord Staff", icon: "5e74e9b61934fc1f67c65515d1f7e60d", link: "https://discord.com/company" },
-    get staff() { return this.discord_employee; },
+    get staff() { return this.discord_employee!; },
     hypesquad: { id: "hypesquad", description: "HypeSquad Events", icon: "bf01d1073931f921909045f3a39fd264", link: "https://discord.com/hypesquad" },
     hypesquad_online_house_1: { id: "hypesquad_house_1", description: "HypeSquad Bravery", icon: "8a88d63823d8a71cd5e390baa45efa02", link: "https://discord.com/settings/hypesquad-online" },
     hypesquad_online_house_2: { id: "hypesquad_house_2", description: "HypeSquad Brilliance", icon: "011940fd013da3f7fb926e4a1cd2e618", link: "https://discord.com/settings/hypesquad-online" },
@@ -46,13 +47,6 @@ const badges: Record<string, ProfileBadge> = {
 
 const fetching = new Set<string>();
 const queue = new Queue(5);
-
-interface ProfileBadge {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-}
 
 interface MentionProps {
     data: {
@@ -71,11 +65,10 @@ interface MentionProps {
 }
 
 async function getUser(id: string) {
-    let userObj = UserStore.getUser(id);
-    if (userObj)
-        return userObj;
+    let user = UserStore.getUser(id);
+    if (user) return user;
 
-    const user: any = await RestAPI.get({ url: Constants.Endpoints.USER(id) }).then(response => {
+    const apiUser: UserJSON = await RestAPI.get({ url: Constants.Endpoints.USER(id) }).then(response => {
         FluxDispatcher.dispatch({
             type: "USER_UPDATE",
             user: response.body,
@@ -92,22 +85,22 @@ async function getUser(id: string) {
         }
     );
 
-    userObj = UserStore.getUser(id);
-    const fakeBadges: ProfileBadge[] = Object.entries(UserFlags)
-        .filter(([_, flag]) => !isNaN(flag) && userObj.hasFlag(flag))
+    user = UserStore.getUser(id)!;
+    const fakeBadges = Object.entries(UserFlags)
+        .filter(([_, flag]) => !isNaN(flag as $UserFlags) && user.hasFlag(flag as $UserFlags))
         .map(([key]) => badges[key.toLowerCase()])
         .filter(isNonNullish);
-    if (user.premium_type || !user.bot && (user.banner || user.avatar?.startsWith?.("a_")))
-        fakeBadges.push(badges.premium);
+    if (apiUser.premium_type || !apiUser.bot && (apiUser.banner || apiUser.avatar?.startsWith("a_")))
+        fakeBadges.push(badges.premium!);
 
     // Fill in what we can deduce
-    const profile = UserProfileStore.getUserProfile(id);
-    profile.accentColor = user.accent_color;
+    const profile = UserProfileStore.getUserProfile<false>(id)!;
+    profile.accentColor = apiUser.accent_color;
     profile.badges = fakeBadges;
-    profile.banner = user.banner;
-    profile.premiumType = user.premium_type;
+    profile.banner = apiUser.banner;
+    profile.premiumType = apiUser.premium_type || null;
 
-    return userObj;
+    return user;
 }
 
 function MentionWrapper({ data, UserMention, RoleMention, parse, props }: MentionProps) {
@@ -136,6 +129,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
         >
             <span
                 onMouseEnter={() => {
+                    // @ts-ignore
                     const mention = children?.[0]?.props?.children;
                     if (typeof mention !== "string") return;
 
@@ -145,8 +139,10 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                     if (fetching.has(id))
                         return;
 
-                    if (UserStore.getUser(id))
-                        return setUserId(id);
+                    if (UserStore.getUser(id)) {
+                        setUserId(id);
+                        return;
+                    }
 
                     const fetch = () => {
                         fetching.add(id);
@@ -201,7 +197,13 @@ export default definePlugin({
         }
     ],
 
-    renderMention(RoleMention, UserMention, data, parse, props) {
+    renderMention(
+        RoleMention: MentionProps["RoleMention"],
+        UserMention: MentionProps["UserMention"],
+        data: MentionProps["data"],
+        parse: MentionProps["parse"],
+        props: MentionProps["props"]
+    ) {
         return (
             <ErrorBoundary noop>
                 <MentionWrapper

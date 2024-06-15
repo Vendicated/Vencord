@@ -21,7 +21,7 @@ import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
-import definePlugin, { PluginNative, StartAt } from "@utils/types";
+import definePlugin, { type PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
@@ -76,7 +76,8 @@ function makeShortcuts() {
     const findByProps = newFindWrapper(filters.byProps);
 
     return {
-        ...Object.fromEntries(Object.keys(Common).map(key => [key, { getter: () => Common[key] }])),
+        ...Object.fromEntries((Object.keys(Common) as (keyof typeof Common)[])
+            .map(key => [key, { getter: () => Common[key] }])),
         wp: Webpack,
         wpc: { getter: () => Webpack.cache },
         wreq: { getter: () => Webpack.wreq },
@@ -87,19 +88,19 @@ function makeShortcuts() {
         find,
         findAll: findAll,
         findByProps,
-        findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
+        findAllByProps: (...props: [string, ...string[]]) => findAll(filters.byProps(...props)),
         findByCode: newFindWrapper(filters.byCode),
         findAllByCode: (code: string) => findAll(filters.byCode(code)),
         findComponentByCode: newFindWrapper(filters.componentByCode),
-        findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
-        findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
+        findAllComponentsByCode: (...code: [string, ...string[]]) => findAll(filters.componentByCode(...code)),
+        findExportedComponent: (...props: [string, ...string[]]) => findByProps(...props)[props[0]],
         findStore: newFindWrapper(filters.byStoreName),
         PluginsApi: { getter: () => Vencord.Plugins },
         plugins: { getter: () => Vencord.Plugins.plugins },
         Settings: { getter: () => Vencord.Settings },
         Api: { getter: () => Vencord.Api },
         Util: { getter: () => Vencord.Util },
-        reload: () => location.reload(),
+        reload: () => { location.reload(); },
         restart: IS_WEB ? DESKTOP_ONLY("restart") : relaunch,
         canonicalizeMatch,
         canonicalizeReplace,
@@ -123,7 +124,7 @@ function makeShortcuts() {
 
                     if (s.parentElement?.tagName === "HEAD")
                         doc.head.append(n);
-                    else if (n.id?.startsWith("vencord-") || n.id?.startsWith("vcd-"))
+                    else if (n.id.startsWith("vencord-") || n.id.startsWith("vcd-"))
                         doc.documentElement.append(n);
                     else
                         doc.body.append(n);
@@ -140,8 +141,8 @@ function makeShortcuts() {
         guild: { getter: () => getCurrentGuild(), preload: false },
         guildId: { getter: () => Common.SelectedGuildStore.getGuildId(), preload: false },
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
-        meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
-        messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false }
+        meId: { getter: () => Common.UserStore.getCurrentUser()!.id, preload: false },
+        messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()!), preload: false }
     };
 }
 

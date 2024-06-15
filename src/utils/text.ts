@@ -29,13 +29,13 @@ export const wordsFromTitle = (text: string) => text.toLowerCase().split(" ");
 
 // Words to case style
 export const wordsToCamel = (words: string[]) =>
-    words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join("");
+    words.map((w, i) => (i ? w[0]!.toUpperCase() + w.slice(1) : w)).join("");
 export const wordsToSnake = (words: string[]) => words.join("_").toUpperCase();
 export const wordsToKebab = (words: string[]) => words.join("-").toLowerCase();
 export const wordsToPascal = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
+    words.map(w => w[0]!.toUpperCase() + w.slice(1)).join("");
 export const wordsToTitle = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+    words.map(w => w[0]!.toUpperCase() + w.slice(1)).join(" ");
 
 const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
 type Units = typeof units[number];
@@ -61,9 +61,9 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
 
     outer:
     for (let i = 0; i < unitsAmounts.length; i++) {
-        if (unitsAmounts[i].amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
+        if (unitsAmounts[i]!.amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
         for (let v = i + 1; v < unitsAmounts.length; v++) {
-            if (unitsAmounts[v].amount !== 0) continue outer;
+            if (unitsAmounts[v]!.amount !== 0) continue outer;
         }
 
         amountsToBeRemoved = unitsAmounts.length - (i + 1);
@@ -74,9 +74,9 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     if (daysAmountIndex !== -1) {
         const daysAmount = unitsAmounts[daysAmountIndex];
 
-        const daysMod = daysAmount.amount % 7;
+        const daysMod = daysAmount!.amount % 7;
         if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
-        else daysAmount.amount = daysMod;
+        else daysAmount!.amount = daysMod;
     }
 
     let res: string = "";

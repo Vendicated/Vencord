@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Menu } from "@webpack/common";
 
 import { addChannelToCategory, canMoveChannelInDirection, categories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
@@ -26,19 +26,17 @@ function createPinMenuItem(channelId: string) {
                         id="vc-add-category"
                         label="Add Category"
                         color="brand"
-                        action={() => openCategoryModal(null, channelId)}
+                        action={() => { openCategoryModal(null, channelId); }}
                     />
                     <Menu.MenuSeparator />
 
-                    {
-                        categories.map(category => (
-                            <Menu.MenuItem
-                                id={`pin-category-${category.name}`}
-                                label={category.name}
-                                action={() => addChannelToCategory(channelId, category.id).then(forceUpdate)}
-                            />
-                        ))
-                    }
+                    {categories.map(category => (
+                        <Menu.MenuItem
+                            id={`pin-category-${category.name}`}
+                            label={category.name}
+                            action={() => { addChannelToCategory(channelId, category.id).then(() => { forceUpdate; }); }}
+                        />
+                    ))}
                 </>
             )}
 
@@ -48,28 +46,24 @@ function createPinMenuItem(channelId: string) {
                         id="unpin-dm"
                         label="Unpin DM"
                         color="danger"
-                        action={() => removeChannelFromCategory(channelId).then(forceUpdate)}
+                        action={() => { removeChannelFromCategory(channelId).then(() => { forceUpdate; }); }}
                     />
 
-                    {
-                        settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
-                            <Menu.MenuItem
-                                id="move-up"
-                                label="Move Up"
-                                action={() => moveChannel(channelId, -1).then(forceUpdate)}
-                            />
-                        )
-                    }
+                    {settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
+                        <Menu.MenuItem
+                            id="move-up"
+                            label="Move Up"
+                            action={() => { moveChannel(channelId, -1).then(() => { forceUpdate; }); }}
+                        />
+                    )}
 
-                    {
-                        settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, 1) && (
-                            <Menu.MenuItem
-                                id="move-down"
-                                label="Move Down"
-                                action={() => moveChannel(channelId, 1).then(forceUpdate)}
-                            />
-                        )
-                    }
+                    {settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, 1) && (
+                        <Menu.MenuItem
+                            id="move-down"
+                            label="Move Down"
+                            action={() => { moveChannel(channelId, 1).then(() => { forceUpdate; }); }}
+                        />
+                    )}
                 </>
             )}
 
@@ -77,18 +71,18 @@ function createPinMenuItem(channelId: string) {
     );
 }
 
-const GroupDMContext: NavContextMenuPatchCallback = (children, props) => {
+const GroupDMContext = ((children, props) => {
     const container = findGroupChildrenByChildId("leave-channel", children);
     container?.unshift(createPinMenuItem(props.channel.id));
-};
+}) satisfies NavContextMenuPatchCallback;
 
-const UserContext: NavContextMenuPatchCallback = (children, props) => {
+const UserContext = ((children, props) => {
     const container = findGroupChildrenByChildId("close-dm", children);
     if (container) {
         const idx = container.findIndex(c => c?.props?.id === "close-dm");
         container.splice(idx, 0, createPinMenuItem(props.channel.id));
     }
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export const contextMenus = {
     "gdm-context": GroupDMContext,

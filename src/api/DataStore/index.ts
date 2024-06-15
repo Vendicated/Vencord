@@ -23,9 +23,9 @@ export function promisifyRequest<T = undefined>(
 ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
         // @ts-ignore - file size hacks
-        request.oncomplete = request.onsuccess = () => resolve(request.result);
+        request.oncomplete = request.onsuccess = () => { resolve(request.result); };
         // @ts-ignore - file size hacks
-        request.onabort = request.onerror = () => reject(request.error);
+        request.onabort = request.onerror = () => { reject(request.error); };
     });
 }
 
@@ -214,6 +214,7 @@ export function keys<KeyType extends IDBValidKey>(
 ): Promise<KeyType[]> {
     return customStore("readonly", store => {
         // Fast path for modern browsers
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAllKeys) {
             return promisifyRequest(
                 store.getAllKeys() as unknown as IDBRequest<KeyType[]>,
@@ -236,6 +237,7 @@ export function keys<KeyType extends IDBValidKey>(
 export function values<T = any>(customStore = defaultGetStore()): Promise<T[]> {
     return customStore("readonly", store => {
         // Fast path for modern browsers
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAll) {
             return promisifyRequest(store.getAll() as IDBRequest<T[]>);
         }
@@ -256,9 +258,11 @@ export function values<T = any>(customStore = defaultGetStore()): Promise<T[]> {
 export function entries<KeyType extends IDBValidKey, ValueType = any>(
     customStore = defaultGetStore(),
 ): Promise<[KeyType, ValueType][]> {
+    // @ts-ignore
     return customStore("readonly", store => {
         // Fast path for modern browsers
         // (although, hopefully we'll get a simpler path some day)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAll && store.getAllKeys) {
             return Promise.all([
                 promisifyRequest(

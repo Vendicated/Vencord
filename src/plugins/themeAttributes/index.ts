@@ -6,9 +6,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
-
 
 export default definePlugin({
     name: "ThemeAttributes",
@@ -54,16 +53,14 @@ export default definePlugin({
         }
     ],
 
-    getAvatarStyles(src: string) {
-        return Object.fromEntries(
-            [128, 256, 512, 1024, 2048, 4096].map(size => [
-                `--avatar-url-${size}`,
-                `url(${src.replace(/\d+$/, String(size))})`
-            ])
-        );
-    },
+    getAvatarStyles: (src: string) => Object.fromEntries(
+        [128, 256, 512, 1024, 2048, 4096].map(size => [
+            `--avatar-url-${size}`,
+            `url(${src.replace(/\d+$/, String(size))})`
+        ])
+    ),
 
-    getMessageProps(props: { message: Message; }) {
+    getMessageProps(props: { message?: MessageRecord; }) {
         const author = props.message?.author;
         const authorId = author?.id;
         return {

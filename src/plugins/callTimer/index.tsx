@@ -21,11 +21,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
 
 function formatDuration(ms: number) {
     // here be dragons (moment fucking sucks)
-    const human = Settings.plugins.CallTimer.format === "human";
+    const human = Settings.plugins.CallTimer!.format === "human";
 
     const format = (n: number) => human ? n : n.toString().padStart(2, "0");
     const unit = (s: string) => human ? s : "";
@@ -52,7 +51,7 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     startTime: 0,
-    interval: void 0 as NodeJS.Timeout | undefined,
+    interval: undefined as NodeJS.Timeout | undefined,
 
     options: {
         format: {
@@ -80,9 +79,11 @@ export default definePlugin({
         }
     }],
     renderTimer(channelId: string) {
-        return <ErrorBoundary noop>
-            <this.Timer channelId={channelId} />
-        </ErrorBoundary>;
+        return (
+            <ErrorBoundary noop>
+                <this.Timer channelId={channelId} />
+            </ErrorBoundary>
+        );
     },
 
     Timer({ channelId }: { channelId: string; }) {

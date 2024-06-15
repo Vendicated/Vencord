@@ -20,6 +20,7 @@ import "./ExpandableHeader.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Text, Tooltip, useState } from "@webpack/common";
+import type { ReactNode } from "react";
 
 const cl = classNameFactory("vc-expandableheader-");
 
@@ -29,8 +30,8 @@ export interface ExpandableHeaderProps {
     onDropDownClick?: (state: boolean) => void;
     defaultState?: boolean;
     headerText: string;
-    children: React.ReactNode;
-    buttons?: React.ReactNode[];
+    children: ReactNode;
+    buttons?: ReactNode[];
 }
 
 export function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {

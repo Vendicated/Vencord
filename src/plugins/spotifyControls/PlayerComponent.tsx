@@ -18,16 +18,18 @@
 
 import "./spotifyStyles.css";
 
+import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
+import type { ButtonHTMLAttributes, CSSProperties, HTMLAttributes, MouseEvent } from "react";
 
-import { SpotifyStore, Track } from "./SpotifyStore";
+import { SpotifyStore, type Track } from "./SpotifyStore";
 
-const cl = (className: string) => `vc-spotify-${className}`;
+const cl = classNameFactory("vc-spotify-");
 
 function msToHuman(ms: number) {
     const minutes = ms / 1000 / 60;
@@ -36,21 +38,19 @@ function msToHuman(ms: number) {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-function Svg(path: string, label: string) {
-    return () => (
-        <svg
-            className={classes(cl("button-icon"), cl(label))}
-            height="24"
-            width="24"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-label={label}
-            focusable={false}
-        >
-            <path d={path} />
-        </svg>
-    );
-}
+const Svg = (path: string, label: string) => () => (
+    <svg
+        className={classes(cl("button-icon"), cl(label))}
+        height="24"
+        width="24"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-label={label}
+        focusable={false}
+    >
+        <path d={path} />
+    </svg>
+);
 
 // KraXen's icons :yesyes:
 // from https://fonts.google.com/icons?icon.style=Rounded&icon.set=Material+Icons
@@ -62,16 +62,14 @@ const SkipNext = Svg("M7.58 16.89l5.77-4.07c.56-.4.56-1.24 0-1.63L7.58 7.11C6.91
 const Repeat = Svg("M7 7h10v1.79c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.36V5H6c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1s1-.45 1-1V7zm10 10H7v-1.79c0-.45-.54-.67-.85-.35l-2.79 2.79c-.2.2-.2.51 0 .71l2.79 2.79c.31.31.85.09.85-.36V19h11c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1s-1 .45-1 1v3z", "repeat");
 const Shuffle = Svg("M10.59 9.17L6.12 4.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.46 4.46 1.42-1.4zm4.76-4.32l1.19 1.19L4.7 17.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L17.96 7.46l1.19 1.19c.31.31.85.09.85-.36V4.5c0-.28-.22-.5-.5-.5h-3.79c-.45 0-.67.54-.36.85zm-.52 8.56l-1.41 1.41 3.13 3.13-1.2 1.2c-.31.31-.09.85.36.85h3.79c.28 0 .5-.22.5-.5v-3.79c0-.45-.54-.67-.85-.35l-1.19 1.19-3.13-3.14z", "shuffle");
 
-function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-    return (
-        <button
-            className={cl("button")}
-            {...props}
-        >
-            {props.children}
-        </button>
-    );
-}
+const Button = (props: ButtonHTMLAttributes<HTMLButtonElement>) => (
+    <button
+        className={cl("button")}
+        {...props}
+    >
+        {props.children}
+    </button>
+);
 
 function CopyContextMenu({ name, path }: { name: string; path: string; }) {
     const copyId = `spotify-copy-${name}`;
@@ -80,31 +78,30 @@ function CopyContextMenu({ name, path }: { name: string; path: string; }) {
     return (
         <Menu.Menu
             navId={`spotify-${name}-menu`}
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            onClose={() => { FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" }); }}
             aria-label={`Spotify ${name} Menu`}
         >
             <Menu.MenuItem
                 key={copyId}
                 id={copyId}
                 label={`Copy ${name} Link`}
-                action={() => copyWithToast("https://open.spotify.com" + path)}
+                action={() => { copyWithToast("https://open.spotify.com" + path); }}
                 icon={LinkIcon}
             />
             <Menu.MenuItem
                 key={openId}
                 id={openId}
                 label={`Open ${name} in Spotify`}
-                action={() => SpotifyStore.openExternal(path)}
+                action={() => { SpotifyStore.openExternal(path); }}
                 icon={OpenExternalIcon}
             />
         </Menu.Menu>
     );
 }
 
-function makeContextMenu(name: string, path: string) {
-    return (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
-        ContextMenuApi.openContextMenu(e, () => <CopyContextMenu name={name} path={path} />);
-}
+const makeContextMenu = (name: string, path: string) => (e: MouseEvent<HTMLElement>) => {
+    ContextMenuApi.openContextMenu(e, () => <CopyContextMenu name={name} path={path} />);
+};
 
 function Controls() {
     const [isPlaying, shuffle, repeat] = useStateFromStores(
@@ -126,22 +123,22 @@ function Controls() {
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
                 className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
-                onClick={() => SpotifyStore.setShuffle(!shuffle)}
+                onClick={() => { SpotifyStore.setShuffle(!shuffle); }}
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => { SpotifyStore.prev(); }}>
                 <SkipPrev />
             </Button>
-            <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
+            <Button onClick={() => { SpotifyStore.setPlaying(!isPlaying); }}>
                 {isPlaying ? <PauseButton /> : <PlayButton />}
             </Button>
-            <Button onClick={() => SpotifyStore.next()}>
+            <Button onClick={() => { SpotifyStore.next(); }}>
                 <SkipNext />
             </Button>
             <Button
                 className={classes(cl("button"), cl(repeatClassName))}
-                onClick={() => SpotifyStore.setRepeat(nextRepeat)}
+                onClick={() => { SpotifyStore.setRepeat(nextRepeat); }}
                 style={{ position: "relative" }}
             >
                 {repeat === "track" && <span className={cl("repeat-1")}>1</span>}
@@ -163,7 +160,7 @@ function SeekBar() {
         () => [SpotifyStore.mPosition, SpotifyStore.isSettingPosition, SpotifyStore.isPlaying]
     );
 
-    const [position, setPosition] = useState(storePosition);
+    const [position, setPosition] = useState<number>(storePosition);
 
     // eslint-disable-next-line consistent-return
     useEffect(() => {
@@ -173,7 +170,7 @@ function SeekBar() {
                 setPosition(p => p + 1000);
             }, 1000);
 
-            return () => clearInterval(interval);
+            return () => { clearInterval(interval); };
         }
     }, [storePosition, isSettingPosition, isPlaying]);
 
@@ -191,9 +188,10 @@ function SeekBar() {
                 maxValue={duration}
                 value={position}
                 onChange={(v: number) => {
-                    if (isSettingPosition) return;
-                    setPosition(v);
-                    seek(v);
+                    if (!isSettingPosition) {
+                        setPosition(v);
+                        seek(v);
+                    }
                 }}
                 renderValue={msToHuman}
             />
@@ -215,14 +213,14 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     return (
         <Menu.Menu
             navId="spotify-album-menu"
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            onClose={() => { FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" }); }}
             aria-label="Spotify Album Menu"
         >
             <Menu.MenuItem
                 key="open-album"
                 id="open-album"
                 label="Open Album"
-                action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+                action={() => { SpotifyStore.openExternal(`/album/${track.album.id}`); }}
                 icon={OpenExternalIcon}
             />
             <Menu.MenuItem
@@ -230,21 +228,21 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => openImageModal(track.album.image.url)}
+                action={() => { openImageModal(track.album.image.url); }}
                 icon={ImageIcon}
             />
             <Menu.MenuControlItem
                 id="spotify-volume"
                 key="spotify-volume"
                 label="Volume"
-                control={(props, ref) => (
+                control={(props: any, ref: any) => (
                     <Menu.MenuSliderControl
                         {...props}
                         ref={ref}
                         value={volume}
                         minValue={0}
                         maxValue={100}
-                        onChange={debounce((v: number) => SpotifyStore.setVolume(v))}
+                        onChange={debounce((v: number) => { SpotifyStore.setVolume(v); })}
                     />
                 )}
             />
@@ -257,24 +255,26 @@ function makeLinkProps(name: string, condition: unknown, path: string) {
 
     return {
         role: "link",
-        onClick: () => SpotifyStore.openExternal(path),
+        onClick() { SpotifyStore.openExternal(path); },
         onContextMenu: makeContextMenu(name, path)
-    } satisfies React.HTMLAttributes<HTMLElement>;
+    } satisfies HTMLAttributes<HTMLElement>;
 }
 
 function Info({ track }: { track: Track; }) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const img = track?.album?.image;
 
     const [coverExpanded, setCoverExpanded] = useState(false);
 
     const i = (
         <>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {img && (
                 <img
                     id={cl("album-image")}
                     src={img.url}
                     alt="Album Image"
-                    onClick={() => setCoverExpanded(!coverExpanded)}
+                    onClick={() => { setCoverExpanded(!coverExpanded); }}
                     onContextMenu={e => {
                         ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />);
                     }}
@@ -283,6 +283,7 @@ function Info({ track }: { track: Track; }) {
         </>
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (coverExpanded && img) return (
         <div id={cl("album-expanded-wrapper")}>
             {i}
@@ -359,20 +360,21 @@ export function Player() {
 
     // Hide player after 5 minutes of inactivity
     // eslint-disable-next-line consistent-return
-    React.useEffect(() => {
+    useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
-            const timeout = setTimeout(() => setShouldHide(true), 1000 * 60 * 5);
-            return () => clearTimeout(timeout);
+            const timeout = setTimeout(() => { setShouldHide(true); }, 1000 * 60 * 5);
+            return () => { clearTimeout(timeout); };
         }
     }, [isPlaying]);
 
     if (!track || !device?.is_active || shouldHide)
         return null;
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const exportTrackImageStyle = {
         "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
-    } as React.CSSProperties;
+    } as CSSProperties;
 
     return (
         <div id={cl("player")} style={exportTrackImageStyle}>

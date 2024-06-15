@@ -1,34 +1,30 @@
 {
+    "include": ["browser", "src"],
+
     "compilerOptions": {
-        "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "esnext",
-            "esnext.array",
-            "esnext.asynciterable",
-            "esnext.symbol"
-        ],
-        "module": "esnext",
-        "moduleResolution": "node",
+        "noUncheckedIndexedAccess": true,
         "strict": true,
-        "noImplicitAny": false,
-        "target": "ESNEXT",
-        "jsx": "preserve",
 
         "baseUrl": "./src/",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
         "paths": {
-            "@main/*": ["./main/*"],
+            "@api": ["./api"],
             "@api/*": ["./api/*"],
+            "@components": ["./components"],
             "@components/*": ["./components/*"],
-            "@utils/*": ["./utils/*"],
+            "@main": ["./main"],
+            "@main/*": ["./main/*"],
             "@shared/*": ["./shared/*"],
+            "@utils": ["./utils"],
+            "@utils/*": ["./utils/*"],
+            "@webpack": ["./webpack/webpack"],
             "@webpack/types": ["./webpack/common/types"],
-            "@webpack/common": ["./webpack/common"],
-            "@webpack": ["./webpack/webpack"]
+            "@webpack/common": ["./webpack/common"]
         },
+        "resolveJsonModule": true,
+
+        "noEmit": true,
 
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
@@ -36,7 +32,17 @@
                 "transform": "typescript-transform-paths",
                 "afterDeclarations": true
             }
-        ]
-    },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+        ],
+
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+
+        "jsx": "preserve",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "target": "ESNext"
+    }
 }

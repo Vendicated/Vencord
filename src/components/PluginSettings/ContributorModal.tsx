@@ -14,8 +14,8 @@ import { DevsById } from "@utils/constants";
 import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
 import { pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import type { UserRecord } from "@vencord/discord-types";
 import { Forms, MaskedLink, showToast, Tooltip, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
 
@@ -28,8 +28,8 @@ const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
 
 const cl = classNameFactory("vc-author-modal-");
 
-export function openContributorModal(user: User) {
-    openModal(modalProps =>
+export function openContributorModal(user: UserRecord) {
+    openModal(modalProps => (
         <ModalRoot {...modalProps}>
             <ErrorBoundary>
                 <ModalContent className={cl("root")}>
@@ -37,7 +37,7 @@ export function openContributorModal(user: User) {
                 </ModalContent>
             </ErrorBoundary>
         </ModalRoot>
-    );
+    ));
 }
 
 function GithubIcon() {
@@ -50,23 +50,23 @@ function WebsiteIcon() {
     return <img src={src} alt="Website" />;
 }
 
-function ContributorModal({ user }: { user: User; }) {
+function ContributorModal({ user }: { user: UserRecord; }) {
     useSettings();
 
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
 
     useEffect(() => {
-        if (!profile && !user.bot && user.id)
+        if ((!profile || profile.profileFetchFailed) && !user.bot && user.id)
             fetchUserProfile(user.id);
     }, [user.id]);
 
-    const githubName = profile?.connectedAccounts?.find(a => a.type === "github")?.name;
-    const website = profile?.connectedAccounts?.find(a => a.type === "domain")?.name;
+    const githubName = profile?.connectedAccounts.find(a => a.type === "github")?.name;
+    const website = profile?.connectedAccounts.find(a => a.type === "domain")?.name;
 
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
         const pluginsByAuthor = DevsById[user.id]
-            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
+            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]!))
             : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
 
         return pluginsByAuthor
@@ -81,7 +81,7 @@ function ContributorModal({ user }: { user: User; }) {
             <div className={cl("header")}>
                 <img
                     className={cl("avatar")}
-                    src={user.getAvatarURL(void 0, 512, true)}
+                    src={user.getAvatarURL(undefined, 512, true)}
                     alt=""
                 />
                 <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
@@ -125,7 +125,7 @@ function ContributorModal({ user }: { user: User; }) {
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            onRestartNeeded={() => { showToast("Restart to apply changes!"); }}
                         />
                     )}
                 </div>

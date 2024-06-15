@@ -26,7 +26,7 @@ function setCss() {
     style.textContent = `
         .vc-nsfw-img [class^=imageWrapper] img,
         .vc-nsfw-img [class^=wrapperPaused] video {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${Settings.plugins.BlurNSFW!.blurAmount}px);
             transition: filter 0.2s;
         }
         .vc-nsfw-img [class^=imageWrapper]:hover img,
@@ -69,6 +69,6 @@ export default definePlugin({
     },
 
     stop() {
-        style?.remove();
+        style.remove();
     }
 });

@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useAwaiter, useIntersection } from "@utils/react";
-import { hljs, React } from "@webpack/common";
+import { hljs } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
 import { shiki } from "../api/shiki";
@@ -51,12 +51,13 @@ export const createHighlighter = (props: HighlighterProps) => (
         </ErrorBoundary>
     </pre>
 );
-export const Highlighter = ({
+
+export function Highlighter({
     lang,
     content,
     isPreview,
     tempSettings,
-}: HighlighterProps) => {
+}: HighlighterProps) {
     const {
         tryHljs,
         useDevIcon,
@@ -87,6 +88,7 @@ export const Highlighter = ({
     };
 
     let langName;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (lang) langName = useHljs ? hljs?.getLanguage?.(lang)?.name : shikiLang?.name;
 
     return (
@@ -115,12 +117,14 @@ export const Highlighter = ({
                     content={content}
                     tokens={tokens}
                 />
-                {!isPreview && <ButtonRow
-                    content={content}
-                    theme={themeBase}
-                />}
+                {!isPreview && (
+                    <ButtonRow
+                        content={content}
+                        theme={themeBase}
+                    />
+                )}
             </code>
         </div>
     );
-};
+}
 

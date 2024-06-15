@@ -32,14 +32,20 @@ async function extract(data: Buffer, outDir: string) {
     await mkdir(outDir, { recursive: true });
     return new Promise<void>((resolve, reject) => {
         unzip(data, (err, files) => {
-            if (err) return void reject(err);
+            if (err) {
+                reject(err);
+                return;
+            }
             Promise.all(Object.keys(files).map(async f => {
                 // Signature stuff
                 // 'Cannot load extension with file or directory name
                 // _metadata. Filenames starting with "_" are reserved for use by the system.';
                 if (f.startsWith("_metadata/")) return;
 
-                if (f.endsWith("/")) return void mkdir(join(outDir, f), { recursive: true });
+                if (f.endsWith("/")) {
+                    mkdir(join(outDir, f), { recursive: true });
+                    return;
+                }
 
                 const pathElements = f.split("/");
                 const name = pathElements.pop()!;
@@ -50,9 +56,9 @@ async function extract(data: Buffer, outDir: string) {
                     await mkdir(dir, { recursive: true });
                 }
 
-                await writeFile(join(dir, name), files[f]);
+                await writeFile(join(dir, name), files[f]!);
             }))
-                .then(() => resolve())
+                .then(() => { resolve(); })
                 .catch(err => {
                     rm(outDir, { recursive: true, force: true });
                     reject(err);

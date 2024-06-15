@@ -38,9 +38,9 @@ const enum IndicatorMode {
     Avatars = 1 << 1
 }
 
-function getDisplayName(guildId: string, userId: string) {
-    const user = UserStore.getUser(userId);
-    return GuildMemberStore.getNick(guildId, userId) ?? (user as any).globalName ?? user.username;
+function getDisplayName(guildId: string | null, userId: string) {
+    const user = UserStore.getUser(userId)!;
+    return GuildMemberStore.getNick(guildId, userId) ?? user.globalName ?? user.username;
 }
 
 function TypingIndicator({ channelId }: { channelId: string; }) {
@@ -55,40 +55,54 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-    const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
-    const guildId = ChannelStore.getChannel(channelId).guild_id;
+    const currentChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId()!);
+    const guildId = ChannelStore.getChannel(channelId)!.guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
         if (isChannelMuted) return null;
     }
 
-    if (!settings.store.includeCurrentChannel) {
-        if (currentChannelId === channelId) return null;
-    }
+    if (!settings.store.includeCurrentChannel && currentChannelId === channelId)
+        return null;
 
-    const myId = UserStore.getCurrentUser()?.id;
+    const meId = UserStore.getCurrentUser()?.id;
 
-    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
+    const typingUsersArray = Object.keys(typingUsers)
+        .filter(id => id !== meId && !(RelationshipStore.isBlocked(id) || !settings.store.includeBlockedUsers));
+
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = i18n.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
+            tooltipText = i18n.Messages.ONE_USER_TYPING.format({
+                a: getDisplayName(guildId, typingUsersArray[0]!)
+            });
             break;
         }
         case 2: {
-            tooltipText = i18n.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = i18n.Messages.TWO_USERS_TYPING.format({
+                a: getDisplayName(guildId, typingUsersArray[0]!),
+                b: getDisplayName(guildId, typingUsersArray[1]!)
+            });
             break;
         }
         case 3: {
-            tooltipText = i18n.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
+            tooltipText = i18n.Messages.THREE_USERS_TYPING.format({
+                a: getDisplayName(guildId, typingUsersArray[0]!),
+                b: getDisplayName(guildId, typingUsersArray[1]!),
+                c: getDisplayName(guildId, typingUsersArray[2]!)
+            });
             break;
         }
         default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
+            tooltipText = Settings.plugins.TypingTweaks!.enabled
+                ? buildSeveralUsers({
+                    a: getDisplayName(guildId, typingUsersArray[0]!),
+                    b: getDisplayName(guildId, typingUsersArray[1]!),
+                    count: typingUsersArray.length - 2
+                })
                 : i18n.Messages.SEVERAL_USERS_TYPING;
             break;
         }

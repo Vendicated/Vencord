@@ -17,7 +17,7 @@
 */
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/Settings";
+import { type Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { ErrorCard } from "@components/ErrorCard";
@@ -25,7 +25,7 @@ import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
+import { Button, Card, Forms, Select, Slider, Switch, useMemo } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -34,9 +34,9 @@ const cl = classNameFactory("vc-settings-");
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
 
-type KeysOfType<Object, Type> = {
-    [K in keyof Object]: Object[K] extends Type ? K : never;
-}[keyof Object];
+type KeysOfType<T extends object, Type> = keyof {
+    [Key in keyof T as T[Key] extends Type ? Key : never]: never;
+};
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
@@ -44,17 +44,17 @@ function VencordSettings() {
     });
     const settings = useSettings();
 
-    const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
+    const donateImage = useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
-    const Switches: Array<false | {
+    const Switches: ({
         key: KeysOfType<typeof settings, boolean>;
         title: string;
         note: string;
-    }> =
+    } | false)[] =
         [
             {
                 key: "useQuickCss",
@@ -97,35 +97,33 @@ function VencordSettings() {
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
-                    <React.Fragment>
-                        {!IS_WEB && (
-                            <Button
-                                onClick={relaunch}
-                                size={Button.Sizes.SMALL}>
-                                Restart Client
-                            </Button>
-                        )}
+                    {!IS_WEB && (
                         <Button
-                            onClick={() => VencordNative.quickCss.openEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
+                            onClick={relaunch}
+                            size={Button.Sizes.SMALL}>
+                            Restart Client
                         </Button>
-                        {!IS_WEB && (
-                            <Button
-                                onClick={() => showItemInFolder(settingsDir)}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDirPending}>
-                                Open Settings Folder
-                            </Button>
-                        )}
+                    )}
+                    <Button
+                        onClick={() => { VencordNative.quickCss.openEditor(); }}
+                        size={Button.Sizes.SMALL}
+                        disabled={settingsDir === "Loading..."}>
+                        Open QuickCSS File
+                    </Button>
+                    {!IS_WEB && (
                         <Button
-                            onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                            onClick={() => { showItemInFolder(settingsDir); }}
                             size={Button.Sizes.SMALL}
                             disabled={settingsDirPending}>
-                            Open in GitHub
+                            Open Settings Folder
                         </Button>
-                    </React.Fragment>
+                    )}
+                    <Button
+                        onClick={() => { VencordNative.native.openExternal("https://github.com/Vendicated/Vencord"); }}
+                        size={Button.Sizes.SMALL}
+                        disabled={settingsDirPending}>
+                        Open in GitHub
+                    </Button>
                 </Card>
             </Forms.FormSection>
 
@@ -139,7 +137,7 @@ function VencordSettings() {
                     <Switch
                         key={s.key}
                         value={settings[s.key]}
-                        onChange={v => settings[s.key] = v}
+                        onChange={v => { settings[s.key] = v; }}
                         note={s.note}
                     >
                         {s.title}
@@ -207,7 +205,7 @@ function VencordSettings() {
                             value: "hud"
                         },
                     ]}
-                    select={v => settings.macosVibrancyStyle = v}
+                    select={v => { settings.macosVibrancyStyle = v; }}
                     isSelected={v => settings.macosVibrancyStyle === v}
                     serialize={identity} />
             </>}
@@ -221,6 +219,7 @@ function NotificationSection({ settings }: { settings: typeof Settings["notifica
     return (
         <>
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
                     <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
@@ -240,9 +239,9 @@ function NotificationSection({ settings }: { settings: typeof Settings["notifica
                     { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
                     { label: "Always use Desktop notifications", value: "always" },
                     { label: "Always use Vencord notifications", value: "never" },
-                ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
+                ] satisfies ({ value: typeof settings["useNative"]; } & Record<string, any>)[]}
                 closeOnSelect={true}
-                select={v => settings.useNative = v}
+                select={v => { settings.useNative = v; }}
                 isSelected={v => v === settings.useNative}
                 serialize={identity}
             />
@@ -254,8 +253,8 @@ function NotificationSection({ settings }: { settings: typeof Settings["notifica
                 options={[
                     { label: "Bottom Right", value: "bottom-right", default: true },
                     { label: "Top Right", value: "top-right" },
-                ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
-                select={v => settings.position = v}
+                ] satisfies ({ value: typeof settings["position"]; } & Record<string, any>)[]}
+                select={v => { settings.position = v; }}
                 isSelected={v => v === settings.position}
                 serialize={identity}
             />
@@ -268,7 +267,7 @@ function NotificationSection({ settings }: { settings: typeof Settings["notifica
                 minValue={0}
                 maxValue={20_000}
                 initialValue={settings.timeout}
-                onValueChange={v => settings.timeout = v}
+                onValueChange={v => { settings.timeout = v; }}
                 onValueRender={v => (v / 1000).toFixed(2) + "s"}
                 onMarkerRender={v => (v / 1000) + "s"}
                 stickToMarkers={false}
@@ -285,7 +284,7 @@ function NotificationSection({ settings }: { settings: typeof Settings["notifica
                 maxValue={200}
                 stickToMarkers={true}
                 initialValue={settings.logLimit}
-                onValueChange={v => settings.logLimit = v}
+                onValueChange={v => { settings.logLimit = v; }}
                 onValueRender={v => v === 200 ? "∞" : v}
                 onMarkerRender={v => v === 200 ? "∞" : v}
             />
@@ -318,9 +317,9 @@ function DonateCard({ image }: DonateCardProps) {
                 alt=""
                 height={128}
                 style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : undefined,
                     marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : undefined
                 }}
             />
         </Card>

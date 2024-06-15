@@ -4,71 +4,25 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { MessageJSON } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, type PluginNative, ReporterTestable } from "@utils/types";
+import { type ChannelRecord, ChannelType } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
-import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
-
-const { ChannelTypes } = findByPropsLazy("ChannelTypes");
-
-interface Message {
-    guild_id: string,
-    attachments: MessageAttachment[],
-    author: User,
-    channel_id: string,
-    components: any[],
-    content: string,
-    edited_timestamp: string,
-    embeds: Embed[],
-    sticker_items?: Sticker[],
-    flags: number,
-    id: string,
-    member: GuildMember,
-    mention_everyone: boolean,
-    mention_roles: string[],
-    mentions: Mention[],
-    nonce: string,
-    pinned: false,
-    referenced_message: any,
-    timestamp: string,
-    tts: boolean,
-    type: number;
-}
-
-interface Mention {
-    avatar: string,
-    avatar_decoration_data: any,
-    discriminator: string,
-    global_name: string,
-    id: string,
-    public_flags: number,
-    username: string;
-}
-
-interface Sticker {
-    t: "Sticker";
-    description: string;
-    format_type: number;
-    guild_id: string;
-    id: string;
-    name: string;
-    tags: string;
-    type: number;
-}
 
 interface Call {
-    channel_id: string,
-    guild_id: string,
-    message_id: string,
-    region: string,
-    ringing: string[];
+    channel_id: string;
+    guild_id: string;
+    message_id: string;
+    region: string;
+    ringing?: string[];
 }
 
-const Notifs = findByPropsLazy("makeTextChatNotification");
+const NotificationTextUtils = findByPropsLazy("makeTextChatNotification");
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
@@ -147,17 +101,17 @@ export default definePlugin({
     settings,
 
     flux: {
-        CALL_UPDATE({ call }: { call: Call; }) {
-            if (call?.ringing?.includes(UserStore.getCurrentUser().id) && settings.store.callNotifications) {
-                const channel = ChannelStore.getChannel(call.channel_id);
+        CALL_UPDATE({ call }: { call?: Call; }) {
+            if (call?.ringing?.includes(UserStore.getCurrentUser()!.id) && settings.store.callNotifications) {
+                const channel = ChannelStore.getChannel(call.channel_id)!;
                 sendOtherNotif("Incoming call", `${channel.name} is calling you...`);
             }
         },
-        MESSAGE_CREATE({ message, optimistic }: { message: Message; optimistic: boolean; }) {
+        MESSAGE_CREATE({ message, optimistic }: { message: MessageJSON; optimistic: boolean; }) {
             // Apparently without this try/catch, discord's socket connection dies if any part of this errors
             try {
                 if (optimistic) return;
-                const channel = ChannelStore.getChannel(message.channel_id);
+                const channel = ChannelStore.getChannel(message.channel_id)!;
                 if (!shouldNotify(message, message.channel_id)) return;
 
                 const pingColor = settings.store.pingColor.replaceAll("#", "").trim();
@@ -166,17 +120,17 @@ export default definePlugin({
                 let titleString = "";
 
                 if (channel.guild_id) {
-                    const guild = GuildStore.getGuild(channel.guild_id);
+                    const guild = GuildStore.getGuild(channel.guild_id)!;
                     titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
                 }
 
 
                 switch (channel.type) {
-                    case ChannelTypes.DM:
+                    case ChannelType.DM:
                         titleString = message.author.username.trim();
                         break;
-                    case ChannelTypes.GROUP_DM:
-                        const channelName = channel.name.trim() ?? channel.rawRecipients.map(e => e.username).join(", ");
+                    case ChannelType.GROUP_DM:
+                        const channelName = channel.name.trim();
                         titleString = `${message.author.username} (${channelName})`;
                         break;
                 }
@@ -199,9 +153,9 @@ export default definePlugin({
                     }
                 }
 
-                const images = message.attachments.filter(e =>
-                    typeof e?.content_type === "string"
-                    && e?.content_type.startsWith("image")
+                const images = message.attachments.filter(a =>
+                    typeof a.content_type === "string"
+                    && a.content_type.startsWith("image")
                 );
 
 
@@ -209,19 +163,22 @@ export default definePlugin({
                     finalMsg += ` [image: ${img.filename}] `;
                 });
 
-                message.attachments.filter(a => a && !a.content_type?.startsWith("image")).forEach(a => {
+                message.attachments.filter(a => !a.content_type?.startsWith("image")).forEach(a => {
                     finalMsg += ` [attachment: ${a.filename}] `;
                 });
 
                 // make mentions readable
                 if (message.mentions.length > 0) {
-                    finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
+                    finalMsg = finalMsg.replace(
+                        /<@!?(\d{17,20})>/g,
+                        (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`
+                    );
                 }
 
                 // color role mentions (unity styling btw lol)
                 if (message.mention_roles.length > 0) {
                     for (const roleId of message.mention_roles) {
-                        const role = GuildStore.getRole(channel.guild_id, roleId);
+                        const role = GuildStore.getRole(channel.guild_id!, roleId);
                         if (!role) continue;
                         const roleColor = role.colorString ?? `#${pingColor}`;
                         finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
@@ -242,8 +199,11 @@ export default definePlugin({
                 if (channelMatches) {
                     for (const cMatch of channelMatches) {
                         let channelId = cMatch.split("<#")[1];
-                        channelId = channelId.substring(0, channelId.length - 1);
-                        finalMsg = finalMsg.replace(new RegExp(`${cMatch}`, "g"), `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(channelId).name}</color></b>`);
+                        channelId = channelId!.substring(0, channelId!.length - 1);
+                        finalMsg = finalMsg.replace(
+                            new RegExp(`${cMatch}`, "g"),
+                            `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(channelId)!.name}</color></b>`
+                        );
                     }
                 }
 
@@ -256,30 +216,34 @@ export default definePlugin({
     }
 });
 
-function shouldIgnoreForChannelType(channel: Channel) {
-    if (channel.type === ChannelTypes.DM && settings.store.dmNotifications) return false;
-    if (channel.type === ChannelTypes.GROUP_DM && settings.store.groupDmNotifications) return false;
+function shouldIgnoreForChannelType(channel: ChannelRecord) {
+    if (channel.isDM() && settings.store.dmNotifications) return false;
+    if (channel.isGroupDM() && settings.store.groupDmNotifications) return false;
     else return !settings.store.serverNotifications;
 }
 
-function sendMsgNotif(titleString: string, content: string, message: Message) {
-    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
-        const msgData = {
-            messageType: 1,
-            index: 0,
-            timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
-            height: calculateHeight(content),
-            opacity: settings.store.opacity,
-            volume: settings.store.volume,
-            audioPath: settings.store.soundPath,
-            title: titleString,
-            content: content,
-            useBase64Icon: true,
-            icon: result,
-            sourceApp: "Vencord"
-        };
-        Native.sendToOverlay(msgData);
-    });
+function sendMsgNotif(titleString: string, content: string, message: MessageJSON) {
+    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)
+        .then(response => response.arrayBuffer())
+        .then(result => {
+            const msgData = {
+                messageType: 1,
+                index: 0,
+                timeout: settings.store.lengthBasedTimeout
+                    ? calculateTimeout(content)
+                    : settings.store.timeout,
+                height: calculateHeight(content),
+                opacity: settings.store.opacity,
+                volume: settings.store.volume,
+                audioPath: settings.store.soundPath,
+                title: titleString,
+                content: content,
+                useBase64Icon: true,
+                icon: result,
+                sourceApp: "Vencord"
+            };
+            Native.sendToOverlay(msgData);
+        });
 }
 
 function sendOtherNotif(content: string, titleString: string) {
@@ -300,11 +264,11 @@ function sendOtherNotif(content: string, titleString: string) {
     Native.sendToOverlay(msgData);
 }
 
-function shouldNotify(message: Message, channel: string) {
-    const currentUser = UserStore.getCurrentUser();
+function shouldNotify(message: MessageJSON, channel: string) {
+    const currentUser = UserStore.getCurrentUser()!;
     if (message.author.id === currentUser.id) return false;
     if (message.author.bot && !settings.store.botNotifications) return false;
-    return Notifs.shouldNotify(message, channel);
+    return NotificationTextUtils.shouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {

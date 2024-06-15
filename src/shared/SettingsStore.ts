@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { LiteralUnion } from "type-fest";
+import type { LiteralUnion } from "type-fest";
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
@@ -51,7 +51,7 @@ export class SettingsStore<T extends object> {
         Object.assign(this, options);
     }
 
-    private makeProxy(object: any, root: T = object, path: string = "") {
+    private makeProxy(object: any, root: T = object, path: string = ""): any {
         const self = this;
 
         return new Proxy(object, {
@@ -78,8 +78,8 @@ export class SettingsStore<T extends object> {
                 Reflect.set(target, key, value);
                 const setPath = `${path}${path && "."}${key}`;
 
-                self.globalListeners.forEach(cb => cb(value, setPath));
-                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
+                self.globalListeners.forEach(cb => { cb(value, setPath); });
+                self.pathListeners.get(setPath)?.forEach(cb => { cb(value); });
 
                 return true;
             }
@@ -105,16 +105,18 @@ export class SettingsStore<T extends object> {
 
             const path = pathToNotify.split(".");
             for (const p of path) {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!v) {
                     console.warn(
                         `Settings#setData: Path ${pathToNotify} does not exist in new data. Not dispatching update`
                     );
                     return;
                 }
+                // @ts-ignore
                 v = v[p];
             }
 
-            this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
+            this.pathListeners.get(pathToNotify)?.forEach(cb => { cb(v); });
         }
 
         this.markAsChanged();
@@ -177,6 +179,6 @@ export class SettingsStore<T extends object> {
      * Call all global change listeners
      */
     public markAsChanged() {
-        this.globalListeners.forEach(cb => cb(this.plain, ""));
+        this.globalListeners.forEach(cb => { cb(this.plain, ""); });
     }
 }

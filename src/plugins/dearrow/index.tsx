@@ -15,7 +15,7 @@ import { Tooltip } from "@webpack/common";
 import type { Component } from "react";
 
 interface Props {
-    embed: {
+    embed?: {
         rawTitle: string;
         provider?: {
             name: string;
@@ -48,6 +48,7 @@ async function embedDidMount(this: Component<Props>) {
         const { embed } = this.props;
         const { replaceElements } = settings.store;
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
 
         const videoId = embedUrlRe.exec(embed.video.url)?.[1];
@@ -111,26 +112,24 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                 >
                     {/* Dearrow Icon, taken from https://dearrow.ajay.app/logo.svg (and optimised) */}
                     <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24px"
-                        height="24px"
+                        width="24"
+                        height="24"
                         viewBox="0 0 36 36"
                         aria-label="Toggle Dearrow"
                     >
                         <path
                             fill="#1213BD"
-                            d="M36 18.302c0 4.981-2.46 9.198-5.655 12.462s-7.323 5.152-12.199 5.152s-9.764-1.112-12.959-4.376S0 23.283 0 18.302s2.574-9.38 5.769-12.644S13.271 0 18.146 0s9.394 2.178 12.589 5.442C33.931 8.706 36 13.322 36 18.302z"
+                            d="M36 18.302c0 4.981-2.46 9.198-5.655 12.462s-7.323 5.152-12.199 5.152-9.764-1.112-12.959-4.376S0 23.283 0 18.302s2.574-9.38 5.769-12.644S13.271 0 18.146 0s9.394 2.178 12.589 5.442C33.931 8.706 36 13.322 36 18.302z"
                         />
                         <path
                             fill="#88c9f9"
-                            d="m 30.394282,18.410186 c 0,3.468849 -1.143025,6.865475 -3.416513,9.137917 -2.273489,2.272442 -5.670115,2.92874 -9.137918,2.92874 -3.467803,0 -6.373515,-1.147212 -8.6470033,-3.419654 -2.2734888,-2.272442 -3.5871299,-5.178154 -3.5871299,-8.647003 0,-3.46885 0.9420533,-6.746149 3.2144954,-9.0196379 2.2724418,-2.2734888 5.5507878,-3.9513905 9.0196378,-3.9513905 3.46885,0 6.492841,1.9322561 8.76633,4.204698 2.273489,2.2724424 3.788101,5.2974804 3.788101,8.7663304 z"
+                            d="M30.394282 18.410186c0 3.468849-1.143025 6.865475-3.416513 9.137917-2.273489 2.272442-5.670115 2.92874-9.137918 2.92874-3.467803 0-6.373515-1.147212-8.6470033-3.419654-2.2734888-2.272442-3.5871299-5.178154-3.5871299-8.647003 0-3.46885.9420533-6.746149 3.2144954-9.0196379 2.2724418-2.2734888 5.5507878-3.9513905 9.0196378-3.9513905 3.46885 0 6.492841 1.9322561 8.76633 4.204698 2.273489 2.2724424 3.788101 5.2974804 3.788101 8.7663304z"
                         />
                         <path
                             fill="#0a62a5"
-                            d="m 23.95823,17.818306 c 0,3.153748 -2.644888,5.808102 -5.798635,5.808102 -3.153748,0 -5.599825,-2.654354 -5.599825,-5.808102 0,-3.153747 2.446077,-5.721714 5.599825,-5.721714 3.153747,0 5.798635,2.567967 5.798635,5.721714 z"
+                            d="M23.95823 17.818306c0 3.153748-2.644888 5.808102-5.798635 5.808102-3.153748 0-5.599825-2.654354-5.599825-5.808102 0-3.153747 2.446077-5.721714 5.599825-5.721714 3.153747 0 5.798635 2.567967 5.798635 5.721714z"
                         />
                     </svg>
-
                 </button>
             )}
         </Tooltip>
@@ -163,13 +162,11 @@ export default definePlugin({
     settings,
 
     embedDidMount,
-    renderButton(component: Component<Props>) {
-        return (
-            <ErrorBoundary noop>
-                <DearrowButton component={component} />
-            </ErrorBoundary>
-        );
-    },
+    renderButton: (component: Component<Props>) => (
+        <ErrorBoundary noop>
+            <DearrowButton component={component} />
+        </ErrorBoundary>
+    ),
 
     patches: [{
         find: "this.renderInlineMediaEmbed",

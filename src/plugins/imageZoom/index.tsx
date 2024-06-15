@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
@@ -24,9 +24,10 @@ import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
+import type { FunctionComponentElement, JSX, MouseEvent } from "react";
 import type { Root } from "react-dom/client";
 
-import { Magnifier, MagnifierProps } from "./components/Magnifier";
+import { Magnifier, type MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
 import styles from "./styles.css?managed";
 
@@ -80,7 +81,7 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+const imageContextMenuPatch = (children => {
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
@@ -104,49 +105,49 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
             <Menu.MenuControlItem
                 id="vc-zoom"
                 label="Zoom"
-                control={(props, ref) => (
+                control={(props: any, ref: any) => (
                     <Menu.MenuSliderControl
                         ref={ref}
                         {...props}
                         minValue={1}
                         maxValue={50}
                         value={settings.store.zoom}
-                        onChange={debounce((value: number) => settings.store.zoom = value, 100)}
+                        onChange={debounce((value: number) => { settings.store.zoom = value; }, 100)}
                     />
                 )}
             />
             <Menu.MenuControlItem
                 id="vc-size"
                 label="Lens Size"
-                control={(props, ref) => (
+                control={(props: any, ref: any) => (
                     <Menu.MenuSliderControl
                         ref={ref}
                         {...props}
                         minValue={50}
                         maxValue={1000}
                         value={settings.store.size}
-                        onChange={debounce((value: number) => settings.store.size = value, 100)}
+                        onChange={debounce((value: number) => { settings.store.size = value; }, 100)}
                     />
                 )}
             />
             <Menu.MenuControlItem
                 id="vc-zoom-speed"
                 label="Zoom Speed"
-                control={(props, ref) => (
+                control={(props: any, ref: any) => (
                     <Menu.MenuSliderControl
                         ref={ref}
                         {...props}
                         minValue={0.1}
                         maxValue={5}
                         value={settings.store.zoomSpeed}
-                        onChange={debounce((value: number) => settings.store.zoomSpeed = value, 100)}
+                        onChange={debounce((value: number) => { settings.store.zoomSpeed = value; }, 100)}
                         renderValue={(value: number) => `${value.toFixed(3)}x`}
                     />
                 )}
             />
         </Menu.MenuGroup>
     );
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "ImageZoom",
@@ -201,28 +202,32 @@ export default definePlugin({
     },
 
     // to stop from rendering twice /shrug
-    currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
+    currentMagnifierElement: null as FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
     element: null as HTMLDivElement | null,
 
     Magnifier,
     root: null as Root | null,
-    makeProps(instance) {
+    makeProps(instance: any) {
         return {
-            onMouseOver: () => this.onMouseOver(instance),
-            onMouseOut: () => this.onMouseOut(instance),
-            onMouseDown: (e: React.MouseEvent) => this.onMouseDown(e, instance),
-            onMouseUp: () => this.onMouseUp(instance),
+            onMouseOver: () => { this.onMouseOver(instance); },
+            onMouseOut: () => { this.onMouseOut(instance); },
+            onMouseDown: (e: MouseEvent) => { this.onMouseDown(e, instance); },
+            onMouseUp: () => { this.onMouseUp(instance); },
             id: instance.props.id,
         };
     },
 
-    renderMagnifier(instance) {
-        if (instance.props.id === ELEMENT_ID) {
-            if (!this.currentMagnifierElement) {
-                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                this.root = ReactDOM.createRoot(this.element!);
-                this.root.render(this.currentMagnifierElement);
-            }
+    renderMagnifier(instance: any) {
+        if (instance.props.id === ELEMENT_ID && !this.currentMagnifierElement) {
+            this.currentMagnifierElement = (
+                <Magnifier
+                    size={settings.store.size}
+                    zoom={settings.store.zoom}
+                    instance={instance}
+                />
+            );
+            this.root = ReactDOM.createRoot(this.element!);
+            this.root.render(this.currentMagnifierElement);
         }
     },
 
@@ -232,17 +237,17 @@ export default definePlugin({
         this.root = null;
     },
 
-    onMouseOver(instance) {
+    onMouseOver(instance: any) {
         instance.setState((state: any) => ({ ...state, mouseOver: true }));
     },
-    onMouseOut(instance) {
+    onMouseOut(instance: any) {
         instance.setState((state: any) => ({ ...state, mouseOver: false }));
     },
-    onMouseDown(e: React.MouseEvent, instance) {
+    onMouseDown(e: MouseEvent, instance: any) {
         if (e.button === 0 /* left */)
             instance.setState((state: any) => ({ ...state, mouseDown: true }));
     },
-    onMouseUp(instance) {
+    onMouseUp(instance: any) {
         instance.setState((state: any) => ({ ...state, mouseDown: false }));
     },
 

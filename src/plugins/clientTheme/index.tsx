@@ -19,8 +19,8 @@ const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COL
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
     "#3A483D", "#344242", "#313D4B", "#2D2F47", "#322B42",
-    "#3C2E42", "#422938", "#b6908f", "#bfa088", "#d3c77d",
-    "#86ac86", "#88aab3", "#8693b5", "#8a89ba", "#ad94bb",
+    "#3C2E42", "#422938", "#B6908F", "#BFA088", "#D3C77D",
+    "#86AC86", "#88AAB3", "#8693B5", "#8A89BA", "#AD94BB",
 ];
 
 function onPickColor(color: number) {
@@ -74,18 +74,34 @@ function ThemeSettings() {
                     suggestedColors={colorPresets}
                 />
             </div>
-            {(contrastWarning || nitroThemeEnabled) && (<>
-                <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
-                <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
-                    <div className="client-theme-warning">
-                        <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
-                        {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
-                        {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
+            {(contrastWarning || nitroThemeEnabled) && (
+                <>
+                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
+                    <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
+                        <div className="client-theme-warning">
+                            <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
+                            {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
+                            {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
+                        </div>
+                        {(contrastWarning && fixableContrast) && (
+                            <Button
+                                color={Button.Colors.RED}
+                                onClick={() => { setTheme(oppositeTheme); }}
+                            >
+                                Switch to {oppositeTheme} mode
+                            </Button>
+                        )}
+                        {(nitroThemeEnabled) && (
+                            <Button
+                                color={Button.Colors.RED}
+                                onClick={() => { setTheme(theme); }}
+                            >
+                                Disable Nitro Theme
+                            </Button>
+                        )}
                     </div>
-                    {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>Switch to {oppositeTheme} mode</Button>}
-                    {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>Disable Nitro Theme</Button>}
-                </div>
-            </>)}
+                </>
+            )}
         </div>
     );
 }
@@ -102,7 +118,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         default: "313338",
         component: () => (
-            <Button onClick={() => onPickColor(0x313338)}>
+            <Button onClick={() => { onPickColor(0x313338); }}>
                 Reset Theme Color
             </Button>
         )
@@ -140,7 +156,7 @@ const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
 function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp, centerVariable: string): string {
     return Object.entries(variableLightness).filter(([key]) => key.search(regex) > -1)
         .map(([key, lightness]) => {
-            const lightnessOffset = lightness - variableLightness[centerVariable];
+            const lightnessOffset = lightness - variableLightness[centerVariable]!;
             const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
             return `${key}: var(--theme-h) var(--theme-s) calc(var(--theme-l) ${plusOrMinus} ${Math.abs(lightnessOffset).toFixed(2)}%);`;
         })
@@ -148,14 +164,14 @@ function genThemeSpecificOffsets(variableLightness: Record<string, number>, rege
 }
 
 
-function generateColorOffsets(styles) {
-    const variableLightness = {} as Record<string, number>;
+function generateColorOffsets(styles: string) {
+    const variableLightness: Record<string, number> = {};
 
     // Get lightness values of --primary variables
     let variableMatch = variableRegex.exec(styles);
     while (variableMatch !== null) {
         const [, variable, lightness] = variableMatch;
-        variableLightness[variable] = parseFloat(lightness);
+        variableLightness[variable!] = parseFloat(lightness!);
         variableMatch = variableRegex.exec(styles);
     }
 
@@ -165,7 +181,7 @@ function generateColorOffsets(styles) {
     ].join("\n\n"));
 }
 
-function generateLightModeFixes(styles) {
+function generateLightModeFixes(styles: string) {
     const groupLightUsesW500Regex = /\.theme-light[^{]*\{[^}]*var\(--white-500\)[^}]*}/gm;
     // get light capturing groups that mention --white-500
     const relevantStyles = [...styles.matchAll(groupLightUsesW500Regex)].flat();
@@ -182,9 +198,9 @@ function generateLightModeFixes(styles) {
     const groupBgVarRegex = /\.theme-light\{([^}]*--[^:}]*(?:background|bg)[^:}]*:var\(--white-500\)[^}]*)\}/m;
     const bgVarRegex = /^(--[^:]*(?:background|bg)[^:]*):var\(--white-500\)/m;
     // get all global variables used for backgrounds
-    const lightVars = mapReject(relevantStyles, style => captureOne(style, groupBgVarRegex)) // get the insides of capture groups that have at least one background var with w500
+    const lightVars = mapReject(relevantStyles, style => captureOne(style, groupBgVarRegex)!) // get the insides of capture groups that have at least one background var with w500
         .map(str => str.split(";")).flat(); // captureGroupInsides[] -> cssRule[]
-    const lightBgVars = mapReject(lightVars, variable => captureOne(variable, bgVarRegex)); // remove vars that aren't for backgrounds or w500
+    const lightBgVars = mapReject(lightVars, variable => captureOne(variable, bgVarRegex)!); // remove vars that aren't for backgrounds or w500
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
 
@@ -195,13 +211,13 @@ function generateLightModeFixes(styles) {
     ].join("\n\n"));
 }
 
-function captureOne(str, regex) {
+function captureOne(str: string, regex: RegExp) {
     const result = str.match(regex);
     return (result === null) ? null : result[1];
 }
 
-function mapReject(arr, mapFunc) {
-    return arr.map(mapFunc).filter(Boolean);
+function mapReject<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => U) {
+    return array.map(callback).filter((v): v is Exclude<U, "" | 0n | 0 | false | null | undefined> => Boolean(v));
 }
 
 function updateColorVars(color: string) {
@@ -218,7 +234,7 @@ function updateColorVars(color: string) {
     }`;
 }
 
-function createStyleSheet(id, content = "") {
+function createStyleSheet(id: string, content = "") {
     const style = document.createElement("style");
     style.setAttribute("id", id);
     style.textContent = content.split("\n").map(line => line.trim()).join("\n");
@@ -227,7 +243,7 @@ function createStyleSheet(id, content = "") {
 }
 
 // returns all of discord's native styles in a single string
-async function getStyles(): Promise<string> {
+async function getStyles() {
     let out = "";
     const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
     for (const styleLinkNode of styleLinkNodes) {

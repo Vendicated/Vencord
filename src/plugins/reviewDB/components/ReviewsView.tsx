@@ -17,12 +17,13 @@
 */
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
+import { ChannelType } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { Forms, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
-import { Review } from "../entities";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
+import type { Review } from "../entities";
+import { addReview, getReviews, type Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
 import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
@@ -65,7 +66,7 @@ export default function ReviewsView({
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
             if (settings.store.hideBlockedUsers)
-                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+                data!.reviews = data!.reviews.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
 
             scrollToTop?.();
             onFetchReviews(data!);
@@ -78,7 +79,7 @@ export default function ReviewsView({
         <>
             <ReviewList
                 refetch={refetch}
-                reviews={reviewData!.reviews}
+                reviews={reviewData.reviews}
                 hideOwnReview={hideOwnReview}
                 profileId={discordId}
             />
@@ -88,7 +89,7 @@ export default function ReviewsView({
                     name={name}
                     discordId={discordId}
                     refetch={refetch}
-                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
+                    isAuthor={reviewData.reviews.some(r => r.sender.discordID === UserStore.getCurrentUser()!.id)}
                 />
             )}
         </>
@@ -96,12 +97,12 @@ export default function ReviewsView({
 }
 
 function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
-    const myId = UserStore.getCurrentUser().id;
+    const meId = UserStore.getCurrentUser()!.id;
 
     return (
         <div className={cl("view")}>
-            {reviews?.map(review =>
-                (review.sender.discordID !== myId || !hideOwnReview) &&
+            {reviews.map(review =>
+                (review.sender.discordID !== meId || !hideOwnReview) &&
                 <ReviewComponent
                     key={review.id}
                     review={review}
@@ -110,7 +111,7 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch():
                 />
             )}
 
-            {reviews?.length === 0 && (
+            {reviews.length === 0 && (
                 <Forms.FormText className={cl("placeholder")}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
@@ -126,7 +127,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
     const inputType = ChatInputTypes.FORM;
     inputType.disableAutoFocus = true;
 
-    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
+    const channel = createChannelRecordFromServer({ id: "0", type: ChannelType.DM });
 
     return (
         <>
@@ -148,10 +149,10 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     }
                     type={inputType}
                     disableThemedBackground={true}
-                    setEditorRef={ref => editorRef.current = ref}
+                    setEditorRef={(ref: any) => { editorRef.current = ref; }}
                     textValue=""
                     onSubmit={
-                        async res => {
+                        async (res: any) => {
                             const response = await addReview({
                                 userid: discordId,
                                 comment: res.value,
@@ -180,7 +181,6 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     }
                 />
             </div>
-
         </>
     );
 }

@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, type Argument, type CommandContext, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
+import { ApplicationCommandOptionType, DraftType, type FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
+import { UploadAttachmentActionCreators, UploadHandler, UserActionCreators } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
@@ -35,7 +36,7 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const UploadStore = findByPropsLazy("getUploads");
+const UploadStore: FluxStore & Record<string, any> = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -48,7 +49,7 @@ function loadImage(source: File | string) {
                 URL.revokeObjectURL(url);
             resolve(img);
         };
-        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
+        img.onerror = (event, _source, _lineno, _colno, err) => { reject(err || event); };
         img.crossOrigin = "Anonymous";
         img.src = url;
     });
@@ -58,10 +59,10 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
+                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SLASH_COMMAND);
                 if (upload) {
                     if (!upload.isImage) {
-                        UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+                        UploadAttachmentActionCreators.clearAll(ctx.channel.id, DraftType.SLASH_COMMAND);
                         throw "Upload is not an image";
                     }
                     return upload.item.file;
@@ -71,16 +72,16 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
                 return opt.value;
             case "user":
                 try {
-                    const user = await UserUtils.getUser(opt.value);
-                    return user.getAvatarURL(noServerPfp ? void 0 : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
+                    const user = (await UserActionCreators.getUser(opt.value))!;
+                    return user.getAvatarURL(noServerPfp ? undefined : ctx.guild?.id, 2048).replace(/\?size=\d+$/, "?size=2048");
                 } catch (err) {
                     console.error("[petpet] Failed to fetch user\n", err);
-                    UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+                    UploadAttachmentActionCreators.clearAll(ctx.channel.id, DraftType.SLASH_COMMAND);
                     throw "Failed to fetch user. Check the console for more info.";
                 }
         }
     }
-    UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+    UploadAttachmentActionCreators.clearAll(ctx.channel.id, DraftType.SLASH_COMMAND);
     return null;
 }
 
@@ -134,7 +135,7 @@ export default definePlugin({
                     var url = await resolveImage(opts, cmdCtx, noServerPfp);
                     if (!url) throw "No Image specified!";
                 } catch (err) {
-                    UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+                    UploadAttachmentActionCreators.clearAll(cmdCtx.channel.id, DraftType.SLASH_COMMAND);
                     sendBotMessage(cmdCtx.channel.id, {
                         content: String(err),
                     });
@@ -152,7 +153,7 @@ export default definePlugin({
                 canvas.width = canvas.height = resolution;
                 const ctx = canvas.getContext("2d")!;
 
-                UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+                UploadAttachmentActionCreators.clearAll(cmdCtx.channel.id, DraftType.SLASH_COMMAND);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -164,7 +165,7 @@ export default definePlugin({
                     const offsetY = 1 - height - 0.08;
 
                     ctx.drawImage(avatar, offsetX * resolution, offsetY * resolution, width * resolution, height * resolution);
-                    ctx.drawImage(frames[i], 0, 0, resolution, resolution);
+                    ctx.drawImage(frames[i]!, 0, 0, resolution, resolution);
 
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
                     const palette = quantize(data, 256);
@@ -181,7 +182,7 @@ export default definePlugin({
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
-                setTimeout(() => UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.ChannelMessage), 10);
+                setTimeout(() => { UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.CHANNEL_MESSAGE); }, 10);
             },
         },
     ]

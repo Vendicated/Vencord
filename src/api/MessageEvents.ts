@@ -17,21 +17,21 @@
 */
 
 import { Logger } from "@utils/Logger";
+import type { ChannelRecord, GuildEmoji, MessageRecord, MessageReference } from "@vencord/discord-types";
 import { MessageStore } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import type { Channel, Message } from "discord-types/general";
 import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
 export interface MessageObject {
     content: string,
-    validNonShortcutEmojis: CustomEmoji[];
+    validNonShortcutEmojis: GuildEmoji[];
     invalidEmojis: any[];
     tts: boolean;
 }
 
-export interface Upload {
+// Actually a class
+export interface CloudUpload {
     classification: string;
     currentSize: number;
     description: string | null;
@@ -41,7 +41,7 @@ export interface Upload {
     isVideo: boolean;
     item: {
         file: File;
-        platform: number;
+        platform: UploadPlatform;
     };
     loaded: number;
     mimeType: string;
@@ -50,31 +50,45 @@ export interface Upload {
     sensitive: boolean;
     showLargeMessageDialog: boolean;
     spoiler: boolean;
-    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
+    status: CloudUploadStatus;
     uniqueId: string;
     uploadedFilename: string;
 }
 
+export const enum UploadPlatform {
+    REACT_NATIVE = 0,
+    WEB = 1,
+}
+
+export const enum CloudUploadStatus {
+    CANCELED = "CANCELED",
+    COMPLETED = "COMPLETED",
+    ERROR = "ERROR",
+    NOT_STARTED = "NOT_STARTED",
+    STARTED = "STARTED",
+    UPLOADING = "UPLOADING",
+}
+
 export interface MessageReplyOptions {
-    messageReference: Message["messageReference"];
+    messageReference: MessageReference;
     allowedMentions?: {
-        parse: Array<string>;
+        parse: string[];
         repliedUser: boolean;
     };
 }
 
 export interface MessageExtra {
     stickers?: string[];
-    uploads?: Upload[];
+    uploads?: CloudUpload[];
     replyOptions: MessageReplyOptions;
     content: string;
-    channel: Channel;
+    channel: ChannelRecord;
     type?: any;
     openWarningPopout: (props: any) => any;
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<{ cancel: boolean; } | void>;
+export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<{ cancel: boolean; } | void>;
 
 const sendListeners = new Set<SendListener>();
 const editListeners = new Set<EditListener>();
@@ -131,11 +145,11 @@ export function removePreEditListener(listener: EditListener) {
 
 
 // Message clicks
-type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
+type ClickListener = (message: MessageRecord, channel: ChannelRecord, event: MouseEvent) => void;
 
 const listeners = new Set<ClickListener>();
 
-export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
+export function _handleClick(message: MessageRecord, channel: ChannelRecord, event: MouseEvent) {
     // message object may be outdated, so (try to) fetch latest one
     message = MessageStore.getMessage(channel.id, message.id) ?? message;
     for (const listener of listeners) {

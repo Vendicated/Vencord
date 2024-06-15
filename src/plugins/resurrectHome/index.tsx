@@ -23,39 +23,43 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, Menu, Tooltip, useEffect, useState } from "@webpack/common";
+import type { Dispatch, SetStateAction } from "react";
 
-const ChannelRowClasses = findByPropsLazy("modeConnected", "modeLocked", "icon");
+const ChannelRowClasses: Record<string, string> = findByPropsLazy("modeConnected", "modeLocked", "icon");
 
 let currentShouldViewServerHome = false;
-const shouldViewServerHomeStates = new Set<React.Dispatch<React.SetStateAction<boolean>>>();
+const shouldViewServerHomeStates = new Set<Dispatch<SetStateAction<boolean>>>();
 
-function ViewServerHomeButton() {
-    return (
-        <Tooltip text="View Server Home">
-            {tooltipProps => (
-                <Button
-                    {...tooltipProps}
-                    look={Button.Looks.BLANK}
-                    size={Button.Sizes.NONE}
-                    innerClassName={ChannelRowClasses.icon}
-                    onClick={e => {
-                        e.preventDefault();
+const ViewServerHomeButton = () => (
+    <Tooltip text="View Server Home">
+        {tooltipProps => (
+            <Button
+                {...tooltipProps}
+                look={Button.Looks.BLANK}
+                size={Button.Sizes.NONE}
+                innerClassName={ChannelRowClasses.icon}
+                onClick={e => {
+                    e.preventDefault();
 
-                        currentShouldViewServerHome = true;
-                        for (const setState of shouldViewServerHomeStates) {
-                            setState(true);
-                        }
-                    }}
+                    currentShouldViewServerHome = true;
+                    for (const setState of shouldViewServerHomeStates) {
+                        setState(true);
+                    }
+                }}
 
+            >
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="m2.4 8.4 8.38-6.46a2 2 0 0 1 2.44 0l8.39 6.45a2 2 0 0 1-.79 3.54l-.32.07-.82 8.2a2 2 0 0 1-1.99 1.8H16a1 1 0 0 1-1-1v-5a3 3 0 0 0-6 0v5a1 1 0 0 1-1 1H6.31a2 2 0 0 1-1.99-1.8L3.5 12l-.32-.07a2 2 0 0 1-.79-3.54Z" />
-                    </svg>
-                </Button>
-            )}
-        </Tooltip>
-    );
-}
+                    <path d="m2.4 8.4 8.38-6.46a2 2 0 0 1 2.44 0l8.39 6.45a2 2 0 0 1-.79 3.54l-.32.07-.82 8.2a2 2 0 0 1-1.99 1.8H16a1 1 0 0 1-1-1v-5a3 3 0 0 0-6 0v5a1 1 0 0 1-1 1H6.31a2 2 0 0 1-1.99-1.8L3.5 12l-.32-.07a2 2 0 0 1-.79-3.54Z" />
+                </svg>
+            </Button>
+        )}
+    </Tooltip>
+);
 
 function useForceServerHome() {
     const { forceServerHome } = settings.use(["forceServerHome"]);
@@ -187,7 +191,7 @@ export default definePlugin({
                     id="force-server-home"
                     label="Force Server Home"
                     checked={forceServerHome}
-                    action={() => settings.store.forceServerHome = !forceServerHome}
+                    action={() => { settings.store.forceServerHome = !forceServerHome; }}
                 />
             );
         }

@@ -9,6 +9,7 @@ import "./ui/styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { AvatarDecorationData } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
@@ -21,10 +22,6 @@ import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/compone
 import DecorSection from "./ui/components/DecorSection";
 
 const { isAnimatedAvatarDecoration } = findByPropsLazy("isAnimatedAvatarDecoration");
-export interface AvatarDecoration {
-    asset: string;
-    skuId: string;
-}
 
 export default definePlugin({
     name: "Decor",
@@ -105,7 +102,7 @@ export default definePlugin({
         CONNECTION_OPEN: () => {
             useAuthorizationStore.getState().init();
             useCurrentUserDecorationsStore.getState().clear();
-            useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
+            useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser()!.id, true);
         },
         USER_PROFILE_MODAL_OPEN: data => {
             useUsersDecorationsStore.getState().fetch(data.userId, true);
@@ -124,11 +121,11 @@ export default definePlugin({
 
     useUserDecorAvatarDecoration,
 
-    async start() {
-        useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
+    start() {
+        useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser()!.id, true);
     },
 
-    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecoration | null; canAnimate?: boolean; }) {
+    getDecorAvatarDecorationURL({ avatarDecoration, canAnimate }: { avatarDecoration: AvatarDecorationData | null; canAnimate?: boolean; }) {
         // Only Decor avatar decorations have this SKU ID
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");

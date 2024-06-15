@@ -42,7 +42,7 @@ export default definePlugin({
 
         ERROR_CODES = await fetch(CODES_URL)
             .then(res => res.json())
-            .catch(e => console.error("[ReactErrorDecoder] Failed to fetch React error codes\n", e));
+            .catch(e => { console.error("[ReactErrorDecoder] Failed to fetch React error codes\n", e); });
     },
 
     stop() {

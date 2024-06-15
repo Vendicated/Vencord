@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
+import { useEffect, useMemo, useReducer, useRef, useState } from "@webpack/common";
+import type { RefCallback } from "react";
 
 import { checkIntersecting } from "./misc";
 
@@ -30,10 +31,10 @@ export const NoopComponent = () => null;
  * @returns [refCallback, isIntersecting]
  */
 export const useIntersection = (intersectOnly = false): [
-    refCallback: React.RefCallback<Element>,
+    refCallback: RefCallback<Element>,
     isIntersecting: boolean,
 ] => {
-    const observerRef = React.useRef<IntersectionObserver | null>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
     const [isIntersecting, setIntersecting] = useState(false);
 
     const refCallback = (element: Element | null) => {
@@ -69,8 +70,8 @@ type AwaiterRes<T> = [T, any, boolean];
 interface AwaiterOpts<T> {
     fallbackValue: T;
     deps?: unknown[];
-    onError?(e: any): void;
-    onSuccess?(value: T): void;
+    onError?: (e: any) => void;
+    onSuccess?: (value: T) => void;
 }
 /**
  * Await a promise
@@ -81,7 +82,7 @@ interface AwaiterOpts<T> {
 export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts: AwaiterOpts<T>): AwaiterRes<T>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterOpts<T | null>): AwaiterRes<T | null> {
-    const opts: Required<AwaiterOpts<T | null>> = Object.assign({
+    const opts: AwaiterOpts<T | null> = Object.assign({
         fallbackValue: null,
         deps: [],
         onError: null,
@@ -108,7 +109,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
                 opts.onError?.(error);
             });
 
-        return () => void (isAlive = false);
+        return () => { (isAlive = false); };
     }, opts.deps);
 
     return [state.value, state.error, state.pending];
@@ -134,7 +135,7 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     const start = useMemo(() => Date.now(), deps);
 
     useEffect(() => {
-        const intervalId = setInterval(() => setTime(Date.now() - start), interval);
+        const intervalId = setInterval(() => { setTime(Date.now() - start); }, interval);
 
         return () => {
             setTime(0);

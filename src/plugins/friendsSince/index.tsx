@@ -11,13 +11,12 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Heading, React, RelationshipStore, Text } from "@webpack/common";
+import { Heading, i18n, RelationshipStore, Text } from "@webpack/common";
 
 const container = findByPropsLazy("memberSinceWrapper");
 const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
-const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");
-const locale = findByPropsLazy("getLocale");
-const lastSection = findByPropsLazy("lastSection");
+const clydeMoreInfo: Record<string, string> = findByPropsLazy("clydeMoreInfo");
+const lastSection: Record<string, string> = findByPropsLazy("lastSection");
 
 export default definePlugin({
     name: "FriendsSince",
@@ -87,7 +86,7 @@ export default definePlugin({
                         </svg>
                     )}
                     <Text variant="text-sm/normal" className={classes(clydeMoreInfo.body, textClassName)}>
-                        {getCreatedAtDate(friendsSince, locale.getLocale())}
+                        {getCreatedAtDate(friendsSince, i18n.getLocale())}
                     </Text>
                 </div>
             </div>

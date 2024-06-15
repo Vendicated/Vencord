@@ -18,7 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType, type PluginNative } from "@utils/types";
+import { PlatformType } from "@vencord/discord-types";
 import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
@@ -85,7 +86,7 @@ export default definePlugin({
         }
     ],
 
-    async handleLink(data: { href: string; }, event?: MouseEvent) {
+    async handleLink(data?: { href: string; }, event?: MouseEvent) {
         if (!data) return false;
 
         let url = data.href;
@@ -155,11 +156,11 @@ export default definePlugin({
         return false;
     },
 
-    handleAccountView(event: { preventDefault(): void; }, platformType: string, userId: string) {
-        if (platformType === "spotify" && settings.store.spotify) {
+    handleAccountView(event: { preventDefault(): void; }, platformType: PlatformType, userId: string) {
+        if (platformType === PlatformType.SPOTIFY && settings.store.spotify) {
             VencordNative.native.openExternal(`spotify:user:${userId}`);
             event.preventDefault();
-        } else if (platformType === "steam" && settings.store.steam) {
+        } else if (platformType === PlatformType.STEAM && settings.store.steam) {
             VencordNative.native.openExternal(`steam://openurl/https://steamcommunity.com/profiles/${userId}`);
             showToast("Opened link in Steam", Toasts.Type.SUCCESS);
             event.preventDefault();

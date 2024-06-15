@@ -36,7 +36,7 @@ const cssListeners = new Set<(css: string) => void>();
 const NOOP = () => { };
 const NOOP_ASYNC = async () => { };
 
-const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
+const setCssDebounced = debounce((css: string) => { VencordNative.quickCss.set(css); });
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
@@ -69,7 +69,7 @@ window.VencordNative = {
         get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
         set: async (css: string) => {
             await DataStore.set("VencordQuickCss", css);
-            cssListeners.forEach(l => l(css));
+            cssListeners.forEach(l => { l(css); });
         },
         addChangeListener(cb) {
             cssListeners.add(cb);

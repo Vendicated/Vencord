@@ -24,11 +24,11 @@ import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import monacoHtml from "file://monacoWin.html?minify&base64";
-import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
+import { type FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { join, normalize } from "path";
 
-import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
+import { getThemeInfo, stripBOM, type UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
@@ -85,15 +85,16 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
 
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
-ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    writeFileSync(QUICKCSS_PATH, css)
-);
+ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) => {
+    writeFileSync(QUICKCSS_PATH, css);
+});
 
 ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
 ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
     // win & mac only
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
 }));
 
@@ -109,7 +110,7 @@ export function initIpc(mainWindow: BrowserWindow) {
     }).catch(() => { });
 
     const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
-        mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
+        mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, undefined);
     }));
 
     mainWindow.once("closed", () => {

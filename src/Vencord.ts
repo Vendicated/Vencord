@@ -40,7 +40,7 @@ import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
-import { SettingsRouter } from "./webpack/common";
+import { UserSettingsModalActionCreators } from "./webpack/common";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
@@ -58,7 +58,7 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.open("VencordCloud")
+            onClick: () => { UserSettingsModalActionCreators.open("VencordCloud"); }
         });
         return;
     }
@@ -99,23 +99,27 @@ async function init() {
             if (Settings.autoUpdate) {
                 await update();
                 if (Settings.autoUpdateNotification)
-                    setTimeout(() => showNotification({
-                        title: "Vencord has been updated!",
-                        body: "Click here to restart",
-                        permanent: true,
-                        noPersist: true,
-                        onClick: relaunch
-                    }), 10_000);
+                    setTimeout(() => {
+                        showNotification({
+                            title: "Vencord has been updated!",
+                            body: "Click here to restart",
+                            permanent: true,
+                            noPersist: true,
+                            onClick: relaunch
+                        });
+                    }, 10_000);
                 return;
             }
 
-            setTimeout(() => showNotification({
-                title: "A Vencord update is available!",
-                body: "Click here to view the update",
-                permanent: true,
-                noPersist: true,
-                onClick: openUpdaterModal!
-            }), 10_000);
+            setTimeout(() => {
+                showNotification({
+                    title: "A Vencord update is available!",
+                    body: "Click here to view the update",
+                    permanent: true,
+                    noPersist: true,
+                    onClick: openUpdaterModal!
+                });
+            }, 10_000);
         } catch (err) {
             UpdateLogger.error("Failed to check for updates", err);
         }

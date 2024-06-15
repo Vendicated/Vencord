@@ -16,20 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionString } from "@utils/types";
-import { Forms, React, TextInput } from "@webpack/common";
+import type { PluginOptionString } from "@utils/types";
+import { Forms, TextInput, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import type { ISettingElementProps } from ".";
 
 export function SettingTextComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
-    const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
-    const [error, setError] = React.useState<string | null>(null);
+    const [state, setState] = useState(pluginSettings[id] ?? option.default ?? null);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
+    function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");

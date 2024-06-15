@@ -24,10 +24,10 @@ import { useAwaiter } from "@utils/react";
 import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
-import { CachePronouns, PronounCode, PronounMapping, PronounsResponse } from "./types";
+import { type CachePronouns, type PronounCode, PronounMapping, type PronounsResponse } from "./types";
 
-type PronounsWithSource = [string | null, string];
-const EmptyPronouns: PronounsWithSource = [null, ""];
+type PronounsWithSource = [string | undefined, string];
+const EmptyPronouns: PronounsWithSource = [undefined, ""];
 
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
@@ -50,7 +50,7 @@ const bulkFetch = debounce(async () => {
     const pronouns = await bulkFetchPronouns(ids);
     for (const id of ids) {
         // Call all callbacks for the id
-        requestQueue[id]?.forEach(c => c(pronouns[id] ? extractPronouns(pronouns[id].sets) : ""));
+        requestQueue[id]?.forEach(c => { c(pronouns[id] ? extractPronouns(pronouns[id]!.sets) : ""); });
         delete requestQueue[id];
     }
 });
@@ -72,7 +72,7 @@ export function useFormattedPronouns(id: string, useGlobalProfile: boolean = fal
 
     const [result] = useAwaiter(() => fetchPronouns(id), {
         fallbackValue: getCachedPronouns(id),
-        onError: e => console.error("Fetching pronouns failed: ", e)
+        onError: e => { console.error("Fetching pronouns failed: ", e); }
     });
 
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
@@ -88,7 +88,7 @@ export function useProfilePronouns(id: string, useGlobalProfile: boolean = false
     const pronouns = useFormattedPronouns(id, useGlobalProfile);
 
     if (!settings.store.showInProfile) return EmptyPronouns;
-    if (!settings.store.showSelf && id === UserStore.getCurrentUser().id) return EmptyPronouns;
+    if (!settings.store.showSelf && id === UserStore.getCurrentUser()!.id) return EmptyPronouns;
 
     return pronouns;
 }
@@ -98,7 +98,7 @@ const NewLineRe = /\n+/g;
 
 // Gets the cached pronouns, if you're too impatient for a promise!
 export function getCachedPronouns(id: string): string | null {
-    const cached = cache[id] ? extractPronouns(cache[id].sets) : undefined;
+    const cached = cache[id] ? extractPronouns(cache[id]!.sets) : undefined;
 
     if (cached && cached !== PronounMapping.unspecified) return cached;
 
@@ -109,10 +109,13 @@ export function getCachedPronouns(id: string): string | null {
 export function fetchPronouns(id: string): Promise<string> {
     return new Promise(res => {
         const cached = getCachedPronouns(id);
-        if (cached) return res(cached);
+        if (cached) {
+            res(cached);
+            return;
+        }
 
         // If there is already a request added, then just add this callback to it
-        if (id in requestQueue) return requestQueue[id].push(res);
+        if (id in requestQueue) return requestQueue[id]!.push(res);
 
         // If not already added, then add it and call the debounced function to make sure the request gets executed
         requestQueue[id] = [res];
@@ -147,6 +150,8 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     }
 }
 
+const SpecialCodes = new Set(["any", "ask", "avoid", "other", "unspecified"]);
+
 export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
     if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
     // PronounDB returns an empty set instead of {sets: {en: ["unspecified"]}}.
@@ -155,10 +160,11 @@ export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }
 
     if (pronouns.length === 1) {
         // For capitalized pronouns or special codes (any, ask, avoid), we always return the normal (capitalized) string
-        if (pronounsFormat === PronounsFormat.Capitalized || ["any", "ask", "avoid", "other", "unspecified"].includes(pronouns[0]))
-            return PronounMapping[pronouns[0]];
-        else return PronounMapping[pronouns[0]].toLowerCase();
+        if (pronounsFormat === PronounsFormat.Capitalized || SpecialCodes.has(pronouns[0]!))
+            return PronounMapping[pronouns[0]!];
+        else
+            return PronounMapping[pronouns[0]!].toLowerCase();
     }
-    const pronounString = pronouns.map(p => p[0].toUpperCase() + p.slice(1)).join("/");
+    const pronounString = pronouns.map(p => p[0]!.toUpperCase() + p.slice(1)).join("/");
     return pronounsFormat === PronounsFormat.Capitalized ? pronounString : pronounString.toLowerCase();
 }

@@ -21,13 +21,12 @@ import esbuild from "esbuild";
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
+// @ts-ignore
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, disposeAll, globPlugins, IS_DEV, IS_REPORTER, rebuildAll, VERSION, watch, watchAll } from "./common.mjs";
 
-/**
- * @type {esbuild.BuildOptions}
- */
+/** @satisfies {esbuild.BuildOptions} */
 const commonOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
@@ -39,17 +38,18 @@ const commonOptions = {
         ...commonOpts.plugins,
     ],
     target: ["esnext"],
+    // https://github.com/evanw/esbuild/releases/tag/v0.16.0#:~:text=esbuild%20now,parameter
     define: {
-        IS_WEB: true,
-        IS_EXTENSION: false,
-        IS_STANDALONE: true,
-        IS_DEV,
-        IS_REPORTER,
-        IS_DISCORD_DESKTOP: false,
-        IS_VESKTOP: false,
-        IS_UPDATER_DISABLED: true,
+        IS_WEB: "true",
+        IS_EXTENSION: "false",
+        IS_STANDALONE: "true",
+        IS_DEV: IS_DEV.toString(),
+        IS_REPORTER: IS_REPORTER.toString(),
+        IS_DISCORD_DESKTOP: "false",
+        IS_VESKTOP: "false",
+        IS_UPDATER_DISABLED: "true",
         VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP
+        BUILD_TIMESTAMP: BUILD_TIMESTAMP.toString()
     }
 };
 
@@ -65,61 +65,68 @@ const RnNoiseFiles = [
     "LICENSE"
 ];
 
-await Promise.all(
-    [
-        esbuild.build({
-            entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
-            bundle: true,
-            minify: true,
-            format: "iife",
-            outbase: "node_modules/monaco-editor/esm/",
-            outdir: "dist/monaco"
-        }),
-        esbuild.build({
-            entryPoints: ["browser/monaco.ts"],
-            bundle: true,
-            minify: true,
-            format: "iife",
-            outfile: "dist/monaco/index.js",
-            loader: {
-                ".ttf": "file"
-            }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            outfile: "dist/browser.js",
-            footer: { js: "//# sourceURL=VencordWeb" }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            outfile: "dist/extension.js",
-            define: {
-                ...commonOptions?.define,
-                IS_EXTENSION: true,
-            },
-            footer: { js: "//# sourceURL=VencordWeb" }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
-            define: {
-                ...(commonOptions?.define),
-                window: "unsafeWindow",
-            },
-            outfile: "dist/Vencord.user.js",
-            banner: {
-                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
-            },
-            footer: {
-                // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
-                js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
-            }
-        })
-    ]
-);
+const contexts = await Promise.all([
+    esbuild.context({
+        entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
+        bundle: true,
+        minify: true,
+        format: "iife",
+        outbase: "node_modules/monaco-editor/esm/",
+        outdir: "dist/monaco"
+    }),
+    esbuild.context({
+        entryPoints: ["browser/monaco.ts"],
+        bundle: true,
+        minify: true,
+        format: "iife",
+        outfile: "dist/monaco/index.js",
+        loader: {
+            ".ttf": "file"
+        }
+    }),
+    esbuild.context({
+        ...commonOptions,
+        outfile: "dist/browser.js",
+        footer: { js: "//# sourceURL=VencordWeb" }
+    }),
+    esbuild.context({
+        ...commonOptions,
+        outfile: "dist/extension.js",
+        define: {
+            ...commonOptions.define,
+            IS_EXTENSION: "true",
+        },
+        footer: { js: "//# sourceURL=VencordWeb" }
+    }),
+    esbuild.context({
+        ...commonOptions,
+        inject: ["browser/GMPolyfill.js", ...commonOptions.inject],
+        define: {
+            ...(commonOptions.define),
+            window: "unsafeWindow",
+        },
+        outfile: "dist/Vencord.user.js",
+        banner: {
+            js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
+        },
+        footer: {
+            // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
+            js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
+        }
+    })
+]);
+
+await rebuildAll(contexts);
+
+// https://github.com/evanw/esbuild/releases/tag/v0.17.0
+if (watch)
+    await watchAll(contexts);
+else
+    disposeAll(contexts);
 
 /**
- * @type {(dir: string) => Promise<string[]>}
+ * @param {string} dir
+ * @returns {Promise<string[]>}
  */
 async function globDir(dir) {
     const files = [];
@@ -136,7 +143,9 @@ async function globDir(dir) {
 }
 
 /**
- * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
+ * @param {string} dir
+ * @param {string} [basePath]
+ * @returns {Promise<Record<string, string>>}
  */
 async function loadDir(dir, basePath = "") {
     const files = await globDir(dir);
@@ -144,7 +153,8 @@ async function loadDir(dir, basePath = "") {
 }
 
 /**
-  * @type {(target: string, files: string[]) => Promise<void>}
+ * @param {string} target
+ * @param {string[]} files
  */
 async function buildExtension(target, files) {
     const entries = {
@@ -159,6 +169,7 @@ async function buildExtension(target, files) {
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
+                // @ts-ignore
                 content = new TextEncoder().encode(JSON.stringify(json));
             }
 

@@ -24,13 +24,13 @@ import type { ReactElement } from "react";
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  */
-export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => void;
+export type NavContextMenuPatchCallback = (children: (ReactElement | null)[], ...args: any[]) => void;
 /**
  * @param navId The navId of the context menu being patched
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  */
-export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => void;
+export type GlobalContextMenuPatchCallback = (navId: string, children: (ReactElement | null)[], ...args: any[]) => void;
 
 const ContextMenuLogger = new Logger("ContextMenu");
 
@@ -42,7 +42,7 @@ export const globalPatches = new Set<GlobalContextMenuPatchCallback>();
  * @param navId The navId(s) for the context menu(s) to patch
  * @param patch The patch to be applied
  */
-export function addContextMenuPatch(navId: string | Array<string>, patch: NavContextMenuPatchCallback) {
+export function addContextMenuPatch(navId: string[] | string, patch: NavContextMenuPatchCallback) {
     if (!Array.isArray(navId)) navId = [navId];
     for (const id of navId) {
         let contextMenuPatches = navPatches.get(id);
@@ -69,12 +69,13 @@ export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback)
  * @param patch The patch to be removed
  * @returns Whether the patch was successfully removed from the context menu(s)
  */
-export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
-    const navIds = Array.isArray(navId) ? navId : [navId as string];
+export function removeContextMenuPatch<T extends string[] | string>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : boolean[] {
+    // https://github.com/microsoft/TypeScript/issues/33700
+    const navIds: string[] = Array.isArray(navId) ? navId : [navId];
 
     const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
 
-    return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : Array<boolean>;
+    return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : boolean[];
 }
 
 /**
@@ -91,7 +92,7 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
  * @param id The id of the child. If an array is specified, all ids will be tried
  * @param children The context menu children
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>): Array<ReactElement | null> | null {
+export function findGroupChildrenByChildId(id: string[] | string, children: (ReactElement | null)[]): (ReactElement | null)[] | null {
     for (const child of children) {
         if (child == null) continue;
 
@@ -121,12 +122,12 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
 }
 
 interface ContextMenuProps {
-    contextMenuApiArguments?: Array<any>;
+    contextMenuApiArguments?: unknown[];
     navId: string;
-    children: Array<ReactElement | null>;
+    children: (ReactElement | null)[];
     "aria-label": string;
     onSelect: (() => void) | undefined;
-    onClose: (callback: (...args: Array<any>) => any) => void;
+    onClose: (callback: (...args: unknown[]) => unknown) => void;
 }
 
 export function _usePatchContextMenu(props: ContextMenuProps) {
@@ -161,7 +162,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     return props;
 }
 
-function cloneMenuChildren(obj: ReactElement | Array<ReactElement | null> | null) {
+function cloneMenuChildren(obj: ReactElement | (ReactElement | null)[] | null): any {
     if (Array.isArray(obj)) {
         return obj.map(cloneMenuChildren);
     }
@@ -170,7 +171,7 @@ function cloneMenuChildren(obj: ReactElement | Array<ReactElement | null> | null
         obj = React.cloneElement(obj);
 
         if (
-            obj?.props?.children &&
+            obj.props?.children &&
             (obj.type !== Menu.MenuControlItem || obj.type === Menu.MenuControlItem && obj.props.control != null)
         ) {
             obj.props.children = cloneMenuChildren(obj.props.children);

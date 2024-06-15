@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function Badge({ text, color }): JSX.Element {
+import type { JSX, ReactNode } from "react";
+
+export function Badge({ text, color }: { text: ReactNode; color: string; }): JSX.Element {
     return (
         <div className="vc-plugins-badge" style={{
             backgroundColor: color,

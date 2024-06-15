@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addPreEditListener, addPreSendListener, type MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -56,8 +56,8 @@ export default definePlugin({
     },
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => this.unindentMsg(msg));
-        this.preEdit = addPreEditListener((_cid, _mid, msg) => this.unindentMsg(msg));
+        this.preSend = addPreSendListener((_, msg) => { this.unindentMsg(msg); });
+        this.preEdit = addPreEditListener((_cid, _mid, msg) => { this.unindentMsg(msg); });
     },
 
     stop() {

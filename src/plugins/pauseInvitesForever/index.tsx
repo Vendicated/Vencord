@@ -19,6 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { GuildFeature } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
 
@@ -27,13 +28,12 @@ const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment
 function showDisableInvites(guildId: string) {
     // Once the experiment is removed, this should keep working
     const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
-    // @ts-ignore
-    return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+    return enableInvitesDisabled && !GuildStore.getGuild(guildId)!.hasFeature(GuildFeature.INVITES_DISABLED);
 }
 
 function disableInvites(guildId: string) {
-    const guild = GuildStore.getGuild(guildId);
-    const features = [...guild.features, "INVITES_DISABLED"];
+    const guild = GuildStore.getGuild(guildId)!;
+    const features = [...guild.features, GuildFeature.INVITES_DISABLED];
     RestAPI.patch({
         url: Constants.Endpoints.GUILD(guildId),
         body: { features },

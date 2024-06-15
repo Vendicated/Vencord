@@ -52,7 +52,7 @@ export const shiki = {
         );
         await client.init();
 
-        const themeUrl = initThemeUrl || themeUrls[0];
+        const themeUrl = initThemeUrl || themeUrls[0]!;
 
         await loadLanguages();
         await client.run("setOnigasm", { wasm: shikiOnigasmSrc });
@@ -77,8 +77,9 @@ export const shiki = {
     },
     setTheme: async (themeUrl: string) => {
         await shiki.clientPromise;
-        themeUrl ||= themeUrls[0];
-        if (!shiki.loadedThemes.has(themeUrl)) await shiki.loadTheme(themeUrl);
+        themeUrl ||= themeUrls[0]!;
+        if (!shiki.loadedThemes.has(themeUrl))
+            await shiki.loadTheme(themeUrl);
 
         await shiki._setTheme(themeUrl);
     },
@@ -101,7 +102,8 @@ export const shiki = {
         const lang = resolveLang(langId);
         if (!lang) return [];
 
-        if (!shiki.loadedLangs.has(lang.id)) await shiki.loadLang(lang.id);
+        if (!shiki.loadedLangs.has(lang.id))
+            await shiki.loadLang(lang.id);
 
         return await client.run("codeToThemedTokens", {
             code,

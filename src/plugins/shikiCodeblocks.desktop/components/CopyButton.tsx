@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import type { ButtonHTMLAttributes, DetailedHTMLProps } from "react";
+
 import { useCopyCooldown } from "../hooks/useCopyCooldown";
 
-export interface CopyButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
+export interface CopyButtonProps extends DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
     content: string;
 }
 
@@ -32,7 +34,7 @@ export function CopyButton({ content, ...props }: CopyButtonProps) {
                 ...props.style,
                 cursor: copyCooldown ? "default" : undefined,
             }}
-            onClick={() => copy(content)}
+            onClick={() => { copy(content); }}
         >
             {copyCooldown ? "Copied!" : "Copy"}
         </button>

@@ -19,17 +19,13 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { FluxPersistedStore, UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+const UserAffinitiesStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserAffinitiesStore");
 const { FriendsSections } = findByPropsLazy("FriendsSections");
-
-interface UserAffinity {
-    user_id: string;
-    affinity: number;
-}
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -81,7 +77,7 @@ export default definePlugin({
         {
             find: "getRelationshipCounts(){",
             replacement: {
-                predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
+                predicate: () => Settings.plugins.ImplicitRelationships!.sortByAffinity,
                 match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
                 replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
@@ -121,13 +117,13 @@ export default definePlugin({
         }
     ),
 
-    wrapSort(comparator: Function, row: any) {
+    wrapSort(comparator: (...args: unknown[]) => any, row: any) {
         return row.type === 5
-            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
+            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity
             : comparator(row);
     },
 
-    async fetchImplicitRelationships() {
+    fetchImplicitRelationships() {
         // Implicit relationships are defined as users that you:
         // 1. Have an affinity for
         // 2. Do not have a relationship with // TODO: Check how this works with pending/blocked relationships
@@ -142,7 +138,7 @@ export default definePlugin({
         // So there's no guarantee that a user being in user cache means they have a mutual with you
         // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
         const dmUserIds = new Set(
-            Object.values(ChannelStore.getSortedPrivateChannels()).flatMap(c => c.recipients)
+            Object.values(ChannelStore.getMutablePrivateChannels()).flatMap(c => c.recipients)
         );
         const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || dmUserIds.has(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
@@ -152,15 +148,17 @@ export default definePlugin({
         // OP 8 Request Guild Members allows 100 user IDs at a time
         const ignore = new Set(toRequest);
         const relationships = RelationshipStore.getRelationships();
-        const callback = ({ chunks }) => {
+        const callback = ({ chunks }: { chunks: any }) => {
             for (const chunk of chunks) {
                 const { nonce, members } = chunk;
                 if (nonce !== sentNonce) return;
-                members.forEach(member => {
+                members.forEach((member: any) => {
                     ignore.delete(member.user.id);
                 });
 
-                nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
+                nonFriendAffinities.map(id => UserStore.getUser(id))
+                    .filter((user): user is UserRecord => !!user && !ignore.has(user.id))
+                    .forEach(user => { relationships[user.id] = 5; });
                 RelationshipStore.emitChange();
                 if (--count === 0) {
                     // @ts-ignore
@@ -169,7 +167,6 @@ export default definePlugin({
             }
         };
 
-        // @ts-ignore
         FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
         for (let i = 0; i < toRequest.length; i += 100) {
             FluxDispatcher.dispatch({

@@ -12,27 +12,22 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-              with:
-                  sparse-checkout: packages/discord-types
-                  sparse-checkout-cone-mode: false
+
+            - uses: pnpm/action-setup@v4 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
                   node-version: ^20.11.0
-
-            - uses: pnpm/action-setup@v4
-              with:
-                  version: 9
-
-            - name: Move packages/discord-types to root
-              run: |
-                  shopt -s dotglob
-                  mv packages/discord-types/* .
-                  rm -rf packages
+                  cache: "pnpm"
 
             - name: Install dependencies
-              run: pnpm install --no-frozen-lockfile
+              run: pnpm install --frozen-lockfile
 
-            - name: Check for TypeScript errors and lint
-              run: pnpm test
+            - name: Check packages/discord-types for TypeScript errors and lint
+              run: |
+                  cd packages/discord-types
+                  pnpm test
+
+            - name: Check if packages/discord-types is compatible with Vencord
+              run: "pnpm testTsc"

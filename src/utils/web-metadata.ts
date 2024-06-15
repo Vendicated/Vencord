@@ -8,7 +8,7 @@ export let EXTENSION_BASE_URL: string;
 export let EXTENSION_VERSION: string;
 
 if (IS_EXTENSION) {
-    const script = document.querySelector("#vencord-script") as HTMLScriptElement;
+    const script = document.querySelector<HTMLScriptElement>("#vencord-script")!;
     EXTENSION_BASE_URL = script.dataset.extensionBaseUrl!;
     EXTENSION_VERSION = script.dataset.version!;
 }

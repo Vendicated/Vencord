@@ -22,14 +22,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, type Patch } from "@utils/types";
+import type { ChannelRecord, GuildCategoryChannelRecord, GuildChannel, GuildChannelRecord, Role } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
-import type { Channel, Role } from "discord-types/general";
+import { ChannelStore, Permissions, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
-const ChannelListClasses = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
+const ChannelListClasses: Record<string, string> = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
 
 const enum ShowMode {
     LockIcon,
@@ -134,7 +134,7 @@ export default definePlugin({
                     match: new RegExp(`(?<=${func}\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
                     replace: "if($self.isHiddenChannel(this.props.channel))return null;"
                 }))
-            ]
+            ] as Patch["replacement"]
         },
         {
             find: "VoiceChannel.renderPopout: There must always be something to render",
@@ -477,19 +477,20 @@ export default definePlugin({
         }
     ],
 
-    isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
+    isHiddenChannel(channel?: ChannelRecord & { channelId?: string; }, checkConnect = false) {
         if (!channel) return false;
 
-        if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
+        if (channel.channelId)
+            channel = ChannelStore.getChannel(channel.channelId);
+        if (!channel || channel.isPrivate()) return false;
 
-        return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(Permissions.CONNECT, channel);
     },
 
-    resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
+    resolveGuildChannels(channels: Record<string | number, GuildChannel[] | string | number>, shouldIncludeHidden: boolean) {
         if (shouldIncludeHidden) return channels;
 
-        const res = {};
+        const res: typeof channels = {};
         for (const [key, maybeObjChannels] of Object.entries(channels)) {
             if (!Array.isArray(maybeObjChannels)) {
                 res[key] = maybeObjChannels;
@@ -498,9 +499,9 @@ export default definePlugin({
 
             res[key] ??= [];
 
-            for (const objChannel of maybeObjChannels) {
-                if (objChannel.channel.id === null || !this.isHiddenChannel(objChannel.channel)) res[key].push(objChannel);
-            }
+            for (const objChannel of maybeObjChannels)
+                if (!this.isHiddenChannel(objChannel.channel))
+                    (res[key] as GuildChannel[]).push(objChannel);
         }
 
         return res;
@@ -508,7 +509,7 @@ export default definePlugin({
 
     makeAllowedRolesReduce(guildId: string) {
         return [
-            (prev: Array<Role>, _: Role, index: number, originalArray: Array<Role>) => {
+            (prev: Role[], _: Role, index: number, originalArray: Role[]) => {
                 if (index !== 0) return prev;
 
                 const everyoneRole = originalArray.find(role => role.id === guildId);
@@ -516,11 +517,12 @@ export default definePlugin({
                 if (everyoneRole) return [everyoneRole];
                 return originalArray;
             },
-            [] as Array<Role>
+            [] as Role[]
         ];
     },
 
-    HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
+    HiddenChannelLockScreen: (channel: Exclude<GuildChannelRecord, GuildCategoryChannelRecord>) =>
+        <HiddenChannelLockScreen channel={channel} />,
 
     LockIcon: ErrorBoundary.wrap(() => (
         <svg
@@ -531,7 +533,10 @@ export default definePlugin({
             aria-hidden={true}
             role="img"
         >
-            <path className="shc-evenodd-fill-current-color" d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z" />
+            <path
+                className="shc-evenodd-fill-current-color"
+                d="M17 11V7C17 4.243 14.756 2 12 2C9.242 2 7 4.243 7 7V11C5.897 11 5 11.896 5 13V20C5 21.103 5.897 22 7 22H17C18.103 22 19 21.103 19 20V13C19 11.896 18.103 11 17 11ZM12 18C11.172 18 10.5 17.328 10.5 16.5C10.5 15.672 11.172 15 12 15C12.828 15 13.5 15.672 13.5 16.5C13.5 17.328 12.828 18 12 18ZM15 11H9V7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V11Z"
+            />
         </svg>
     ), { noop: true }),
 
@@ -548,7 +553,10 @@ export default definePlugin({
                     aria-hidden={true}
                     role="img"
                 >
-                    <path className="shc-evenodd-fill-current-color" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z" />
+                    <path
+                        className="shc-evenodd-fill-current-color"
+                        d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z"
+                    />
                 </svg>
             )}
         </Tooltip>

@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, type Patch } from "@utils/types";
 
 const settings = definePluginSettings({
     multiplier: {
@@ -42,7 +42,7 @@ export default definePlugin({
         ...[
             ".Messages.USER_VOLUME",
             "currentVolume:"
-        ].map(find => ({
+        ].map<Omit<Patch, "plugin">>(find => ({
             find,
             replacement: {
                 match: /(?<=maxValue:\i\.\i)\?(\d+?):(\d+?)(?=,)/,

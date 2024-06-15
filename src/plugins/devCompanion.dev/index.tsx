@@ -61,7 +61,7 @@ interface PatchData {
 
 interface FindData {
     type: string;
-    args: Array<StringNode | FunctionNode>;
+    args: (StringNode | FunctionNode)[];
 }
 
 const settings = definePluginSettings({
@@ -142,7 +142,7 @@ function initWs(isManual = false) {
         }
 
         function reply(error?: string) {
-            const data = { nonce, ok: !error } as Record<string, unknown>;
+            const data: Record<string, unknown> = { nonce, ok: !error };
             if (error) data.error = error;
 
             ws.send(JSON.stringify(data));
@@ -156,11 +156,13 @@ function initWs(isManual = false) {
 
                 const candidates = search(find);
                 const keys = Object.keys(candidates);
-                if (keys.length !== 1)
-                    return reply("Expected exactly one 'find' matches, found " + keys.length);
+                if (keys.length !== 1) {
+                    reply("Expected exactly one 'find' matches, found " + keys.length);
+                    return;
+                }
 
-                const mod = candidates[keys[0]];
-                let src = String(mod.original ?? mod).replaceAll("\n", "");
+                const mod = candidates[keys[0]!]!;
+                let src = String((mod as any).original ?? mod).replaceAll("\n", "");
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
@@ -182,7 +184,8 @@ function initWs(isManual = false) {
 
                         src = newSource;
                     } catch (err) {
-                        return reply(`Replacement ${i} failed: ${err}`);
+                        reply(`Replacement ${i} failed: ${err}`);
+                        return;
                     }
                 }
 
@@ -191,10 +194,12 @@ function initWs(isManual = false) {
             }
             case "testFind": {
                 const { type, args } = data as FindData;
+                let parsedArgs: any;
                 try {
-                    var parsedArgs = args.map(parseNode);
+                    parsedArgs = args.map(parseNode);
                 } catch (err) {
-                    return reply("Failed to parse args: " + err);
+                    reply("Failed to parse args: " + err);
+                    return;
                 }
 
                 try {
@@ -204,29 +209,34 @@ function initWs(isManual = false) {
                             results = findAll(parsedArgs[0]);
                             break;
                         case "ByProps":
+                            // @ts-ignore
                             results = findAll(filters.byProps(...parsedArgs));
                             break;
                         case "Store":
                             results = findAll(filters.byStoreName(parsedArgs[0]));
                             break;
                         case "ByCode":
+                            // @ts-ignore
                             results = findAll(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
+                            // @ts-ignore
                             results = findAll(filters.componentByCode(...parsedArgs));
                             break;
                         default:
-                            return reply("Unknown Find Type " + type);
+                            reply("Unknown Find Type " + type);
+                            return;
                     }
 
                     const uniqueResultsCount = new Set(results).size;
                     if (uniqueResultsCount === 0) throw "No results";
                     if (uniqueResultsCount > 1) throw "Found more than one result! Make this filter more specific";
                 } catch (err) {
-                    return reply("Failed to find: " + err);
+                    reply("Failed to find: " + err);
+                    return;
                 }
 
                 reply();
@@ -259,6 +269,6 @@ export default definePlugin({
 
     stop() {
         socket?.close(1000, "Plugin Stopped");
-        socket = void 0;
+        socket = undefined;
     }
 });

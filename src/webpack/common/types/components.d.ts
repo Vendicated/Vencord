@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref, RefObject } from "react";
+import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, Key, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref, RefObject } from "react";
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
@@ -195,13 +195,13 @@ interface SelectOption {
     disabled?: boolean;
     value: any;
     label: string;
-    key?: React.Key;
+    key?: Key;
     default?: boolean;
 }
 
 export type Select = ComponentType<PropsWithChildren<{
     placeholder?: string;
-    options: ReadonlyArray<SelectOption>; // TODO
+    options: readonly SelectOption[]; // TODO
 
     /**
      * - 0 ~ Filled
@@ -240,7 +240,7 @@ export type Select = ComponentType<PropsWithChildren<{
 
 export type SearchableSelect = ComponentType<PropsWithChildren<{
     placeholder?: string;
-    options: ReadonlyArray<SelectOption>; // TODO
+    options: readonly SelectOption[]; // TODO
     value?: SelectOption;
 
     /**

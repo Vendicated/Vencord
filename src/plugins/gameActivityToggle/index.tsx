@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { StatusSettingsStores } from "@webpack/common";
+import { UserSettings } from "@webpack/common";
 
 import style from "./style.css?managed";
 
@@ -44,7 +44,7 @@ function makeIcon(showCurrentGame?: boolean) {
             <svg width="20" height="20" viewBox="0 0 24 24">
                 <path
                     fill={!showCurrentGame && !oldIcon ? "var(--status-danger)" : "currentColor"}
-                    mask={!showCurrentGame ? "url(#gameActivityMask)" : void 0}
+                    mask={!showCurrentGame ? "url(#gameActivityMask)" : undefined}
                     d="M3.06 20.4q-1.53 0-2.37-1.065T.06 16.74l1.26-9q.27-1.8 1.605-2.97T6.06 3.6h11.88q1.8 0 3.135 1.17t1.605 2.97l1.26 9q.21 1.53-.63 2.595T20.94 20.4q-.63 0-1.17-.225T18.78 19.5l-2.7-2.7H7.92l-2.7 2.7q-.45.45-.99.675t-1.17.225Zm14.94-7.2q.51 0 .855-.345T19.2 12q0-.51-.345-.855T18 10.8q-.51 0-.855.345T16.8 12q0 .51.345 .855T18 13.2Zm-2.4-3.6q.51 0 .855-.345T16.8 8.4q0-.51-.345-.855T15.6 7.2q-.51 0-.855.345T14.4 8.4q0 .51.345 .855T15.6 9.6ZM6.9 13.2h1.8v-2.1h2.1v-1.8h-2.1v-2.1h-1.8v2.1h-2.1v1.8h2.1v2.1Z"
                 />
                 {!showCurrentGame && <>
@@ -60,7 +60,7 @@ function makeIcon(showCurrentGame?: boolean) {
 }
 
 function GameActivityToggleButton() {
-    const showCurrentGame = StatusSettingsStores.ShowCurrentGame.useSetting();
+    const showCurrentGame = UserSettings.ShowCurrentGame!.useSetting();
 
     return (
         <Button
@@ -68,7 +68,7 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
-            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(old => !old)}
+            onClick={() => { UserSettings.ShowCurrentGame!.updateSetting((old: any) => !old); }}
         />
     );
 }

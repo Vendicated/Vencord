@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { ApplicationCommandOptionType } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Constants, RestAPI, UserStore } from "@webpack/common";
+import { Constants, InstantInviteActionCreators, RestAPI, UserStore } from "@webpack/common";
 
-const FriendInvites = findByPropsLazy("createFriendInvite");
 const { uuid4 } = findByPropsLazy("uuid4");
 
 export default definePlugin({
@@ -49,7 +49,7 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 const uses = findOption<number>(args, "Uses", 5);
 
-                if (uses === 1 && !UserStore.getCurrentUser().phone)
+                if (uses === 1 && !UserStore.getCurrentUser()!.phone)
                     return sendBotMessage(ctx.channel.id, {
                         content: "You need to have a phone number connected to your account to create a friend invite with 1 use!"
                     });
@@ -66,7 +66,7 @@ export default definePlugin({
                             phone_contact_methods_count: 1
                         }
                     });
-                    invite = await FriendInvites.createFriendInvite({
+                    invite = await InstantInviteActionCreators.createFriendInvite({
                         code: invite_suggestions[0][3],
                         recipient_phone_number_or_email: random,
                         contact_visibility: 1,
@@ -74,7 +74,7 @@ export default definePlugin({
                         filtered_invite_suggestions_index: 1
                     });
                 } else {
-                    invite = await FriendInvites.createFriendInvite();
+                    invite = await InstantInviteActionCreators.createFriendInvite();
                 }
 
                 sendBotMessage(ctx.channel.id, {
@@ -91,8 +91,8 @@ export default definePlugin({
             description: "View a list of all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const invites = await FriendInvites.getAllFriendInvites();
-                const friendInviteList = invites.map(i =>
+                const invites = await InstantInviteActionCreators.getAllFriendInvites();
+                const friendInviteList = invites.map((i: any) =>
                     `
                     _discord.gg/${i.code}_ ·
                     Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R> ·
@@ -110,7 +110,7 @@ export default definePlugin({
             description: "Revokes all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                await FriendInvites.revokeFriendInvites();
+                await InstantInviteActionCreators.revokeFriendInvites();
 
                 sendBotMessage(ctx.channel.id, {
                     content: "All friend invites have been revoked."

@@ -18,14 +18,14 @@
 
 import "./styles.css";
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore, Menu, PermissionsBits, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
+import type { GuildMember, GuildRecord } from "@vencord/discord-types";
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, Permissions, UserStore } from "@webpack/common";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
@@ -57,21 +57,21 @@ export const settings = definePluginSettings({
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
-    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id!)) return null;
+    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id)) return null;
 
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
             label="Permissions"
             action={() => {
-                const guild = GuildStore.getGuild(guildId);
+                const guild = GuildStore.getGuild(guildId)!;
 
                 let permissions: RoleOrUserPermission[];
                 let header: string;
 
                 switch (type) {
                     case MenuItemParentType.User: {
-                        const member = GuildMemberStore.getMember(guildId, id!);
+                        const member = GuildMemberStore.getMember(guildId, id!)!;
 
                         permissions = getSortedRoles(guild, member)
                             .map(role => ({
@@ -82,20 +82,20 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         if (guild.ownerId === id) {
                             permissions.push({
                                 type: PermissionType.Owner,
-                                permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
+                                permissions: Object.values(Permissions).reduce((prev, curr) => prev | curr, 0n)
                             });
                         }
 
-                        header = member.nick ?? UserStore.getUser(member.userId).username;
+                        header = member.nick ?? UserStore.getUser(member.userId)!.username;
 
                         break;
                     }
 
                     case MenuItemParentType.Channel: {
-                        const channel = ChannelStore.getChannel(id!);
+                        const channel = ChannelStore.getChannel(id)!;
 
                         permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
-                            type: type as PermissionType,
+                            type: type as number as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
@@ -171,7 +171,7 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
+    UserPermissions: (guild: GuildRecord, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
 
     contextMenus: {
         "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),

@@ -30,14 +30,19 @@ import type { LiteralUnion } from "type-fest";
 export function onceDefined<T extends object, P extends LiteralUnion<keyof T, PropertyKey>>(
     target: T, property: P, callback: (v: P extends keyof T ? T[P] : any) => void
 ): void {
-    const propertyAsAny = property as any;
+    const propertyAsAny: any = property;
 
-    if (property in target)
-        return void callback(target[propertyAsAny]);
+    if (property in target) {
+        // @ts-ignore
+        callback(target[propertyAsAny]);
+        return;
+    }
 
     Object.defineProperty(target, property, {
         set(v) {
+            // @ts-ignore
             delete target[propertyAsAny];
+            // @ts-ignore
             target[propertyAsAny] = v;
             callback(v);
         },

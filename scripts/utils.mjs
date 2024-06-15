@@ -18,12 +18,14 @@
 
 /**
  * @param {string} filePath
- * @returns {string | null}
+ * @returns {string | null | undefined}
  */
 export function getPluginTarget(filePath) {
     const pathParts = filePath.split(/[/\\]/);
+    // @ts-ignore
     if (/^index\.tsx?$/.test(pathParts.at(-1))) pathParts.pop();
 
+    // @ts-ignore
     const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
     const identiferBits = identifier.split(".");
     return identiferBits.length === 1 ? null : identiferBits.at(-1);

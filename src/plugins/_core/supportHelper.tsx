@@ -26,7 +26,7 @@ import { relaunch } from "@utils/native";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { isOutdated, update } from "@utils/updater";
-import { Alerts, Card, ChannelStore, Forms, GuildMemberStore, NavigationRouter, Parser, RelationshipStore, UserStore } from "@webpack/common";
+import { AlertActionCreators, Card, ChannelStore, Forms, GuildMemberStore, MarkupUtils, RelationshipStore, RouterUtils, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins from "~plugins";
@@ -65,7 +65,10 @@ export default definePlugin({
     commands: [{
         name: "vencord-debug",
         description: "Send Vencord Debug info",
-        predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+        predicate: ctx => {
+            const meId = UserStore.getCurrentUser()?.id;
+            return meId && isPluginDev(meId) || AllowedChannelIds.includes(ctx.channel.id);
+        },
         async execute() {
             const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
@@ -79,11 +82,11 @@ export default definePlugin({
                 return `${name} (${navigator.userAgent})`;
             })();
 
-            const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
+            const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin]!.required;
 
             const enabledPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
 
-            const info = {
+            const info: Record<string, string> = {
                 Vencord:
                     `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
                     `${settings.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
@@ -116,7 +119,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
             if (!selfId || isPluginDev(selfId)) return;
 
             if (isOutdated) {
-                return Alerts.show({
+                AlertActionCreators.show({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
@@ -124,7 +127,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
                             Please first update before asking for support!
                         </Forms.FormText>
                     </div>,
-                    onCancel: () => openUpdaterModal!(),
+                    onCancel: () => { openUpdaterModal!(); },
                     cancelText: "View Updates",
                     confirmText: "Update & Restart Now",
                     async onConfirm() {
@@ -133,14 +136,14 @@ ${makeCodeblock(enabledPlugins.join(", "))}
                     },
                     secondaryConfirmText: "I know what I'm doing or I can't update"
                 });
+                return;
             }
 
-            // @ts-ignore outdated type
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return Alerts.show({
+                AlertActionCreators.show({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
@@ -149,13 +152,14 @@ ${makeCodeblock(enabledPlugins.join(", "))}
                             contact your package maintainer for support instead.
                         </Forms.FormText>
                     </div>,
-                    onCloseCallback: () => setTimeout(() => NavigationRouter.back(), 50)
+                    onCloseCallback: () => setTimeout(() => { RouterUtils.back(); }, 50)
                 });
+                return;
             }
 
             const repo = await VencordNative.updater.getRepo();
             if (repo.ok && !repo.value.includes("Vendicated/Vencord")) {
-                return Alerts.show({
+                AlertActionCreators.show({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>You are using a fork of Vencord, which we do not provide support for!</Forms.FormText>
@@ -164,8 +168,9 @@ ${makeCodeblock(enabledPlugins.join(", "))}
                             contact your package maintainer for support instead.
                         </Forms.FormText>
                     </div>,
-                    onCloseCallback: () => setTimeout(() => NavigationRouter.back(), 50)
+                    onCloseCallback: () => setTimeout(() => { RouterUtils.back(); }, 50)
                 });
+                return;
             }
         }
     },
@@ -178,7 +183,7 @@ ${makeCodeblock(enabledPlugins.join(", "))}
             <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
                 Please do not private message Vencord plugin developers for support!
                 <br />
-                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
+                Instead, use the Vencord support channel: {MarkupUtils.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}
             </Card>
         );

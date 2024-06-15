@@ -18,7 +18,7 @@
 
 import { findStoreLazy } from "@webpack";
 
-import * as t from "./types/stores";
+import type * as t from "./types/stores";
 
 export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
 export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");

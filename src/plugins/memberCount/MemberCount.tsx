@@ -5,6 +5,7 @@
  */
 
 import { getCurrentChannel } from "@utils/discord";
+import { StatusType } from "@vencord/discord-types";
 import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
 
 import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat } from ".";
@@ -13,7 +14,7 @@ import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
 
-    const guildId = isTooltip ? tooltipGuildId! : currentChannel.guild_id;
+    const guildId = isTooltip ? tooltipGuildId! : currentChannel!.guild_id!;
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
@@ -30,8 +31,8 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
     );
 
-    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
-        onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
+    if (!isTooltip && (groups.length >= 1 || groups[0]!.id !== StatusType.UNKNOWN)) {
+        onlineCount = groups.reduce((total, curr) => total + (curr.id === StatusType.OFFLINE ? 0 : curr.count), 0);
     }
 
     useEffect(() => {

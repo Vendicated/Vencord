@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { ApplicationCommandOptionType, MessageEmbedType } from "@vencord/discord-types";
 
 export default definePlugin({
     name: "Wikisearch",
@@ -92,17 +93,17 @@ export default definePlugin({
                 sendBotMessage(ctx.channel.id, {
                     embeds: [
                         {
-                            type: "rich",
+                            type: MessageEmbedType.RICH,
                             title: data.query.search[0].title,
                             url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
-                            color: "0x8663BE",
+                            color: 0x8663BE,
                             description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
                             image: thumbnail,
                             footer: {
                                 text: "Powered by the Wikimedia API",
                             },
                         }
-                    ] as any
+                    ]
                 });
             }
         }

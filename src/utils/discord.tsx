@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Guild, Message, User } from "discord-types/general";
+import type { MessageObject } from "@api/MessageEvents";
+import type { MessageReference, UserRecord } from "@vencord/discord-types";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InstantInviteActionCreators, MaskedLink, MessageActionCreators, ModalImageClasses, RestAPI, SelectedChannelStore, SelectedGuildStore, UserActionCreators, UserProfileModalActionCreators, UserProfileStore, UserSettingsProtoActionCreators } from "@webpack/common";
+import type { ComponentProps } from "react";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
@@ -28,7 +29,7 @@ import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
  * @returns Whether the invite was accepted
  */
 export async function openInviteModal(code: string) {
-    const { invite } = await InviteActions.resolveInvite(code, "Desktop Modal");
+    const { invite } = await InstantInviteActionCreators.resolveInvite(code, "Desktop Modal");
     if (!invite) throw new Error("Invalid invite: " + code);
 
     FluxDispatcher.dispatch({
@@ -38,8 +39,9 @@ export async function openInviteModal(code: string) {
         context: "APP"
     });
 
-    return new Promise<boolean>(r => {
-        let onClose: () => void, onAccept: () => void;
+    return new Promise<boolean>(resolve => {
+        let onAccept: () => void;
+        let onClose: () => void;
         let inviteAccepted = false;
 
         FluxDispatcher.subscribe("INVITE_ACCEPT", onAccept = () => {
@@ -49,21 +51,17 @@ export async function openInviteModal(code: string) {
         FluxDispatcher.subscribe("INVITE_MODAL_CLOSE", onClose = () => {
             FluxDispatcher.unsubscribe("INVITE_MODAL_CLOSE", onClose);
             FluxDispatcher.unsubscribe("INVITE_ACCEPT", onAccept);
-            r(inviteAccepted);
+            resolve(inviteAccepted);
         });
     });
 }
 
-export function getCurrentChannel() {
-    return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
-}
+export const getCurrentChannel = () => ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 
-export function getCurrentGuild(): Guild | undefined {
-    return GuildStore.getGuild(getCurrentChannel()?.guild_id);
-}
+export const getCurrentGuild = () => GuildStore.getGuild(getCurrentChannel()?.guild_id);
 
 export function openPrivateChannel(userId: string) {
-    PrivateChannelsStore.openPrivateChannel(userId);
+    ChannelActionCreators.openPrivateChannel(userId);
 }
 
 export const enum Theme {
@@ -71,9 +69,9 @@ export const enum Theme {
     Light = 2
 }
 
-export function getTheme(): Theme {
-    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
-}
+export const getTheme = (): Theme =>
+    UserSettingsProtoActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+
 
 export function insertTextIntoChatInputBox(text: string) {
     ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
@@ -83,7 +81,7 @@ export function insertTextIntoChatInputBox(text: string) {
 }
 
 interface MessageExtra {
-    messageReference: Message["messageReference"];
+    messageReference: MessageReference;
     allowedMentions: {
         parse: string[];
         replied_user: boolean;
@@ -105,11 +103,11 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    return MessageActionCreators.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
-    return openModal(modalProps => (
+export const openImageModal = (url: string, props?: Partial<ComponentProps<ImageModal>>) =>
+    openModal(modalProps => (
         <ModalRoot
             {...modalProps}
             className={ModalImageClasses.modal}
@@ -126,15 +124,14 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
             />
         </ModalRoot>
     ));
-}
 
-export async function openUserProfile(id: string) {
-    const user = await UserUtils.getUser(id);
-    if (!user) throw new Error("No such user: " + id);
+export async function openUserProfile(userId: string) {
+    const user = await UserActionCreators.getUser(userId);
+    if (!user) throw new Error("No such user: " + userId);
 
     const guildId = SelectedGuildStore.getGuildId();
-    UserProfileActions.openUserProfileModal({
-        userId: id,
+    UserProfileModalActionCreators.openUserProfileModal({
+        userId,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),
         analyticsLocation: {
@@ -145,24 +142,24 @@ export async function openUserProfile(id: string) {
 }
 
 interface FetchUserProfileOptions {
-    friend_token?: string;
     connections_role_id?: string;
+    friend_token?: string;
     guild_id?: string;
-    with_mutual_guilds?: boolean;
     with_mutual_friends_count?: boolean;
+    with_mutual_guilds?: boolean;
 }
 
 /**
  * Fetch a user's profile
  */
-export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions) {
-    const cached = UserProfileStore.getUserProfile(id);
+export async function fetchUserProfile(userId: string, options?: FetchUserProfileOptions) {
+    const cached = UserProfileStore.getUserProfile(userId);
     if (cached) return cached;
 
-    FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
+    FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId });
 
     const { body } = await RestAPI.get({
-        url: Constants.Endpoints.USER_PROFILE(id),
+        url: Constants.Endpoints.USER_PROFILE(userId),
         query: {
             with_mutual_guilds: false,
             with_mutual_friends_count: false,
@@ -176,12 +173,12 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     if (options?.guild_id && body.guild_member)
         FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
 
-    return UserProfileStore.getUserProfile(id);
+    return UserProfileStore.getUserProfile(userId);
 }
 
 /**
  * Get the unique username for a user. Returns user.username for pomelo people, user.tag otherwise
  */
-export function getUniqueUsername(user: User) {
-    return user.discriminator === "0" ? user.username : user.tag;
+export function getUniqueUsername(user: UserRecord) {
+    return user.isPomelo() ? user.username : user.tag;
 }

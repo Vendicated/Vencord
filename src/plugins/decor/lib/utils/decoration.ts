@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { AvatarDecoration } from "../../";
-import { Decoration } from "../api";
+import type { AvatarDecorationData } from "@vencord/discord-types";
+
+import type { Decoration } from "../api";
 import { SKU_ID } from "../constants";
 
-export function decorationToAsset(decoration: Decoration) {
-    return `${decoration.animated ? "a_" : ""}${decoration.hash}`;
-}
+export const decorationToAsset = (decoration: Decoration) =>
+    `${decoration.animated ? "a_" : ""}${decoration.hash}`;
 
-export function decorationToAvatarDecoration(decoration: Decoration): AvatarDecoration {
-    return { asset: decorationToAsset(decoration), skuId: SKU_ID };
-}
+export const decorationToAvatarDecoration = (decoration: Decoration): AvatarDecorationData =>
+    ({ asset: decorationToAsset(decoration), skuId: SKU_ID });

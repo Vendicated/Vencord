@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, useLayoutEffect, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -55,7 +55,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const imageRef = useRef<HTMLImageElement | null>(null);
 
     // since we accessing document im gonna use useLayoutEffect
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Shift") {
                 isShiftDown.current = true;
@@ -111,7 +111,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             }
         };
 
-        const onWheel = async (e: WheelEvent) => {
+        function onWheel(e: WheelEvent) {
             if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
                 const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
                 zoom.current = val <= 1 ? 1 : val;
@@ -122,14 +122,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                 size.current = val <= 50 ? 50 : val;
                 updateMousePosition(e);
             }
-        };
+        }
 
         waitFor(() => instance.state.readyState === "READY", () => {
             const elem = document.getElementById(ELEMENT_ID) as HTMLDivElement;
             element.current = elem;
             elem.querySelector("img,video")?.setAttribute("draggable", "false");
             if (instance.props.animated) {
-                originalVideoElementRef.current = elem!.querySelector("video")!;
+                originalVideoElementRef.current = elem.querySelector("video")!;
                 originalVideoElementRef.current.addEventListener("timeupdate", syncVideos);
             }
 

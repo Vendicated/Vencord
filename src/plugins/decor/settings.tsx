@@ -19,23 +19,30 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Change your avatar decoration",
         component() {
-            if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
-                Enable Decor and restart your client to change your avatar decoration.
-            </Forms.FormText>;
-
-            return <div>
-                <DecorSection hideTitle hideDivider noMargin />
-                <Forms.FormText type="description" className={classes(Margins.top8, Margins.bottom8)}>
-                    You can also access Decor decorations from the <Link
-                        href="/settings/profile-customization"
-                        onClick={e => {
-                            e.preventDefault();
-                            closeAllModals();
-                            FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Profile Customization" });
-                        }}
-                    >Profiles</Link> page.
+            if (!Vencord.Plugins.plugins.Decor!.started) return (
+                <Forms.FormText>
+                    Enable Decor and restart your client to change your avatar decoration.
                 </Forms.FormText>
-            </div>;
+            );
+
+            return (
+                <div>
+                    <DecorSection hideTitle hideDivider noMargin />
+                    <Forms.FormText type="description" className={classes(Margins.top8, Margins.bottom8)}>
+                        You can also access Decor decorations from the <Link
+                            href="/settings/profile-customization"
+                            onClick={e => {
+                                e.preventDefault();
+                                closeAllModals();
+                                FluxDispatcher.dispatch({
+                                    type: "USER_SETTINGS_MODAL_SET_SECTION",
+                                    section: "Profile Customization"
+                                });
+                            }}
+                        >Profiles</Link> page.
+                    </Forms.FormText>
+                </div>
+            );
         }
     },
     agreedToGuidelines: {

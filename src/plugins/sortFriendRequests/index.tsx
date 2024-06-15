@@ -20,8 +20,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { UserRecord } from "@vencord/discord-types";
 import { RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
     showDates: {
@@ -38,32 +38,35 @@ export default definePlugin({
     description: "Sorts friend requests by date of receipt",
     settings,
 
-    patches: [{
-        find: "getRelationshipCounts(){",
-        replacement: {
-            match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
-            replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
+    patches: [
+        {
+            find: "getRelationshipCounts(){",
+            replacement: {
+                match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+                replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
+            }
+        },
+        {
+            find: ".Messages.FRIEND_REQUEST_CANCEL",
+            replacement: {
+                predicate: () => settings.store.showDates,
+                match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
+                replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
+            }
         }
-    }, {
-        find: ".Messages.FRIEND_REQUEST_CANCEL",
-        replacement: {
-            predicate: () => settings.store.showDates,
-            match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
-            replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
-        }
-    }],
+    ],
 
-    wrapSort(comparator: Function, row: any) {
+    wrapSort(comparator: (...args: unknown[]) => any, row: any) {
         return row.type === 3 || row.type === 4
             ? -this.getSince(row.user)
             : comparator(row);
     },
 
-    getSince(user: User) {
-        return new Date(RelationshipStore.getSince(user.id));
+    getSince(user: UserRecord) {
+        return new Date(RelationshipStore.getSince(user.id)!);
     },
 
-    makeSubtext(text: string, user: User) {
+    makeSubtext(text: string, user: UserRecord) {
         const since = this.getSince(user);
         return (
             <Flex flexDirection="row" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>

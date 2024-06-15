@@ -19,7 +19,7 @@
 import { Toasts } from "@webpack/common";
 
 import { Auth, authorize, getToken, updateAuth } from "./auth";
-import { Review, ReviewDBCurrentUser, ReviewDBUser, ReviewType } from "./entities";
+import { type Review, type ReviewDBCurrentUser, type ReviewDBUser, ReviewType } from "./entities";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
@@ -35,21 +35,21 @@ export interface Response {
     reviewCount: number;
 }
 
-const WarningFlag = 0b00000010;
+const WARNING_FLAG = 1 << 1;
 
 async function rdbRequest(path: string, options: RequestInit = {}) {
     return fetch(API_URL + path, {
         ...options,
         headers: {
             ...options.headers,
-            Authorization: await getToken() || "",
+            Authorization: await getToken() ?? "",
         }
     });
 }
 
 export async function getReviews(id: string, offset = 0): Promise<Response> {
     let flags = 0;
-    if (!settings.store.showWarning) flags |= WarningFlag;
+    if (!settings.store.showWarning) flags |= WARNING_FLAG;
 
     const params = new URLSearchParams({
         flags: String(flags),
@@ -108,10 +108,10 @@ export async function addReview(review: any): Promise<Response | null> {
         headers: {
             "Content-Type": "application/json",
         }
-    }).then(async r => {
-        const data = await r.json() as Response;
+    }).then(async res => {
+        const data = await res.json() as Response;
         showToast(data.message);
-        return r.ok ? data : null;
+        return res.ok ? data : null;
     });
 }
 
@@ -125,10 +125,10 @@ export async function deleteReview(id: number): Promise<Response | null> {
         body: JSON.stringify({
             reviewid: id
         })
-    }).then(async r => {
-        const data = await r.json() as Response;
+    }).then(async res => {
+        const data = await res.json() as Response;
         showToast(data.message);
-        return r.ok ? data : null;
+        return res.ok ? data : null;
     });
 }
 
@@ -165,7 +165,7 @@ async function patchBlock(action: "block" | "unblock", userId: string) {
     } else {
         showToast(`Successfully ${action}ed user`, Toasts.Type.SUCCESS);
 
-        if (Auth?.user?.blockedUsers) {
+        if (Auth.user?.blockedUsers) {
             const newBlockedUsers = action === "block"
                 ? [...Auth.user.blockedUsers, userId]
                 : Auth.user.blockedUsers.filter(id => id !== userId);

@@ -19,7 +19,7 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Clipboard, Toasts } from "@webpack/common";
+import { ClipboardUtils, Toasts } from "@webpack/common";
 
 export default definePlugin({
     name: "BetterRoleDot",
@@ -39,7 +39,7 @@ export default definePlugin({
             find: '"dot"===',
             all: true,
             noWarn: true,
-            predicate: () => Settings.plugins.BetterRoleDot.bothStyles,
+            predicate: () => Settings.plugins.BetterRoleDot!.bothStyles,
             replacement: {
                 match: /"(?:username|dot)"===\i(?!\.\i)/g,
                 replace: "true",
@@ -49,7 +49,7 @@ export default definePlugin({
         {
             find: ".ADD_ROLE_A11Y_LABEL",
             all: true,
-            predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
+            predicate: () => Settings.plugins.BetterRoleDot!.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot!.bothStyles,
             noWarn: true,
             replacement: {
                 match: /"dot"===\i/,
@@ -59,7 +59,7 @@ export default definePlugin({
         {
             find: ".roleVerifiedIcon",
             all: true,
-            predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
+            predicate: () => Settings.plugins.BetterRoleDot!.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot!.bothStyles,
             noWarn: true,
             replacement: {
                 match: /"dot"===\i/,
@@ -84,7 +84,7 @@ export default definePlugin({
     },
 
     copyToClipBoard(color: string) {
-        Clipboard.copy(color);
+        ClipboardUtils.copy(color);
         Toasts.show({
             message: "Copied to Clipboard!",
             type: Toasts.Type.SUCCESS,

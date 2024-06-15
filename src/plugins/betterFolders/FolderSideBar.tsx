@@ -17,13 +17,14 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import type { FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
-const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
+const ChannelRTCStore: FluxStore & Record<string, any> = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
@@ -40,13 +41,13 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     );
 
     const visible = !!expandedFolders.size;
-    const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
+    const guilds = document.querySelector(guildsBarProps.className.split(" ").map((c: any) => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
     // Also display flex otherwise to fix scrolling
-    const barStyle = {
+    const barStyle: CSSProperties = {
         display: isFullscreen ? "none" : "flex",
-    } as CSSProperties;
+    };
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
@@ -62,7 +63,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(animationStyle, show) =>
+            {(animationStyle: any, show: any) =>
                 show && (
                     <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
                         {Sidebar}

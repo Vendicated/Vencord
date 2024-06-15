@@ -43,9 +43,9 @@ const requestOptions: RequestInit = {
 };
 
 interface RemoteData {
-    appleMusicLink?: string,
-    songLink?: string,
-    albumArtwork?: string,
+    appleMusicLink?: string;
+    songLink?: string;
+    albumArtwork?: string;
     artistArtwork?: string;
 }
 
@@ -60,7 +60,7 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
     try {
         const [songData, artistData] = await Promise.all([
             fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]), requestOptions).then(r => r.json())
+            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]!), requestOptions).then(r => r.json())
         ]);
 
         const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
@@ -112,9 +112,9 @@ export async function fetchTrackData(): Promise<TrackData | null> {
     ]);
 
     const [id, name, album, artist, durationStr] = stdout.split("\n").filter(k => !!k);
-    const duration = Number.parseFloat(durationStr);
+    const duration = Number.parseFloat(durationStr!);
 
-    const remoteData = await fetchRemoteData({ id, name, artist, album });
+    const remoteData = await fetchRemoteData({ id: id!, name: name!, artist: artist!, album: album! });
 
-    return { name, album, artist, playerPosition, duration, ...remoteData };
+    return { name: name!, album: album!, artist: artist!, playerPosition, duration, ...remoteData };
 }

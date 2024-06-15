@@ -23,13 +23,13 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
 
 import { decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;
-    const [password, setPassword] = React.useState("password");
+    const [password, setPassword] = useState("password");
 
     return (
         <ModalRoot {...props}>
@@ -52,10 +52,11 @@ export function DecModal(props: any) {
                     color={Button.Colors.GREEN}
                     onClick={() => {
                         const toSend = decrypt(encryptedMessage, password, true);
-                        if (!toSend || !props?.message) return;
-                        // @ts-expect-error
-                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
-                        props.onClose();
+                        if (toSend && props?.message) {
+                            // @ts-expect-error
+                            Vencord.Plugins.plugins.InvisibleChat!.buildEmbed(props?.message, toSend);
+                            props.onClose();
+                        }
                     }}>
                     Decrypt
                 </Button>
@@ -72,6 +73,6 @@ export function DecModal(props: any) {
     );
 }
 
-export function buildDecModal(msg: any): any {
+export function buildDecModal(msg: any) {
     openModal((props: any) => <DecModal {...props} {...msg} />);
 }

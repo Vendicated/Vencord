@@ -5,15 +5,15 @@
  */
 
 import { Link } from "@components/Link";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, Text } from "@webpack/common";
 
 import { settings } from "../../settings";
 import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
-function GuidelinesModal(props: ModalProps) {
-    return <ModalRoot
+const GuidelinesModal = (props: ModalProps) => (
+    <ModalRoot
         {...props}
         size={ModalSize.SMALL}
         className={DecorationModalStyles.modal}
@@ -58,8 +58,8 @@ function GuidelinesModal(props: ModalProps) {
                 Go Back
             </Button>
         </ModalFooter>
-    </ModalRoot>;
-}
+    </ModalRoot>
+);
 
 export const openGuidelinesModal = () =>
     requireAvatarDecorationModal().then(() => openModal(props => <GuidelinesModal {...props} />));

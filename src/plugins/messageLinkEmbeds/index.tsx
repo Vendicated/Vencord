@@ -24,6 +24,7 @@ import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
+import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
@@ -31,19 +32,19 @@ import {
     Constants,
     GuildStore,
     IconUtils,
+    MarkupUtils,
     MessageStore,
-    Parser,
-    PermissionsBits,
+    Permissions,
     PermissionStore,
     RestAPI,
     Text,
-    TextAndImagesSettingsStores,
+    UserSettings,
     UserStore
 } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
+import type { JSX } from "react";
 
 const messageCache = new Map<string, {
-    message?: Message;
+    message?: MessageRecord;
     fetched: boolean;
 }>();
 
@@ -51,8 +52,8 @@ const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
 
-const SearchResultClasses = findByPropsLazy("message", "searchResult");
-const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+const SearchResultClasses: Record<string, string> = findByPropsLazy("message", "searchResult");
+const EmbedClasses: Record<string, string> = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -65,8 +66,8 @@ interface Attachment {
 }
 
 interface MessageEmbedProps {
-    message: Message;
-    channel: Channel;
+    message: MessageRecord;
+    channel: ChannelRecord;
 }
 
 const messageFetchQueue = new Queue();
@@ -119,24 +120,23 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Clear the linked message cache",
         component: () =>
-            <Button onClick={() => messageCache.clear()}>
+            <Button onClick={() => { messageCache.clear(); }}>
                 Clear the linked message cache
             </Button>
     }
 });
 
-
-async function fetchMessage(channelID: string, messageID: string) {
-    const cached = messageCache.get(messageID);
+async function fetchMessage(channelId: string, messageId: string) {
+    const cached = messageCache.get(messageId);
     if (cached) return cached.message;
 
-    messageCache.set(messageID, { fetched: false });
+    messageCache.set(messageId, { fetched: false });
 
     const res = await RestAPI.get({
-        url: Constants.Endpoints.MESSAGES(channelID),
+        url: Constants.Endpoints.MESSAGES(channelId),
         query: {
             limit: 1,
-            around: messageID
+            around: messageId
         },
         retries: 2
     }).catch(() => null);
@@ -144,7 +144,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     const msg = res?.body?.[0];
     if (!msg) return;
 
-    const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    const message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id)!;
 
     messageCache.set(message.id, {
         message,
@@ -155,20 +155,20 @@ async function fetchMessage(channelID: string, messageID: string) {
 }
 
 
-function getImages(message: Message): Attachment[] {
+function getImages(message: MessageRecord) {
     const attachments: Attachment[] = [];
 
-    for (const { content_type, height, width, url, proxy_url } of message.attachments ?? []) {
+    for (const { content_type, height, width, url, proxy_url } of message.attachments) {
         if (content_type?.startsWith("image/"))
             attachments.push({
                 height: height!,
                 width: width!,
                 url: url,
-                proxyURL: proxy_url!
+                proxyURL: proxy_url
             });
     }
 
-    for (const { type, image, thumbnail, url } of message.embeds ?? []) {
+    for (const { type, image, thumbnail, url } of message.embeds) {
         if (type === "image")
             attachments.push({ ...(image ?? thumbnail!) });
         else if (url && type === "gifv" && !tenorRegex.test(url))
@@ -183,13 +183,16 @@ function getImages(message: Message): Attachment[] {
 }
 
 function noContent(attachments: number, embeds: number) {
-    if (!attachments && !embeds) return "";
-    if (!attachments) return `[no content, ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
-    if (!embeds) return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""}]`;
+    if (!attachments && !embeds)
+        return "";
+    if (!attachments)
+        return `[no content, ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
+    if (!embeds)
+        return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""}]`;
     return `[no content, ${attachments} attachment${attachments !== 1 ? "s" : ""} and ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
 }
 
-function requiresRichEmbed(message: Message) {
+function requiresRichEmbed(message: MessageRecord) {
     if (message.components.length) return true;
     if (message.attachments.some(a => !a.content_type?.startsWith("image/"))) return true;
     if (message.embeds.some(e => e.type !== "image" && (e.type !== "gifv" || tenorRegex.test(e.url!)))) return true;
@@ -210,7 +213,7 @@ function computeWidthAndHeight(width: number, height: number) {
     return { width: Math.round(width / (height / adjustedHeight)), height: adjustedHeight };
 }
 
-function withEmbeddedBy(message: Message, embeddedBy: string[]) {
+function withEmbeddedBy(message: MessageRecord, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
@@ -220,40 +223,37 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     });
 }
 
-
-function MessageEmbedAccessory({ message }: { message: Message; }) {
-    // @ts-ignore
+function MessageEmbedAccessory({ message }: { message: MessageRecord & { vencordEmbeddedBy?: string[] }; }) {
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
-    const accessories = [] as (JSX.Element | null)[];
+    const accessories: (JSX.Element | null)[] = [];
 
-    for (const [_, channelID, messageID] of message.content!.matchAll(messageLinkRegex)) {
-        if (embeddedBy.includes(messageID) || embeddedBy.length > 2) {
+    for (const [_, channelId, messageId] of message.content.matchAll(messageLinkRegex)) {
+        if (embeddedBy.includes(messageId!) || embeddedBy.length > 2) {
             continue;
         }
 
-        const linkedChannel = ChannelStore.getChannel(channelID);
-        if (!linkedChannel || (!linkedChannel.isPrivate() && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, linkedChannel))) {
+        const linkedChannel = ChannelStore.getChannel(channelId);
+        if (!linkedChannel || (!linkedChannel.isPrivate() && !PermissionStore.can(Permissions.VIEW_CHANNEL, linkedChannel))) {
             continue;
         }
 
         const { listMode, idList } = settings.store;
 
-        const isListed = [linkedChannel.guild_id, channelID, message.author.id].some(id => id && idList.includes(id));
+        const isListed = [linkedChannel.guild_id, channelId, message.author.id].some(id => id && idList.includes(id));
 
         if (listMode === "blacklist" && isListed) continue;
         if (listMode === "whitelist" && !isListed) continue;
 
-        let linkedMessage = messageCache.get(messageID)?.message;
+        let linkedMessage = messageCache.get(messageId!)?.message;
         if (!linkedMessage) {
-            linkedMessage ??= MessageStore.getMessage(channelID, messageID);
+            linkedMessage ??= MessageStore.getMessage(channelId!, messageId!);
             if (linkedMessage) {
-                messageCache.set(messageID, { message: linkedMessage, fetched: true });
+                messageCache.set(messageId!, { message: linkedMessage, fetched: true });
             } else {
-
-                messageFetchQueue.unshift(() => fetchMessage(channelID, messageID)
-                    .then(m => m && updateMessage(message.channel_id, message.id))
-                );
+                messageFetchQueue.unshift(() => fetchMessage(channelId!, messageId!).then(m => {
+                    if (m) updateMessage(message.channel_id, message.id);
+                }));
                 continue;
             }
         }
@@ -274,14 +274,20 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
     return accessories.length ? <>{accessories}</> : null;
 }
 
-function getChannelLabelAndIconUrl(channel: Channel) {
-    if (channel.isDM()) return ["Direct Message", IconUtils.getUserAvatarURL(UserStore.getUser(channel.recipients[0]))];
-    if (channel.isGroupDM()) return ["Group DM", IconUtils.getChannelIconURL(channel)];
-    return ["Server", IconUtils.getGuildIconURL(GuildStore.getGuild(channel.guild_id))];
+function getChannelLabelAndIconUrl(channel: ChannelRecord) {
+    if (channel.isDM())
+        return ["Direct Message", UserStore.getUser(channel.getRecipientId())!.getAvatarURL()];
+    if (channel.isGroupDM())
+        return ["Group DM", IconUtils.getChannelIconURL({
+            id: channel.id,
+            icon: channel.icon,
+            applicationId: channel.getApplicationId()
+        })];
+    return ["Server", IconUtils.getGuildIconURL({ id: GuildStore.getGuild(channel.guild_id)!.id })];
 }
 
-function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
-    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
+function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps) {
+    const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id)!.recipients?.[0])!;
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
@@ -293,13 +299,13 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                 author: {
                     name: <Text variant="text-xs/medium" tag="span">
                         <span>{channelLabel} - </span>
-                        {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
+                        {MarkupUtils.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
                     </Text>,
                     iconProxyURL: iconUrl
                 }
             }}
             renderDescription={() => (
-                <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult)}>
+                <div key={message.id} className={classes(SearchResultClasses.message, settings.store.messageBackgroundColor && SearchResultClasses.searchResult!)}>
                     <ChannelMessage
                         id={`message-link-embeds-${message.id}`}
                         message={message}
@@ -312,49 +318,55 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
     );
 }
 
-function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
+function AutomodEmbedAccessory(props: MessageEmbedProps) {
     const { message, channel } = props;
-    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+    const compact = UserSettings.MessageDisplayCompact!.useSetting();
     const images = getImages(message);
-    const { parse } = Parser;
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
-    return <AutoModEmbed
-        channel={channel}
-        childrenAccessories={
-            <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
-                {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
-                <span>
-                    <span>{channelLabel} - </span>
-                    {channel.isDM()
-                        ? Parser.parse(`<@${ChannelStore.getChannel(channel.id).recipients[0]}>`)
-                        : Parser.parse(`<#${channel.id}>`)
+    return (
+        <AutoModEmbed
+            channel={channel}
+            childrenAccessories={
+                <Text
+                    color="text-muted"
+                    variant="text-xs/medium"
+                    tag="span"
+                    className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}
+                >
+                    {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
+                    <span>
+                        <span>{channelLabel} - </span>
+                        {channel.isDM()
+                            ? MarkupUtils.parse(`<@${ChannelStore.getChannel(channel.id)!.recipients![0]}>`)
+                            : MarkupUtils.parse(`<#${channel.id}>`)
+                        }
+                    </span>
+                </Text>
+            }
+            compact={compact}
+            content={
+                <>
+                    {message.content || message.attachments.length <= images.length
+                        ? MarkupUtils.parse(message.content)
+                        : [noContent(message.attachments.length, message.embeds.length)]
                     }
-                </span>
-            </Text>
-        }
-        compact={compact}
-        content={
-            <>
-                {message.content || message.attachments.length <= images.length
-                    ? parse(message.content)
-                    : [noContent(message.attachments.length, message.embeds.length)]
-                }
-                {images.map(a => {
-                    const { width, height } = computeWidthAndHeight(a.width, a.height);
-                    return (
-                        <div>
-                            <img src={a.url} width={width} height={height} />
-                        </div>
-                    );
-                })}
-            </>
-        }
-        hideTimestamp={false}
-        message={message}
-        _messageEmbed="automod"
-    />;
+                    {images.map(a => {
+                        const { width, height } = computeWidthAndHeight(a.width, a.height);
+                        return (
+                            <div>
+                                <img src={a.url} width={width} height={height} />
+                            </div>
+                        );
+                    })}
+                </>
+            }
+            hideTimestamp={false}
+            message={message}
+            _messageEmbed="automod"
+        />
+    );
 }
 
 export default definePlugin({

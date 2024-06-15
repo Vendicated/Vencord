@@ -21,9 +21,9 @@ import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
-import { Patch, ReplaceFn } from "@utils/types";
+import type { Patch, ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, Clipboard, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
+import { Button, ClipboardUtils, Forms, MarkupUtils, Switch, TextArea, TextInput, useEffect, useMemo, useState } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -32,7 +32,12 @@ if (IS_DEV) {
     var differ = require("diff") as typeof import("diff");
 }
 
-const findCandidates = debounce(function ({ find, setModule, setError }) {
+interface FindCandidatesOptions extends Pick<Patch, "find"> {
+    setError: (error: string) => void;
+    setModule: (module: ReplacementComponentProps["module"]) => void;
+}
+
+const findCandidates = debounce(({ find, setError, setModule }: FindCandidatesOptions) => {
     const candidates = search(find);
     const keys = Object.keys(candidates);
     const len = keys.length;
@@ -41,21 +46,21 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
     else if (len !== 1)
         setError("Multiple matches. Please refine your filter");
     else
-        setModule([keys[0], candidates[keys[0]]]);
+        setModule([keys[0]!, candidates[keys[0]!]!]);
 });
 
 interface ReplacementComponentProps {
-    module: [id: number, factory: Function];
+    module: [id: string | number, factory: (...args: unknown[]) => unknown];
     match: string;
     replacement: string | ReplaceFn;
-    setReplacementError(error: any): void;
+    setReplacementError: (error: any) => void;
 }
 
 function ReplacementComponent({ module, match, replacement, setReplacementError }: ReplacementComponentProps) {
     const [id, fact] = module;
-    const [compileResult, setCompileResult] = React.useState<[boolean, string]>();
+    const [compileResult, setCompileResult] = useState<[boolean, string]>();
 
-    const [patchedCode, matchResult, diff] = React.useMemo(() => {
+    const [patchedCode, matchResult, diff] = useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
 
         try {
@@ -67,7 +72,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
-            setReplacementError(void 0);
+            setReplacementError(undefined);
         } catch (e) {
             setReplacementError((e as Error).message);
             return ["", [], []];
@@ -104,8 +109,8 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
         return (
             <>
-                <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
-                <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
+                <div style={{ userSelect: "text" }}>{MarkupUtils.parse(fullMatch)}</div>
+                <div style={{ userSelect: "text" }}>{MarkupUtils.parse(groups)}</div>
             </>
         );
     }
@@ -155,31 +160,38 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     );
 }
 
-function ReplacementInput({ replacement, setReplacement, replacementError }) {
-    const [isFunc, setIsFunc] = React.useState(false);
-    const [error, setError] = React.useState<string>();
+interface ReplacementInputProps {
+    replacement: string | ReplaceFn;
+    setReplacement: (value: string | ReplaceFn) => void;
+    replacementError?: string;
+}
 
-    function onChange(v: string) {
-        setError(void 0);
+function ReplacementInput({ replacement, setReplacement, replacementError }: ReplacementInputProps) {
+    const [isFunc, setIsFunc] = useState(false);
+    const [error, setError] = useState<string>();
+
+    function onChange(val: string | ReplaceFn) {
+        setError(undefined);
 
         if (isFunc) {
             try {
-                const func = (0, eval)(v);
+                // @ts-expect-error
+                const func = (0, eval)(val);
                 if (typeof func === "function")
                     setReplacement(() => func);
                 else
                     setError("Replacement must be a function");
             } catch (e) {
-                setReplacement(v);
+                setReplacement(val);
                 setError((e as Error).message);
             }
         } else {
-            setReplacement(v);
+            setReplacement(val);
         }
     }
 
-    React.useEffect(
-        () => void (isFunc ? onChange(replacement) : setError(void 0)),
+    useEffect(
+        () => { (isFunc ? onChange(replacement) : setError(undefined)); },
         [isFunc]
     );
 
@@ -188,7 +200,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
             {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
             <Forms.FormTitle className="">replacement</Forms.FormTitle>
             <TextInput
-                value={replacement?.toString()}
+                value={replacement.toString()}
                 onChange={onChange}
                 error={error ?? replacementError}
             />
@@ -205,7 +217,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                         "$self": "Insert the plugin instance",
                     }).map(([placeholder, desc]) => (
                         <Forms.FormText key={placeholder}>
-                            {Parser.parse("`" + placeholder + "`")}: {desc}
+                            {MarkupUtils.parse("`" + placeholder + "`")}: {desc}
                         </Forms.FormText>
                     ))}
                 </div>
@@ -225,15 +237,15 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 }
 
 interface FullPatchInputProps {
-    setFind(v: string): void;
-    setParsedFind(v: string | RegExp): void;
-    setMatch(v: string): void;
-    setReplacement(v: string | ReplaceFn): void;
+    setFind: (v: string) => void;
+    setParsedFind: (v: string | RegExp) => void;
+    setMatch: (v: string) => void;
+    setReplacement: (v: string | ReplaceFn) => void;
 }
 
 function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: FullPatchInputProps) {
-    const [fullPatch, setFullPatch] = React.useState<string>("");
-    const [fullPatchError, setFullPatchError] = React.useState<string>("");
+    const [fullPatch, setFullPatch] = useState<string>("");
+    const [fullPatchError, setFullPatchError] = useState<string>("");
 
     function update() {
         if (fullPatch === "") {
@@ -247,12 +259,13 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
         }
 
         try {
-            const parsed = (0, eval)(`(${fullPatch})`) as Patch;
+            const parsed: Patch = (0, eval)(`(${fullPatch})`);
 
             if (!parsed.find) throw new Error("No 'find' field");
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (!parsed.replacement) throw new Error("No 'replacement' field");
 
-            if (parsed.replacement instanceof Array) {
+            if (Array.isArray(parsed.replacement)) {
                 if (parsed.replacement.length === 0) throw new Error("Invalid replacement");
 
                 parsed.replacement = {
@@ -274,26 +287,28 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
         }
     }
 
-    return <>
-        <Forms.FormText className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Forms.FormText>
-        <TextArea value={fullPatch} onChange={setFullPatch} onBlur={update} />
-        {fullPatchError !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{fullPatchError}</Forms.FormText>}
-    </>;
+    return (
+        <>
+            <Forms.FormText className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Forms.FormText>
+            <TextArea value={fullPatch} onChange={setFullPatch} onBlur={update} />
+            {fullPatchError !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{fullPatchError}</Forms.FormText>}
+        </>
+    );
 }
 
 function PatchHelper() {
-    const [find, setFind] = React.useState<string>("");
-    const [parsedFind, setParsedFind] = React.useState<string | RegExp>("");
-    const [match, setMatch] = React.useState<string>("");
-    const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
+    const [find, setFind] = useState<string>("");
+    const [parsedFind, setParsedFind] = useState<string | RegExp>("");
+    const [match, setMatch] = useState<string>("");
+    const [replacement, setReplacement] = useState<string | ReplaceFn>("");
 
-    const [replacementError, setReplacementError] = React.useState<string>();
+    const [replacementError, setReplacementError] = useState<string>();
 
-    const [module, setModule] = React.useState<[number, Function]>();
-    const [findError, setFindError] = React.useState<string>();
-    const [matchError, setMatchError] = React.useState<string>();
+    const [module, setModule] = useState<ReplacementComponentProps["module"]>();
+    const [findError, setFindError] = useState<string>();
+    const [matchError, setMatchError] = useState<string>();
 
-    const code = React.useMemo(() => {
+    const code = useMemo(() => {
         return `
 {
     find: ${parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind)},
@@ -312,7 +327,7 @@ function PatchHelper() {
             let parsedFind = v as string | RegExp;
             if (/^\/.+?\/$/.test(v)) parsedFind = new RegExp(v.slice(1, -1));
 
-            setFindError(void 0);
+            setFindError(undefined);
             setParsedFind(parsedFind);
 
             if (v.length) {
@@ -328,7 +343,7 @@ function PatchHelper() {
 
         try {
             new RegExp(v);
-            setMatchError(void 0);
+            setMatchError(undefined);
         } catch (e: any) {
             setMatchError((e as Error).message);
         }
@@ -381,7 +396,7 @@ function PatchHelper() {
                 <>
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
                     <CodeBlock lang="js" content={code} />
-                    <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
+                    <Button onClick={() => { ClipboardUtils.copy(code); }}>Copy to Clipboard</Button>
                 </>
             )}
         </SettingsTab>

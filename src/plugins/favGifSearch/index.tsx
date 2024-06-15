@@ -22,9 +22,10 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
+import type { FunctionComponent, MutableRefObject } from "react";
 
 interface SearchBarComponentProps {
-    ref?: React.MutableRefObject<any>;
+    ref?: MutableRefObject<any>;
     autoFocus: boolean;
     className: string;
     size: string;
@@ -34,8 +35,8 @@ interface SearchBarComponentProps {
     placeholder: string;
 }
 
-type TSearchBarComponent =
-    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+type TSearchBarComponent = FunctionComponent<SearchBarComponentProps>
+    & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
 
 interface Gif {
     format: number;
@@ -128,6 +129,7 @@ export default definePlugin({
         if (!this.instance || this.instance.dead) return favorites;
         const { favorites: filteredFavorites } = this.instance.props;
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
 
     }
@@ -136,7 +138,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
+    const ref = useRef<{ containerRef?: MutableRefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -160,6 +162,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         const result =
             props.favCopy
                 .map(gif => ({
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
                     gif,
                 }))
@@ -186,6 +189,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             onChange={onChange}
             onClear={() => {
                 setQuery("");
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (instance.props.favCopy != null) {
                     instance.props.favorites = instance.props.favCopy;
                     instance.forceUpdate();

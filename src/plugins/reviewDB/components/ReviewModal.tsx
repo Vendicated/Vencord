@@ -17,17 +17,17 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import { Paginator, Text, useRef, useState } from "@webpack/common";
 
 import { Auth } from "../auth";
-import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
+import { type Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
+function Modal({ modalProps, discordId, name }: { modalProps: ModalProps; discordId: string; name: string; }) {
     const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
@@ -56,7 +56,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             page={page}
                             refetchSignal={signal}
                             onFetchReviews={setData}
-                            scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                            scrollToTop={() => { ref.current?.scrollTo({ top: 0, behavior: "smooth" }); }}
                             hideOwnReview
                         />
                     </div>

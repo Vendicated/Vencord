@@ -19,8 +19,9 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, MessageActions } from "@webpack/common";
+import type { FluxStore } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
+import { FluxDispatcher, MessageActionCreators } from "@webpack/common";
 
 interface Album {
     id: string;
@@ -52,11 +53,11 @@ interface Track {
     name: string;
 }
 
-const Spotify = findByPropsLazy("getPlayerState");
-const PendingReplyStore = findByPropsLazy("getPendingReply");
+const SpotifyStore: FluxStore & Record<string, any> = findStoreLazy("SpotifyStore");
+const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
 
-function sendMessage(channelId, message) {
-    message = {
+function sendMessage(channelId: string, message: { content: string; }) {
+    const messageToSend = {
         // The following are required to prevent Discord from throwing an error
         invalidEmojis: [],
         tts: false,
@@ -64,7 +65,7 @@ function sendMessage(channelId, message) {
         ...message
     };
     const reply = PendingReplyStore.getPendingReply(channelId);
-    MessageActions.sendMessage(channelId, message, void 0, MessageActions.getSendMessageOptionsForReply(reply))
+    MessageActionCreators.sendMessage(channelId, messageToSend, undefined, MessageActionCreators.getSendMessageOptionsForReply(reply))
         .then(() => {
             if (reply) {
                 FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
@@ -84,7 +85,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -103,7 +104,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -121,7 +122,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -129,7 +130,7 @@ export default definePlugin({
                     return;
                 }
                 sendMessage(ctx.channel.id, {
-                    content: track.artists[0].external_urls.spotify
+                    content: track.artists[0]!.external_urls.spotify
                 });
             }
         }

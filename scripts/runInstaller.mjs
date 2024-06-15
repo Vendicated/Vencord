@@ -60,11 +60,13 @@ async function ensureBinary() {
         ? readFileSync(ETAG_FILE, "utf-8")
         : null;
 
+    const headers = new Headers();
+    headers.append("User-Agent", "Vencord (https://github.com/Vendicated/Vencord)");
+    if (etag != null)
+        headers.append("If-None-Match", etag);
+
     const res = await fetch(BASE_URL + filename, {
-        headers: {
-            "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
-            "If-None-Match": etag
-        }
+        headers
     });
 
     if (res.status === 304) {
@@ -74,7 +76,7 @@ async function ensureBinary() {
     if (!res.ok)
         throw new Error(`Failed to download installer: ${res.status} ${res.statusText}`);
 
-    writeFileSync(ETAG_FILE, res.headers.get("etag"));
+    writeFileSync(ETAG_FILE, res.headers.get("etag") ?? "");
 
     if (process.platform === "darwin") {
         console.log("Unzipping...");
@@ -85,11 +87,13 @@ async function ensureBinary() {
             filter: f => f.name === INSTALLER_PATH_DARWIN
         })[INSTALLER_PATH_DARWIN];
 
+        // @ts-ignore
         writeFileSync(outputFile, bytes, { mode: 0o755 });
 
         console.log("Overriding security policy for installer binary (this is required to run it)");
         console.log("xattr might error, that's okay");
 
+        /** @param {string} cmd */
         const logAndRun = cmd => {
             console.log("Running", cmd);
             try {
@@ -100,6 +104,7 @@ async function ensureBinary() {
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
+        // @ts-ignore
         const body = Readable.fromWeb(res.body);
         await finished(body.pipe(createWriteStream(outputFile, {
             mode: 0o755,

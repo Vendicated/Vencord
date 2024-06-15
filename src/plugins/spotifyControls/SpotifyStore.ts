@@ -17,6 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
+import type { ExtractAction, FluxAction } from "@vencord/discord-types";
 import { findByProps, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
@@ -46,15 +47,15 @@ export interface Track {
 interface PlayerState {
     accountId: string;
     track: Track | null;
-    volumePercent: number,
-    isPlaying: boolean,
+    volumePercent?: number,
+    isPlaying?: boolean,
     repeat: boolean,
-    position: number,
+    position?: number,
     context?: any;
     device?: Device;
 
     // added by patch
-    actual_repeat: Repeat;
+    actual_repeat?: Repeat;
 }
 
 interface Device {
@@ -66,15 +67,14 @@ type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazyWebpack(() => {
-    // For some reason ts hates extends Flux.Store
-    const { Store } = Flux;
-
     const SpotifySocket = findByProps("getActiveSocketAndDevice");
     const SpotifyUtils = findByProps("SpotifyAPI");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
-    class SpotifyStore extends Store {
+    type SpotifyStoreAction = ExtractAction<FluxAction, "SPOTIFY_PLAYER_STATE" | "SPOTIFY_SET_DEVICES">;
+
+    class SpotifyStore extends Flux.Store<SpotifyStoreAction> {
         public mPosition = 0;
         private start = 0;
 
@@ -88,7 +88,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = Settings.plugins.SpotifyControls!.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
@@ -176,13 +176,13 @@ export const SpotifyStore = proxyLazyWebpack(() => {
     }
 
     const store = new SpotifyStore(FluxDispatcher, {
-        SPOTIFY_PLAYER_STATE(e: PlayerState) {
-            store.track = e.track;
-            store.device = e.device ?? null;
-            store.isPlaying = e.isPlaying ?? false;
-            store.volume = e.volumePercent ?? 0;
-            store.repeat = e.actual_repeat || "off";
-            store.position = e.position ?? 0;
+        SPOTIFY_PLAYER_STATE(a: PlayerState) {
+            store.track = a.track;
+            store.device = a.device ?? null;
+            store.isPlaying = a.isPlaying ?? false;
+            store.volume = a.volumePercent ?? 0;
+            store.repeat = a.actual_repeat || "off";
+            store.position = a.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
         },

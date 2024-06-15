@@ -103,8 +103,9 @@ export default definePlugin({
     ],
     settings,
 
-    getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
-        if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
+    getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string | null; }) {
+        guildId ??= ChannelStore.getChannel(channelId)?.guild_id;
+        if (!guildId) return null;
         return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
     },
 
@@ -113,12 +114,12 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title?: string; guildId: string; label: string; }) => {
         const role = GuildStore.getRole(guildId, id);
 
         return (
             <span style={{
-                color: role?.colorString,
+                color: role?.colorString ?? undefined,
                 fontWeight: "unset",
                 letterSpacing: ".05em"
             }}>

@@ -10,9 +10,9 @@ import { Devs } from "@utils/constants";
 import { getCurrentGuild, openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
+import { ClipboardUtils, GuildStore, Menu, Permissions, PermissionStore, UserSettings } from "@webpack/common";
 
-const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
+const GuildSettingsActionCreators = findByPropsLazy("open", "selectRole", "updateGuild");
 
 function PencilIcon() {
     return (
@@ -67,7 +67,7 @@ export default definePlugin({
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
-        TextAndImagesSettingsStores.DeveloperMode.updateSetting(true);
+        UserSettings.DeveloperMode!.updateSetting(true);
     },
 
     contextMenus: {
@@ -83,7 +83,7 @@ export default definePlugin({
                     <Menu.MenuItem
                         id="vc-copy-role-color"
                         label="Copy Role Color"
-                        action={() => Clipboard.copy(role.colorString!)}
+                        action={() => { ClipboardUtils.copy(role.colorString!); }}
                         icon={AppearanceIcon}
                     />
                 );
@@ -103,14 +103,14 @@ export default definePlugin({
                 );
             }
 
-            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
+            if (PermissionStore.can(Permissions.MANAGE_ROLES, guild)) {
                 children.push(
                     <Menu.MenuItem
                         id="vc-edit-role"
                         label="Edit Role"
                         action={async () => {
-                            await GuildSettingsActions.open(guild.id, "ROLES");
-                            GuildSettingsActions.selectRole(id);
+                            await GuildSettingsActionCreators.open(guild.id, "ROLES");
+                            GuildSettingsActionCreators.selectRole(id);
                         }}
                         icon={PencilIcon}
                     />

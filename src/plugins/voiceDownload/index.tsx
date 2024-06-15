@@ -28,7 +28,7 @@ export default definePlugin({
             <a
                 className="vc-voice-download"
                 href={src}
-                onClick={e => e.stopPropagation()}
+                onClick={e => { e.stopPropagation(); }}
                 aria-label="Download voice message"
                 {...IS_DISCORD_DESKTOP
                     ? { target: "_blank" } // open externally

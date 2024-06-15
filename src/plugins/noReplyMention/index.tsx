@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Message } from "discord-types/general";
+import type { MessageRecord } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     userList: {
@@ -56,7 +56,7 @@ export default definePlugin({
     authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed],
     settings,
 
-    shouldMention(message: Message, isHoldingShift: boolean) {
+    shouldMention(message: MessageRecord, isHoldingShift: boolean) {
         const isListed = settings.store.userList.includes(message.author.id);
         const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
         return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;

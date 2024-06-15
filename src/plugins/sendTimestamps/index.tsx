@@ -25,9 +25,9 @@ import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, Parser, Select, useMemo, useState } from "@webpack/common";
+import { Button, Forms, MarkupUtils, Select, useMemo, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -63,7 +63,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
 
     const [formatted, rendered] = useMemo(() => {
         const formatted = formatTimestamp(time, format);
-        return [formatted, Parser.parse(formatted)];
+        return [formatted, MarkupUtils.parse(formatted)];
     }, [time, format]);
 
     return (
@@ -80,7 +80,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                 <input
                     type="datetime-local"
                     value={value}
-                    onChange={e => setValue(e.currentTarget.value)}
+                    onChange={e => { setValue(e.currentTarget.value); }}
                     style={{
                         colorScheme: getTheme() === Theme.Light ? "light" : "dark",
                     }}
@@ -95,11 +95,11 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                         }))
                     }
                     isSelected={v => v === format}
-                    select={v => setFormat(v)}
+                    select={v => { setFormat(v); }}
                     serialize={v => v}
                     renderOptionLabel={o => (
                         <div className={cl("format-label")}>
-                            {Parser.parse(formatTimestamp(time, o.value))}
+                            {MarkupUtils.parse(formatTimestamp(time, o.value))}
                         </div>
                     )}
                     renderOptionValue={() => rendered}
@@ -133,7 +133,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 const key = openModal(props => (
                     <PickerModal
                         rootProps={props}
-                        close={() => closeModal(key)}
+                        close={() => { closeModal(key); }}
                     />
                 ));
             }}
@@ -202,7 +202,7 @@ export default definePlugin({
                     <ul>
                         {samples.map(s => (
                             <li key={s}>
-                                <code>{s}</code> {"->"} {Parser.parse(parseTime(s))}
+                                <code>{s}</code> {"->"} {MarkupUtils.parse(parseTime(s))}
                             </li>
                         ))}
                     </ul>

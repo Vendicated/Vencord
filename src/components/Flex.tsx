@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { React } from "@webpack/common";
+import type { CSSProperties, HTMLProps, PropsWithChildren } from "react";
 
-export function Flex(props: React.PropsWithChildren<{
-    flexDirection?: React.CSSProperties["flexDirection"];
-    style?: React.CSSProperties;
+export function Flex(props: PropsWithChildren<{
+    flexDirection?: CSSProperties["flexDirection"];
+    style?: CSSProperties;
     className?: string;
-} & React.HTMLProps<HTMLDivElement>>) {
+} & HTMLProps<HTMLDivElement>>) {
     props.style ??= {};
     props.style.display = "flex";
     // TODO(ven): Remove me, what was I thinking??

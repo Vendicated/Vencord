@@ -50,7 +50,7 @@ export default definePlugin({
             find: ".trackEmojiSearchEmpty,200",
             replacement: {
                 match: /(\.trackEmojiSearchEmpty,200(?=.+?isBurstReaction:(\i).+?(\i===\i\.EmojiIntention.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
-                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
+                replace: (_, rest, _isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
             }
         }
     ],
@@ -63,6 +63,6 @@ export default definePlugin({
     },
 
     get shouldSuperReactByDefault() {
-        return settings.store.superReactByDefault && UserStore.getCurrentUser().premiumType != null;
+        return settings.store.superReactByDefault && UserStore.getCurrentUser()!.premiumType != null;
     }
 });

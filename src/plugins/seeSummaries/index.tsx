@@ -8,10 +8,11 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { type FluxPersistedStore, GuildFeature } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
+const SummaryStore: FluxPersistedStore & Record<string, any> = findByPropsLazy("allSummaries", "findSummary");
 const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
 
 const settings = definePluginSettings({
@@ -106,10 +107,8 @@ export default definePlugin({
     },
 
     shouldFetch(channelId: string) {
-        const channel = ChannelStore.getChannel(channelId);
-        // SUMMARIES_ENABLED feature is not in discord-types
-        const guild = GuildStore.getGuild(channel.guild_id);
-        // @ts-ignore
-        return guild.hasFeature("SUMMARIES_ENABLED_GA");
+        const channel = ChannelStore.getChannel(channelId)!;
+        const guild = GuildStore.getGuild(channel.guild_id)!;
+        return guild.hasFeature(GuildFeature.SUMMARIES_ENABLED_GA);
     }
 });

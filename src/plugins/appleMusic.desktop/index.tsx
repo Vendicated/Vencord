@@ -6,48 +6,15 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, type PluginNative, ReporterTestable } from "@utils/types";
+import { type Activity, type ActivityAssets, ActivityFlags, ActivityType } from "@vencord/discord-types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusic as PluginNative<typeof import("./native")>;
 
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
 interface ActivityButton {
     label: string;
     url: string;
-}
-
-interface Activity {
-    state: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: number;
-    flags: number;
-}
-
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
 }
 
 export interface TrackData {
@@ -73,7 +40,11 @@ const enum AssetImageType {
 
 const applicationId = "1239490006054207550";
 
+let createdAt: number | null = null;
+
 function setActivity(activity: Activity | null) {
+    if (!activity)
+        createdAt = null;
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
         activity,
@@ -176,20 +147,23 @@ export default definePlugin({
     hidden: !navigator.platform.startsWith("Mac"),
     reporterTestable: ReporterTestable.None,
 
-    settingsAboutComponent() {
-        return <>
+    settingsAboutComponent: () => (
+        <>
             <Forms.FormText>
                 For the customizable activity format strings, you can use several special strings to include track data in activities!{" "}
                 <code>{"{name}"}</code> is replaced with the track name; <code>{"{artist}"}</code> is replaced with the artist(s)' name(s); and <code>{"{album}"}</code> is replaced with the album name.
             </Forms.FormText>
-        </>;
-    },
+        </>
+    ),
 
     settings,
 
     start() {
         this.updatePresence();
-        this.updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.refreshInterval * 1000);
+        this.updateInterval = setInterval(
+            () => { this.updatePresence(); },
+            settings.store.refreshInterval * 1000
+        );
     },
 
     stop() {
@@ -238,7 +212,11 @@ export default definePlugin({
                 });
         }
 
+        createdAt ??= Date.now();
+
         return {
+            id: "custom",
+            created_at: createdAt,
             application_id: applicationId,
 
             name: customFormat(settings.store.nameString, trackData),
@@ -253,10 +231,10 @@ export default definePlugin({
             assets,
 
             buttons: buttons.length ? buttons.map(v => v.label) : undefined,
-            metadata: { button_urls: buttons.map(v => v.url) || undefined, },
+            metadata: { button_urls: buttons.length ? buttons.map(v => v.url) : undefined },
 
             type: settings.store.activityType,
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });

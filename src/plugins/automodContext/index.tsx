@@ -7,9 +7,11 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Text } from "@webpack/common";
 
+// SelectedChannelActionCreators
 const { selectChannel } = findByPropsLazy("selectChannel", "selectVoiceChannel");
 
 function jumpToMessage(channelId: string, messageId: string) {
@@ -23,13 +25,11 @@ function jumpToMessage(channelId: string, messageId: string) {
     });
 }
 
-function findChannelId(message: any): string | null {
-    const { embeds: [embed] } = message;
+function findChannelId(message: MessageRecord): string | null {
+    const embed = message.embeds[0]!;
     const channelField = embed.fields.find(({ rawName }) => rawName === "channel_id");
 
-    if (!channelField) {
-        return null;
-    }
+    if (!channelField) return null;
 
     return channelField.rawValue;
 }
@@ -49,12 +49,10 @@ export default definePlugin({
         }
     ],
 
-    renderJumpButton: ErrorBoundary.wrap(({ message }: { message: any; }) => {
+    renderJumpButton: ErrorBoundary.wrap(({ message }: { message: MessageRecord; }) => {
         const channelId = findChannelId(message);
 
-        if (!channelId) {
-            return null;
-        }
+        if (!channelId) return null;
 
         return (
             <Button
@@ -62,7 +60,7 @@ export default definePlugin({
                 look={Button.Looks.LINK}
                 size={Button.Sizes.SMALL}
                 color={Button.Colors.LINK}
-                onClick={() => jumpToMessage(channelId, message.id)}
+                onClick={() => { jumpToMessage(channelId, message.id); }}
             >
                 <Text color="text-link" variant="text-xs/normal">
                     Jump to Surrounding

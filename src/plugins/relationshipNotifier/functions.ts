@@ -17,28 +17,28 @@
 */
 
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { UserUtils } from "@webpack/common";
+import { RelationshipType } from "@vencord/discord-types";
+import { UserActionCreators } from "@webpack/common";
 
 import settings from "./settings";
-import { ChannelDelete, ChannelType, GuildDelete, RelationshipRemove, RelationshipType } from "./types";
-import { deleteGroup, deleteGuild, getGroup, getGuild, notify } from "./utils";
+import type { ChannelDeleteAction, GuildDeleteAction, RelationshipRemoveAction } from "./types";
+import { deleteGroupDM, deleteGuild, getGroupDM, getGuild, notify } from "./utils";
 
 let manuallyRemovedFriend: string | undefined;
 let manuallyRemovedGuild: string | undefined;
-let manuallyRemovedGroup: string | undefined;
+let manuallyRemovedGroupDM: string | undefined;
 
-export const removeFriend = (id: string) => manuallyRemovedFriend = id;
-export const removeGuild = (id: string) => manuallyRemovedGuild = id;
-export const removeGroup = (id: string) => manuallyRemovedGroup = id;
+export const removeFriend = (userId: string) => manuallyRemovedFriend = userId;
+export const removeGuild = (guildId: string) => manuallyRemovedGuild = guildId;
+export const removeGroupDM = (channelId: string) => manuallyRemovedGroupDM = channelId;
 
-export async function onRelationshipRemove({ relationship: { type, id } }: RelationshipRemove) {
+export async function onRelationshipRemove({ relationship: { type, id } }: RelationshipRemoveAction) {
     if (manuallyRemovedFriend === id) {
         manuallyRemovedFriend = undefined;
         return;
     }
 
-    const user = await UserUtils.getUser(id)
-        .catch(() => null);
+    const user = await UserActionCreators.getUser(id).catch(() => null);
     if (!user) return;
 
     switch (type) {
@@ -46,22 +46,22 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
             if (settings.store.friends)
                 notify(
                     `${getUniqueUsername(user)} removed you as a friend.`,
-                    user.getAvatarURL(undefined, undefined, false),
+                    user.getAvatarURL(),
                     () => openUserProfile(user.id)
                 );
             break;
-        case RelationshipType.INCOMING_REQUEST:
+        case RelationshipType.PENDING_INCOMING:
             if (settings.store.friendRequestCancels)
                 notify(
                     `A friend request from ${getUniqueUsername(user)} has been removed.`,
-                    user.getAvatarURL(undefined, undefined, false),
+                    user.getAvatarURL(),
                     () => openUserProfile(user.id)
                 );
             break;
     }
 }
 
-export function onGuildDelete({ guild: { id, unavailable } }: GuildDelete) {
+export function onGuildDelete({ guild: { id, unavailable } }: GuildDeleteAction) {
     if (!settings.store.servers) return;
     if (unavailable) return;
 
@@ -78,19 +78,19 @@ export function onGuildDelete({ guild: { id, unavailable } }: GuildDelete) {
     }
 }
 
-export function onChannelDelete({ channel: { id, type } }: ChannelDelete) {
+export function onChannelDelete({ channel, channel: { id } }: ChannelDeleteAction) {
     if (!settings.store.groups) return;
-    if (type !== ChannelType.GROUP_DM) return;
+    if (!channel.isGroupDM()) return;
 
-    if (manuallyRemovedGroup === id) {
-        deleteGroup(id);
-        manuallyRemovedGroup = undefined;
+    if (manuallyRemovedGroupDM === id) {
+        deleteGroupDM(id);
+        manuallyRemovedGroupDM = undefined;
         return;
     }
 
-    const group = getGroup(id);
+    const group = getGroupDM(id);
     if (group) {
-        deleteGroup(id);
+        deleteGroupDM(id);
         notify(`You were removed from the group ${group.name}.`, group.iconURL);
     }
 }

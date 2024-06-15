@@ -20,31 +20,31 @@ import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatB
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
+import { DraftType, type FluxStore, type MessageAttachment } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
-import { MessageAttachment } from "discord-types/general";
+import { DraftStore, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const UploadStore = findByPropsLazy("getUploads");
+const UploadStore: FluxStore & Record<string, any> = findByPropsLazy("getUploads");
 
-const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
-
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.CHANNEL_MESSAGE);
 
 const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
     new Promise(res => {
         const img = new Image();
-        img.onload = () =>
+        img.onload = () => {
             res({ width: img.width, height: img.height });
+        };
 
-        img.onerror = () =>
+        img.onerror = () => {
             res(null);
+        };
 
         img.src = url;
     });
 
-
 const getAttachments = async (channelId: string) =>
     await Promise.all(
-        UploadStore.getUploads(channelId, DraftType.ChannelMessage)
+        UploadStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE)
             .map(async (upload: any) => {
                 const { isImage, filename, spoiler, item: { file } } = upload;
                 const url = URL.createObjectURL(file);
@@ -72,30 +72,31 @@ const getAttachments = async (channelId: string) =>
             })
     );
 
-
 const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
-    const channelId = SelectedChannelStore.getChannelId();
+    const channelId = SelectedChannelStore.getChannelId()!;
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
     if (!isMainChat) return null;
 
-    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
-    const hasContent = !isEmpty && draft?.length > 0;
+    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE).length > 0;
+    const hasContent = !isEmpty && draft.length > 0;
 
     if (!hasContent && !hasAttachments) return null;
 
     return (
         <ChatBarButton
             tooltip="Preview Message"
-            onClick={async () =>
+            onClick={async () => {
+                const { id } = UserStore.getCurrentUser()!;
                 sendBotMessage(
                     channelId,
                     {
                         content: getDraft(channelId),
-                        author: UserStore.getCurrentUser(),
+                        author: { id },
                         attachments: hasAttachments ? await getAttachments(channelId) : undefined,
                     }
-                )}
+                );
+            }}
             buttonProps={{
                 style: {
                     translate: "0 2px"
@@ -126,6 +127,6 @@ export default definePlugin({
     // This makes the popping in less awkward
     startAt: StartAt.Init,
 
-    start: () => addChatBarButton("previewMessage", PreviewButton),
-    stop: () => removeChatBarButton("previewMessage"),
+    start() { addChatBarButton("previewMessage", PreviewButton); },
+    stop() { removeChatBarButton("previewMessage"); },
 });

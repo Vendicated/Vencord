@@ -16,51 +16,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { type FluxStore, type GuildEmoji as $Emoji, type MessageRecord, type Sticker as $Sticker, StickerFormat } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
-import { Promisable } from "type-fest";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, Permissions, PermissionStore, RestAPI, Toasts, Tooltip, useMemo, useReducer, UserStore, useState } from "@webpack/common";
+import type { Promisable } from "type-fest";
 
-const StickersStore = findStoreLazy("StickersStore");
-const EmojiManager = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
+const StickersStore: FluxStore & Record<string, any> = findStoreLazy("StickersStore");
+const EmojiActionCreators = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
 
-interface Sticker {
-    t: "Sticker";
-    description: string;
-    format_type: number;
-    guild_id: string;
-    id: string;
-    name: string;
-    tags: string;
-    type: number;
+const DATA_TYPE = Symbol();
+
+const enum DataType {
+    EMOJI,
+    STICKER
 }
 
-interface Emoji {
-    t: "Emoji";
-    id: string;
-    name: string;
-    isAnimated: boolean;
-}
+type Emoji = $Emoji & { [DATA_TYPE]: DataType.EMOJI; };
+
+type Sticker = $Sticker & { [DATA_TYPE]: DataType.STICKER; };
 
 type Data = Emoji | Sticker;
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
-    if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
+    if (data[DATA_TYPE] === DataType.EMOJI)
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.animated ? "gif" : "png"}?size=4096&lossless=true`;
 
     return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
-    const cached = StickersStore.getStickerById(id);
+    const cached: $Sticker | undefined = StickersStore.getStickerById(id);
     if (cached) return cached;
 
     const { body } = await RestAPI.get({
@@ -72,14 +66,14 @@ async function fetchSticker(id: string) {
         sticker: body
     });
 
-    return body as Sticker;
+    return body as $Sticker;
 }
 
 async function cloneSticker(guildId: string, sticker: Sticker) {
     const data = new FormData();
     data.append("name", sticker.name);
     data.append("tags", sticker.tags);
-    data.append("description", sticker.description);
+    data.append("description", sticker.description ?? "");
     data.append("file", await fetchBlob(getUrl(sticker)));
 
     const { body } = await RestAPI.post({
@@ -102,11 +96,11 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
 
     const dataUrl = await new Promise<string>(resolve => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
+        reader.onload = () => { resolve(reader.result as string); };
         reader.readAsDataURL(data);
     });
 
-    return EmojiManager.uploadEmoji({
+    return EmojiActionCreators.uploadEmoji({
         guildId,
         name: emoji.name.split("~")[0],
         image: dataUrl
@@ -114,23 +108,23 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
 }
 
 function getGuildCandidates(data: Data) {
-    const meId = UserStore.getCurrentUser().id;
+    const meId = UserStore.getCurrentUser()!.id;
 
-    return Object.values(GuildStore.getGuilds()).filter(g => {
-        const canCreate = g.ownerId === meId ||
-            (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
+    return Object.values(GuildStore.getGuilds()).filter(guild => {
+        const canCreate = guild.ownerId === meId ||
+            PermissionStore.can(Permissions.CREATE_GUILD_EXPRESSIONS, guild);
         if (!canCreate) return false;
 
-        if (data.t === "Sticker") return true;
+        if (data[DATA_TYPE] === DataType.STICKER) return true;
 
-        const { isAnimated } = data as Emoji;
+        const { animated } = data;
 
-        const emojiSlots = g.getMaxEmojiSlots();
-        const { emojis } = EmojiStore.getGuilds()[g.id];
+        const emojiSlots = guild.getMaxEmojiSlots();
+        const emojis = EmojiStore.getGuildEmoji(guild.id);
 
         let count = 0;
         for (const emoji of emojis)
-            if (emoji.animated === isAnimated && !emoji.managed)
+            if (emoji.animated === animated)
                 count++;
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
@@ -144,9 +138,9 @@ async function fetchBlob(url: string) {
     return res.blob();
 }
 
-async function doClone(guildId: string, data: Sticker | Emoji) {
+async function doClone(guildId: string, data: Data) {
     try {
-        if (data.t === "Sticker")
+        if (data[DATA_TYPE] === DataType.STICKER)
             await cloneSticker(guildId, data);
         else
             await cloneEmoji(guildId, data);
@@ -171,34 +165,34 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
     }
 }
 
-const getFontSize = (s: string) => {
+const getFontSize = (str: string) => {
     // [18, 18, 16, 16, 14, 12, 10]
     const sizes = [20, 20, 18, 18, 16, 14, 12];
-    return sizes[s.length] ?? 4;
+    return sizes[str.length] ?? 4;
 };
 
 const nameValidator = /^\w+$/i;
 
-function CloneModal({ data }: { data: Sticker | Emoji; }) {
-    const [isCloning, setIsCloning] = React.useState(false);
-    const [name, setName] = React.useState(data.name);
+function CloneModal({ data }: { data: Data; }) {
+    const [isCloning, setIsCloning] = useState(false);
+    const [name, setName] = useState(data.name);
 
-    const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
+    const [x, invalidateMemo] = useReducer(x => x + 1, 0);
 
-    const guilds = React.useMemo(() => getGuildCandidates(data), [data.id, x]);
+    const guilds = useMemo(() => getGuildCandidates(data), [data.id, x]);
 
     return (
         <>
             <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
             <CheckedTextInput
                 value={name}
-                onChange={v => {
-                    data.name = v;
-                    setName(v);
+                onChange={val => {
+                    data.name = val;
+                    setName(val);
                 }}
-                validate={v =>
-                    (data.t === "Emoji" && v.length > 2 && v.length < 32 && nameValidator.test(v))
-                    || (data.t === "Sticker" && v.length > 2 && v.length < 30)
+                validate={val =>
+                    (data[DATA_TYPE] === DataType.EMOJI && val.length > 2 && val.length < 32 && nameValidator.test(val))
+                    || (data[DATA_TYPE] === DataType.STICKER && val.length > 2 && val.length < 30)
                     || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
                 }
             />
@@ -210,14 +204,14 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 justifyContent: "center",
                 alignItems: "center"
             }}>
-                {guilds.map(g => (
-                    <Tooltip text={g.name}>
+                {guilds.map(guild => (
+                    <Tooltip text={guild.name}>
                         {({ onMouseLeave, onMouseEnter }) => (
                             <div
                                 onMouseLeave={onMouseLeave}
                                 onMouseEnter={onMouseEnter}
                                 role="button"
-                                aria-label={"Clone to " + g.name}
+                                aria-label={"Clone to " + guild.name}
                                 aria-disabled={isCloning}
                                 style={{
                                     borderRadius: "50%",
@@ -230,15 +224,15 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                     cursor: isCloning ? "not-allowed" : "pointer",
                                     filter: isCloning ? "brightness(50%)" : "none"
                                 }}
-                                onClick={isCloning ? void 0 : async () => {
+                                onClick={isCloning ? undefined : () => {
                                     setIsCloning(true);
-                                    doClone(g.id, data).finally(() => {
+                                    doClone(guild.id, data).finally(() => {
                                         invalidateMemo();
                                         setIsCloning(false);
                                     });
                                 }}
                             >
-                                {g.icon ? (
+                                {guild.icon ? (
                                     <img
                                         aria-hidden
                                         style={{
@@ -246,13 +240,13 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             width: "100%",
                                             height: "100%",
                                         }}
-                                        src={g.getIconURL(512, true)}
-                                        alt={g.name}
+                                        src={guild.getIconURL(512, true)}
+                                        alt={guild.name}
                                     />
                                 ) : (
                                     <Forms.FormText
                                         style={{
-                                            fontSize: getFontSize(g.acronym),
+                                            fontSize: getFontSize(guild.acronym),
                                             width: "100%",
                                             overflow: "hidden",
                                             whiteSpace: "nowrap",
@@ -260,7 +254,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             cursor: isCloning ? "not-allowed" : "pointer",
                                         }}
                                     >
-                                        {g.acronym}
+                                        {guild.acronym}
                                     </Forms.FormText>
                                 )}
                             </div>
@@ -272,93 +266,102 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
     );
 }
 
-function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Omit<Sticker | Emoji, "t">>) {
-    return (
-        <Menu.MenuItem
-            id="emote-cloner"
-            key="emote-cloner"
-            label={`Clone ${type}`}
-            action={() =>
-                openModalLazy(async () => {
-                    const res = await fetchData();
-                    const data = { t: type, ...res } as Sticker | Emoji;
-                    const url = getUrl(data);
+const buildMenuItem = (type: DataType, fetchData: () => Promisable<$Emoji | $Sticker>) => (
+    <Menu.MenuItem
+        id="emote-cloner"
+        key="emote-cloner"
+        label={`Clone ${type}`}
+        action={() =>
+            openModalLazy(async () => {
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                const data = { [DATA_TYPE]: type, ...await fetchData() } as Data;
+                const url = getUrl(data);
 
-                    return modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={url}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                    style={{ marginRight: "0.5em" }}
-                                />
-                                <Forms.FormText>Clone {data.name}</Forms.FormText>
-                            </ModalHeader>
-                            <ModalContent>
-                                <CloneModal data={data} />
-                            </ModalContent>
-                        </ModalRoot>
-                    );
-                })
-            }
-        />
-    );
+                return modalProps => (
+                    <ModalRoot {...modalProps}>
+                        <ModalHeader>
+                            <img
+                                role="presentation"
+                                aria-hidden
+                                src={url}
+                                alt=""
+                                height={24}
+                                width={24}
+                                style={{ marginRight: "0.5em" }}
+                            />
+                            <Forms.FormText>Clone {data.name}</Forms.FormText>
+                        </ModalHeader>
+                        <ModalContent>
+                            <CloneModal data={data} />
+                        </ModalContent>
+                    </ModalRoot>
+                );
+            })
+        }
+    />
+);
+
+const isGifUrl = (url: string) => new URL(url).pathname.endsWith(".gif");
+
+const enum FavoriteableType {
+    EMOJI = "emoji",
+    STICKER = "sticker",
 }
 
-function isGifUrl(url: string) {
-    return new URL(url).pathname.endsWith(".gif");
+interface Props {
+    favoriteableId: string;
+    favoriteableType: FavoriteableType;
+    itemHref?: string;
+    itemSrc: string;
+    message: MessageRecord;
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
-
+const messageContextMenuPatch = ((children, { favoriteableId, favoriteableType, itemHref, itemSrc, message }: Props) => {
     if (!favoriteableId) return;
 
     const menuItem = (() => {
         switch (favoriteableType) {
-            case "emoji":
-                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+            case FavoriteableType.EMOJI:
+                const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
+                const reaction = message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
                 if (!match && !reaction) return;
                 const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
-                return buildMenuItem("Emoji", () => ({
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                return buildMenuItem(DataType.EMOJI, () => ({
                     id: favoriteableId,
                     name,
-                    isAnimated: isGifUrl(itemHref ?? itemSrc)
-                }));
-            case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-                if (sticker?.format_type === 3 /* LOTTIE */) return;
+                    animated: isGifUrl(itemHref ?? itemSrc)
+                } as $Emoji));
+            case FavoriteableType.STICKER:
+                const sticker = message.stickerItems.find(s => s.id === favoriteableId);
+                if (sticker?.format_type === StickerFormat.LOTTIE) return;
 
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+                return buildMenuItem(DataType.STICKER, () => fetchSticker(favoriteableId));
         }
     })();
 
     if (menuItem)
         findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
-};
+}) satisfies NavContextMenuPatchCallback;
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    const { id, name, type } = props?.target?.dataset ?? {};
+const expressionPickerPatch = ((children, { target }: { target: HTMLElement; }) => {
+    const { id, name, type } = target.dataset;
     if (!id) return;
 
-    if (type === "emoji" && name) {
-        const firstChild = props.target.firstChild as HTMLImageElement;
+    if (type === FavoriteableType.EMOJI && name) {
+        const firstChild = target.firstChild as HTMLImageElement | null;
 
-        children.push(buildMenuItem("Emoji", () => ({
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        children.push(buildMenuItem(DataType.EMOJI, () => ({
             id,
             name,
-            isAnimated: firstChild && isGifUrl(firstChild.src)
-        })));
-    } else if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
-        children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
+            animated: firstChild && isGifUrl(firstChild.src)
+        } as $Emoji)));
+    } else if (type === FavoriteableType.STICKER && !target.className.includes("lottieCanvas")) {
+        children.push(buildMenuItem(DataType.STICKER, () => fetchSticker(id)));
     }
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "EmoteCloner",

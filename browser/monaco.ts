@@ -6,6 +6,7 @@
 
 import "./patch-worker";
 
+// @ts-ignore
 import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
 
 declare global {

@@ -44,7 +44,7 @@ export async function getAuthorization() {
         await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
             secrets ??= {};
             // use the current user ID
-            secrets[`${origin}:${getUserId()}`] = secrets[origin];
+            secrets[`${origin}:${getUserId()}`] = secrets[origin]!;
             delete secrets[origin];
             return secrets;
         });

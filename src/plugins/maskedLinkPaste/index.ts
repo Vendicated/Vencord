@@ -24,7 +24,7 @@ export default definePlugin({
         }
     }],
 
-    handlePaste(editor, content: string, originalBehavior: () => void) {
+    handlePaste(editor: any, content: string, originalBehavior: () => void) {
         if (content && linkRegex.test(content) && editor.operations?.[0]?.type === "remove_text") {
             SlateTransforms.insertText(
                 editor,

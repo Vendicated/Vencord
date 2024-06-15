@@ -16,28 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import type { ChannelRecord, GuildRecord, UserRecord } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
-import type { Channel, Guild, User } from "discord-types/general";
-
 
 interface UserContextProps {
-    channel: Channel;
+    channel?: ChannelRecord;
     guildId?: string;
-    user: User;
+    user?: UserRecord;
 }
 
 interface GuildContextProps {
-    guild?: Guild;
+    guild?: GuildRecord;
 }
 
 interface GroupDMContextProps {
-    channel: Channel;
+    channel?: ChannelRecord;
 }
 
 const settings = definePluginSettings({
@@ -84,7 +83,7 @@ function openImage(url: string) {
     });
 }
 
-const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
+const UserContext = ((children, { user, guildId }: UserContextProps) => {
     if (!user) return;
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
@@ -93,27 +92,29 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
             <Menu.MenuItem
                 id="view-avatar"
                 label="View Avatar"
-                action={() => openImage(IconUtils.getUserAvatarURL(user, true))}
+                action={() => { openImage(IconUtils.getUserAvatarURL(user, true)); }}
                 icon={ImageIcon}
             />
             {memberAvatar && (
                 <Menu.MenuItem
                     id="view-server-avatar"
                     label="View Server Avatar"
-                    action={() => openImage(IconUtils.getGuildMemberAvatarURLSimple({
-                        userId: user.id,
-                        avatar: memberAvatar,
-                        guildId: guildId!,
-                        canAnimate: true
-                    }))}
+                    action={() => {
+                        openImage(IconUtils.getGuildMemberAvatarURLSimple({
+                            userId: user.id,
+                            avatar: memberAvatar,
+                            guildId: guildId!,
+                            canAnimate: true
+                        }));
+                    }}
                     icon={ImageIcon}
                 />
             )}
         </Menu.MenuGroup>
     ));
-};
+}) satisfies NavContextMenuPatchCallback;
 
-const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => {
+const GuildContext = ((children, { guild }: GuildContextProps) => {
     if (!guild) return;
 
     const { id, icon, banner } = guild;
@@ -125,13 +126,13 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                 <Menu.MenuItem
                     id="view-icon"
                     label="View Icon"
-                    action={() =>
+                    action={() => {
                         openImage(IconUtils.getGuildIconURL({
                             id,
                             icon,
                             canAnimate: true
-                        })!)
-                    }
+                        })!);
+                    }}
                     icon={ImageIcon}
                 />
             ) : null}
@@ -139,17 +140,17 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                 <Menu.MenuItem
                     id="view-banner"
                     label="View Banner"
-                    action={() =>
-                        openImage(IconUtils.getGuildBannerURL(guild, true)!)
-                    }
+                    action={() =>{
+                        openImage(IconUtils.getGuildBannerURL(guild, true)!);
+                    }}
                     icon={ImageIcon}
                 />
             ) : null}
         </Menu.MenuGroup>
     ));
-};
+}) satisfies NavContextMenuPatchCallback;
 
-const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: GroupDMContextProps) => {
+const GroupDMContext = ((children, { channel }: GroupDMContextProps) => {
     if (!channel) return;
 
     children.splice(-1, 0, (
@@ -157,14 +158,14 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
             <Menu.MenuItem
                 id="view-group-channel-icon"
                 label="View Icon"
-                action={() =>
-                    openImage(IconUtils.getChannelIconURL(channel)!)
-                }
+                action={() => {
+                    openImage(IconUtils.getChannelIconURL(channel)!);
+                }}
                 icon={ImageIcon}
             />
         </Menu.MenuGroup>
     ));
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "ViewIcons",

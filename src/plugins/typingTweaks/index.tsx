@@ -21,8 +21,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import type { UserRecord } from "@vencord/discord-types";
+import { Avatar, GuildMemberStore, RelationshipStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -42,50 +42,47 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
-    return [
-        <strong key="0">{a}</strong>,
-        ", ",
-        <strong key="1">{b}</strong>,
-        `, and ${count} others are typing...`
-    ];
-}
+export const buildSeveralUsers = ({ a, b, count }: { a: string, b: string, count: number; }) => [
+    <strong key="0">{a}</strong>,
+    ", ",
+    <strong key="1">{b}</strong>,
+    `, and ${count} others are typing...`
+];
 
 interface Props {
-    user: User;
+    user: UserRecord;
     guildId: string;
 }
 
-const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
-    return (
-        <strong
-            role="button"
-            onClick={() => {
-                openUserProfile(user.id);
-            }}
-            style={{
-                display: "grid",
-                gridAutoFlow: "column",
-                gap: "4px",
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
-                cursor: "pointer"
-            }}
-        >
-            {settings.store.showAvatars && (
-                <div style={{ marginTop: "4px" }}>
-                    <Avatar
-                        size="SIZE_16"
-                        src={user.getAvatarURL(guildId, 128)} />
-                </div>
-            )}
-            {GuildMemberStore.getNick(guildId!, user.id)
-                || (!guildId && RelationshipStore.getNickname(user.id))
-                || (user as any).globalName
-                || user.username
-            }
-        </strong>
-    );
-}, { noop: true });
+const TypingUser = ErrorBoundary.wrap(({ user, guildId }: Props) => (
+    <strong
+        role="button"
+        onClick={() => {
+            openUserProfile(user.id);
+        }}
+        style={{
+            display: "grid",
+            gridAutoFlow: "column",
+            gap: "4px",
+            color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+            cursor: "pointer"
+        }}
+    >
+        {settings.store.showAvatars && (
+            <div style={{ marginTop: "4px" }}>
+                <Avatar
+                    size="SIZE_16"
+                    src={user.getAvatarURL(guildId, 128)}
+                />
+            </div>
+        )}
+        {GuildMemberStore.getNick(guildId, user.id)
+            || (!guildId && RelationshipStore.getNickname(user.id))
+            || user.globalName
+            || user.username
+        }
+    </strong>
+), { noop: true });
 
 export default definePlugin({
     name: "TypingTweaks",
@@ -128,15 +125,15 @@ export default definePlugin({
 
     buildSeveralUsers,
 
-    mutateChildren(props: any, users: User[], children: any) {
+    mutateChildren(props: any, users: UserRecord[], children: any) {
         if (!Array.isArray(children)) return children;
 
         let element = 0;
 
-        return children.map(c =>
-            c.type === "strong"
+        return children.map(child =>
+            child.type === "strong"
                 ? <TypingUser {...props} user={users[element++]} />
-                : c
+                : child
         );
     }
 });

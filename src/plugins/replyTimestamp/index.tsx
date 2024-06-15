@@ -9,13 +9,15 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Timestamp } from "@webpack/common";
-import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const { getMessageTimestampId } = findByPropsLazy("getMessageTimestampId");
-const { calendarFormat, dateFormat, isSameDay } = findByPropsLazy("calendarFormat", "dateFormat", "isSameDay", "accessibilityLabelCalendarFormat");
+const { getMessageTimestampId }: {
+    getMessageTimestampId: (partialMessage: { id: string; }) => string;
+} = findByPropsLazy("getMessageTimestampId");
+const DateUtils = findByPropsLazy("calendarFormat", "dateFormat", "isSameDay", "accessibilityLabelCalendarFormat");
 const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
@@ -28,30 +30,31 @@ const enum ReferencedMessageState {
     DELETED = 2,
 }
 
-type ReferencedMessage = { state: ReferencedMessageState.LOADED; message: Message; } | { state: ReferencedMessageState.NOT_LOADED | ReferencedMessageState.DELETED; };
+type ReferencedMessage = { state: ReferencedMessageState.LOADED; message: MessageRecord; }
+    | { state: ReferencedMessageState.NOT_LOADED | ReferencedMessageState.DELETED; };
 
 function ReplyTimestamp({
     referencedMessage,
     baseMessage,
 }: {
     referencedMessage: ReferencedMessage,
-    baseMessage: Message;
+    baseMessage: MessageRecord;
 }) {
     if (referencedMessage.state !== ReferencedMessageState.LOADED) return null;
-    const refTimestamp = referencedMessage.message.timestamp as any;
-    const baseTimestamp = baseMessage.timestamp as any;
+    const refTimestamp = referencedMessage.message.timestamp;
+    const baseTimestamp = baseMessage.timestamp;
     return (
         <Timestamp
             id={getMessageTimestampId(referencedMessage.message)}
             className="vc-reply-timestamp"
-            compact={isSameDay(refTimestamp, baseTimestamp)}
+            compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
         >
             <Sep>[</Sep>
-            {isSameDay(refTimestamp, baseTimestamp)
-                ? dateFormat(refTimestamp, "LT")
-                : calendarFormat(refTimestamp)
+            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
+                ? DateUtils.dateFormat(refTimestamp, "LT")
+                : DateUtils.calendarFormat(refTimestamp)
             }
             <Sep>]</Sep>
         </Timestamp>

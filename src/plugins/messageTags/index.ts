@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ApplicationCommandOptionType, MessageEmbedType } from "@vencord/discord-types";
 
 const EMOTE = "<:luna:1035316192220553236>";
 const DATA_KEY = "MessageTags_TAGS";
@@ -32,20 +33,21 @@ interface Tag {
     enabled: boolean;
 }
 
-const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>(t => t ?? []);
-const getTag = (name: string) => DataStore.get(DATA_KEY).then<Tag | null>((t: Tag[]) => (t ?? []).find((tt: Tag) => tt.name === name) ?? null);
-const addTag = async (tag: Tag) => {
+const getTags = async () => (await DataStore.get<Tag[]>(DATA_KEY)) ?? [];
+const getTag = async (name: string) => (await DataStore.get<Tag[]>(DATA_KEY))?.find(t => t.name === name);
+
+async function addTag(tag: Tag) {
     const tags = await getTags();
     tags.push(tag);
     DataStore.set(DATA_KEY, tags);
     return tags;
-};
-const removeTag = async (name: string) => {
-    let tags = await getTags();
-    tags = await tags.filter((t: Tag) => t.name !== name);
+}
+
+async function removeTag(name: string) {
+    const tags = (await getTags()).filter(t => t.name !== name);
     DataStore.set(DATA_KEY, tags);
     return tags;
-};
+}
 
 function createTagCommand(tag: Tag) {
     registerCommand({
@@ -60,9 +62,10 @@ function createTagCommand(tag: Tag) {
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
-                content: `${EMOTE} The tag **${tag.name}** has been sent!`
-            });
+            if (Settings.plugins.MessageTags!.clyde)
+                sendBotMessage(ctx.channel.id, {
+                    content: `${EMOTE} The tag **${tag.name}** has been sent!`
+                });
             return { content: tag.message.replaceAll("\\n", "\n") };
         },
         [MessageTagsMarker]: true,
@@ -85,7 +88,8 @@ export default definePlugin({
     dependencies: ["CommandsAPI"],
 
     async start() {
-        for (const tag of await getTags()) createTagCommand(tag);
+        for (const tag of await getTags())
+            createTagCommand(tag);
     },
 
     commands: [
@@ -148,11 +152,10 @@ export default definePlugin({
             ],
 
             async execute(args, ctx) {
-
-                switch (args[0].name) {
+                switch (args[0]!.name) {
                     case "create": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-                        const message: string = findOption(args[0].options, "message", "");
+                        const name = findOption(args[0]!.options, "tag-name", "");
+                        const message = findOption(args[0]!.options, "message", "");
 
                         if (await getTag(name))
                             return sendBotMessage(ctx.channel.id, {
@@ -174,7 +177,7 @@ export default definePlugin({
                         break; // end 'create'
                     }
                     case "delete": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                        const name = findOption(args[0]!.options, "tag-name", "");
 
                         if (!await getTag(name))
                             return sendBotMessage(ctx.channel.id, {
@@ -193,22 +196,19 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             embeds: [
                                 {
-                                    // @ts-ignore
                                     title: "All Tags:",
-                                    // @ts-ignore
                                     description: (await getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-ignore
-                                    color: 0xd77f7f,
-                                    type: "rich",
+                                    color: 0xD77F7F,
+                                    type: MessageEmbedType.RICH,
                                 }
                             ]
                         });
                         break; // end 'list'
                     }
                     case "preview": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                        const name = findOption(args[0]!.options, "tag-name", "");
                         const tag = await getTag(name);
 
                         if (!tag)

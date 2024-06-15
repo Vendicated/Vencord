@@ -19,7 +19,7 @@
 import {
     addPreEditListener,
     addPreSendListener,
-    MessageObject,
+    type MessageObject,
     removePreEditListener,
     removePreSendListener
 } from "@api/MessageEvents";
@@ -44,20 +44,20 @@ export default definePlugin({
             : (str || "");
     },
 
+    universalRules: new Set<RegExp>(),
+    rulesByHost: new Map<string, Set<RegExp>>(),
+    hostRules: new Map<string, RegExp>(),
+
     createRules() {
         // Can be extended upon once user configs are available
         // Eg. (useDefaultRules: boolean, customRules: Array[string])
         const rules = defaultRules;
 
-        this.universalRules = new Set();
-        this.rulesByHost = new Map();
-        this.hostRules = new Map();
-
         for (const rule of rules) {
             const splitRule = rule.split("@");
             const paramRule = new RegExp(
                 "^" +
-                this.escapeRegExp(splitRule[0]).replace(/\\\*/, ".+?") +
+                this.escapeRegExp(splitRule[0]!).replace(/\\\*/, ".+?") +
                 "$"
             );
 
@@ -79,7 +79,7 @@ export default definePlugin({
             if (this.rulesByHost.get(hostRuleIndex) == null) {
                 this.rulesByHost.set(hostRuleIndex, new Set());
             }
-            this.rulesByHost.get(hostRuleIndex).add(paramRule);
+            this.rulesByHost.get(hostRuleIndex)!.add(paramRule);
         }
     },
 
@@ -114,7 +114,7 @@ export default definePlugin({
         // Check rules for each hosts that match
         this.hostRules.forEach((regex, hostRuleName) => {
             if (!regex.test(url.hostname)) return;
-            this.rulesByHost.get(hostRuleName).forEach(rule => {
+            this.rulesByHost.get(hostRuleName)!.forEach(rule => {
                 url.searchParams.forEach((_value, param, parent) => {
                     this.removeParam(rule, param, parent);
                 });
@@ -136,10 +136,8 @@ export default definePlugin({
 
     start() {
         this.createRules();
-        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
-        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
-            this.onSend(msg)
-        );
+        this.preSend = addPreSendListener((_, msg) => { this.onSend(msg); });
+        this.preEdit = addPreEditListener((_cid, _mid, msg) => { this.onSend(msg); });
     },
 
     stop() {

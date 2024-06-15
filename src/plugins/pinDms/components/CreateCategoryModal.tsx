@@ -5,19 +5,20 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Forms, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
+import type { FormEvent, MouseEvent, ReactNode } from "react";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
-import { categories, Category, createCategory, getCategory, updateCategory } from "../data";
+import { categories, type Category, createCategory, getCategory, updateCategory } from "../data";
 import { forceUpdate } from "../index";
 
 interface ColorPickerProps {
     color: number | null;
     showEyeDropper?: boolean;
     suggestedColors?: string[];
-    onChange(value: number | null): void;
+    onChange: (value: number | null) => void;
 }
 
 interface ColorPickerWithSwatchesProps {
@@ -25,9 +26,9 @@ interface ColorPickerWithSwatchesProps {
     colors: number[];
     value: number;
     disabled?: boolean;
-    onChange(value: number | null): void;
-    renderDefaultButton?: () => React.ReactNode;
-    renderCustomButton?: () => React.ReactNode;
+    onChange: (value: number | null) => void;
+    renderDefaultButton?: () => ReactNode;
+    renderCustomButton?: () => ReactNode;
 }
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
@@ -70,8 +71,8 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
 
     if (!category) return null;
 
-    const onSave = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
+    const onSave = async (event: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
         if (!categoryId)
             await createCategory(category);
         else
@@ -94,7 +95,7 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
                         <Forms.FormTitle>Name</Forms.FormTitle>
                         <TextInput
                             value={category.name}
-                            onChange={e => setCategory({ ...category, name: e })}
+                            onChange={e => { setCategory({ ...category, name: e }); }}
                         />
                     </Forms.FormSection>
                     <Forms.FormDivider />
@@ -104,13 +105,13 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
                             key={category.name}
                             defaultColor={DEFAULT_COLOR}
                             colors={SWATCHES}
-                            onChange={c => setCategory({ ...category, color: c! })}
+                            onChange={c => { setCategory({ ...category, color: c! }); }}
                             value={category.color}
                             renderDefaultButton={() => null}
                             renderCustomButton={() => (
                                 <ColorPicker
                                     color={category.color}
-                                    onChange={c => setCategory({ ...category, color: c! })}
+                                    onChange={c => { setCategory({ ...category, color: c! }); }}
                                     key={category.name}
                                     showEyeDropper={false}
                                 />
@@ -119,7 +120,13 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
                     </Forms.FormSection>
                 </ModalContent>
                 <ModalFooter>
-                    <Button type="submit" onClick={onSave} disabled={!category.name}>{categoryId ? "Save" : "Create"}</Button>
+                    <Button
+                        type="submit"
+                        onClick={onSave}
+                        disabled={!category.name}
+                    >
+                        {categoryId ? "Save" : "Create"}
+                    </Button>
                 </ModalFooter>
             </form>
         </ModalRoot>
@@ -129,6 +136,12 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
 export const openCategoryModal = (categoryId: string | null, channelId: string | null) =>
     openModalLazy(async () => {
         await requireSettingsMenu();
-        return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initalChannelId={channelId} />;
+        return modalProps => (
+            <NewCategoryModal
+                categoryId={categoryId}
+                modalProps={modalProps}
+                initalChannelId={channelId}
+            />
+        );
     });
 

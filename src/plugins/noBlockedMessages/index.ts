@@ -18,10 +18,9 @@
 
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+import definePlugin, { OptionType, type Patch } from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
+import { RelationshipStore } from "@webpack/common";
 
 export default definePlugin({
     name: "NoBlockedMessages",
@@ -40,9 +39,9 @@ export default definePlugin({
         ...[
             '="MessageStore",',
             '"displayName","ReadStateStore")'
-        ].map(find => ({
+        ].map<Omit<Patch, "plugin">>(find => ({
             find,
-            predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
+            predicate: () => Settings.plugins.NoBlockedMessages!.ignoreBlockedMessages === true,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
@@ -59,6 +58,6 @@ export default definePlugin({
             restartNeeded: true,
         },
     },
-    isBlocked: message =>
+    isBlocked: (message: MessageRecord) =>
         RelationshipStore.isBlocked(message.author.id)
 });

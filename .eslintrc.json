@@ -1,6 +1,9 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": true
+    },
     "ignorePatterns": ["browser", "dist", "packages/discord-types", "packages/vencord-types"],
     "plugins": [
         "@typescript-eslint",
@@ -33,6 +36,31 @@
                 "templates": { "author": [".*", "Vendicated and contributors"] }
             }
         ],
+        "@typescript-eslint/array-type": "error",
+        "@typescript-eslint/await-thenable": "error",
+        "@typescript-eslint/ban-types": "error",
+        "@typescript-eslint/consistent-generic-constructors": "error",
+        "@typescript-eslint/consistent-type-assertions": ["error", {
+            "assertionStyle": "as",
+            "objectLiteralTypeAssertions": "allow-as-parameter"
+        }],
+        "@typescript-eslint/consistent-type-exports": ["error", {
+            "fixMixedExportsWithInlineTypeSpecifier": true
+        }],
+        "@typescript-eslint/consistent-type-imports": ["error", {
+            "disallowTypeAnnotations": false,
+            "fixStyle": "inline-type-imports"
+        }],
+        "@typescript-eslint/no-confusing-void-expression": "error",
+        "@typescript-eslint/no-extra-non-null-assertion": "error",
+        "@typescript-eslint/no-import-type-side-effects": "error",
+        "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
+        "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
+        "@typescript-eslint/no-unnecessary-condition": "error",
+        "@typescript-eslint/no-unnecessary-type-assertion": "error",
+        "@typescript-eslint/non-nullable-type-assertion-style": "error",
+        "@typescript-eslint/prefer-as-const": "error",
+        "@typescript-eslint/require-await": "error",
         "quotes": ["error", "double", { "avoidEscape": true }],
         "jsx-quotes": ["error", "prefer-double"],
         "no-mixed-spaces-and-tabs": "error",
@@ -80,6 +108,19 @@
         "no-misleading-character-class": "error",
         "no-prototype-builtins": "error",
         "no-regex-spaces": "error",
+        "no-restricted-globals": ["error", "_", "Diff", "JSX", "React", "ReactDOM"],
+        "no-restricted-imports": ["error", {
+            "paths": [{
+               "name": "discord-types",
+               "message": "Use @vencord/discord-types instead."
+            }],
+            "patterns": [{
+                "group": ["discord-types/*"],
+                "importNamePattern": "^(?!WebpackInstance$)",
+                "message": "Use @vencord/discord-types instead."
+            }]
+        }],
+        "no-restricted-syntax": ["error", "[operator=void]"],
         "no-shadow-restricted-names": "error",
         "no-unexpected-multiline": "error",
         "no-unsafe-optional-chaining": "error",

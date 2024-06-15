@@ -6,28 +6,28 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { ChannelRecord, MessageRecord, UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
-import { Message, User } from "discord-types/general";
-import { Channel } from "discord-types/general/index.js";
 
 const enum ReferencedMessageState {
-    Loaded,
-    NotLoaded,
-    Deleted
+    LOADED = 0,
+    NOT_LOADED = 1,
+    DELETED = 2,
 }
 
 interface Reply {
-    baseAuthor: User,
-    baseMessage: Message;
-    channel: Channel;
+    baseAuthor: UserRecord,
+    baseMessage: MessageRecord;
+    channel: ChannelRecord;
     referencedMessage: { state: ReferencedMessageState; };
     compact: boolean;
     isReplyAuthorBlocked: boolean;
 }
 
 const fetching = new Map<string, string>();
-let ReplyStore: any;
+
+let ReferencedMessageCache: any;
 
 const { createMessageRecord } = findByPropsLazy("createMessageRecord");
 
@@ -47,22 +47,21 @@ export default definePlugin({
             find: "ReferencedMessageStore",
             replacement: {
                 match: /constructor\(\)\{\i\(this,"_channelCaches",new Map\)/,
-                replace: "$&;$self.setReplyStore(this);"
+                replace: "$&;$self.setReferencedMessageCache(this);"
             }
         }
     ],
 
-    setReplyStore(store: any) {
-        ReplyStore = store;
+    setReferencedMessageCache(obj: any) {
+        ReferencedMessageCache = obj;
     },
 
-    async fetchReply(reply: Reply) {
+    fetchReply(reply: Reply) {
         const { channel_id: channelId, message_id: messageId } = reply.baseMessage.messageReference!;
 
-        if (fetching.has(messageId)) {
-            return;
-        }
-        fetching.set(messageId, channelId);
+        if (fetching.has(messageId!)) return;
+
+        fetching.set(messageId!, channelId);
 
         RestAPI.get({
             url: `/channels/${channelId}/messages`,
@@ -73,12 +72,12 @@ export default definePlugin({
             retries: 2
         })
             .then(res => {
-                const reply: Message | undefined = res?.body?.[0];
+                const reply: MessageRecord | undefined = res?.body?.[0];
                 if (!reply) return;
 
                 if (reply.id !== messageId) {
-                    ReplyStore.set(channelId, messageId, {
-                        state: ReferencedMessageState.Deleted
+                    ReferencedMessageCache.set(channelId, messageId, {
+                        state: ReferencedMessageState.DELETED
                     });
 
                     FluxDispatcher.dispatch({
@@ -87,8 +86,8 @@ export default definePlugin({
                         message: messageId
                     });
                 } else {
-                    ReplyStore.set(reply.channel_id, reply.id, {
-                        state: ReferencedMessageState.Loaded,
+                    ReferencedMessageCache.set(reply.channel_id, reply.id, {
+                        state: ReferencedMessageState.LOADED,
                         message: createMessageRecord(reply)
                     });
 
@@ -100,7 +99,7 @@ export default definePlugin({
             })
             .catch(() => { })
             .finally(() => {
-                fetching.delete(messageId);
+                fetching.delete(messageId!);
             });
     }
 });

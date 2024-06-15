@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ServerListAPI",
     authors: [Devs.kemo],
-    description: "Api required for plugins that modify the server list",
+    description: "API required for plugins that modify the server list",
     patches: [
         {
             find: "Messages.DISCODO_DISABLED",

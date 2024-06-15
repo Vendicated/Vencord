@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { sendBotMessage } from "@api/Commands";
 import { ApplicationCommandInputType } from "@api/Commands/types";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ApplicationCommandOptionType } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     resultsAmount: {
@@ -51,15 +52,17 @@ export default definePlugin({
             ],
             execute: async (args, ctx) => {
                 try {
-                    const query: string = encodeURIComponent(args[0].value);
-                    const { list } = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`).then(response => response.json());
+                    const query = encodeURIComponent(args[0]!.value);
+                    const { list } = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`)
+                        .then(response => response.json());
 
-                    if (!list.length)
-                        return void sendBotMessage(ctx.channel.id, { content: "No results found." });
+                    if (!list.length) {
+                        sendBotMessage(ctx.channel.id, { content: "No results found." });
+                        return;
+                    }
 
-                    const definition = list.reduce((prev, curr) => {
-                        return prev.thumbs_up > curr.thumbs_up ? prev : curr;
-                    });
+                    const definition = list.reduce((prev: any, curr: any) =>
+                        prev.thumbs_up > curr.thumbs_up ? prev : curr);
 
                     const linkify = (text: string) => text
                         .replaceAll("\r\n", "\n")
@@ -67,7 +70,7 @@ export default definePlugin({
                         .replace(/\[(.+?)\]/g, (_, word) => `[${word}](https://www.urbandictionary.com/define.php?term=${encodeURIComponent(word)} "Define '${word}' on Urban Dictionary")`)
                         .trim();
 
-                    return void sendBotMessage(ctx.channel.id, {
+                    sendBotMessage(ctx.channel.id, {
                         embeds: [
                             {
                                 type: "rich",
@@ -85,15 +88,19 @@ export default definePlugin({
                                     },
                                     {
                                         name: "Want more definitions?",
-                                        value: `Check out [more definitions](https://www.urbandictionary.com/define.php?term=${query} "Define "${args[0].value}" on Urban Dictionary") on Urban Dictionary.`,
+                                        value: `Check out [more definitions](https://www.urbandictionary.com/define.php?term=${query} "Define "${args[0]!.value}" on Urban Dictionary") on Urban Dictionary.`,
                                     },
                                 ],
                                 color: 0xFF9900,
-                                footer: { text: `👍 ${definition.thumbs_up.toString()} | 👎 ${definition.thumbs_down.toString()}`, icon_url: "https://www.urbandictionary.com/favicon.ico" },
+                                footer: {
+                                    text: `👍 ${definition.thumbs_up.toString()} | 👎 ${definition.thumbs_down.toString()}`,
+                                    icon_url: "https://www.urbandictionary.com/favicon.ico"
+                                },
                                 timestamp: new Date(definition.written_on).toISOString(),
                             },
-                        ] as any,
+                        ],
                     });
+                    return;
                 } catch (error) {
                     sendBotMessage(ctx.channel.id, {
                         content: `Something went wrong: \`${error}\``,

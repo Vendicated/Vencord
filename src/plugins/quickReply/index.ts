@@ -19,17 +19,15 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { ChannelStore, FluxDispatcher, MessageStore, Permissions, PermissionStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 const Kangaroo = findByPropsLazy("jumpToMessage");
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
 let editIdx = -1;
-
 
 const enum MentionOptions {
     DISABLED,
@@ -60,18 +58,18 @@ export default definePlugin({
     settings,
 
     start() {
-        Dispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
-        Dispatcher.subscribe("MESSAGE_END_EDIT", onEndEdit);
-        Dispatcher.subscribe("MESSAGE_START_EDIT", onStartEdit);
-        Dispatcher.subscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
+        FluxDispatcher.subscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
+        FluxDispatcher.subscribe("MESSAGE_END_EDIT", onEndEdit);
+        FluxDispatcher.subscribe("MESSAGE_START_EDIT", onStartEdit);
+        FluxDispatcher.subscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
         document.addEventListener("keydown", onKeydown);
     },
 
     stop() {
-        Dispatcher.unsubscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
-        Dispatcher.unsubscribe("MESSAGE_END_EDIT", onEndEdit);
-        Dispatcher.unsubscribe("MESSAGE_START_EDIT", onStartEdit);
-        Dispatcher.unsubscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
+        FluxDispatcher.unsubscribe("DELETE_PENDING_REPLY", onDeletePendingReply);
+        FluxDispatcher.unsubscribe("MESSAGE_END_EDIT", onEndEdit);
+        FluxDispatcher.unsubscribe("MESSAGE_START_EDIT", onStartEdit);
+        FluxDispatcher.unsubscribe("CREATE_PENDING_REPLY", onCreatePendingReply);
         document.removeEventListener("keydown", onKeydown);
     },
 });
@@ -79,7 +77,7 @@ export default definePlugin({
 const onDeletePendingReply = () => replyIdx = -1;
 const onEndEdit = () => editIdx = -1;
 
-function calculateIdx(messages: Message[], id: string) {
+function calculateIdx(messages: MessageRecord[], id: string) {
     const idx = messages.findIndex(m => m.id === id);
     return idx === -1
         ? idx
@@ -89,13 +87,13 @@ function calculateIdx(messages: Message[], id: string) {
 function onStartEdit({ channelId, messageId, _isQuickEdit }: any) {
     if (_isQuickEdit) return;
 
-    const meId = UserStore.getCurrentUser().id;
+    const meId = UserStore.getCurrentUser()!.id;
 
     const messages = MessageStore.getMessages(channelId)._array.filter(m => m.author.id === meId);
     editIdx = calculateIdx(messages, messageId);
 }
 
-function onCreatePendingReply({ message, _isQuickReply }: { message: Message; _isQuickReply: boolean; }) {
+function onCreatePendingReply({ message, _isQuickReply }: { message: MessageRecord; _isQuickReply: boolean; }) {
     if (_isQuickReply) return;
 
     replyIdx = calculateIdx(MessageStore.getMessages(message.channel_id)._array, message.id);
@@ -134,9 +132,9 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
+    let messages: (MessageRecord & { deleted?: boolean; })[] = MessageStore.getMessages(SelectedChannelStore.getChannelId()!)._array;
     if (!isReply) { // we are editing so only include own
-        const meId = UserStore.getCurrentUser().id;
+        const meId = UserStore.getCurrentUser()!.id;
         messages = messages.filter(m => m.author.id === meId);
     }
 
@@ -164,8 +162,8 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     return i === - 1 ? undefined : messages[messages.length - i - 1];
 }
 
-function shouldMention(message) {
-    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention;
+function shouldMention(message: MessageRecord) {
+    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention!;
     const shouldPing = !enabled || (shouldPingListed === userList.includes(message.author.id));
 
     switch (settings.store.shouldMention) {
@@ -177,19 +175,21 @@ function shouldMention(message) {
 
 // handle next/prev reply
 function nextReply(isUp: boolean) {
-    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
-    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId())!;
+    if (currChannel.guild_id && !PermissionStore.can(Permissions.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, true);
 
-    if (!message)
-        return void Dispatcher.dispatch({
+    if (!message) {
+        FluxDispatcher.dispatch({
             type: "DELETE_PENDING_REPLY",
             channelId: SelectedChannelStore.getChannelId(),
         });
-    const channel = ChannelStore.getChannel(message.channel_id);
-    const meId = UserStore.getCurrentUser().id;
+        return;
+    }
+    const channel = ChannelStore.getChannel(message.channel_id)!;
+    const meId = UserStore.getCurrentUser()!.id;
 
-    Dispatcher.dispatch({
+    FluxDispatcher.dispatch({
         type: "CREATE_PENDING_REPLY",
         channel,
         message,
@@ -202,16 +202,18 @@ function nextReply(isUp: boolean) {
 
 // handle next/prev edit
 function nextEdit(isUp: boolean) {
-    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
-    if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
+    const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId())!;
+    if (currChannel.guild_id && !PermissionStore.can(Permissions.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, false);
 
-    if (!message)
-        return Dispatcher.dispatch({
+    if (!message) {
+        FluxDispatcher.dispatch({
             type: "MESSAGE_END_EDIT",
             channelId: SelectedChannelStore.getChannelId()
         });
-    Dispatcher.dispatch({
+        return;
+    }
+    FluxDispatcher.dispatch({
         type: "MESSAGE_START_EDIT",
         channelId: message.channel_id,
         messageId: message.id,

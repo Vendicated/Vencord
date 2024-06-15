@@ -20,28 +20,25 @@ import { DataStore } from "@api/index";
 import { UserStore } from "@webpack/common";
 
 import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./components/icons";
-import { SessionInfo } from "./types";
+import type { Session } from "./types";
 
-const getDataKey = () => `BetterSessions_savedSessions_${UserStore.getCurrentUser().id}`;
+const getDataKey = () => `BetterSessions_savedSessions_${UserStore.getCurrentUser()!.id}`;
 
-export const savedSessionsCache: Map<string, { name: string, isNew: boolean; }> = new Map();
+export const savedSessionsCache = new Map<string, { name: string; isNew: boolean; }>();
 
-export function getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {
-    return `${clientInfo.os} · ${clientInfo.platform}`;
-}
+export const getDefaultName = (clientInfo: Session["client_info"]) =>
+    `${clientInfo.os} · ${clientInfo.platform}`;
 
-export function saveSessionsToDataStore() {
-    return DataStore.set(getDataKey(), savedSessionsCache);
-}
+export const saveSessionsToDataStore = () => DataStore.set(getDataKey(), savedSessionsCache);
 
 export async function fetchNamesFromDataStore() {
-    const savedSessions = await DataStore.get<Map<string, { name: string, isNew: boolean; }>>(getDataKey()) || new Map();
+    const savedSessions = await DataStore.get<typeof savedSessionsCache>(getDataKey()) ?? new Map();
     savedSessions.forEach((data, idHash) => {
         savedSessionsCache.set(idHash, data);
     });
 }
 
-export function GetOsColor(os: string) {
+export function GetOSColor(os: string) {
     switch (os) {
         case "Windows Mobile":
         case "Windows":
