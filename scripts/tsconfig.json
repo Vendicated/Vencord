@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+
+        "module": "NodeNext",
+        "resolveJsonModule": true,
+
+        "noEmit": true,
+
+        "allowJs": true,
+        "checkJs": true,
+
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+
+        "target": "ESNext"
+    },
+}
