@@ -156,7 +156,6 @@
 }
 
 .vc-user-notes-data-modal-user-info > div {
-    /* width: 100%; */
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -212,12 +211,18 @@ div:has(.vc-user-notes-data-modal-user-text-area) {
     overflow: visible !important;
 }
 
+.vc-user-notes-data-modal-user-actions > button {
+    overflow: visible;
+    position: relative;
+}
+
 .vc-user-notes-data-modal-user-actions > button::before {
-    position: fixed;
+    position: absolute;
     display: block;
     z-index: 2;
     opacity: 0;
-    transform: translateY(130%);
+    top: 130%;
+    right: 0%;
     width: fit-content;
     padding: 8px 12px;
     border-radius: 6px;
