@@ -176,7 +176,7 @@ export default definePlugin({
     }, { noop: true }),
 
     makeEdit: (newMessage: MessageJSON, oldMessage: MessageJSON) => ({
-        timestamp: new Date(newMessage.edited_timestamp),
+        timestamp: newMessage.edited_timestamp,
         content: oldMessage.content
     }),
 

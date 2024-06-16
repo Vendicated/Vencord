@@ -21,7 +21,7 @@ import { ApplicationCommandInputType } from "@api/Commands/types";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ApplicationCommandOptionType } from "@vencord/discord-types";
+import { ApplicationCommandOptionType, MessageEmbedType } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     resultsAmount: {
@@ -73,7 +73,7 @@ export default definePlugin({
                     sendBotMessage(ctx.channel.id, {
                         embeds: [
                             {
-                                type: "rich",
+                                type: MessageEmbedType.RICH,
                                 author: {
                                     name: `Uploaded by "${definition.author}"`,
                                     url: `https://www.urbandictionary.com/author.php?author=${encodeURIComponent(definition.author)}`,
