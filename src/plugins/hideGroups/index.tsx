@@ -24,22 +24,6 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { FluxDispatcher, Menu } from "@webpack/common";
 import { createStore, entries, set } from "@api/DataStore";
 
-/**
- * Finds an element with the specified 'aria-label'.
- *
- * @param label The label to search for.
- */
-function findElement(label: string): HTMLElement[] {
-    const found: HTMLElement[] = [];
-    const elements = document.querySelectorAll("[aria-label]");
-    for (const element of elements) {
-        if (element.getAttribute("aria-label") === label) {
-            found.push(element as HTMLElement);
-        }
-    }
-    return found;
-}
-
 const mutationObserver = new MutationObserver(onChange);
 const hiddenGroupsStore = createStore("HiddenGroups", "HiddenGroupsList");
 
@@ -52,13 +36,14 @@ async function saveToStorage(): Promise<void> {
 
 function onChange(): void {
     // Check if the 'Direct Messages' panel is visible.
-    const dms = findElement("Direct Messages");
-    if (dms.length < 2) return;
-
-    const list = dms[1];
+    const dms = document.evaluate(
+        "/html/body/div[1]/div[3]/div[1]/div[1]/div/div[2]/div/div/div/div/div[1]/nav/div[2]/ul",
+        document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue as HTMLElement;
+    if (!dms) return;
 
     // Traverse and determine the channel IDs of each element.
-    for (const element of list.children) {
+    for (const element of dms.children) {
         const first = element.children[0];
         if (first == null) continue;
 
