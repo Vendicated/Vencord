@@ -16,17 +16,13 @@ export const events = {
 
 export const removeIgnore = (userId: string) => {
     removeHiddenUser(userId);
-    changeMessages(userId, "remove");
+    events.useListener();
     DataStore.set(STORE_KEY, userIds);
 };
 export const createIgnore = (userId: string, write = true) => {
     if (!userIds.includes(userId))
         userIds.push(userId);
-    changeMessages(userId, "add");
+    events.useListener();
     if (write)
         DataStore.set(STORE_KEY, userIds);
-};
-
-export const changeMessages = (userId: string, action: "remove" | "add") => {
-    events.useListener();
 };
