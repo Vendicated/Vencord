@@ -12,7 +12,7 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, moduleListeners, PatchedModuleFactories, PatchedModuleFactory, waitForSubscriptions, WebpackRequire, wreq } from ".";
+import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -85,7 +85,7 @@ define(Function.prototype, "O", {
             }
 
             notifyFactoryListeners(this.m[id]);
-            defineModulesFactoryGetter(id, Settings.eagerPatches ? patchFactory(id, this.m[id]) : this.m[id]);
+            defineModulesFactoryGetter(id, Settings.eagerPatches ? wrapAndPatchFactory(id, this.m[id]) : this.m[id]);
         }
 
         define(this.m, Symbol.toStringTag, {
@@ -104,7 +104,7 @@ define(Function.prototype, "O", {
     }
 });
 
-const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
+const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     /*
     If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
     and that requires defining additional traps for keeping the object working
@@ -132,7 +132,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
         }
 
         notifyFactoryListeners(newValue);
-        defineModulesFactoryGetter(p, Settings.eagerPatches ? patchFactory(p, newValue) : newValue);
+        defineModulesFactoryGetter(p, Settings.eagerPatches ? wrapAndPatchFactory(p, newValue) : newValue);
 
         return true;
     }
@@ -148,7 +148,7 @@ const moduleFactoriesHandler: ProxyHandler<PatchedModuleFactories> = {
  * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
  */
 function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: AnyModuleFactory, ignoreExistingInTarget: boolean = false) {
-    let existingFactory: TypedPropertyDescriptor<PatchedModuleFactory> | undefined;
+    let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
     for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
 
@@ -194,7 +194,7 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
  * @param id The id of the module
  * @param factory The original or patched module factory
  */
-function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFactory) {
+function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory) {
     // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
     // have the patched version
     for (const wreq of allWebpackInstances) {
@@ -205,7 +205,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
                     return factory;
                 }
 
-                return (factory = patchFactory(id, factory));
+                return (factory = wrapAndPatchFactory(id, factory));
             },
             set(v: AnyModuleFactory) {
                 if (factory.$$vencordOriginal != null) {
@@ -220,128 +220,21 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: PatchedModuleFacto
 }
 
 /**
- * Patches a module factory.
+ * Wraps and patches a module factory.
  *
- * The factory argument will become the patched version of the factory.
  * @param id The id of the module
  * @param factory The original or patched module factory
  * @returns The wrapper for the patched module factory
  */
-function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
-    const originalFactory = factory;
-
-    const patchedBy = new Set<string>();
-
-    // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + String(factory);
-
-    for (let i = 0; i < patches.length; i++) {
-        const patch = patches[i];
-        if (patch.predicate && !patch.predicate()) continue;
-
-        const moduleMatches = typeof patch.find === "string"
-            ? code.includes(patch.find)
-            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
-
-        if (!moduleMatches) continue;
-
-        patchedBy.add(patch.plugin);
-
-        const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
-        const previousCode = code;
-        const previousFactory = factory;
-
-        // We change all patch.replacement to array in plugins/index
-        for (const replacement of patch.replacement as PatchReplacement[]) {
-            if (replacement.predicate && !replacement.predicate()) continue;
-
-            const lastCode = code;
-            const lastFactory = factory;
-
-            canonicalizeReplacement(replacement, patch.plugin);
-
-            try {
-                const newCode = executePatch(replacement.match, replacement.replace as string);
-                if (newCode === code) {
-                    if (!patch.noWarn) {
-                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(id)}): ${replacement.match}`);
-                        if (IS_DEV) {
-                            logger.debug("Function Source:\n", code);
-                        }
-                    }
-
-                    if (patch.group) {
-                        logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
-                        code = previousCode;
-                        factory = previousFactory;
-                        patchedBy.delete(patch.plugin);
-                        break;
-                    }
-
-                    continue;
-                }
-
-                code = newCode;
-                factory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
-            } catch (err) {
-                logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(id)}): ${replacement.match}\n`, err);
-
-                if (IS_DEV) {
-                    const changeSize = code.length - lastCode.length;
-                    const match = lastCode.match(replacement.match)!;
-
-                    // Use 200 surrounding characters of context
-                    const start = Math.max(0, match.index! - 200);
-                    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
-                    // (changeSize may be negative)
-                    const endPatched = end + changeSize;
-
-                    const context = lastCode.slice(start, end);
-                    const patchedContext = code.slice(start, endPatched);
-
-                    // inline require to avoid including it in !IS_DEV builds
-                    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
-                    let fmt = "%c %s ";
-                    const elements = [] as string[];
-                    for (const d of diff) {
-                        const color = d.removed
-                            ? "red"
-                            : d.added
-                                ? "lime"
-                                : "grey";
-                        fmt += "%c%s";
-                        elements.push("color:" + color, d.value);
-                    }
-
-                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
-                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
-                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
-                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
-                }
-
-                patchedBy.delete(patch.plugin);
-
-                if (patch.group) {
-                    logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                    code = previousCode;
-                    factory = previousFactory;
-                    break;
-                }
-
-                code = lastCode;
-                factory = lastFactory;
-            }
-        }
-
-        if (!patch.all) patches.splice(i--, 1);
-    }
+function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory) {
+    const patchedFactory = patchFactory(id, originalFactory);
 
     // The patched factory wrapper, define it in an object to preserve the name after minification
-    const patchedFactory: PatchedModuleFactory = {
+    const wrappedFactory: WrappedModuleFactory = {
         PatchedFactory(...args: Parameters<AnyModuleFactory>) {
             // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
             for (const wreq of allWebpackInstances) {
-                define(wreq.m, id, { value: patchedFactory.$$vencordOriginal });
+                define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
             }
 
             // eslint-disable-next-line prefer-const
@@ -367,22 +260,22 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                 }
 
                 if (IS_DEV) {
-                    return patchedFactory.$$vencordOriginal?.apply(this, args);
+                    return wrappedFactory.$$vencordOriginal?.apply(this, args);
                 }
             }
 
             let factoryReturn: unknown;
             try {
                 // Call the patched factory
-                factoryReturn = factory.apply(this, args);
+                factoryReturn = patchedFactory.apply(this, args);
             } catch (err) {
                 // Just re-throw Discord errors
-                if (factory === originalFactory) {
+                if (patchedFactory === originalFactory) {
                     throw err;
                 }
 
                 logger.error("Error in patched module factory", err);
-                return patchedFactory.$$vencordOriginal?.apply(this, args);
+                return wrappedFactory.$$vencordOriginal?.apply(this, args);
             }
 
             // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
@@ -427,8 +320,126 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
         }
     }.PatchedFactory;
 
-    patchedFactory.toString = originalFactory.toString.bind(originalFactory);
-    patchedFactory.$$vencordOriginal = originalFactory;
+    wrappedFactory.toString = originalFactory.toString.bind(originalFactory);
+    wrappedFactory.$$vencordOriginal = originalFactory;
+
+    return wrappedFactory;
+}
+
+/**
+ * Patches a module factory.
+ *
+ * @param id The id of the module
+ * @param factory The original module factory
+ * @returns The patched module factory
+ */
+function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
+    // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
+    let code: string = "0," + String(factory);
+    let patchedFactory = factory;
+
+    const patchedBy = new Set<string>();
+
+    for (let i = 0; i < patches.length; i++) {
+        const patch = patches[i];
+        if (patch.predicate && !patch.predicate()) continue;
+
+        const moduleMatches = typeof patch.find === "string"
+            ? code.includes(patch.find)
+            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
+
+        if (!moduleMatches) continue;
+
+        patchedBy.add(patch.plugin);
+
+        const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
+        const previousCode = code;
+        const previousFactory = factory;
+
+        // We change all patch.replacement to array in plugins/index
+        for (const replacement of patch.replacement as PatchReplacement[]) {
+            if (replacement.predicate && !replacement.predicate()) continue;
+
+            const lastCode = code;
+            const lastFactory = factory;
+
+            canonicalizeReplacement(replacement, patch.plugin);
+
+            try {
+                const newCode = executePatch(replacement.match, replacement.replace as string);
+                if (newCode === code) {
+                    if (!patch.noWarn) {
+                        logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(id)}): ${replacement.match}`);
+                        if (IS_DEV) {
+                            logger.debug("Function Source:\n", code);
+                        }
+                    }
+
+                    if (patch.group) {
+                        logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                        code = previousCode;
+                        patchedFactory = previousFactory;
+                        patchedBy.delete(patch.plugin);
+                        break;
+                    }
+
+                    continue;
+                }
+
+                code = newCode;
+                patchedFactory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
+            } catch (err) {
+                logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(id)}): ${replacement.match}\n`, err);
+
+                if (IS_DEV) {
+                    const changeSize = code.length - lastCode.length;
+                    const match = lastCode.match(replacement.match)!;
+
+                    // Use 200 surrounding characters of context
+                    const start = Math.max(0, match.index! - 200);
+                    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
+                    // (changeSize may be negative)
+                    const endPatched = end + changeSize;
+
+                    const context = lastCode.slice(start, end);
+                    const patchedContext = code.slice(start, endPatched);
+
+                    // inline require to avoid including it in !IS_DEV builds
+                    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
+                    let fmt = "%c %s ";
+                    const elements = [] as string[];
+                    for (const d of diff) {
+                        const color = d.removed
+                            ? "red"
+                            : d.added
+                                ? "lime"
+                                : "grey";
+                        fmt += "%c%s";
+                        elements.push("color:" + color, d.value);
+                    }
+
+                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
+                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
+                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
+                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
+                }
+
+                patchedBy.delete(patch.plugin);
+
+                if (patch.group) {
+                    logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                    code = previousCode;
+                    patchedFactory = previousFactory;
+                    break;
+                }
+
+                code = lastCode;
+                patchedFactory = lastFactory;
+            }
+        }
+
+        if (!patch.all) patches.splice(i--, 1);
+    }
 
     return patchedFactory;
 }
