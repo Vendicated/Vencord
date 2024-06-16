@@ -8,10 +8,6 @@ import { Flex } from "@components/Flex";
 import {
     Margins,
     ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalProps,
-    ModalRoot,
     useForceUpdater,
 } from "@utils/index";
 import { Forms, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
@@ -50,9 +46,8 @@ function UserElement({ userId, onClick }: UserElementProps) {
     );
 }
 
-export function HiddenPeopleModal({ rootProps }: { rootProps: ModalProps; }) {
+export function FakeBlockedUserList() {
     const forceUpdate = useForceUpdater();
-
 
     const Users = userIds.map(id => {
         // Without this variable for some reason 'removeIgnore' is not defined in onClick event
@@ -69,15 +64,6 @@ export function HiddenPeopleModal({ rootProps }: { rootProps: ModalProps; }) {
     });
 
     return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader>
-                <Forms.FormTitle tag="h2">Hidden users</Forms.FormTitle>
-                <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
-
-            <ModalContent>
-                <ul className="vc-hidden-modal-list">{Users}</ul>
-            </ModalContent>
-        </ModalRoot>
+        <ul className="vc-hidden-modal-list">{Users}</ul>
     );
 }

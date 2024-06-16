@@ -9,15 +9,15 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { Devs, openModal } from "@utils/index";
-import definePlugin, { OptionType } from "@utils/types";
-import { Button, Menu, UserStore } from "@webpack/common";
+import { Devs } from "@utils/index";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { Menu, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 import type { SVGProps } from "react";
 
-import { HiddenPeopleModal } from "./HiddenPeopleModal";
+import { FakeBlockedUserList } from "./HiddenPeopleModal";
 import { STORE_KEY, userIds } from "./store";
-import { createIgnore, removeIgnore } from "./utils";
+import { createIgnore, events, removeIgnore } from "./utils";
 
 
 // Icons are taken from https://iconify.design/
@@ -42,7 +42,7 @@ const userProfileContextPatch: NavContextMenuPatchCallback = (
         <Menu.MenuItem
             label={label}
             id="vc-hide-user"
-            icon={isIgnored ? UserDeleteOutlinedIcon : UserAddOutlinedIcon}
+            icon={isIgnored ? UserAddOutlinedIcon : UserDeleteOutlinedIcon}
             action={() => {
                 isIgnored ? removeIgnore(user.id) :
                     createIgnore(user.id);
@@ -51,21 +51,11 @@ const userProfileContextPatch: NavContextMenuPatchCallback = (
     );
 };
 
-const OpenHiddenUsersModalComponent = () => {
-    return (
-        <Button onClick={() => openModal(props => {
-            return <HiddenPeopleModal rootProps={props} />;
-        })}>
-            Open a list of ignored users
-        </Button>
-    );
-};
-
 const settings = definePluginSettings({
     hiddenUsers: {
         type: OptionType.COMPONENT,
-        description: "",
-        component: () => <OpenHiddenUsersModalComponent />
+        description: "A list of all fake-blocked users",
+        component: () => <FakeBlockedUserList />
     },
 });
 
@@ -80,10 +70,10 @@ export default definePlugin({
     },
     patches: [
         {
-            find: ".messageListItem",
+            find: ".Messages.CHANNEL_MESSAGES_A11Y_DESCRIPTION",
             replacement: {
-                match: /(\i)\.messageListItem,/,
-                replace: "$self.checkHidden(arguments[0]?.message)+$&"
+                match: /function\((\i)\){/,
+                replace: "$&;$1={...$1};$1.channelStream=$self.updateMessageList($1.channelStream);const vcUpdate=Vencord.Util.useForceUpdater();$self.listen(vcUpdate);"
             }
         },
         {
@@ -95,7 +85,6 @@ export default definePlugin({
         },
         // Thanks, noBlockedMessages
         ...[
-            '="MessageStore",',
             '"displayName","ReadStateStore")'
         ].map(find => ({
             find,
@@ -107,20 +96,22 @@ export default definePlugin({
             ]
         }))
     ],
+    startAt: StartAt.Init,
     async start() {
         const storedData: string[] | undefined = await DataStore.get(STORE_KEY);
         (storedData || []).forEach(id => createIgnore(id, false));
     },
+    listen(cb: () => any) {
+        events.useListener = cb;
+    },
+    updateMessageList(channelStream: any) {
+        const test = channelStream.filter(s => {
+            if (s.type !== "MESSAGE") return true;
+            return !this.isHidden(s.content);
+        });
+        return test;
+    },
     isHidden(message: Message): boolean {
         return userIds.includes(message.author.id);
     },
-    checkHidden(message: Message): string {
-        if (this.isHidden(message)) {
-            message.blocked = true;
-            message.mentioned = false;
-            return "vc-message-hidden ";
-        }
-
-        return "";
-    }
 });

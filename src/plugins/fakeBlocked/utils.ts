@@ -8,6 +8,12 @@ import { DataStore } from "@api/index";
 
 import { removeHiddenUser, STORE_KEY, userIds } from "./store";
 
+export const events = {
+    // It gets changed in definePlugin.listen
+    // Tricky, but helps to forceUpdate list of messages
+    useListener: () => { }
+};
+
 export const removeIgnore = (userId: string) => {
     removeHiddenUser(userId);
     changeMessages(userId, "remove");
@@ -22,6 +28,5 @@ export const createIgnore = (userId: string, write = true) => {
 };
 
 export const changeMessages = (userId: string, action: "remove" | "add") => {
-    // DOM selectors are used because message component is memoized :(
-    document.querySelectorAll(`li[data-author-id="${userId}"]`).forEach(m => m.classList[action]("vc-message-hidden"));
+    events.useListener();
 };

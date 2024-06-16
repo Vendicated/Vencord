@@ -1,6 +1,6 @@
 # HideMessages
 
-Allow you to hide annoying messages without blocking their author
+Allow you to hide annoying messages/notifications without blocking their author
 
 ### Before
 ![Before](https://github.com/Vendicated/Vencord/assets/68553709/bfb796a8-c4cc-4bac-a94c-25772b342d06)
