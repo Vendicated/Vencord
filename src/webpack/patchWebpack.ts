@@ -274,7 +274,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                     throw err;
                 }
 
-                logger.error("Error in patched module factory", err);
+                logger.error("Error in patched module factory:\n", err);
                 return wrappedFactory.$$vencordOriginal?.apply(this, args);
             }
 
