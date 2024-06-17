@@ -50,7 +50,7 @@ export default definePlugin({
     description: "Allows profile theming and the usage of profile effects by hiding the colors and effect ID in your About Me using invisible, zero-width characters",
     authors: [Devs.ryan],
     patches: [
-        // Patches UserProfileStore.getUserProfile()
+        // Patches UserProfileStore.getUserProfile
         {
             find: '"UserProfileStore"',
             replacement: {
@@ -92,7 +92,7 @@ export default definePlugin({
         },
         // CustomColorPicker
         {
-            find: "CustomColorPicker:function(){",
+            find: ".colorPickerSwatch",
             replacement: {
                 match: /CustomColorPicker:function\(\){return (\i)}.+?[ ,;}]\1=(?!=)/,
                 replace: "$&$self.CustomColorPicker="
