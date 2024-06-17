@@ -24,51 +24,42 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { FluxDispatcher, Menu } from "@webpack/common";
 import { createStore, entries, set } from "@api/DataStore";
 
-const mutationObserver = new MutationObserver(onChange);
 const hiddenGroupsStore = createStore("HiddenGroups", "HiddenGroupsList");
 
 const hiddenGroups: string[] = [];
-const elements: { [key: string]: HTMLElement } = {};
 
+/**
+ * Saves the list of hidden groups to the device's storage.
+ */
 async function saveToStorage(): Promise<void> {
     await set("list", JSON.stringify(hiddenGroups), hiddenGroupsStore);
 }
 
-function onChange(): void {
-    // Check if the 'Direct Messages' panel is visible.
-    const dms = document.evaluate(
-        "/html/body/div[1]/div[3]/div[1]/div[1]/div/div[2]/div/div/div/div/div[1]/nav/div[2]/ul",
-        document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-        .singleNodeValue as HTMLElement;
-    if (!dms) return;
-
-    // Traverse and determine the channel IDs of each element.
-    for (const element of dms.children) {
-        const first = element.children[0];
-        if (first == null) continue;
-
-        const anchor = first.children[0];
-        if (!anchor) continue;
-
-        const { href } = anchor as HTMLAnchorElement;
-        const split = href.split("/");
-
-        if (split.length != 6) continue;
-        const channelId = split[split.length - 1];
-        elements[channelId] = element as HTMLElement;
-    }
-
-    // Hide elements.
-    for (const key in elements) {
-        if (!hiddenGroups.includes(key)) continue;
-
-        const element = elements[key];
-        element.style.display = "none";
-    }
-
-    saveToStorage().catch(console.error);
+/**
+ * Check to ensure a channel should render.
+ */
+function shouldRender(channelId: string): boolean {
+    return !hiddenGroups.includes(channelId);
 }
 
+let forceUpdate: () => void;
+
+/**
+ * Sets the global force update function.
+ */
+function setForceUpdate(func: () => void): undefined {
+    console.log("set force update", func);
+    forceUpdate = () => {
+        console.log("call to force update", func);
+        func();
+    };
+    return undefined;
+}
+
+/**
+ * Event handler for when a message is received.
+ * @param event
+ */
 function removeIgnored(event: any) {
     if (!settings.store.showOnMessage) return;
 
@@ -77,13 +68,8 @@ function removeIgnored(event: any) {
 
     if (!hiddenGroups.includes(channelId)) return;
 
-    // Append the channel to the list.
-    const groupDm = elements[channelId];
-    groupDm.style.display = "block";
-
-    // Remove the channel from the ignored list.
     hiddenGroups.splice(hiddenGroups.indexOf(channelId), 1);
-    delete elements[channelId];
+    forceUpdate?.();
 
     saveToStorage().catch(console.error);
 }
@@ -104,7 +90,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }) => {
             label={"Hide Group"}
             action={() => {
                 hiddenGroups.push(channel.id);
-                onChange(); // Instantly apply the changes.
+                forceUpdate?.();
             }}
         />
     );
@@ -117,6 +103,39 @@ export default definePlugin({
     settings,
 
     startAt: StartAt.DOMContentLoaded,
+    patches: [
+        {
+            find: 'location:"private_channel"',
+            replacement: {
+                match: /return .\.isMultiUserDM\(\)/,
+                replace: (match) => {
+                    const ret = match.split(".")[0];
+                    const varName = ret.charAt(ret.length - 1);
+
+                    return `return !$self.shouldRender(${varName}.id)?undefined:${varName}.isMultiUserDM()`;
+                }
+            }
+        },
+        {
+            find: 'location:"private_channel"',
+            replacement: {
+                match: /\i.default=\i=>{let{.+}=\i,/,
+                replace: (match) => {
+                    const declaration = match.split("=>")[0];
+                    const props = declaration.split("=")[1];
+
+                    return `${match}_a=$self.setForceUpdate(${props}._forceUpdate),`;
+                }
+            }
+        },
+        {
+            find: ".renderDM(",
+            replacement: {
+                match: /\(O\.default,{/,
+                replace: "$&_forceUpdate:this.forceUpdate.bind(this),"
+            }
+        }
+    ],
     async start() {
         // Import hidden DMs.
         entries(hiddenGroupsStore).then(data => {
@@ -125,14 +144,15 @@ export default definePlugin({
         });
 
         FluxDispatcher.subscribe("MESSAGE_CREATE", removeIgnored);
-        mutationObserver.observe(document, { childList: true, subtree: true });
     },
     stop() {
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", removeIgnored);
-        mutationObserver.disconnect();
     },
 
     contextMenus: {
         "gdm-context": GroupDMContext
-    }
+    },
+
+    shouldRender,
+    setForceUpdate
 });
