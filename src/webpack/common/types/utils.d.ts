@@ -17,7 +17,8 @@
 */
 
 import { Guild, GuildMember } from "discord-types/general";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
+import type { EmptyObject } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
 import { i18nMessages } from "./i18nMessages";
@@ -133,15 +134,9 @@ export type Permissions = "CREATE_INSTANT_INVITE"
 
 export type PermissionsBits = Record<Permissions, bigint>;
 
-type ASTNode = {
-    type: string;
-    content: string | ASTNode;
-}[];
-
 export class FormattedMessage<
-    Params extends string = string,
-    Markdown extends boolean | undefined = undefined,
-    Args = [Record<Params, any>] | (Params extends `${infer _}` ? never : [])
+    Params extends object | string = string,
+    Markdown extends boolean | undefined = undefined
 > {
     /**
      * @throws {SyntaxError} Argument `message` must follow the proper syntax.
@@ -149,25 +144,38 @@ export class FormattedMessage<
      */
     constructor(message: string, locale?: string, hasMarkdown?: Markdown);
 
-    format(...args: Args): Markdown extends true
-        ? (string | React.ReactElement)[]
+    format(...args: FormatArgs<Params>): Markdown extends true
+        ? (string | ReactElement)[]
         : string;
-    astFormat(...args: Args): ASTNode;
-    plainFormat(...args: Args): string;
-    getContext<A extends Record<string, any>>(args: A): Markdown extends true
+    astFormat(...args: FormatArgs<Params>): ASTNode;
+    plainFormat(...args: FormatArgs<Params>): string;
+    getContext<A extends Record<PropertyKey, unknown>>(args: A): Markdown extends true
         ? [
             Record<Exclude<keyof A, Params>, A[keyof A]> & Record<Params & keyof A, number | A[keyof A]>,
-            keyof A extends never ? {} : Record<number, A[Params & keyof A]>
+            keyof A extends never ? EmptyObject : Record<number, A[Params & keyof A]>
         ]
-        : [A, {}];
+        : [A, EmptyObject];
 
     message: string;
     hasMarkdown: Markdown;
-    intlMessage: {
-        format(...args: Args): string;
+    /** An instance of MessageFormat. */
+    intlMessage: Record<string, any> & {
         _locale: string;
+        format: (...args: FormatArgs<Params>) => string;
     };
 }
+
+type FormatArgs<Params extends object | string>
+    = [Params] extends [object]
+        ? [args: Params]
+        : [Params] extends [`${infer _}`]
+            ? [args: Record<Params, unknown>]
+            : [args?: Record<PropertyKey, unknown>];
+
+type ASTNode = {
+    type: string;
+    content: string | ASTNode;
+}[];
 
 export interface Locale {
     name: string;
