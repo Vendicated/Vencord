@@ -42,7 +42,18 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
+const forceDisabled = new Set([
+    "MessageLogger",
+    "ShowHiddenChannels",
+    "MoreUserTags",
+    "Decor",
+    "IgnoreActivities",
+    "NoBlockedMessages",
+    "BetterFolders",
+    "NoPendingCount"
+]);
 export function isPluginEnabled(pluginName: string) {
+    if (forceDisabled.has(pluginName)) return false;
     return (
         Plugins[pluginName]?.required ||
         Plugins[pluginName]?.isDependency ||
