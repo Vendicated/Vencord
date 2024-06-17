@@ -48,11 +48,7 @@ let forceUpdate: () => void;
  * Sets the global force update function.
  */
 function setForceUpdate(func: () => void): undefined {
-    console.log("set force update", func);
-    forceUpdate = () => {
-        console.log("call to force update", func);
-        func();
-    };
+    forceUpdate = func;
     return undefined;
 }
 
