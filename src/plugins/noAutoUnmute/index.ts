@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "NoAutoUnmute",
-    description: "Prevents you from being automatically unmuted by Discord (such as by joining a VC call)",
+    description: "Prevents you from being automatically unmuted / undeafened when joining a DM call",
     authors: [Devs.HAHALOSAH],
     patches: [
         {
