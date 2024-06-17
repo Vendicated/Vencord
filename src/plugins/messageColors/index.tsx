@@ -14,18 +14,23 @@ import { React } from "@webpack/common";
 import type { Message } from "discord-types/general";
 
 import { ColorPickerChatButton } from "./ColorPicker";
-import { COLOR_PICKER_DATA_KEY, ColorType, regex, RenderType, savedColors, settings } from "./constants";
+import { CHAT_BUTTON_ID, COLOR_PICKER_DATA_KEY, ColorType, regex, RenderType, savedColors, settings } from "./constants";
+
+const enum MessageTypes {
+    DEFAULT = 0,
+    REPLY = 19
+}
 
 export default definePlugin({
     authors: [Devs.hen],
     name: "MessageColors",
-    description: "Displays hex/rgb/hsl colors inside of a message",
+    description: "Displays color codes like #FF0042 inside of messages",
     settings,
     patches: [{
         find: "memoizeMessageProps:",
         replacement: {
-            match: /function (\i)\((\i),(\i)\){return (.+?)(\i)}/,
-            replace: "function $1($2,$3){return $4$self.getColoredText($2,$3)}"
+            match: /(\?\i.default.Messages.SOURCE_MESSAGE_DELETED:)\i/,
+            replace: "$1$self.getColoredText(...arguments)"
         }
     }],
     async start() {
@@ -35,9 +40,10 @@ export default definePlugin({
             type: ColorType.HEX
         });
 
-        if (!settings.store.colorPicker) return;
+        if (settings.store.colorPicker) {
+            addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
+        }
 
-        addChatBarButton("vc-color-picker", ColorPickerChatButton);
         let colors = await DataStore.get(COLOR_PICKER_DATA_KEY);
         if (!colors) {
             colors = [
@@ -70,19 +76,13 @@ export default definePlugin({
 
     getColoredText(message: Message, originalChildren: React.ReactElement[]) {
         if (settings.store.renderType === RenderType.NONE) return originalChildren;
-        if (![0, 19].includes(message.type)) return originalChildren;
+        if (![MessageTypes.DEFAULT, MessageTypes.REPLY].includes(message.type)) return originalChildren;
 
-        let hasColor = false;
-        for (const { reg } of regex) {
-            if (reg.test(message.content)) {
-                hasColor = true;
-                break;
-            }
-        }
+        const hasColor = regex.some(({ reg }) => reg.test(message.content));
 
         if (!hasColor) return originalChildren;
 
-        return <ColoredMessage ch={originalChildren} />;
+        return <ColoredMessage children={originalChildren} />;
     }
 });
 
@@ -97,12 +97,42 @@ function parseColor(str: string, type: ColorType): string {
     }
 }
 
-function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
+
+// https://en.wikipedia.org/wiki/Relative_luminance
+const calcRGBLightness = (r: number, g: number, b: number) => {
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const isColorDark = (color: string, type: ColorType): boolean => {
+    switch (type) {
+        case ColorType.RGB: {
+            const match = color.match(/\d+/g)!;
+            const lightness = calcRGBLightness(+match[0], +match[1], +match[2]);
+            return lightness < 140;
+        }
+        case ColorType.HEX: {
+            var rgb = parseInt(color.substring(1), 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >> 8) & 0xff;
+            const b = (rgb >> 0) & 0xff;
+            const lightness = calcRGBLightness(r, g, b);
+            return lightness < 140;
+        }
+        case ColorType.HSL: {
+            const match = color.match(/\d+/g)!;
+            const lightness = +match[2];
+            return lightness < 50;
+        }
+    }
+};
+
+function ColoredMessage({ children }: { children: React.ReactElement[]; }) {
     let result: (string | React.ReactElement)[] = [];
-    // I hate discord
-    // I need this to avoid breaking mentions
-    for (let i = 0; i < ch.length; i++) {
-        const chunk = ch[i];
+    // Discord renders message as bunch of small span chunks
+    // Mostly they are splitted by a space, which breaks rgb/hsl regex
+    // Also mentions are nested react elements, so we don't want to affect them
+    // Ignore everything except plain text and combine it
+    for (let i = 0; i < children.length; i++) {
+        const chunk = children[i];
         if (chunk.type !== "span") {
             result.push(chunk);
             continue;
@@ -138,14 +168,18 @@ function ColoredMessage({ ch }: { ch: React.ReactElement[]; }) {
                     return [...arr, element];
                 const color = parseColor(element, type);
 
-                if (settings.store.renderType === RenderType.BACKGROUND)
-                    return [...arr, <span style={{ background: color }}>{element}</span>];
-                if (settings.store.renderType === RenderType.FOREGROUND)
+                if (settings.store.renderType === RenderType.FOREGROUND) {
                     return [...arr, <span style={{ color: color }}>{element}</span>];
-
+                }
                 const styles = {
                     "--color": color
                 } as React.CSSProperties;
+
+                if (settings.store.renderType === RenderType.BACKGROUND) {
+                    const isDark = isColorDark(color, type);
+                    const className = isDark ? "vc-color-bg" : "vc-color-bg vc-color-bg-light";
+                    return [...arr, <span className={className} style={styles}>{element}</span>];
+                }
 
                 return [...arr, element, <span className="vc-color-block" style={styles}></span>];
             }, temp);

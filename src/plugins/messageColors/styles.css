@@ -23,3 +23,13 @@
 .vc-chat-color-picker [class^="defaultContainer"] {
     display: none;
 }
+
+.vc-color-bg {
+    background: var(--color);
+}
+
+/* Light color in dark theme */
+.theme-dark .vc-color-bg.vc-color-bg-light,
+.theme-light .vc-color-bg:not(.vc-color-bg-light) {
+    color: var(--background-primary);
+}
