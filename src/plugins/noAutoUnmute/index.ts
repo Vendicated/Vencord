@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: "isSelfMute(){",
             replacement: {
-                match: /video:\i}=\i;/,
-                replace: "$&return;"
+                match: /\(\i.mute||\i.deaf\)&&/,
+                replace: "false&&"
             },
         },
     ],
