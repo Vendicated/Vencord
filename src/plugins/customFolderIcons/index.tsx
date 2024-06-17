@@ -9,10 +9,11 @@ import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Menu, TextInput } from "@webpack/common";
+import { Button, Menu, Slider, TextInput, useState } from "@webpack/common";
 const DATA_STORE_NAME = "CFI_DATA";
 interface folderIcon{
     url: string,
+    size: number,
 }
 interface folderStoredData {
     [key: string]: folderIcon | undefined
@@ -54,12 +55,21 @@ export default definePlugin({
     },
     replace(props: any){
         if(folderData && folderData[props.folderNode.id]){
+            const data = folderData[props.folderNode.id];
             return (
-                <img src={folderData[props.folderNode.id]!.url} width={"100%"} height={"100%"}
+                <div
                     style={{
                         backgroundColor: int2rgba(props.folderNode.color, .4),
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: "100%",
+                        height: "100%"
                     }}
-                />
+                >
+                    <img src={data!.url} width={`${data!.size}%`} height={`${data!.size}%`}
+                    />
+                </div>
             );
         }
     }
@@ -68,17 +78,18 @@ export default definePlugin({
     * @param rgbVal RGB value
     * @param alpha alpha bewteen zero and 1
     */
-const int2rgba = (rgbVal: number, alpha: number = 1)=>{
+function int2rgba(rgbVal: number, alpha: number = 1) {
     const b = rgbVal & 0xFF,
         g = (rgbVal & 0xFF00) >>> 8,
         r = (rgbVal & 0xFF0000) >>> 16;
-    return `rgba(${[r,g,b].join(",")},${alpha})`;
-};
-const setFolderUrl = async (props: folderProp, url: string) => {
+    return `rgba(${[r, g, b].join(",")},${alpha})`;
+}
+async function setFolderUrl(props: folderProp, url: string, size: number) {
     DataStore.get<folderStoredData>(DATA_STORE_NAME).then(data => {
         data = data ?? {} as folderStoredData;
         data[props.folderId] = {
             url: url,
+            size: size
         };
         DataStore.set(DATA_STORE_NAME, data).then(() => { folderData = data; }).catch(e => {
             handleUpdateError(e);
@@ -88,25 +99,60 @@ const setFolderUrl = async (props: folderProp, url: string) => {
         .catch(e => {
             handleUpdateError(e);
         });
-};
-
+}
+function RenderPreview({ folderProps, url, size }: {folderProps: folderProp, url: string, size: number}){
+    if (!url) return null;
+    return(
+        <div style={{
+            width: "20vh",
+            height: "20vh",
+            borderRadius: "24px",
+            backgroundColor: int2rgba(folderProps.folderColor, .4),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+        }}>
+            <img src={url} width={`${size}%`} height={`${size}%`} style={{
+                // borderRadius: "24px",
+            }}/>
+        </div>
+    );
+}
 function ImageModal(folderProps: folderProp){
-    let data = "";
+    const [data, setData]= useState("");
+    const [size, setSize] = useState(100);
     return(
         <>
-            <hr />
             <TextInput onChange={(val, n) => {
-                data = val;
+                setData(val);
             }}
             placeholder="https://example.com/image.png"
             >
             </TextInput>
+            <RenderPreview folderProps={folderProps} url={data} size={size}/>
+            {data && <>
+                <div style= {{
+                    color: "#FFF"
+                }}>Change the size of the folder icon</div>
+                <Slider
+                    initialValue={100}
+                    onValueChange={(v: number) => {
+                        setSize(v);
+                    }}
+                    maxValue={200}
+                    minValue={25}
+                    markers={Array.apply(0, Array(176)).map((v, i) => i+25)}
+                    stickToMarkers = {true}
+                    keyboardStep={1}
+                    renderMarker={() => null}
+                />
+            </>}
             <Button onClick={() => {
-                setFolderUrl(folderProps, data);
+                setFolderUrl(folderProps, data, size);
                 closeModal("custom-folder-icon");
             }}
             >
-                Set With Url
+                Save
             </Button>
             <hr />
             <Button onClick={() => {
