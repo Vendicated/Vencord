@@ -28,7 +28,7 @@
     },
     "devDependencies": {
         "@eslint-types/unicorn": "^52.0.0",
-        "@stylistic/eslint-plugin": "^2.2.0",
+        "@stylistic/eslint-plugin": "^2.2.1",
         "eslint": "^9.5.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-headers": "^1.1.2",
