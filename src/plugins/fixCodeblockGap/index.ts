@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.Grzesiek11],
     patches: [
         {
-            find: ".Messages.UNKNOWN_ROLE_PLACEHOLDER",
+            find: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}`,
             replacement: {
                 match: String.raw`/^${"```"}(?:([a-z0-9_+\-.#]+?)\n)?\n*([^\n][^]*?)\n*${"```"}`,
                 replace: "$&\\n?",
