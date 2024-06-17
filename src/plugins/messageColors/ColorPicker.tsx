@@ -8,7 +8,7 @@ import { ChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
-import { filters, find, findComponentByCode, findComponentByCodeLazy, LazyComponentWebpack } from "@webpack";
+import { findComponentByCodeLazy, findExportedComponentLazy } from "@webpack";
 import { Button, Popout, React, useState } from "@webpack/common";
 
 import { COLOR_PICKER_DATA_KEY, savedColors } from "./constants";
@@ -32,11 +32,11 @@ interface ColorPickerWithSwatchesProps {
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
-// const ColorPickerWithSwatches = findExportedComponentLazy<ColorPickerWithSwatchesProps>("ColorPicker", "CustomColorPicker");
-const ColorPickerWithSwatches = LazyComponentWebpack<ColorPickerWithSwatchesProps>(() =>
-    find(filters.byProps("ColorPicker", "CustomColorPicker"), { isIndirect: true })?.ColorPicker ||
-    findComponentByCode("presets,", "customColor:")
-);
+const ColorPickerWithSwatches = findExportedComponentLazy<ColorPickerWithSwatchesProps>("ColorPicker", "CustomColorPicker");
+// const ColorPickerWithSwatches = LazyComponentWebpack<ColorPickerWithSwatchesProps>(() =>
+//     find(filters.byProps("ColorPicker", "CustomColorPicker"), { isIndirect: true })?.ColorPicker ||
+//     findComponentByCode("presets,", "customColor:")
+// );
 
 
 
@@ -75,8 +75,9 @@ function ColorPickerPopout() {
                 const hex = "#" +
                     (value & 0x00FFFFFF).toString(16).padStart(6, "0");
                 insertTextIntoChatInputBox(hex);
-                if (savedColors.includes(value)) {
-                    const index = savedColors.findIndex(v => value === v);
+                const index = savedColors.findIndex(v => value === v);
+
+                if (index !== -1) {
                     savedColors.splice(index, 1);
                 } else {
                     savedColors.pop();

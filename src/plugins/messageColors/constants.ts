@@ -4,13 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-export const COLOR_PICKER_DATA_KEY = "vs-color-picker-latest" as const;
+import { ColorPickerChatButton } from "./ColorPicker";
+
+export const COLOR_PICKER_DATA_KEY = "vc-color-picker-latest" as const;
+export const CHAT_BUTTON_ID = "vc-color-picker" as const;
 export const savedColors: number[] = [];
 
-export enum RenderType {
+export const enum RenderType {
     BLOCK,
     FOREGROUND,
     BACKGROUND,
@@ -21,8 +25,13 @@ export const settings = definePluginSettings({
     colorPicker: {
         type: OptionType.BOOLEAN,
         description: "Enable color picker",
-        default: true,
-        restartNeeded: true
+        onChange(newValue) {
+            if (newValue) {
+                addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
+            } else {
+                removeChatBarButton(CHAT_BUTTON_ID);
+            }
+        },
     },
     renderType: {
         type: OptionType.SELECT,
@@ -49,13 +58,13 @@ export const settings = definePluginSettings({
     },
     isHexRequired: {
         type: OptionType.BOOLEAN,
-        description: "Is # required in parsing hex",
         default: true,
-        restartNeeded: true
+        restartNeeded: true,
+        description: "Require leading # in hex color codes",
     },
 });
 
-export enum ColorType {
+export const enum ColorType {
     RGB,
     HEX,
     HSL
