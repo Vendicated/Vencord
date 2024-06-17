@@ -205,12 +205,7 @@ page.on("console", async e => {
     }
 
     if (isVencord) {
-        let args: unknown[] = [];
-        try {
-            args = await Promise.all(e.args().map(a => a.jsonValue()));
-        } catch {
-            return;
-        }
+        const args = await Promise.all(e.args().map(a => a.jsonValue()));
 
         const [, tag, message] = args as Array<string>;
         const cause = await maybeGetError(e.args()[3]);
