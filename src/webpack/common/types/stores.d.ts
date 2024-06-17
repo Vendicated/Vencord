@@ -39,6 +39,8 @@ export class FluxStore {
     syncWith: GenericFunction;
     waitFor: GenericFunction;
     __getLocalVars(): Record<string, any>;
+
+    static getAll(): FluxStore[];
 }
 
 export class FluxEmitter {
