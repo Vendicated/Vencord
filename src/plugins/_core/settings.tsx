@@ -182,7 +182,7 @@ export default definePlugin({
     patchedSettings: new WeakSet(),
 
     addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: SectionTypes) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
+        if (this.patchedSettings.has(elements)) return;
 
         this.patchedSettings.add(elements);
 
