@@ -103,25 +103,15 @@ export default definePlugin({
         {
             find: 'location:"private_channel"',
             replacement: {
-                match: /return .\.isMultiUserDM\(\)/,
-                replace: (match) => {
-                    const ret = match.split(".")[0];
-                    const varName = ret.charAt(ret.length - 1);
-
-                    return `return !$self.shouldRender(${varName}.id)?undefined:${varName}.isMultiUserDM()`;
-                }
+                match: /return (\i).isMultiUserDM\(\)/,
+                replace: "return !$self.shouldRender($1.id)?undefined:$1.isMultiUserDM()"
             }
         },
         {
             find: 'location:"private_channel"',
             replacement: {
-                match: /\i.default=\i=>{let{.+}=\i,/,
-                replace: (match) => {
-                    const declaration = match.split("=>")[0];
-                    const props = declaration.split("=")[1];
-
-                    return `${match}_a=$self.setForceUpdate(${props}._forceUpdate),`;
-                }
+                match: /\i.default=(\i)=>{let{.+}=\i,/,
+                replace: "$&_a=$self.setForceUpdate($1._forceUpdate),"
             }
         },
         {
