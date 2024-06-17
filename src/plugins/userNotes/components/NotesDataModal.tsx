@@ -11,12 +11,11 @@ import {
     closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, openModal
 } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
-import { filters, find } from "@webpack";
-import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, RelationshipStore, Select, Text, TextArea, TextInput, useCallback, useMemo, useReducer, UserStore, UserUtils, useState } from "@webpack/common";
+import { Alerts, Avatar, Button, ContextMenuApi, Menu, Popout, React, RelationshipStore, Select, Text, TextArea, TextInput, Tooltip, useCallback, useMemo, useReducer, UserStore, UserUtils, useState } from "@webpack/common";
 
-import { deleteUserNotes, saveUserNotes, usersNotes as usersNotesMap } from "../data";
+import { cacheUsers, deleteUserNotes, getRunning, saveUserNotes, setupStates, stopCacheProcess, usersCache, usersNotes as usersNotesMap } from "../data";
 import settings from "../settings";
-import { DeleteIcon, PopupIcon, RefreshIcon, SaveIcon } from "./Icons";
+import { CrossIcon, DeleteIcon, PopupIcon, ProblemIcon, RefreshIcon, SaveIcon, SuccessIcon } from "./Icons";
 import { openUserNotesModal } from "./UserNotesModal";
 
 const cl = classNameFactory("vc-user-notes-data-modal-");
@@ -27,11 +26,23 @@ const enum SearchStatus {
     BLOCKED,
 }
 
+const filterByUserDetails = (userId: string, query: string) => {
+    if (userId.includes(query)) return true;
+
+    const user = usersCache.get(userId);
+
+    if (!user) return false;
+
+    return user.globalName?.includes(query) || user.username.includes(query);
+};
+
 export function NotesDataModal({ modalProps, close }: {
     modalProps: ModalProps;
     close(): void;
 }) {
-    const [searchValue, setSearchValue] = React.useState({ query: "", status: SearchStatus.ALL });
+    const [shouldShow, setShouldShow] = useState(false);
+
+    const [searchValue, setSearchValue] = useState({ query: "", status: SearchStatus.ALL });
 
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, query }));
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
@@ -55,7 +66,7 @@ export function NotesDataModal({ modalProps, close }: {
                         (
                             query === "" ||
                             (
-                                userId.includes(query) ||
+                                filterByUserDetails(userId, query) ||
                                 userNotes.toLowerCase().includes(query.toLowerCase())
                             )
                         )
@@ -65,14 +76,14 @@ export function NotesDataModal({ modalProps, close }: {
                             (
                                 query === "" ||
                                 (
-                                    userId.includes(query) ||
+                                    filterByUserDetails(userId, query) ||
                                     userNotes.toLowerCase().includes(query.toLowerCase())
                                 )
                             )
                             :
                             query === "" ||
                             (
-                                userId.includes(query) ||
+                                filterByUserDetails(userId, query) ||
                                 userNotes.toLowerCase().includes(query.toLowerCase())
                             )
                 );
@@ -93,7 +104,7 @@ export function NotesDataModal({ modalProps, close }: {
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>
                 <Text className={cl("header-text")} variant="heading-lg/semibold">Notes Data</Text>
-                <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Notes)" />
+                <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Notes and Global/Username if cached)" />
                 <div className={cl("header-user-type")}>
                     <Select
                         options={[
@@ -107,6 +118,91 @@ export function NotesDataModal({ modalProps, close }: {
                         closeOnSelect={true}
                     />
                 </div>
+                <Popout
+                    animation={Popout.Animation.SCALE}
+                    align="center"
+                    position="bottom"
+                    shouldShow={shouldShow}
+                    onRequestClose={() => setShouldShow(false)}
+                    renderPopout={() => {
+                        const [isRunning, setRunning] = useState(getRunning);
+                        const [cacheStatus, setCacheStatus] = useState(usersCache.size);
+
+                        setupStates({
+                            setRunning,
+                            setCacheStatus,
+                        });
+
+                        return <div className={cl("cache-container")}>
+                            <Text className={cl("cache-header")} variant="heading-lg/semibold">
+                                Fetch the profile of all users to filter notes by global name or username
+                            </Text>
+                            <div>
+                                <div className={cl("cache-buttons")}>
+                                    <Button
+                                        className={cl("cache-cache")}
+                                        size={Button.Sizes.NONE}
+                                        color={Button.Colors.GREEN}
+                                        disabled={isRunning}
+                                        onClick={() => cacheUsers()}
+                                    >
+                                        {
+                                            cacheStatus === 0 ? "Cache Users" : "Re-Cache Users"
+                                        }
+                                    </Button>
+                                    <Button
+                                        className={cl("cache-cache-missing")}
+                                        size={Button.Sizes.NONE}
+                                        color={Button.Colors.YELLOW}
+                                        disabled={isRunning || cacheStatus === 0 || cacheStatus === usersNotesMap.size}
+                                        onClick={() => cacheUsers(true)}
+                                    >
+                                        Cache Missing Users
+                                    </Button>
+                                    <Button
+                                        className={cl("cache-stop")}
+                                        size={Button.Sizes.NONE}
+                                        color={Button.Colors.RED}
+                                        disabled={!isRunning}
+                                        onClick={() => {
+                                            stopCacheProcess();
+                                        }}
+                                    >
+                                        Stop
+                                    </Button>
+                                </div>
+                                <div className={cl("cache-status")}>
+                                    {
+                                        isRunning ? <LoadingSpinner />
+                                            : cacheStatus === usersNotesMap.size ? <SuccessIcon />
+                                                : cacheStatus === 0 ? <CrossIcon />
+                                                    : <ProblemIcon />
+                                    }
+                                    {
+                                        cacheStatus === usersNotesMap.size ? "All users cached 👍"
+                                            : cacheStatus === 0 ? "Users didn't cached 😔"
+                                                : `${cacheStatus}/${usersNotesMap.size}`
+                                    }
+                                </div>
+                            </div>
+                            <Text className={cl("cache-footer")} variant="heading-md/normal">
+                                Please note that during this process Discord may not properly load some content, such as messages, images or user profiles
+                            </Text>
+                        </div>;
+                    }}
+                >
+                    {
+                        (_, { isShown }) =>
+                            <Button
+                                className={cl("header-cache")}
+                                size={Button.Sizes.NONE}
+                                color={Button.Colors.PRIMARY}
+                                onClick={() => setShouldShow(!isShown)}
+                            >
+                                Cache
+                            </Button>
+                    }
+                </Popout>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
             {
@@ -179,11 +275,6 @@ function NoNotes() {
         </div>
     );
 }
-
-const IconButton = LazyComponent(() => {
-    const filter = filters.byCode(".HEADER_BAR_BADGE");
-    return find(m => m.Icon && filter(m.Icon)).Icon;
-});
 
 type UserInfo = {
     id: string;
@@ -277,7 +368,7 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
             }}
         >
             {
-                pending ? <LoaderSpinner /> :
+                pending ? <LoadingSpinner /> :
                     <Avatar
                         className={cl("user-avatar")}
                         size="SIZE_56"
@@ -298,77 +389,103 @@ function NotesDataRow({ userId, userNotes: userNotesArg, refreshNotesData }: {
                     spellCheck={!settings.store.disableSpellCheck}
                 />
                 <div className={cl("user-actions")}>
-                    <Button
-                        className={cl("user-actions-save")}
-                        size={Button.Sizes.NONE}
-                        data={"Save"}
-                        color={Button.Colors.GREEN}
-                        onClick={() => {
-                            saveUserNotes(userId, userNotes);
-                            refreshNotesData();
-                        }}
-                    >
-                        <SaveIcon />
-                    </Button>
-                    <Button
-                        className={cl("user-actions-delete")}
-                        size={Button.Sizes.NONE}
-                        data={"Delete"}
-                        color={Button.Colors.RED}
-                        onClick={() => {
-                            Alerts.show({
-                                title: "Delete Notes",
-                                body: `Are you sure you want to delete notes for ${pending ? userId : `${userInfo!.globalName} (${userId})`}?`,
-                                confirmColor: Button.Colors.RED,
-                                confirmText: "Delete",
-                                cancelText: "Cancel",
-                                onConfirm: () => {
-                                    deleteUserNotes(userId);
+                    <Tooltip text={"Save"}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <Button
+                                className={cl("user-actions-save")}
+                                size={Button.Sizes.NONE}
+                                color={Button.Colors.GREEN}
+                                onClick={() => {
+                                    saveUserNotes(userId, userNotes);
                                     refreshNotesData();
-                                },
-                            });
-                        }}
-                    >
-                        <DeleteIcon />
-                    </Button>
-                    <Button
-                        className={cl("user-actions-refresh")}
-                        size={Button.Sizes.NONE}
-                        data={"Refresh"}
-                        color={Button.Colors.LINK}
-                        onClick={() => setUserNotes(userNotesArg)}
-                    >
-                        <RefreshIcon />
-                    </Button>
-                    <Button
-                        className={cl("user-actions-popup")}
-                        size={Button.Sizes.NONE}
-                        data={"Open Full View"}
-                        color={Button.Colors.PRIMARY}
-                        disabled={pending}
-                        onClick={async () => {
-                            const user = UserStore.getUser(userId);
+                                }}
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                            >
+                                <SaveIcon />
+                            </Button>
+                        )}
+                    </Tooltip>
+                    <Tooltip text={"Delete"}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <Button
+                                className={cl("user-actions-delete")}
+                                size={Button.Sizes.NONE}
+                                color={Button.Colors.RED}
+                                onClick={() => {
+                                    Alerts.show({
+                                        title: "Delete Notes",
+                                        body: `Are you sure you want to delete notes for ${pending ? userId : `${userInfo!.globalName} (${userId})`}?`,
+                                        confirmColor: Button.Colors.RED,
+                                        confirmText: "Delete",
+                                        cancelText: "Cancel",
+                                        onConfirm: () => {
+                                            deleteUserNotes(userId);
+                                            refreshNotesData();
+                                        },
+                                    });
+                                }}
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                            >
+                                <DeleteIcon />
+                            </Button>
+                        )}
+                    </Tooltip>
+                    <Tooltip text={"Set current text of user notes by saved one from data, i.e. reset changes"}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <Button
+                                className={cl("user-actions-refresh")}
+                                size={Button.Sizes.NONE}
+                                color={Button.Colors.LINK}
+                                onClick={() => setUserNotes(userNotesArg)}
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                            >
+                                <RefreshIcon />
+                            </Button>
+                        )}
+                    </Tooltip>
+                    <Tooltip text={"Open Full View User Notes"}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <Button
+                                className={cl("user-actions-popup")}
+                                size={Button.Sizes.NONE}
+                                color={Button.Colors.PRIMARY}
+                                disabled={pending}
+                                onClick={async () => {
+                                    const user = UserStore.getUser(userId);
 
-                            openUserNotesModal(user ?? userId, refreshNotesData);
-                        }}
-                    >
-                        <PopupIcon />
-                    </Button>
+                                    openUserNotesModal(user ?? userId, refreshNotesData);
+                                }}
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                            >
+                                <PopupIcon />
+                            </Button>
+                        )}
+                    </Tooltip>
                 </div>
             </div>
         </div>
     );
 }
 
-function LoaderSpinnerFactory() {
+const LoadingSpinner = LazyComponent(() => React.memo(() => {
     return (
         <div className={cl("loading-container")}>
             <span className={cl("loading")} />
         </div>
     );
-}
+}));
 
-const LoaderSpinner = LazyComponent(() => React.memo(LoaderSpinnerFactory));
+const CacheSpinner = LazyComponent(() => React.memo(() => {
+    return (
+        <div className={cl("caching-container")}>
+            <span className={cl("caching")} />
+        </div>
+    );
+}));
 
 export const openNotesDataModal = async () => {
     const key = openModal(modalProps => (

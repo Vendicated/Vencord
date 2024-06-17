@@ -17,7 +17,7 @@ import { PopupIcon } from "./components/Icons";
 import { OpenNotesDataButton } from "./components/NotesDataButton";
 import { openNotesDataModal } from "./components/NotesDataModal";
 import { openUserNotesModal } from "./components/UserNotesModal";
-import { getUserNotes, saveUserNotes } from "./data";
+import { cacheUsers, getUserNotes, saveUserNotes } from "./data";
 import settings from "./settings";
 
 const patchUserContext: NavContextMenuPatchCallback = (children, { user }: {
@@ -128,4 +128,10 @@ export default definePlugin({
     toolboxActions: {
         "Open Notes Data": openNotesDataModal,
     },
+
+    start: () => {
+        if (settings.store.startupCache) {
+            cacheUsers();
+        }
+    }
 });

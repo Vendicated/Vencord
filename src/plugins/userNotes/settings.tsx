@@ -8,10 +8,13 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, showToast } from "@webpack/common";
+import { User } from "discord-types/general";
 
 import { clearUserNotes, transferUserNotes } from "./data";
 
 const token = findByPropsLazy("getToken");
+
+let a: User;
 
 export default definePluginSettings({
     removeRegularButton: {
@@ -37,6 +40,11 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         description: 'Add "Open Notes Data" button to toolbar',
         restartNeeded: true,
+    },
+    startupCache: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Cache all users on startup",
     },
     transferExistingNotes: {
         type: OptionType.COMPONENT,

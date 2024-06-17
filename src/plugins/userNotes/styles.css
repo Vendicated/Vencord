@@ -43,6 +43,15 @@
     height: 100%;
 }
 
+/* Part of Cache Popout Data. css linter is awesome */
+.vc-user-notes-data-modal-cache-status svg,
+.vc-user-notes-data-modal-cache-status div,
+.vc-user-notes-data-modal-cache-status div span,
+.vc-user-notes-data-modal-cache-status div span::after {
+    width: 40px;
+    height: 40px;
+}
+
 /* Open "Notes Data" toolbox button */
 .vc-notes-toolbox-button svg {
     color: var(--interactive-normal);
@@ -80,6 +89,12 @@
 
 .vc-user-notes-data-modal-header-user-type {
     min-width: 160px;
+    margin-right: 16px;
+}
+
+.vc-user-notes-data-modal-header-cache {
+    width: fit-content;
+    height: 100%;
     margin-right: 16px;
 }
 
@@ -211,46 +226,6 @@ div:has(.vc-user-notes-data-modal-user-text-area) {
     overflow: visible !important;
 }
 
-.vc-user-notes-data-modal-user-actions > button::before {
-    position: absolute;
-    display: block;
-    z-index: 2;
-    opacity: 0;
-    top: 130%;
-    right: 0%;
-    width: fit-content;
-    padding: 8px 12px;
-    border-radius: 6px;
-    content: attr(data);
-    background-color: var(--background-floating);
-    box-shadow: var(--elevation-high);
-    color: var(--text-normal);
-    text-align: center;
-    font-size: 14px;
-    line-height: 16px;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-.vc-user-notes-data-modal-user-actions > button::after {
-    position: absolute;
-    display: block;
-    z-index: 1;
-    opacity: 0;
-    top: 110%;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 10px solid var(--background-floating);
-    content: "";
-    pointer-events: none;
-}
-
-.vc-user-notes-data-modal-user-actions > button:hover::before,
-.vc-user-notes-data-modal-user-actions > button:hover::after {
-    opacity: 1;
-    transition: opacity 0.2s ease-out;
-}
-
 /* Loading Spinner */
 .vc-user-notes-data-modal-loading-container {
     /* aspect-ratio: 1 / 1; */
@@ -306,4 +281,53 @@ div:has(.vc-user-notes-data-modal-user-text-area) {
     80% {
         transform: scale(1.1);
     }
+}
+
+.vc-user-notes-data-modal-cache-container {
+    width: 25vw;
+    background-color: var(--modal-background);
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: var(--legacy-elevation-border), var(--legacy-elevation-high);
+}
+
+.vc-user-notes-data-modal-cache-header {
+    margin-bottom: 12px;
+}
+
+.vc-user-notes-data-modal-cache-footer {
+    margin-top: 12px;
+    border-radius: 4px;
+    background-color: #e7828430;
+    border: 1px solid #e78284;
+    padding: 8px;
+}
+
+.vc-user-notes-data-modal-cache-container > div:nth-child(2) {
+    display: grid;
+    grid-template-columns: min-content auto;
+}
+
+.vc-user-notes-data-modal-cache-buttons {
+    width: fit-content;
+    display: grid;
+    row-gap: 6px;
+}
+
+.vc-user-notes-data-modal-cache-buttons > button {
+    height: 32px;
+}
+
+.vc-user-notes-data-modal-cache-status {
+    display: grid;
+    align-items: center;
+    color: var(--text-normal);
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    padding: 0 12px;
+}
+
+.vc-user-notes-data-modal-cache-status :nth-child(1) {
+    margin: 0 auto;
 }
