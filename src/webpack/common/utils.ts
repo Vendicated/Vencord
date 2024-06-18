@@ -38,9 +38,10 @@ waitFor(["dispatch", "subscribe"], m => {
 export let ComponentDispatch;
 waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
-
-// FIXME
-export const Constants = findByPropsLazy("Endpoints");
+export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
+    Endpoints: filters.byProps("USER", "ME"),
+    UserFlags: filters.byProps("STAFF", "SPAMMER")
+});
 
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");

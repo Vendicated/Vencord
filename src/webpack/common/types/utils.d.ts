@@ -215,3 +215,8 @@ export interface IconUtils {
     getApplicationIconSource: any;
     getAnimatableSourceWithFallback: any;
 }
+
+export interface Constants {
+    Endpoints: Record<string, any>;
+    UserFlags: Record<string, number>;
+}
