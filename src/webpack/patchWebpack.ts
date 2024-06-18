@@ -232,9 +232,18 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
-                    } else if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, id);
+                    } else if (typeof exports === "object") {
+                        if (exports.default && filter(exports.default)) {
+                            subscriptions.delete(filter);
+                            callback(exports.default, id);
+                        }
+
+                        for (const nested in exports) if (nested.length <= 3) {
+                            if (exports[nested] && filter(exports[nested])) {
+                                subscriptions.delete(filter);
+                                callback(exports[nested], id);
+                            }
+                        }
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
