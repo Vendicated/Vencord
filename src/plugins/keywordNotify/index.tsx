@@ -17,7 +17,7 @@ import "./style.css";
 
 let regexes = [];
 
-const MenuHeader = findByCodeLazy("useInDesktopNotificationCenterExperiment)(");
+const MenuHeader = findByCodeLazy(".useInDesktopNotificationCenterExperiment)()?");
 const Popout = findByPropsLazy("ItemsPopout");
 const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
 

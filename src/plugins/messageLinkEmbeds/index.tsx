@@ -17,6 +17,7 @@
 */
 
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
@@ -27,7 +28,7 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
-    FluxDispatcher,
+    Constants,
     GuildStore,
     IconUtils,
     MessageStore,
@@ -132,7 +133,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     messageCache.set(messageID, { fetched: false });
 
     const res = await RestAPI.get({
-        url: `/channels/${channelID}/messages`,
+        url: Constants.Endpoints.MESSAGES(channelID),
         query: {
             limit: 1,
             around: messageID
@@ -226,10 +227,8 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     const accessories = [] as (JSX.Element | null)[];
 
-    let match = null as RegExpMatchArray | null;
-    while ((match = messageLinkRegex.exec(message.content!)) !== null) {
-        const [_, channelID, messageID] = match;
-        if (embeddedBy.includes(messageID)) {
+    for (const [_, channelID, messageID] of message.content!.matchAll(messageLinkRegex)) {
+        if (embeddedBy.includes(messageID) || embeddedBy.length > 2) {
             continue;
         }
 
@@ -251,15 +250,9 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
             if (linkedMessage) {
                 messageCache.set(messageID, { message: linkedMessage, fetched: true });
             } else {
-                const msg = { ...message } as any;
-                delete msg.embeds;
-                delete msg.interaction;
 
                 messageFetchQueue.unshift(() => fetchMessage(channelID, messageID)
-                    .then(m => m && FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message: msg
-                    }))
+                    .then(m => m && updateMessage(message.channel_id, message.id))
                 );
                 continue;
             }
@@ -288,6 +281,8 @@ function getChannelLabelAndIconUrl(channel: Channel) {
 }
 
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
+    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+
     const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
@@ -312,6 +307,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                         message={message}
                         channel={channel}
                         subscribeToComponentDispatch={false}
+                        compact={compact}
                     />
                 </div>
             )}
@@ -368,7 +364,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI"],
 
     settings,
 
