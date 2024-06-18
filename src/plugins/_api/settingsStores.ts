@@ -31,6 +31,11 @@ export default definePlugin({
                 {
                     match: /(?<=INFREQUENT_USER_ACTION.{0,20}),useSetting:/,
                     replace: ",settingsStoreApiGroup:arguments[0],settingsStoreApiName:arguments[1]$&"
+                },
+                // some wrapper. just make it copy the group and name
+                {
+                    match: /updateSetting:.{0,20}shouldSync/,
+                    replace: "settingsStoreApiGroup:arguments[0].settingsStoreApiGroup,settingsStoreApiName:arguments[0].settingsStoreApiName,$&"
                 }
             ]
         }

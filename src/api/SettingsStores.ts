@@ -40,7 +40,7 @@ interface Setting<T> {
     settingsStoreApiName: string;
 }
 
-const SettingsStores: Array<Setting<any>> | undefined = proxyLazyWebpack(() => {
+export const SettingsStores: Array<Setting<any>> | undefined = proxyLazyWebpack(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"') as any;
     if (modId == null) return new Logger("SettingsStoreAPI").error("Didn't find stores module.");
 
