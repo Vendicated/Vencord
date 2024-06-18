@@ -14,6 +14,6 @@ export const TextAndImagesSettingsStores = findByPropsLazy("MessageDisplayCompac
 export const StatusSettingsStores = findByPropsLazy("ShowCurrentGame") as Record<string, t.SettingsStore>;
 
 export const UserSettingsActionCreators = {
-    FrecencyUserSettings: findLazy(m => m.typeName?.endsWith(".FrecencyUserSettings")),
-    PreloadedUserSettings: findLazy(m => m.typeName?.endsWith(".PreloadedUserSettings")),
+    FrecencyUserSettingsActionCreators: findLazy(m => m.typeName?.endsWith(".FrecencyUserSettings")),
+    PreloadedUserSettingsActionCreators: findLazy(m => m.typeName?.endsWith(".PreloadedUserSettings")),
 };
