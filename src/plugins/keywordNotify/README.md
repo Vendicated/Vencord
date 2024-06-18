@@ -1,3 +1,3 @@
 # KeywordNotify
 
-Sends a notification when a message matches any number of regex cases.
+Allows for custom regex-defined keywords to notify the user exactly how a ping would. Adds a custom inbox for viewing keywords next to the mentions.
