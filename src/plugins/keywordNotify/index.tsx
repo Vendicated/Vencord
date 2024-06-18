@@ -410,12 +410,6 @@ export default definePlugin({
             return [msg];
         };
 
-        /*return (
-            <>
-                <p>hi uwu</p>
-            </>
-        );*/
-
         return (
             <>
                 <Popout
