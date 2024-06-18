@@ -16,30 +16,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { ComponentDispatch } from "@webpack/common";
 
 const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker");
+const clearChatInputBox = () => ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
+
+const settings = definePluginSettings({
+    commandBehavior: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Should plugin's behavior be the same for commands?",
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "GifPaste",
     description: "Makes picking a gif in the gif picker insert a link into the chatbox instead of instantly sending it",
     authors: [Devs.Ven],
+    settings,
 
-    patches: [{
-        find: '"handleSelectGIF",',
-        replacement: {
-            match: /"handleSelectGIF",(\i)=>\{/,
-            replace: '"handleSelectGIF",$1=>{if (!this.props.className) return $self.handleSelect($1);'
+    patches: [
+        {
+            find: '"handleSelectGIF",',
+            replacement: {
+                match: /"handleSelectGIF",(\i)=>\{/,
+                replace: '"handleSelectGIF",$1=>{if (!this.props.className) return $self.handleSelect($1);'
+            }
+        },
+        {
+            find: "(this,\"handleMouseEnter\",()=>{let{onHover",
+            replacement: {
+                match: /let{onClick:\i,index:\i}=this\.props;/,
+                replace: "$&if (this.props.url && $self.shouldCopyFromCmd) return $self.handleSelect(this.props, true);"
+            }
         }
-    }],
+    ],
 
-    handleSelect(gif?: { url: string; }) {
-        if (gif) {
-            insertTextIntoChatInputBox(gif.url + " ");
-            closeExpressionPicker();
+    get shouldCopyFromCmd() {
+        return settings.store.commandBehavior;
+    },
+
+    handleSelect(gif?: { url: string; }, isCommand = false) {
+        if (gif?.url) {
+            if (isCommand) clearChatInputBox();
+            setTimeout(() => insertTextIntoChatInputBox(gif.url + " "), 0);
+            if (!isCommand) closeExpressionPicker();
         }
     }
 });
