@@ -131,7 +131,7 @@ export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetI
 
 export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
     copy: filters.byCode(".copy("),
-    SUPPORTS_COPY: filters.byCode("queryCommandEnabled")
+    SUPPORTS_COPY: e => typeof e === "boolean"
 });
 
 export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {

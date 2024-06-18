@@ -27,7 +27,7 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
+export const DraftType = findByPropsLazy("ChannelMessage", "SlashCommand");
 
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
