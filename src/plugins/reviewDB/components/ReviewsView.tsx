@@ -28,10 +28,11 @@ import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 
-const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
-const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
+const Transforms = findByPropsLazy("insertNodes","textToText");
+const Editor = findByPropsLazy("start","end","toSlateRange");
+const ChatInputTypes = findByPropsLazy("FORM");
 
-const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
+const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
