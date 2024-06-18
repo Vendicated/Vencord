@@ -233,9 +233,9 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         configurable: true,
                         writable: true
                     });
-                }
 
-                return;
+                    return;
+                }
             }
 
             for (const callback of moduleListeners) {
