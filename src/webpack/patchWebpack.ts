@@ -209,13 +209,32 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (require.c && (exports === window || exports?.default === window)) {
-                Object.defineProperty(require.c, id, {
-                    value: require.c[id],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
+            if (require.c) {
+                let foundWindow = false;
+
+                if (exports === window) {
+                    foundWindow = true;
+                } else if (typeof exports === "object") {
+                    if (exports?.default === window) {
+                        foundWindow = true;
+                    } else {
+                        for (const nested in exports) if (nested.length <= 3) {
+                            if (exports[nested] === window) {
+                                foundWindow = true;
+                            }
+                        }
+                    }
+                }
+
+                if (foundWindow) {
+                    Object.defineProperty(require.c, id, {
+                        value: require.c[id],
+                        enumerable: false,
+                        configurable: true,
+                        writable: true
+                    });
+                }
+
                 return;
             }
 
@@ -236,12 +255,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         if (exports.default && filter(exports.default)) {
                             subscriptions.delete(filter);
                             callback(exports.default, id);
-                        }
-
-                        for (const nested in exports) if (nested.length <= 3) {
-                            if (exports[nested] && filter(exports[nested])) {
-                                subscriptions.delete(filter);
-                                callback(exports[nested], id);
+                        } else {
+                            for (const nested in exports) if (nested.length <= 3) {
+                                if (exports[nested] && filter(exports[nested])) {
+                                    subscriptions.delete(filter);
+                                    callback(exports[nested], id);
+                                }
                             }
                         }
                     }

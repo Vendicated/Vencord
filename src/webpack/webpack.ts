@@ -114,6 +114,11 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
         if (typeof mod.exports !== "object") continue;
 
+        if (mod.exports.default && filter(mod.exports.default)) {
+            const found = mod.exports.default;
+            return isWaitFor ? [found, key] : found;
+        }
+
         // the length check makes search about 20% faster
         for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
             const nested = mod.exports[nestedMod];
