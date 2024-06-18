@@ -393,7 +393,6 @@ export default definePlugin({
         };
 
         const messageRender = (e, t) => {
-            console.log(this);
             const msg = this.renderMsg({
                 message: e,
                 gotoMessage: t,
