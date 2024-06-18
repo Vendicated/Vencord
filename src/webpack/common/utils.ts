@@ -19,7 +19,7 @@
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -36,7 +36,7 @@ waitFor(["dispatch", "subscribe"], m => {
 });
 
 export let ComponentDispatch;
-waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
 
 export const Constants = findByPropsLazy("Endpoints");
@@ -129,9 +129,17 @@ export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetI
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
-export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
+export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
+    copy: filters.byCode(".copy("),
+    SUPPORTS_COPY: filters.byCode("queryCommandEnabled")
+});
 
-export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
+    back: filters.byCode("goBack()"),
+    forward: filters.byCode("goForward()"),
+});
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
