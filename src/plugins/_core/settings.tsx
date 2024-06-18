@@ -60,6 +60,7 @@ export default definePlugin({
         // FIXME: remove once change merged to stable
         {
             find: "Messages.ACTIVITY_SETTINGS",
+            noWarn: true,
             replacement: {
                 get match() {
                     switch (Settings.plugins.Settings.settingsLocation) {
@@ -181,7 +182,7 @@ export default definePlugin({
     patchedSettings: new WeakSet(),
 
     addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: SectionTypes) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
+        if (this.patchedSettings.has(elements)) return;
 
         this.patchedSettings.add(elements);
 

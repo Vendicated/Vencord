@@ -86,6 +86,10 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
+     * Whether this plugin should be hidden from the user
+     */
+    hidden?: boolean;
+    /**
      * Whether this plugin should be enabled by default, but can be disabled
      */
     enabledByDefault?: boolean;
@@ -94,6 +98,10 @@ export interface PluginDef {
      * @default StartAt.WebpackReady
      */
     startAt?: StartAt,
+    /**
+     * Which parts of the plugin can be tested by the reporter. Defaults to all parts
+     */
+    reporterTestable?: number;
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
@@ -142,6 +150,13 @@ export const enum StartAt {
     DOMContentLoaded = "DOMContentLoaded",
     /** Once Discord's core webpack modules have finished loading, so as soon as things like react and flux are available */
     WebpackReady = "WebpackReady"
+}
+
+export const enum ReporterTestable {
+    None = 1 << 1,
+    Start = 1 << 2,
+    Patches = 1 << 3,
+    FluxEvents = 1 << 4
 }
 
 export const enum OptionType {
