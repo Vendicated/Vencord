@@ -28,8 +28,9 @@ import { blockUser, deleteReview, reportReview, unblockUser } from "../reviewDbA
 import { settings } from "../settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "../utils";
 import { openBlockModal } from "./BlockedUserModal";
-import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
+import { BlockButton, DeleteButton, ReplyButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
+import { ReviewsInputComponent } from "./ReviewsView";
 
 export default LazyComponent(() => {
     // this is terrible, blame mantika
@@ -50,8 +51,11 @@ export default LazyComponent(() => {
 
     const dateFormat = new Intl.DateTimeFormat();
 
-    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
+    return function ReviewComponent({ review, refetch, profileId, isReply = false }: { review: Review; refetch(): void; profileId: string; isReply?: boolean; }) {
         const [showAll, setShowAll] = useState(false);
+        const [replying, setReplying] = useState(false);
+
+        const refresh = () => { refetch(); setReplying(false); };
 
         function openModal() {
             openUserProfile(review.sender.discordID);
@@ -69,7 +73,7 @@ export default LazyComponent(() => {
                     } else {
                         deleteReview(review.id).then(res => {
                             if (res) {
-                                refetch();
+                                refresh();
                             }
                         });
                     }
@@ -117,75 +121,91 @@ export default LazyComponent(() => {
         }
 
         return (
-            <div className={classes(cl("review"), cozyMessage, wrapper, message, groupStart, cozy)} style={
-                {
-                    marginLeft: "0px",
-                    paddingLeft: "52px", // wth is this
-                    // nobody knows anymore
-                }
-            }>
+            <>
+                <div className={classes(cl("review-container"), cozyMessage, wrapper, message, groupStart, cozy, isReply ? cl("reply") : cl("review"))} style={
+                    {
+                        marginLeft: "0px",
+                        paddingLeft: "52px", // wth is this
+                        // nobody knows anymore
+                    }
+                }>
+                    {isReply && <div className={cl("reply-line")} />}
 
-                <img
-                    className={classes(avatar, clickable)}
-                    onClick={openModal}
-                    src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                    style={{ left: "0px", zIndex: 0 }}
-                />
-                <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
-                    <span
-                        className={classes(clickable, username)}
-                        style={{ color: "var(--channels-default)", fontSize: "14px" }}
-                        onClick={() => openModal()}
-                    >
-                        {review.sender.username}
-                    </span>
+                    <>
+                        <img style={{ left: "0px", zIndex: 0 }}
+                            className={classes(avatar, clickable, cl("avatar"))}
+                            onClick={openModal}
+                            src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                        />
 
-                    {review.type === ReviewType.System && (
-                        <span
-                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
-                            style={{ marginLeft: "4px" }}>
-                            <span className={botTag.botText}>
-                                System
+                        <div className={cl("white-line")} />
+
+                        <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
+                            <span
+                                className={classes(clickable, username)}
+                                style={{ color: "var(--channels-default)", fontSize: "14px" }}
+                                onClick={() => openModal()}
+                            >
+                                {review.sender.username}
                             </span>
-                        </span>
-                    )}
-                </div>
-                {isAuthorBlocked && (
-                    <ReviewBadge
-                        name="You have blocked this user"
-                        description="You have blocked this user"
-                        icon="/assets/aaee57e0090991557b66.svg"
-                        type={0}
-                        onClick={() => openBlockModal()}
-                    />
-                )}
-                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
-                {
-                    !settings.store.hideTimestamps && review.type !== ReviewType.System && (
-                        <Timestamp timestamp={new Date(review.timestamp * 1000)} >
-                            {dateFormat.format(review.timestamp * 1000)}
-                        </Timestamp>)
-                }
-
-                <div className={cl("review-comment")}>
-                    {(review.comment.length > 200 && !showAll)
-                        ? [Parser.parseGuildEventDescription(review.comment.substring(0, 200)), "...", <br />, (<a onClick={() => setShowAll(true)}>Read more</a>)]
-                        : Parser.parseGuildEventDescription(review.comment)}
-                </div>
-
-                {review.id !== 0 && (
-                    <div className={classes(container, isHeader, buttons)} style={{
-                        padding: "0px",
-                    }}>
-                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
-                            {canReportReview(review) && <ReportButton onClick={reportRev} />}
-                            {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
-                            {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
+                            {review.type === ReviewType.System && (
+                                <span
+                                    className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                                    style={{ marginLeft: "4px" }}>
+                                    <span className={botTag.botText}>
+                                        System
+                                    </span>
+                                </span>
+                            )}
                         </div>
-                    </div>
-                )}
-            </div>
+
+                        {isAuthorBlocked && (
+                            <ReviewBadge
+                                name="You have blocked this user"
+                                description="You have blocked this user"
+                                icon="/assets/aaee57e0090991557b66.svg"
+                                type={0}
+                                onClick={() => openBlockModal()}
+                            />
+                        )}
+                        {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+
+                        {
+                            !settings.store.hideTimestamps && review.type !== ReviewType.System && (
+                                <Timestamp timestamp={new Date(review.timestamp * 1000)} >
+                                    {dateFormat.format(review.timestamp * 1000)}
+                                </Timestamp>)
+                        }
+
+                        <div className={cl("review-comment")}>
+                            {(review.comment.length > 200 && !showAll)
+                                ? [Parser.parseGuildEventDescription(review.comment.substring(0, 200)), "...", <br />, (<a onClick={() => setShowAll(true)}>Read more</a>)]
+                                : Parser.parseGuildEventDescription(review.comment)}
+                        </div>
+
+                        {review.id !== 0 && (
+                            <div className={classes(container, isHeader, cl("buttons"))} style={{
+                                padding: "0px",
+                            }}>
+                                <div className={classes(buttonClasses.wrapper, buttonsInner)} >
+                                    {canReportReview(review) && <ReportButton onClick={reportRev} />}
+                                    {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
+                                    {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
+                                    {!isReply && <ReplyButton onClick={() => setReplying(!replying)} />}
+                                </div>
+                            </div>
+                        )}
+                    </>
+
+                    {
+                        review.replies?.map(r => (
+                            <ReviewComponent review={r} refetch={refresh} profileId={profileId} isReply={true} />
+                        ))
+                    }
+                    {replying && <ReviewsInputComponent repliesTo={review.id} discordId={profileId} name={review.sender.username} isAuthor={false} refetch={refresh} />}
+                </div>
+            </>
         );
     };
 });
