@@ -61,7 +61,7 @@ export default definePlugin({
             replacement: [{
                 // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
-                replace: "post:$1.bind(null,$2.post),$&"
+                replace: "post:$1.bind(null,$2.post),vcSpotifyMarker:1,$&"
             },
             {
                 // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
@@ -81,7 +81,7 @@ export default definePlugin({
         {
             find: "artists.filter",
             replacement: {
-                match: /\(0,(\i)\.isNotNullish\)\((\i)\.id\)&&/,
+                match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
                 replace: ""
             }
         }
