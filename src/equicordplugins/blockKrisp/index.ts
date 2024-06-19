@@ -16,7 +16,7 @@ export default definePlugin({
         {
             find: "Failed to load Krisp module",
             replacement: {
-                match: /await (\i).default.ensureModule\("discord_krisp"\)/,
+                match: /await \i.\i.ensureModule\("discord_krisp"\)/,
                 replace: "throw new Error();$&"
             }
         },
@@ -24,7 +24,7 @@ export default definePlugin({
         {
             find: "krisp_browser_models",
             replacement: {
-                match: /getKrispSDK:function\(\)\{/,
+                match: /\i:function\(\)\{/,
                 replace: "$&return null;"
             }
         },

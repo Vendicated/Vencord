@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (64 additional plugins)</summary>
+<summary>Extra included plugins (62 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -29,7 +29,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterQuests by kvba
 - BetterQuickReact by Ven and Sqaaakoi
-- BetterShopPreview by Tolgchu
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
 - CleanChannelName by AutumnVN
@@ -78,7 +77,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - SoundBoardLogger by Moxxie, fres, echo, thororen
 - TalkInReverse by Tolgchu
 - ThemeLibrary by Fafa
-- Title by Kyuuhachi
 - UnlimitedAccounts by Balaclava and thororen
 - UserPFP by nexpid and thororen
 - VCSupport by thororen

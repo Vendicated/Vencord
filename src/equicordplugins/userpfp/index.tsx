@@ -56,10 +56,6 @@ export default definePlugin({
                 {
                     match: /(getUserAvatarURL:)(\i),/,
                     replace: "$1$self.getAvatarHook($2),"
-                },
-                {
-                    match: /(getUserAvatarURL:\i\(\){return )(\i)}/,
-                    replace: "$1$self.getAvatarHook($2)}"
                 }
             ]
         }
