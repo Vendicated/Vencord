@@ -45,9 +45,7 @@ const settings = Settings.plugins;
 
 const forceDisabled = new Set([
     "ShowHiddenChannels",
-    "MoreUserTags",
-    "IgnoreActivities",
-    "NoBlockedMessages"
+    "MoreUserTags"
 ]);
 export function isPluginEnabled(p: string) {
     return (
