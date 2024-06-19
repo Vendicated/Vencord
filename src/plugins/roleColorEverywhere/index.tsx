@@ -17,12 +17,22 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { getCurrentGuild } from "@utils/discord";
+import { ModalProps, openModal } from "@utils/modal";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, Menu, React } from "@webpack/common";
+
+import { blendColors } from "./blendColors";
+import { RoleModalList } from "./components/RolesView";
+
+const cl = classNameFactory("rolecolor");
+const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -69,11 +79,79 @@ const settings = definePluginSettings({
         markers: makeRange(0, 100, 10),
         default: 30
     }
-});
+}).withPrivateSettings<{
+    userColorFromRoles: Record<string, string[]>
+}>();
+
+function atLeastOneOverrideAppliesToGuild(overrides: string[], guildId: string) {
+    for (const role of overrides) {
+        if (GuildRoleStore.getRole(guildId, role)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function getPrimaryRoleOverrideColor(roles: string[], guildId: string) {
+    const overrides = settings.store.userColorFromRoles[guildId];
+    if (!overrides?.length) return null;
+
+    if (atLeastOneOverrideAppliesToGuild(overrides, guildId!)) {
+        const memberRoles = roles.map(role => GuildRoleStore.getRole(guildId!, role)).filter(e => e);
+        const blendColorsFromRoles = memberRoles
+            .filter(role => overrides.includes(role.id))
+            .sort((a, b) => b.color - a.color);
+
+        // if only one override apply, return the first role color
+        if (blendColorsFromRoles.length < 2)
+            return blendColorsFromRoles[0]?.colorString ?? null;
+
+        const color = blendColorsFromRoles
+            .slice(1)
+            .reduce(
+                (p, c) => blendColors(p, c!.colorString!, .5),
+                blendColorsFromRoles[0].colorString!
+            );
+
+        return color;
+    }
+
+    return null;
+}
+
+// Using plain replaces cause i dont want sanitize regexp
+function toggleRole(guildId: string, id: string) {
+    let roles = settings.store.userColorFromRoles[guildId];
+    const len = roles.length;
+
+    roles = roles.filter(e => e !== id);
+
+    if (len === roles.length) {
+        roles.push(id);
+    }
+
+    settings.store.userColorFromRoles[guildId] = roles;
+}
+
+function RoleModal({ modalProps, guild }: { modalProps: ModalProps, guild: Guild }) {
+    const [ids, setIds] = React.useState(settings.store.userColorFromRoles[guild.id]);
+    const roles = React.useMemo(() => ids.map(id => GuildRoleStore.getRole(guild.id, id)), [ids]);
+
+    return <RoleModalList
+        modalProps={modalProps}
+        roleList={roles}
+        header={`${guild.name} highlighted roles.`}
+        onRoleRemove={id => {
+            toggleRole(guild.id, id);
+            setIds(settings.store.userColorFromRoles[guild.id]);
+        }}
+    />;
+}
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365, Devs.EnergoStalin],
     description: "Adds the top role color anywhere possible",
     settings,
 
@@ -165,13 +243,20 @@ export default definePlugin({
         try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
+                const member = GuildMemberStore.getMember(guildId, userId);
 
-            return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
+            return getPrimaryRoleOverrideColor(member.roles, channelOrGuildId) ?? member.colorString;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
 
         return null;
+    },
+
+    start() {
+        DeveloperMode.updateSetting(true);
+
+        settings.store.userColorFromRoles ??= {};
     },
 
     getColorInt(userId: string, channelOrGuildId: string) {
@@ -220,5 +305,54 @@ export default definePlugin({
                 {title ?? label} &mdash; {count}
             </span>
         );
-    }, { noop: true })
+    }, { noop: true }),
+
+    getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
+        return {
+            style: {
+                color: this.getColor(userId, { guildId })
+            }
+        };
+    },
+
+    contextMenus: {
+        "dev-context"(children, { id }: { id: string; }) {
+            const guild = getCurrentGuild();
+            if (!guild) return;
+
+            settings.store.userColorFromRoles[guild.id] ??= [];
+
+            const role = GuildRoleStore.getRole(guild.id, id);
+            if (!role) return;
+
+            const togglelabel = (settings.store.userColorFromRoles[guild.id]?.includes(role.id) ?
+                "Remove role from" :
+                "Add role to") + " coloring list";
+
+            if (role.colorString) {
+                children.push(
+                    <Menu.MenuItem
+                        id={cl("context-menu")}
+                        label="Coloring"
+                    >
+                        <Menu.MenuItem
+                            id={cl("toggle-role-for-guild")}
+                            label={togglelabel}
+                            action={() => toggleRole(guild.id, role.id)}
+                        />
+                        <Menu.MenuItem
+                            id={cl("show-color-roles")}
+                            label="Show roles"
+                            action={() => openModal(modalProps => (
+                                <RoleModal
+                                    modalProps={modalProps}
+                                    guild={guild}
+                                />
+                            ))}
+                        />
+                    </Menu.MenuItem>
+                );
+            }
+        }
+    }
 });
