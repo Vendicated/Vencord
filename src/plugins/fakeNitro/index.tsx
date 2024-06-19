@@ -23,7 +23,7 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
@@ -52,6 +52,7 @@ const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsA
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
+const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
 
 const enum EmojiIntentions {
     REACTION,
@@ -234,16 +235,14 @@ export default definePlugin({
                 }
             ]
         },
-        // FIXME
         // Allows the usage of subscription-locked emojis
-        /* {
+        {
             find: ".getUserIsAdmin(",
             replacement: {
-                match: /(?=.+?\.getUserIsAdmin\((?<=function (\i)\(\i,\i\){.+?))(\i):function\(\){return \1}/,
-                // Replace the original export with a func that always returns false and alias the original
-                replace: "$2:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function(){return $1}"
+                match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
+                replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
-        }, */
+        },
         // Allow stickers to be sent everywhere
         {
             find: "canUseCustomStickersEverywhere:function",
@@ -817,9 +816,7 @@ export default definePlugin({
         if (e.type === 0) return true;
         if (e.available === false) return false;
 
-        // FIXME
-        /* const isUnusableRoleSubEmoji = isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false; */
+        if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
