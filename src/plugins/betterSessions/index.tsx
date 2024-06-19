@@ -153,7 +153,7 @@ export default definePlugin({
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} />
+                    <DeviceIcon width={28} height={28} color="currentColor" />
                 </div>
             </BlobMask>
         );
