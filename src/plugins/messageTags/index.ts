@@ -42,7 +42,7 @@ const addTag = async (tag: Tag) => {
 };
 const removeTag = async (name: string) => {
     let tags = await getTags();
-    tags = await tags.filter((t: Tag) => t.name !== name);
+    tags = tags.filter((t: Tag) => t.name !== name);
     DataStore.set(DATA_KEY, tags);
     return tags;
 };
@@ -175,13 +175,16 @@ export default definePlugin({
 
                 switch (args[0].name) {
                     case "create": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-                        const message: string = findOption(args[0].options, "message", "");
+                        const name = findOption(args[0].options, "name", "") as string;
+                        const message = findOption(args[0].options, "message", "") as string;
 
-                        if (await getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
+                        if (await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
+
+                            return;
+                        }
 
                         const tag = {
                             name: name,
@@ -189,21 +192,25 @@ export default definePlugin({
                             message: message
                         };
 
-                        createTagCommand(tag);
                         await addTag(tag);
+                        createTagCommand(tag);
 
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully created the tag **${name}**!`
                         });
+
                         break; // end 'create'
                     }
                     case "delete": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                        const name = findOption(args[0].options, "name", "") as string;
 
-                        if (!await getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
+                        if (!await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
                             });
+
+                            return;
+                        }
 
                         unregisterCommand(name);
                         await removeTag(name);
@@ -211,6 +218,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully deleted the tag **${name}**!`
                         });
+
                         break; // end 'delete'
                     }
                     case "list": {
@@ -221,7 +229,7 @@ export default definePlugin({
                                     title: "All Tags:",
                                     // @ts-ignore
                                     description: (await getTags())
-                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
+                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 64).replaceAll("\\n", " ")}${tag.message.length > 64 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
                                     // @ts-ignore
                                     color: 0xd77f7f,
@@ -229,23 +237,27 @@ export default definePlugin({
                                 }
                             ]
                         });
+
                         break; // end 'list'
                     }
                     case "preview": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                        const name = findOption(args[0].options, "name", "") as string;
                         const tag = await getTag(name);
 
-                        if (!tag)
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
+                        if (!tag) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
                             });
 
+                            return;
+                        }
 
                         const message = await replaceSubTags(tag.message);
 
                         sendBotMessage(ctx.channel.id, {
                             content: message.replaceAll("\\n", "\n")
                         });
+
                         break; // end 'preview'
                     }
 
@@ -253,6 +265,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             content: "Invalid sub-command"
                         });
+
                         break;
                     }
                 }
