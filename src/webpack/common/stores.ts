@@ -18,7 +18,7 @@
 
 import type * as Stores from "discord-types/stores";
 
-import { findByPropsLazy } from "../webpack";
+import { findByCodeLazy, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -26,7 +26,7 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const { DraftType }: { DraftType: typeof t.DraftType; } = findByPropsLazy("DraftType");
+export const DraftType = findByPropsLazy("ChannelMessage", "SlashCommand");
 
 export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
@@ -66,7 +66,7 @@ export let DraftStore: t.DraftStore;
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
 // eslint-disable-next-line prefer-destructuring
-export const useStateFromStores: t.useStateFromStores = findByPropsLazy("useStateFromStores").useStateFromStores;
+export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);

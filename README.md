@@ -21,11 +21,12 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (69 additional plugins)</summary>
+<summary>Extra included plugins (64 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
 - Annamox by Kyuuhachi
+- BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterQuests by kvba
 - BetterQuickReact by Ven and Sqaaakoi
 - BetterShopPreview by Tolgchu
@@ -42,7 +43,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - EmojiDumper by Cortex, Samwich, Woosh
 - EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
 - ExportContacts by dat_insanity
-- FakeProfileThemes by Ryan
 - FindReply by newwares
 - FriendshipRanks by Samwich
 - GlobalBadges by HypedDomi and Hosted by Wolfie
@@ -54,6 +54,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - IRememberYou by zoodogood
 - Keyboard Sounds by HypedDomi
 - KeywordNotify by camila314
+- Meow by Samwich
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced (MLEnhanced) by Aria
 - noAppsAllowed by kvba
@@ -84,6 +85,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - VencordRPC by AutumnVN
 - VoiceChatUtilities by Dams and D3SOX
 - WhosWatching by fres
+- Woof by Samwich
 - YoutubeDescription by arHSM
 
 </details>
