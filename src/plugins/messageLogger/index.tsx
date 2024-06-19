@@ -223,7 +223,7 @@ export default definePlugin({
         },
         ignoreQuickDelete: {
             type: OptionType.NUMBER,
-            description: "Ignore deleted messages if they were deleted quicker than this many milliseconds",
+            description: "Ignore messages younger than this many seconds",
             default: 0
         },
     },
@@ -276,7 +276,7 @@ export default definePlugin({
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
             // Ignore Venbot in the support channel
             (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332") ||
-            timeNow - timeMessage <= ignoreQuickDelete;
+            timeNow - timeMessage <= ignoreQuickDelete * 1000;
     },
 
     patches: [
