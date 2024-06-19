@@ -57,7 +57,7 @@ export default definePlugin({
         {
             find: "SUMMARIZEABLE.has",
             replacement: {
-                match: /\i\.hasFeature\(.{0,10}\.SUMMARIES_ENABLED\w+?\)/g,
+                match: /\i\.hasFeature\(\i\.\i\.SUMMARIES_ENABLED\w+?\)/g,
                 replace: "true"
             }
         },

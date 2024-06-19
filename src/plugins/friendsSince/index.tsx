@@ -28,7 +28,7 @@ export default definePlugin({
         {
             find: ".USER_PROFILE}};return",
             replacement: {
-                match: /\i.\i,\{userId:(\i.id).{0,30}}\)/,
+                match: /,{userId:(\i.id).{0,30}}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
@@ -36,7 +36,7 @@ export default definePlugin({
         {
             find: ".PROFILE_PANEL,",
             replacement: {
-                match: /\i.\i,\{userId:([^,]+?)}\)/,
+                match: /,{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
