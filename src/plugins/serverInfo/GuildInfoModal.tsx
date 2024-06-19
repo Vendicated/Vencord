@@ -12,11 +12,11 @@ import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { GuildChannelType, type GuildRecord, type UserRecord } from "@vencord/discord-types";
-import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, MarkupUtils, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserActionCreators, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses: Record<string, string> = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findExportedComponentLazy("FriendRow");
+const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
 
 const cl = classNameFactory("vc-gp-");
 

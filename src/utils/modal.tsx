@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -38,13 +38,13 @@ const enum ModalTransitionState {
 
 export interface ModalProps {
     transitionState: ModalTransitionState;
-    onClose(): Promise<void>;
+    onClose: () => Promise<void>;
 }
 
 export interface ModalOptions {
     modalKey?: string;
-    onCloseRequest?: (() => void);
-    onCloseCallback?: (() => void);
+    onCloseRequest?: () => void;
+    onCloseCallback?: () => void;
 }
 
 type RenderFunction = (props: ModalProps) => ReactNode;
@@ -58,7 +58,7 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
         fullscreenOnMobile?: boolean;
         "aria-label"?: string;
         "aria-labelledby"?: string;
-        onAnimationEnd?(): string;
+        onAnimationEnd?: () => string;
     }>>;
     ModalHeader: ComponentType<PropsWithChildren<{
         /** Flex.Justify.START */
@@ -94,7 +94,7 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     }>>;
     ModalCloseButton: ComponentType<{
         focusProps?: any;
-        onClick(): void;
+        onClick: () => void;
         withCircleBackground?: boolean;
         hideOnFullscreen?: boolean;
         className?: string;
@@ -110,15 +110,16 @@ export type ImageModal = ComponentType<{
     height?: number;
     animated?: boolean;
     responsive?: boolean;
-    renderLinkComponent(props: any): ReactNode;
+    renderLinkComponent: (props: any) => ReactNode;
+    renderForwardComponent: (props: any) => ReactNode;
     maxWidth?: number;
     maxHeight?: number;
     shouldAnimate?: boolean;
-    onClose?(): void;
+    onClose?: () => void;
     shouldHideMediaOptions?: boolean;
 }>;
 
-export const ImageModal: ImageModal = findExportedComponentLazy("ImageModal");
+export const ImageModal: ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE", "responsive");
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
@@ -149,13 +150,13 @@ export function openModal(render: RenderFunction, options?: ModalOptions, contex
 /**
  * Close a modal by its key
  */
-export function closeModal(modalKey: string, contextKey?: string): void {
-    return ModalsStore.closeModal(modalKey, contextKey);
+export function closeModal(modalKey: string, contextKey?: string) {
+    ModalsStore.closeModal(modalKey, contextKey);
 }
 
 /**
  * Close all open modals
  */
-export function closeAllModals(): void {
-    return ModalsStore.closeAllModals();
+export function closeAllModals() {
+    ModalsStore.closeAllModals();
 }

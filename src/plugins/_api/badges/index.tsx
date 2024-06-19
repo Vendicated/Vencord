@@ -93,7 +93,7 @@ export default definePlugin({
         {
             find: ".PANEL]:14",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.default\)\(\i\);)return 0===\i.length\?/,
+                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
                 replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
             }
         },

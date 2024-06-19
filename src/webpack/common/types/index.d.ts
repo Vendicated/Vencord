@@ -20,5 +20,4 @@ export * from "./classes";
 export * from "./components";
 export * from "./i18nMessages";
 export * from "./menu";
-export * from "./UserSettingDefinition";
 export * from "./utils";

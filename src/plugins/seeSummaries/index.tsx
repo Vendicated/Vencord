@@ -9,11 +9,11 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { type FluxPersistedStore, GuildFeature } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore: FluxPersistedStore & Record<string, any> = findByPropsLazy("allSummaries", "findSummary");
-const { createSummaryFromServer } = findByPropsLazy("createSummaryFromServer");
+const createSummaryFromServer = findByCodeLazy(".people)),startId:");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -56,9 +56,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "ChannelTypesSets.SUMMARIZEABLE.has",
+            find: "SUMMARIZEABLE.has",
             replacement: {
-                match: /\i\.hasFeature\(\i\.GuildFeatures\.SUMMARIES_ENABLED\w+?\)/g,
+                match: /\i\.hasFeature\(\i\.\i\.SUMMARIES_ENABLED\w+?\)/g,
                 replace: "true"
             }
         },

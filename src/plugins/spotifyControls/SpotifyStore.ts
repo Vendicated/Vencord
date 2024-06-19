@@ -18,7 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import type { ExtractAction, FluxAction } from "@vencord/discord-types";
-import { findByProps, proxyLazyWebpack } from "@webpack";
+import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 export interface Track {
@@ -68,7 +68,7 @@ type Repeat = "off" | "track" | "context";
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazyWebpack(() => {
     const SpotifySocket = findByProps("getActiveSocketAndDevice");
-    const SpotifyUtils = findByProps("SpotifyAPI");
+    const SpotifyAPI = findByPropsLazy("vcSpotifyMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
@@ -168,7 +168,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyUtils.SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });

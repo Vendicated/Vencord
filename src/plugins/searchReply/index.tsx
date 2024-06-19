@@ -21,11 +21,11 @@ import { ReplyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { MessageRecord } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, i18n, Menu, Permissions, PermissionStore, SelectedChannelStore } from "@webpack/common";
 import type { MouseEvent } from "react";
 
-const MessageUtils = findByPropsLazy("replyToMessage");
+const replyToMessage = findByCodeLazy(".TEXTAREA_FOCUS)", "showMentionToggle:");
 
 const messageContextMenuPatch = ((children, { message }: { message: MessageRecord; }) => {
     // make sure the message is in the selected channel
@@ -43,7 +43,7 @@ const messageContextMenuPatch = ((children, { message }: { message: MessageRecor
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: MouseEvent) => { MessageUtils.replyToMessage(channel, message, e); }}
+                action={(e: MouseEvent) => { replyToMessage(channel, message, e); }}
             />
         ));
         return;
@@ -57,7 +57,7 @@ const messageContextMenuPatch = ((children, { message }: { message: MessageRecor
                 id="reply"
                 label={i18n.Messages.MESSAGE_ACTION_REPLY}
                 icon={ReplyIcon}
-                action={(e: MouseEvent) => { MessageUtils.replyToMessage(channel, message, e); }}
+                action={(e: MouseEvent) => { replyToMessage(channel, message, e); }}
             />
         ));
         return;

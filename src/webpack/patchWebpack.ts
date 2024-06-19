@@ -22,7 +22,14 @@ import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
 import type { PatchReplacement } from "@utils/types";
 // Can be removed when #2485 gets merged.
 // eslint-disable-next-line no-restricted-imports
-import type { WebpackInstance } from "discord-types/other";
+import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
+
+interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
+    // Omit removes call signatures
+    (id: number): any;
+    c?: $WebpackInstance["c"] & Record<string | number, any>;
+    m: $WebpackInstance["m"] & Record<string | number, any>;
+}
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
@@ -214,15 +221,33 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (require.c && (exports === window || exports?.default === window)) {
-                Object.defineProperty(require.c, id, {
-                    value: require.c[id as any as number],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
-                return;
+            if (require.c) {
+                let foundWindow = false;
+
+                if (exports === window) {
+                    foundWindow = true;
+                } else if (typeof exports === "object") {
+                    if (exports?.default === window) {
+                        foundWindow = true;
+                    } else {
+                        for (const nested in exports) if (nested.length <= 3) {
+                            if (exports[nested] === window) {
+                                foundWindow = true;
+                            }
+                        }
+                    }
+                }
+
+                if (foundWindow) {
+                    Object.defineProperty(require.c, id, {
+                        value: require.c[id],
+                        enumerable: false,
+                        configurable: true,
+                        writable: true
+                    });
+
+                    return;
+                }
             }
 
             for (const callback of moduleListeners) {
@@ -238,9 +263,18 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
-                    } else if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, id);
+                    } else if (typeof exports === "object") {
+                        if (exports.default && filter(exports.default)) {
+                            subscriptions.delete(filter);
+                            callback(exports.default, id);
+                        } else {
+                            for (const nested in exports) if (nested.length <= 3) {
+                                if (exports[nested] && filter(exports[nested])) {
+                                    subscriptions.delete(filter);
+                                    callback(exports[nested], id);
+                                }
+                            }
+                        }
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);

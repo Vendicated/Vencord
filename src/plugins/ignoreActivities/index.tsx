@@ -6,6 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings, Settings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -13,8 +14,8 @@ import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { ActivityType, type FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
+import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 import type { MouseEvent } from "react";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, UserSettings, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -29,6 +30,8 @@ interface IgnoredActivity {
 
 const RunningGameStore: FluxStore & Record<string, any> = findStoreLazy("RunningGameStore");
 
+const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
+
 const ToggleIcon = (activity: IgnoredActivity, tooltipText: string, path: string, fill: string) => (
     <Tooltip text={tooltipText}>
         {tooltipProps => (
@@ -37,10 +40,10 @@ const ToggleIcon = (activity: IgnoredActivity, tooltipText: string, path: string
                 onClick={e => { handleActivityToggle(e, activity); }}
                 style={{
                     all: "unset",
-                    cursor: "pointer",
                     display: "flex",
+                    alignItems: "center",
                     justifyContent: "center",
-                    alignItems: "center"
+                    cursor: "pointer"
                 }}
             >
                 <svg
@@ -76,7 +79,7 @@ function handleActivityToggle(e: MouseEvent<HTMLButtonElement>, activity: Ignore
     else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
 
     // Trigger activities recalculation
-    UserSettings.ShowCurrentGame!.updateSetting((old: any) => old);
+    ShowCurrentGame.updateSetting((old: any) => old);
 }
 
 const ImportCustomRPCComponent = () => (
@@ -217,6 +220,7 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
+    dependencies: ["SettingsStoreAPI"],
 
     settings,
 

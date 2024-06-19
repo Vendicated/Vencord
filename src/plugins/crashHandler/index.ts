@@ -25,20 +25,19 @@ import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { DraftType } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { FluxDispatcher, RouterUtils, SelectedChannelStore } from "@webpack/common";
+import { ExpressionPickerStore, FluxDispatcher, RouterUtils, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
-const { ModalActionCreators, DraftActionCreators, closeExpressionPicker } = proxyLazyWebpack(() => {
-    const [ModalActionCreators, DraftActionCreators, ExpressionPickerStore] = findBulk(
+const { ModalActionCreators, DraftActionCreators } = proxyLazyWebpack(() => {
+    const [ModalActionCreators, DraftActionCreators] = findBulk(
         filters.byProps("pushLazy", "popAll"),
         filters.byProps("clearDraft", "saveDraft"),
-        filters.byProps("closeExpressionPicker", "openExpressionPicker"),);
+    );
 
     return {
         ModalActionCreators,
-        DraftActionCreators,
-        closeExpressionPicker: ExpressionPickerStore?.closeExpressionPicker, // zustand store
+        DraftActionCreators
     };
 });
 
@@ -145,7 +144,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }
         try {
-            closeExpressionPicker();
+            ExpressionPickerStore.closeExpressionPicker();
         }
         catch (err) {
             CrashHandlerLogger.debug("Failed to close expression picker.", err);

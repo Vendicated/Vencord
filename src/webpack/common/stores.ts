@@ -20,16 +20,14 @@ import type { FluxEmitter } from "@vencord/discord-types";
 import type * as Stores from "@vencord/discord-types/src/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByPropsLazy } from "../webpack";
+import { findByCode, findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "../webpack";
 import { waitForStore } from "./internal";
 
 export const Flux: {
     Emitter: typeof FluxEmitter;
     PersistedStore: typeof Stores.FluxPersistedStore;
     Store: typeof Stores.FluxStore;
-}= findByPropsLazy("connectStores");
-
-const storeHooksModule = findByPropsLazy("useStateFromStores", "useStateFromStoresArray", "useStateFromStoresObject");
+} = findByPropsLazy("connectStores");
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -41,16 +39,20 @@ const storeHooksModule = findByPropsLazy("useStateFromStores", "useStateFromStor
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-// eslint-disable-next-line prefer-destructuring
-export const useStateFromStores: Stores.UseStateFromStoresHook = storeHooksModule.useStateFromStores;
+export const useStateFromStores: Stores.UseStateFromStoresHook = findByCodeLazy("useStateFromStores");
+
+const areArraysShallowEqual = (a: unknown[], b?: unknown[] | null | undefined) =>
+    b != null && a.length === b.length && !a.some((x, y) => b[y] !== x);
 
 /** @see {@link useStateFromStores} */
-// eslint-disable-next-line prefer-destructuring
-export const useStateFromStoresArray: Stores.UseStateFromStoresArrayHook = storeHooksModule.useStateFromStoresArray;
+export const useStateFromStoresArray: Stores.UseStateFromStoresArrayHook
+    = (a, b, c) => useStateFromStores(a, b, c, areArraysShallowEqual);
 
 /** @see {@link useStateFromStores} */
-// eslint-disable-next-line prefer-destructuring
-export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook = storeHooksModule.useStateFromStoresObject;
+export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook = proxyLazyWebpack(() => {
+    const shallowEqual = findByCode('"shallowEqual: unequal key lengths "');
+    return (a: any, b: any, c: any) => useStateFromStores(a, b, c, shallowEqual);
+});
 
 export let ChannelStore: Stores.ChannelStore;
 waitForStore("ChannelStore", m => ChannelStore = m);

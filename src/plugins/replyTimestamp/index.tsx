@@ -10,19 +10,26 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { MessageRecord } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { Timestamp } from "@webpack/common";
-import type { HTMLAttributes } from "react";
+import type { PropsWithChildren } from "react";
 
-const { getMessageTimestampId }: {
-    getMessageTimestampId: (partialMessage: { id: string; }) => string;
-} = findByPropsLazy("getMessageTimestampId");
-const DateUtils = findByPropsLazy("calendarFormat", "dateFormat", "isSameDay", "accessibilityLabelCalendarFormat");
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
+const { calendarFormat, dateFormat, isSameDay } = mapMangledModuleLazy("millisecondsInUnit:", {
+    calendarFormat: filters.byCode("sameElse"),
+    dateFormat: filters.byCode('":'),
+    isSameDay: filters.byCode("Math.abs(+"),
+});
 
-function Sep(props: HTMLAttributes<HTMLElement>) {
-    return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
-}
+const MessageClasses: Record<string, string> = findByPropsLazy("separator", "latin24CompactTimeStamp");
+
+const Sep = ({ children }: PropsWithChildren) => (
+    <i
+        className={MessageClasses.separator}
+        aria-hidden={true}
+    >
+        {children}
+    </i>
+);
 
 const enum ReferencedMessageState {
     LOADED = 0,
@@ -45,16 +52,15 @@ function ReplyTimestamp({
     const baseTimestamp = baseMessage.timestamp;
     return (
         <Timestamp
-            id={getMessageTimestampId(referencedMessage.message)}
             className="vc-reply-timestamp"
-            compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
+            compact={isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
         >
             <Sep>[</Sep>
-            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
-                ? DateUtils.dateFormat(refTimestamp, "LT")
-                : DateUtils.calendarFormat(refTimestamp)
+            {isSameDay(refTimestamp, baseTimestamp)
+                ? dateFormat(refTimestamp, "LT")
+                : calendarFormat(refTimestamp)
             }
             <Sep>]</Sep>
         </Timestamp>
@@ -68,7 +74,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "renderSingleLineMessage:function()",
+            find: ".REPLY_QUOTE_MESSAGE_BLOCKED",
             replacement: {
                 match: /(?<="aria-label":\i,children:\[)(?=\i,\i,\i\])/,
                 replace: "$self.ReplyTimestamp(arguments[0]),"

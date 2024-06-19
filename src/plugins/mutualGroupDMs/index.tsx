@@ -53,7 +53,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UserProfileSections.USER_INFO_CONNECTIONS:",
+            find: ".USER_INFO_CONNECTIONS:case",
             replacement: {
                 match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
                 replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs({user: $1, onClose: $2});"

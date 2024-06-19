@@ -185,7 +185,7 @@ export default definePlugin({
 
     patches: [
         // Profiles Modal pfp
-        ...[".UserProfileTypes.MODAL,hasProfileEffect", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
+        ...[".MODAL,hasProfileEffect", ".FULL_SIZE,hasProfileEffect:"].map(find => ({
             find,
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
@@ -223,7 +223,7 @@ export default definePlugin({
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
             replacement: {
-                match: /null==\i\.icon\?.+?src:(\(0,\i\.getChannelIconURL\).+?\))(?=[,}])/,
+                match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 replace: (m, iconUrl) => `${m},onClick:()=>$self.openImage(${iconUrl})`
             }
         },

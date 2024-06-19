@@ -28,7 +28,7 @@ import openRolesAndUsersPermissionsModal, { type PermissionType, type RoleOrUser
 import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
 import { settings } from "..";
 
-const ChatScrollClasses: Record<string, string> = findByPropsLazy("auto", "content", "scrollerBase");
+const ChatScrollClasses: Record<string, string> = findByPropsLazy("auto", "managedReactiveScroller");
 const ChatClasses: Record<string, string> = findByPropsLazy("chat", "content", "noChat", "chatContent");
 const ChannelBeginHeader = findComponentByCodeLazy(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
 const TagComponent = findComponentLazy(m => {
@@ -39,8 +39,8 @@ const TagComponent = findComponentLazy(m => {
     return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
 });
 
-const UnicodeEmojis = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
+const UnicodeEmojis = findByPropsLazy("convertSurrogateToName");
 
 const ChannelTypeName = {
     [ChannelType.GUILD_TEXT]: "text",

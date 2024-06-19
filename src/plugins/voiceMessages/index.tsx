@@ -28,7 +28,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { type ChannelRecord, type FluxStore, MessageFlags, MessageType } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActionCreators, Permissions, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import type { ComponentType } from "react";
 
@@ -38,7 +38,7 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const { CloudUpload } = findByPropsLazy("CloudUpload");
+const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
 const OptionClasses: Record<string, string> = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
@@ -53,7 +53,7 @@ const ctxMenuPatch = ((children, { channel }: { channel: ChannelRecord; }) => {
     if (
         !channel.isPrivate()
         && !(PermissionStore.can(Permissions.SEND_VOICE_MESSAGES, channel)
-        && PermissionStore.can(Permissions.SEND_MESSAGES, channel))
+            && PermissionStore.can(Permissions.SEND_MESSAGES, channel))
     ) return;
 
     children.push(
@@ -97,7 +97,6 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
 
     const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
-        isClip: false,
         isThumbnail: false,
         platform: 1,
     }, channelId, false, 0);

@@ -28,7 +28,7 @@ import { Forms } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
-const KbdStyles: Record<string, string> = findByPropsLazy("key", "removeBuildOverride");
+const KbdStyles: Record<string, string> = findByPropsLazy("key", "combo");
 
 const settings = definePluginSettings({
     toolbarDevMenu: {
@@ -106,9 +106,11 @@ export default definePlugin({
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
                     You can open Discord's DevTools via {" "}
-                    <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>O</kbd>{" "}
+                    <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
+                        <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>O</kbd>{" "}
+                    </div>
                 </Forms.FormText>
             </>
         );

@@ -17,22 +17,20 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType,MessageFlags, MessageInteractionMetadata, MessagePoll, MessageRoleSubscriptionData, MessageType, Sticker, StickerItem, UserFlags, UserPremiumType } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType, MessageFlags, MessageInteractionMetadata, MessagePoll, MessageRoleSubscriptionData, MessageType, Sticker, StickerItem, UserFlags, UserPremiumType } from "@vencord/discord-types";
+import { findByCodeLazy } from "@webpack";
 import { MessageActionCreators, SnowflakeUtils } from "@webpack/common";
 import type { LiteralToPrimitive, PartialDeep } from "type-fest";
 
 import type { Argument } from "./types";
 
-const MessageCreator: {
-    createBotMessage: (partialMessageRecord: {
-        channelId: string;
-        content: string;
-        embeds?: EmbedJSON[] | null | undefined;
-        loggingName?: string | null | undefined;
-        messageId?: string | null | undefined;
-    }) => MessageJSON;
-} = findByPropsLazy("createBotMessage");
+const createBotMessage: (partialMessageRecord: {
+    channelId: string;
+    content: string;
+    embeds?: EmbedJSON[] | null | undefined;
+    loggingName?: string | null | undefined;
+    messageId?: string | null | undefined;
+}) => MessageJSON = findByCodeLazy('username:"Clyde"');
 
 export const generateId = () => `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
 
@@ -42,7 +40,7 @@ export const generateId = () => `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
  * @param message The message to send
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<MessageJSON, { recurseIntoArrays: true; }>) {
-    const botMessage = MessageCreator.createBotMessage({ channelId, content: "" });
+    const botMessage = createBotMessage({ channelId, content: "" });
 
     MessageActionCreators.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
@@ -117,7 +115,7 @@ export interface MessageJSON {
         emoji: {
             animated?: boolean;
             id: string | null;
-            name: string| null;
+            name: string | null;
         };
         me: boolean;
         me_burst: boolean;
@@ -175,7 +173,7 @@ export interface EmbedJSON {
     color?: number;
     description?: string;
     fields?: {
-        inline?: boolean
+        inline?: boolean;
         name: string;
         value: string;
     }[];

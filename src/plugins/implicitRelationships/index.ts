@@ -20,12 +20,11 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { FluxPersistedStore, UserRecord } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserAffinitiesStore");
-const { FriendsSections } = findByPropsLazy("FriendsSections");
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -66,7 +65,7 @@ export default definePlugin({
         },
         // Piggyback relationship fetch
         {
-            find: ".fetchRelationships()",
+            find: '"FriendsStore',
             replacement: {
                 match: /(\i\.\i)\.fetchRelationships\(\)/,
                 // This relationship fetch is actually completely useless, but whatevs
@@ -148,7 +147,7 @@ export default definePlugin({
         // OP 8 Request Guild Members allows 100 user IDs at a time
         const ignore = new Set(toRequest);
         const relationships = RelationshipStore.getRelationships();
-        const callback = ({ chunks }: { chunks: any }) => {
+        const callback = ({ chunks }: { chunks: any; }) => {
             for (const chunk of chunks) {
                 const { nonce, members } = chunk;
                 if (nonce !== sentNonce) return;
@@ -179,6 +178,6 @@ export default definePlugin({
     },
 
     start() {
-        FriendsSections.IMPLICIT = "IMPLICIT";
+        Constants.FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });

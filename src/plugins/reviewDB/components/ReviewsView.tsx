@@ -18,7 +18,7 @@
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { ChannelType } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Forms, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
@@ -28,12 +28,11 @@ import { settings } from "../settings";
 import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-
-const { Editor, Transforms } = findByPropsLazy("Editor", "Transforms");
-const { ChatInputTypes } = findByPropsLazy("ChatInputTypes");
-
-const InputComponent = findComponentByCodeLazy("default.CHANNEL_TEXT_AREA", "input");
-const { createChannelRecordFromServer } = findByPropsLazy("createChannelRecordFromServer");
+const Transforms = findByPropsLazy("insertNodes", "textToText");
+const Editor = findByPropsLazy("start", "end", "toSlateRange");
+const ChatInputTypes = findByPropsLazy("FORM");
+const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
+const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
     discordId: string;
@@ -41,12 +40,12 @@ interface UserProps {
 }
 
 interface Props extends UserProps {
-    onFetchReviews(data: Response): void;
-    refetchSignal?: unknown;
-    showInput?: boolean;
-    page?: number;
-    scrollToTop?(): void;
     hideOwnReview?: boolean;
+    onFetchReviews: (data: Response) => void;
+    page?: number;
+    refetchSignal?: unknown;
+    scrollToTop?: () => void;
+    showInput?: boolean;
 }
 
 export default function ReviewsView({

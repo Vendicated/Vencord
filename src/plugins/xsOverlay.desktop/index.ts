@@ -11,7 +11,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, type PluginNative, ReporterTestable } from "@utils/types";
 import { type ChannelRecord, ChannelType } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 
 interface Call {
@@ -22,7 +22,8 @@ interface Call {
     ringing?: string[];
 }
 
-const NotificationTextUtils = findByPropsLazy("makeTextChatNotification");
+const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
+
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
@@ -268,7 +269,7 @@ function shouldNotify(message: MessageJSON, channel: string) {
     const currentUser = UserStore.getCurrentUser()!;
     if (message.author.id === currentUser.id) return false;
     if (message.author.bot && !settings.store.botNotifications) return false;
-    return NotificationTextUtils.shouldNotify(message, channel);
+    return notificationsShouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {

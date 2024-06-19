@@ -31,19 +31,17 @@ import { Text, Tooltip, UserProfileStore } from "@webpack/common";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const ConnectionsHooks: {
-    useLegacyPlatformType: (platform: PlatformType) => PlatformType;
-} = findByPropsLazy("useLegacyPlatformType");
-
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const Platforms: {
-    get: (type: string) => ConnectionPlatform;
+    get(type: PlatformType): ConnectionPlatform;
 } = findByPropsLazy("isSupported", "getByUrl");
 
 const Section = findComponentByCodeLazy(".lastSection", "children:");
 
 const ThemeStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ThemeStore");
+
+const useLegacyPlatformType: (platform: PlatformType) => PlatformType = findByCodeLazy(".TWITTER_LEGACY:");
 
 const enum Spacing {
     COMPACT,
@@ -134,7 +132,7 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData, theme: string; }) {
-    const platform = Platforms.get(ConnectionsHooks.useLegacyPlatformType(connection.type));
+    const platform = Platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
@@ -204,7 +202,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            find: ".PROFILE_PANEL,",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
@@ -212,7 +210,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UserProfileTypes.BITE_SIZE,onOpenProfile",
+            find: ".BITE_SIZE,onOpenProfile",
             replacement: {
                 match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"

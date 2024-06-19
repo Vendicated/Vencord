@@ -144,7 +144,7 @@ export default LazyComponent(() => {
 
                     {review.type === ReviewType.System && (
                         <span
-                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.px, botTag.rem)}
                             style={{ marginLeft: "4px" }}>
                             <span className={botTag.botText}>
                                 System

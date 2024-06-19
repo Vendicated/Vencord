@@ -47,7 +47,8 @@ await page.setBypassCSP(true);
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
     return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue());
+        .then(m => m?.jsonValue())
+        .catch(() => undefined);
 }
 /* eslint-enable @typescript-eslint/no-unnecessary-condition */
 

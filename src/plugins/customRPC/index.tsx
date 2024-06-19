@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -27,16 +28,18 @@ import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { ActivityFlags, ActivityType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, SelectedChannelStore, SelectedGuildStore, UserSettings, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName: Record<string, string> = findByPropsLazy("activity", "buttonColor");
 
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+
 async function getApplicationAsset(key: string) {
     if (/^https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key))
         return "mp:" + key.replace(/^https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
-    return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0]!;
+    return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
 }
 
 interface ActivityAssets {
@@ -401,13 +404,14 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    dependencies: ["SettingsStoreAPI"],
     start() { setRpc(false); },
     stop() { setRpc(true); },
     settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
-        const gameActivityEnabled = UserSettings.ShowCurrentGame!.useSetting();
+        const gameActivityEnabled = ShowCurrentGame.useSetting();
         const { profileThemeStyle } = useProfileThemeStyle({});
 
         return (
@@ -423,7 +427,7 @@ export default definePlugin({
                         <Button
                             color={Button.Colors.TRANSPARENT}
                             className={Margins.top8}
-                            onClick={() => { UserSettings.ShowCurrentGame!.updateSetting(true); }}
+                            onClick={() => ShowCurrentGame.updateSetting(true)}
                         >
                             Enable
                         </Button>

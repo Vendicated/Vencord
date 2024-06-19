@@ -7,7 +7,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { ChannelRecord, MessageRecord, UserRecord } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
 
 const enum ReferencedMessageState {
@@ -29,7 +29,7 @@ const fetching = new Map<string, string>();
 
 let ReferencedMessageCache: any;
 
-const { createMessageRecord } = findByPropsLazy("createMessageRecord");
+const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 
 export default definePlugin({
     name: "ValidReply",

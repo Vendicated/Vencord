@@ -22,7 +22,7 @@ import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { ApplicationCommandOptionType, DraftType, type FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { UploadAttachmentActionCreators, UploadHandler, UserActionCreators } from "@webpack/common";
+import { promptToUpload, UploadAttachmentActionCreators, UserActionCreators } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
@@ -182,7 +182,7 @@ export default definePlugin({
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
-                setTimeout(() => { UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.CHANNEL_MESSAGE); }, 10);
+                setTimeout(() => { promptToUpload([file], cmdCtx.channel, DraftType.CHANNEL_MESSAGE); }, 10);
             },
         },
     ]

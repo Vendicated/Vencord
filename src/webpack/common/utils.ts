@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { canonicalizeMatch } from "@utils/patches";
 import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: $FluxDispatcher;
@@ -109,12 +110,24 @@ export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const ChannelMessages: typeof $ChannelMessages = findByPropsLazy("clearCache", "_channelMessages");
 
-export const ClipboardUtils: t.ClipboardUtils = findByPropsLazy("SUPPORTS_COPY", "copy");
+export const ClipboardUtils: t.ClipboardUtils = mapMangledModuleLazy('queryCommandEnabled("copy")', {
+    copy: filters.byCode(".copy("),
+    SUPPORTS_COPY: e => typeof e === "boolean"
+});
 
 export let ComponentDispatch: any;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
 export const Constants = findByPropsLazy("Endpoints");
+
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
+
+// TODO: type
+// zustand store
+export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    closeExpressionPicker: filters.byCode("setState({activeView:null"),
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+});
 
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
@@ -133,28 +146,28 @@ export const MessageActionCreators = findByPropsLazy("editMessage", "sendMessage
 
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const { Permissions }: { Permissions: t.Permissions; } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint");
+export const Permissions: t.Permissions = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
-    const mod = findByProps("getAPIBaseURL");
-    return mod.HTTP ?? mod;
+export const promptToUpload: (files: File[], channel: ChannelRecord, draftType: DraftType) => void
+    = findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,");
+
+export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
+
+export const RouterUtils: t.RouterUtils = mapMangledModuleLazy("Transitioning to ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
+    back: filters.byCode("goBack()"),
+    forward: filters.byCode("goForward()"),
 });
-
-export const RouterUtils: t.RouterUtils = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
 
 export const UploadAttachmentActionCreators = findByPropsLazy("clearAll", "addFile");
 
-// Probably named promptToUpload.tsx or *Utils.tsx
-export const UploadHandler: {
-    promptToUpload: (files: File[], channel: ChannelRecord, draftType: DraftType) => void;
-} = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload");
-
-export const UserActionCreators: {
-    getUser: (userId: string) => Promise<UserRecord | undefined>;
-} = findByPropsLazy("getUser", "fetchCurrentUser");
+export const UserActionCreators = {
+    getUser: findByCodeLazy(".USER(") as (userId: string) => Promise<UserRecord | undefined>
+};
 
 export const UserProfileModalActionCreators = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 
@@ -163,5 +176,4 @@ waitFor(["open", "saveAccountChanges"], m => UserSettingsModalActionCreators = m
 
 export const zustandCreate = findByCodeLazy("will be removed in v4");
 
-const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
+export const zustandPersist = findByCodeLazy("[zustand persist middleware]");

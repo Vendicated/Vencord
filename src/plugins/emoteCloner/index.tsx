@@ -24,12 +24,12 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { type FluxStore, type GuildEmoji as $Emoji, type MessageRecord, type Sticker as $Sticker, StickerFormat } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, Permissions, PermissionStore, RestAPI, Toasts, Tooltip, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 import type { Promisable } from "type-fest";
 
 const StickersStore: FluxStore & Record<string, any> = findStoreLazy("StickersStore");
-const EmojiActionCreators = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
+const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 const DATA_TYPE = Symbol();
 
@@ -100,7 +100,7 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
         reader.readAsDataURL(data);
     });
 
-    return EmojiActionCreators.uploadEmoji({
+    return uploadEmoji({
         guildId,
         name: emoji.name.split("~")[0],
         image: dataUrl

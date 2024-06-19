@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { ChannelRecord, MessageRecord, StickerItem } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, MessageActionCreators } from "@webpack/common";
 import type { UIEvent } from "react";
 
@@ -43,9 +43,8 @@ const settings = definePluginSettings({
     unholyMultiGreetEnabled?: boolean;
 }>();
 
-const { WELCOME_STICKERS }: {
-    WELCOME_STICKERS: (StickerItem & { description: string; })[];
-} = findByPropsLazy("WELCOME_STICKERS");
+const WELCOME_STICKERS: (StickerItem & { description: string; })[]
+    = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
 
 function greet(channel: ChannelRecord, message: MessageRecord, stickers: string[]) {
     const options = MessageActionCreators.getSendMessageOptionsForReply({

@@ -21,8 +21,8 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import type { ChannelRecord, MessageRecord, UserRecord } from "@vencord/discord-types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import type { ChannelRecord, GuildRecord, MessageRecord, PermissionOverwriteMap, UserRecord } from "@vencord/discord-types";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { Card, ChannelStore, Forms, GuildStore, Permissions, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import type { PermissionsKeys, RC } from "@webpack/types";
 
@@ -33,7 +33,7 @@ interface Tag {
     displayName: string;
     description: string;
     permissions?: PermissionsKeys[];
-    condition?: (message: MessageRecord | undefined, user: UserRecord, channel: ChannelRecord | undefined) => boolean;
+    condition?: (message: MessageRecord | undefined, user: UserRecord, channel?: ChannelRecord) => boolean;
 }
 
 interface TagSetting {
@@ -41,7 +41,8 @@ interface TagSetting {
     showInChat: boolean;
     showInNotChat: boolean;
 }
-interface TagSettings {
+
+interface TagSettings extends Record<string, TagSetting> {
     WEBHOOK: TagSetting;
     OWNER: TagSetting;
     ADMINISTRATOR: TagSetting;
@@ -49,15 +50,19 @@ interface TagSettings {
     MODERATOR: TagSetting;
     VOICE_MODERATOR: TagSetting;
     TRIAL_MODERATOR: TagSetting;
-    [key: string]: TagSetting;
 }
 
-// PermissionStore.computePermissions is not the same function and doesn't work here
-const PermissionUtils = findByPropsLazy("computePermissions", "canEveryoneRole") as {
-    computePermissions({ ...args }): bigint;
-};
+// PermissionStore.computePermissions will not work here since it only gets permissions for the current user
+const computePermissions: (options: {
+    user?: { id: string; } | string | null;
+    context?: GuildRecord | ChannelRecord | null;
+    overwrites?: PermissionOverwriteMap | null;
+    checkElevated?: boolean /* = true */;
+    excludeGuildPermissions?: boolean /* = false */;
+}) => bigint = findByCodeLazy(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
 
-const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag: RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; }
+    = findLazy(m => m.Types?.[0] === "BOT");
 
 const isWebhook = (message: MessageRecord | undefined, user: UserRecord) => !!message?.webhookId && user.isNonUserBot();
 
@@ -191,7 +196,7 @@ export default definePlugin({
     patches: [
         // add tags to the tag list
         {
-            find: "BotTagTypes:",
+            find: ".ORIGINAL_POSTER=",
             replacement: {
                 match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
                 replace: "($1=$self.getTagTypes()))[$2.BOT"
@@ -220,7 +225,7 @@ export default definePlugin({
         },
         // in messages
         {
-            find: "renderSystemTag:",
+            find: ".Types.ORIGINAL_POSTER",
             replacement: {
                 match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
                 replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
@@ -281,7 +286,7 @@ export default definePlugin({
         const guild = GuildStore.getGuild(channel.guild_id);
         if (!guild) return [];
 
-        const permissions = PermissionUtils.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
+        const permissions = computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
         return Object.entries(Permissions)
             .map(([perm, permInt]) =>
                 permissions & permInt ? perm : ""
@@ -365,7 +370,7 @@ export default definePlugin({
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message, user, channel))
             ) {
-                if (channel.isForumPost() && channel.ownerId === user.id)
+                if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
                     type = Tag.Types[`${tag.name}-OP`]!;
                 else if (user.bot && !isWebhook(message, user) && !settings.dontShowBotTag)
                     type = Tag.Types[`${tag.name}-BOT`]!;
