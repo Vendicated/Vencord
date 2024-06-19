@@ -71,7 +71,7 @@ export default definePlugin({
             find: ".userTooltip,children",
             replacement: [
                 {
-                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
+                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
                     replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
@@ -110,7 +110,7 @@ export default definePlugin({
         {
             find: ".reactorDefault",
             replacement: {
-                match: /\.openUserContextMenu\)\((\i),(\i),\i\).{0,250}tag:"strong"/,
+                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
             predicate: () => settings.store.reactorsList,
