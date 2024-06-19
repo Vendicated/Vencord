@@ -55,9 +55,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "ChannelTypesSets.SUMMARIZEABLE.has",
+            find: "SUMMARIZEABLE.has",
             replacement: {
-                match: /\i\.hasFeature\(\i\.GuildFeatures\.SUMMARIES_ENABLED\w+?\)/g,
+                match: /\i\.hasFeature\(.{0,10}\.SUMMARIES_ENABLED\w+?\)/g,
                 replace: "true"
             }
         },
