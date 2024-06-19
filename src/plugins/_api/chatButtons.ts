@@ -15,8 +15,8 @@ export default definePlugin({
     patches: [{
         find: '"sticker")',
         replacement: {
-            match: /!\i\.isMobile(?=.+?(\i)\.push\(.{0,50}"gift")/,
-            replace: "$& &&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),true)"
+            match: /[^\w$]return.(?=(?:.(?![^\w$]return[^\w$]))*[^\w$](\i)\.push\((?:.(?![^\w$]return[^\w$]))*children:\1[^\w$])/,
+            replace: "$&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),!0)&&"
         }
     }]
 });
