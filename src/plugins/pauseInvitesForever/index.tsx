@@ -56,7 +56,7 @@ export default definePlugin({
                     replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
                 },
                 {
-                    match: /(\i\.hasDMsDisabled\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
+                    match: /(\i\.\i\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
                     replace: "$1,setChecked=$2"
                 }
             ]
