@@ -14,7 +14,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "HangStatusTypes.CHILLING)",
+            find: ".CHILLING)",
             replacement: {
                 match: /{enableHangStatus:(\i),/,
                 replace: "{_enableHangStatus:$1=false,"

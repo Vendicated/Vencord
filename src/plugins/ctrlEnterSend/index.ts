@@ -40,9 +40,9 @@ export default definePlugin({
     }),
     patches: [
         {
-            find: "KeyboardKeys.ENTER&&(!",
+            find: ".ENTER&&(!",
             replacement: {
-                match: /(?<=(\i)\.which===\i\.KeyboardKeys.ENTER&&).{0,100}(\(0,\i\.hasOpenPlainTextCodeBlock\)\(\i\)).{0,100}(?=&&\(\i\.preventDefault)/,
+                match: /(?<=(\i)\.which===\i\.\i.ENTER&&).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=&&\(\i\.preventDefault)/,
                 replace: "$self.shouldSubmit($1, $2)"
             }
         }

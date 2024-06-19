@@ -19,10 +19,10 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findLazy } from "@webpack";
 import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
 
-const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
+const InvitesDisabledExperiment = findLazy(m => m.definition?.id === "2022-07_invites_disabled");
 
 function showDisableInvites(guildId: string) {
     // Once the experiment is removed, this should keep working
@@ -56,7 +56,7 @@ export default definePlugin({
                     replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
                 },
                 {
-                    match: /(\i\.hasDMsDisabled\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
+                    match: /(\i\.\i\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
                     replace: "$1,setChecked=$2"
                 }
             ]
