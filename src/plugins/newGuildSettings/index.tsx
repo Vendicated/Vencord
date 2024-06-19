@@ -19,10 +19,15 @@
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
+const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
+    toggleShowAllChannels: m => {
+        const s = String(m);
+        return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
+    }
+});
 const isOptInEnabledForGuild = findByCodeLazy(".COMMUNITY)||", ".isOptInEnabled(");
 
 const settings = definePluginSettings({
