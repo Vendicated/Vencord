@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Channel, User } from "discord-types/general";
+import { canonicalizeMatch } from "@utils/patches";
+import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByProps, findByPropsLazy, findLazy, proxyLazyWebpack, waitFor } from "../webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -36,15 +37,15 @@ waitFor(["dispatch", "subscribe"], m => {
 });
 
 export let ComponentDispatch;
-waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
-
-export const Constants = findByPropsLazy("Endpoints");
-
-export const RestAPI: t.RestAPI = proxyLazyWebpack(() => {
-    const mod = findByProps("getAPIBaseURL");
-    return mod.HTTP ?? mod;
+export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
+    Endpoints: filters.byProps("USER", "ME"),
+    UserFlags: filters.byProps("STAFF", "SPAMMER"),
+    FriendsSections: m => m.PENDING === "PENDING" && m.ADD_FRIEND
 });
+
+export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
@@ -118,30 +119,39 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = findByPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+export const UserUtils = {
+    getUser: findByCodeLazy(".USER(")
+};
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
-export const UploadHandler = findByPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
-    promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
+export const UploadHandler = {
+    promptToUpload: findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
-export const Clipboard: t.Clipboard = findByPropsLazy("SUPPORTS_COPY", "copy");
+export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
+    copy: filters.byCode(".copy("),
+    SUPPORTS_COPY: e => typeof e === "boolean"
+});
 
-export const NavigationRouter: t.NavigationRouter = findByPropsLazy("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
+    back: filters.byCode("goBack()"),
+    forward: filters.byCode("goForward()"),
+});
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
-export const { Permissions: PermissionsBits } = findLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
 export const zustandCreate = findByCodeLazy("will be removed in v4");
 
-const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = findLazy(m => m.persist && persistFilter(m.persist));
+export const zustandPersist = findByCodeLazy("[zustand persist middleware]");
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
@@ -149,3 +159,10 @@ export const UserProfileActions = findByPropsLazy("openUserProfileModal", "close
 export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
+
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
+// TODO: type
+export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    closeExpressionPicker: filters.byCode("setState({activeView:null"),
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+});
