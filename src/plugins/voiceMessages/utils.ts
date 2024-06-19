@@ -17,7 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 
-export const { getInputDeviceId } = findByPropsLazy("getInputDeviceId");
+export const { getInputDeviceId } = findStoreLazy("MediaEngineStore");
 export const cl = classNameFactory("vc-vmsg-");
