@@ -27,13 +27,6 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
-            replacement: {
-                match: /,?(?=\i\(this,"idleTimeout",new \i\.Timeout\))/,
-                replace: ";return;"
-            }
-        },
-        {
             find: "this,\"actions\",{VOICE_STATE_UPDATES:this.handleVoiceStateUpdates,",
             replacement: {
                 match: /\i:this.handleVoiceStateUpdates/,
