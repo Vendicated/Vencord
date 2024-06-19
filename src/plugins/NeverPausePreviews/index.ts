@@ -32,10 +32,10 @@ export default definePlugin({
             }
         },
         {   //in-call player patch #1 (keep stream playing)
-            find: "VideoStreamFit:",
+            find: "onSpinnerStarted():null",
             replacement: {
-                match: /paused:\i}\)/,
-                replace: "paused:false})"
+                match: /paused:\i([^=])/,
+                replace: "paused:false$1"
             }
         },
         {   //in-call player patch #2 (disable "your stream is still running" text overlay)
