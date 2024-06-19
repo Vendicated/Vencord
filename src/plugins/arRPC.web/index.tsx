@@ -20,10 +20,10 @@ import { popNotice, showNotice } from "@api/Notices";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const RpcUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
+const fetchApplicationsRPC = findByCodeLazy("APPLICATION_RPC(", "Client ID");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
@@ -32,7 +32,7 @@ async function lookupAsset(applicationId: string, key: string): Promise<string> 
 const apps: any = {};
 async function lookupApp(applicationId: string): Promise<string> {
     const socket: any = {};
-    await RpcUtils.fetchApplicationsRPC(socket, applicationId);
+    await fetchApplicationsRPC(socket, applicationId);
     return socket.application;
 }
 
