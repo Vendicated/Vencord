@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Message } from "discord-types/general";
 import { Logger } from "@utils/Logger";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
@@ -131,9 +130,9 @@ export default definePlugin({
             },
         },
     ],
-    isBlocked(message: Message) {
+    isBlocked(userId: string) {
         try {
-            return RelationshipStore.isBlocked(message.author.id);
+            return RelationshipStore.isBlocked(userId);
         } catch (e) {
             new Logger(this.name).error("Failed to check if user is blocked:", e);
         }
