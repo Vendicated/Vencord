@@ -52,6 +52,8 @@ export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", 
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
+export const ReactDnd = findByPropsLazy("useDrop", "DndProvider");
+
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
@@ -160,6 +162,7 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
+export const { ackChannel } = findByPropsLazy("ackChannel");
 const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
 // TODO: type
 export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
