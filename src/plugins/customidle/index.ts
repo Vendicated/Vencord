@@ -34,15 +34,12 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "IDLE_DURATION:function(){return",
-            replacement: {
-                match: /(IDLE_DURATION:function\(\){return )\i/,
-                replace: "$1$self.getIdleTimeout()"
-            }
-        },
-        {
             find: 'type:"IDLE",idle:',
             replacement: [
+                {
+                    match: /(?<=Date\.now\(\)-\i>)\i\.\i/,
+                    replace: "$self.getIdleTimeout()"
+                },
                 {
                     match: /Math\.min\((\i\.\i\.getSetting\(\)\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
                     replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
