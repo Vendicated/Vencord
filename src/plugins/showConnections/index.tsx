@@ -203,7 +203,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            find: ".PROFILE_PANEL,",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
@@ -211,7 +211,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".UserProfileTypes.BITE_SIZE,onOpenProfile",
+            find: ".BITE_SIZE,onOpenProfile",
             replacement: {
                 match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
