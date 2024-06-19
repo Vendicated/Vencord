@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "NoAccountLimit",
-    description: "Allows you to add as many accounts as you want", 
+    description: "Allows you to add as many accounts as you want",
     authors: [Devs.HAHALOSAH],
     patches: [
         {
