@@ -26,6 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
+import { CSSProperties } from "react";
 
 const SessionsStore = findStoreLazy("SessionsStore");
 
@@ -69,7 +70,15 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
 
 const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
+interface PlatformIndicatorProps {
+    user: User;
+    wantMargin?: boolean;
+    wantTopMargin?: boolean;
+    small?: boolean;
+    style?: CSSProperties;
+}
+
+export const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false, style = {} }: PlatformIndicatorProps) => {
     if (!user || user.bot) return null;
 
     if (user.id === UserStore.getCurrentUser().id) {
@@ -120,7 +129,8 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
                 position: "relative",
                 top: wantTopMargin ? 2 : 0,
                 padding: !wantMargin ? 1 : 0,
-                gap: 2
+                gap: 2,
+                ...style
             }}
 
         >

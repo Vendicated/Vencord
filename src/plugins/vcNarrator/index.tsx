@@ -25,16 +25,7 @@ import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
-
-interface VoiceState {
-    userId: string;
-    channelId?: string;
-    oldChannelId?: string;
-    deaf: boolean;
-    mute: boolean;
-    selfDeaf: boolean;
-    selfMute: boolean;
-}
+import { VoiceState } from "@webpack/types";
 
 const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
