@@ -19,16 +19,27 @@
 import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { DeleteIcon } from "@components/Icons";
+import { classNameFactory } from "@api/Styles";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { insertTextIntoChatInputBox } from "@utils/discord";
+import { Margins } from "@utils/margins";
+import {
+    ModalCloseButton,
+    ModalContent, ModalFooter,
+    ModalHeader,
+    ModalProps,
+    ModalRoot,
+    openModal
+} from "@utils/modal";
+import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, PermissionStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, Forms, PermissionStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { Member, PKAPI, System } from "pkapi.js";
 
-const api = new PKAPI({
-});
+import pluralKit from "./index";
+import { localStorage } from "@utils/localStorage";
 
 function isPk(msg: Message) {
     return (msg && msg.applicationId === "466378653216014359");
@@ -40,6 +51,8 @@ const EditIcon = () => {
     </svg>;
 };
 
+const cl = classNameFactory("vc-pluralkit-");
+
 const settings = definePluginSettings({
     colorNames: {
         type: OptionType.BOOLEAN,
@@ -50,6 +63,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Display member IDs in chat",
         default: false
+    },
+    displayMemberPronouns: {
+        type: OptionType.BOOLEAN,
+        description: "Display member pronouns in chat",
+        default: false
     }
 });
 
@@ -58,11 +76,13 @@ const DATASTORE_KEY = "pk";
 
 interface Author {
     messageIds: string[];
-    member: Member|string|undefined;
+    member: Member;
     system: System;
 }
 
 let authors: Record<string, Author> = {};
+
+let localSystem: Author[] = [];
 
 const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
@@ -85,7 +105,7 @@ export default definePlugin({
         },
     ],
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => {
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => useAwaiter(async () => {
         const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
         try {
             const discordUsername = author.nick??author.displayName??author.username;
@@ -93,19 +113,24 @@ export default definePlugin({
                 return <>{prefix}{discordUsername}</>;
 
             const authorOfMessage = getAuthorOfMessage(message);
-            let color: string = "ffffff";
+            let color: string = "666666";
 
-            if (authorOfMessage?.member instanceof Member && settings.store.colorNames) {
+            if (authorOfMessage?.member && settings.store.colorNames) {
                 color = authorOfMessage.member.color??color;
             }
             const member: Member = authorOfMessage?.member as Member;
+            const systemSettings = await (authorOfMessage?.system as System).getGuildSettings(message.guild_id);
+
             return <span style={{
                 color: `#${color}`,
-            }}>{prefix}{member.display_name??member.name}{authorOfMessage.system?.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
+            }}>{prefix}{member.display_name??member.name}{settings.store.displayMemberPronouns&&authorOfMessage.member.pronouns?` | (${authorOfMessage.member.pronouns})`:""}{systemSettings.tag??authorOfMessage.system?.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
         } catch {
             return <>{prefix}{author?.nick}</>;
         }
-    },
+    }),
+
+    api: new PKAPI({
+    }),
 
     async start() {
         authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
@@ -136,15 +161,39 @@ export default definePlugin({
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: async () => deleteMessage(msg),
+                onClick: () => deleteMessage(msg),
                 onContextMenu: _ => {}
             };
+        });
+
+        addButton("pk-view-profile", msg => {
+            if (!msg) return null;
+            if (!isPk(msg)) return null;
+
+            return {
+                icon: () => {
+                    return <PlusIcon/>;
+                },
+                label: "View Profile",
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: () => openProfile(msg)
+            };
+
         });
     },
     stop() {
         removeButton("pk-edit");
     },
 });
+
+async function openProfile(message: Message) {
+    const author = getAuthorOfMessage(message);
+    const id = author.member?.id??"n/a";
+    openModal(modalProps => {
+        return <UserPopoutModal author={author} modalProps={modalProps}/>;
+    });
+}
 
 function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, content?: string | undefined) {
     FluxDispatcher.dispatch({
@@ -189,10 +238,92 @@ function getAuthorOfMessage(message: Message) {
         return authors[generateAuthorData(message)];
     }
 
-    api.getMessage({ message: message.id }).then(msg => {
-        authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: msg.member, system: msg.system as System });
+    pluralKit.api.getMessage({ message: message.id }).then(msg => {
+        if (!(msg.member instanceof Member)) {
+            pluralKit.api.getMember({ member: msg.member??"n/a" }).then(m => {
+                authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: m, system: msg.system as System });
+            });
+        }
+        const mem = msg.member as Member;
+        // @ts-ignore
+        authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: mem, system: msg.system as System });
     });
 
     DataStore.set(DATASTORE_KEY, authors);
     return authors[generateAuthorData(message)];
 }
+/*
+async function generateLocalSystemData() {
+    let author: Author|undefined = undefined;
+    const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
+    for (const s of system.members??[]) {
+        author = {
+            messageIds: [],
+            member: member,
+            system: system
+        };
+        localSystem.push(author);
+    }
+
+}*/
+
+
+function UserPopoutModal({ author, modalProps }: { author: Author, modalProps: ModalProps; }) {
+    const { member, system } = author;
+
+    if (!member || !system) {
+        return UnknownUser(modalProps);
+    }
+
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader className={cl("modal-header")}>
+                <Forms.FormSection>
+                    <img className={cl("banner")} src={member.banner ?? system.banner ?? ""} alt={"Banner"} height={120}
+                        width={340}/>
+                </Forms.FormSection>
+                <img className={cl("avatar")} src={member.avatar_url ?? system.avatar_url ?? ""} alt="Avatar"
+                    height={128} width={128} style={
+                        {
+                            borderRadius: "50%",
+                            border: "1px solid var(--background-modifier-accent)"
+                        }
+                    }/>
+            </ModalHeader>
+
+            <ModalContent className={cl("modal-content")}>
+                <Forms.FormTitle tag="h3">
+                    {member.display_name}
+                </Forms.FormTitle>
+                <Forms.FormText>{member.name}</Forms.FormText>
+            </ModalContent>
+            <ModalFooter>
+                <Forms.FormTitle tag="h3">
+                    {system.name}
+                </Forms.FormTitle>
+                <Forms.FormText>{system.tag}</Forms.FormText>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
+
+
+const UnknownUser = (modalProps: ModalProps) => {
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader className={cl("modal-header")}>
+                <Forms.FormTitle tag="h2">
+                    User not found
+                </Forms.FormTitle>
+                <ModalCloseButton onClick={modalProps.onClose} />
+            </ModalHeader>
+            <ModalContent className={cl("modal-content")}>
+                <section className={Margins.bottom16}>
+                    <Forms.FormTitle tag="h3">
+                        The user you're trying to view doesn't exist.
+                    </Forms.FormTitle>
+                </section>
+            </ModalContent>
+        </ModalRoot>
+    );
+};
