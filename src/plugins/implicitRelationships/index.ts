@@ -19,17 +19,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
-const { FriendsSections } = findByPropsLazy("FriendsSections");
-
-interface UserAffinity {
-    user_id: string;
-    affinity: number;
-}
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -70,7 +64,7 @@ export default definePlugin({
         },
         // Piggyback relationship fetch
         {
-            find: ".fetchRelationships()",
+            find: '"FriendsStore',
             replacement: {
                 match: /(\i\.\i)\.fetchRelationships\(\)/,
                 // This relationship fetch is actually completely useless, but whatevs
@@ -182,6 +176,6 @@ export default definePlugin({
     },
 
     start() {
-        FriendsSections.IMPLICIT = "IMPLICIT";
+        Constants.FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });
