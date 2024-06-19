@@ -115,23 +115,23 @@ export default definePlugin({
     commands: [
         {
             name: "tags",
-            description: "Manage all the tags for yourself",
+            description: "Manage all your custom commands.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
                     name: "create",
-                    description: "Create a new tag",
+                    description: "Create a new custom slash command.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         },
                         {
                             name: "message",
-                            description: "The message that you will send when using this tag",
+                            description: "The message that will sent as you when using this tag.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -139,18 +139,18 @@ export default definePlugin({
                 },
                 {
                     name: "list",
-                    description: "List all tags from yourself",
+                    description: "List all your custom commands.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: []
                 },
                 {
                     name: "delete",
-                    description: "Remove a tag from your yourself",
+                    description: "Delete a custom slash command.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -162,8 +162,8 @@ export default definePlugin({
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
