@@ -100,6 +100,7 @@ export async function showNotification(data: NotificationData) {
         const n = new Notification(title, {
             body,
             icon,
+            // @ts-expect-error ts is drunk
             image
         });
         n.onclick = onClick;
