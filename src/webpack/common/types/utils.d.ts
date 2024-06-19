@@ -219,4 +219,5 @@ export interface IconUtils {
 export interface Constants {
     Endpoints: Record<string, any>;
     UserFlags: Record<string, number>;
+    FriendsSections: Record<string, string>;
 }

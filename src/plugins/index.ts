@@ -44,7 +44,6 @@ const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
 const forceDisabled = new Set([
-    "ShowHiddenChannels",
     "MoreUserTags"
 ]);
 export function isPluginEnabled(p: string) {
