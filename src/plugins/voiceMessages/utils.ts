@@ -17,5 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { findByPropsLazy } from "@webpack";
 
+export const { getInputDeviceId } = findByPropsLazy("getInputDeviceId");
 export const cl = classNameFactory("vc-vmsg-");
