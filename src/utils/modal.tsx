@@ -111,6 +111,7 @@ export type ImageModal = ComponentType<{
     animated?: boolean;
     responsive?: boolean;
     renderLinkComponent(props: any): ReactNode;
+    renderForwardComponent(props: any): ReactNode;
     maxWidth?: number;
     maxHeight?: number;
     shouldAnimate?: boolean;
