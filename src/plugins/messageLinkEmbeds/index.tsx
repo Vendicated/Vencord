@@ -49,7 +49,7 @@ const messageCache = new Map<string, {
 
 const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
-const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
+const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
