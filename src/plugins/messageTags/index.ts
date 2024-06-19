@@ -47,6 +47,24 @@ const removeTag = async (name: string) => {
     return tags;
 };
 
+async function replaceSubTags(message: string) {
+    const templates = message.match(/\[insert-tag:.{1,32}?\]/gi);
+
+    if (templates?.length) {
+        for (const template of templates) {
+            const name = template.split(":")[1].slice(0, -1);
+            const tag = await getTag(name);
+
+            message = message.replace(
+                template,
+                tag?.message || `[invalid tag: ${name}]`
+            );
+        }
+    }
+
+    return message;
+}
+
 function createTagCommand(tag: Tag) {
     registerCommand({
         name: tag.name,
@@ -57,13 +75,19 @@ function createTagCommand(tag: Tag) {
                 sendBotMessage(ctx.channel.id, {
                     content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
                 });
+
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
-                content: `${EMOTE} The tag **${tag.name}** has been sent!`
-            });
-            return { content: tag.message.replaceAll("\\n", "\n") };
+            if (Settings.plugins.MessageTags.clyde) {
+                sendBotMessage(ctx.channel.id, {
+                    content: `${EMOTE} The Tag **${tag.name}** has been sent!`
+                });
+            }
+
+            const message = await replaceSubTags(tag.message);
+
+            return { content: message.replaceAll("\\n", "\n") };
         },
         [MessageTagsMarker]: true,
     }, "CustomTags");
@@ -216,8 +240,11 @@ export default definePlugin({
                                 content: `${EMOTE} A Tag with the name **${name}** does not exist!`
                             });
 
+
+                        const message = await replaceSubTags(tag.message);
+
                         sendBotMessage(ctx.channel.id, {
-                            content: tag.message.replaceAll("\\n", "\n")
+                            content: message.replaceAll("\\n", "\n")
                         });
                         break; // end 'preview'
                     }
