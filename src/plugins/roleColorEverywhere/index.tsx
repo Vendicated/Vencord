@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
@@ -39,8 +40,15 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the voice chat user list",
         restartNeeded: true
+    },
+    reactorsList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the reactors list",
+        restartNeeded: true
     }
 });
+
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -49,7 +57,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -63,7 +71,7 @@ export default definePlugin({
             find: ".userTooltip,children",
             replacement: [
                 {
-                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
+                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
                     replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
@@ -93,11 +101,19 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
             predicate: () => settings.store.voiceUsers,
+        },
+        {
+            find: ".reactorDefault",
+            replacement: {
+                match: /\.openUserContextMenu\)\((\i),(\i),\i\).{0,250}tag:"strong"/,
+                replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
+            },
+            predicate: () => settings.store.reactorsList,
         }
     ],
     settings,
@@ -112,9 +128,8 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) {
-        const guild = GuildStore.getGuild(guildId);
-        const role = guild?.roles[id];
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
+        const role = GuildStore.getRole(guildId, id);
 
         return (
             <span style={{
@@ -125,7 +140,7 @@ export default definePlugin({
                 {title ?? label} &mdash; {count}
             </span>
         );
-    },
+    }, { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {

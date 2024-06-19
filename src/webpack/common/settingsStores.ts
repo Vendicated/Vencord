@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByPropsLazy } from "@webpack";
+import { findLazy } from "@webpack";
 
-export const TextAndImagesSettingsStores = findByPropsLazy("MessageDisplayCompact");
-export const StatusSettingsStores = findByPropsLazy("ShowCurrentGame");
-
-export const UserSettingsActionCreators = findByPropsLazy("PreloadedUserSettingsActionCreators");
+export const UserSettingsActionCreators = {
+    FrecencyUserSettingsActionCreators: findLazy(m => m.typeName?.endsWith(".FrecencyUserSettings")),
+    PreloadedUserSettingsActionCreators: findLazy(m => m.typeName?.endsWith(".PreloadedUserSettings")),
+};

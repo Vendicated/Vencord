@@ -77,7 +77,8 @@ const enum NameFormat {
     ArtistFirst = "artist-first",
     SongFirst = "song-first",
     ArtistOnly = "artist",
-    SongOnly = "song"
+    SongOnly = "song",
+    AlbumName = "album"
 }
 
 const applicationId = "1108588077900898414";
@@ -113,6 +114,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
+    shareSong: {
+        description: "show link to song on last.fm",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
     hideWithSpotify: {
         description: "hide last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
@@ -147,6 +153,10 @@ const settings = definePluginSettings({
             {
                 label: "Use song name only",
                 value: NameFormat.SongOnly
+            },
+            {
+                label: "Use album name (falls back to custom status text if song has no album)",
+                value: NameFormat.AlbumName
             }
         ],
     },
@@ -170,6 +180,11 @@ const settings = definePluginSettings({
             }
         ],
     },
+    showLastFmLogo: {
+        description: "show the Last.fm logo by the album cover",
+        type: OptionType.BOOLEAN,
+        default: true,
+    }
 });
 
 export default definePlugin({
@@ -276,24 +291,27 @@ export default definePlugin({
             {
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
-                small_image: await getApplicationAsset("lastfm-small"),
-                small_text: "Last.fm",
+                ...(settings.store.showLastFmLogo && {
+                    small_image: await getApplicationAsset("lastfm-small"),
+                    small_text: "Last.fm"
+                }),
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
                 large_text: trackData.album || undefined,
             };
 
-        const buttons: ActivityButton[] = [
-            {
-                label: "View Song",
-                url: trackData.url,
-            },
-        ];
+        const buttons: ActivityButton[] = [];
 
         if (settings.store.shareUsername)
             buttons.push({
                 label: "Last.fm Profile",
                 url: `https://www.last.fm/user/${settings.store.username}`,
+            });
+
+        if (settings.store.shareSong)
+            buttons.push({
+                label: "View Song",
+                url: trackData.url,
             });
 
         const statusName = (() => {
@@ -306,6 +324,8 @@ export default definePlugin({
                     return trackData.artist;
                 case NameFormat.SongOnly:
                     return trackData.name;
+                case NameFormat.AlbumName:
+                    return trackData.album || settings.store.statusName;
                 default:
                     return settings.store.statusName;
             }
@@ -319,7 +339,7 @@ export default definePlugin({
             state: trackData.artist,
             assets,
 
-            buttons: buttons.map(v => v.label),
+            buttons: buttons.length ? buttons.map(v => v.label) : undefined,
             metadata: {
                 button_urls: buttons.map(v => v.url),
             },
