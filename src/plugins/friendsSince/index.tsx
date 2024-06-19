@@ -26,17 +26,17 @@ export default definePlugin({
     patches: [
         // User popup
         {
-            find: ".AnalyticsSections.USER_PROFILE}",
+            find: ".USER_PROFILE}};return",
             replacement: {
-                match: /\i.default,\{userId:(\i.id).{0,30}}\)/,
+                match: /\i.\i,\{userId:(\i.id).{0,30}}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
         // User DMs "User Profile" popup in the right
         {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            find: ".PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,\{userId:([^,]+?)}\)/,
+                match: /\i.\i,\{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
