@@ -49,7 +49,6 @@ const forceDisabled = new Set([
     "MoreUserTags",
     "Decor",
     "IgnoreActivities",
-    "NoBlockedMessages",
     "BetterFolders"
 ]);
 export function isPluginEnabled(p: string) {

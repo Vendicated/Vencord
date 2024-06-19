@@ -67,20 +67,20 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu],
     settings,
     patches: [
-        // Based on canary 70001c7d67fae9258eb77f27d7addd4a20b99fad
+        // Based on canary bd584cf8aedd674f8d65c316892cf5054b7b6fd5
         {
             // Hide blocked message groups from non-DM channels
-            find: "ChannelStreamTypes.MESSAGE_GROUP_BLOCKED||",
+            find: ".MESSAGE_GROUP_BLOCKED||",
             replacement: {
-                match: /map\(\((?<param>\i).+?ChannelStreamTypes.MESSAGE_GROUP_SPAMMER\)\{/,
-                replace: "$& if(!arguments[0].channel.isDM() && $<param>.type === 'MESSAGE_GROUP_BLOCKED') return;",
+                match: /(\i)\.type===(?:\i\.)+MESSAGE_GROUP_SPAMMER\)\{/,
+                replace: "$& console.log(arguments);if($1.type === 'MESSAGE_GROUP_BLOCKED') return;",
             },
         },
         ...[
             // Ignore new messages from blocked users
-            "displayName=\"MessageStore\"",
+            "\"MessageStore\"",
             // Don't mark channels unread because of blocked user messages
-            "displayName=\"ReadStateStore\"",
+            "\"ReadStateStore\"",
         ].map(find => ({
             find,
             predicate: () => settings.store.ignoreBlockedMessages,
@@ -100,7 +100,7 @@ export default definePlugin({
         },
         {
             // Ignore all TYPING_START events from blocked users
-            find: "displayName=\"TypingStore\"",
+            find: "\"TypingStore\"",
             predicate: () => settings.store.ignoreTyping,
             replacement: {
                 match: /TYPING_START:(?<func>\i)/,
@@ -109,10 +109,14 @@ export default definePlugin({
         },
         {
             // Hide blocked users from chat autocomplete
-            find: ".GlobalMentionMode.ALLOW_EVERYONE_OR_HERE,",
+            find: ".ALLOW_EVERYONE_OR_HERE,",
             replacement: {
-                match: /(?<start>queryResults.+?)(?<end>return{results:(?<results>\i))/,
-                replace: "$<start> $<results>.users=$<results>.users.filter(res=>!$self.isBlocked(res.user.id)); $<end>",
+                match: /(?<start>queryResults.+?)return\{results:(?<results>.+?\))}/,
+                replace:
+                    "$<start>" +
+                    "let results = $<results>;" +
+                    "results.users=results.users.filter(res=>!$self.isBlocked(res.user.id));" +
+                    "return { results }",
             },
         },
         {
