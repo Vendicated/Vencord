@@ -144,8 +144,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Modify the expanded state to instead return the list of expanded folders
-                    match: /(\i\).{0,20}=>)(\i\.\i)\.isFolderExpanded\(\i\)/,
-                    replace: (_, rest, ExpandedGuildFolderStore) => `${rest}${ExpandedGuildFolderStore}.getExpandedFolders()`,
+                    match: /(\],\(\)=>)(\i\.\i)\.isFolderExpanded\(\i\)\)/,
+                    replace: (_, rest, ExpandedGuildFolderStore) => `${rest}${ExpandedGuildFolderStore}.getExpandedFolders())`,
                 },
                 {
                     // Modify the expanded prop to use the boolean if the above patch fails, or check if the folder is expanded from the list if it succeeds
