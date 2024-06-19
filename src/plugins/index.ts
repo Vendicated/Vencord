@@ -44,7 +44,6 @@ const settings = Settings.plugins;
 
 export function isPluginEnabled(p: string) {
     return (
-        IS_REPORTER ||
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
         settings[p]?.enabled
@@ -196,7 +195,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, flux, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -242,7 +241,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, flux, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);

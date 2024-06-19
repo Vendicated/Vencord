@@ -17,16 +17,18 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStores";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { StatusSettingsStores } from "@webpack/common";
 
 import style from "./style.css?managed";
 
 const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
+
+const ShowCurrentGame = getSettingStoreLazy<boolean>("status", "showCurrentGame")!;
 
 function makeIcon(showCurrentGame?: boolean) {
     const { oldIcon } = settings.use(["oldIcon"]);
@@ -60,7 +62,7 @@ function makeIcon(showCurrentGame?: boolean) {
 }
 
 function GameActivityToggleButton() {
-    const showCurrentGame = StatusSettingsStores.ShowCurrentGame.useSetting();
+    const showCurrentGame = ShowCurrentGame.useSetting();
 
     return (
         <Button
@@ -68,7 +70,7 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
-            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(old => !old)}
+            onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
 }
@@ -85,6 +87,7 @@ export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
     authors: [Devs.Nuckyz, Devs.RuukuLada],
+    dependencies: ["SettingsStoreAPI"],
     settings,
 
     patches: [

@@ -34,25 +34,22 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "IDLE_DURATION:function(){return",
-            replacement: {
-                match: /(IDLE_DURATION:function\(\){return )\i/,
-                replace: "$1$self.getIdleTimeout()"
-            }
-        },
-        {
             find: 'type:"IDLE",idle:',
             replacement: [
                 {
-                    match: /Math\.min\((\i\.AfkTimeout\.getSetting\(\)\*\i\.default\.Millis\.SECOND),\i\.IDLE_DURATION\)/,
+                    match: /(?<=Date\.now\(\)-\i>)\i\.\i/,
+                    replace: "$self.getIdleTimeout()"
+                },
+                {
+                    match: /Math\.min\((\i\.\i\.getSetting\(\)\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
                     replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
                 },
                 {
-                    match: /\i\.default\.dispatch\({type:"IDLE",idle:!1}\)/,
+                    match: /\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,
                     replace: "$self.handleOnline()"
                 },
                 {
-                    match: /(setInterval\(\i,\.25\*)\i\.IDLE_DURATION/,
+                    match: /(setInterval\(\i,\.25\*)\i\.\i/,
                     replace: "$1$self.getIntervalDelay()" // For web installs
                 }
             ]
