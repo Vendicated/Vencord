@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: "this,\"actions\",{VOICE_STATE_UPDATES:this.handleVoiceStateUpdates,",
+            find: 'this,"actions",{VOICE_STATE_UPDATES:this.handleVoiceStateUpdates,',
             replacement: {
                 match: /\i:this.handleVoiceStateUpdates/,
                 replace: "VOICE_STATE_UPDATES:()=>{}"
