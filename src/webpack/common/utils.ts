@@ -40,7 +40,8 @@ waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
 export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
     Endpoints: filters.byProps("USER", "ME"),
-    UserFlags: filters.byProps("STAFF", "SPAMMER")
+    UserFlags: filters.byProps("STAFF", "SPAMMER"),
+    FriendsSections: m => m.PENDING === "PENDING" && m.ADD_FRIEND
 });
 
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
