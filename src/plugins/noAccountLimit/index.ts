@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,19 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "BANger",
-    description: "Replaces the GIF in the ban dialogue with a custom one.",
-    authors: [Devs.Xinto, Devs.Glitch],
+    name: "NoAccountLimit",
+    description: "Allows you to add as many accounts as you want",
+    authors: [Devs.HAHALOSAH],
     patches: [
         {
-            find: "BAN_CONFIRM_TITLE.",
+            find: '"switch-accounts-modal"',
             replacement: {
-                match: /src:\i\("?\d+"?\)/g,
-                replace: "src: Vencord.Settings.plugins.BANger.source"
-            }
-        }
+                match: "=5",
+                replace: "=1/0"
+            },
+        },
     ],
-    options: {
-        source: {
-            description: "Source to replace ban GIF with (Video or Gif)",
-            type: OptionType.STRING,
-            default: "https://i.imgur.com/wp5q52C.mp4",
-            restartNeeded: true,
-        }
-    }
 });
