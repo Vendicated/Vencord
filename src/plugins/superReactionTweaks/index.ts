@@ -47,9 +47,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".trackEmojiSearchEmpty,200",
+            find: ".EMOJI_PICKER_CONSTANTS_EMOJI_CONTAINER_PADDING_HORIZONTAL)",
             replacement: {
-                match: /(\.trackEmojiSearchEmpty,200(?=.+?isBurstReaction:(\i).+?(\i===\i\.EmojiIntention.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
+                match: /(openPopoutType:void 0(?=.+?isBurstReaction:(\i).+?(\i===\i\.\i.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
                 replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
             }
         }
