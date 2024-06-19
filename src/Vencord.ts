@@ -17,6 +17,7 @@
 */
 
 export * as Api from "./api";
+export * as Components from "./components";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
@@ -40,6 +41,10 @@ import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
+
+if (IS_REPORTER) {
+    require("./debug/runReporter");
+}
 
 async function syncSettings() {
     // pre-check for local shared settings

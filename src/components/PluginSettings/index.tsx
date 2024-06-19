@@ -27,6 +27,7 @@ import PluginModal from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
@@ -38,8 +39,8 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 
 import Plugins from "~plugins";
 
-import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugins";
-
+// Avoid circular dependency
+const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
@@ -68,7 +69,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button color={Button.Colors.YELLOW} onClick={() => location.reload()}>
+                    <Button onClick={() => location.reload()}>
                         Restart
                     </Button>
                 </>
@@ -260,8 +261,9 @@ export default function PluginSettings() {
         plugins = [];
         requiredPlugins = [];
 
+        const showApi = searchValue.value === "API";
         for (const p of sortedPlugins) {
-            if (!p.options && p.name.endsWith("API") && searchValue.value !== "API")
+            if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
                 continue;
 
             if (!pluginFilter(p)) continue;
