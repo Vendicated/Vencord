@@ -38,7 +38,6 @@ const StickerStore = findStoreLazy("StickersStore") as {
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
-const RoleSubscriptionEmojiUtils = findByPropsLazy("isUnusableRoleSubscriptionEmoji");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -234,15 +233,16 @@ export default definePlugin({
                 }
             ]
         },
+        // FIXME
         // Allows the usage of subscription-locked emojis
-        {
-            find: "isUnusableRoleSubscriptionEmoji:function",
+        /* {
+            find: ".getUserIsAdmin(",
             replacement: {
-                match: /isUnusableRoleSubscriptionEmoji:function/,
+                match: /(?=.+?\.getUserIsAdmin\((?<=function (\i)\(\i,\i\){.+?))(\i):function\(\){return \1}/,
                 // Replace the original export with a func that always returns false and alias the original
-                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
+                replace: "$2:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function(){return $1}"
             }
-        },
+        }, */
         // Allow stickers to be sent everywhere
         {
             find: "canUseCustomStickersEverywhere:function",
@@ -361,7 +361,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Export the renderable sticker to be used in the fake nitro sticker notice
-                    match: /let{renderableSticker:(\i).{0,250}isGuildSticker.+?channel:\i,/,
+                    match: /let{renderableSticker:(\i).{0,270}sticker:\i,channel:\i,/,
                     replace: (m, renderableSticker) => `${m}fakeNitroRenderableSticker:${renderableSticker},`
                 },
                 {
@@ -816,8 +816,9 @@ export default definePlugin({
         if (e.type === 0) return true;
         if (e.available === false) return false;
 
-        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
+        // FIXME
+        /* const isUnusableRoleSubEmoji = isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
+        if (isUnusableRoleSubEmoji(e, this.guildId)) return false; */
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
