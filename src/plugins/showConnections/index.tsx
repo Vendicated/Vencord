@@ -33,7 +33,8 @@ import { VerifiedIcon } from "./VerifiedIcon";
 
 const Section = findComponentByCodeLazy(".lastSection", "children:");
 const ThemeStore = findStoreLazy("ThemeStore");
-const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
+
+const useLegacyPlatformType: (platform: string) => string = findByCodeLazy(".TWITTER_LEGACY:");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
@@ -74,15 +75,28 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} />
+const profilePopoutComponent = ErrorBoundary.wrap(
+    (props: { user: User; displayProfile?: any; simplified?: boolean; }) => (
+        <ConnectionsComponent
+            {...props}
+            id={props.user.id}
+            theme={getProfileThemeProps(props).theme}
+        />
+    ),
+    { noop: true }
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
-    <ConnectionsComponent id={id} theme={ThemeStore.theme} />
+const profilePanelComponent = ErrorBoundary.wrap(
+    (props: { id: string; simplified?: boolean; }) => (
+        <ConnectionsComponent
+            {...props}
+            theme={ThemeStore.theme}
+        />
+    ),
+    { noop: true }
 );
 
-function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
+function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: string, simplified?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -90,6 +104,19 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const connections: Connection[] = profile.connectedAccounts;
     if (!connections?.length)
         return null;
+
+    const connectionsContainer = (
+        <Flex style={{
+            marginTop: !simplified ? "8px" : undefined,
+            gap: getSpacingPx(settings.store.iconSpacing),
+            flexWrap: "wrap"
+        }}>
+            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+        </Flex>
+    );
+
+    if (simplified)
+        return connectionsContainer;
 
     return (
         <Section>
@@ -100,19 +127,13 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             >
                 Connections
             </Text>
-            <Flex style={{
-                marginTop: "8px",
-                gap: getSpacingPx(settings.store.iconSpacing),
-                flexWrap: "wrap"
-            }}>
-                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-            </Flex>
+            {connectionsContainer}
         </Section>
     );
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
-    const platform = platforms.get(platformHooks.useLegacyPlatformType(connection.type));
+    const platform = platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
@@ -132,7 +153,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
         <Tooltip
             text={
                 <span className="vc-sc-tooltip">
-                    {connection.name}
+                    <span className="vc-sc-connection-name">{connection.name}</span>
                     {connection.verified && <VerifiedIcon />}
                     <TooltipIcon height={16} width={16} />
                 </span>
@@ -182,11 +203,18 @@ export default definePlugin({
             }
         },
         {
-            find: "\"Profile Panel: user cannot be undefined\"",
+            find: ".PROFILE_PANEL,",
             replacement: {
                 // createElement(Divider, {}), createElement(NoteComponent)
                 match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
                 replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
+            }
+        },
+        {
+            find: ".BITE_SIZE,onOpenProfile",
+            replacement: {
+                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
             }
         }
     ],

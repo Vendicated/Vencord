@@ -56,7 +56,27 @@ export default definePlugin({
                 }
             ]
         },
-        // Discord Canary
+        // Discord Stable
+        // FIXME: remove once change merged to stable
+        {
+            find: "Messages.ACTIVITY_SETTINGS",
+            noWarn: true,
+            replacement: {
+                get match() {
+                    switch (Settings.plugins.Settings.settingsLocation) {
+                        case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
+                        case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
+                        case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
+                        case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
+                        case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
+                        case "aboveActivity":
+                        default:
+                            return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS/;
+                    }
+                },
+                replace: "...$self.makeSettingsCategories($1),$&"
+            }
+        },
         {
             find: "Messages.ACTIVITY_SETTINGS",
             replacement: {
@@ -65,17 +85,10 @@ export default definePlugin({
             }
         },
         {
-            find: "useDefaultUserSettingsSections:function",
-            replacement: {
-                match: /(?<=useDefaultUserSettingsSections:function\(\){return )(\i)\}/,
-                replace: "$self.wrapSettingsHook($1)}"
-            }
-        },
-        {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
-                replace: "$2.default.open($1);return;"
+                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
+                replace: "$2.open($1);return;"
             }
         }
     ],

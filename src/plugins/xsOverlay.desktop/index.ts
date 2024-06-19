@@ -8,12 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
-const { ChannelTypes } = findByPropsLazy("ChannelTypes");
+const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
 
 interface Message {
     guild_id: string,
@@ -68,7 +68,7 @@ interface Call {
     ringing: string[];
 }
 
-const Notifs = findByPropsLazy("makeTextChatNotification");
+const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
@@ -143,7 +143,9 @@ export default definePlugin({
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
     authors: [Devs.Nyako],
     tags: ["vr", "notify"],
+    reporterTestable: ReporterTestable.None,
     settings,
+
     flux: {
         CALL_UPDATE({ call }: { call: Call; }) {
             if (call?.ringing?.includes(UserStore.getCurrentUser().id) && settings.store.callNotifications) {
@@ -302,7 +304,7 @@ function shouldNotify(message: Message, channel: string) {
     const currentUser = UserStore.getCurrentUser();
     if (message.author.id === currentUser.id) return false;
     if (message.author.bot && !settings.store.botNotifications) return false;
-    return Notifs.shouldNotify(message, channel);
+    return notificationsShouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {
