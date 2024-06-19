@@ -37,7 +37,8 @@ const StickerStore = findStoreLazy("StickersStore") as {
 };
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
-const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
+
+const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -472,12 +473,12 @@ export default definePlugin({
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
-        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !ProtoUtils) return;
+        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
 
         const currentAppearanceSettings = PreloadedUserSettingsActionCreators.getCurrentValue().appearance;
 
         const newAppearanceProto = currentAppearanceSettings != null
-            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), ProtoUtils.BINARY_READ_OPTIONS)
+            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), BINARY_READ_OPTIONS)
             : AppearanceSettingsActionCreators.create();
 
         newAppearanceProto.theme = theme;
