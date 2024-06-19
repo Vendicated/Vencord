@@ -73,7 +73,7 @@ export default definePlugin({
     patches: [
         // voice message embeds
         {
-            find: "ComponentActions.VOICE_MESSAGE_PLAYBACK_STARTED",
+            find: "--:--",
             replacement: {
                 match: /onVolumeShow:\i,onVolumeHide:\i\}\)(?<=useCallback\(\(\)=>\{let \i=(\i).current;.+?)/,
                 replace: "$&,$self.playbackSpeedComponent($1)"
