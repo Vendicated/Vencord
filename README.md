@@ -24,7 +24,7 @@ The cutest Discord client mod
 
 ## Installing / Uninstalling
 
-Visit https://vencord.dev/download
+Download at https://github.com/Piripe/VencordPlusPlusInstaller/releases
 
 ## Join our Support/Community Server
 
