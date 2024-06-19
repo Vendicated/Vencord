@@ -30,7 +30,6 @@ import ReviewComponent from "./ReviewComponent";
 const Transforms = findByPropsLazy("insertNodes", "textToText");
 const Editor = findByPropsLazy("start", "end", "toSlateRange");
 const ChatInputTypes = findByPropsLazy("FORM");
-
 const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
