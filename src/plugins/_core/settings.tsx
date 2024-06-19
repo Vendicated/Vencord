@@ -85,13 +85,6 @@ export default definePlugin({
             }
         },
         {
-            find: "useDefaultUserSettingsSections:function",
-            replacement: {
-                match: /(?<=useDefaultUserSettingsSections:function\(\){return )(\i)\}/,
-                replace: "$self.wrapSettingsHook($1)}"
-            }
-        },
-        {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
                 match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
