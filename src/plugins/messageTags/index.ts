@@ -185,6 +185,12 @@ export default definePlugin({
                             description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
+                        },
+                        {
+                            name: "raw",
+                            description: "Get the raw content of your custom response.",
+                            type: ApplicationCommandOptionType.BOOLEAN,
+                            required: false
                         }
                     ]
                 }
@@ -291,6 +297,8 @@ export default definePlugin({
                     }
                     case "preview": {
                         const name = findOption(args[0].options, "name", "") as string;
+                        const isRaw = findOption(args[0].options, "raw", false) as boolean;
+
                         const tag = await getTag(name);
 
                         if (!tag) {
@@ -301,11 +309,19 @@ export default definePlugin({
                             return;
                         }
 
-                        const message = await replaceSubTags(tag.message);
 
-                        sendBotMessage(ctx.channel.id, {
-                            content: message.replaceAll("\\n", "\n")
-                        });
+                        if (isRaw) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: "```" + tag.message + "```"
+                            });
+                        }
+                        else {
+                            const message = await replaceSubTags(tag.message);
+
+                            sendBotMessage(ctx.channel.id, {
+                                content: message.replaceAll("\\n", "\n")
+                            });
+                        }
 
                         break; // end 'preview'
                     }
