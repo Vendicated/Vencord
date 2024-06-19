@@ -116,14 +116,14 @@ export default definePlugin({
         },
         // Prevent Discord from trying to connect to hidden stage channels
         {
-            find: ".MAX_STAGE_VOICE_USER_LIMIT})",
+            find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
                 match: /!(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
                 replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
-            find: "ChannelItemEditButton:function(){",
+            find: 'tutorialId:"instant-invite"',
             replacement: [
                 // Render null instead of the buttons if the channel is hidden
                 ...[
@@ -209,9 +209,9 @@ export default definePlugin({
         },
         {
             // Make the state of the old version of unreads box not include hidden channels
-            find: ".useFlattenedChannelIdListWithThreads)",
+            find: "ignoreRecents:!0",
             replacement: {
-                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i)\))/,
+                match: /(?=\.id\)\)&&\(0,\i\.\i\)\((\i)\))/,
                 replace: "&&!$self.isHiddenChannel($1)"
             }
         },
@@ -422,7 +422,7 @@ export default definePlugin({
                 },
                 {
                     // Avoid filtering out hidden channels from the channel list
-                    match: /(?<=queryChannels\(\i\){.+?isGuildChannelType\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
+                    match: /(?<=queryChannels\(\i\){.+?\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
                     replace: "&&!$self.isHiddenChannel($1)"
                 }
             ]
