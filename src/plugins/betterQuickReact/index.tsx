@@ -60,7 +60,7 @@ export default definePlugin({
         },
         // Override limit of emojis to display
         {
-            find: "default.Messages.ADD_REACTION_NAMED.format",
+            find: ".ADD_REACTION_NAMED.format",
             replacement: {
                 match: /(\i)\.length>4&&\((\i)\.length=4\);/,
                 replace: "let [betterQuickReactScrollValue,setBetterQuickReactScrollValue]=Vencord.Webpack.Common.React.useState(0);betterQuickReactScrollValue;"
@@ -68,14 +68,14 @@ export default definePlugin({
         },
         // Add a custom class to identify the quick reactions have been modified and a CSS variable for the number of columns to display
         {
-            find: "default.Messages.ADD_REACTION_NAMED.format",
+            find: ".ADD_REACTION_NAMED.format",
             replacement: {
                 match: /className:(\i)\.wrapper,/,
                 replace: "className:\"vc-better-quick-react \"+($self.settings.store.compactMode?\"vc-better-quick-react-compact \":\"\")+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
             }
         },
         {
-            find: "default.Messages.ADD_REACTION_NAMED.format",
+            find: ".ADD_REACTION_NAMED.format",
             replacement: {
                 match: /children:(\i)\.map\(/,
                 replace: "onWheel:$self.onWheelWrapper(betterQuickReactScrollValue,setBetterQuickReactScrollValue,$1.length),children:$self.applyScroll($1,betterQuickReactScrollValue).map("
@@ -83,7 +83,7 @@ export default definePlugin({
         },
         // MenuGroup doesn't accept styles or anything special by default :/
         {
-            find: "{MenuGroup:function()",
+            find: ".groupLabel,",
             replacement: {
                 match: /role:"group",/,
                 replace: "role:\"group\",style:arguments[0].style,onWheel:arguments[0].onWheel,"
