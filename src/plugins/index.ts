@@ -19,6 +19,7 @@
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
+import { onceDefined } from "@shared/onceDefined";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
 import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
@@ -33,7 +34,7 @@ const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
 export const plugins = Plugins;
-export const patches = [] as Patch[];
+export let patches = [] as Patch[];
 
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
@@ -43,17 +44,9 @@ const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
 const forceDisabled = new Set([
-    "MessageLogger",
-    "ShowHiddenChannels",
-    "MoreUserTags",
-    "Decor",
-    "IgnoreActivities",
-    "NoBlockedMessages",
-    "BetterFolders",
-    "NoPendingCount"
+    "MoreUserTags"
 ]);
 export function isPluginEnabled(p: string) {
-    if (forceDisabled.has(p)) return false;
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
@@ -133,9 +126,17 @@ for (const p of pluginsValues) {
     }
 }
 
+onceDefined(window, "GLOBAL_ENV", v => {
+    if (v.SENTRY_TAGS.buildId !== "366c746173a6ca0a801e9f4a4d7b6745e6de45d4") {
+        patches = patches.filter(p => !forceDisabled.has(p.plugin));
+    }
+});
+
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
     logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins) {
+        if (window.GLOBAL_ENV?.SENTRY_TAGS.buildId !== "366c746173a6ca0a801e9f4a4d7b6745e6de45d4" && forceDisabled.has(name)) continue;
+
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
             const p = Plugins[name];
 

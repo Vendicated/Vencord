@@ -17,27 +17,27 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "BANger",
-    description: "Replaces the GIF in the ban dialogue with a custom one.",
-    authors: [Devs.Xinto, Devs.Glitch],
+    name: "SettingsStoreAPI",
+    description: "Patches Discord's SettingsStores to expose their group and name",
+    authors: [Devs.Nuckyz],
+
     patches: [
         {
-            find: "BAN_CONFIRM_TITLE.",
-            replacement: {
-                match: /src:\i\("?\d+"?\)/g,
-                replace: "src: Vencord.Settings.plugins.BANger.source"
-            }
+            find: ",updateSetting:",
+            replacement: [
+                {
+                    match: /(?<=INFREQUENT_USER_ACTION.{0,20}),useSetting:/,
+                    replace: ",settingsStoreApiGroup:arguments[0],settingsStoreApiName:arguments[1]$&"
+                },
+                // some wrapper. just make it copy the group and name
+                {
+                    match: /updateSetting:.{0,20}shouldSync/,
+                    replace: "settingsStoreApiGroup:arguments[0].settingsStoreApiGroup,settingsStoreApiName:arguments[0].settingsStoreApiName,$&"
+                }
+            ]
         }
-    ],
-    options: {
-        source: {
-            description: "Source to replace ban GIF with (Video or Gif)",
-            type: OptionType.STRING,
-            default: "https://i.imgur.com/wp5q52C.mp4",
-            restartNeeded: true,
-        }
-    }
+    ]
 });
