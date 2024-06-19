@@ -11,12 +11,12 @@ import { openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findExportedComponentLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findExportedComponentLazy("FriendRow");
+const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
 
 const cl = classNameFactory("vc-gp-");
 

@@ -19,6 +19,7 @@
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStores";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -37,7 +38,6 @@ import {
     PermissionStore,
     RestAPI,
     Text,
-    TextAndImagesSettingsStores,
     UserStore
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
@@ -49,10 +49,12 @@ const messageCache = new Map<string, {
 
 const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
-const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
+const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+
+const MessageDisplayCompact = getSettingStoreLazy("textAndImages", "messageDisplayCompact")!;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -281,7 +283,7 @@ function getChannelLabelAndIconUrl(channel: Channel) {
 }
 
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
-    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+    const compact = MessageDisplayCompact.useSetting();
 
     const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
 
@@ -317,7 +319,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel } = props;
-    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+    const compact = MessageDisplayCompact.useSetting();
     const images = getImages(message);
     const { parse } = Parser;
 
@@ -364,7 +366,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "SettingsStoreAPI"],
 
     settings,
 

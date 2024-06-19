@@ -6,13 +6,14 @@
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings, Settings } from "@api/Settings";
+import { getSettingStoreLazy } from "@api/SettingsStores";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, StatusSettingsStores, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
+import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -26,6 +27,8 @@ interface IgnoredActivity {
 }
 
 const RunningGameStore = findStoreLazy("RunningGameStore");
+
+const ShowCurrentGame = getSettingStoreLazy("status", "showCurrentGame")!;
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     return (
@@ -68,7 +71,7 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
 
     // Trigger activities recalculation
-    StatusSettingsStores.ShowCurrentGame.updateSetting(old => old);
+    ShowCurrentGame.updateSetting(old => old);
 }
 
 function ImportCustomRPCComponent() {
@@ -205,6 +208,7 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
+    dependencies: ["SettingsStoreAPI"],
 
     settings,
 

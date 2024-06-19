@@ -46,7 +46,8 @@ await page.setBypassCSP(true);
 
 async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
     return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue());
+        .then(m => m?.jsonValue())
+        .catch(() => undefined);
 }
 
 const report = {

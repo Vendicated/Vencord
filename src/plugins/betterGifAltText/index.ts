@@ -36,7 +36,7 @@ export default definePlugin({
         {
             find: ".Messages.GIF,",
             replacement: {
-                match: /alt:(\i)=(\i\.default\.Messages\.GIF)(?=,[^}]*\}=(\i))/,
+                match: /alt:(\i)=(\i\.\i\.Messages\.GIF)(?=,[^}]*\}=(\i))/,
                 replace:
                     // rename prop so we can always use default value
                     "alt_$$:$1=$self.altify($3)||$2",

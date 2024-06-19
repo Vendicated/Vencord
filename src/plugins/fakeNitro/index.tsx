@@ -399,7 +399,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: ".FreemiumAppIconIds.DEFAULT&&(",
+            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"

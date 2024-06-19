@@ -197,8 +197,8 @@ export default definePlugin({
         {
             find: '"MediaEngineWebRTC");',
             replacement: {
-                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
-                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+                match: /supports\(\i\)\{switch\(\i\)\{(case (\i).\i)/,
+                replace: "$&.DISABLE_VIDEO:return true;$1"
             }
         }
     ],

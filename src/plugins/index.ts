@@ -50,8 +50,7 @@ const forceDisabled = new Set([
     "Decor",
     "IgnoreActivities",
     "NoBlockedMessages",
-    "BetterFolders",
-    "NoPendingCount"
+    "BetterFolders"
 ]);
 export function isPluginEnabled(p: string) {
     return (
