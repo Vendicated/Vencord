@@ -64,18 +64,18 @@ export default definePlugin({
             },
         },
         {
-            find: "useShouldShowInvitesDisabledNotif:",
+            find: "2022-07_invites_disabled",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
-                match: /\i\.\i\.can\(\i\.Permissions.MANAGE_GUILD,\i\)/,
+                match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
                 replace: "true",
             },
         },
         {
-            find: "canAccessGuildMemberModViewWithExperiment:",
+            find: /context:\i,checkElevated:!1\}\),\i\.\i.{0,200}autoTrackExposure/,
             predicate: () => settings.store.showModView,
             replacement: {
-                match: /return \i\.hasAny\(\i\.computePermissions\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.MemberSafetyPagePermissions\)/,
+                match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
                 replace: "return true",
             }
         },
@@ -87,28 +87,31 @@ export default definePlugin({
                 replace: "{}"
             }
         },
+        // remove the 200 server minimum
         {
-            find: "MINIMUM_MEMBER_COUNT:",
+            find: '">200"',
             predicate: () => settings.store.disableDiscoveryFilters,
             replacement: {
-                match: /MINIMUM_MEMBER_COUNT:function\(\)\{return \i}/,
-                replace: "MINIMUM_MEMBER_COUNT:() => \">0\""
+                match: '">200"',
+                replace: '">0"'
             }
         },
+        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
         {
-            find: "DiscoveryBannedSearchWords.includes",
+            find: '"horny","fart"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             replacement: {
-                match: /(?<=function\(\){)(?=.{0,130}DiscoveryBannedSearchWords\.includes)/,
-                replace: "return false;"
+                match: /=\["egirl",.+?\]/,
+                replace: "=[]"
             }
         },
+        // patch request that queries if term is allowed
         {
-            find: "Endpoints.GUILD_DISCOVERY_VALID_TERM",
+            find: ".GUILD_DISCOVERY_VALID_TERM",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.HTTP\.get\(\{url:\i\.Endpoints\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
                 replace: "Promise.resolve({ body: { valid: true } });"
             }
         }
