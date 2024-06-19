@@ -144,6 +144,25 @@ export default definePlugin({
                     options: []
                 },
                 {
+                    name: "edit",
+                    description: "Edit a custom slash command response.",
+                    type: ApplicationCommandOptionType.SUB_COMMAND,
+                    options: [
+                        {
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
+                            type: ApplicationCommandOptionType.STRING,
+                            required: true
+                        },
+                        {
+                            name: "message",
+                            description: "The message that will sent as you when using this tag.",
+                            type: ApplicationCommandOptionType.STRING,
+                            required: true
+                        }
+                    ]
+                },
+                {
                     name: "delete",
                     description: "Delete a custom slash command.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
@@ -200,6 +219,36 @@ export default definePlugin({
                         });
 
                         break; // end 'create'
+                    }
+                    case "edit": {
+                        const name = findOption(args[0].options, "name", "") as string;
+                        const message = findOption(args[0].options, "message", "") as string;
+
+                        if (!await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
+                            });
+
+                            return;
+                        }
+
+                        await removeTag(name);
+                        unregisterCommand(name);
+
+                        const tag = {
+                            name: name,
+                            enabled: true,
+                            message: message
+                        };
+
+                        await addTag(tag);
+                        createTagCommand(tag);
+
+                        sendBotMessage(ctx.channel.id, {
+                            content: `${EMOTE} Successfully edited the tag **${name}**!`
+                        });
+
+                        break; // end 'edit'
                     }
                     case "delete": {
                         const name = findOption(args[0].options, "name", "") as string;
