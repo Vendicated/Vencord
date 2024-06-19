@@ -32,7 +32,7 @@ export default definePlugin({
     authors: [Devs.catcraft],
     patches: [
         {
-            find: '.default("ChannelMessages")',
+            find: '"_channelMessages",{})',
             replacement: {
                 match: /static commit\((.{1,2})\){/g,
                 replace: "$&$1=$self.blockMessagesWithKeywords($1);"
