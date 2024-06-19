@@ -27,9 +27,8 @@ import { settings } from "../settings";
 import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-
-const Transforms = findByPropsLazy("insertNodes","textToText");
-const Editor = findByPropsLazy("start","end","toSlateRange");
+const Transforms = findByPropsLazy("insertNodes", "textToText");
+const Editor = findByPropsLazy("start", "end", "toSlateRange");
 const ChatInputTypes = findByPropsLazy("FORM");
 
 const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
