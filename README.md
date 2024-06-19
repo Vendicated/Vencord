@@ -2,7 +2,7 @@
 
 An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord.
 
-![image](https://i.ibb.co/xgNr2gq/image-2023-11-24-122019133.png)
+![image](https://github.com/Equicord/Equicord/assets/78185467/81707ad9-3a04-4f76-88a0-60ee70684f81)
 
 ## Features
 
