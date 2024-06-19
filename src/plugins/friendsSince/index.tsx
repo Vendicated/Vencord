@@ -34,9 +34,9 @@ export default definePlugin({
         },
         // User DMs "User Profile" popup in the right
         {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            find: ".PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,\{userId:([^,]+?)}\)/,
+                match: /\i.\i,\{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
