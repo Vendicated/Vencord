@@ -27,10 +27,17 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: 'this,"actions",{VOICE_STATE_UPDATES:this.handleVoiceStateUpdates,',
+            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
             replacement: {
-                match: /\i:this.handleVoiceStateUpdates/,
-                replace: "VOICE_STATE_UPDATES:()=>{}"
+                match: /,?(?=\i\(this,"idleTimeout",new \i\.\i\))/,
+                replace: ";return;"
+            }
+        },
+        {
+            find: "handleIdleUpdate(){",
+            replacement: {
+                match: /(?<=_initialize\(\){)/,
+                replace: "return;"
             }
         }
     ]
