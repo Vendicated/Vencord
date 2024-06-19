@@ -243,9 +243,9 @@ export default definePlugin({
     patches: [
         {
             // Patch activity icons
-            find: "default.getHangStatusActivity():null!",
+            find: ".getHangStatusActivity():null!",
             replacement: {
-                match: /null!=(\i)&&\i.some\(\i=>\(0,\i.default\)\(\i,\i\)\)\?/,
+                match: /null!=(\i)&&\i.some\(\i=>\(0,\i.\i\)\(\i,\i\)\)\?/,
                 replace: "$self.patchActivityList(e),false?"
             },
             predicate: () => settings.store.memberList,
