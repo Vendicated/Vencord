@@ -116,7 +116,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "isImageFile:function()",
+            find: "png|jpe?g|webp|gif|",
             replacement: {
                 match: /(?<=png\|jpe\?g\|webp\|gif\|)/,
                 replace: "svg|"
