@@ -10,7 +10,7 @@ import { findByPropsLazy } from "@webpack";
 
 const linkRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
-const { SlateTransforms } = findByPropsLazy("SlateTransforms");
+const SlateTransforms = findByPropsLazy("insertText", "selectCommandOption");
 
 export default definePlugin({
     name: "MaskedLinkPaste",

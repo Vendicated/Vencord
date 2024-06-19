@@ -49,7 +49,7 @@ export default definePlugin({
             predicate: () => settings.store.domain
         },
         {
-            find: "isSuspiciousDownload:",
+            find: "bitbucket.org",
             replacement: {
                 match: /function \i\(\i\){(?=.{0,60}\.parse\(\i\))/,
                 replace: "$&return null;"

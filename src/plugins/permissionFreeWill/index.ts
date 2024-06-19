@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
@@ -31,7 +32,7 @@ export default definePlugin({
     patches: [
         // Permission lockout, just set the check to true
         {
-            find: ".showPermissionLockoutModal(",
+            find: ".STAGE_CHANNEL_CANNOT_OVERWRITE_PERMISSION",
             replacement: [
                 {
                     match: /case"DENY":.{0,50}if\((?=\i\.\i\.can)/,
@@ -45,9 +46,8 @@ export default definePlugin({
             find: ".ONBOARDING_CHANNEL_THRESHOLD_WARNING",
             replacement: [
                 {
-                    // are we java yet?
-                    match: /(?<=(?:isDefaultChannelThresholdMetAfterDelete|checkDefaultChannelThresholdMetAfterChannelPermissionDeny):function\(\)\{)return \i(?=\})/g,
-                    replace: "return () => true"
+                    match: /{(\i:function\(\){return \i},?){2}}/,
+                    replace: m => m.replaceAll(canonicalizeMatch(/return \i/g), "return ()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding

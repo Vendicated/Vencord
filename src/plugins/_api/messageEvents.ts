@@ -35,11 +35,11 @@ export default definePlugin({
             }
         },
         {
-            find: ".handleSendMessage",
+            find: ".handleSendMessage,onResize",
             replacement: {
                 // props.chatInputType...then((function(isMessageValid)... var parsedMessage = b.c.parse(channel,... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply);
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)
-                match: /(type:this\.props\.chatInputType.+?\.then\()(\i=>\{.+?let (\i)=\i\.\i\.parse\((\i),.+?let (\i)=\i\.\i\.\i\(\i\);)(?<=\)\(({.+?})\)\.then.+?)/,
+                match: /(type:this\.props\.chatInputType.+?\.then\()(\i=>\{.+?let (\i)=\i\.\i\.parse\((\i),.+?let (\i)=\i\.\i\.getSendMessageOptionsForReply\(\i\);)(?<=\)\(({.+?})\)\.then.+?)/,
                 // props.chatInputType...then((async function(isMessageValid)... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply); if(await Vencord.api...) return { shoudClear:true, shouldRefocus:true };
                 replace: (_, rest1, rest2, parsedMessage, channel, replyOptions, extra) => "" +
                     `${rest1}async ${rest2}` +
