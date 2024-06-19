@@ -9,7 +9,6 @@ import "./ui/styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
@@ -20,7 +19,6 @@ import { settings } from "./settings";
 import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import DecorSection from "./ui/components/DecorSection";
 
-const { isAnimatedAvatarDecoration } = findByPropsLazy("isAnimatedAvatarDecoration");
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -61,7 +59,7 @@ export default definePlugin({
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.Section\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
+                    match: /(?<=\.\i\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
                     replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
@@ -93,7 +91,7 @@ export default definePlugin({
             replacement: [
                 // Use Decor avatar decoration hook
                 {
-                    match: /(?<=getAvatarDecorationURL\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
+                    match: /(?<=\i\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
@@ -133,7 +131,7 @@ export default definePlugin({
         if (avatarDecoration?.skuId === SKU_ID) {
             const parts = avatarDecoration.asset.split("_");
             // Remove a_ prefix if it's animated and animation is disabled
-            if (isAnimatedAvatarDecoration(avatarDecoration.asset) && !canAnimate) parts.shift();
+            if (avatarDecoration.asset.startsWith("a_") && !canAnimate) parts.shift();
             return `${CDN_URL}/${parts.join("_")}.png`;
         } else if (avatarDecoration?.skuId === RAW_SKU_ID) {
             return avatarDecoration.asset;
