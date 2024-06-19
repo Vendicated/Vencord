@@ -43,9 +43,7 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
-const forceDisabled = new Set([
-    "MoreUserTags"
-]);
+const forceDisabled = new Set();
 export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
