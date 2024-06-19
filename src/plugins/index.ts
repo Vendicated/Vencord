@@ -44,14 +44,7 @@ const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
 const forceDisabled = new Set([
-    "MessageLogger",
-    "ShowHiddenChannels",
-    "MoreUserTags",
-    "Decor",
-    "IgnoreActivities",
-    "NoBlockedMessages",
-    "BetterFolders",
-    "NoPendingCount"
+    "MoreUserTags"
 ]);
 export function isPluginEnabled(p: string) {
     return (
