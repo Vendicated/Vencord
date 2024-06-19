@@ -21,12 +21,10 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
-import { RC } from "@webpack/types";
-import { Channel, Message, User } from "discord-types/general";
-
-type PermissionName = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "CREATE_GUILD_EXPRESSIONS" | "VIEW_AUDIT_LOG" | "VIEW_CHANNEL" | "VIEW_GUILD_ANALYTICS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "MODERATE_MEMBERS" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "ADD_REACTIONS" | "USE_APPLICATION_COMMANDS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "PRIORITY_SPEAKER" | "STREAM" | "USE_EMBEDDED_ACTIVITIES" | "USE_SOUNDBOARD" | "USE_EXTERNAL_SOUNDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "CREATE_EVENTS";
+import type { Permissions, RC } from "@webpack/types";
+import type { Channel, Guild, Message, User } from "discord-types/general";
 
 interface Tag {
     // name used for identifying, must be alphanumeric + underscores
@@ -34,7 +32,7 @@ interface Tag {
     // name shown on the tag itself, can be anything probably; automatically uppercase'd
     displayName: string;
     description: string;
-    permissions?: PermissionName[];
+    permissions?: Permissions[];
     condition?(message: Message | null, user: User, channel: Channel): boolean;
 }
 
@@ -50,13 +48,18 @@ interface TagSettings {
     MODERATOR_STAFF: TagSetting,
     MODERATOR: TagSetting,
     VOICE_MODERATOR: TagSetting,
+    TRIAL_MODERATOR: TagSetting,
     [k: string]: TagSetting;
 }
 
-// PermissionStore.computePermissions is not the same function and doesn't work here
-const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") as {
-    computePermissions({ ...args }): bigint;
-};
+// PermissionStore.computePermissions will not work here since it only gets permissions for the current user
+const computePermissions: (options: {
+    user?: { id: string; } | string | null;
+    context?: Guild | Channel | null;
+    overwrites?: Channel["permissionOverwrites"] | null;
+    checkElevated?: boolean /* = true */;
+    excludeGuildPermissions?: boolean /* = false */;
+}) => bigint = findByCodeLazy(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
 
 const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
@@ -93,6 +96,11 @@ const tags: Tag[] = [
         displayName: "VC Mod",
         description: "Can manage voice chats",
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
+    }, {
+        name: "CHAT_MODERATOR",
+        displayName: "Chat Mod",
+        description: "Can timeout people",
+        permissions: ["MODERATE_MEMBERS"]
     }
 ];
 const defaultSettings = Object.fromEntries(
@@ -187,14 +195,14 @@ export default definePlugin({
     patches: [
         // add tags to the tag list
         {
-            find: "BotTagTypes:",
+            find: ".ORIGINAL_POSTER=",
             replacement: {
                 match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
                 replace: "($1=$self.getTagTypes()))[$2.BOT"
             }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP,",
+            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,",
             replacement: [
                 // make the tag show the right text
                 {
@@ -216,7 +224,7 @@ export default definePlugin({
         },
         // in messages
         {
-            find: "renderSystemTag:",
+            find: ".Types.ORIGINAL_POSTER",
             replacement: {
                 match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
                 replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
@@ -263,41 +271,21 @@ export default definePlugin({
     ],
 
     start() {
-        if (settings.store.tagSettings) return;
-        // @ts-ignore
-        if (!settings.store.visibility_WEBHOOK) settings.store.tagSettings = defaultSettings;
-        else {
-            const newSettings = { ...defaultSettings };
-            Object.entries(Vencord.PlainSettings.plugins.MoreUserTags).forEach(([name, value]) => {
-                const [setting, tag] = name.split("_");
-                if (setting === "visibility") {
-                    switch (value) {
-                        case "always":
-                            // its the default
-                            break;
-                        case "chat":
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                        case "not-chat":
-                            newSettings[tag].showInChat = false;
-                            break;
-                        case "never":
-                            newSettings[tag].showInChat = false;
-                            newSettings[tag].showInNotChat = false;
-                            break;
-                    }
-                }
-                settings.store.tagSettings = newSettings;
-                delete Vencord.Settings.plugins.MoreUserTags[name];
-            });
-        }
+        settings.store.tagSettings ??= defaultSettings;
+
+        // newly added field might be missing from old users
+        settings.store.tagSettings.CHAT_MODERATOR ??= {
+            text: "Chat Mod",
+            showInChat: true,
+            showInNotChat: true
+        };
     },
 
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
 
-        const permissions = PermissionUtil.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
+        const permissions = computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
         return Object.entries(PermissionsBits)
             .map(([perm, permInt]) =>
                 permissions & permInt ? perm : ""
@@ -344,7 +332,7 @@ export default definePlugin({
     }: {
         message?: Message,
         user: User & { isClyde(): boolean; },
-        channel?: Channel & { isForumPost(): boolean; },
+        channel?: Channel & { isForumPost(): boolean; isMediaPost(): boolean; },
         channelId?: string;
         origType?: number;
         location: "chat" | "not-chat";
@@ -368,11 +356,20 @@ export default definePlugin({
             if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
             if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
 
+            // If the owner tag is disabled, and the user is the owner of the guild,
+            // avoid adding other tags because the owner will always match the condition for them
+            if (
+                tag.name !== "OWNER" &&
+                GuildStore.getGuild(channel?.guild_id)?.ownerId === user.id &&
+                (location === "chat" && !settings.tagSettings.OWNER.showInChat) ||
+                (location === "not-chat" && !settings.tagSettings.OWNER.showInNotChat)
+            ) continue;
+
             if (
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message!, user, channel))
             ) {
-                if (channel.isForumPost() && channel.ownerId === user.id)
+                if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
                     type = Tag.Types[`${tag.name}-OP`];
                 else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
                     type = Tag.Types[`${tag.name}-BOT`];

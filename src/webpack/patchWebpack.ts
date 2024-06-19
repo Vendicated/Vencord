@@ -99,6 +99,16 @@ Object.defineProperty(Function.prototype, "O", {
             };
 
             onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
+
+            // Returns whether a chunk has been loaded
+            Object.defineProperty(onChunksLoaded, "j", {
+                set(v) {
+                    delete onChunksLoaded.j;
+                    onChunksLoaded.j = v;
+                    originalOnChunksLoaded.j = v;
+                },
+                configurable: true
+            });
         }
 
         Object.defineProperty(this, "O", {
@@ -122,7 +132,7 @@ Object.defineProperty(Function.prototype, "m", {
         // When using react devtools or other extensions, we may also catch their webpack here.
         // This ensures we actually got the right one
         const { stack } = new Error();
-        if (stack?.includes("discord.com") || stack?.includes("discordapp.com")) {
+        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(v)) {
             logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
             patchFactories(v);
         }
@@ -199,14 +209,33 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (exports === window && require.c) {
-                Object.defineProperty(require.c, id, {
-                    value: require.c[id],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
-                return;
+            if (require.c) {
+                let foundWindow = false;
+
+                if (exports === window) {
+                    foundWindow = true;
+                } else if (typeof exports === "object") {
+                    if (exports?.default === window) {
+                        foundWindow = true;
+                    } else {
+                        for (const nested in exports) if (nested.length <= 3) {
+                            if (exports[nested] === window) {
+                                foundWindow = true;
+                            }
+                        }
+                    }
+                }
+
+                if (foundWindow) {
+                    Object.defineProperty(require.c, id, {
+                        value: require.c[id],
+                        enumerable: false,
+                        configurable: true,
+                        writable: true
+                    });
+
+                    return;
+                }
             }
 
             for (const callback of moduleListeners) {
@@ -219,12 +248,21 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             for (const [filter, callback] of subscriptions) {
                 try {
-                    if (filter(exports)) {
+                    if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
-                    } else if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, id);
+                    } else if (typeof exports === "object") {
+                        if (exports.default && filter(exports.default)) {
+                            subscriptions.delete(filter);
+                            callback(exports.default, id);
+                        } else {
+                            for (const nested in exports) if (nested.length <= 3) {
+                                if (exports[nested] && filter(exports[nested])) {
+                                    subscriptions.delete(filter);
+                                    callback(exports[nested], id);
+                                }
+                            }
+                        }
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
@@ -257,7 +295,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         for (let i = 0; i < patches.length; i++) {
             const patch = patches[i];
             if (patch.predicate && !patch.predicate()) continue;
-            if (!code.includes(patch.find)) continue;
+
+            const moduleMatches = typeof patch.find === "string"
+                ? code.includes(patch.find)
+                : patch.find.test(code);
+
+            if (!moduleMatches) continue;
 
             patchedBy.add(patch.plugin);
 

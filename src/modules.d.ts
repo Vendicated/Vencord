@@ -20,7 +20,7 @@
 /// <reference types="standalone-electron-types"/>
 
 declare module "~plugins" {
-    const plugins: Record<string, import("@utils/types").Plugin>;
+    const plugins: Record<string, import("./utils/types").Plugin>;
     export default plugins;
 }
 
@@ -38,7 +38,7 @@ declare module "~git-remote" {
     export default remote;
 }
 
-declare module "~fileContent/*" {
+declare module "file://*" {
     const content: string;
     export default content;
 }

@@ -82,7 +82,7 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
+                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.\i),\{channel:.+?)/,
                     replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
@@ -111,8 +111,8 @@ export default definePlugin({
                     replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
                 },
                 {
-                    match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
+                    match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
+                    replace: "$1[...$2,...$self.getAllUncollapsedChannels()]"
                 },
 
             ]
@@ -131,7 +131,7 @@ export default definePlugin({
 
         // Fix Alt Up/Down navigation
         {
-            find: ".Routes.APPLICATION_STORE&&",
+            find: ".APPLICATION_STORE&&",
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
