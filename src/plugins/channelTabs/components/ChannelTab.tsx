@@ -19,8 +19,8 @@
 import { classNameFactory } from "@api/Styles";
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, i18n, PresenceStore, ReactDnd, ReadStateStore, Text, TypingStore, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
@@ -30,9 +30,16 @@ const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
 const { FriendsIcon } = findByPropsLazy("FriendsIcon");
-const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
 
 const cl = classNameFactory("vc-channeltabs-");
+
+function XIcon({ size, fill }: { size: number, fill: string; }) {
+    return <svg width={size} height={size} viewBox="0 0 24 24">
+        <path fill={fill}
+            d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z"
+        />
+    </svg>;
+}
 
 const GuildIcon = ({ guild }: { guild: Guild; }) => {
     return guild.icon
@@ -77,7 +84,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
                 width: getBadgeWidthForValue(mentionCount || unreadCount)
             }}
             ref={node => node?.style.setProperty("background-color",
-                mentionCount ? "var(--red-400)" : "var(--brand-experiment)", "important"
+                mentionCount ? "var(--red-400)" : "var(--brand-500)", "important"
             )}
         >
             {mentionCount || unreadCount}
@@ -199,8 +206,6 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     const guild = GuildStore.getGuild(guildId);
     const channel = ChannelStore.getChannel(channelId);
 
-    const { useDrag, useDrop } = ReactDnd;
-
     const ref = useRef<HTMLDivElement>(null);
     const [, drag] = useDrag(() => ({
         type: "vc_ChannelTab",
@@ -262,7 +267,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
             className={cl("button", "close-button", { "close-button-compact": compact, "hoverable": !compact })}
             onClick={() => closeTab(id)}
         >
-            <XIcon height={16} width={16} />
+            <XIcon size={16} fill="var(--interactive-normal)" />
         </button>}
     </div>;
 }
