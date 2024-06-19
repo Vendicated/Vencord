@@ -34,10 +34,10 @@ export default definePlugin({
             }
         },
         {
-            find: "handleIdleUpdate(){",
+            find: "this,\"actions\",{VOICE_STATE_UPDATES:this.handleVoiceStateUpdates,",
             replacement: {
-                match: /(?<=_initialize\(\){)/,
-                replace: "return;"
+                match: /\i:this.handleVoiceStateUpdates/,
+                replace: "VOICE_STATE_UPDATES:()=>{}"
             }
         }
     ]
