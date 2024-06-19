@@ -209,7 +209,7 @@ export default definePlugin({
             }
         },
         {
-            find: "⌘C",
+            find: "focus()}}):null",
             replacement: {
                 match: /\i\.isPlatformEmbedded/,
                 replace: "true"
