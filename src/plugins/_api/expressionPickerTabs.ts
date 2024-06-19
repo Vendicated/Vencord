@@ -21,8 +21,8 @@ export default definePlugin({
                     replace: "$&,...Vencord.Api.ExpressionPickerTabs.RenderTabButtons($1, $2)"
                 },
                 {
-                    match: /null,(\i)===\i\.ExpressionPickerViewType\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
-                    replace: "$&,...Vencord.Api.ExpressionPickerTabs.TabPanels($1, $2)"
+                    match: /null,(\i)===\i\.\i\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
+                    replace: "$&,...Vencord.Api.Tablist.RenderButtons($1, $2, $3)"
                 }
             ]
         }
