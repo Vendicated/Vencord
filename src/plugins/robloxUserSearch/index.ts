@@ -116,7 +116,7 @@ export default definePlugin({
                     });
                 } catch (error) {
                     sendBotMessage(ctx.channel.id, {
-                        content: `Something went wrong: \`${error}\``,
+                        content: `Something went wrong, there is a chance roblox could be down: \`${error}\``,
                     });
                 }
             }
