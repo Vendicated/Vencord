@@ -404,7 +404,7 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
-    dependencies: ["SettingsStoreAPI"],
+    dependencies: ["UserSettingsAPI"],
     start() { setRpc(false); },
     stop() { setRpc(true); },
     settings,
