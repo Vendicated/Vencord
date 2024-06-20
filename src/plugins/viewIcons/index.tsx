@@ -184,7 +184,7 @@ export default definePlugin({
 
     patches: [
         // Profiles Modal pfp
-        ...["User Profile Modal - Context Menu", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
+        ...[".MODAL,hasProfileEffect", ".FULL_SIZE,hasProfileEffect:"].map(find => ({
             find,
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
@@ -192,7 +192,7 @@ export default definePlugin({
             }
         })),
         // Banners
-        ...[".NITRO_BANNER,", /overrideBannerSrc:\i,overrideBannerWidth:/].map(find => ({
+        ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
             find,
             replacement: {
                 // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
@@ -222,7 +222,7 @@ export default definePlugin({
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
             replacement: {
-                match: /null==\i\.icon\?.+?src:(\(0,\i\.getChannelIconURL\).+?\))(?=[,}])/,
+                match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 replace: (m, iconUrl) => `${m},onClick:()=>$self.openImage(${iconUrl})`
             }
         },
