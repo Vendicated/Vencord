@@ -200,8 +200,8 @@ export default definePlugin({
 
                 switch (args[0].name) {
                     case "create": {
-                        const name = findOption(args[0].options, "name", "") as string;
-                        const message = findOption(args[0].options, "message", "") as string;
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const message = findOption<string>(args[0].options, "message", "");
 
                         if (await getTag(name)) {
                             sendBotMessage(ctx.channel.id, {
@@ -227,8 +227,8 @@ export default definePlugin({
                         break; // end 'create'
                     }
                     case "edit": {
-                        const name = findOption(args[0].options, "name", "") as string;
-                        const message = findOption(args[0].options, "message", "") as string;
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const message = findOption<string>(args[0].options, "message", "");
 
                         if (!await getTag(name)) {
                             sendBotMessage(ctx.channel.id, {
@@ -257,7 +257,7 @@ export default definePlugin({
                         break; // end 'edit'
                     }
                     case "delete": {
-                        const name = findOption(args[0].options, "name", "") as string;
+                        const name = findOption<string>(args[0].options, "name", "");
 
                         if (!await getTag(name)) {
                             sendBotMessage(ctx.channel.id, {
@@ -296,8 +296,8 @@ export default definePlugin({
                         break; // end 'list'
                     }
                     case "preview": {
-                        const name = findOption(args[0].options, "name", "") as string;
-                        const isRaw = findOption(args[0].options, "raw", false) as boolean;
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const isRaw = findOption<boolean>(args[0].options, "raw", false);
 
                         const tag = await getTag(name);
 
