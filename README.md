@@ -62,7 +62,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - NotifyUserChanges by D3SOX
 - OnePingPerDM by ProffDea
 - PlatformSpoofer by Drag
-- MessagePurge by bhop and nyx
+- PurgeMessages by bhop and nyx
 - QuestionMarkReplacement (QuestionMarkReplace) by nyx
 - Quoter by Samwich
 - RepeatMessage by Tolgchu

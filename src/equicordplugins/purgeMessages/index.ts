@@ -17,7 +17,8 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { migratePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { MessageStore, UserStore } from "@webpack/common";
@@ -27,25 +28,29 @@ import { loggedMessages } from "../messageLoggerEnhanced/LoggedMessageManager";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 
-async function DeleteMessages(amount: number, channel: Channel, delay: number = 1500) {
+async function deleteMessages(amount: number, channel: Channel, delay: number = 1500): Promise<number> {
+    let deleted = 0;
     const userId = UserStore.getCurrentUser().id;
-    const messages: Message[] = MessageStore.getMessages(channel.id)._array.filter((m: Message) => m.author.id === userId).reverse();
-    const parsedMessages: Message[] = JSON.parse(JSON.stringify(messages));
-    const uniqueMessages: Message[] = parsedMessages.filter(message => !loggedMessages.deletedMessages[channel.id].includes(message.id));
+    const messages: Message[] = JSON.parse(JSON.stringify(MessageStore.getMessages(channel.id)._array.filter((m: Message) => m.author.id === userId).reverse()));
+    const uniqueMessages: Message[] = !loggedMessages.deletedMessages[channel.id] ? messages : messages.filter(message => !loggedMessages.deletedMessages[channel.id].includes(message.id));
 
     for (const message of uniqueMessages) {
         MessageActions.deleteMessage(channel.id, message.id);
         amount--;
+        deleted++;
         if (amount === 0) break;
         await new Promise(resolve => setTimeout(resolve, delay));
     }
+
+    return deleted;
 }
 
+migratePluginSettings("PurgeMessages", "MessagePurge");
 export default definePlugin({
-    name: "MessagePurge",
+    name: "PurgeMessages",
     description: "Purges messages from a channel",
     dependencies: ["CommandsAPI"],
-    authors: [EquicordDevs.bhop, Devs.nyx],
+    authors: [EquicordDevs.bhop, EquicordDevs.nyx],
     commands: [
         {
             name: "purge",
@@ -80,10 +85,10 @@ export default definePlugin({
                     content: `> deleting ${amount} messages.`
                 });
 
-                DeleteMessages(amount, channel, delay).then(() => {
+                deleteMessages(amount, channel, delay).then((deleted: number) => {
                     sendBotMessage(ctx.channel.id,
                         {
-                            content: `> deleted ${amount} messages`
+                            content: `> deleted ${deleted} messages`
                         }
                     );
                 });
