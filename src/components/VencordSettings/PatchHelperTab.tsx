@@ -311,12 +311,13 @@ function PatchHelper() {
         try {
             let parsedFind = v as string | RegExp;
             if (/^\/.+?\/$/.test(v)) parsedFind = new RegExp(v.slice(1, -1));
+            const canonicalFind = canonicalizeMatch(parsedFind);
 
             setFindError(void 0);
             setParsedFind(parsedFind);
 
             if (v.length) {
-                findCandidates({ find: parsedFind, setModule, setError: setFindError });
+                findCandidates({ find: canonicalFind, setModule, setError: setFindError });
             }
         } catch (e: any) {
             setFindError((e as Error).message);
