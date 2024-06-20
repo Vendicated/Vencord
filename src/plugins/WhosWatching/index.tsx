@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
+import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -92,7 +93,7 @@ export default definePlugin({
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /default:function\(\)\{return ([a-zA-Z0-9_]{0,5})\}/,
+                match: /default:function\(\)\{return (\i)\}/,
                 replace: "default:function(){return $self.component({OriginalComponent:$1})}"
             }
         },
@@ -105,7 +106,7 @@ export default definePlugin({
             }
         }
     ],
-    WrapperComponent: function ({ ...props }) {
+    WrapperComponent: ErrorBoundary.wrap(props => {
         const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
 
         if (!stream) return <div {...props}>{props.children}</div>;
@@ -168,9 +169,9 @@ export default definePlugin({
                 </div>
             </>
         );
-    },
+    }),
     component: function ({ OriginalComponent }) {
-        return (props: any) => {
+        return ErrorBoundary.wrap((props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
             const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
@@ -180,6 +181,6 @@ export default definePlugin({
                     </div>
                 )}
             </Tooltip>;
-        };
+        });
     }
 });
