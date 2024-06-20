@@ -82,7 +82,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
 export type Permissions = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"

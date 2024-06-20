@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings, Settings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStores";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -28,7 +28,7 @@ interface IgnoredActivity {
 
 const RunningGameStore = findStoreLazy("RunningGameStore");
 
-const ShowCurrentGame = getSettingStoreLazy("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     return (
@@ -208,7 +208,7 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
-    dependencies: ["SettingsStoreAPI"],
+    dependencies: ["UserSettingsAPI"],
 
     settings,
 
