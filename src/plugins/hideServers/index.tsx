@@ -96,7 +96,7 @@ export default definePlugin({
             find: '("guildsnav")',
             replacement: [
                 {
-                    match: /(?<=Messages\.SERVERS.+?)(\i)(\.map.{0,50}?case \i\.GuildsNodeType\.FOLDER)/,
+                    match: /(?<=Messages\.SERVERS.+?)(\i)(\.map.{0,50}?case \i\.\i\.FOLDER)/,
                     replace: "$1.flatMap($self.filterGuilds)$2",
                 },
                 {
