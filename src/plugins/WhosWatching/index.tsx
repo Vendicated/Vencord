@@ -61,9 +61,22 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
 }
 
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-const { encodeStreamKey }: {
-    encodeStreamKey: (any) => string;
-} = findByPropsLazy("encodeStreamKey");
+
+function encodeStreamKey(e): string {
+    const { streamType: t, guildId: n, channelId: r, ownerId: s } = e;
+    switch (t) {
+        case "guild":
+            if (!n) {
+                throw new Error("guildId is required for streamType GUILD");
+            }
+            return [t, n, r, s].join(":");
+        case "call":
+            return [t, r, s].join(":");
+        default:
+            throw new Error("Unknown stream type ".concat(t));
+    }
+}
+
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
