@@ -93,8 +93,8 @@ export default definePlugin({
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /default:function\(\)\{return (\i)\}/,
-                replace: "default:function(){return $self.component({OriginalComponent:$1})}"
+                match: /function\(\)\{return (\i)\}/,
+                replace: "function(){return $self.component({OriginalComponent:$1})}"
             }
         },
         {
