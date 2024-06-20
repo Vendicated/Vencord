@@ -220,7 +220,7 @@ export default definePlugin({
             replacement: [
                 // Grab the colors from the params using the custom params
                 {
-                    match: /type:\i=\i\.BotTagTypes\.BOT/,
+                    match: /type:\i=\i\.\i\.BOT/,
                     replace: "$&,bgColor:bgColor,fgColor:fgColor"
                 },
                 // make the tag show the right text
@@ -248,8 +248,8 @@ export default definePlugin({
             replacement: [
                 // Pass the tag's colors and type to the next function
                 {
-                    match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)\?null:\(0,(\i)\.jsx\)\((\i).default,{/,
-                    replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null?null:(0,$3.jsx)($4.default,{...$self.getTagColors({...arguments[0],tagType:$2,location:'chat'}),"
+                    match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)\?null:\(0,(\i)\.jsx\)\((\i).(\i),{/,
+                    replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null?null:(0,$3.jsx)($4.$5,{...$self.getTagColors({...arguments[0],tagType:$2,location:'chat'}),"
                 }
             ]
         },
@@ -259,8 +259,8 @@ export default definePlugin({
             replacement: [
                 // Pass the tag's colors and type to the next function
                 {
-                    match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot\?\(0,(?<jsxf>\i)\.jsx\)\((?<module>\i)\.default,{/,
-                    replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'?(0,$<jsxf>.jsx)($<module>.default,{...$self.getTagColors({...arguments[0],tagType:$<type>,location:'not-chat'}),"
+                    match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot\?\(0,(?<jsxf>\i)\.jsx\)\((?<module>\i)\.(?<subm>\i),{/,
+                    replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'?(0,$<jsxf>.jsx)($<module>.$<subm>,{...$self.getTagColors({...arguments[0],tagType:$<type>,location:'not-chat'}),"
                 }
             ]
         },
@@ -299,7 +299,7 @@ export default definePlugin({
                     replace: "$&,bgColor:bgColor,fgColor:fgColor"
                 }, {
                     // Finally pass the color information into the renderer
-                    match: /\.jsx\)\(\i\.default,{type:\i,/,
+                    match: /\.jsx\)\(\i\.\i\,{type:\i,/,
                     replace: "$&bgColor,fgColor,"
                 }
             ]
