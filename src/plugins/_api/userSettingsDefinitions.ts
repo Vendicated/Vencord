@@ -20,23 +20,30 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "SettingsStoreAPI",
-    description: "Patches Discord's SettingsStores to expose their group and name",
+    name: "UserSettingDefinitionsAPI",
+    description: "Patches Discord's UserSettingDefinitions to expose their group and name.",
     authors: [Devs.Nuckyz],
 
     patches: [
         {
             find: ",updateSetting:",
             replacement: [
+                // Main setting definition
                 {
-                    match: /(?<=INFREQUENT_USER_ACTION.{0,20}),useSetting:/,
-                    replace: ",settingsStoreApiGroup:arguments[0],settingsStoreApiName:arguments[1]$&"
+                    match: /(?<=INFREQUENT_USER_ACTION.{0,20},)useSetting:/,
+                    replace: "userSettingDefinitionsAPIGroup:arguments[0],userSettingDefinitionsAPIName:arguments[1],$&"
                 },
-                // some wrapper. just make it copy the group and name
+                // Selective wrapper
                 {
-                    match: /updateSetting:.{0,20}shouldSync/,
-                    replace: "settingsStoreApiGroup:arguments[0].settingsStoreApiGroup,settingsStoreApiName:arguments[0].settingsStoreApiName,$&"
+                    match: /updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,
+                    replace: "userSettingDefinitionsAPIGroup:arguments[0].userSettingDefinitionsAPIGroup,userSettingDefinitionsAPIName:arguments[0].userSettingDefinitionsAPIName,$&"
+                },
+                // Override wrapper
+                {
+                    match: /updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,
+                    replace: "userSettingDefinitionsAPIGroup:arguments[0].userSettingDefinitionsAPIGroup,userSettingDefinitionsAPIName:arguments[0].userSettingDefinitionsAPIName,$&"
                 }
+
             ]
         }
     ]
