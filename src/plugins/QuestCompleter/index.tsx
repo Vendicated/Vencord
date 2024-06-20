@@ -38,6 +38,48 @@ function getLeftQuests() {
     return quest;
 }
 
+function encodeStreamKey(e): string {
+    const { streamType: t, guildId: n, channelId: r, ownerId: s } = e;
+    switch (t) {
+        case "guild":
+            if (!n) {
+                throw new Error("guildId is required for streamType GUILD");
+            }
+            return [t, n, r, s].join(":");
+        case "call":
+            return [t, r, s].join(":");
+        default:
+            throw new Error("Unknown stream type ".concat(t));
+    }
+}
+
+function decodeStreamKey(e: string): any {
+    const t = e.split(":");
+    const n = t[0];
+    switch (n) {
+        case "guild": {
+            const [e, n, i, r] = t;
+            return {
+                streamType: e,
+                guildId: n,
+                channelId: i,
+                ownerId: r
+            };
+        }
+        case "call": {
+            const [e, n, i] = t;
+            return {
+                streamType: e,
+                channelId: n,
+                ownerId: i
+            };
+        }
+        default:
+            throw new Error("Unknown stream type ".concat(n));
+    }
+}
+
+
 let interval;
 let quest;
 let ImagesConfig = {};
@@ -143,7 +185,7 @@ export default definePlugin({
         // check if user is sharing screen and there is someone that is watching the stream
 
         const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
-        const encodedStreamKey = findByProps("encodeStreamKey").encodeStreamKey(currentStream);
+        const encodedStreamKey = encodeStreamKey(currentStream);
         quest = getLeftQuests();
         ImagesConfig = {
             icon: findByProps("getQuestBarHeroAssetUrl").getQuestBarHeroAssetUrl(quest),
@@ -162,7 +204,7 @@ export default definePlugin({
     },
     flux: {
         STREAM_STOP: event => {
-            const stream: Stream = findByProps("encodeStreamKey").decodeStreamKey(event.streamKey);
+            const stream: Stream = decodeStreamKey(event.streamKey);
             // we check if the stream is by the current user id so we do not clear the interval without any reason.
             if (stream.ownerId === window.currentUserId && interval) {
                 clearInterval(interval);
