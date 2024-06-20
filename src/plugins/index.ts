@@ -42,18 +42,7 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
-const forceDisabled = new Set([
-    "MessageLogger",
-    "ShowHiddenChannels",
-    "MoreUserTags",
-    "Decor",
-    "IgnoreActivities",
-    "NoBlockedMessages",
-    "BetterFolders",
-    "NoPendingCount"
-]);
 export function isPluginEnabled(p: string) {
-    if (forceDisabled.has(p)) return false;
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
@@ -206,7 +195,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, flux, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -252,7 +241,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, flux, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);

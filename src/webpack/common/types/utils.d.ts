@@ -168,17 +168,8 @@ export interface Clipboard {
 export interface NavigationRouter {
     back(): void;
     forward(): void;
-    hasNavigated(): boolean;
-    getHistory(): {
-        action: string;
-        length: 50;
-        [key: string]: any;
-    };
     transitionTo(path: string, ...args: unknown[]): void;
     transitionToGuild(guildId: string, ...args: unknown[]): void;
-    replaceWith(...args: unknown[]): void;
-    getLastRouteChangeSource(): any;
-    getLastRouteChangeSourceLocationStack(): any;
 }
 
 export interface IconUtils {
@@ -223,4 +214,10 @@ export interface IconUtils {
     getChannelIconSource: any;
     getApplicationIconSource: any;
     getAnimatableSourceWithFallback: any;
+}
+
+export interface Constants {
+    Endpoints: Record<string, any>;
+    UserFlags: Record<string, number>;
+    FriendsSections: Record<string, string>;
 }
