@@ -4,20 +4,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Heading, React, RelationshipStore, Text } from "@webpack/common";
 
 const container = findByPropsLazy("memberSinceWrapper");
-const { getCreatedAtDate } = findByPropsLazy("getCreatedAtDate");
-const clydeMoreInfo = findByPropsLazy("clydeMoreInfo");
+const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 const lastSection = findByPropsLazy("lastSection");
+
+const cl = classNameFactory("vc-friendssince-");
 
 export default definePlugin({
     name: "FriendsSince",
@@ -26,17 +28,17 @@ export default definePlugin({
     patches: [
         // User popup
         {
-            find: ".AnalyticsSections.USER_PROFILE}",
+            find: ".USER_PROFILE}};return",
             replacement: {
-                match: /\i.default,\{userId:(\i.id).{0,30}}\)/,
+                match: /,{userId:(\i.id).{0,30}}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
         // User DMs "User Profile" popup in the right
         {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
+            find: ".PROFILE_PANEL,",
             replacement: {
-                match: /\i.default,\{userId:([^,]+?)}\)/,
+                match: /,{userId:([^,]+?)}\)/,
                 replace: "$&,$self.friendsSince({ userId: $1 })"
             }
         },
@@ -69,7 +71,7 @@ export default definePlugin({
 
         return (
             <div className={lastSection.section}>
-                <Heading variant="eyebrow" className={clydeMoreInfo.title}>
+                <Heading variant="eyebrow" className={cl("title")}>
                     Friends Since
                 </Heading>
 
@@ -86,7 +88,7 @@ export default definePlugin({
                             <path d="M3 5v-.75C3 3.56 3.56 3 4.25 3s1.24.56 1.33 1.25C6.12 8.65 9.46 12 13 12h1a8 8 0 0 1 8 8 2 2 0 0 1-2 2 .21.21 0 0 1-.2-.15 7.65 7.65 0 0 0-1.32-2.3c-.15-.2-.42-.06-.39.17l.25 2c.02.15-.1.28-.25.28H9a2 2 0 0 1-2-2v-2.22c0-1.57-.67-3.05-1.53-4.37A15.85 15.85 0 0 1 3 5Z" />
                         </svg>
                     )}
-                    <Text variant="text-sm/normal" className={classes(clydeMoreInfo.body, textClassName)}>
+                    <Text variant="text-sm/normal" className={classes(cl("body"), textClassName)}>
                         {getCreatedAtDate(friendsSince, locale.getLocale())}
                     </Text>
                 </div>

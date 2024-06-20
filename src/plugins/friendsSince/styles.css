@@ -1,0 +1,12 @@
+/* copy pasted from discord */
+
+.vc-friendssince-title {
+    display: flex;
+    font-weight: 700;
+    margin-bottom: 6px
+}
+
+.vc-friendssince-body {
+    font-size: 14px;
+    line-height: 18px
+}
