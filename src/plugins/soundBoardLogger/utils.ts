@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/react";
 import { saveFile } from "@utils/web";
-import { findByCode, findByProps, findByPropsLazy } from "@webpack";
+import { findByCode, findByCodeLazy, findByProps, findByPropsLazy } from "@webpack";
 import type { User } from "discord-types/general";
 
 import settings from "./settings";
@@ -39,10 +39,10 @@ export function getEmojiUrl(emoji) {
     return emoji.id ? `https://cdn.discordapp.com/emojis/${emoji.id}.png?size=32` : getURL(emoji.name);
 }
 
-const v1 = findByPropsLazy("amplitudeToPerceptual");
-const v2 = findByPropsLazy("getAmplitudinalSoundboardVolume");
+const amplitudeToPerceptual = findByCodeLazy("20*Math.log10(");
+const getAmplitudinalSoundboardVolume = findByCodeLazy(".getSetting();return null");
 
-export const getSoundboardVolume = () => v1.amplitudeToPerceptual(v2.getAmplitudinalSoundboardVolume());
+export const getSoundboardVolume = () => amplitudeToPerceptual(getAmplitudinalSoundboardVolume());
 
 export const playSound = id => {
     const audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
