@@ -20,8 +20,10 @@ import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import { localStorage } from "@utils/localStorage";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByCodeLazy, findByProps } from "@webpack";
 import { Text } from "@webpack/common";
+
+const ToolTipButton = findByCodeLazy(".CHANNEL_CALL_CONTROL_BUTTON");
 
 interface Stream {
     streamType: string;
@@ -92,7 +94,7 @@ export default definePlugin({
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\.usePreventIdle\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
+                match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\..?\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
                 replace: "$1[$self.renderQuestButton(),...$2]})}}"
             }
         }
@@ -148,8 +150,6 @@ export default definePlugin({
         }
 
 
-
-        const ToolTipButton = findByProps("CenterControlButton").default;
         const QuestsIcon = () => props => (
             <svg
                 xmlns="http://www.w3.org/2000/svg"
