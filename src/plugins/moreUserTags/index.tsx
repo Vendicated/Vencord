@@ -221,7 +221,7 @@ export default definePlugin({
                 // Grab the colors from the params using the custom params
                 {
                     match: /type:\i=\i\.\i\.BOT/,
-                    replace: "$&,bgColor:bgColor,fgColor:fgColor"
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
                 },
                 // make the tag show the right text
                 {
@@ -238,7 +238,7 @@ export default definePlugin({
                 // also set the colors
                 {
                     match: /.botText,children:(\i)}\)]/,
-                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':bgColor,'color':fgColor}"
+                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor}"
                 },
             ],
         },
@@ -289,21 +289,37 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
-                    // Get the tag itself and the tag colors, but this isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
-                    match: /(return\(0,\i.jsx\)\(\i,{primary:\i,secondary:\i,botVerified:\i.isVerifiedBot\(\)),botType:(\i\((\i)\)),/g,
-                    replace: "let moreTags_tagType=$self.getTag({user:$3,channelId:moreTags_channelId,origType:$2,location:'not-chat'});$1,botType:moreTags_tagType,...$self.getTagColors({user:$3,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'}),"
+                    // Get the tag type and tag colors so that they can be distributed
+                    match: /(,\i=\i\.isPomelo\(\)\|\|\i;)(.+?botType:(\i\((\i)\)),)/,
+                    replace: "$1let moreTags_tagType=$self.getTag({user:$4,channelId:moreTags_channelId,origType:$3,location:'not-chat'});let moreTags_tagColors=$self.getTagColors({user:$4,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'});$2"
+                }, {
+                    // This isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
+                    match: /,botType:(\i\((\i)\)),/g,
+                    replace: ",botType:moreTags_tagType,...moreTags_tagColors,"
                 }, {
                     // Get the parameters from the function that were passed in previously
                     // because Discord needs to make it hard on us
                     match: /,showStreamerModeTooltip:\i/,
-                    replace: "$&,bgColor:bgColor,fgColor:fgColor"
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
                 }, {
                     // Finally pass the color information into the renderer
-                    match: /\.jsx\)\(\i\.\i\,{type:\i,/,
-                    replace: "$&bgColor,fgColor,"
+                    match: /\.jsx\)\(\i\.\i,{type:\i,/,
+                    replace: "$&moreTags_bgColor,moreTags_fgColor,"
                 }
             ]
         },
+        {
+            find: ",invertBotTagColor:",
+            replacement: [
+                {
+                    match: /,invertBotTagColor:\i/,
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
+                }, {
+                    match: /verified:\i,useRemSizes:\i/,
+                    replace: "$&,moreTags_bgColor,moreTags_fgColor"
+                }
+            ]
+        }
     ],
 
     start() {
@@ -372,19 +388,19 @@ export default definePlugin({
         location: "chat" | "not-chat";
         tagType: number;
     }): {
-        bgColor: string,
-        fgColor: string;
+        moreTags_bgColor: string,
+        moreTags_fgColor: string;
     } {
         const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] === tagType);
         const [tagName, variant] = passedTagName?.split("-") ?? [null, null];
         if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName]?.showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName]?.showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
-            return { bgColor: "", fgColor: "" };
+            return { moreTags_bgColor: "", moreTags_fgColor: "" };
         }
         if (!channel && channelId) channel = ChannelStore.getChannel(channelId);
         const member = channel?.guild_id != null ? GuildMemberStore.getMember(channel?.guild_id, user.id) : null;
         const colorString = member?.colorString;
         const fgColorString = colorString != null ? getContrastYIQ(colorString) : null;
-        return { bgColor: colorString ?? "", fgColor: fgColorString ?? "" };
+        return { moreTags_bgColor: colorString ?? "", moreTags_fgColor: fgColorString ?? "" };
     },
 
     getTag({
