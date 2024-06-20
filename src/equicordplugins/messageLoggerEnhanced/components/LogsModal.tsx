@@ -21,7 +21,7 @@ import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent, useAwaiter } from "@utils/react";
-import { find, findByCode, findByPropsLazy } from "@webpack";
+import { find, findByCode, findByCodeLazy } from "@webpack";
 import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, Text, TextInput, useCallback, useMemo, useRef, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -61,7 +61,7 @@ export interface ChildrenAccProops {
     showClydeAiEmbeds: boolean;
 }
 
-const ChannelRecords = findByPropsLazy("PrivateChannelRecord");
+const PrivateChannelRecord = findByCodeLazy(".is_message_request_timestamp,");
 const MessagePreview = LazyComponent<MessagePreviewProps>(() => find(m => m?.type?.toString().includes("previewLinkTarget:") && !m?.type?.toString().includes("HAS_THREAD")));
 const ChildrenAccessories = LazyComponent<ChildrenAccProops>(() => findByCode("channelMessageProps:{message:"));
 
@@ -448,7 +448,7 @@ function LMessage({ log, isGroupStart, forceUpdate, }: LMessageProps) {
                 childrenAccessories={
                     <ChildrenAccessories
                         channelMessageProps={{
-                            channel: ChannelStore.getChannel(message.channel_id) || new ChannelRecords.PrivateChannelRecord({ id: "" }),
+                            channel: ChannelStore.getChannel(message.channel_id) || new PrivateChannelRecord({ id: "" }),
                             message,
                             compact: false,
                             groupId: "1",

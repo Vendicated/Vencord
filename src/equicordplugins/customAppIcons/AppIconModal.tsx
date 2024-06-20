@@ -32,13 +32,13 @@ function AppIconModal(props: ModalProps) {
 
 
         appIcons.push(icon);
-        findByProps("ICONS", "ICONS_BY_ID").ICONS.push(icon);
-        findByProps("ICONS", "ICONS_BY_ID").ICONS_BY_ID[icon.id] = icon;
+        findByProps("UZ", "QA").UZ.push(icon);
+        findByProps("UZ", "QA").QA[icon.id] = icon;
         showToast("Added custom app icon!", Toasts.Type.SUCCESS);
         props.onClose();
         const oldIcon = findByProps("getCurrentDesktopIcon").getCurrentDesktopIcon();
 
-        let random_icon = Object.keys(findByProps("ICONS_BY_ID")).filter(icon => icon !== oldIcon) as [];
+        let random_icon = Object.keys(findByProps("UZ")).filter(icon => icon !== oldIcon) as [];
         random_icon = random_icon[Math.floor(Math.random() * random_icon.length)];
 
         FluxDispatcher.dispatch({

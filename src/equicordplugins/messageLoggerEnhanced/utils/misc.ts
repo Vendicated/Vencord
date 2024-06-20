@@ -18,7 +18,7 @@
 
 import { get, set } from "@api/DataStore";
 import { PluginNative } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { ChannelStore, moment, UserStore } from "@webpack/common";
 
 import { LOGGED_MESSAGES_KEY, MessageLoggerStore } from "../LoggedMessageManager";
@@ -29,7 +29,7 @@ import { memoize } from "./memoize";
 
 const MessageClass: any = findLazy(m => m?.prototype?.isEdited);
 const AuthorClass = findLazy(m => m?.prototype?.getAvatarURL);
-const embedModule = findByPropsLazy("sanitizeEmbed");
+const sanitizeEmbed = findByCodeLazy('"embed_"),');
 
 export function getGuildIdByChannel(channel_id: string) {
     return ChannelStore.getChannel(channel_id)?.guild_id;
@@ -104,7 +104,7 @@ export const messageJsonToMessageClass = memoize((log: { message: LoggedMessageJ
     message.author = new AuthorClass(message.author);
     message.author.nick = message.author.globalName ?? message.author.username;
 
-    message.embeds = message.embeds.map(e => embedModule.sanitizeEmbed(message.channel_id, message.id, e));
+    message.embeds = message.embeds.map(e => sanitizeEmbed(message.channel_id, message.id, e));
 
     if (message.poll)
         message.poll.expiry = moment(message.poll.expiry);

@@ -211,6 +211,13 @@ export function getOldestMessage(loggedMessageIds: LoggedMessages) {
     return oldestMessage ?? null;
 }
 
+export function getMessage(channelId: string, messageId: string) {
+    const messags = Object.values(savedLoggedMessages)
+        .filter(m => !Array.isArray(m) && m.message != null) as MessageRecord[];
+
+    return messags.find(m => m.message.channel_id === channelId && m.message.id === messageId);
+}
+
 export async function deleteOldestMessageWithoutSaving(loggedMessages: LoggedMessages) {
     const oldestMessage = getOldestMessage(loggedMessages);
     if (!oldestMessage || !oldestMessage.message) {
