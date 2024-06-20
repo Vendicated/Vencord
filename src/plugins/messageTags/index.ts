@@ -131,7 +131,7 @@ export default definePlugin({
                         },
                         {
                             name: "message",
-                            description: "The message that will sent as you when using this tag.",
+                            description: "The message that will be sent as you when using this tag.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -232,7 +232,7 @@ export default definePlugin({
 
                         if (!await getTag(name)) {
                             sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
                             });
 
                             return;
@@ -261,7 +261,7 @@ export default definePlugin({
 
                         if (!await getTag(name)) {
                             sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
                             });
 
                             return;
@@ -303,7 +303,7 @@ export default definePlugin({
 
                         if (!tag) {
                             sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} No Tag with the name **${name}** does exist!`
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
                             });
 
                             return;
