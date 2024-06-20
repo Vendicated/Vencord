@@ -9,7 +9,7 @@ import "./styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { RestAPI } from "@webpack/common";
+import { Constants, RestAPI } from "@webpack/common";
 
 import { OpenNotesDataButton } from "./components/NotesDataButton";
 import { refreshNotesData } from "./components/NotesDataModal";
@@ -57,7 +57,7 @@ export default definePlugin({
     refreshNotesData,
 
     start: async () => {
-        const result = await RestAPI.get({ url: "/users/@me/notes" });
+        const result = await RestAPI.get({ url: Constants.Endpoints.NOTES });
 
         const userNotes: { [userId: string]: string; } | undefined = result.body;
 
