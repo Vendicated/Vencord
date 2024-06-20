@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStores";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild, openImageModal } from "@utils/discord";
@@ -15,7 +15,7 @@ import { Clipboard, GuildStore, Menu, PermissionStore } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 
-const DeveloperMode = getSettingStoreLazy("appearance", "developerMode")!;
+const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 
 function PencilIcon() {
     return (
@@ -65,7 +65,7 @@ export default definePlugin({
     name: "BetterRoleContext",
     description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
     authors: [Devs.Ven, Devs.goodbee],
-    dependencies: ["SettingsStoreAPI"],
+    dependencies: ["UserSettingsAPI"],
 
     settings,
 
