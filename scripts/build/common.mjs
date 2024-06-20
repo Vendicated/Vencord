@@ -89,15 +89,20 @@ export const globPlugins = kind => ({
             const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins", "equicordplugins"];
             let code = "";
             let plugins = "\n";
+            let meta = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!await exists(`./src/${dir}`)) continue;
-                const files = await readdir(`./src/${dir}`);
-                for (const file of files) {
-                    if (file.startsWith("_") || file.startsWith(".")) continue;
-                    if (file === "index.ts") continue;
+                const userPlugin = dir === "userplugins";
 
-                    const target = getPluginTarget(file);
+                if (!await exists(`./src/${dir}`)) continue;
+                const files = await readdir(`./src/${dir}`, { withFileTypes: true });
+                for (const file of files) {
+                    const fileName = file.name;
+                    if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
+                    if (fileName === "index.ts") continue;
+
+                    const target = getPluginTarget(fileName);
+
                     if (target && !IS_REPORTER) {
                         if (target === "dev" && !watch) continue;
                         if (target === "web" && kind === "discordDesktop") continue;
@@ -106,13 +111,16 @@ export const globPlugins = kind => ({
                         if (target === "vencordDesktop" && kind !== "vencordDesktop") continue;
                     }
 
+                    const folderName = `src/${dir}/${fileName}`.replace(/^src\/plugins\//, "");
+
                     const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
+                    code += `import ${mod} from "./${dir}/${fileName.replace(/\.tsx?$/, "")}";\n`;
                     plugins += `[${mod}.name]:${mod},\n`;
+                    meta += `[${mod}.name]:${JSON.stringify({ folderName, userPlugin })},\n`; // TODO: add excluded plugins to display in the UI?
                     i++;
                 }
             }
-            code += `export default {${plugins}};`;
+            code += `export default {${plugins}};export const PluginMeta={${meta}};`;
             return {
                 contents: code,
                 resolveDir: "./src"
