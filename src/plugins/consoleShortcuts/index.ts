@@ -97,6 +97,8 @@ function makeShortcuts() {
         findAllComponentsByCode: (...code: string[]) => cacheFindAll(filters.byComponentCode(...code)),
         findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
         findStore: newFindWrapper(filters.byStoreName),
+        findByFactoryCode: newFindWrapper(filters.byFactoryCode),
+        findAllByFactoryCode: (...code: string[]) => cacheFindAll(filters.byFactoryCode(...code)),
         PluginsApi: { getter: () => Vencord.Plugins },
         plugins: { getter: () => Vencord.Plugins.plugins },
         Settings: { getter: () => Vencord.Settings },
