@@ -24,7 +24,7 @@ import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from 
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { cacheFindAll, extract, filters, findModuleId, search } from "@webpack";
+import { cacheFindAll, extract, filters, search } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
@@ -83,7 +83,7 @@ function makeShortcuts() {
         wreq: { getter: () => Webpack.wreq },
         wpsearch: search,
         wpex: extract,
-        wpexs: (code: string) => extract(findModuleId(code)!),
+        wpexs: (code: string) => extract(Webpack.cacheFindModuleId(code)!),
         loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
         find,
         findAll: cacheFindAll,
