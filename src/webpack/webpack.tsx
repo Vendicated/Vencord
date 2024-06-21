@@ -469,11 +469,11 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         if (!mod?.loaded || mod?.exports == null) continue;
 
         if (filter.$$vencordIsFactoryFilter && filter(wreq.m[key])) {
-            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] };
+            return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] };
         }
 
         if (filter(mod.exports)) {
-            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] };
+            return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] };
         }
 
         if (typeof mod.exports !== "object") {
@@ -481,7 +481,7 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         }
 
         if (mod.exports.default != null && filter(mod.exports.default)) {
-            return { result: exports.default, id: key, exportKey: "default ", factory: wreq.m[key] };
+            return { result: mod.exports.default, id: key, exportKey: "default ", factory: wreq.m[key] };
         }
 
         for (const exportKey in mod.exports) if (exportKey.length <= 3) {
