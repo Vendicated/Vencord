@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/lazyReact";
 import { Button, Popout, React, Text, useState } from "@webpack/common";
 
-import { cacheUsers, getRunning, NotesMap, setupStates, stopCacheProcess, usersCache } from "../data";
+import { cacheUsers, getNotes, getRunning, setupStates, stopCacheProcess, usersCache } from "../data";
 import { CrossIcon, ProblemIcon, SuccessIcon } from "./Icons";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -33,6 +33,8 @@ export default LazyComponent(() => React.memo(() => {
                     setCacheStatus,
                 });
 
+                const notesLength = Object.keys(getNotes()).length;
+
                 return <div className={cl("cache-container")}>
                     <Text className={cl("cache-header")} variant="heading-lg/semibold">
                         Fetch the profile of all users to filter notes by global name or username
@@ -47,14 +49,14 @@ export default LazyComponent(() => React.memo(() => {
                                 onClick={() => cacheUsers()}
                             >
                                 {
-                                    cacheStatus === 0 ? "Cache Users" : "Re-Cache Users"
+                                    cacheStatus === 10 ? "Cache Users" : "Re-Cache Users"
                                 }
                             </Button>
                             <Button
                                 className={cl("cache-cache-missing")}
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.YELLOW}
-                                disabled={isRunning || cacheStatus === 0 || cacheStatus === NotesMap.size}
+                                disabled={isRunning || cacheStatus === 0 || cacheStatus >= notesLength}
                                 onClick={() => cacheUsers(true)}
                             >
                                 Cache Missing Users
@@ -74,14 +76,14 @@ export default LazyComponent(() => React.memo(() => {
                         <div className={cl("cache-status")}>
                             {
                                 isRunning ? <LoadingSpinner />
-                                    : cacheStatus === NotesMap.size ? <SuccessIcon />
+                                    : cacheStatus >= notesLength ? <SuccessIcon />
                                         : cacheStatus === 0 ? <CrossIcon />
                                             : <ProblemIcon />
                             }
                             {
-                                cacheStatus === NotesMap.size ? "All users cached 👍"
+                                cacheStatus >= notesLength ? "Users are cached 👍"
                                     : cacheStatus === 0 ? "Users aren't cached 😔"
-                                        : `${cacheStatus}/${NotesMap.size}`
+                                        : `${cacheStatus}/${notesLength}`
                             }
                         </div>
                     </div>

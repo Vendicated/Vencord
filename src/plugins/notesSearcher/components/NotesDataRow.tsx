@@ -10,7 +10,7 @@ import { copyWithToast } from "@utils/misc";
 import { LazyComponent, useAwaiter } from "@utils/react";
 import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, Tooltip, UserUtils, useState } from "@webpack/common";
 
-import { putNote, updateNote, usersCache } from "../data";
+import { updateNote, usersCache } from "../data";
 import { DeleteIcon, PopupIcon, RefreshIcon, SaveIcon } from "./Icons";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -141,7 +141,6 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.GREEN}
                                 onClick={() => {
-                                    putNote(userId, userNotes);
                                     updateNote(userId, userNotes);
                                     refreshNotesData();
                                 }}
@@ -166,7 +165,6 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                         confirmText: "Delete",
                                         cancelText: "Cancel",
                                         onConfirm: () => {
-                                            putNote(userId, "");
                                             updateNote(userId, "");
                                             refreshNotesData();
                                         },

@@ -11,7 +11,7 @@ import {
 import { LazyComponent } from "@utils/react";
 import { Button, React, RelationshipStore, Select, Text, TextInput, useCallback, useMemo, useReducer, useState } from "@webpack/common";
 
-import { NotesMap, usersCache } from "../data";
+import { getNotes, usersCache } from "../data";
 import CachePopout from "./CachePopout";
 import NotesDataRow from "./NotesDataRow";
 
@@ -54,8 +54,8 @@ export function NotesDataModal({ modalProps, close }: {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const [usersNotesData, refreshNotesData] = useReducer(() => {
-        return Array.from(NotesMap);
-    }, Array.from(NotesMap));
+        return Object.entries(getNotes());
+    }, Object.entries(getNotes()));
 
     RefreshNotesDataEx = refreshNotesData;
 
@@ -110,25 +110,23 @@ export function NotesDataModal({ modalProps, close }: {
                 <CachePopout />
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
-            {
-                <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0" }} className={cl("content-container")}>
-                    {
-                        modalProps.transitionState === 1 &&
-                        <ModalContent className={cl("content")}>
-                            {
-                                !visibleNotes.length ? <NoNotes /> : (
-                                    <NotesDataContent
-                                        visibleNotes={visibleNotes}
-                                        canLoadMore={canLoadMore}
-                                        loadMore={loadMore}
-                                        refreshNotesData={refreshNotesData}
-                                    />
-                                )
-                            }
-                        </ModalContent>
-                    }
-                </div>
-            }
+            <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0" }} className={cl("content-container")}>
+                {
+                    modalProps.transitionState === 1 &&
+                    <ModalContent className={cl("content")}>
+                        {
+                            !visibleNotes.length ? <NoNotes /> : (
+                                <NotesDataContent
+                                    visibleNotes={visibleNotes}
+                                    canLoadMore={canLoadMore}
+                                    loadMore={loadMore}
+                                    refreshNotesData={refreshNotesData}
+                                />
+                            )
+                        }
+                    </ModalContent>
+                }
+            </div>
         </ModalRoot>
     );
 }
