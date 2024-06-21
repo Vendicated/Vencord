@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -27,7 +27,7 @@ const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 const settings = definePluginSettings(
     {
         hideBlockedMessages: {
-            description: "Hide messages from blocked users.",
+            description: "Hide messages from blocked users",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
@@ -36,25 +36,25 @@ const settings = definePluginSettings(
             },
         },
         ignoreBlockedMessages: {
-            description: "Completely ignore incoming gateway messages from blocked users. (locally)",
+            description: "Completely ignore incoming gateway messages from blocked users (locally)",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
         },
         ignoreTyping: {
-            description: "Hide blocked users from the currently typing list in chat.",
+            description: "Hide blocked users from the currently typing list in chat",
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
         },
         hideReferencedAuthor: {
-            description: "Hide blocked authors of referenced messages in replies.",
+            description: "Hide blocked authors of referenced messages in replies",
             type: OptionType.BOOLEAN,
             default: false,
             restartNeeded: true,
         },
         hideFromMemberList: {
-            description: "Hide blocked users from the members list.",
+            description: "Hide blocked users from the members list",
             type: OptionType.BOOLEAN,
             default: false,
             restartNeeded: true,
@@ -62,13 +62,15 @@ const settings = definePluginSettings(
     },
 );
 
+migratePluginSettings("NoBlockedUsers", "NoBlockedMessages");
+
 export default definePlugin({
     name: "NoBlockedUsers",
     description: "Hides blocked users and their messages from everywhere possible",
     authors: [Devs.rushii, Devs.Samu],
     settings,
     patches: [
-        // Based on canary bd584cf8aedd674f8d65c316892cf5054b7b6fd5
+        // Based on canary 303229
         {
             // Hide blocked message groups from non-DM channels
             find: ".MESSAGE_GROUP_BLOCKED||",
@@ -79,9 +81,9 @@ export default definePlugin({
         },
         ...[
             // Ignore new messages from blocked users
-            "\"MessageStore\"",
+            '"MessageStore"',
             // Don't mark channels unread because of blocked user messages
-            "\"ReadStateStore\"",
+            '"ReadStateStore"',
         ].map(find => ({
             find,
             predicate: () => settings.store.ignoreBlockedMessages,
