@@ -21,7 +21,7 @@ import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 
-import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./Utils";
+import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./utils";
 const styles = findByPropsLazy("timestampInline");
 
 const useTimezones = makeLazy(getAllTimezones);

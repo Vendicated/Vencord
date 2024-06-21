@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { findStoreLazy } from "@webpack";
-export const DATASTORE_KEY = "plugins.Timezones.savedTimezones";
+export const DATASTORE_KEY = "plugins.timezones.savedTimezones";
 
 import { debounce } from "@shared/debounce";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
