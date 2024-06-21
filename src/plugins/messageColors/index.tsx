@@ -27,9 +27,9 @@ export default definePlugin({
     description: "Displays color codes like #FF0042 inside of messages",
     settings,
     patches: [{
-        find: "memoizeMessageProps:",
+        find: ".VOICE_HANGOUT_INVITE?\"\"",
         replacement: {
-            match: /(\?\i.default.Messages.SOURCE_MESSAGE_DELETED:)\i/,
+            match: /(\?\i.\i.Messages.SOURCE_MESSAGE_DELETED:)\i/,
             replace: "$1$self.getColoredText(...arguments)"
         }
     }],

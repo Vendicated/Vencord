@@ -33,12 +33,6 @@ interface ColorPickerWithSwatchesProps {
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
 const ColorPickerWithSwatches = findExportedComponentLazy<ColorPickerWithSwatchesProps>("ColorPicker", "CustomColorPicker");
-// const ColorPickerWithSwatches = LazyComponentWebpack<ColorPickerWithSwatchesProps>(() =>
-//     find(filters.byProps("ColorPicker", "CustomColorPicker"), { isIndirect: true })?.ColorPicker ||
-//     findComponentByCode("presets,", "customColor:")
-// );
-
-
 
 export function EyeDropperIcon() {
     return (
