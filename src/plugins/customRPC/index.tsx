@@ -17,7 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { getUserSettingDefinitionLazy } from "@api/UserSettingDefinitions";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -33,7 +33,7 @@ const useProfileThemeStyle = findByCode("profileThemeStyle:", "--profile-gradien
 const ActivityComponent = findComponentByCode("onOpenGameProfile");
 const ActivityClassName = findByProps("activity", "buttonColor");
 
-const ShowCurrentGame = getUserSettingDefinitionLazy<boolean>("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -393,7 +393,7 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
-    dependencies: ["UserSettingDefinitionsAPI"],
+    dependencies: ["UserSettingsAPI"],
     start: setRpc,
     stop: () => setRpc(true),
     settings,

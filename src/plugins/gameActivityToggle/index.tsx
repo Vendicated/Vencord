@@ -18,7 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { getUserSettingDefinitionLazy } from "@api/UserSettingDefinitions";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -28,7 +28,7 @@ import style from "./style.css?managed";
 
 const Button = findComponentByCode("Button.Sizes.NONE,disabled:");
 
-const ShowCurrentGame = getUserSettingDefinitionLazy<boolean>("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 function makeIcon(showCurrentGame?: boolean) {
     const { oldIcon } = settings.use(["oldIcon"]);
@@ -87,7 +87,7 @@ export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
     authors: [Devs.Nuckyz, Devs.RuukuLada],
-    dependencies: ["UserSettingDefinitionsAPI"],
+    dependencies: ["UserSettingsAPI"],
     settings,
 
     patches: [
