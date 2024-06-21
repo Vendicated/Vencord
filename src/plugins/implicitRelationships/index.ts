@@ -19,11 +19,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStore } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { findStore } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 
 const UserAffinitiesStore = findStore("UserAffinitiesStore");
-const { FriendsSections } = findByProps("FriendsSections");
 
 const settings = definePluginSettings({
     sortByAffinity: {
@@ -75,7 +74,7 @@ export default definePlugin({
         },
         // Piggyback relationship fetch
         {
-            find: ".fetchRelationships()",
+            find: '"FriendsStore',
             replacement: {
                 match: /(\i\.\i)\.fetchRelationships\(\)/,
                 // This relationship fetch is actually completely useless, but whatevs
@@ -177,6 +176,6 @@ export default definePlugin({
     },
 
     start() {
-        FriendsSections.IMPLICIT = "IMPLICIT";
+        Constants.FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });

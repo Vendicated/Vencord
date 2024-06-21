@@ -18,6 +18,7 @@
 
 import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
+import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
 import { i18nMessages } from "./i18nMessages";
@@ -81,7 +82,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
 export type Permissions = "ADD_REACTIONS"
     | "ADMINISTRATOR"
@@ -172,17 +173,8 @@ export interface Clipboard {
 export interface NavigationRouter {
     back(): void;
     forward(): void;
-    hasNavigated(): boolean;
-    getHistory(): {
-        action: string;
-        length: 50;
-        [key: string]: any;
-    };
     transitionTo(path: string, ...args: unknown[]): void;
     transitionToGuild(guildId: string, ...args: unknown[]): void;
-    replaceWith(...args: unknown[]): void;
-    getLastRouteChangeSource(): any;
-    getLastRouteChangeSourceLocationStack(): any;
 }
 
 export interface IconUtils {
@@ -241,3 +233,42 @@ export interface ApplicationAssetUtils {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 }
 
+export interface Constants {
+    Endpoints: Record<string, any>;
+    UserFlags: Record<string, number>;
+    FriendsSections: Record<string, string>;
+}
+
+export interface ExpressionPickerStore {
+    closeExpressionPicker(activeViewType?: any): void;
+    openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+}
+
+export interface BrowserWindowFeatures {
+    toolbar?: boolean;
+    menubar?: boolean;
+    location?: boolean;
+    directories?: boolean;
+    width?: number;
+    height?: number;
+    defaultWidth?: number;
+    defaultHeight?: number;
+    left?: number;
+    top?: number;
+    defaultAlwaysOnTop?: boolean;
+    movable?: boolean;
+    resizable?: boolean;
+    frame?: boolean;
+    alwaysOnTop?: boolean;
+    hasShadow?: boolean;
+    transparent?: boolean;
+    skipTaskbar?: boolean;
+    titleBarStyle?: string | null;
+    backgroundColor?: string;
+}
+
+export interface PopoutActions {
+    open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
+    close(key: string): void;
+    setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
+}

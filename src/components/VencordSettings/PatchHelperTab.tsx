@@ -56,7 +56,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     const [compileResult, setCompileResult] = React.useState<[boolean, string]>();
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
-        const src: string = String(fact).replaceAll("\n", "");
+        const src = String(fact).replaceAll("\n", "");
 
         try {
             new RegExp(match);

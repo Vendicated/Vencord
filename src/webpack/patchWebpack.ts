@@ -278,25 +278,43 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                 return wrappedFactory.$$vencordOriginal?.apply(this, args);
             }
 
-            // Webpack sometimes sets the value of module.exports directly, so assign exports to it to make sure we properly handle it
-            exports = module?.exports;
-            if (exports == null) {
-                return factoryReturn;
-            }
+            exports = module.exports;
+            if (exports == null) return;
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if ((exports === window || exports?.default === window) && typeof require === "function" && require.c != null) {
-                define(require.c, id, {
-                    value: require.c[id],
-                    enumerable: false
-                });
-                return factoryReturn;
+            if (require.c) {
+                let foundWindow = false;
+
+                if (exports === window) {
+                    foundWindow = true;
+                } else if (typeof exports === "object") {
+                    if (exports.default === window) {
+                        foundWindow = true;
+                    } else {
+                        for (const exportKey in exports) if (exportKey.length <= 3) {
+                            if (exports[exportKey] === window) {
+                                foundWindow = true;
+                            }
+                        }
+                    }
+                }
+
+                if (foundWindow) {
+                    Object.defineProperty(require.c, id, {
+                        value: require.c[id],
+                        enumerable: false,
+                        configurable: true,
+                        writable: true
+                    });
+
+                    return;
+                }
             }
 
             for (const callback of moduleListeners) {
                 try {
-                    callback(exports, id);
+                    callback(exports, { id, factory: originalMod });
                 } catch (err) {
                     logger.error("Error in Webpack module listener:\n", err, callback);
                 }
@@ -304,12 +322,36 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
             for (const [filter, callback] of waitForSubscriptions) {
                 try {
+                    if (filter.$$vencordIsFactoryFilter && filter(originalMod)) {
+                        waitForSubscriptions.delete(filter);
+                        callback(exports, { id, exportKey: null, factory: originalMod });
+                        continue;
+                    }
+
                     if (filter(exports)) {
                         waitForSubscriptions.delete(filter);
-                        callback(exports);
-                    } else if (exports.default && filter(exports.default)) {
+                        callback(exports, { id, exportKey: null, factory: originalMod });
+                        continue;
+                    }
+
+                    if (typeof exports !== "object") {
+                        continue;
+                    }
+
+                    if (exports.default != null && filter(exports.default)) {
                         waitForSubscriptions.delete(filter);
-                        callback(exports.default);
+                        callback(exports.default, { id, exportKey: "default", factory: originalMod });
+                        continue;
+                    }
+
+                    for (const exportKey in exports) if (exportKey.length <= 3) {
+                        const exportValue = exports[exportKey];
+
+                        if (exportValue != null && filter(exportValue)) {
+                            waitForSubscriptions.delete(filter);
+                            callback(exportValue, { id, exportKey, factory: originalMod });
+                            break;
+                        }
                     }
                 } catch (err) {
                     logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);

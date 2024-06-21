@@ -116,14 +116,14 @@ export default definePlugin({
         },
         // Prevent Discord from trying to connect to hidden stage channels
         {
-            find: ".MAX_STAGE_VOICE_USER_LIMIT})",
+            find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
                 match: /!(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
                 replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
-            find: "ChannelItemEditButton:function(){",
+            find: 'tutorialId:"instant-invite"',
             replacement: [
                 // Render null instead of the buttons if the channel is hidden
                 ...[
@@ -195,7 +195,7 @@ export default definePlugin({
             // Hide the new version of unreads box for hidden channels
             find: '="ChannelListUnreadsStore",',
             replacement: {
-                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i)\))/g, // Global because Discord has multiple methods like that in the same module
+                match: /(?<=\.id\)\))(?=&&\(0,\i\.\i\)\((\i)\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
@@ -203,15 +203,15 @@ export default definePlugin({
             // Make the old version of unreads box not visible for hidden channels
             find: "renderBottomUnread(){",
             replacement: {
-                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i\.record)\))/,
+                match: /(?<=!0\))(?=&&\(0,\i\.\i\)\((\i\.record)\))/,
                 replace: "&&!$self.isHiddenChannel($1)"
             }
         },
         {
             // Make the state of the old version of unreads box not include hidden channels
-            find: ".useFlattenedChannelIdListWithThreads)",
+            find: "ignoreRecents:!0",
             replacement: {
-                match: /(?=&&\(0,\i\.getHasImportantUnread\)\((\i)\))/,
+                match: /(?<=\.id\)\))(?=&&\(0,\i\.\i\)\((\i)\))/,
                 replace: "&&!$self.isHiddenChannel($1)"
             }
         },
@@ -257,7 +257,7 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?getHasImportantUnread\)\(\i\))/,
+                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?>0\)&&\(0,\i\.\i\)\(\i\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
@@ -289,7 +289,7 @@ export default definePlugin({
                 },
                 {
                     // If the @everyone role has the required permissions, make the array only contain it
-                    match: /computePermissionsForRoles.+?.value\(\)(?<=channel:(\i).+?)/,
+                    match: /forceRoles:.+?.value\(\)(?<=channel:(\i).+?)/,
                     replace: (m, channel) => `${m}.reduce(...$self.makeAllowedRolesReduce(${channel}.guild_id))`
                 },
                 {
@@ -422,7 +422,7 @@ export default definePlugin({
                 },
                 {
                     // Avoid filtering out hidden channels from the channel list
-                    match: /(?<=queryChannels\(\i\){.+?isGuildChannelType\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
+                    match: /(?<=queryChannels\(\i\){.+?\)\((\i)\.type\))(?=&&!\i\.\i\.can\()/,
                     replace: "&&!$self.isHiddenChannel($1)"
                 }
             ]

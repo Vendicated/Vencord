@@ -50,9 +50,8 @@ async function runReporter() {
         await Promise.all(Webpack.webpackSearchHistory.map(async ([searchType, args]) => {
             args = [...args];
 
+            let result = null as any;
             try {
-                let result = null as any;
-
                 switch (searchType) {
                     case "webpackDependantLazy":
                     case "webpackDependantLazyComponent": {
@@ -61,9 +60,9 @@ async function runReporter() {
                         break;
                     }
                     case "extractAndLoadChunks": {
-                        const [code, matcher] = args;
+                        const extractAndLoadChunks = args.shift();
 
-                        result = await Webpack.extractAndLoadChunks(code, matcher);
+                        result = await extractAndLoadChunks();
                         if (result === false) {
                             result = null;
                         }
@@ -80,6 +79,14 @@ async function runReporter() {
 
                             if (findResult[SYM_PROXY_INNER_GET] != null) {
                                 result = findResult[SYM_PROXY_INNER_VALUE];
+
+                                if (result != null && searchType === "mapMangledModule") {
+                                    for (const innerMap in result) {
+                                        if (result[innerMap][SYM_PROXY_INNER_GET] != null) {
+                                            throw new Error("Webpack Find Fail");
+                                        }
+                                    }
+                                }
                             }
 
                             if (findResult[SYM_LAZY_COMPONENT_INNER] != null) {
@@ -92,7 +99,7 @@ async function runReporter() {
                 }
 
                 if (result == null) {
-                    throw "a rock at ben shapiro";
+                    throw new Error("Webpack Find Fail");
                 }
             } catch (e) {
                 let logMessage = searchType;
@@ -121,16 +128,37 @@ async function runReporter() {
 
                     logMessage += `(${filter})`;
                 } else if (searchType === "extractAndLoadChunks") {
+                    const [code, matcher] = parsedArgs;
+
                     let regexStr: string;
-                    if (parsedArgs[1] === Webpack.DefaultExtractAndLoadChunksRegex) {
+                    if (matcher === Webpack.DefaultExtractAndLoadChunksRegex) {
                         regexStr = "DefaultExtractAndLoadChunksRegex";
                     } else {
-                        regexStr = String(parsedArgs[1]);
+                        regexStr = String(matcher);
                     }
 
-                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${regexStr})`;
+                    logMessage += `(${JSON.stringify(code)}, ${regexStr})`;
+                } else if (searchType === "mapMangledModule") {
+                    const [code, mappers] = parsedArgs;
+
+                    const parsedFailedMappers = Object.entries<any>(mappers)
+                        .filter(([key]) => result == null || result[key][SYM_PROXY_INNER_GET] != null)
+                        .map(([key, filter]) => {
+                            let parsedFilter: string;
+
+                            if (filter.$$vencordProps != null) {
+                                const filterName = filter.$$vencordProps[0];
+                                parsedFilter = `${filterName}(${filter.$$vencordProps.slice(1).map((arg: any) => JSON.stringify(arg)).join(", ")})`;
+                            } else {
+                                parsedFilter = String(filter).slice(0, 147) + "...";
+                            }
+
+                            return [key, parsedFilter];
+                        });
+
+                    logMessage += `(${JSON.stringify(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
                 } else {
-                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
                 }
 
                 ReporterLogger.log("Webpack Find Fail:", logMessage);

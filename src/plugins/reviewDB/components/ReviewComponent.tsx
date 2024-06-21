@@ -34,7 +34,7 @@ const messageClasses = findByProps("cozyMessage");
 const containerClasses = findByProps("container", "isHeader");
 const avatarClasses = findByProps("avatar", "zalgo");
 const buttonClasses = findByProps("button", "wrapper", "selected");
-const botTagClasses = findByProps("botTag", "botTagRegular");
+const botTagClasses = findByProps("botTagRegular");
 
 const dateFormat = new Intl.DateTimeFormat();
 
@@ -130,7 +130,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
 
                 {review.type === ReviewType.System && (
                     <span
-                        className={classes(botTagClasses.botTagVerified, botTagClasses.botTagRegular, botTagClasses.botTag, botTagClasses.px, botTagClasses.rem)}
+                        className={classes(botTagClasses.botTagVerified, botTagClasses.botTagRegular, botTagClasses.px, botTagClasses.rem)}
                         style={{ marginLeft: "4px" }}>
                         <span className={botTagClasses.botText}>
                             System

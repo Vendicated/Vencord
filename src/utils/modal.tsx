@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, find, findByProps, findExportedComponent } from "@webpack";
+import { filters, find, findByProps, findComponentByCode } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { NoopComponent } from "./react";
@@ -38,7 +38,7 @@ const enum ModalTransitionState {
 
 export interface ModalProps {
     transitionState: ModalTransitionState;
-    onClose(): Promise<void>;
+    onClose(): void;
 }
 
 export interface ModalOptions {
@@ -124,6 +124,7 @@ export type ImageModalProps = {
     animated?: boolean;
     responsive?: boolean;
     renderLinkComponent(props: any): ReactNode;
+    renderForwardComponent(props: any): ReactNode;
     maxWidth?: number;
     maxHeight?: number;
     shouldAnimate?: boolean;
@@ -131,7 +132,7 @@ export type ImageModalProps = {
     shouldHideMediaOptions?: boolean;
 };
 
-export const ImageModal = findExportedComponent<ImageModalProps>("ImageModal");
+export const ImageModal = findComponentByCode<ImageModalProps>(".MEDIA_MODAL_CLOSE", "responsive");
 
 const ModalAPI = findByProps("openModalLazy");
 

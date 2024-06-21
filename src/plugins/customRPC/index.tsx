@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -26,11 +27,13 @@ import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByProps, findComponentByCode } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, StatusSettingsStores, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const useProfileThemeStyle = findByCode("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCode("onOpenGameProfile");
 const ActivityClassName = findByProps("activity", "buttonColor");
+
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -390,13 +393,14 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    dependencies: ["UserSettingsAPI"],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
-        const gameActivityEnabled = StatusSettingsStores.ShowCurrentGame.useSetting();
+        const gameActivityEnabled = ShowCurrentGame.useSetting();
         const { profileThemeStyle } = useProfileThemeStyle({});
 
         return (
@@ -412,7 +416,7 @@ export default definePlugin({
                         <Button
                             color={Button.Colors.TRANSPARENT}
                             className={Margins.top8}
-                            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(true)}
+                            onClick={() => ShowCurrentGame.updateSetting(true)}
                         >
                             Enable
                         </Button>

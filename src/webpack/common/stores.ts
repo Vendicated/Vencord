@@ -17,14 +17,14 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, find, findByProps, findStore } from "../webpack";
+import { findByCode, findByProps, findStore } from "../webpack";
 import * as t from "./types/stores";
 
 export const Flux = findByProps<t.Flux>("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const DraftType = find<typeof t.DraftType>(filters.byProps("DraftType"), m => m.DraftType);
+export const DraftType = findByProps<typeof t.DraftType>("ChannelMessage", "SlashCommand");
 
 // This is not actually a FluxStore
 export const PrivateChannelsStore = findByProps("openPrivateChannel");
@@ -57,4 +57,4 @@ export const DraftStore = findStore<t.DraftStore>("DraftStore");
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores = find<t.useStateFromStores>(filters.byProps("useStateFromStores"), m => m.useStateFromStores);
+export const useStateFromStores = findByCode<t.useStateFromStores>("useStateFromStores");

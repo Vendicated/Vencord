@@ -27,7 +27,7 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { findByProps, findStore } from "@webpack";
+import { find, findByProps, findStore } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
@@ -37,7 +37,7 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUtils = findByProps("CloudUpload");
+const CloudUpload = find(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findStore("PendingReplyStore");
 const OptionClasses = findByProps("optionName", "optionIcon", "optionLabel");
 
@@ -89,9 +89,8 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
     const reply = PendingReplyStore.getPendingReply(channelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
-    const upload = new CloudUtils.CloudUpload({
+    const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
-        isClip: false,
         isThumbnail: false,
         platform: 1,
     }, channelId, false, 0);

@@ -10,5 +10,5 @@ import { extractAndLoadChunksLazy, findByProps } from "@webpack";
 export const cl = classNameFactory("vc-decor-");
 export const DecorationModalStyles = findByProps("modalFooterShopButton");
 
-export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["openAvatarDecorationModal:"]);
-export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
+export const requireAvatarDecorationModal = extractAndLoadChunksLazy(".COLLECTIBLES_SHOP_FULLSCREEN&&");
+export const requireCreateStickerModal = extractAndLoadChunksLazy("stickerInspected]:");

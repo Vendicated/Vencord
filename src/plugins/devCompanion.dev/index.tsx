@@ -216,7 +216,7 @@ function initWs(isManual = false) {
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
-                            results = cacheFindAll(filters.componentByCode(...parsedArgs));
+                            results = cacheFindAll(filters.byComponentCode(...parsedArgs));
                             break;
                         default:
                             return reply("Unknown Find Type " + type);

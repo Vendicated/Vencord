@@ -17,5 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { findStore } from "@webpack";
 
+export const MediaEngineStore = findStore("MediaEngineStore");
 export const cl = classNameFactory("vc-vmsg-");

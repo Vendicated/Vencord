@@ -24,7 +24,7 @@ import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from 
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { cacheFindAll, extract, filters, findModuleId, search } from "@webpack";
+import { cacheFindAll, extract, filters, search } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
@@ -84,7 +84,7 @@ function makeShortcuts() {
         WebpackInstances: { getter: () => Vencord.WebpackPatcher.allWebpackInstances },
         wpsearch: search,
         wpex: extract,
-        wpexs: (code: string) => extract(findModuleId(code)!),
+        wpexs: (code: string) => extract(Webpack.cacheFindModuleId(code)!),
         loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
         find,
         findAll: cacheFindAll,
@@ -92,8 +92,8 @@ function makeShortcuts() {
         findAllByProps: (...props: string[]) => cacheFindAll(filters.byProps(...props)),
         findByCode: newFindWrapper(filters.byCode),
         findAllByCode: (code: string) => cacheFindAll(filters.byCode(code)),
-        findComponentByCode: newFindWrapper(filters.componentByCode),
-        findAllComponentsByCode: (...code: string[]) => cacheFindAll(filters.componentByCode(...code)),
+        findComponentByCode: newFindWrapper(filters.byComponentCode),
+        findAllComponentsByCode: (...code: string[]) => cacheFindAll(filters.byComponentCode(...code)),
         findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
         findStore: newFindWrapper(filters.byStoreName),
         PluginsApi: { getter: () => Vencord.Plugins },

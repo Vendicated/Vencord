@@ -16,8 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { canonicalizeMatch } from "@utils/patches";
+import { Channel } from "discord-types/general";
+
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, waitFor } from "../webpack";
+import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {
@@ -33,11 +36,15 @@ export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch",
     return m;
 });
 
-export const ComponentDispatch = find(filters.byProps("ComponentDispatch", "ComponentDispatcher"), m => m.ComponentDispatch);
+export const ComponentDispatch = findByProps("dispatchToLastSubscribed");
 
-export const Constants = findByProps("Endpoints");
+export const Constants: t.Constants = mapMangledModule('ME:"/users/@me"', {
+    Endpoints: filters.byProps("USER", "ME"),
+    UserFlags: filters.byProps("STAFF", "SPAMMER"),
+    FriendsSections: m => m.PENDING === "PENDING" && m.ADD_FRIEND
+});
 
-export const RestAPI = find<t.RestAPI>(filters.byProps("getAPIBaseURL"), m => m.HTTP ?? m);
+export const RestAPI = find<t.RestAPI>(m => typeof m === "object" && m.del && m.put);
 export const moment = findByProps<typeof import("moment")>("parseTwoDigitYear");
 
 export const hljs = findByProps<typeof import("highlight.js")>("highlight", "registerLanguage");
@@ -106,25 +113,35 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = findByProps<t.UserUtils>("getUser", "fetchCurrentUser");
+export const UserUtils: t.UserUtils = {
+    getUser: findByCode(".USER(")
+};
 
 export const UploadManager = findByProps("clearAll", "addFile");
-export const UploadHandler = findByProps<t.UploadHandler>("showUploadFileSizeExceededError", "promptToUpload");
+export const UploadHandler: t.UploadHandler = {
+    promptToUpload: findByCode(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
+};
 
 export const ApplicationAssetUtils = findByProps<t.ApplicationAssetUtils>("fetchAssetIds", "getAssetImage");
 
-export const Clipboard = findByProps<t.Clipboard>("SUPPORTS_COPY", "copy");
+export const Clipboard: t.Clipboard = mapMangledModule('queryCommandEnabled("copy")', {
+    copy: filters.byCode(".copy("),
+    SUPPORTS_COPY: e => typeof e === "boolean"
+});
 
-export const NavigationRouter = findByProps<t.NavigationRouter>("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter: t.NavigationRouter = mapMangledModule("Transitioning to ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
+    back: filters.byCode("goBack()"),
+    forward: filters.byCode("goForward()"),
+});
 
 export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
-export const PermissionsBits = find<t.PermissionsBits>(m => typeof m.Permissions?.ADMINISTRATOR === "bigint", m => m.Permissions);
+export const PermissionsBits = find<t.PermissionsBits>(m => typeof m.ADMINISTRATOR === "bigint");
 
 export const zustandCreate = findByCode("will be removed in v4");
-
-const persistFilter = filters.byCode("[zustand persist middleware]");
-export const zustandPersist = find(m => m.persist && persistFilter(m.persist), m => m.persist);
+export const zustandPersist = findByCode("[zustand persist middleware]");
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
 export const MessageCache = findByProps("clearCache", "_channelMessages");
@@ -132,3 +149,16 @@ export const UserProfileActions = findByProps("openUserProfileModal", "closeUser
 export const InviteActions = findByProps("resolveInvite");
 
 export const IconUtils = findByProps<t.IconUtils>("getGuildBannerURL", "getUserAvatarURL");
+
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
+// TODO: type
+export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModule("expression-picker-last-active-view", {
+    closeExpressionPicker: filters.byCode("setState({activeView:null"),
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+});
+
+export const PopoutActions: t.PopoutActions = mapMangledModule('type:"POPOUT_WINDOW_OPEN"', {
+    open: filters.byCode('type:"POPOUT_WINDOW_OPEN"'),
+    close: filters.byCode('type:"POPOUT_WINDOW_CLOSE"'),
+    setAlwaysOnTop: filters.byCode('type:"POPOUT_WINDOW_SET_ALWAYS_ON_TOP"'),
+});

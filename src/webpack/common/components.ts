@@ -44,8 +44,8 @@ export let Avatar: t.Avatar = NoopComponent;
 export let FocusLock: t.FocusLock = NoopComponent;
 export let useToken: t.useToken;
 
-export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = findComponent<t.TimestampProps>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.byComponentCode("MASKED_LINK)"));
+export const Timestamp = findComponent<t.TimestampProps>(filters.byComponentCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const Flex = findComponent(filters.byProps("Justify", "Align", "Wrap")) as t.Flex;
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");

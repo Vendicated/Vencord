@@ -17,14 +17,14 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { findByProps } from "@webpack";
+import { findByCode } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
 import { Argument } from "./types";
 
-const MessageCreator = findByProps("createBotMessage");
+const createBotMessage = findByCode('username:"Clyde"');
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
@@ -37,7 +37,7 @@ export function generateId() {
  * @returns {Message}
  */
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
-    const botMessage = MessageCreator.createBotMessage({ channelId, content: "", embeds: [] });
+    const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
     MessageActions.receiveMessage(channelId, mergeDefaults(message, botMessage));
 

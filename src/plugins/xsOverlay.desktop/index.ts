@@ -9,11 +9,11 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
-import { findByProps } from "@webpack";
+import { find, findByCode } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
-const { ChannelTypes } = findByProps("ChannelTypes");
+const ChannelTypes = find(m => m.ANNOUNCEMENT_THREAD === 10);
 
 interface Message {
     guild_id: string,
@@ -68,7 +68,7 @@ interface Call {
     ringing: string[];
 }
 
-const Notifs = findByProps("makeTextChatNotification");
+const notificationsShouldNotify = findByCode(".SUPPRESS_NOTIFICATIONS))return!1");
 const XSLog = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
@@ -136,7 +136,7 @@ const settings = definePluginSettings({
     },
 });
 
-const Native = VencordNative.pluginHelpers.XsOverlay as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
@@ -304,7 +304,7 @@ function shouldNotify(message: Message, channel: string) {
     const currentUser = UserStore.getCurrentUser();
     if (message.author.id === currentUser.id) return false;
     if (message.author.bot && !settings.store.botNotifications) return false;
-    return Notifs.shouldNotify(message, channel);
+    return notificationsShouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {

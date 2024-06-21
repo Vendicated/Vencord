@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
 
 const SpoilerClasses = findByProps("spoilerContent");
-const MessagesClasses = findByProps("messagesWrapper", "messages");
+const MessagesClasses = findByProps("messagesWrapper");
 
 export default definePlugin({
     name: "RevealAllSpoilers",
