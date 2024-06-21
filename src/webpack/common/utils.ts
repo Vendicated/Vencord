@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, waitFor } from "../webpack";
+import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {
@@ -115,7 +115,12 @@ export const ApplicationAssetUtils = findByProps<t.ApplicationAssetUtils>("fetch
 
 export const Clipboard = findByProps<t.Clipboard>("SUPPORTS_COPY", "copy");
 
-export const NavigationRouter = findByProps<t.NavigationRouter>("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter: t.NavigationRouter = mapMangledModule("aTransitioning to ", {
+    transitionTo: filters.byCode("transitionTo -"),
+    transitionToGuild: filters.byCode("transitionToGuild -"),
+    back: filters.byCode("goBack()"),
+    forward: filters.byCode("goForward()"),
+});
 
 export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
