@@ -30,7 +30,6 @@ const settings = definePluginSettings(
             description: "Hide messages from blocked users",
             type: OptionType.BOOLEAN,
             default: true,
-            restartNeeded: true,
         },
         ignoreBlockedMessages: {
             description: "Completely ignore incoming gateway messages from blocked users (locally)",
@@ -78,7 +77,7 @@ export default definePlugin({
             find: ".MESSAGE_GROUP_BLOCKED||",
             replacement: {
                 match: /(\i)\.type===(?:\i\.)+MESSAGE_GROUP_SPAMMER\)\{/,
-                replace: "$& if($1.type === 'MESSAGE_GROUP_BLOCKED') return;",
+                replace: "$& if($1.type === 'MESSAGE_GROUP_BLOCKED' && $self.settings.store.hideBlockedMessages) return;",
             },
         },
         ...[
