@@ -45,13 +45,13 @@ const settings = definePluginSettings(
         hideReferencedAuthor: {
             description: "Hide blocked authors of referenced messages in replies",
             type: OptionType.BOOLEAN,
-            default: false,
+            default: true,
             restartNeeded: true,
         },
         hideFromMemberList: {
             description: "Hide blocked users from the members list",
             type: OptionType.BOOLEAN,
-            default: false,
+            default: true,
             restartNeeded: true,
         },
     },
