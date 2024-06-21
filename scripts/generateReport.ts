@@ -46,7 +46,8 @@ await page.setBypassCSP(true);
 
 async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
     return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue());
+        .then(m => m?.jsonValue())
+        .catch(() => undefined);
 }
 
 const report = {
@@ -78,8 +79,8 @@ const IGNORED_DISCORD_ERRORS = [
 function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
 
-    const indentationStr = Array(indentation).fill(" ").join("");
-    return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${!isDiscord ? indentationStr : ""}\`\`\``;
+    const indentationStr = Array(!isDiscord ? indentation : 0).fill(" ").join("");
+    return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${indentationStr}\`\`\``;
 }
 
 async function printReport() {
