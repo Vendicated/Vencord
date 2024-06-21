@@ -86,8 +86,8 @@ export default definePlugin({
             find,
             predicate: () => settings.store.ignoreBlockedMessages,
             replacement: {
-                match: /(?<=MESSAGE_CREATE:function\((?<props>\i)\){)/,
-                replace: "if($self.isBlocked($<props>.message.id)) return;",
+                match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                replace: "if($self.isBlocked($1.message.id)) return;",
             },
         })),
         {
@@ -104,18 +104,18 @@ export default definePlugin({
             find: "\"TypingStore\"",
             predicate: () => settings.store.ignoreTyping,
             replacement: {
-                match: /TYPING_START:(?<func>\i)/,
-                replace: "TYPING_START: (e) => { if($self.isBlocked(e.userId))return; $<func>(e) }",
+                match: /TYPING_START:(\i)/,
+                replace: "TYPING_START: (e) => { if($self.isBlocked(e.userId))return; $1(e) }",
             },
         },
         {
             // Hide blocked users from chat autocomplete
             find: ".ALLOW_EVERYONE_OR_HERE,",
             replacement: {
-                match: /(?<start>queryResults.+?)return\{results:(?<results>.+?\))}/,
+                match: /(queryResults.+?)return\{results:(.+?\))}/,
                 replace:
-                    "$<start>" +
-                    "let results = $<results>;" +
+                    "$1" +
+                    "let results = $2;" +
                     "results.users=results.users.filter(res=>!$self.isBlocked(res.user.id));" +
                     "return { results }",
             },
@@ -125,8 +125,8 @@ export default definePlugin({
             find: "this.props.channel.id&&this.updateSubscription(),this.trackMemberListViewed()",
             predicate: () => settings.store.hideFromMemberList,
             replacement: {
-                match: /(?<start>memo\((?<param>\i)=>{)(?<end>let{colorRoleId)/,
-                replace: "$<start> if($self.isBlocked($<param>.user.id)) return; $<end>",
+                match: /(memo\((\i)=>{)(let{colorRoleId)/,
+                replace: "$1 if($self.isBlocked($2.user.id)) return; $3",
             },
         },
     ],
