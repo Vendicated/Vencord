@@ -131,8 +131,28 @@ if (!IS_VANILLA) {
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
-    // work around discord unloading when in background
+    // Monkey patch commandLine to:
+    // - disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
+    // - disable UseEcoQoSForBackgroundProcess: Work around Discord unloading when in background
+    const originalAppend = app.commandLine.appendSwitch;
+    app.commandLine.appendSwitch = function (...args) {
+        if (args[0] === "disable-features") {
+            const disabledFeatures = new Set((args[1] ?? "").split(","));
+            disabledFeatures.add("WidgetLayering");
+            disabledFeatures.add("UseEcoQoSForBackgroundProcess");
+            args[1] += [...disabledFeatures].join(",");
+        }
+        return originalAppend.apply(this, args);
+    };
+
+    // disable renderer backgrounding to prevent the app from unloading when in the background
+    // https://github.com/electron/electron/issues/2822
+    // https://github.com/GoogleChrome/chrome-launcher/blob/5a27dd574d47a75fec0fb50f7b774ebf8a9791ba/docs/chrome-flags-for-tools.md#task-throttling
+    // Work around discord unloading when in background
+    // Discord also recently started adding these flags but only on windows for some reason dunno why, it happens on Linux too
     app.commandLine.appendSwitch("disable-renderer-backgrounding");
+    app.commandLine.appendSwitch("disable-background-timer-throttling");
+    app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }

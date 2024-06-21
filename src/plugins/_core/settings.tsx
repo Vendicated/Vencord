@@ -58,23 +58,22 @@ export default definePlugin({
         },
         {
             find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-            }
-        },
-        {
-            find: "useDefaultUserSettingsSections:function",
-            replacement: {
-                match: /(?<=useDefaultUserSettingsSections:function\(\){return )(\i)\}/,
-                replace: "$self.wrapSettingsHook($1)}"
-            }
+            replacement: [
+                {
+                    match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
+                    replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
+                },
+                {
+                    match: /({(?=.+?function (\i).{0,120}(\i)=\i\.useMemo.{0,30}return \i\.useMemo\(\(\)=>\i\(\3).+?function\(\){return )\2(?=})/,
+                    replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
+                }
+            ]
         },
         {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
-                replace: "$2.default.open($1);return;"
+                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
+                replace: "$2.open($1);return;"
             }
         }
     ],
