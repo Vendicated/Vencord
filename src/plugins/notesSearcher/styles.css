@@ -182,14 +182,13 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
 }
 
 /* Loading Spinner */
-.vc-notes-searcher-modal-loading-container {
-    /* aspect-ratio: 1 / 1; */
+.vc-notes-searcher-modal-spinner-container {
     width: 56px;
     height: 56px;
     margin: 12px;
 }
 
-.vc-notes-searcher-modal-loading {
+.vc-notes-searcher-modal-spinner {
     width: 56px;
     height: 56px;
     border: 5px solid #fff;
@@ -197,10 +196,10 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     display: inline-block;
     box-sizing: border-box;
     position: relative;
-    animation: vc-user-notes-pulse 1s linear infinite;
+    animation: vc-notes-searcher-pulse 1s linear infinite;
 }
 
-.vc-notes-searcher-modal-loading::after {
+.vc-notes-searcher-modal-spinner::after {
     content: "";
     position: absolute;
     width: 56px;
@@ -212,10 +211,10 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    animation: vc-user-notes-scale-up 1s linear infinite;
+    animation: vc-notes-searcher-scale-up 1s linear infinite;
 }
 
-@keyframes vc-user-notes-scale-up {
+@keyframes vc-notes-searcher-scale-up {
     0% {
         transform: translate(-50%, -50%) scale(0);
     }
@@ -226,7 +225,7 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     }
 }
 
-@keyframes vc-user-notes-pulse {
+@keyframes vc-notes-searcher-pulse {
     0%,
     60%,
     100% {

@@ -5,17 +5,15 @@
  */
 
 import { LazyComponent } from "@utils/react";
-import { filters, find } from "@webpack";
+import { findExportedComponentLazy } from "@webpack";
+import { React } from "@webpack/common";
 
 import { NotesDataIcon } from "./Icons";
 import { openNotesDataModal } from "./NotesDataModal";
 
-const HeaderBarIcon = LazyComponent(() => {
-    const filter = filters.byCode(".HEADER_BAR_BADGE");
-    return find(m => m.Icon && filter(m.Icon)).Icon;
-});
+const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
-export function OpenNotesDataButton() {
+export const OpenNotesDataButton = LazyComponent(() => React.memo(() => {
     return (
         <HeaderBarIcon
             className="vc-notes-searcher-toolbox-button"
@@ -24,4 +22,4 @@ export function OpenNotesDataButton() {
             icon={NotesDataIcon}
         />
     );
-}
+}));

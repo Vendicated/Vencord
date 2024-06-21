@@ -42,17 +42,19 @@ const fetchUser = async (userId: string) => {
     }
 };
 
+type Dispatch = ReturnType<typeof useState<any>>[1]
+
 const states: {
-    setRunning?: ReturnType<typeof useState<any>>[1];
-    setCacheStatus?: ReturnType<typeof useState<any>>[1],
+    setRunning?: Dispatch;
+    setCacheStatus?: Dispatch,
 } = {};
 
 export const setupStates = ({
     setRunning,
     setCacheStatus,
 }: {
-    setRunning: ReturnType<typeof useState<any>>[1],
-    setCacheStatus: ReturnType<typeof useState<any>>[1],
+    setRunning: Dispatch,
+    setCacheStatus: Dispatch,
 }) => {
     states.setRunning = setRunning;
     states.setCacheStatus = setCacheStatus;

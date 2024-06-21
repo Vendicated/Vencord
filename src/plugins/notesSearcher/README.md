@@ -1,6 +1,6 @@
 # NotesSearcher
 
-Allows you to open modal with all of your notes and search throught them by UserID, Note text and Global/Username if user is cached
+Allows you to open a modal with all of your notes and search through them by user ID, note text, and username
 
 ## Preview
 
