@@ -60,6 +60,7 @@ export default definePlugin({
         // FIXME: remove once change merged to stable
         {
             find: "Messages.ACTIVITY_SETTINGS",
+            noWarn: true,
             replacement: {
                 get match() {
                     switch (Settings.plugins.Settings.settingsLocation) {
@@ -84,17 +85,10 @@ export default definePlugin({
             }
         },
         {
-            find: "useDefaultUserSettingsSections:function",
-            replacement: {
-                match: /(?<=useDefaultUserSettingsSections:function\(\){return )(\i)\}/,
-                replace: "$self.wrapSettingsHook($1)}"
-            }
-        },
-        {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
-                replace: "$2.default.open($1);return;"
+                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
+                replace: "$2.open($1);return;"
             }
         }
     ],
