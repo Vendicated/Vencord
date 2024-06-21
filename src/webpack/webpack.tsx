@@ -429,7 +429,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | string[],
                 }
             }
 
-            const [proxy] = proxyInner(`Webpack mapMangled mapper filter matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
+            const [proxy] = proxyInner(`Webpack mapMangledModule mapper filter matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
             // Use the proxy to throw errors because no export matched the filter
             mapping[newName] = proxy;
         }
