@@ -4,24 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import { Link } from "@components/Link";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { localStorage } from "@utils/localStorage";
@@ -106,12 +88,12 @@ export default definePlugin({
             <><Forms.FormTitle>
                 <Forms.FormTitle>How to use?</Forms.FormTitle>
             </Forms.FormTitle>
-                <Forms.FormText>
-                    <Forms.FormText>Go to <Link href="/settings/appearance" onClick={e => { e.preventDefault(); closeAllModals(); FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Appearance" }); }}>Appearance Settings</Link> tab.</Forms.FormText>
-                    <Forms.FormText>Scroll down to "In-app Icons" and click on "Preview App Icon".</Forms.FormText>
-                    <Forms.FormText>And upload your own custom icon!</Forms.FormText>
-                    <Forms.FormText>You can only use links when you are uploading your Custom Icon.</Forms.FormText>
-                </Forms.FormText></>
+            <Forms.FormText>
+                <Forms.FormText>Go to <Link href="/settings/appearance" onClick={e => { e.preventDefault(); closeAllModals(); FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Appearance" }); }}>Appearance Settings</Link> tab.</Forms.FormText>
+                <Forms.FormText>Scroll down to "In-app Icons" and click on "Preview App Icon".</Forms.FormText>
+                <Forms.FormText>And upload your own custom icon!</Forms.FormText>
+                <Forms.FormText>You can only use links when you are uploading your Custom Icon.</Forms.FormText>
+            </Forms.FormText></>
         );
     }
 });

@@ -21,7 +21,7 @@ import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE,
@@ -76,22 +76,20 @@ const globNativesPlugin = {
             for (const dir of pluginDirs) {
                 const dirPath = join("src", dir);
                 if (!await exists(dirPath)) continue;
-                const plugins = await readdir(dirPath);
-                for (const p of plugins) {
-                    const nativePath = join(dirPath, p, "native.ts");
-                    const indexNativePath = join(dirPath, p, "native/index.ts");
+                const plugins = await readdir(dirPath, { withFileTypes: true });
+                for (const file of plugins) {
+                    const fileName = file.name;
+                    const nativePath = join(dirPath, fileName, "native.ts");
+                    const indexNativePath = join(dirPath, fileName, "native/index.ts");
 
                     if (!(await exists(nativePath)) && !(await exists(indexNativePath)))
                         continue;
 
-                    const nameParts = p.split(".");
-                    const namePartsWithoutTarget = nameParts.length === 1 ? nameParts : nameParts.slice(0, -1);
-                    // pluginName.thing.desktop -> PluginName.thing
-                    const cleanPluginName = p[0].toUpperCase() + namePartsWithoutTarget.join(".").slice(1);
+                    const pluginName = await resolvePluginName(dirPath, file);
 
                     const mod = `p${i}`;
-                    code += `import * as ${mod} from "./${dir}/${p}/native";\n`;
-                    natives += `${JSON.stringify(cleanPluginName)}:${mod},\n`;
+                    code += `import * as ${mod} from "./${dir}/${fileName}/native";\n`;
+                    natives += `${JSON.stringify(pluginName)}:${mod},\n`;
                     i++;
                 }
             }
