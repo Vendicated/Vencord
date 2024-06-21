@@ -138,7 +138,6 @@ export const cacheUsers = async (onlyMissing = false) => {
             states.setCacheStatus?.(usersCache.size);
 
             if (--count === 0) {
-                console.log(usersCache.size);
                 allChunksCached = true;
                 stop();
                 FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
