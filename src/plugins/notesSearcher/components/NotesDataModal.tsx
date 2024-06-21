@@ -54,8 +54,8 @@ export function NotesDataModal({ modalProps, close }: {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const [usersNotesData, refreshNotesData] = useReducer(() => {
-        return Object.entries(getNotes());
-    }, Object.entries(getNotes()));
+        return Object.entries(getNotes()).map(([userId, { note }]) => [userId, note]) as [string, string][];
+    }, Object.entries(getNotes()).map(([userId, { note }]) => [userId, note]) as [string, string][]);
 
     RefreshNotesDataEx = refreshNotesData;
 

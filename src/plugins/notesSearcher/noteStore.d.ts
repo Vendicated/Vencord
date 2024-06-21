@@ -6,9 +6,16 @@
 
 import { FluxStore } from "@webpack/types";
 
-export type Notes = { [userId: string]: string; };
+export type Note = {
+    loading: boolean;
+    note: string;
+};
+
+export type Notes = {
+    [userId: string]: Note;
+};
 
 export class NoteStore extends FluxStore {
     getNotes(): Notes;
-    getNote(userId: string): string | null;
+    getNote(userId: string): Note;
 }

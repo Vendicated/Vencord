@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Constants, FluxDispatcher, GuildStore, RestAPI, SnowflakeUtils, UserStore, UserUtils, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, GuildStore, RestAPI, SnowflakeUtils, UserStore, useState } from "@webpack/common";
 import { waitForStore } from "webpack/common/internal";
 
 import { refreshNotesData } from "./components/NotesDataModal";
@@ -34,20 +34,6 @@ export const usersCache = new Map<string, {
     globalName?: string,
     username: string;
 }>();
-
-const fetchUser = async (userId: string) => {
-    for (let _ = 0; _ < 10; _++) {
-        try {
-            return await UserUtils.getUser(userId);
-        } catch (error: any) {
-            const wait = error?.body?.retry_after;
-
-            if (!wait) break;
-
-            await new Promise(resolve => setTimeout(resolve, wait * 1000 + 50));
-        }
-    }
-};
 
 type Dispatch = ReturnType<typeof useState<any>>[1];
 
@@ -83,7 +69,10 @@ const stop = () => {
     cacheProcessNeedStop = false;
     isRunning = false;
     states.setRunning?.(false);
+    states.setCacheStatus?.(usersCache.size);
 };
+
+export let allChunksCached = false;
 
 export const cacheUsers = async (onlyMissing = false) => {
     isRunning = true;
@@ -109,7 +98,6 @@ export const cacheUsers = async (onlyMissing = false) => {
 
     if (usersCache.size >= Object.keys(getNotes()).length) {
         stop();
-        states.setCacheStatus?.(usersCache.size);
         return;
     }
 
@@ -141,38 +129,17 @@ export const cacheUsers = async (onlyMissing = false) => {
 
                 processed.add(member.user.id);
 
-                usersCache.set(member.id, {
+                usersCache.set(member.user.id, {
                     globalName: (member as any).globalName,
                     username: member.username,
                 });
-
-                states.setCacheStatus?.(usersCache.size);
             });
 
+            states.setCacheStatus?.(usersCache.size);
+
             if (--count === 0) {
-                const userIds = Object.keys(getNotes());
-
-                if (usersCache.size !== userIds.length) {
-                    for (const userId of userIds) {
-                        if (cacheProcessNeedStop) {
-                            stop();
-                            FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
-                            break;
-                        }
-
-                        const user = await fetchUser(userId);
-
-                        if (user) {
-                            usersCache.set(user.id, {
-                                globalName: (user as any).globalName,
-                                username: user.username,
-                            });
-
-                            states.setCacheStatus?.(usersCache.size);
-                        }
-                    }
-                }
-
+                console.log(usersCache.size);
+                allChunksCached = true;
                 stop();
                 FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
             }

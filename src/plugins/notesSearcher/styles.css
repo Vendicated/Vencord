@@ -249,14 +249,6 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     margin-bottom: 12px;
 }
 
-.vc-notes-searcher-modal-cache-warning {
-    margin-top: 12px;
-    border-radius: 4px;
-    background-color: #e7828430;
-    border: 1px solid #e78284;
-    padding: 8px;
-}
-
 .vc-notes-searcher-modal-cache-footer {
     margin-top: 12px;
     border-radius: 4px;
@@ -284,8 +276,7 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     display: grid;
     align-items: center;
     color: var(--text-normal);
-    font-size: 20px;
-    line-height: 24px;
+    font-size: 16px;
     text-align: center;
     padding: 0 12px;
 }

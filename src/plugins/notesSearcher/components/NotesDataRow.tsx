@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { openPrivateChannel, openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import { LazyComponent, useAwaiter } from "@utils/react";
-import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, Tooltip, UserUtils, useState } from "@webpack/common";
+import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, Tooltip, UserStore, UserUtils, useState } from "@webpack/common";
 
 import { updateNote, usersCache } from "../data";
 import { DeleteIcon, PopupIcon, RefreshIcon, SaveIcon } from "./Icons";
@@ -29,7 +29,7 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
     refreshNotesData(): void;
 }) => {
     const awaitedResult = useAwaiter(async () => {
-        const user = await UserUtils.getUser(userId);
+        const user = UserStore.getUser(userId) || await UserUtils.getUser(userId);
 
         usersCache.set(userId, {
             globalName: (user as any).globalName ?? user.username,
@@ -50,7 +50,7 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
     userInfo ??= {
         id: userId,
         globalName: pending ? "Loading..." : "Unable to load",
-        username: pending ? "Loading..." : "Unable to load",
+        username: pending ? "Loading..." : "No mutual guilds",
         avatar: "https://discord.com/assets/0048cbfdd0b3ef186d22.png",
     } as const;
 

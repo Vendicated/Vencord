@@ -88,14 +88,21 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("USER_NOTE_UPDATE", onNoteUpdate);
     },
 
-    ready: ({ notes }: { notes: Notes; }) => {
+    ready: ({ notes }: { notes: { [userId: string]: string; }; }) => {
         const notesFromStore = getNotes();
 
         for (const userId of Object.keys(notesFromStore)) {
             delete notesFromStore[userId];
         }
 
-        Object.assign(notesFromStore, notes);
+        Object.assign(notesFromStore, Object.entries(notes).reduce((newNotes, [userId, note]) => {
+            newNotes[userId] = {
+                note,
+                loading: false,
+            };
+
+            return newNotes;
+        }, {} as Notes));
     },
 
     addToolBarButton: (children: { toolbar: React.ReactNode[] | React.ReactNode; }) => {

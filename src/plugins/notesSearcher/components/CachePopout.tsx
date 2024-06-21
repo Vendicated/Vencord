@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/lazyReact";
 import { Button, Popout, React, Text, useState } from "@webpack/common";
 
-import { cacheUsers, getNotes, getRunning, setupStates, stopCacheProcess, usersCache } from "../data";
+import { allChunksCached, cacheUsers, getNotes, getRunning, setupStates, stopCacheProcess, usersCache } from "../data";
 import { CrossIcon, ProblemIcon, SuccessIcon } from "./Icons";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -83,13 +83,11 @@ export default LazyComponent(() => React.memo(() => {
                             {
                                 cacheStatus >= notesLength ? "Users are cached 👍"
                                     : cacheStatus === 0 ? "Users aren't cached 😔"
-                                        : `${cacheStatus}/${notesLength}`
+                                        : allChunksCached ? `Not all users are cached due to no mutual guilds ${cacheStatus}/${notesLength}`
+                                            : `${cacheStatus}/${notesLength}`
                             }
                         </div>
                     </div>
-                    <Text className={cl("cache-warning")} variant="text-md/normal">
-                        Please note that during this process Discord may not properly load some content, such as messages, images or user profiles
-                    </Text>
                     <Text className={cl("cache-footer")} variant="text-md/normal">
                         You can turn on caching of all users on startup in plugin settings
                     </Text>
