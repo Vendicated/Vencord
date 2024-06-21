@@ -27,3 +27,12 @@
 .vc-settings-theme-author::before {
     content: "by ";
 }
+
+.vc-settings-theme-link-input {
+    width: 100%;
+}
+
+.vc-settings-theme-add-card {
+    padding: 1em;
+    margin-bottom: 16px;
+}

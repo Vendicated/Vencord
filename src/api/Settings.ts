@@ -34,6 +34,7 @@ export interface Settings {
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    enabledThemeLinks: string[];
     enabledThemes: string[];
     frameless: boolean;
     transparent: boolean;
@@ -81,6 +82,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    enabledThemeLinks: [],
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,
