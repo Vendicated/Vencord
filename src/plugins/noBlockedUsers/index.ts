@@ -98,8 +98,8 @@ export default definePlugin({
             find: "isRepliedMessage:!!",
             predicate: () => settings.store.hideReferencedAuthor,
             replacement: {
-                match: /function \i\(\i\){/,
-                replace: "$& if($self.isBlocked(arguments[0].message.author.id)) return;",
+                match: /return null!=.+?SYSTEM_TAG/,
+                replace: "if($self.isBlocked(arguments[0].message.author.id)) return; $&",
             },
         },
         {
