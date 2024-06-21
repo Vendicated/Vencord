@@ -76,7 +76,7 @@ export default definePlugin({
             find: ".MESSAGE_GROUP_BLOCKED||",
             replacement: {
                 match: /(\i)\.type===(?:\i\.)+MESSAGE_GROUP_SPAMMER\)\{/,
-                replace: "$& console.log(arguments);if($1.type === 'MESSAGE_GROUP_BLOCKED') return;",
+                replace: "$& if($1.type === 'MESSAGE_GROUP_BLOCKED') return;",
             },
         },
         ...[
@@ -89,7 +89,7 @@ export default definePlugin({
             predicate: () => settings.store.ignoreBlockedMessages,
             replacement: {
                 match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                replace: "if($self.isBlocked($1.message.id)) return;",
+                replace: "if($self.isBlocked($1.message.author.id)) return;",
             },
         })),
         {
@@ -103,11 +103,11 @@ export default definePlugin({
         },
         {
             // Ignore all TYPING_START events from blocked users
-            find: "\"TypingStore\"",
+            find: '"TypingStore"',
             predicate: () => settings.store.ignoreTyping,
             replacement: {
                 match: /TYPING_START:(\i)/,
-                replace: "TYPING_START: (e) => { if($self.isBlocked(e.userId))return; $1(e) }",
+                replace: "TYPING_START: (event) => { if($self.isBlocked(event.userId))return; $1(event) }",
             },
         },
         {
