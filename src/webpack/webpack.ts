@@ -453,14 +453,14 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
  *             closeModal: filters.byCode("key==")
  *          })
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, ModuleExports> {
+    const exports = {} as Record<S, ModuleExports>;
 
     const id = findModuleId(code);
     if (id === null)
         return exports;
 
-    const mod = wreq(id as any);
+    const mod = wreq(id);
     outer:
     for (const key in mod) {
         const member = mod[key];

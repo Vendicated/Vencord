@@ -85,6 +85,7 @@ function makeShortcuts() {
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
         loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
+        filters,
         find,
         findAll: findAll,
         findByProps,

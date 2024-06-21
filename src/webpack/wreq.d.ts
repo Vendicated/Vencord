@@ -58,21 +58,21 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     m: Record<PropertyKey, ModuleFactory>;
     /** The module cache, where all modules which have been WebpackRequire'd are stored */
     c: Record<PropertyKey, Module>;
-    /**
-     * Export star. Sets properties of "fromObject" to "toObject" as getters that return the value from "fromObject", like this:
-     * @example
-     * const fromObject = { a: 1 };
-     * Object.keys(fromObject).forEach(key => {
-     *     if (key !== "default" && !Object.hasOwn(toObject, key)) {
-     *         Object.defineProperty(toObject, key, {
-     *             get: () => fromObject[key],
-     *             enumerable: true
-     *         });
-     *     }
-     * });
-     * @returns fromObject
-     */
-    es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
+    // /**
+    //  * Export star. Sets properties of "fromObject" to "toObject" as getters that return the value from "fromObject", like this:
+    //  * @example
+    //  * const fromObject = { a: 1 };
+    //  * Object.keys(fromObject).forEach(key => {
+    //  *     if (key !== "default" && !Object.hasOwn(toObject, key)) {
+    //  *         Object.defineProperty(toObject, key, {
+    //  *             get: () => fromObject[key],
+    //  *             enumerable: true
+    //  *         });
+    //  *     }
+    //  * });
+    //  * @returns fromObject
+    //  */
+    // es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
     /**
      * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
      *
@@ -179,6 +179,8 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     v: (this: WebpackRequire, exports: ModuleExports, wasmModuleId: any, wasmModuleHash: string, importsObj?: WebAssembly.Imports) => Promise<any>;
     /** Bundle public path, where chunk files are stored. Used by other methods which load chunks to obtain the full asset url */
     p: string;
+    /** The runtime id of the current runtime */
+    j: string;
     /** Document baseURI or WebWorker location.href */
     b: string;
 };
