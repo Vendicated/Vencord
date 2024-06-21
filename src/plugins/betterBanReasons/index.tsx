@@ -73,7 +73,7 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "default.Messages.BAN_MULTIPLE_CONFIRM_TITLE",
+            find: "Messages.BAN_MULTIPLE_CONFIRM_TITLE",
             replacement: [{
                 match: /=\[[^]*?\]/,
                 replace: "=$self.getReasons()"
