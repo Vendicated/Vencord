@@ -97,7 +97,7 @@ export const Toasts = {
     }
 };
 
-waitFor(filters.byCode("showToast"), m => {
+waitFor(filters.byProps("showToast"), m => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;
 });
