@@ -24,12 +24,11 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { findByProps } from "@webpack";
-import { DraftType, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 const ModalStack = findByProps("pushLazy", "popAll");
 const DraftManager = findByProps("clearDraft", "saveDraft");
-const { closeExpressionPicker } = findByProps("closeExpressionPicker", "openExpressionPicker");
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
@@ -134,7 +133,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }
         try {
-            closeExpressionPicker();
+            ExpressionPickerStore.closeExpressionPicker();
         }
         catch (err) {
             CrashHandlerLogger.debug("Failed to close expression picker.", err);

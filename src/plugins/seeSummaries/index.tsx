@@ -8,11 +8,11 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByProps("allSummaries", "findSummary");
-const { createSummaryFromServer } = findByProps("createSummaryFromServer");
+const createSummaryFromServer = findByCode(".people)),startId:");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -55,9 +55,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "ChannelTypesSets.SUMMARIZEABLE.has",
+            find: "SUMMARIZEABLE.has",
             replacement: {
-                match: /\i\.hasFeature\(\i\.GuildFeatures\.SUMMARIES_ENABLED\w+?\)/g,
+                match: /\i\.hasFeature\(\i\.\i\.SUMMARIES_ENABLED\w+?\)/g,
                 replace: "true"
             }
         },

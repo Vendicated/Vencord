@@ -23,7 +23,7 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findStore, webpackDependantLazy } from "@webpack";
+import { findByCode, findByProps, findStore, webpackDependantLazy } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
@@ -37,8 +37,8 @@ const StickerStore = findStore("StickersStore") as {
 };
 
 const UserSettingsProtoStore = findStore("UserSettingsProtoStore");
-const ProtoUtils = findByProps("BINARY_READ_OPTIONS");
-const RoleSubscriptionEmojiUtils = findByProps("isUnusableRoleSubscriptionEmoji");
+
+const BINARY_READ_OPTIONS = findByProps("readerFactory");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -51,6 +51,8 @@ function searchProtoClassField(localName: string, protoClass: any) {
 const PreloadedUserSettingsActionCreators = webpackDependantLazy(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
 const AppearanceSettingsActionCreators = webpackDependantLazy(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = webpackDependantLazy(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
+
+const isUnusableRoleSubscriptionEmoji = findByCode(".getUserIsAdmin(");
 
 const enum EmojiIntentions {
     REACTION,
@@ -235,11 +237,10 @@ export default definePlugin({
         },
         // Allows the usage of subscription-locked emojis
         {
-            find: "isUnusableRoleSubscriptionEmoji:function",
+            find: ".getUserIsAdmin(",
             replacement: {
-                match: /isUnusableRoleSubscriptionEmoji:function/,
-                // Replace the original export with a func that always returns false and alias the original
-                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
+                match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
+                replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
         },
         // Allow stickers to be sent everywhere
@@ -360,7 +361,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Export the renderable sticker to be used in the fake nitro sticker notice
-                    match: /let{renderableSticker:(\i).{0,250}isGuildSticker.+?channel:\i,/,
+                    match: /let{renderableSticker:(\i).{0,270}sticker:\i,channel:\i,/,
                     replace: (m, renderableSticker) => `${m}fakeNitroRenderableSticker:${renderableSticker},`
                 },
                 {
@@ -398,7 +399,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: ".FreemiumAppIconIds.DEFAULT&&(",
+            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -471,12 +472,12 @@ export default definePlugin({
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
-        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !ProtoUtils) return;
+        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
 
         const currentAppearanceSettings = PreloadedUserSettingsActionCreators.getCurrentValue().appearance;
 
         const newAppearanceProto = currentAppearanceSettings != null
-            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), ProtoUtils.BINARY_READ_OPTIONS)
+            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), BINARY_READ_OPTIONS)
             : AppearanceSettingsActionCreators.create();
 
         newAppearanceProto.theme = theme;
@@ -815,8 +816,7 @@ export default definePlugin({
         if (e.type === 0) return true;
         if (e.available === false) return false;
 
-        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
+        if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
         if (this.canUseEmotes)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);

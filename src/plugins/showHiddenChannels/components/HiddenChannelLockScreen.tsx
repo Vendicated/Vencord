@@ -77,7 +77,7 @@ const enum ChannelFlags {
 }
 
 
-const ChatScrollClasses = findByProps("auto", "content", "scrollerBase");
+const ChatScrollClasses = findByProps("auto", "managedReactiveScroller");
 const ChatClasses = findByProps("chat", "content", "noChat", "chatContent");
 const ChannelBeginHeader = findComponentByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
 const TagComponent = findComponentByCode(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG");

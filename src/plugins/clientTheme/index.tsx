@@ -11,7 +11,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByProps, findComponentByCode, findStore } from "@webpack";
+import { findByCode, findComponentByCode, findStore } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
 
 const ColorPicker = findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
@@ -30,7 +30,7 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
-const { saveClientTheme } = findByProps("saveClientTheme");
+const saveClientTheme = findByCode('type:"UNSYNCED_USER_SETTINGS_UPDATE",settings:{useSystemTheme:"system"===');
 
 function setTheme(theme: string) {
     saveClientTheme({ theme });

@@ -68,7 +68,7 @@ interface Device {
 type Repeat = "off" | "track" | "context";
 
 const SpotifySocket = findByProps("getActiveSocketAndDevice");
-const SpotifyUtils = findByProps("SpotifyAPI");
+const SpotifyAPI = findByProps("vcSpotifyMarker");
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = webpackDependantLazy(() => {
@@ -171,7 +171,7 @@ export const SpotifyStore = webpackDependantLazy(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyUtils.SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });

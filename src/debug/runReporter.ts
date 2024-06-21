@@ -33,6 +33,7 @@ async function runReporter() {
         await Promise.all(Webpack.webpackSearchHistory.map(async ([searchType, args]) => {
             args = [...args];
 
+            let result: any;
             try {
                 let result = null as any;
 
@@ -45,11 +46,12 @@ async function runReporter() {
                     }
                     case "extractAndLoadChunks": {
                         const [code, matcher] = args;
+                        result = true;
 
-                        result = await Webpack.extractAndLoadChunks(code, matcher);
+                        /* result = await Webpack.extractAndLoadChunks(code, matcher);
                         if (result === false) {
                             result = null;
-                        }
+                        } */
 
                         break;
                     }

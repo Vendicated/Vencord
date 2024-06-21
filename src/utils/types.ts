@@ -357,4 +357,6 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     : never;
 };
 
-export type AnyObject = Record<PropertyKey, any> & ((...args: any[]) => any);
+export type AnyObject = Record<PropertyKey, any> & ((...args: any[]) => any) & {
+    new(...args: any[]): any;
+};

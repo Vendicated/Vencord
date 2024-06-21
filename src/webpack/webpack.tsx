@@ -726,7 +726,7 @@ export function extractAndLoadChunksLazy(code: string | string[], matcher: RegEx
     const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
 
     async function extractAndLoadChunks() {
-        if (module[SYM_PROXY_INNER_VALUE]) {
+        if (module[SYM_PROXY_INNER_VALUE] == null) {
             const err = new Error("extractAndLoadChunks: Couldn't find module factory");
 
             if (!IS_DEV || devToolsOpen) {

@@ -23,12 +23,12 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByProps, findStore } from "@webpack";
+import { findByCode, findStore } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStore("StickersStore");
-const EmojiManager = findByProps("fetchEmoji", "uploadEmoji", "deleteEmoji");
+const uploadEmoji = findByCode(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 interface Sticker {
     t: "Sticker";
@@ -106,7 +106,7 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
         reader.readAsDataURL(data);
     });
 
-    return EmojiManager.uploadEmoji({
+    return uploadEmoji({
         guildId,
         name: emoji.name.split("~")[0],
         image: dataUrl

@@ -19,11 +19,16 @@
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByCode, findByProps, mapMangledModule } from "@webpack";
 
 const { updateGuildNotificationSettings } = findByProps("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = findByProps("toggleShowAllChannels");
-const { isOptInEnabledForGuild } = findByProps("isOptInEnabledForGuild");
+const { toggleShowAllChannels } = mapMangledModule(".onboardExistingMember(", {
+    toggleShowAllChannels: m => {
+        const s = String(m);
+        return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
+    }
+});
+const isOptInEnabledForGuild = findByCode(".COMMUNITY)||", ".isOptInEnabled(");
 
 const settings = definePluginSettings({
     guild: {
