@@ -12,7 +12,7 @@ import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
-const createSummaryFromServer = findByCodeLazy(".people)),startId:");
+const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
