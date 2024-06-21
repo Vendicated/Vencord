@@ -16,7 +16,7 @@ import type { HTMLAttributes } from "react";
 
 const { calendarFormat, dateFormat, isSameDay } = mapMangledModule("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
-    dateFormat: filters.byCode('":'),
+    dateFormat: filters.byCode(':").concat'),
     isSameDay: filters.byCode("Math.abs(+"),
 });
 const MessageClasses = findByProps("separator", "latin24CompactTimeStamp");
