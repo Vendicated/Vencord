@@ -112,7 +112,6 @@ export type ModCallbackFn = ((module: ModuleExports, info: ModCallbackInfo) => v
 export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
 export const moduleListeners = new Set<ModListenerFn>();
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
-export const beforeInitListeners = new Set<(wreq: WebpackRequire) => void>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
