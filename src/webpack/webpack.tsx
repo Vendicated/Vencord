@@ -13,7 +13,7 @@ import { AnyObject } from "@utils/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { GenericStore } from "./common";
-import { ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -95,13 +95,13 @@ export const filters = {
 
 export type ModListenerInfo = {
     id: PropertyKey;
-    factory: ModuleFactory;
+    factory: AnyModuleFactory;
 };
 
 export type ModCallbackInfo = {
     id: PropertyKey;
     exportKey: PropertyKey | null;
-    factory: ModuleFactory;
+    factory: AnyModuleFactory;
 };
 
 export type ModListenerFn = (module: ModuleExports, info: ModListenerInfo) => void;
@@ -109,7 +109,7 @@ export type ModCallbackFn = ((module: ModuleExports, info: ModCallbackInfo) => v
     $$vencordCallbackCalled?: () => boolean;
 };
 
-export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
 export const moduleListeners = new Set<ModListenerFn>();
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
 export const beforeInitListeners = new Set<(wreq: WebpackRequire) => void>();
@@ -395,10 +395,10 @@ export function findByFactoryCode<T = AnyObject>(...code: string[]) {
 export function findModuleFactory(...code: string[]) {
     const filter = filters.byFactoryCode(...code);
 
-    const [proxy, setInnerValue] = proxyInner<ModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
+    const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, (_, { factory }) => setInnerValue(factory));
 
-    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<ModuleFactory>;
+    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<AnyModuleFactory>;
 
     return proxy;
 }
@@ -418,8 +418,8 @@ export function findModuleFactory(...code: string[]) {
  * @returns Unmangled exports as specified in mappers
  */
 export function mapMangledModule<S extends PropertyKey>(code: string | string[], mappers: Record<S, FilterFn>) {
-    const result = find<Record<S, any>>(filters.byFactoryCode(...Array.isArray(code) ? code : [code]), exports => {
-        const mapping = {} as Record<S, any>;
+    const result = find<Record<S, ModuleExports>>(filters.byFactoryCode(...Array.isArray(code) ? code : [code]), exports => {
+        const mapping = {} as Record<S, ModuleExports>;
 
         outer:
         for (const newName in mappers) {
@@ -459,7 +459,7 @@ type CacheFindResult = {
     /** The key exporting the result. `null` if the find result was all the module exports, `undefined` if nothing was found */
     exportKey?: PropertyKey | null;
     /** The factory of the module exporting the result. `undefined` if nothing was found */
-    factory?: ModuleFactory;
+    factory?: AnyModuleFactory;
 };
 
 /**
@@ -476,11 +476,11 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         if (!mod?.loaded || mod?.exports == null) continue;
 
         if (filter.$$vencordIsFactoryFilter && filter(wreq.m[key])) {
-            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] };
+            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
         }
 
         if (filter(mod.exports)) {
-            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] };
+            return { result: exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
         }
 
         if (typeof mod.exports !== "object") {
@@ -488,14 +488,14 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         }
 
         if (mod.exports.default != null && filter(mod.exports.default)) {
-            return { result: exports.default, id: key, exportKey: "default ", factory: wreq.m[key] };
+            return { result: exports.default, id: key, exportKey: "default ", factory: wreq.m[key] as AnyModuleFactory };
         }
 
         for (const exportKey in mod.exports) if (exportKey.length <= 3) {
             const exportValue = mod.exports[exportKey];
 
             if (exportValue != null && filter(exportValue)) {
-                return { result: exportValue, id: key, exportKey, factory: wreq.m[key] };
+                return { result: exportValue, id: key, exportKey, factory: wreq.m[key] as AnyModuleFactory };
             }
         }
     }

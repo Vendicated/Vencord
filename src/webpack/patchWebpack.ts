@@ -283,7 +283,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
             // There are (at the time of writing) 11 modules exporting the window
             // Make these non enumerable to improve webpack search performance
-            if (require.c) {
+            if (typeof require === "function" && require.c != null) {
                 let foundWindow = false;
 
                 if (exports === window) {
@@ -308,13 +308,13 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                         writable: true
                     });
 
-                    return;
+                    return factoryReturn;
                 }
             }
 
             for (const callback of moduleListeners) {
                 try {
-                    callback(exports, { id, factory: originalMod });
+                    callback(exports, { id, factory: wrappedFactory.$$vencordOriginal! });
                 } catch (err) {
                     logger.error("Error in Webpack module listener:\n", err, callback);
                 }
@@ -322,15 +322,15 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
             for (const [filter, callback] of waitForSubscriptions) {
                 try {
-                    if (filter.$$vencordIsFactoryFilter && filter(originalMod)) {
+                    if (filter.$$vencordIsFactoryFilter && filter(wrappedFactory.$$vencordOriginal!)) {
                         waitForSubscriptions.delete(filter);
-                        callback(exports, { id, exportKey: null, factory: originalMod });
+                        callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
                         continue;
                     }
 
                     if (filter(exports)) {
                         waitForSubscriptions.delete(filter);
-                        callback(exports, { id, exportKey: null, factory: originalMod });
+                        callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
                         continue;
                     }
 
@@ -340,7 +340,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
                     if (exports.default != null && filter(exports.default)) {
                         waitForSubscriptions.delete(filter);
-                        callback(exports.default, { id, exportKey: "default", factory: originalMod });
+                        callback(exports.default, { id, exportKey: "default", factory: wrappedFactory.$$vencordOriginal! });
                         continue;
                     }
 
@@ -349,7 +349,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
                         if (exportValue != null && filter(exportValue)) {
                             waitForSubscriptions.delete(filter);
-                            callback(exportValue, { id, exportKey, factory: originalMod });
+                            callback(exportValue, { id, exportKey, factory: wrappedFactory.$$vencordOriginal! });
                             break;
                         }
                     }
