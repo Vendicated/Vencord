@@ -55,13 +55,7 @@ export const settings = definePluginSettings({
                 value: RenderType.NONE
             }
         ]
-    },
-    isHexRequired: {
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true,
-        description: "Require leading # in hex color codes",
-    },
+    }
 });
 
 export const enum ColorType {
@@ -72,5 +66,6 @@ export const enum ColorType {
 
 export const regex = [
     { reg: /(rgb\(\s*?\d+?\s*?,\s*?\d+?\s*?,\s*?\d+?\s*?\))/g, type: ColorType.RGB },
-    { reg: /(hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\))/g, type: ColorType.HSL }
+    { reg: /(hsl\(\s*\d+\s*°?,\s*\d+%\s*,\s*\d+%\s*\))/g, type: ColorType.HSL },
+    { reg: /(#(?:[0-9a-fA-F]{3}){1,2})/g, type: ColorType.HEX }
 ];

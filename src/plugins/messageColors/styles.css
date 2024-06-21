@@ -29,7 +29,7 @@
 }
 
 /* Light color in dark theme */
-.theme-dark .vc-color-bg.vc-color-bg-light,
-.theme-light .vc-color-bg:not(.vc-color-bg-light) {
+.theme-dark .vc-color-bg.vc-color-bg-invert,
+.theme-light .vc-color-bg:not(.vc-color-bg-invert) {
     color: var(--background-tertiary);
 }
