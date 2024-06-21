@@ -260,7 +260,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                 }
 
                 if (IS_DEV) {
-                    return wrappedFactory.$$vencordOriginal?.apply(this, args);
+                    return wrappedFactory.$$vencordOriginal!.apply(this, args);
                 }
             }
 
@@ -275,7 +275,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                 }
 
                 logger.error("Error in patched module factory:\n", err);
-                return wrappedFactory.$$vencordOriginal?.apply(this, args);
+                return wrappedFactory.$$vencordOriginal!.apply(this, args);
             }
 
             exports = module.exports;
