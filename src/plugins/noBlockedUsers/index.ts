@@ -31,9 +31,6 @@ const settings = definePluginSettings(
             type: OptionType.BOOLEAN,
             default: true,
             restartNeeded: true,
-            onChange: newValue => {
-                if (!newValue) settings.store.ignoreBlockedMessages = false;
-            },
         },
         ignoreBlockedMessages: {
             description: "Completely ignore incoming gateway messages from blocked users (locally)",
@@ -60,6 +57,11 @@ const settings = definePluginSettings(
             restartNeeded: true,
         },
     },
+    {
+        ignoreBlockedMessages: {
+            disabled: () => !settings.store.hideBlockedMessages,
+        }
+    }
 );
 
 migratePluginSettings("NoBlockedUsers", "NoBlockedMessages");
