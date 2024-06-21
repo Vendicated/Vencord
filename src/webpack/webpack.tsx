@@ -782,7 +782,7 @@ export function extractAndLoadChunksLazy(code: string | string[], matcher: RegEx
     });
 
     if (IS_REPORTER) {
-        webpackSearchHistory.push(["extractAndLoadChunks", [extractAndLoadChunks]]);
+        webpackSearchHistory.push(["extractAndLoadChunks", [extractAndLoadChunks, code, matcher]]);
     }
 
     return extractAndLoadChunks;

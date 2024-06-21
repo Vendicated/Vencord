@@ -65,7 +65,7 @@ export function getUserSettingDefinition<T = any>(group: string, name: string): 
 }
 
 /**
- * {@link getUserSettingDefinition}, lazy.
+ * Lazy version of {@link getUserSettingDefinition}
  *
  * Get the definition for a setting.
  *
