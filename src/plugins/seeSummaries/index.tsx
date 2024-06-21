@@ -12,7 +12,7 @@ import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByProps("allSummaries", "findSummary");
-const createSummaryFromServer = findByCode(".people)),startId:");
+const createSummaryFromServer = findByCode(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
