@@ -30,13 +30,13 @@ import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { ThemeHeader } from "@utils/themes";
+import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
-import { UserstyleHeader } from "usercss-meta";
+import type { UserstyleHeader } from "usercss-meta";
 
 import { isPluginEnabled } from "../../plugins";
 import { UserCSSSettingsModal } from "./UserCSSModal";

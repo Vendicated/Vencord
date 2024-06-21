@@ -68,39 +68,15 @@ async function initThemes() {
     const links: string[] = [...enabledThemeLinks];
 
     if (IS_WEB) {
-        for (let i = enabledThemes.length - 1; i >= 0; i--) {
-            const theme = enabledThemes[i];
-
-            try {
-                var themeData = await VencordNative.themes.getThemeData(theme);
-            } catch (e) {
-                logger.warn("Failed to get theme data for", theme, "(has it gone missing?)", e);
-            }
-
-            if (!themeData) {
-                // disable the theme since it has problems
-                Settings.enabledThemes = enabledThemes.splice(enabledThemes.indexOf(theme), 1);
-                continue;
-            }
+        for (const theme of enabledThemes) {
+            const themeData = await VencordNative.themes.getThemeData(theme);
+            if (!themeData) continue;
 
             const blob = new Blob([themeData], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        for (let i = enabledThemes.length - 1; i >= 0; i--) {
-            const theme = enabledThemes[i];
-
-            if (theme.endsWith(".user.css")) continue;
-
-            try {
-                // whilst this is unnecessary here, we're doing it to make sure the theme is valid
-                await VencordNative.themes.getThemeData(theme);
-            } catch (e) {
-                logger.warn("Failed to get theme data for", theme, "(has it gone missing?)", e);
-                Settings.enabledThemes = enabledThemes.splice(enabledThemes.indexOf(theme), 1);
-                continue;
-            }
-
+        for (const theme of enabledThemes) if (!theme.endsWith(".user.css")) {
             links.push(`vencord:///themes/${theme}?v=${Date.now()}`);
         }
     }
