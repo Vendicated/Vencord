@@ -453,7 +453,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | string[],
 
 export type CacheFindResult = {
     /** The find result. `undefined` if nothing was found */
-    result?: any;
+    result?: ModuleExports;
     /** The id of the module exporting where the result was found. `undefined` if nothing was found */
     id?: PropertyKey;
     /** The key exporting the result. `null` if the find result was all the module exports, `undefined` if nothing was found */
