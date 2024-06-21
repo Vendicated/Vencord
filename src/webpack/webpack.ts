@@ -630,15 +630,15 @@ export function search(...filters: Array<string | RegExp>) {
  * @param id The id of the module to extract
  */
 export function extract(id: PropertyKey) {
-    const mod = wreq.m[id];
-    if (!mod) return null;
+    const factory = wreq.m[id];
+    if (!factory) return null;
 
     const code = `
 // [EXTRACTED] WebpackModule${String(id)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-0,${String(mod)}
+0,${String(factory)}
 //# sourceURL=ExtractedWebpackModule${String(id)}
 `;
     const extracted: ModuleFactory = (0, eval)(code);
