@@ -34,52 +34,26 @@ export default definePlugin({
         }
     }],
     async start() {
-        regex.push({
-            reg: settings.store.isHexRequired ?
-                /(#(?:[0-9a-fA-F]{3}){1,2})/g : /(#?(?:[0-9a-fA-F]{3}){1,2})/g,
-            type: ColorType.HEX
-        });
-
         if (settings.store.colorPicker) {
             addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
         }
 
         let colors = await DataStore.get(COLOR_PICKER_DATA_KEY);
-        if (!colors) {
-            colors = [
-                1752220,
-                3066993,
-                3447003,
-                10181046,
-                15277667,
-                15844367,
-                15105570,
-                15158332,
-                9807270,
-                6323595,
+        colors ||= [
+            1752220, 3066993, 3447003, 10181046, 15277667,
+            15844367, 15105570, 15158332, 9807270, 6323595,
 
-                1146986,
-                2067276,
-                2123412,
-                7419530,
-                11342935,
-                12745742,
-                11027200,
-                10038562,
-                9936031,
-                5533306
-            ];
-        }
+            1146986, 2067276, 2123412, 7419530, 11342935,
+            12745742, 11027200, 10038562, 9936031, 5533306
+        ];
 
         savedColors.push(...colors);
     },
-
     getColoredText(message: Message, originalChildren: React.ReactElement[]) {
         if (settings.store.renderType === RenderType.NONE) return originalChildren;
         if (![MessageTypes.DEFAULT, MessageTypes.REPLY].includes(message.type)) return originalChildren;
 
         const hasColor = regex.some(({ reg }) => reg.test(message.content));
-
         if (!hasColor) return originalChildren;
 
         return <ColoredMessage children={originalChildren} />;
@@ -93,7 +67,7 @@ function parseColor(str: string, type: ColorType): string {
         case ColorType.HEX:
             return str[0] === "#" ? str : `#${str}`;
         case ColorType.HSL:
-            return str;
+            return str.replace("°", "");
     }
 }
 
@@ -125,11 +99,29 @@ const isColorDark = (color: string, type: ColorType): boolean => {
     }
 };
 
+const renderColor = (element: string, type: ColorType) => {
+    const color = parseColor(element, type);
+    if (settings.store.renderType === RenderType.FOREGROUND) {
+        return [<span style={{ color: color }}>{element}</span>];
+    }
+    const styles = {
+        "--color": color
+    } as React.CSSProperties;
+
+    if (settings.store.renderType === RenderType.BACKGROUND) {
+        const isDark = isColorDark(color, type);
+        const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
+        return [<span className={className} style={styles}>{element}</span>];
+    }
+
+    return [element, <span className="vc-color-block" style={styles}></span>];
+};
+
 function ColoredMessage({ children }: { children: React.ReactElement[]; }) {
     let result: (string | React.ReactElement)[] = [];
     // Discord renders message as bunch of small span chunks
     // Mostly they are splitted by a space, which breaks rgb/hsl regex
-    // Also mentions are nested react elements, so we don't want to affect them
+    // Mentions are nested react elements, so we don't want to affect them
     // Ignore everything except plain text and combine it
     for (let i = 0; i < children.length; i++) {
         const chunk = children[i];
@@ -166,22 +158,10 @@ function ColoredMessage({ children }: { children: React.ReactElement[]; }) {
 
                 if (!matches.includes(element))
                     return [...arr, element];
-                const color = parseColor(element, type);
 
-                if (settings.store.renderType === RenderType.FOREGROUND) {
-                    return [...arr, <span style={{ color: color }}>{element}</span>];
-                }
-                const styles = {
-                    "--color": color
-                } as React.CSSProperties;
+                const elements = renderColor(element, type);
 
-                if (settings.store.renderType === RenderType.BACKGROUND) {
-                    const isDark = isColorDark(color, type);
-                    const className = isDark ? "vc-color-bg" : "vc-color-bg vc-color-bg-light";
-                    return [...arr, <span className={className} style={styles}>{element}</span>];
-                }
-
-                return [...arr, element, <span className="vc-color-block" style={styles}></span>];
+                return [...arr, ...elements];
             }, temp);
         }
         result = temp;
