@@ -39,10 +39,13 @@ import { Message } from "discord-types/general";
 import { Member, PKAPI, System } from "pkapi.js";
 
 import pluralKit from "./index";
-import { localStorage } from "@utils/localStorage";
 
 function isPk(msg: Message) {
     return (msg && msg.applicationId === "466378653216014359");
+}
+
+function isLocalPk(msg: Message) {
+    return (isPk(msg) && localSystem.some(value => { return value.member.id === getAuthorOfMessage(msg)?.member.id; }));
 }
 
 const EditIcon = () => {
@@ -71,7 +74,7 @@ const settings = definePluginSettings({
     }
 });
 
-// I dont fully understand how to use datastores, if i used anything incorrectly please let me know
+// I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 const DATASTORE_KEY = "pk";
 
 interface Author {
@@ -82,7 +85,7 @@ interface Author {
 
 let authors: Record<string, Author> = {};
 
-let localSystem: Author[] = [];
+const localSystem: Author[] = [];
 
 const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
@@ -136,7 +139,7 @@ export default definePlugin({
         authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            if (!isPk(msg)) return null;
+            if (!isLocalPk(msg)) return null;
 
             return {
                 label: "Edit",
@@ -152,7 +155,7 @@ export default definePlugin({
 
         addButton("pk-delete", msg => {
             if (!msg) return null;
-            if (!isPk(msg)) return null;
+            if (!isLocalPk(msg)) return null;
 
             return {
                 label: "Delete",
@@ -252,20 +255,19 @@ function getAuthorOfMessage(message: Message) {
     DataStore.set(DATASTORE_KEY, authors);
     return authors[generateAuthorData(message)];
 }
-/*
+
 async function generateLocalSystemData() {
     let author: Author|undefined = undefined;
     const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
-    for (const s of system.members??[]) {
+    for (const [s, m] of system.members??[]) {
         author = {
             messageIds: [],
-            member: member,
+            member: m,
             system: system
         };
         localSystem.push(author);
     }
-
-}*/
+}
 
 
 function UserPopoutModal({ author, modalProps }: { author: Author, modalProps: ModalProps; }) {
