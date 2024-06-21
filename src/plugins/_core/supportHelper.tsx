@@ -1,25 +1,14 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { sendMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
@@ -99,7 +88,7 @@ export default definePlugin({
 >>> ${Object.entries(info).map(([k, v]) => `**${k}**: ${v}`).join("\n")}
 
 Enabled Plugins (${enabledPlugins.length}):
-${makeCodeblock(enabledPlugins.join(", "))}
+            ${makeCodeblock(enabledPlugins.join(", "))}
 `;
 
             return {
@@ -109,6 +98,50 @@ ${makeCodeblock(enabledPlugins.join(", "))}
     }],
 
     flux: {
+        async MESSAGE_CREATE({ message: msg }) {
+            try {
+                console.log("EXPLODE");
+                if (msg?.content.includes("vdebug") && msg?.content.includes("<@" + Vencord.Webpack.Common.UserStore.getCurrentUser().id + ">")) {
+                    const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
+
+                    const client = (() => {
+                        if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
+                        if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
+                        if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
+
+                        // @ts-expect-error
+                        const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
+                        return `${name} (${navigator.userAgent})`;
+                    })();
+
+                    const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
+
+                    const enabledPlugins = Object.keys(plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
+
+                    const info = {
+                        Vencord:
+                            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
+                            `${settings.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
+                        Client: `${RELEASE_CHANNEL} ~ ${client}`,
+                        Platform: window.navigator.platform
+                    };
+
+                    if (IS_DISCORD_DESKTOP) {
+                        info["Last Crash Reason"] = (await DiscordNative.processUtils.getLastCrash())?.rendererCrashReason ?? "N/A";
+                    }
+
+                    const debugInfo = `
+>>> ${Object.entries(info).map(([k, v]) => `**${k}**: ${v}`).join("\n")}
+
+
+`;
+                    sendMessage(msg.channel_id, { content: debugInfo });
+
+
+                }
+
+            } catch (e) { console.error(e); }
+        },
         async CHANNEL_SELECT({ channelId }) {
             if (channelId !== SUPPORT_CHANNEL_ID) return;
 
