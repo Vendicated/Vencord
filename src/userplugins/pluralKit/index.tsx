@@ -45,7 +45,9 @@ function isPk(msg: Message) {
 }
 
 function isLocalPk(msg: Message) {
-    return (isPk(msg) && localSystem.some(value => { return value.member.id === getAuthorOfMessage(msg)?.member.id; }));
+    if (!isPk(msg)) return false;
+    const author = getAuthorOfMessage(msg);
+    return localSystem.map(a => a.member.id).includes(author.member.id);
 }
 
 const EditIcon = () => {
@@ -137,6 +139,11 @@ export default definePlugin({
 
     async start() {
         authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
+        while (localSystem.length === 0) {
+            // pause
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        console.log(localSystem);
         addButton("pk-edit", msg => {
             if (!msg) return null;
             if (!isLocalPk(msg)) return null;
