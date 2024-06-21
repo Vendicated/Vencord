@@ -107,3 +107,14 @@ export function interpolateIfDefined(strings: TemplateStringsArray, ...args: any
     if (args.some(arg => arg == null)) return "";
     return strings.reduce((acc, str, i) => `${acc}${str}${args[i] ?? ""}`, "");
 }
+
+export function tryOrElse<T>(func: () => T, fallback: T): T {
+    try {
+        const res = func();
+        return res instanceof Promise
+            ? res.catch(() => fallback) as T
+            : res;
+    } catch {
+        return fallback;
+    }
+}
