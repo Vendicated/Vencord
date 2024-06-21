@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { proxyLazy } from "@utils/lazy";
+import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -725,7 +725,7 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 export function extractAndLoadChunksLazy(code: string | string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
     const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
 
-    async function extractAndLoadChunks() {
+    const extractAndLoadChunks = makeLazy(async () => {
         if (module[SYM_PROXY_INNER_VALUE] == null) {
             const err = new Error("extractAndLoadChunks: Couldn't find module factory");
 
@@ -779,7 +779,7 @@ export function extractAndLoadChunksLazy(code: string | string[], matcher: RegEx
 
         wreq(entryPointId as any);
         return true;
-    }
+    });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["extractAndLoadChunks", [extractAndLoadChunks]]);
