@@ -32,10 +32,9 @@ const settings = definePluginSettings(
             default: true,
         },
         ignoreBlockedMessages: {
-            description: "Completely ignore incoming gateway messages from blocked users (locally)",
+            description: "Ignore incoming gateway messages from blocked users (locally)",
             type: OptionType.BOOLEAN,
             default: true,
-            restartNeeded: true,
         },
         ignoreTyping: {
             description: "Hide blocked users from the currently typing list in chat",
@@ -56,11 +55,6 @@ const settings = definePluginSettings(
             restartNeeded: true,
         },
     },
-    {
-        ignoreBlockedMessages: {
-            disabled: () => !settings.store.hideBlockedMessages,
-        }
-    }
 );
 
 migratePluginSettings("NoBlockedUsers", "NoBlockedMessages");
@@ -87,10 +81,9 @@ export default definePlugin({
             '"ReadStateStore"',
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreBlockedMessages,
             replacement: {
                 match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                replace: "if($self.isBlocked($1.message.author.id)) return;",
+                replace: "if($self.settings.store.ignoreBlockedMessages && $self.isBlocked($1.message.author.id)) return;",
             },
         })),
         {
