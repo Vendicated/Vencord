@@ -37,12 +37,11 @@ interface Props {
     onMouseLeave?: MouseEventHandler<HTMLDivElement>;
 
     infoButton?: ReactNode;
-    hideSwitch?: boolean;
     footer?: ReactNode;
     author?: ReactNode;
 }
 
-export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave, hideSwitch }: Props) {
+export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
     return (
@@ -79,11 +78,11 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
 
                 {infoButton}
 
-                {!hideSwitch && <Switch
+                <Switch
                     checked={enabled}
                     onChange={setEnabled}
                     disabled={disabled}
-                />}
+                />
             </div>
 
             <Text className={cl("note")} variant="text-sm/normal">{description}</Text>

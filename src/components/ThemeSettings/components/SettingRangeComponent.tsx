@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Slider, useMemo, useState } from "@webpack/common";
+import { Forms, Slider, useMemo } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -17,12 +17,8 @@ interface Props {
 }
 
 export function SettingRangeComponent({ label, name, default: def, min, max, step, themeSettings }: Props) {
-    const [value, setValue] = useState(themeSettings[name]);
-
     function handleChange(value: number) {
         const corrected = value.toString();
-
-        setValue(corrected);
 
         themeSettings[name] = corrected;
     }
@@ -42,7 +38,7 @@ export function SettingRangeComponent({ label, name, default: def, min, max, ste
         <Forms.FormSection>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <Slider
-                initialValue={parseInt(value, 10)}
+                initialValue={parseInt(themeSettings[name], 10)}
                 defaultValue={def}
                 onValueChange={handleChange}
                 minValue={min}

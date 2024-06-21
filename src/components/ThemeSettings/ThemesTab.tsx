@@ -1,8 +1,20 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 import "./themesStyles.css";
 
@@ -18,16 +30,15 @@ import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import type { ThemeHeader } from "@utils/themes";
+import { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
-import { findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { findByPropsLazy, findLazy } from "@webpack";
+import { Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
-import type { UserstyleHeader } from "usercss-meta";
+import { UserstyleHeader } from "usercss-meta";
 
 import { isPluginEnabled } from "../../plugins";
-import { OnlineThemes } from "./OnlineThemes";
 import { UserCSSSettingsModal } from "./UserCSSModal";
 
 type FileInput = ComponentType<{
@@ -37,16 +48,34 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
+const InviteActions = findByPropsLazy("resolveInvite");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
+const TextAreaProps = findLazy(m => typeof m.textarea === "string");
+
 const cl = classNameFactory("vc-settings-theme-");
 
-interface ThemeCardProps {
-    theme: UserThemeHeader;
-    enabled: boolean;
-    onChange: (enabled: boolean) => void;
-    onDelete: () => void;
-    showDelete?: boolean;
-    extraButtons?: React.ReactNode;
+function Validator({ link, onValidate }: { link: string; onValidate: (valid: boolean) => void; }) {
+    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+        if (res.status > 300) throw `${res.status} ${res.statusText}`;
+        const contentType = res.headers.get("Content-Type");
+        if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain")) {
+            onValidate(false);
+            throw "Not a CSS file. Remember to use the raw link!";
+        }
+
+        onValidate(true);
+        return "Okay!";
+    }));
+
+    const text = pending
+        ? "Checking..."
+        : err
+            ? `Error: ${err instanceof Error ? err.message : String(err)}`
+            : "Valid!";
+
+    return <Forms.FormText style={{
+        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
+    }}>{text}</Forms.FormText>;
 }
 
 interface OtherThemeCardProps {
@@ -54,8 +83,7 @@ interface OtherThemeCardProps {
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
-    showDelete?: boolean;
-    extraButtons?: React.ReactNode;
+    showDeleteButton?: boolean;
 }
 
 interface UserCSSCardProps {
@@ -63,50 +91,10 @@ interface UserCSSCardProps {
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
+    onSettingsReset: () => void;
 }
 
-export function ThemeCard({ theme, enabled, onChange, onDelete, showDelete, extraButtons }: ThemeCardProps) {
-    return (
-        <AddonCard
-            name={theme.name}
-            description={theme.description}
-            author={theme.author}
-            enabled={enabled}
-            setEnabled={onChange}
-            infoButton={
-                (IS_WEB || showDelete) && (<>
-                    {extraButtons}
-                    <div
-                        style={{ cursor: "pointer", color: "var(--status-danger" }}
-                        onClick={onDelete}
-                    >
-                        <DeleteIcon />
-                    </div>
-                </>
-                )
-            }
-            footer={
-                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
-                    {!!theme.website && <Link href={theme.website}>Website</Link>}
-                    {!!(theme.website && theme.invite) && " • "}
-                    {!!theme.invite && (
-                        <Link
-                            href={`https://discord.gg/${theme.invite}`}
-                            onClick={async e => {
-                                e.preventDefault();
-                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
-                            }}
-                        >
-                            Discord Server
-                        </Link>
-                    )}
-                </Flex>
-            }
-        />
-    );
-}
-
-function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardProps) {
+function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
     const missingPlugins = useMemo(() =>
         theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
 
@@ -117,13 +105,14 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
             author={theme.author ?? "Unknown"}
             enabled={enabled}
             setEnabled={onChange}
+            disabled={missingPlugins && missingPlugins.length > 0}
             infoButton={
                 <>
                     {missingPlugins && missingPlugins.length > 0 && (
                         <Tooltip text={"The following plugins are required, but aren't enabled: " + missingPlugins.join(", ")}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <div
-                                    style={{ color: "var(--status-warning" }}
+                                    style={{ color: "var(--status-danger" }}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
                                 >
@@ -135,7 +124,7 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
                     {theme.vars && (
                         <div style={{ cursor: "pointer" }} onClick={
                             () => openModal(modalProps =>
-                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} />)
+                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} onSettingsReset={onSettingsReset} />)
                         }>
                             <CogWheel />
                         </div>
@@ -158,7 +147,7 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete }: UserCSSCardPro
     );
 }
 
-function OtherThemeCard({ theme, enabled, onChange, onDelete, showDelete, extraButtons }: OtherThemeCardProps) {
+function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }: OtherThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -167,15 +156,10 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDelete, extraB
             enabled={enabled}
             setEnabled={onChange}
             infoButton={
-                (IS_WEB || showDelete) && (<>
-                    {extraButtons}
-                    <div
-                        style={{ cursor: "pointer", color: "var(--status-danger" }}
-                        onClick={onDelete}
-                    >
+                (IS_WEB || showDeleteButton) && (
+                    <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
                         <DeleteIcon />
                     </div>
-                </>
                 )
             }
             footer={
@@ -201,25 +185,27 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDelete, extraB
 
 enum ThemeTab {
     LOCAL,
-    ONLINE,
-    REPO
+    ONLINE
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "disabledThemeLinks", "enabledThemes"]);
+    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes"]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
+    const [currentThemeLink, setCurrentThemeLink] = useState("");
+    const [themeLinkValid, setThemeLinkValid] = useState(false);
     const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
+    const [onlineThemes, setOnlineThemes] = useState<(UserThemeHeader & { link: string; })[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
         refreshLocalThemes();
-    }, [settings.themeLinks]);
+        refreshOnlineThemes();
+    }, []);
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
-
         const themeInfo: ThemeHeader[] = [];
 
         for (const { fileName, content } of themes) {
@@ -242,13 +228,11 @@ function ThemesTab() {
                     switch (varInfo.type) {
                         case "text":
                         case "color":
+                        case "checkbox":
                             normalizedValue = varInfo.default;
                             break;
                         case "select":
                             normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
-                            break;
-                        case "checkbox":
-                            normalizedValue = varInfo.default ? "1" : "0";
                             break;
                         case "range":
                             normalizedValue = `${varInfo.default}${varInfo.units}`;
@@ -295,8 +279,7 @@ function ThemesTab() {
             return new Promise<void>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    VencordNative.themes
-                        .uploadTheme(name, reader.result as string)
+                    VencordNative.themes.uploadTheme(name, reader.result as string)
                         .then(resolve)
                         .catch(reject);
                 };
@@ -308,7 +291,7 @@ function ThemesTab() {
         refreshLocalThemes();
     }
 
-    function renderLocalThemes() {
+    function LocalThemes() {
         return (
             <>
                 <Card className="vc-settings-card">
@@ -319,38 +302,45 @@ function ThemesTab() {
                         </Link>
                         <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                     </div>
-                    <Forms.FormText>
-                        If using the BD site, click on "Download" and place the downloaded
-                        .theme.css file into your themes folder.
-                    </Forms.FormText>
+                    <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
                     <Card className="vc-settings-quick-actions-card">
                         <>
-                            {IS_WEB ? (
-                                <Button size={Button.Sizes.SMALL} disabled={themeDirPending}>
-                                    Upload Theme
-                                    <FileInput
-                                        ref={fileInputRef}
-                                        onChange={onFileUpload}
-                                        multiple={true}
-                                        filters={[{ extensions: ["css"] }]}
-                                    />
-                                </Button>
-                            ) : (
-                                <Button
-                                    onClick={() => showItemInFolder(themeDir!)}
-                                    size={Button.Sizes.SMALL}
-                                    disabled={themeDirPending}
-                                >
-                                    Open Themes Folder
-                                </Button>
-                            )}
-                            <Button onClick={refreshLocalThemes} size={Button.Sizes.SMALL}>
+                            {IS_WEB ?
+                                (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        disabled={themeDirPending}
+                                    >
+                                        Upload Theme
+                                        <FileInput
+                                            ref={fileInputRef}
+                                            onChange={onFileUpload}
+                                            multiple={true}
+                                            filters={[{ extensions: ["css"] }]}
+                                        />
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => showItemInFolder(themeDir!)}
+                                        size={Button.Sizes.SMALL}
+                                        disabled={themeDirPending}
+                                    >
+                                        Open Themes Folder
+                                    </Button>
+                                )}
+                            <Button
+                                onClick={refreshLocalThemes}
+                                size={Button.Sizes.SMALL}
+                            >
                                 Load missing Themes
                             </Button>
-                            <Button onClick={() => VencordNative.quickCss.openEditor()} size={Button.Sizes.SMALL}>
+                            <Button
+                                onClick={() => VencordNative.quickCss.openEditor()}
+                                size={Button.Sizes.SMALL}
+                            >
                                 Edit QuickCSS
                             </Button>
 
@@ -395,9 +385,72 @@ function ThemesTab() {
                                         await VencordNative.themes.deleteTheme(theme.fileName);
                                         refreshLocalThemes();
                                     }}
+                                    onSettingsReset={refreshLocalThemes}
                                     theme={theme as UserstyleHeader}
                                 />
                             )))}
+                    </div>
+                </Forms.FormSection>
+            </>
+        );
+    }
+
+    function addThemeLink(link: string) {
+        if (!themeLinkValid) return;
+        if (settings.themeLinks.includes(link)) return;
+
+        settings.themeLinks = [...settings.themeLinks, link];
+        setCurrentThemeLink("");
+        refreshOnlineThemes();
+    }
+
+    async function refreshOnlineThemes() {
+        const themes = await Promise.all(settings.themeLinks.map(async link => {
+            const css = await fetch(link).then(res => res.text());
+            return { ...getThemeInfo(css, link), link };
+        }));
+        setOnlineThemes(themes);
+    }
+
+    function onThemeLinkEnabledChange(link: string, enabled: boolean) {
+        if (enabled) {
+            if (settings.enabledThemeLinks.includes(link)) return;
+            settings.enabledThemeLinks = [...settings.enabledThemeLinks, link];
+        } else {
+            settings.enabledThemeLinks = settings.enabledThemeLinks.filter(f => f !== link);
+        }
+    }
+
+    function deleteThemeLink(link: string) {
+        settings.themeLinks = settings.themeLinks.filter(f => f !== link);
+
+        refreshOnlineThemes();
+    }
+
+    function OnlineThemes() {
+        return (
+            <>
+                <Forms.FormSection title="Online Themes" tag="h5">
+                    <Card className="vc-settings-theme-add-card">
+                        <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
+                        <Flex flexDirection="row">
+                            <TextInput placeholder="Theme Link" className="vc-settings-theme-link-input" value={currentThemeLink} onChange={setCurrentThemeLink} />
+                            <Button onClick={() => addThemeLink(currentThemeLink)} disabled={!themeLinkValid}>Add</Button>
+                        </Flex>
+                        {currentThemeLink && <Validator link={currentThemeLink} onValidate={setThemeLinkValid} />}
+                    </Card>
+
+                    <div className={cl("grid")}>
+                        {onlineThemes?.map(theme => {
+                            return <OtherThemeCard
+                                key={theme.fileName}
+                                enabled={settings.enabledThemeLinks.includes(theme.link)}
+                                onChange={enabled => onThemeLinkEnabledChange(theme.link, enabled)}
+                                onDelete={() => deleteThemeLink(theme.link)}
+                                showDeleteButton
+                                theme={theme}
+                            />;
+                        })}
                     </div>
                 </Forms.FormSection>
             </>
@@ -413,15 +466,21 @@ function ThemesTab() {
                 selectedItem={currentTab}
                 onItemSelect={setCurrentTab}
             >
-                <TabBar.Item className="vc-settings-tab-bar-item" id={ThemeTab.LOCAL}>
+                <TabBar.Item
+                    className="vc-settings-tab-bar-item"
+                    id={ThemeTab.LOCAL}
+                >
                     Local Themes
                 </TabBar.Item>
-                <TabBar.Item className="vc-settings-tab-bar-item" id={ThemeTab.ONLINE}>
+                <TabBar.Item
+                    className="vc-settings-tab-bar-item"
+                    id={ThemeTab.ONLINE}
+                >
                     Online Themes
                 </TabBar.Item>
             </TabBar>
 
-            {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
+            {currentTab === ThemeTab.LOCAL && <LocalThemes />}
             {currentTab === ThemeTab.ONLINE && <OnlineThemes />}
         </SettingsTab>
     );

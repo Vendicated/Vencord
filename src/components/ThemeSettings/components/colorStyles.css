@@ -5,7 +5,7 @@
     align-items: center;
 }
 
-.vc-usercss-settings-color-swatch-row>span {
+.vc-usercss-settings-color-swatch-row > span {
     display: block;
     flex: 1;
     overflow: hidden;

@@ -55,7 +55,11 @@ const preprocessors: { [preprocessor: string]: (text: string, vars: Record<strin
 };
 
 export async function compileUsercss(fileName: string) {
-    const themeData = await VencordNative.themes.getThemeData(fileName);
+    try {
+        var themeData = await VencordNative.themes.getThemeData(fileName);
+    } catch (e) {
+        UserCSSLogger.warn("Failed to get theme data for", fileName, "(has it gone missing?)", e);
+    }
     if (!themeData) return null;
 
     // UserCSS preprocessor order look like this:
@@ -71,7 +75,9 @@ export async function compileUsercss(fileName: string) {
         return null;
     }
 
-    const varsToPass = {};
+    const varsToPass = {
+        vencord: "true"
+    };
 
     for (const [k, v] of Object.entries(vars)) {
         varsToPass[k] = Settings.userCssVars[id]?.[k] ?? v.default;

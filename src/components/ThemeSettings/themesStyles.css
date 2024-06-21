@@ -45,3 +45,14 @@
 .vc-settings-theme-add-theme-error {
     color: var(--text-danger);
 }
+
+.vc-settings-usercss-ie-buttons > div {
+    color: var(--interactive-normal);
+    opacity: .5;
+    padding: 4px;
+}
+
+.vc-settings-usercss-ie-buttons > div:hover {
+    color: var(--interactive-hover);
+    opacity: 1;
+}

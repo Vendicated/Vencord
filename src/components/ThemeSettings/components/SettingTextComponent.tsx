@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, TextInput, useState } from "@webpack/common";
+import { Forms, TextInput } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -13,11 +13,7 @@ interface Props {
 }
 
 export function SettingTextComponent({ label, name, themeSettings }: Props) {
-    const [value, setValue] = useState(themeSettings[name]);
-
     function handleChange(value: string) {
-        setValue(value);
-
         themeSettings[name] = value;
     }
 
@@ -26,7 +22,7 @@ export function SettingTextComponent({ label, name, themeSettings }: Props) {
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <TextInput
                 key={name}
-                value={value}
+                value={themeSettings[name]}
                 onChange={handleChange}
             />
         </Forms.FormSection>

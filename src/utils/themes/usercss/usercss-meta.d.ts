@@ -19,7 +19,7 @@ declare module "usercss-meta" {
         }
         | {
             type: "checkbox";
-            default: boolean;
+            default: string;
         }
         | {
             type: "range";

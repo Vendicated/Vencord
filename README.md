@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (62 additional plugins)</summary>
+<summary>Extra included plugins (61 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -35,7 +35,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ColorMessage by Kyuuhachi
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
-- CustomScreenShare by KawaiianPizza
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny
 - DoubleCounterBypass by nyx
