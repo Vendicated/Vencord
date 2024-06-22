@@ -87,7 +87,7 @@ export default definePlugin({
             predicate: () => settings.store.gift,
         },
         { // Emoji list
-            find: /\i\.\i\i\.getEmojiUnavailableReason/,
+            find: /\.filter\(\i=>\i\.\i\i\.getEmojiUnavailableReason/,
             replacement: {
                 match: /(\w+)=!\w+&&\w+.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"

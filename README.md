@@ -25,7 +25,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
-- Annamox by Kyuuhachi
+- Anammox by Kyuuhachi
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterQuests by kvba
 - BetterQuickReact by Ven and Sqaaakoi
