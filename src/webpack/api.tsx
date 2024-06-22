@@ -27,6 +27,42 @@ export const onceDiscordLoaded = new Promise<void>(r => _resolveDiscordLoaded = 
 export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
 
+export function _initWebpack(webpackRequire: WebpackInstance) {
+    wreq = webpackRequire;
+    cache = webpackRequire.c;
+}
+
+type ModuleFactory = (module: any, exports: any, require: WebpackInstance) => void;
+
+export type ModListenerInfo = {
+    id: PropertyKey;
+    factory: ModuleFactory;
+};
+
+export type ModCallbackInfo = {
+    id: PropertyKey;
+    exportKey: PropertyKey | null;
+    factory: ModuleFactory;
+};
+
+export type ModListenerFn = (module: any, info: ModListenerInfo) => void;
+export type ModCallbackFn = ((module: any, info: ModCallbackInfo) => void) & {
+    $$vencordCallbackCalled?: () => boolean;
+};
+
+export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
+export const moduleListeners = new Set<ModListenerFn>();
+export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
+export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
+
+let devToolsOpen = false;
+if (IS_DEV && IS_DISCORD_DESKTOP) {
+    // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
+    setTimeout(() => {
+        DiscordNative?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+    }, 0);
+}
+
 export type FilterFn = ((module: any) => boolean) & {
     $$vencordProps?: string[];
     $$vencordIsFactoryFilter?: boolean;
@@ -92,42 +128,6 @@ export const filters = {
         return byCodeFilter;
     }
 };
-
-type ModuleFactory = (module: any, exports: any, require: WebpackInstance) => void;
-
-export type ModListenerInfo = {
-    id: PropertyKey;
-    factory: ModuleFactory;
-};
-
-export type ModCallbackInfo = {
-    id: PropertyKey;
-    exportKey: PropertyKey | null;
-    factory: ModuleFactory;
-};
-
-export type ModListenerFn = (module: any, info: ModListenerInfo) => void;
-export type ModCallbackFn = ((module: any, info: ModCallbackInfo) => void) & {
-    $$vencordCallbackCalled?: () => boolean;
-};
-
-export const factoryListeners = new Set<(factory: ModuleFactory) => void>();
-export const moduleListeners = new Set<ModListenerFn>();
-export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
-export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
-
-export function _initWebpack(webpackRequire: WebpackInstance) {
-    wreq = webpackRequire;
-    cache = webpackRequire.c;
-}
-
-let devToolsOpen = false;
-if (IS_DEV && IS_DISCORD_DESKTOP) {
-    // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
-    setTimeout(() => {
-        DiscordNative?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
-    }, 0);
-}
 
 export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
@@ -383,20 +383,6 @@ export function findByFactoryCode<T = AnyObject>(...code: string[]) {
 }
 
 /**
- * Find the first module factory that includes all the given code.
- */
-export function findModuleFactory(...code: string[]) {
-    const filter = filters.byFactoryCode(...code);
-
-    const [proxy, setInnerValue] = proxyInner<ModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
-    waitFor(filter, (_, { factory }) => setInnerValue(factory));
-
-    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<ModuleFactory>;
-
-    return proxy;
-}
-
-/**
  * Find the module exports of the first module which the factory includes all the given code,
  * then map them into an easily usable object via the specified mappers.
  *
@@ -442,6 +428,127 @@ export function mapMangledModule<S extends PropertyKey>(code: string | string[],
     }
 
     return result;
+}
+
+/**
+ * Find the first module factory that includes all the given code.
+ */
+export function findModuleFactory(...code: string[]) {
+    const filter = filters.byFactoryCode(...code);
+
+    const [proxy, setInnerValue] = proxyInner<ModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
+    waitFor(filter, (_, { factory }) => setInnerValue(factory));
+
+    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<ModuleFactory>;
+
+    return proxy;
+}
+
+/**
+ * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
+ *
+ * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the factory is evaluated.
+ *
+ * @param factory Factory returning the result
+ * @param attempts How many times to try to evaluate the factory before giving up
+ * @returns Result of factory function
+ */
+export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?: number) {
+    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
+
+    return proxyLazy<T>(factory, attempts);
+}
+
+/**
+ * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
+ *
+ * A lazy component. The factory method is called on first render.
+ *
+ * @param factory Function returning a Component
+ * @param attempts How many times to try to get the component before giving up
+ * @returns Result of factory function
+ */
+export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
+    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
+
+    return LazyComponent<T>(factory, attempts);
+}
+
+export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
+export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
+
+/**
+ * Extract and load chunks using their entry point.
+ *
+ * @param code The code or list of code the module factory containing the lazy chunk loading must include
+ * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
+ * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
+ */
+export function extractAndLoadChunksLazy(code: string | string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
+    const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
+
+    const extractAndLoadChunks = makeLazy(async () => {
+        if (module[SYM_PROXY_INNER_VALUE] == null) {
+            const err = new Error("extractAndLoadChunks: Couldn't find module factory");
+
+            if (!IS_DEV || devToolsOpen) {
+                logger.warn(err, "Code:", code, "Matcher:", matcher);
+                return false;
+            } else {
+                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            }
+        }
+
+        const match = String(module).match(canonicalizeMatch(matcher));
+        if (!match) {
+            const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
+
+            if (!IS_DEV || devToolsOpen) {
+                logger.warn(err, "Code:", code, "Matcher:", matcher);
+                return false;
+            } else {
+                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            }
+        }
+
+        const [, rawChunkIds, entryPointId] = match;
+        if (Number.isNaN(Number(entryPointId))) {
+            const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
+
+            if (!IS_DEV || devToolsOpen) {
+                logger.warn(err, "Code:", code, "Matcher:", matcher);
+                return false;
+            } else {
+                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            }
+        }
+
+        if (rawChunkIds) {
+            const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
+            await Promise.all(chunkIds.map(id => wreq.e(id)));
+        }
+
+        if (wreq.m[entryPointId] == null) {
+            const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
+
+            if (!IS_DEV || devToolsOpen) {
+                logger.warn(err, "Code:", code, "Matcher:", matcher);
+                return false;
+            } else {
+                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
+            }
+        }
+
+        wreq(entryPointId as any);
+        return true;
+    });
+
+    if (IS_REPORTER) {
+        webpackSearchHistory.push(["extractAndLoadChunks", [extractAndLoadChunks, code, matcher]]);
+    }
+
+    return extractAndLoadChunks;
 }
 
 export type CacheFindResult = {
@@ -682,113 +789,6 @@ export function cacheFindModuleFactory(...code: string[]) {
 }
 
 /**
- * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
- *
- * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the factory is evaluated.
- *
- * @param factory Factory returning the result
- * @param attempts How many times to try to evaluate the factory before giving up
- * @returns Result of factory function
- */
-export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?: number) {
-    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
-
-    return proxyLazy<T>(factory, attempts);
-}
-
-/**
- * This is just a wrapper around {@link LazyComponent} to make our reporter test for your webpack finds.
- *
- * A lazy component. The factory method is called on first render.
- *
- * @param factory Function returning a Component
- * @param attempts How many times to try to get the component before giving up
- * @returns Result of factory function
- */
-export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
-
-    return LazyComponent<T>(factory, attempts);
-}
-
-export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
-export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
-
-/**
- * Extract and load chunks using their entry point.
- *
- * @param code The code or list of code the module factory containing the lazy chunk loading must include
- * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
- * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
- */
-export function extractAndLoadChunksLazy(code: string | string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
-    const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
-
-    const extractAndLoadChunks = makeLazy(async () => {
-        if (module[SYM_PROXY_INNER_VALUE] == null) {
-            const err = new Error("extractAndLoadChunks: Couldn't find module factory");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
-        }
-
-        const match = String(module).match(canonicalizeMatch(matcher));
-        if (!match) {
-            const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
-        }
-
-        const [, rawChunkIds, entryPointId] = match;
-        if (Number.isNaN(Number(entryPointId))) {
-            const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
-        }
-
-        if (rawChunkIds) {
-            const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
-            await Promise.all(chunkIds.map(id => wreq.e(id)));
-        }
-
-        if (wreq.m[entryPointId] == null) {
-            const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
-        }
-
-        wreq(entryPointId as any);
-        return true;
-    });
-
-    if (IS_REPORTER) {
-        webpackSearchHistory.push(["extractAndLoadChunks", [extractAndLoadChunks, code, matcher]]);
-    }
-
-    return extractAndLoadChunks;
-}
-
-/**
  * Search modules by keyword. This searches the factory methods,
  * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
  *
@@ -884,7 +884,6 @@ export const findLazy = deprecatedRedirect("findLazy", "find", find);
  * Find the first module that has the specified properties, lazily
  */
 export const findByPropsLazy = deprecatedRedirect("findByPropsLazy", "findByProps", findByProps);
-
 
 /**
  * @deprecated Use {@link findByCode} instead
