@@ -214,7 +214,7 @@ export default definePlugin({
                         const tag = {
                             name: name,
                             enabled: true,
-                            message: message
+                            message: message.replaceAll("`​", "`") // replace "`<200b>" with "`"
                         };
 
                         await addTag(tag);
@@ -244,7 +244,8 @@ export default definePlugin({
                         const tag = {
                             name: name,
                             enabled: true,
-                            message: message
+
+                            message: message.replaceAll("`​", "`") // replace "`<200b>" with "`"
                         };
 
                         await addTag(tag);
@@ -311,8 +312,10 @@ export default definePlugin({
 
 
                         if (isRaw) {
+                            const message = tag.message.replaceAll("`", "`​"); // replace "`" with "`<200b>"
+
                             sendBotMessage(ctx.channel.id, {
-                                content: "```" + tag.message + "```"
+                                content: "```" + message + "```"
                             });
                         }
                         else {
