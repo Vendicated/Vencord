@@ -16,9 +16,8 @@ export default definePlugin({
         {
             find: '"call_ringing_beat"',
             replacement: {
-                // FIXME Remove === alternative when it hits stable
-                match: /500(!==|===)\i\(\)\.random\(1,1e3\)/,
-                replace: (_, predicate) => predicate === "!==" ? "false" : "true",
+                match: /500!==\i\(\)\.random\(1,1e3\)/,
+                replace: "false",
             }
         },
     ],
