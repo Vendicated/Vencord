@@ -51,7 +51,7 @@
         "axios": "^1.6.8",
         "fflate": "^0.7.4",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
-        "monaco-editor": "^0.43.0",
+        "monaco-editor": "^0.50.0",
         "nanoid": "^4.0.2",
         "usercss-meta": "^0.12.0",
         "virtual-merge": "^1.0.1"

@@ -255,7 +255,7 @@ export default definePlugin({
         },
         {
             // Show all activities in the profile panel
-            find: /\i\.\i\i\.PANEL,themeOverride:\i\i,/,
+            find: /\i\.\i\i\.PANEL,themeOverride:.{1,5}children:/,
             replacement: {
                 match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{activity:.+?,user:\i,channelId:\i.id,)/,
                 replace: "$self.showAllActivitiesComponent"

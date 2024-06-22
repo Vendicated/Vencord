@@ -141,7 +141,7 @@ export default definePlugin({
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven, EquicordDevs.thororen],
-    dependencies: ["CommandsAPI", "UserSettingsAPI"],
+    dependencies: ["CommandsAPI", "UserSettingsAPI", "MessageAccessoriesAPI"],
 
     patches: [{
         find: ".BEGINNING_DM.format",
