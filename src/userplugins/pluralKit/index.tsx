@@ -16,23 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index";
+import { addPreEditListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { DeleteIcon } from "@components/Icons";
-import { insertTextIntoChatInputBox } from "@utils/discord";
-import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher } from "@webpack/common";
-import { Message } from "discord-types/general";
-import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
+import {
+    Button,
+    ChannelStore,
+    MessageActions,
+    MessageStore,
+    UserStore
+} from "@webpack/common";
+import { Message, User } from "discord-types/general";
+import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
+import {
+    Author,
+    deleteMessage,
+    getAuthorOfMessage,
+    isOwnPkMessage,
+    isPk,
+    loadAuthors
+} from "./utils";
 
-function isPk(msg: Message) {
-    return (msg && msg.applicationId === "466378653216014359");
-}
+
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
@@ -46,32 +55,53 @@ const settings = definePluginSettings({
         description: "Display member colors in their names in chat",
         default: false
     },
-    displayMemberId: {
+    display: {
+        type: OptionType.STRING,
+        description: "How to display proxied users in chat\n{tag}, {name}, {memberId}, {pronouns}, {systemId}, {systemName} are valid variables (All lowercase)",
+        default: "{name}{tag}",
+    },
+    load: {
+        type: OptionType.COMPONENT,
+        component: () => {
+            return <Button label={"Load"} onClick = {async () => {
+                const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
+                const localSystem: Author[] = [];
+
+                (system.members??(await system.getMembers())).forEach((member: Member) => {
+                    localSystem.push({
+                        messageIds: [],
+                        member,
+                        system
+                    });
+                });
+
+                settings.store.data = JSON.stringify(localSystem);
+            }}>LOAD</Button>;
+        },
+        description: "Load local system into memory"
+    },
+    showDebug: {
         type: OptionType.BOOLEAN,
-        description: "Display member IDs in chat",
+        description: "Show debug options",
         default: false
     },
-    displayMemberPronouns: {
-        type: OptionType.BOOLEAN,
-        description: "Display member pronouns in chat",
-        default: false
+    printData: {
+        type: OptionType.COMPONENT,
+        component: () => {
+            return <Button onClick = {() => {
+                console.log(settings.store.data);
+            }}>Print Data</Button>;
+        },
+        description: "Print stored data to console",
+        hidden: false // showDebug
+    },
+    data: {
+        type: OptionType.STRING,
+        description: "Datastore",
+        default: "{}",
+        hidden: false // showDebug
     }
 });
-
-// I dont fully understand how to use datastores, if I used anything incorrectly please let me know
-const DATASTORE_KEY = "pk";
-
-interface Author {
-    messageIds: string[];
-    member: Member;
-    system: System;
-    guildSettings?: Map<string, MemberGuildSettings>;
-    systemSettings?: Map<string, SystemGuildSettings>;
-}
-
-let authors: Record<string, Author> = {};
-
-const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
 export default definePlugin({
     name: "Plural Kit",
@@ -90,7 +120,39 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])}"
             }
         },
+        // make up arrow to edit most recent message work
+        // this might conflict with messageLogger, but to be honest, if you're
+        // using that plugin, you'll have enough problems with pk already
+        // Stolen directly from https://github.com/lynxize/vencord-plugins/blob/plugins/src/userplugins/pk4vc/index.tsx
+        {
+            find: "getLastEditableMessage",
+            replacement: {
+                match: /return (.)\(\)\(this.getMessages\((.)\).{10,100}:.\.id\)/,
+                replace: "return $1()(this.getMessages($2).toArray()).reverse().find(msg => $self.isOwnMessage(msg)"
+            }
+        },/*
+        {
+            find: "\"UserPopoutExperimentWrapper: user cannot be undefined\"",
+            replacement: {
+                match: /a.default.getUser\(\i\)/,
+                replace: "{$self.getUser(arguments[0]);}"
+            },
+        }*/
     ],
+
+    getUser: (arg: { userId: string, user: User|undefined }) => {
+        const user: User = UserStore.getUser(arg.userId);
+        arg.user = user;
+        if (!user.bot || !user.username) return arg.user;
+        user.bio = "Test Bio";
+        user.discriminator= "0001";
+        user.bot = false;
+        arg.user = user;
+        console.log(arg);
+        return arg.user;
+    },
+
+    isOwnMessage: (message: Message) => isOwnPkMessage(message, settings.store.data) || message.author.id === UserStore.getCurrentUser().id,
 
     renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => {
         const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
@@ -99,7 +161,7 @@ export default definePlugin({
             if (!isPk(message))
                 return <>{prefix}{discordUsername}</>;
 
-            const authorOfMessage = getAuthorOfMessage(message);
+            const authorOfMessage = getAuthorOfMessage(message, pluralKit.api);
             let color: string = "666666";
 
             if (authorOfMessage?.member && settings.store.colorNames) {
@@ -110,28 +172,36 @@ export default definePlugin({
             const systemSettings = authorOfMessage?.systemSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
 
             const name = memberSettings?.display_name??member.display_name??member.name;
-            const pronouns = settings.store.displayMemberPronouns&&member.pronouns?` | (${authorOfMessage.member.pronouns})`:undefined;
-            const tag = systemSettings? systemSettings.tag?systemSettings.tag:authorOfMessage.system.tag??undefined:undefined;
-            const id = settings.store.displayMemberId?` (${member.id})`:undefined;
+            const { pronouns } = member;
+            const tag = (systemSettings&&systemSettings.tag)?systemSettings.tag:authorOfMessage.system.tag;
+
+            const result = settings.store.display
+                .replace("{name}", name)
+                .replace("{pronouns}", pronouns??"")
+                .replace("{tag}", tag??"")
+                .replace("{memberid}", member.id)
+                .replace("{systemid}", authorOfMessage.system.id)
+                .replace("{systemname}", authorOfMessage.system.name??"");
 
 
             return <span style={{
                 color: `#${color}`,
-            }}>{prefix}{name}{pronouns}{tag}{id}</span>;
+            }}>{result}</span>;
         } catch {
             return <>{prefix}{author?.nick}</>;
         }
     },
 
     api: new PKAPI({
+        token: "H2hS5SgyjWN/dpPKyx5Lrc8ggWsqgMHEQqsr9nXL5X6Eg2FF2/6XKsBjQhhgr2F+"
     }),
 
     async start() {
-        authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
+        await loadAuthors();
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            if (!isPk(msg)) return null;
+            if (!isOwnPkMessage(msg, settings.store.data)) return null;
 
             return {
                 label: "Edit",
@@ -140,14 +210,14 @@ export default definePlugin({
                 },
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => replyToMessage(msg, false, true, "pk;edit " + msg.content),
+                onClick: () => MessageActions.startEditMessage(msg.channel_id, msg.id, msg.content),
                 onContextMenu: _ => {}
             };
         });
 
         addButton("pk-delete", msg => {
             if (!msg) return null;
-            if (!isPk(msg)) return null;
+            if (!isOwnPkMessage(msg, settings.store.data)) return null;
 
             return {
                 label: "Delete",
@@ -160,66 +230,25 @@ export default definePlugin({
                 onContextMenu: _ => {}
             };
         });
+
+
+        // Stolen directly from https://github.com/lynxize/vencord-plugins/blob/plugins/src/userplugins/pk4vc/index.tsx
+        this.preEditListener = addPreEditListener((channelId, messageId, messageObj) => {
+            if (isPk(MessageStore.getMessage(channelId, messageId))) {
+                const { guild_id } = ChannelStore.getChannel(channelId);
+                MessageActions.sendMessage(channelId, {
+                    reaction: false,
+                    content: "pk;e https://discord.com/channels/" + guild_id + "/" + channelId + "/" + messageId + " " + messageObj.content
+                });
+                // return {cancel: true}
+                // note that presumably we're sending off invalid edit requests, hopefully that doesn't cause issues
+                // todo: look into closing the edit box without sending a bad edit request to discord
+            }
+        });
     },
     stop() {
         removeButton("pk-edit");
     },
 });
 
-function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, content?: string | undefined) {
-    FluxDispatcher.dispatch({
-        type: "CREATE_PENDING_REPLY",
-        channel: ChannelStore.getChannel(msg.channel_id),
-        message: msg,
-        shouldMention: mention,
-        showMentionToggle: !hideMention,
-    });
-    if (content) {
-        insertTextIntoChatInputBox(content);
-    }
-}
 
-function deleteMessage(msg: Message) {
-    ReactionManager.addReaction(
-        msg.channel_id,
-        msg.id,
-        {
-            id: undefined,
-            name: "❌",
-            animated: false
-        }
-    );
-}
-
-function generateAuthorData(message: Message) {
-    return `${message.author.username}##${message.author.avatar}`;
-}
-
-function getAuthorOfMessage(message: Message) {
-    if (authors[generateAuthorData(message)]) {
-        authors[generateAuthorData(message)].messageIds.push(message.id);
-        return authors[generateAuthorData(message)];
-    }
-
-    pluralKit.api.getMessage({ message: message.id }).then(msg => {
-        if (!(msg.member instanceof Member)) {
-            pluralKit.api.getMember({ member: msg.member??"n/a" }).then(m => {
-                authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: m, system: msg.system as System });
-                authors[generateAuthorData(message)].member.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
-                    authors[generateAuthorData(message)].guildSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
-                });
-            });
-            if (msg.system instanceof System) {
-                msg.system.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
-                    authors[generateAuthorData(message)].systemSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
-                });
-            }
-        }
-        const mem = msg.member as Member;
-        // @ts-ignore
-        authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: mem, system: msg.system as System });
-    });
-
-    DataStore.set(DATASTORE_KEY, authors);
-    return authors[generateAuthorData(message)];
-}
