@@ -69,7 +69,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
-export type FilterFn = ((module: any) => boolean) & {
+export type FilterFn = ((module: ModuleExports) => boolean) & {
     $$vencordProps?: string[];
     $$vencordIsFactoryFilter?: boolean;
 };
