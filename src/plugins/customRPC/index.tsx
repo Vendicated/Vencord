@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { ActivityFlags, ActivityType } from "@vencord/discord-types";
+import { type Activity, ActivityFlags, ActivityType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
@@ -38,34 +38,8 @@ const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")
 
 async function getApplicationAsset(key: string) {
     if (/^https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key))
-        return "mp:" + key.replace(/^https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
-    return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
-}
-
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
-interface Activity {
-    state?: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: string[];
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: string[];
-    };
-    type: ActivityType;
-    url?: string;
-    flags: ActivityFlags;
+        return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
+    return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0]!;
 }
 
 const enum TimestampMode {
@@ -315,6 +289,8 @@ async function createActivity() {
     if (!appName) return;
 
     const activity: Activity = {
+        id: "custom",
+        created_at: Date.now(),
         application_id: appID || "0",
         name: appName,
         state,

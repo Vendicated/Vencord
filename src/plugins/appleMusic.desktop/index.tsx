@@ -10,7 +10,7 @@ import definePlugin, { OptionType, type PluginNative, ReporterTestable } from "@
 import { type Activity, type ActivityAssets, ActivityFlags, ActivityType } from "@vencord/discord-types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
-const Native = VencordNative.pluginHelpers.AppleMusic as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
 
 interface ActivityButton {
     label: string;

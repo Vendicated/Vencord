@@ -13,7 +13,7 @@ import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore: FluxPersistedStore & Record<string, any> = findByPropsLazy("allSummaries", "findSummary");
-const createSummaryFromServer = findByCodeLazy(".people)),startId:");
+const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -72,12 +72,15 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
+            const incomingSummaries: ChannelSummaries[] = data.summaries
+                .map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
-                summaries[data.channel_id] ? summaries[data.channel_id].unshift(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
+                summaries[data.channel_id]
+                    ? summaries[data.channel_id].unshift(...incomingSummaries)
+                    : (summaries[data.channel_id] = incomingSummaries);
                 if (summaries[data.channel_id].length > 50)
                     summaries[data.channel_id] = summaries[data.channel_id].slice(0, 50);
 

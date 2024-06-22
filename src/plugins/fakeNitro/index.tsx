@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, type Patch } from "@utils/types";
 import { DraftType, type Emoji, EmojiIntention, EmojiType, type FluxPersistedStore, type FluxStore, type MessageAttachment, type MessageEmbed, type MessageRecord, type Sticker, StickerFormat, UserPremiumType } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -50,6 +50,8 @@ function searchProtoClassField(localName: string, protoClass: any) {
 const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsProtoActionCreators.PreloadedUserSettingsActionCreators);
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
+
+const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
 
 const IS_BYPASSEABLE_INTENTION = `[${EmojiIntention.CHAT},${EmojiIntention.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`;
 
@@ -192,16 +194,14 @@ export default definePlugin({
                 }
             ]
         },
-        // FIXME
         // Allows the usage of subscription-locked emojis
-        /* {
+        {
             find: ".getUserIsAdmin(",
             replacement: {
-                match: /(?=.+?\.getUserIsAdmin\((?<=function (\i)\(\i,\i\){.+?))(\i):function\(\){return \1}/,
-                // Replace the original export with a func that always returns false and alias the original
-                replace: "$2:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function(){return $1}"
+                match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
+                replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
-        }, */
+        },
         // Allow stickers to be sent everywhere
         {
             find: "canUseCustomStickersEverywhere:function",
@@ -500,7 +500,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement) => {
+        function transformLinkChild(child: ReactElement) {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -532,9 +532,9 @@ export default definePlugin({
             }
 
             return child;
-        };
+        }
 
-        const transformChild = (child?: ReactElement) => {
+        function transformChild(child?: ReactElement) {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -548,7 +548,7 @@ export default definePlugin({
             }
 
             return child;
-        };
+        }
 
         const modifyChild = (child: ReactElement) => {
             const newChild = transformChild(child);
@@ -776,9 +776,7 @@ export default definePlugin({
         if (emoji.type === EmojiType.UNICODE) return true;
         if (emoji.available === false) return false;
 
-        // FIXME
-        /* const isUnusableRoleSubEmoji = isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false; */
+        if (isUnusableRoleSubscriptionEmoji(emoji, this.guildId, true)) return false;
 
         if (this.canUseEmotes)
             return emoji.guildId === this.guildId || hasExternalEmojiPerms(channelId);

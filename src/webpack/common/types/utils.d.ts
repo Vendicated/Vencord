@@ -18,6 +18,7 @@
 
 import type { GuildMember, GuildRecord, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
+import { LiteralUnion } from "type-fest";
 
 export type MarkupUtils = Record<
     | "parse"
@@ -70,7 +71,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"delete" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
 export type PermissionsKeys = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "ADD_REACTIONS" | "VIEW_AUDIT_LOG" | "PRIORITY_SPEAKER" | "STREAM" | "VIEW_CHANNEL" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "VIEW_GUILD_ANALYTICS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "USE_APPLICATION_COMMANDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "USE_EMBEDDED_ACTIVITIES" | "MODERATE_MEMBERS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "USE_SOUNDBOARD" | "CREATE_GUILD_EXPRESSIONS" | "CREATE_EVENTS" | "USE_EXTERNAL_SOUNDS" | "SEND_VOICE_MESSAGES" | "USE_CLYDE_AI" | "SET_VOICE_CHANNEL_STATUS" | "SEND_POLLS" | "USE_EXTERNAL_APPS";
 
@@ -136,4 +137,38 @@ export interface Constants {
     Endpoints: Record<string, any>;
     UserFlags: Record<string, number>;
     FriendsSections: Record<string, string>;
+}
+
+export interface ExpressionPickerStore {
+    closeExpressionPicker(activeViewType?: any): void;
+    openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+}
+
+export interface BrowserWindowFeatures {
+    toolbar?: boolean;
+    menubar?: boolean;
+    location?: boolean;
+    directories?: boolean;
+    width?: number;
+    height?: number;
+    defaultWidth?: number;
+    defaultHeight?: number;
+    left?: number;
+    top?: number;
+    defaultAlwaysOnTop?: boolean;
+    movable?: boolean;
+    resizable?: boolean;
+    frame?: boolean;
+    alwaysOnTop?: boolean;
+    hasShadow?: boolean;
+    transparent?: boolean;
+    skipTaskbar?: boolean;
+    titleBarStyle?: string | null;
+    backgroundColor?: string;
+}
+
+export interface PopoutActions {
+    open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
+    close(key: string): void;
+    setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
 }

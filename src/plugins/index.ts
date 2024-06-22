@@ -35,9 +35,9 @@ export const PMLogger = logger;
 export const plugins = Plugins;
 export const patches: Patch[] = [];
 
-/** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
+/** Whether we have subscribed to Flux actions of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
-const subscribedFluxEventsPlugins = new Set<string>();
+const subscribedFluxActionsPlugins = new Set<string>();
 
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
@@ -163,20 +163,33 @@ export function startDependenciesRecursive(plugin: Plugin) {
     return { restartNeeded, failures };
 }
 
-export function subscribePluginFluxEvents(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
-    if (plugin.flux && !subscribedFluxEventsPlugins.has(plugin.name) && (!IS_REPORTER || isReporterTestable(plugin, ReporterTestable.FluxActions))) {
-        subscribedFluxEventsPlugins.add(plugin.name);
+export function subscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+    if (plugin.flux && !subscribedFluxActionsPlugins.has(plugin.name) && (!IS_REPORTER || isReporterTestable(plugin, ReporterTestable.FluxActions))) {
+        subscribedFluxActionsPlugins.add(plugin.name);
 
         logger.debug("Subscribing to Flux actions of plugin", plugin.name);
         for (const [action, handler] of Object.entries(plugin.flux)) {
-            fluxDispatcher.subscribe(action as FluxActionType, handler);
+            const wrappedHandler = plugin.flux[action as FluxActionType] = function () {
+                try {
+                    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+                    const res = handler.apply(plugin, arguments as any);
+                    // @ts-ignore
+                    return res instanceof Promise
+                        ? res.catch(e => { logger.error(`${plugin.name}: Error while handling ${action}\n`, e); })
+                        : res;
+                } catch (e) {
+                    logger.error(`${plugin.name}: Error while handling ${action}\n`, e);
+                }
+            };
+
+            fluxDispatcher.subscribe(action as FluxActionType, wrappedHandler);
         }
     }
 }
 
-export function unsubscribePluginFluxEvents(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+export function unsubscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
     if (plugin.flux) {
-        subscribedFluxEventsPlugins.delete(plugin.name);
+        subscribedFluxActionsPlugins.delete(plugin.name);
 
         logger.debug("Unsubscribing from Flux action of plugin", plugin.name);
         for (const [action, handler] of Object.entries(plugin.flux)) {
@@ -185,12 +198,12 @@ export function unsubscribePluginFluxEvents(plugin: Plugin, fluxDispatcher: type
     }
 }
 
-export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatcher) {
+export function subscribeAllPluginsFluxActions(fluxDispatcher: typeof FluxDispatcher) {
     enabledPluginsSubscribedFlux = true;
 
     for (const name in Plugins) {
         if (!isPluginEnabled(name)) continue;
-        subscribePluginFluxEvents(Plugins[name]!, fluxDispatcher);
+        subscribePluginFluxActions(Plugins[name]!, fluxDispatcher);
     }
 }
 
@@ -226,7 +239,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(plu
     }
 
     if (enabledPluginsSubscribedFlux) {
-        subscribePluginFluxEvents(plugin, FluxDispatcher);
+        subscribePluginFluxActions(plugin, FluxDispatcher);
     }
 
 
@@ -271,7 +284,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(plugin
         }
     }
 
-    unsubscribePluginFluxEvents(plugin, FluxDispatcher);
+    unsubscribePluginFluxActions(plugin, FluxDispatcher);
 
     if (contextMenus) {
         logger.debug("Removing context menus patches of plugin", name);

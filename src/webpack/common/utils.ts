@@ -28,7 +28,7 @@ export let FluxDispatcher: $FluxDispatcher;
 waitFor(["dispatch", "subscribe"], (m: $FluxDispatcher) => {
     FluxDispatcher = m;
     // Non import call to avoid circular dependency
-    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+    Vencord.Plugins.subscribeAllPluginsFluxActions(m);
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
@@ -120,7 +120,7 @@ waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m
 
 export const Constants = findByPropsLazy("Endpoints");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
 
 // TODO: type
 // zustand store
@@ -149,6 +149,12 @@ export const MessageActionCreators = findByPropsLazy("editMessage", "sendMessage
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const Permissions: t.Permissions = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
+
+export const PopoutWindowActionCreators: t.PopoutWindowActionCreators = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
+    open: filters.byCode('type:"POPOUT_WINDOW_OPEN"'),
+    close: filters.byCode('type:"POPOUT_WINDOW_CLOSE"'),
+    setAlwaysOnTop: filters.byCode('type:"POPOUT_WINDOW_SET_ALWAYS_ON_TOP"'),
+});
 
 export const promptToUpload: (files: File[], channel: ChannelRecord, draftType: DraftType) => void
     = findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,");

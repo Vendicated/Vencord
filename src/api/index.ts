@@ -118,4 +118,7 @@ export const ChatButtons = $ChatButtons;
  */
 export const MessageUpdater = $MessageUpdater;
 
+/**
+ * An API allowing you to get an user setting
+ */
 export const UserSettings = $UserSettings;
