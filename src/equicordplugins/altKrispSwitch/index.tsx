@@ -15,7 +15,7 @@ export default definePlugin({
         {
             find: ",setNoiseCancellation(",
             replacement: {
-                match: /(}\),)(.{1,2}\.default\.dispatch\({type:"AUDIO_SET_NOISE_SUPPRESSION",)/,
+                match: /(}\),)(.{1,2}\.\i\.dispatch\({type:"AUDIO_SET_NOISE_SUPPRESSION",)/,
                 replace: "$1!$self.shouldCancelSuppression(arguments)&&$2"
             }
         }

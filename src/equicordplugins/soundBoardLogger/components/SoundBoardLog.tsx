@@ -13,8 +13,7 @@ import { Button, Clickable, ContextMenuApi, FluxDispatcher, Forms, Menu, Text, T
 import { User } from "discord-types/general";
 
 import { clearLoggedSounds, getLoggedSounds } from "../store";
-import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, getSoundboardVolume, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
-import { openCloneSoundModal } from "./CloneSoundModal";
+import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
 
@@ -100,13 +99,6 @@ export default function SoundBoardLog({ data, closeModal }) {
                 navId="soundboardlogger-sound-menu"
                 onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             >
-                <Menu.MenuGroup label="Extra buttons">
-                    <Menu.MenuItem
-                        id={label("clone")}
-                        label="Clone sound"
-                        action={() => openCloneSoundModal(item)}
-                    />
-                </Menu.MenuGroup>
             </Menu.Menu>
         );
     }
@@ -164,7 +156,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                             <Flex flexDirection="row" className={cl("sound-buttons")}>
                                 <Button color={Button.Colors.PRIMARY} size={Button.Sizes.SMALL} onClick={() => downloadAudio(item.soundId)}>Download</Button>
                                 <Button color={Button.Colors.GREEN} size={Button.Sizes.SMALL} onClick={() => copyWithToast(item.soundId, "ID copied to clipboard!")}>Copy ID</Button>
-                                <Tooltip text={`Soundboard volume: ${Math.floor(getSoundboardVolume())}%`}>
+                                <Tooltip text={"Soundboard volume: currently broken"}>
                                     {({ onMouseEnter, onMouseLeave }) =>
                                         <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={() => playSound(item.soundId)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>Play Sound</Button>
                                     }

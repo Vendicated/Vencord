@@ -62,9 +62,6 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
 }
 
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-const { encodeStreamKey }: {
-    encodeStreamKey: (any) => string;
-} = findByPropsLazy("encodeStreamKey");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
@@ -80,8 +77,8 @@ export default definePlugin({
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /default:function\(\)\{return (\i)\}/,
-                replace: "default:function(){return $self.component({OriginalComponent:$1})}"
+                match: /(\i):function\(\)\{return (\i)\}/,
+                replace: "$1:function(){return $self.component({OriginalComponent:$2})}"
             }
         },
         {
@@ -98,7 +95,7 @@ export default definePlugin({
 
         if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
+        const userIds = ApplicationStreamingStore.getViewerIds(stream);
 
         let missingUsers = 0;
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
@@ -160,7 +157,7 @@ export default definePlugin({
     component: function ({ OriginalComponent }) {
         return (props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-            const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
+            const viewers = ApplicationStreamingStore.getViewerIds(stream);
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>

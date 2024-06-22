@@ -57,14 +57,14 @@ export default definePlugin({
             predicate: () => settings.store.dms,
         },
         { // Above DMs, keyboard nav
-            find: ".default.hasLibraryApplication()&&!",
+            find: ".hasLibraryApplication()&&!",
             replacement: [
                 {
-                    match: /\i\.Routes\.APPLICATION_STORE,/,
+                    match: /\i\.\i\.APPLICATION_STORE,/,
                     replace: "/*$&*/",
                 },
                 {
-                    match: /\i\.Routes\.COLLECTIBLES_SHOP,/,
+                    match: /\i\.\i\.COLLECTIBLES_SHOP,/,
                     replace: "/*$&*/",
                 },
             ],
@@ -87,9 +87,9 @@ export default definePlugin({
             predicate: () => settings.store.gift,
         },
         { // Emoji list
-            find: "useEmojiGrid:function()",
+            find: /\i\.\i\i\.getEmojiUnavailableReason/,
             replacement: {
-                match: /(\w+)=!\w+&&\w+.default.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
+                match: /(\w+)=!\w+&&\w+.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"
             },
             predicate: () => settings.store.emojiList,

@@ -65,15 +65,15 @@ export default definePlugin({
             }
         },
         {
-            find: "Messages.USER_PROFILE_MUTUAL_GUILDS_PLACEHOLDER).with",
+            find: /Messages\.USER_PROFILE_MUTUAL_GUILDS_PLACEHOLDER\)\.with\(0,\(\)=>\i\.\i\.Messages\.USER_PROFILE_NO_MUTUAL_SERVERS/,
             group: true,
             replacement: [
                 {
-                    match: /(user:(\i),.+?=\i,)(.+?)(\i\.push)(.+?UserProfileSections\.MUTUAL_GUILDS,text:.{0,250}}\)\)}\))/,
+                    match: /(user:(\i),.+?=\i,)(.+?)(\i\.push)(.+?\i\.MUTUAL_GUILDS,text:.{0,250}}\)\)}\))/,
                     replace: '$1vencordMutualGroupsTabLabel=$self.useGDMCount($2.id),$3$5,$4({section:"MUTUAL_GDMS",text:vencordMutualGroupsTabLabel})'
                 },
                 {
-                    match: /(?<=(\i)===\i\.UserProfileSections\.MUTUAL_GUILDS?.{0,150}\}\):)/,
+                    match: /(?<=(\i)===\i\.\i\i\.MUTUAL_GUILDS?.{0,150}\}\):)/,
                     replace: '$1==="MUTUAL_GDMS"?$self.renderMutualGDMs(arguments[0]):'
                 },
             ]

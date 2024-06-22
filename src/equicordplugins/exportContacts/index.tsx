@@ -62,8 +62,8 @@ export default definePlugin({
         {
             find: "fetchRelationships(){",
             replacement: {
-                match: /\.then\(e=>o\.default\.dispatch\({type:"LOAD_RELATIONSHIPS_SUCCESS",relationships:e\.body}\)/,
-                replace: ".then(e=>{o.default.dispatch({type:\"LOAD_RELATIONSHIPS_SUCCESS\",relationships:e.body}); $self.getContacts(e.body)}"
+                match: /\.then\(\i=>\i\.\i\.dispatch\({type:"LOAD_RELATIONSHIPS_SUCCESS",relationships:(\i\.body)}\);/,
+                replace: "$&$self.getContacts($2)}"
             }
         },
         {

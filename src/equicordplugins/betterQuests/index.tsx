@@ -9,8 +9,8 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { extractAndLoadChunksLazy, findByPropsLazy, findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { useEffect, useState } from "@webpack/common";
+import { extractAndLoadChunksLazy, findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { NavigationRouter, useEffect, useState } from "@webpack/common";
 
 
 const LinkButton = findExportedComponentLazy("LinkButton"); // let {route: e, selected: t, icon: n, iconClassName: a, interactiveClassName: s, text: r, children: o, locationState: d, onClick: f, className: p, role: m, "aria-posinset": C, "aria-setsize": g, ...E} = this.props;
@@ -20,7 +20,6 @@ const QuestsComponent = findComponentByCodeLazy(".questsContainer"); // No nesse
 const questsStore = findStoreLazy("QuestsStore");
 
 const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}Promise\.all\((\[\i\.\i\(".+?"\).+?\])\).then\(\i\.bind\(\i,"(.+?)"\)\).{0,50}"UserSettings"/);
-const nav: NavigationSettings = findByPropsLazy("transitionTo", "transitionToGuild", "getHistory");
 
 
 // Routes used in this plugin (in case someone wants to add new ones)
@@ -82,14 +81,10 @@ const QuestButtonComponent = () => {
 
 const redirectRoute = (ev: BeforeUnloadEvent) => {
     const paths = Array.from(routes.keys());
-    const path = nav.getHistory().location.pathname;
 
-    if (paths.includes(path)) {
-        const data = routes.get(path);
-        ev.preventDefault();
-        nav.transitionTo(data?.redirectTo ?? "/channels/@me");
-        setTimeout(() => window.location.reload(), 0);
-    }
+    ev.preventDefault();
+    NavigationRouter.transitionTo("/quests/@me");
+    setTimeout(() => window.location.reload(), 0);
 };
 
 export default definePlugin({
@@ -110,23 +105,23 @@ export default definePlugin({
 
     patches: [
         { // Add new quest button
-            find: "\"discord-shop\"",
+            find: "\"discord-shop\"),",
             replacement: {
                 match: /"discord-shop"\),/,
                 replace: "$&,$self.QuestButtonComponent(),"
             }
         },
         { // Add new route
-            find: "Routes.MESSAGE_REQUESTS,render:",
+            find: ".MESSAGE_REQUESTS,render:",
             replacement: {
-                match: /\((0,.{0,10}\.jsx\)\(.{0,10}\.default,){path:.{0,10}\.Routes\.MESSAGE_REQUESTS,.{0,100}?\),/,
+                match: /\((0,.{0,10}\.jsx\)\(.{0,10}\.\i,){path:.{0,10}\.\i\.MESSAGE_REQUESTS,.{0,100}?\),/,
                 replace: "$&...$self.routes.map(r => (($1r))),"
             }
         },
         {
             find: 'on("LAUNCH_APPLICATION"',
             replacement: {
-                match: /path:\[.{0,500}Routes\.MESSAGE_REQUESTS,/,
+                match: /path:\[.{0,500}\i\.MESSAGE_REQUESTS,/,
                 replace: "$&...$self.paths,"
             }
         }

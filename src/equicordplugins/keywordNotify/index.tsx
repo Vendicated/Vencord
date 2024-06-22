@@ -8,6 +8,7 @@ import "./style.css";
 
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
@@ -15,31 +16,32 @@ import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, SearchableSelect, SelectedChannelStore, TabBar, TextInput, UserStore, UserUtils, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, SearchableSelect, SelectedChannelStore, TabBar, TextInput, UserStore, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general/index.js";
 
 let keywordEntries: Array<{ regex: string, listIds: Array<string>, listType: ListType; }> = [];
 let currentUser: User;
 let keywordLog: Array<any> = [];
 
-const MenuHeader = findByCodeLazy(".useInDesktopNotificationCenterExperiment)()?");
-const Popout = findByCodeLazy("let{analyticsName:");
+const MenuHeader = findByCodeLazy(".sv)()?(0,");
+const Popout = findByCodeLazy(".loadingMore&&null==");
 const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
+const createMessageRecord = findByCodeLazy("THREAD_CREATED?[]:(0,");
 const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
 const KEYWORD_LOG_KEY = "KeywordNotify_log";
 
-const { createMessageRecord } = findByPropsLazy("createMessageRecord", "updateMessageRecord");
+const cl = classNameFactory("vc-keywordnotify-");
 
-async function addKeywordEntry(updater: () => void) {
+async function addKeywordEntry(forceUpdate: () => void) {
     keywordEntries.push({ regex: "", listIds: [], listType: ListType.BlackList });
     await DataStore.set(KEYWORD_ENTRIES_KEY, keywordEntries);
-    updater();
+    forceUpdate();
 }
 
-async function removeKeywordEntry(idx: number, updater: () => void) {
+async function removeKeywordEntry(idx: number, forceUpdate: () => void) {
     keywordEntries.splice(idx, 1);
     await DataStore.set(KEYWORD_ENTRIES_KEY, keywordEntries);
-    updater();
+    forceUpdate();
 }
 
 function safeMatchesRegex(s: string, r: string) {
@@ -49,7 +51,6 @@ function safeMatchesRegex(s: string, r: string) {
         return false;
     }
 }
-
 
 enum ListType {
     BlackList = "BlackList",
@@ -90,7 +91,7 @@ function Collapsible({ title, children }) {
                 onClick={() => setIsOpen(!isOpen)}
                 look={Button.Looks.BLANK}
                 size={Button.Sizes.ICON}
-                className="keywordnotify-collapsible">
+                className={cl("collapsible")}>
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <div style={{ marginLeft: "auto", color: "var(--text-muted)", paddingRight: "5px" }}>{isOpen ? "▼" : "▶"}</div>
                     <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
@@ -130,7 +131,7 @@ function ListedIds({ listIds, setListIds }) {
                     }}
                     look={Button.Looks.BLANK}
                     size={Button.Sizes.ICON}
-                    className="keywordnotify-delete">
+                    className={cl("delete")}>
                     <DeleteIcon />
                 </Button>
             </Flex>
@@ -200,18 +201,18 @@ function KeywordEntries() {
                             onClick={() => removeKeywordEntry(i, update)}
                             look={Button.Looks.BLANK}
                             size={Button.Sizes.ICON}
-                            className="keywordnotify-delete">
+                            className={cl("delete")}>
                             <DeleteIcon />
                         </Button>
                     </Flex>
-                    <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+                    <Forms.FormDivider className={[Margins.top8, Margins.bottom8].join(" ")} />
                     <Forms.FormTitle tag="h5">Whitelist/Blacklist</Forms.FormTitle>
                     <Flex flexDirection="row">
                         <div style={{ flexGrow: 1 }}>
                             <ListedIds listIds={values[i].listIds} setListIds={e => setListIds(i, e)} />
                         </div>
                     </Flex>
-                    <div className={Margins.top8 + " " + Margins.bottom8} />
+                    <div className={[Margins.top8, Margins.bottom8].join(" ")} />
                     <Flex flexDirection="row">
                         <Button onClick={() => {
                             values[i].listIds.push("");
@@ -254,7 +255,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "}_dispatch(",
+            find: "Dispatch.dispatch(...) called without an action type",
             replacement: {
                 match: /}_dispatch\((\i),\i\){/,
                 replace: "$&$1=$self.modify($1);"
@@ -268,9 +269,9 @@ export default definePlugin({
             }
         },
         {
-            find: "InboxTab.TODOS?(",
+            find: "location:\"RecentsPopout\"",
             replacement: {
-                match: /:\i&&(\i)===\i\.InboxTab\.TODOS.{1,50}setTab:(\i),onJump:(\i),closePopout:(\i)/,
+                match: /:(\i)===\i\.\i\.MENTIONS\?\(0,.+?setTab:(\i),onJump:(\i),badgeState:\i,closePopout:(\i)/,
                 replace: ": $1 === 5 ? $self.tryKeywordMenu($2, $3, $4) $&"
             }
         },
@@ -280,12 +281,19 @@ export default definePlugin({
                 match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
                 replace: "$self.renderMsg = $1; $&"
             }
+        },
+        {
+            find: ".guildFilter:null",
+            replacement: {
+                match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
+                replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
+            }
         }
     ],
 
     async start() {
         keywordEntries = await DataStore.get(KEYWORD_ENTRIES_KEY) ?? [];
-        currentUser = await UserUtils.getUser(UserStore.getCurrentUser().id);
+        currentUser = UserStore.getCurrentUser();
         this.onUpdate = () => null;
 
         (await DataStore.get(KEYWORD_LOG_KEY) ?? []).map(e => JSON.parse(e)).forEach(e => {
@@ -353,6 +361,10 @@ export default definePlugin({
         if (m == null || keywordLog.some(e => e.id === m.id))
             return;
 
+        DataStore.get(KEYWORD_LOG_KEY).then(log => {
+            DataStore.set(KEYWORD_LOG_KEY, [...log, JSON.stringify(m)]);
+        });
+
         const thing = createMessageRecord(m);
         keywordLog.push(thing);
         keywordLog.sort((a, b) => b.timestamp - a.timestamp);
@@ -363,6 +375,10 @@ export default definePlugin({
         this.onUpdate();
     },
 
+    deleteKeyword(id) {
+        keywordLog = keywordLog.filter(e => e.id !== id);
+        this.onUpdate();
+    },
 
     keywordTabBar() {
         return (
@@ -381,32 +397,22 @@ export default definePlugin({
 
         const [tempLogs, setKeywordLog] = useState(keywordLog);
         this.onUpdate = () => {
-            const newLog = [...keywordLog];
+            const newLog = Array.from(keywordLog);
             setKeywordLog(newLog);
-
-            DataStore.set(KEYWORD_LOG_KEY, newLog.map(e => JSON.stringify(e)));
-        };
-
-        const onDelete = m => {
-            keywordLog = keywordLog.filter(e => e.id !== m.id);
-            this.onUpdate();
         };
 
         const messageRender = (e, t) => {
-            console.log(this);
+            e._keyword = true;
+
+            e.customRenderedContent = {
+                content: highlightKeywords(e.content, keywordEntries.map(e => e.regex))
+            };
+
             const msg = this.renderMsg({
                 message: e,
                 gotoMessage: t,
                 dismissible: true
             });
-
-            if (msg == null)
-                return [null];
-
-            msg.props.children[0].props.children.props.onClick = () => onDelete(e);
-            msg.props.children[1].props.children[1].props.message.customRenderedContent = {
-                content: highlightKeywords(e.content, keywordEntries.map(e => e.regex))
-            };
 
             return [msg];
         };
@@ -420,7 +426,7 @@ export default definePlugin({
                     channel={channel}
                     onJump={onJump}
                     onFetch={() => null}
-                    onCloseMessage={onDelete}
+                    onCloseMessage={this.deleteKeyword}
                     loadMore={() => null}
                     messages={tempLogs}
                     renderEmptyState={() => null}

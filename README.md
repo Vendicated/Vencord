@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (61 additional plugins)</summary>
+<summary>Extra included plugins (59 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -32,7 +32,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
 - CleanChannelName by AutumnVN
-- ColorMessage by Kyuuhachi
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
 - DNDWhilePlaying by thororen
@@ -70,7 +69,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Search by JacobTm and thororen
 - SearchFix by Jaxx
 - Sekai Stickers by MaiKokain
-- ServerProfilesToolbox by D3SOX
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, thororen
