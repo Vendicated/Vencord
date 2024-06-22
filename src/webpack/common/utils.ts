@@ -20,7 +20,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../webpack";
+import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../api";
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {

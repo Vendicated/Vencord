@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByProps, mapMangledModule } from "../webpack";
+import { filters, findByProps, mapMangledModule } from "../api";
 import type * as t from "./types/menu";
 
 export const Menu = findByProps<t.Menu>("MenuItem", "MenuSliderControl");
