@@ -70,6 +70,8 @@ define(Function.prototype, "O", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(setterTimeout);
 
+                if (bundlePath !== "/assets/") return;
+
                 logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
             }
