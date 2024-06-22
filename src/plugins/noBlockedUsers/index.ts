@@ -65,7 +65,6 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu],
     settings,
     patches: [
-        // Based on canary 303229
         {
             // Hide blocked message groups from non-DM channels
             find: ".MESSAGE_GROUP_BLOCKED||",
