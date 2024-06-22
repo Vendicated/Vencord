@@ -68,7 +68,9 @@ function WebhookMessageModal(props: ModalProps) {
                     }
                     else {
                         Native.executeWebhook(params.url, {
-                            content: params.content
+                            webhookMessage: params.content,
+                            username: params.username,
+                            avatar_url: params.avatarUrl
                         });
                     }
 
