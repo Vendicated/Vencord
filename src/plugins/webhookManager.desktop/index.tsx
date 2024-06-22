@@ -8,12 +8,19 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { Button, Forms, React, Switch, TextInput, useState } from "@webpack/common";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 let url, message, username, avatarUrl = "";
 let jsonMode = false;
+
+const [params, setParams] = useState({ content: "", username: "", avatarUrl: "", url: "" });
+
+const onURL = (content: string) => setParams(prev => ({ ...prev, url }));
+const onContent = (content: string) => setParams(prev => ({ ...prev, content }));
+const onUsername = (username: string) => setParams(prev => ({ ...prev, username }));
+const onAvatar = (avatarUrl: string) => setParams(prev => ({ ...prev, avatarUrl }));
 
 // TODO: fix webhooks not sending, fix probable undefined when null issue, add sending as raw again (wanted to make it a checkbox but i cant find checkbox)
 function WebhookMessageModal(props: ModalProps) {
@@ -21,18 +28,15 @@ function WebhookMessageModal(props: ModalProps) {
         <ModalContent className="wm-send-webhook-content">
             <Forms.FormTitle className={Margins.top20}>Webhook URL</Forms.FormTitle>
             <TextInput
-                placeholder={"https://discord.com/api/webhooks/1235349630980722698/QQv06cMyTurEIU8nQsZRQMKxdmnnN6FA8Eaa9zbDqGwqeeACx9UAS6CcnVt7B3v8r8t2"}
-                onChange={v => {
-                    v = url;
-                    console.log(url); // why the FUCK is it undefined.
-                }}
+                placeholder={"Webhook URL"}
+                value={params.url}
+                onChange={onURL}
             />
             <Forms.FormTitle className={Margins.top20}>Webhook Message</Forms.FormTitle>
             <TextInput
-                placeholder={"Hello World!"}
-                onChange={v => {
-                    v = message;
-                }}
+                placeholder={"Content"}
+                value={params.content}
+                onChange={onContent}
             />
             <Switch
                 key="wm-raw"
@@ -44,24 +48,22 @@ function WebhookMessageModal(props: ModalProps) {
             >Send as Raw JSON</Switch>
             <Forms.FormTitle className={Margins.top20}>Webhook Username</Forms.FormTitle>
             <TextInput
-                placeholder={"byeoon"}
-                onChange={v => {
-                    v = username;
-                }}
+                placeholder={"Username"}
+                value={params.username}
+                onChange={onUsername}
             />
             <Forms.FormTitle className={Margins.top20}>Webhook Avatar URL</Forms.FormTitle>
             <TextInput
-                placeholder={"https://cdn.discordapp.com/emojis/1221015075922513990.png"}
-                onChange={v => {
-                    v = avatarUrl;
-                }}
+                placeholder={"Image URL"}
+                value={params.avatarUrl}
+                onChange={onAvatar}
             />
             <Button
                 onClick={() => {
-                    Native.executeWebhook(url, {
-                        content: message,
-                        username: username,
-                        avatar_url: avatarUrl
+                    Native.executeWebhook(params.url, {
+                        content: params.content,
+                        username: params.username,
+                        avatar_url: params.avatarUrl
                     });
                 }}
             >Send Webhook</Button>
