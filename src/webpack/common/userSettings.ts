@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line path-alias/no-relative
-import { find } from "../webpack";
+import { find } from "../api";
 
 export const UserSettingsActionCreators = {
     FrecencyUserSettingsActionCreators: find(m => m.ProtoClass?.typeName?.endsWith(".FrecencyUserSettings")),

@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, find, findByProps } from "../webpack";
+import { filters, find, findByProps } from "../api";
 
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;

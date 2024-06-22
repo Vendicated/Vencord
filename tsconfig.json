@@ -28,7 +28,7 @@
             "@shared/*": ["./shared/*"],
             "@webpack/types": ["./webpack/common/types"],
             "@webpack/common": ["./webpack/common"],
-            "@webpack": ["./webpack/webpack"]
+            "@webpack": ["./webpack/api"]
         },
 
         "plugins": [

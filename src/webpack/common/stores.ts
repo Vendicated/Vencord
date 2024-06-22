@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByCode, findByProps, findStore } from "../webpack";
+import { findByCode, findByProps, findStore } from "../api";
 import * as t from "./types/stores";
 
 export const Flux = findByProps<t.Flux>("connectStores");

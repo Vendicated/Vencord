@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { find, findByProps } from "../webpack";
+import { find, findByProps } from "../api";
 import * as t from "./types/classes";
 
 export const ModalImageClasses = find<t.ImageModalClasses>(m => m.image && m.modal && !m.applicationIcon);

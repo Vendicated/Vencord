@@ -788,6 +788,55 @@ export function extractAndLoadChunksLazy(code: string | string[], matcher: RegEx
     return extractAndLoadChunks;
 }
 
+/**
+ * Search modules by keyword. This searches the factory methods,
+ * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
+ *
+ * @param filters One or more strings or regexes
+ * @returns Mapping of found modules
+ */
+export function search(...filters: Array<string | RegExp>) {
+    const results = {} as Record<number, Function>;
+    const factories = wreq.m;
+    outer:
+    for (const id in factories) {
+        const factory = factories[id];
+        const factoryStr = String(factory);
+        for (const filter of filters) {
+            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
+            if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
+        }
+        results[id] = factory;
+    }
+
+    return results;
+}
+
+/**
+ * Extract a specific module by id into its own Source File. This has no effect on
+ * the code, it is only useful to be able to look at a specific module without having
+ * to view a massive file. extract then returns the extracted module so you can jump to it.
+ * As mentioned above, note that this extracted module is not actually used,
+ * so putting breakpoints or similar will have no effect.
+ *
+ * @param id The id of the module to extract
+ */
+export function extract(id: PropertyKey) {
+    const factory = wreq.m[id] as Function;
+    if (!factory) return;
+
+    const code = `
+// [EXTRACTED] WebpackModule${String(id)}
+// WARNING: This module was extracted to be more easily readable.
+//          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
+
+0,${String(factory)}
+//# sourceURL=ExtractedWebpackModule${String(id)}
+`;
+    const extracted = (0, eval)(code);
+    return extracted as Function;
+}
+
 function deprecatedRedirect<T extends (...args: any[]) => any>(oldMethod: string, newMethod: string, redirect: T): T {
     return ((...args: Parameters<T>) => {
         logger.warn(`Method ${oldMethod} is deprecated. Use ${newMethod} instead. For more information read https://github.com/Vendicated/Vencord/pull/2409#issue-2277161516`);
@@ -914,52 +963,3 @@ export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFin
  * @returns string or null
  */
 export const findModuleId = deprecatedRedirect("findModuleId", "cacheFindModuleId", cacheFindModuleId);
-
-/**
- * Search modules by keyword. This searches the factory methods,
- * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
- *
- * @param filters One or more strings or regexes
- * @returns Mapping of found modules
- */
-export function search(...filters: Array<string | RegExp>) {
-    const results = {} as Record<number, Function>;
-    const factories = wreq.m;
-    outer:
-    for (const id in factories) {
-        const factory = factories[id];
-        const factoryStr = String(factory);
-        for (const filter of filters) {
-            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
-            if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
-        }
-        results[id] = factory;
-    }
-
-    return results;
-}
-
-/**
- * Extract a specific module by id into its own Source File. This has no effect on
- * the code, it is only useful to be able to look at a specific module without having
- * to view a massive file. extract then returns the extracted module so you can jump to it.
- * As mentioned above, note that this extracted module is not actually used,
- * so putting breakpoints or similar will have no effect.
- *
- * @param id The id of the module to extract
- */
-export function extract(id: PropertyKey) {
-    const factory = wreq.m[id] as Function;
-    if (!factory) return;
-
-    const code = `
-// [EXTRACTED] WebpackModule${String(id)}
-// WARNING: This module was extracted to be more easily readable.
-//          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
-
-0,${String(factory)}
-//# sourceURL=ExtractedWebpackModule${String(id)}
-`;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
-}
