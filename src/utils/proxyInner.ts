@@ -77,10 +77,13 @@ export function proxyInner<T = AnyObject>(
             }
 
             // If we're still in the same tick, it means the proxy was immediately used.
-            // thus, we proxy the get access to make things like destructuring work as expected
-            // meow here will also be a proxy
-            // `const { meow } = findByProps("meow");`
-            if (!isChild && isSameTick) {
+            // And, if the inner value is still nullish, it means the proxy was used before setInnerValue was called.
+            // So, proxy the get access to make things like destructuring work as expected.
+            // We dont need to proxy if the inner value is available, and recursiveSetInnerValue won't ever be called anyways,
+            // because the top setInnerValue was called before we proxied the get access
+            // example here will also be a proxy:
+            // `const { example } = findByProps("example");`
+            if (isSameTick && proxyDummy[SYM_PROXY_INNER_VALUE] == null && !isChild) {
                 const [recursiveProxy, recursiveSetInnerValue] = proxyInner(errMsg, primitiveErrMsg, true);
 
                 recursiveSetInnerValues.push((innerValue: T) => {
@@ -109,7 +112,9 @@ export function proxyInner<T = AnyObject>(
         proxyDummy[SYM_PROXY_INNER_VALUE] = innerValue;
         recursiveSetInnerValues.forEach(setInnerValue => setInnerValue(innerValue));
 
-        if (typeof innerValue === "function") {
+        // Avoid binding toString if the inner value is null.
+        // This can happen if we are setting the inner value as another instance of proxyInner, which will cause that proxy to instantly evaluate and throw an error
+        if (typeof innerValue === "function" && innerValue[SYM_PROXY_INNER_GET] == null) {
             proxy.toString = innerValue.toString.bind(innerValue);
         }
     }
