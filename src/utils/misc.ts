@@ -91,7 +91,7 @@ export function identity<T>(value: T) {
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
 
-export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const isPluginDev = (id?: string | null) => id != null && Object.hasOwn(DevsById, id);
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;

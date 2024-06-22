@@ -8,6 +8,7 @@ import "./LinkIconButton.css";
 
 import { getTheme, Theme } from "@utils/discord";
 import { MaskedLink, Tooltip } from "@webpack/common";
+import type { ComponentType } from "react";
 
 const WebsiteIconDark = "/assets/e1e96d89e192de1997f73730db26e94f.svg";
 const WebsiteIconLight = "/assets/730f58bcfd5a57a5e22460c445a0c6cf.svg";
@@ -29,17 +30,15 @@ interface Props {
     href: string;
 }
 
-function LinkIcon({ text, href, Icon }: Props & { Icon: React.ComponentType; }) {
-    return (
-        <Tooltip text={text}>
-            {props => (
-                <MaskedLink {...props} href={href}>
-                    <Icon />
-                </MaskedLink>
-            )}
-        </Tooltip>
-    );
-}
+const LinkIcon = ({ text, href, Icon }: Props & { Icon: ComponentType; }) => (
+    <Tooltip text={text}>
+        {props => (
+            <MaskedLink {...props} href={href}>
+                <Icon />
+            </MaskedLink>
+        )}
+    </Tooltip>
+);
 
 export const WebsiteButton = (props: Props) => <LinkIcon {...props} Icon={WebsiteIcon} />;
 export const GithubButton = (props: Props) => <LinkIcon {...props} Icon={GithubIcon} />;

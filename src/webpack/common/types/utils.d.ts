@@ -18,7 +18,7 @@
 
 import type { GuildMember, GuildRecord, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
-import { LiteralUnion } from "type-fest";
+import type { LiteralUnion } from "type-fest";
 
 export type MarkupUtils = Record<
     | "parse"
@@ -167,8 +167,12 @@ export interface BrowserWindowFeatures {
     backgroundColor?: string;
 }
 
-export interface PopoutActions {
-    open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
-    close(key: string): void;
-    setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
+export interface PopoutWindowActionCreators {
+    close: (key: string) => Promise<void>;
+    open: (
+        key: string,
+        render: (windowKey: string) => ReactNode,
+        features?: BrowserWindowFeatures
+    ) => Promise<void>;
+    setAlwaysOnTop: (key: string, alwaysOnTop: boolean) => Promise<void>;
 }

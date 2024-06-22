@@ -173,7 +173,7 @@ export function subscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeo
                 try {
                     // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
                     const res = handler.apply(plugin, arguments as any);
-                    // @ts-ignore
+                    // @ts-expect-error
                     return res instanceof Promise
                         ? res.catch(e => { logger.error(`${plugin.name}: Error while handling ${action}\n`, e); })
                         : res;

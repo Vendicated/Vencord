@@ -46,7 +46,7 @@ interface UserSettingDefinition<T> {
 export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"');
     if (modId == null) {
-        new Logger("UserSettingsAPI ").error("Didn't find settings module.");
+        new Logger("UserSettingsAPI").error("Didn't find settings module.");
         return;
     }
 
