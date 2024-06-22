@@ -19,24 +19,14 @@
 import { DataStore } from "@api/index";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
+import { DeleteIcon } from "@components/Icons";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { Margins } from "@utils/margins";
-import {
-    ModalCloseButton,
-    ModalContent, ModalFooter,
-    ModalHeader,
-    ModalProps,
-    ModalRoot,
-    openModal
-} from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Forms, PermissionStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { Member, PKAPI, System } from "pkapi.js";
+import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
 
 import pluralKit from "./index";
 
@@ -44,19 +34,11 @@ function isPk(msg: Message) {
     return (msg && msg.applicationId === "466378653216014359");
 }
 
-function isLocalPk(msg: Message) {
-    if (!isPk(msg)) return false;
-    const author = getAuthorOfMessage(msg);
-    return localSystem.map(a => a.member.id).includes(author.member.id);
-}
-
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
         <path fill={"currentColor"} d={"m13.96 5.46 4.58 4.58a1 1 0 0 0 1.42 0l1.38-1.38a2 2 0 0 0 0-2.82l-3.18-3.18a2 2 0 0 0-2.82 0l-1.38 1.38a1 1 0 0 0 0 1.42ZM2.11 20.16l.73-4.22a3 3 0 0 1 .83-1.61l7.87-7.87a1 1 0 0 1 1.42 0l4.58 4.58a1 1 0 0 1 0 1.42l-7.87 7.87a3 3 0 0 1-1.6.83l-4.23.73a1.5 1.5 0 0 1-1.73-1.73Z"}></path>
     </svg>;
 };
-
-const cl = classNameFactory("vc-pluralkit-");
 
 const settings = definePluginSettings({
     colorNames: {
@@ -83,11 +65,11 @@ interface Author {
     messageIds: string[];
     member: Member;
     system: System;
+    guildSettings?: Map<string, MemberGuildSettings>;
+    systemSettings?: Map<string, SystemGuildSettings>;
 }
 
 let authors: Record<string, Author> = {};
-
-const localSystem: Author[] = [];
 
 const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
@@ -102,7 +84,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".useCanSeeRemixBadge)",
+            find: '?"@":"")',
             replacement: {
                 match: /(?<=onContextMenu:\i,children:).*?\)}/,
                 replace: "$self.renderUsername(arguments[0])}"
@@ -110,7 +92,7 @@ export default definePlugin({
         },
     ],
 
-    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => useAwaiter(async () => {
+    renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => {
         const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
         try {
             const discordUsername = author.nick??author.displayName??author.username;
@@ -124,29 +106,32 @@ export default definePlugin({
                 color = authorOfMessage.member.color??color;
             }
             const member: Member = authorOfMessage?.member as Member;
-            const systemSettings = await (authorOfMessage?.system as System).getGuildSettings(message.guild_id);
+            const memberSettings = authorOfMessage?.guildSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
+            const systemSettings = authorOfMessage?.systemSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
+
+            const name = memberSettings?.display_name??member.display_name??member.name;
+            const pronouns = settings.store.displayMemberPronouns&&member.pronouns?` | (${authorOfMessage.member.pronouns})`:undefined;
+            const tag = systemSettings? systemSettings.tag?systemSettings.tag:authorOfMessage.system.tag??undefined:undefined;
+            const id = settings.store.displayMemberId?` (${member.id})`:undefined;
+
 
             return <span style={{
                 color: `#${color}`,
-            }}>{prefix}{member.display_name??member.name}{settings.store.displayMemberPronouns&&authorOfMessage.member.pronouns?` | (${authorOfMessage.member.pronouns})`:""}{systemSettings.tag??authorOfMessage.system?.tag??""}{settings.store.displayMemberId?` (${member.id})`:""}</span>;
+            }}>{prefix}{name}{pronouns}{tag}{id}</span>;
         } catch {
             return <>{prefix}{author?.nick}</>;
         }
-    }),
+    },
 
     api: new PKAPI({
     }),
 
     async start() {
         authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) || {};
-        while (localSystem.length === 0) {
-            // pause
-            await new Promise(r => setTimeout(r, 1000));
-        }
-        console.log(localSystem);
+
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            if (!isLocalPk(msg)) return null;
+            if (!isPk(msg)) return null;
 
             return {
                 label: "Edit",
@@ -162,7 +147,7 @@ export default definePlugin({
 
         addButton("pk-delete", msg => {
             if (!msg) return null;
-            if (!isLocalPk(msg)) return null;
+            if (!isPk(msg)) return null;
 
             return {
                 label: "Delete",
@@ -175,35 +160,11 @@ export default definePlugin({
                 onContextMenu: _ => {}
             };
         });
-
-        addButton("pk-view-profile", msg => {
-            if (!msg) return null;
-            if (!isPk(msg)) return null;
-
-            return {
-                icon: () => {
-                    return <PlusIcon/>;
-                },
-                label: "View Profile",
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => openProfile(msg)
-            };
-
-        });
     },
     stop() {
         removeButton("pk-edit");
     },
 });
-
-async function openProfile(message: Message) {
-    const author = getAuthorOfMessage(message);
-    const id = author.member?.id??"n/a";
-    openModal(modalProps => {
-        return <UserPopoutModal author={author} modalProps={modalProps}/>;
-    });
-}
 
 function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, content?: string | undefined) {
     FluxDispatcher.dispatch({
@@ -219,23 +180,15 @@ function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, co
 }
 
 function deleteMessage(msg: Message) {
-    if (PermissionStore.can("MANAGE_MESSAGES", msg.channel_id)) {
-        FluxDispatcher.dispatch({
-            type: "MESSAGE_DELETE",
-            channelId: msg.channel_id,
-            message: msg.id
-        });
-    } else {
-        ReactionManager.addReaction(
-            msg.channel_id,
-            msg.id,
-            {
-                id: undefined,
-                name: "❌",
-                animated: false
-            }
-        );
-    }
+    ReactionManager.addReaction(
+        msg.channel_id,
+        msg.id,
+        {
+            id: undefined,
+            name: "❌",
+            animated: false
+        }
+    );
 }
 
 function generateAuthorData(message: Message) {
@@ -252,7 +205,15 @@ function getAuthorOfMessage(message: Message) {
         if (!(msg.member instanceof Member)) {
             pluralKit.api.getMember({ member: msg.member??"n/a" }).then(m => {
                 authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: m, system: msg.system as System });
+                authors[generateAuthorData(message)].member.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+                    authors[generateAuthorData(message)].guildSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
+                });
             });
+            if (msg.system instanceof System) {
+                msg.system.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+                    authors[generateAuthorData(message)].systemSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
+                });
+            }
         }
         const mem = msg.member as Member;
         // @ts-ignore
@@ -262,77 +223,3 @@ function getAuthorOfMessage(message: Message) {
     DataStore.set(DATASTORE_KEY, authors);
     return authors[generateAuthorData(message)];
 }
-
-async function generateLocalSystemData() {
-    let author: Author|undefined = undefined;
-    const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
-    for (const [s, m] of system.members??[]) {
-        author = {
-            messageIds: [],
-            member: m,
-            system: system
-        };
-        localSystem.push(author);
-    }
-}
-
-
-function UserPopoutModal({ author, modalProps }: { author: Author, modalProps: ModalProps; }) {
-    const { member, system } = author;
-
-    if (!member || !system) {
-        return UnknownUser(modalProps);
-    }
-
-    return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormSection>
-                    <img className={cl("banner")} src={member.banner ?? system.banner ?? ""} alt={"Banner"} height={120}
-                        width={340}/>
-                </Forms.FormSection>
-                <img className={cl("avatar")} src={member.avatar_url ?? system.avatar_url ?? ""} alt="Avatar"
-                    height={128} width={128} style={
-                        {
-                            borderRadius: "50%",
-                            border: "1px solid var(--background-modifier-accent)"
-                        }
-                    }/>
-            </ModalHeader>
-
-            <ModalContent className={cl("modal-content")}>
-                <Forms.FormTitle tag="h3">
-                    {member.display_name}
-                </Forms.FormTitle>
-                <Forms.FormText>{member.name}</Forms.FormText>
-            </ModalContent>
-            <ModalFooter>
-                <Forms.FormTitle tag="h3">
-                    {system.name}
-                </Forms.FormTitle>
-                <Forms.FormText>{system.tag}</Forms.FormText>
-            </ModalFooter>
-        </ModalRoot>
-    );
-}
-
-
-const UnknownUser = (modalProps: ModalProps) => {
-    return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
-                    User not found
-                </Forms.FormTitle>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-            <ModalContent className={cl("modal-content")}>
-                <section className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">
-                        The user you're trying to view doesn't exist.
-                    </Forms.FormTitle>
-                </section>
-            </ModalContent>
-        </ModalRoot>
-    );
-};
