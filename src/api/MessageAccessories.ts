@@ -62,7 +62,7 @@ export function _modifyAccessories(
                     : accessory.position
                 : elements.length,
             0,
-            ...accessories.filter(e => e != null) as JSX.Element[]
+            ...accessories.filter(e => e != null)
         );
     }
 

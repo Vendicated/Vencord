@@ -217,7 +217,7 @@ export default function PluginSettings() {
             if (deps) {
                 for (const dep of deps) {
                     o[dep] ??= [];
-                    o[dep]!.push(plugin);
+                    o[dep].push(plugin);
                 }
             }
         }

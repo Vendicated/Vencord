@@ -36,7 +36,8 @@ export declare abstract class FluxPersistedStore<
         migrations?: FluxPersistedStoreMigrations<[...OldStates, NewestState]> | Nullish
     ): { requiresPersist: boolean; state: NewestState; } | { requiresPersist: false; state: undefined; };
     static migrations: ((oldState: any) => unknown)[] | undefined;
-    static persistKey: string; // abstract
+    /** Not present on FluxPersistedStore's constructor. */
+    static persistKey: string;
     static shouldClear(options: FluxPersistedStoreClearOptions, persistKey: string): boolean;
     static throttleDelay: number;
     static userAgnosticPersistKeys: Set<string>;

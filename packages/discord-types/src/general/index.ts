@@ -16,6 +16,7 @@ export * from "./Frecency";
 export * from "./GuildMember";
 export * from "./GuildMemberProfile";
 export * from "./GuildRecord";
+export * from "./i18n";
 export * from "./ImmutableRecord";
 export * from "./messages";
 export * from "./misc";

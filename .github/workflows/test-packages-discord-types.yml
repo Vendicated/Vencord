@@ -19,7 +19,7 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: ^20.11.0
-                  cache: "pnpm"
+                  cache: pnpm
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
@@ -30,4 +30,4 @@ jobs:
                   pnpm test
 
             - name: Check if packages/discord-types is compatible with Vencord
-              run: "pnpm testTsc"
+              run: pnpm testTsc

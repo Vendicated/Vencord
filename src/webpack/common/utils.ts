@@ -17,7 +17,7 @@
 */
 
 import { canonicalizeMatch } from "@utils/patches";
-import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, UserRecord } from "@vencord/discord-types";
+import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, FormattedMessage as $FormattedMessage, I18N, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -129,9 +129,11 @@ export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-las
     openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
 });
 
+export const FormattedMessage: typeof $FormattedMessage = findByCodeLazy('(this,"intlMessage",');
+
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
-export const i18n: t.I18N = findLazy(m => m.Messages?.["en-US"]);
+export const i18n: I18N = findLazy(m => m.Messages?.["en-US"]);
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 

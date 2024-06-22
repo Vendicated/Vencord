@@ -25,7 +25,7 @@ export declare class FluxActionLog<Action extends FluxAction = FluxAction> {
 }
 
 export interface FluxActionLogTrace {
-    /** Name of a store. */
+    /** Store name */
     name: string;
     time: number;
 }

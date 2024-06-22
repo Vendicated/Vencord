@@ -32,3 +32,11 @@ export type Optional<T extends object, Value = undefined, Keys extends keyof T =
     = ExcludeKeys extends true
         ? Pick<T, Keys> & { [Key in Exclude<keyof T, Keys>]?: T[Key] | Value; }
         : { [Key in Keys]?: T[Key] | Value; };
+
+type StringablePrimitive = string | bigint | number | boolean | null | undefined;
+
+/** @internal */
+export type Stringable
+    = { [Symbol.toPrimitive]: (hint: "default" | "string") => StringablePrimitive; }
+    | ({ toString: () => StringablePrimitive; } | { valueOf: () => StringablePrimitive; })
+    & { [Symbol.toPrimitive]?: Nullish; };

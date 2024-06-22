@@ -96,7 +96,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
 
                 for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
                     csp[directive] ??= [];
-                    csp[directive]!.push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
+                    csp[directive].push("*", "blob:", "data:", "vencord:", "'unsafe-inline'");
                 }
 
                 // TODO: Restrict this to only imported packages with fixed version.

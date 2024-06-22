@@ -24,6 +24,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import type { ReactNode } from "react";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
@@ -71,7 +72,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     const typingUsersArray = Object.keys(typingUsers)
         .filter(id => id !== meId && !(RelationshipStore.isBlocked(id) || !settings.store.includeBlockedUsers));
 
-    let tooltipText: string;
+    let tooltipText: ReactNode;
 
     switch (typingUsersArray.length) {
         case 0: break;
@@ -110,7 +111,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
 
     if (typingUsersArray.length > 0) {
         return (
-            <Tooltip text={tooltipText!}>
+            <Tooltip text={tooltipText}>
                 {props => (
                     <div className="vc-typing-indicator" {...props}>
                         {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (

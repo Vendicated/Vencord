@@ -789,28 +789,28 @@ export default definePlugin({
     start() {
         const s = settings.store;
 
-        if (!s.enableEmojiBypass && !s.enableStickerBypass) {
+        if (!s.enableEmojiBypass && !s.enableStickerBypass)
             return;
-        }
 
-        function getWordBoundary(origStr: string, offset: number) {
-            return (!origStr[offset] || /\s/.test(origStr[offset]!)) ? "" : " ";
-        }
+        const getWordBoundary = (origStr: string, offset: number) =>
+            (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
 
-        function cannotEmbedNotice() {
-            return new Promise<boolean>(resolve => {
+        const cannotEmbedNotice = () =>
+            new Promise<boolean>(resolve => {
                 AlertActionCreators.show({
                     title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
-                            however you do not have permissions to embed links in the current channel.
-                            Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
-                        </Forms.FormText>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
-                            You can disable this notice in the plugin settings.
-                        </Forms.FormText>
-                    </div>,
+                    body: (
+                        <div>
+                            <Forms.FormText>
+                                You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                                however you do not have permissions to embed links in the current channel.
+                                Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
+                            </Forms.FormText>
+                            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                                You can disable this notice in the plugin settings.
+                            </Forms.FormText>
+                        </div>
+                    ),
                     confirmText: "Send Anyway",
                     cancelText: "Cancel",
                     secondaryConfirmText: "Do not show again",
@@ -822,7 +822,6 @@ export default definePlugin({
                     }
                 });
             });
-        }
 
         this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;

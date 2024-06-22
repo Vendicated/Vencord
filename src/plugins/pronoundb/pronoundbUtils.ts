@@ -50,7 +50,7 @@ const bulkFetch = debounce(async () => {
     const pronouns = await bulkFetchPronouns(ids);
     for (const id of ids) {
         // Call all callbacks for the id
-        requestQueue[id]?.forEach(c => { c(pronouns[id] ? extractPronouns(pronouns[id]!.sets) : ""); });
+        requestQueue[id]?.forEach(c => { c(pronouns[id] ? extractPronouns(pronouns[id].sets) : ""); });
         delete requestQueue[id];
     }
 });
@@ -98,7 +98,7 @@ const NewLineRe = /\n+/g;
 
 // Gets the cached pronouns, if you're too impatient for a promise!
 export function getCachedPronouns(id: string): string | null {
-    const cached = cache[id] ? extractPronouns(cache[id]!.sets) : undefined;
+    const cached = cache[id] ? extractPronouns(cache[id].sets) : undefined;
 
     if (cached && cached !== PronounMapping.unspecified) return cached;
 

@@ -45,7 +45,7 @@ export declare class FluxActionHandlersGraph {
 export interface FluxActionHandlersGraphNode {
     actionHandler: Partial<FluxActionHandlerMap>;
     band: FluxDispatchBand;
-    /** Name of a store. */
+    /** Store name */
     name: string;
     storeDidChange: FluxActionHandler;
 }
@@ -62,7 +62,7 @@ export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
 
 export type FluxOrderedActionHandlers<Action extends FluxAction = FluxAction> = {
     actionHandler: FluxActionHandler<Action>;
-    /** Name of a store. */
+    /** Store name */
     name: string;
     storeDidChange: FluxActionHandler<Action>;
 }[];

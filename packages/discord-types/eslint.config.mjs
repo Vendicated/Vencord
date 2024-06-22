@@ -152,6 +152,7 @@ export default tseslint.config(
         files: ["src/**/*"],
         rules: {
             "@typescript-eslint/prefer-enum-initializers": "error",
+            // Disallow .d.ts files so that package consumers can use exported enums
             "check-file/filename-blocklist": ["error", { "!**/!(*.d).ts": "!(*.d).ts" }],
             "headers/header-format": ["error", {
                 source: "string",
@@ -173,11 +174,22 @@ export default tseslint.config(
                 includeTypes: true
             }],
             "import/no-unassigned-import": "error",
-            "no-restricted-globals": ["error", "_", "JSX", "React"],
+            "no-restricted-globals": ["error", "_", "IntlMessageFormat", "JSX", "React", "SimpleMarkdown"],
             "no-restricted-syntax": [
                 "error",
-                ":expression:not([declare=true] *, [type=/^TS/] *, ExportAllDeclaration *, ImportDeclaration *)",
-                "ObjectPattern.params",
+                `:expression:not(${[
+                    // Allow ambient classes
+                    "[declare=true] *",
+                    // Allow enums, interfaces, and type aliases
+                    "[type=/^TS/] *",
+                    // Allow re-exporting of all named exports
+                    "ExportAllDeclaration *",
+                    // Allow imports
+                    "ImportDeclaration *",
+                ].join(", ")})`,
+                // Prefer naming function parameters instead of destructuring them
+                ":matches(ArrayPattern, ObjectPattern).params",
+                // Disallow enums that are const or ambient since package consumers cannot use them
                 "TSEnumDeclaration:matches([const=true], [declare=true])",
             ],
         }
