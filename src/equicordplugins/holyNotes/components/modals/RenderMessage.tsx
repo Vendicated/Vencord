@@ -6,7 +6,7 @@
 
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
-import { findByCode, findByProps } from "@webpack";
+import { findByCode, findByCodeLazy, findByProps, findComponentByCodeLazy } from "@webpack";
 import { Clipboard, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
 import noteHandler from "../../NoteHandler";
@@ -26,11 +26,11 @@ export const RenderMessage = ({
     fromDeleteModal: boolean;
     closeModal?: () => void;
 }) => {
-    const ChannelMessage = findByProps("ThreadStarterChatMessage").default;
+    const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
     const { message, groupStart, cozyMessage } = findByProps("cozyMessage");
     const User = findByCode("isClyde(){");
     const Message = findByCode("isEdited(){");
-    const Channel = findByProps("ChannelRecordBase").ChannelRecordBase;
+    const Channel = findByCodeLazy("computeLurkerPermissionsAllowList");
 
     const [isHoldingDelete, setHoldingDelete] = React.useState(false);
 
