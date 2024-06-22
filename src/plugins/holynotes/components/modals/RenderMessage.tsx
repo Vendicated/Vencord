@@ -26,13 +26,10 @@ export const RenderMessage = ({
     fromDeleteModal: boolean;
     closeModal?: () => void;
 }) => {
-    // Bad
     const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
     const { message, groupStart, cozyMessage } = findByProps("cozyMessage");
     const User = findByCode("isClyde(){");
     const Message = findByCode("isEdited(){");
-
-    // Bad
     const Channel = findByCodeLazy("computeLurkerPermissionsAllowList");
 
     const [isHoldingDelete, setHoldingDelete] = React.useState(false);
