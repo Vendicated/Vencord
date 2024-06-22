@@ -83,9 +83,7 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
-    // Define the function in an object to preserve the name after minification
-    const proxyDummy = ({ ProxyDummy() { } }).ProxyDummy;
-    Object.assign(proxyDummy, {
+    const proxyDummy = Object.assign(function () { }, {
         [SYM_LAZY_GET]() {
             if (!proxyDummy[SYM_LAZY_CACHED]) {
                 if (!get.$$vencordLazyFailed()) {
