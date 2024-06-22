@@ -144,8 +144,6 @@ export default new (class NoteHandler {
 
         const User = findByCode("tag", "isClyde");
 
-
-
         for (const notebook in notebooks)
             for (const noteId in notebooks[notebook]) {
                 const note = notebooks[notebook][noteId];
@@ -211,4 +209,3 @@ export default new (class NoteHandler {
 
     };
 });
-

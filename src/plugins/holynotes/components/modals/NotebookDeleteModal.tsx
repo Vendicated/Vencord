@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, React, Text } from "@webpack/common";
 
-import noteHandler from "../../noteHandler";
+import noteHandler from "../../NoteHandler";
 import Error from "./Error";
 import { RenderMessage } from "./RenderMessage";
 

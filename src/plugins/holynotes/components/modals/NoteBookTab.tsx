@@ -5,7 +5,7 @@
  */
 
 import { classes } from "@utils/misc";
-import { findByProps } from "@webpack";
+import { findByCode } from "@webpack";
 import { Button, Clickable, Menu, Popout, React } from "@webpack/common";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
@@ -20,8 +20,11 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
     const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
     const [show, setShow] = React.useState(false);
 
-    const { isNotNullish } = findByProps("isNotNullish");
-    const { overflowIcon } = findByProps("overflowIcon");
+    function isNotNullish(value) {
+        return value !== null && value !== undefined;
+    }
+
+    const { overflowIcon } = findByCode("overflowIcon");
 
     const handleResize = React.useCallback(() => {
         if (!tabBarRef.current) return;
