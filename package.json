@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.8.6",
+    "version": "1.9.1",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -20,7 +20,11 @@
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
+        "buildWebStandalone": "pnpm buildWeb --standalone",
+        "buildReporter": "pnpm buildWebStandalone --reporter --skip-extension",
+        "buildReporterDesktop": "pnpm build --reporter",
         "watch": "pnpm build --watch",
+        "watchWeb": "pnpm buildWeb --watch",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types",
         "inject": "node scripts/runInstaller.mjs",
@@ -39,7 +43,7 @@
         "eslint-plugin-simple-header": "^1.0.2",
         "fflate": "^0.7.4",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
-        "monaco-editor": "^0.43.0",
+        "monaco-editor": "^0.50.0",
         "nanoid": "^4.0.2",
         "virtual-merge": "^1.0.1"
     },
@@ -103,6 +107,6 @@
     },
     "engines": {
         "node": ">=18",
-        "pnpm": ">=8"
+        "pnpm": ">=9"
     }
 }

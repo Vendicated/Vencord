@@ -48,10 +48,10 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "showTaglessAccountPanel:",
+            find: '"AccountConnected"',
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?showTaglessAccountPanel:)/,
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
@@ -61,7 +61,7 @@ export default definePlugin({
             replacement: [{
                 // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
-                replace: "post:$1.bind(null,$2.post),$&"
+                replace: "post:$1.bind(null,$2.post),vcSpotifyMarker:1,$&"
             },
             {
                 // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
@@ -76,6 +76,13 @@ export default definePlugin({
             replacement: {
                 match: /repeat:"off"!==(.{1,3}),/,
                 replace: "actual_repeat:$1,$&"
+            }
+        },
+        {
+            find: "artists.filter",
+            replacement: {
+                match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
+                replace: ""
             }
         }
     ],
