@@ -34,8 +34,9 @@ const handler: ProxyHandler<any> = {
         return keys;
     },
     getOwnPropertyDescriptor: (target, p) => {
-        if (typeof p === "string" && unconfigurable.includes(p))
+        if (typeof p === "string" && unconfigurable.includes(p)) {
             return Reflect.getOwnPropertyDescriptor(target, p);
+        }
 
         const descriptor = Reflect.getOwnPropertyDescriptor(target[SYM_PROXY_INNER_GET](), p);
         if (descriptor) Object.defineProperty(target, p, descriptor);
