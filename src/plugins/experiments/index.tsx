@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
@@ -25,12 +26,14 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
-const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
+import hideBugReport from "./hideBugReport.css?managed";
+
+const KbdStyles = findByPropsLazy("key", "combo");
 
 const settings = definePluginSettings({
-    enableIsStaff: {
-        description: "Enable isStaff",
+    toolbarDevMenu: {
         type: OptionType.BOOLEAN,
+        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
         default: false,
         restartNeeded: true
     }
@@ -38,7 +41,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Experiments",
-    description: "Enable Access to Experiments in Discord!",
+    description: "Enable Access to Experiments & other dev-only features in Discord!",
     authors: [
         Devs.Megu,
         Devs.Ven,
@@ -46,6 +49,7 @@ export default definePlugin({
         Devs.BanTheNons,
         Devs.Nuckyz
     ],
+
     settings,
 
     patches: [
@@ -64,27 +68,34 @@ export default definePlugin({
             }
         },
         {
-            find: ".isStaff=()",
-            predicate: () => settings.store.enableIsStaff,
-            replacement: [
-                {
-                    match: /=>*?(\i)\.hasFlag\((\i\.\i)\.STAFF\)}/,
-                    replace: (_, user, flags) => `=>Vencord.Webpack.Common.UserStore.getCurrentUser()?.id===${user}.id||${user}.hasFlag(${flags}.STAFF)}`
-                },
-                {
-                    match: /hasFreePremium\(\){return this.isStaff\(\)\s*?\|\|/,
-                    replace: "hasFreePremium(){return ",
-                }
-            ]
-        },
-        {
             find: 'H1,title:"Experiments"',
             replacement: {
                 match: 'title:"Experiments",children:[',
                 replace: "$&$self.WarningCard(),"
             }
+        },
+        // change top right chat toolbar button from the help one to the dev one
+        {
+            find: "toolbar:function",
+            replacement: {
+                match: /\i\.isStaff\(\)/,
+                replace: "true"
+            },
+            predicate: () => settings.store.toolbarDevMenu
+        },
+
+        // makes the Favourites Server experiment allow favouriting DMs and threads
+        {
+            find: "useCanFavoriteChannel",
+            replacement: {
+                match: /!\(\i\.isDM\(\)\|\|\i\.isThread\(\)\)/,
+                replace: "true",
+            }
         }
     ],
+
+    start: () => enableStyle(hideBugReport),
+    stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
         const isMacOS = navigator.platform.includes("Mac");
@@ -94,14 +105,12 @@ export default definePlugin({
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
-                    You can enable client DevTools{" "}
-                    <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>O</kbd>{" "}
-                    after enabling <code>isStaff</code> below
-                </Forms.FormText>
-                <Forms.FormText>
-                    and then toggling <code>Enable DevTools</code> in the <code>Developer Options</code> tab in settings.
+                    You can open Discord's DevTools via {" "}
+                    <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
+                        <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>O</kbd>{" "}
+                    </div>
                 </Forms.FormText>
             </React.Fragment>
         );
@@ -117,6 +126,12 @@ export default definePlugin({
 
             <Forms.FormText className={Margins.top8}>
                 Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
+
+                If you don't know what an experiment does, ignore it. Do not ask us what experiments do either, we probably don't know.
+            </Forms.FormText>
+
+            <Forms.FormText className={Margins.top8}>
+                No, you cannot use server-side features like checking the "Send to Client" box.
             </Forms.FormText>
         </ErrorCard>
     ), { noop: true })

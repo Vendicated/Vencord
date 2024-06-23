@@ -40,8 +40,15 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the voice chat user list",
         restartNeeded: true
+    },
+    reactorsList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the reactors list",
+        restartNeeded: true
     }
 });
+
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -50,7 +57,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: "CLYDE_AI_MENTION_COLOR:null,",
+            find: 'location:"UserMention',
             replacement: [
                 {
                     match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
@@ -64,7 +71,7 @@ export default definePlugin({
             find: ".userTooltip,children",
             replacement: [
                 {
-                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.default,{(?=children)/,
+                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
                     replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
                 }
             ],
@@ -94,11 +101,19 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: [
                 {
-                    match: /renderName\(\).{0,100}speaking:.{50,100}jsx.{5,10}{/,
+                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
                     replace: "$&...$self.getVoiceProps(this.props),"
                 }
             ],
             predicate: () => settings.store.voiceUsers,
+        },
+        {
+            find: ".reactorDefault",
+            replacement: {
+                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
+            },
+            predicate: () => settings.store.reactorsList,
         }
     ],
     settings,

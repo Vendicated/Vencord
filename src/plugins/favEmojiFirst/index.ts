@@ -50,7 +50,7 @@ export default definePlugin({
         },
 
         {
-            find: "MAX_AUTOCOMPLETE_RESULTS+",
+            find: "numLockedEmojiResults:",
             replacement: [
                 // set maxCount to Infinity so our sortEmojis callback gets the entire list, not just the first 10
                 // and remove Discord's emojiResult slice, storing the endIndex on the array for us to use later
@@ -83,6 +83,6 @@ export default definePlugin({
             if (!aIsFavorite && bIsFavorite) return 1;
 
             return 0;
-        }).slice(0, query.results.emojis.sliceTo ?? 10);
+        }).slice(0, query.results.emojis.sliceTo ?? Infinity);
     }
 });

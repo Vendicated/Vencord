@@ -41,7 +41,7 @@ export default definePlugin({
     authors: [Devs.zt, Devs.Trwy],
     patches: [
         {
-            find: ".displayName=\"MaskedLinkStore\"",
+            find: '="MaskedLinkStore",',
             replacement: {
                 match: /(?<=isTrustedDomain\(\i\){)return \i\(\i\)/,
                 replace: "return true"
@@ -49,7 +49,7 @@ export default definePlugin({
             predicate: () => settings.store.domain
         },
         {
-            find: "isSuspiciousDownload:",
+            find: "bitbucket.org",
             replacement: {
                 match: /function \i\(\i\){(?=.{0,60}\.parse\(\i\))/,
                 replace: "$&return null;"
