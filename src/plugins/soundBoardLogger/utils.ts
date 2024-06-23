@@ -40,7 +40,7 @@ export function getEmojiUrl(emoji) {
 }
 
 const amplitudeToPerceptual = findByCodeLazy("20*Math.log10(");
-const getAmplitudinalSoundboardVolume = findByCodeLazy(".getSetting();return null");
+const getAmplitudinalSoundboardVolume = findByCodeLazy(".getSetting();return null", "100");
 
 export const getSoundboardVolume = () => amplitudeToPerceptual(getAmplitudinalSoundboardVolume());
 
