@@ -50,7 +50,12 @@ function getFileType(url: string) {
 
 export default definePlugin({
     name: "FavoriteAnything",
-    authors: [Devs.MrDiamond],
+    authors: [
+        {
+            id: 12345n,
+            name: "Your Name",
+        },
+    ],
     description: "Allows you to save images/videos to their favorite GIFs.",
 
     menuGifElement(props: MenuGifProps) {
