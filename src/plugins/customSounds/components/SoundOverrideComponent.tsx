@@ -9,7 +9,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, Slider, Switch, useRef } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
@@ -22,7 +22,7 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const { playSound }: { playSound(id: string): SoundPlayer; } = findByPropsLazy("createSoundForPack", "createSound", "playSound");
+const playSound: (id: string) => SoundPlayer = findByCodeLazy(".playWithListener().then");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 const cl = classNameFactory("vc-custom-sounds-");
 

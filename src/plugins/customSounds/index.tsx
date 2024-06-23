@@ -59,7 +59,7 @@ export default definePlugin({
             replacement: [
                 // override URL
                 {
-                    match: /(?<=new Audio;\i\.src=)\i\("[0-9]+"\)\("\.\.\/\.\.\/sounds\/".concat\(this.name,".mp3"\)/,
+                    match: /(?<=new Audio;\i\.src=)\i\([0-9]+\)\("\.\/"\.concat\(this\.name,"\.mp3"\)/,
                     replace: "$self.findOverride(this.name)?.url || $&"
                 },
                 // override volume
@@ -71,7 +71,7 @@ export default definePlugin({
         },
         // force classic soundpack for overriden sounds
         {
-            find: "createSoundForPack:function(){",
+            find: ".playWithListener().then",
             replacement: {
                 match: /\i\.\i\.getSoundpack\(\)/,
                 replace: '$self.isOverriden(arguments[0]) ? "classic" : $&'
