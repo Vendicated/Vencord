@@ -191,7 +191,7 @@ export default definePlugin({
 
     start() {
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (settings[key]) value.onEnable();
+            if (settings.store[key]) value.onEnable();
         });
     },
 
