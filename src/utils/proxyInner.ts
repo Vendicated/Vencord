@@ -82,7 +82,7 @@ export function proxyInner<T = AnyObject>(
             // because the top setInnerValue was called before we proxied the get access
             // example here will also be a proxy:
             // `const { example } = findByProps("example");`
-            if (isSameTick && proxyDummy[SYM_PROXY_INNER_VALUE] == null && !isChild) {
+            if (isSameTick && !isChild && proxyDummy[SYM_PROXY_INNER_VALUE] == null) {
                 const [recursiveProxy, recursiveSetInnerValue] = proxyInner(errMsg, primitiveErrMsg, true);
 
                 recursiveSetInnerValues.push((innerValue: T) => {
@@ -113,7 +113,7 @@ export function proxyInner<T = AnyObject>(
 
         // Avoid binding toString if the inner value is null.
         // This can happen if we are setting the inner value as another instance of proxyInner, which will cause that proxy to instantly evaluate and throw an error
-        if (typeof innerValue === "function" && innerValue[SYM_PROXY_INNER_GET] == null) {
+        if (typeof innerValue === "function" && innerValue[SYM_PROXY_INNER_VALUE] == null) {
             proxy.toString = innerValue.toString.bind(innerValue);
         }
     }
