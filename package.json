@@ -3,13 +3,13 @@
     "private": "true",
     "version": "1.9.2",
     "description": "The cutest Discord client mod",
-    "homepage": "https://github.com/Vendicated/Vencord#readme",
+    "homepage": "https://github.com/doeimospng/Vencord#readme",
     "bugs": {
-        "url": "https://github.com/Vendicated/Vencord/issues"
+        "url": "https://github.com/doeimospng/Vencord/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Vendicated/Vencord.git"
+        "url": "git+https://github.com/doeimospng/Vencord.git"
     },
     "license": "GPL-3.0-or-later",
     "author": "Vendicated",
