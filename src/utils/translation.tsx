@@ -127,7 +127,7 @@ export function t(key: string, variables?: Record<string, any>): string {
     // top level support hax (thank you vee!!)
     // tl;dr: this lets you use $t at the top level in objects by simulating a string, a la:
     // {
-    //    description: $t("clientTheme.description")
+    //    description: t("clientTheme.description")
     // }
     // and any future accesses of the description prop will result in an up to date translation
     const descriptor = {
