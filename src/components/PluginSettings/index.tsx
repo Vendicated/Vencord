@@ -36,9 +36,9 @@ import { useAwaiter } from "@utils/react";
 import { t } from "@utils/translation";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 
-import Plugins from "~plugins";
+import Plugins, { ExcludedPlugins } from "~plugins";
 
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
@@ -178,6 +178,37 @@ const enum SearchStatus {
     NEW
 }
 
+function ExcludedPluginsList({ search }: { search: string; }) {
+    const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
+        .filter(([name]) => name.toLowerCase().includes(search));
+
+    const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+        desktop: "Discord Desktop app or Vesktop",
+        discordDesktop: "Discord Desktop app",
+        vencordDesktop: "Vesktop app",
+        web: "Vesktop app and the Web version of Discord",
+        dev: "Developer version of Vencord"
+    };
+
+    return (
+        <Text variant="text-md/normal" className={Margins.top16}>
+            {matchingExcludedPlugins.length
+                ? <>
+                    <Forms.FormText>Are you looking for:</Forms.FormText>
+                    <ul>
+                        {matchingExcludedPlugins.map(([name, reason]) => (
+                            <li key={name}>
+                                <b>{name}</b>: Only available on the {ExcludedReasons[reason]}
+                            </li>
+                        ))}
+                    </ul>
+                </>
+                : "No plugins meet the search criteria."
+            }
+        </Text>
+    );
+}
+
 export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
@@ -216,26 +247,27 @@ export default function PluginSettings() {
         return o;
     }, []);
 
-    const sortedPlugins = React.useMemo(() => Object.values(Plugins)
+    const sortedPlugins = useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
+    const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const enabled = settings.plugins[plugin.name]?.enabled;
-        if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
-        if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
-        if (searchValue.status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
-        if (!searchValue.value.length) return true;
+        const { status } = searchValue;
+        const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+        if (enabled && status === SearchStatus.DISABLED) return false;
+        if (!enabled && status === SearchStatus.ENABLED) return false;
+        if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
+        if (!search.length) return true;
 
-        const v = searchValue.value.toLowerCase();
         return (
-            plugin.name.toLowerCase().includes(v) ||
-            plugin.description.toLowerCase().includes(v) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(v))
+            plugin.name.toLowerCase().includes(search) ||
+            plugin.description.toLowerCase().includes(search) ||
+            plugin.tags?.some(t => t.toLowerCase().includes(search))
         );
     };
 
@@ -256,54 +288,48 @@ export default function PluginSettings() {
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
-    type P = JSX.Element | JSX.Element[];
-    let plugins: P, requiredPlugins: P;
-    if (sortedPlugins?.length) {
-        plugins = [];
-        requiredPlugins = [];
+    const plugins = [] as JSX.Element[];
+    const requiredPlugins = [] as JSX.Element[];
 
-        const showApi = searchValue.value === "API";
-        for (const p of sortedPlugins) {
-            if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
-                continue;
+    const showApi = searchValue.value.includes("API");
+    for (const p of sortedPlugins) {
+        if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
+            continue;
 
-            if (!pluginFilter(p)) continue;
+        if (!pluginFilter(p)) continue;
 
-            const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
 
-            if (isRequired) {
-                const tooltipText = p.required
-                    ? t("vencord.requiredPlugin")
-                    : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+        if (isRequired) {
+            const tooltipText = p.required
+                ? t("vencord.requiredPlugin")
+                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
-                requiredPlugins.push(
-                    <Tooltip text={tooltipText} key={p.name}>
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <PluginCard
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                onRestartNeeded={name => changes.handleChange(name)}
-                                disabled={true}
-                                plugin={p}
-                            />
-                        )}
-                    </Tooltip>
-                );
-            } else {
-                plugins.push(
-                    <PluginCard
-                        onRestartNeeded={name => changes.handleChange(name)}
-                        disabled={false}
-                        plugin={p}
-                        isNew={newPlugins?.includes(p.name)}
-                        key={p.name}
-                    />
-                );
-            }
-
+            requiredPlugins.push(
+                <Tooltip text={tooltipText} key={p.name}>
+                    {({ onMouseLeave, onMouseEnter }) => (
+                        <PluginCard
+                            onMouseLeave={onMouseLeave}
+                            onMouseEnter={onMouseEnter}
+                            onRestartNeeded={name => changes.handleChange(name)}
+                            disabled={true}
+                            plugin={p}
+                            key={p.name}
+                        />
+                    )}
+                </Tooltip>
+            );
+        } else {
+            plugins.push(
+                <PluginCard
+                    onRestartNeeded={name => changes.handleChange(name)}
+                    disabled={false}
+                    plugin={p}
+                    isNew={newPlugins?.includes(p.name)}
+                    key={p.name}
+                />
+            );
         }
-    } else {
-        plugins = requiredPlugins = <Text variant="text-md/normal">{t("vencord.noSearchResults")}</Text>;
     }
 
     return (
@@ -334,9 +360,18 @@ export default function PluginSettings() {
 
             <Forms.FormTitle className={Margins.top20}>{t("vencord.plugins")}</Forms.FormTitle>
 
-            <div className={cl("grid")}>
-                {plugins}
-            </div>
+            {plugins.length || requiredPlugins.length
+                ? (
+                    <div className={cl("grid")}>
+                        {plugins.length
+                            ? plugins
+                            : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                        }
+                    </div>
+                )
+                : <ExcludedPluginsList search={search} />
+            }
+
 
             <Forms.FormDivider className={Margins.top20} />
 
@@ -344,7 +379,10 @@ export default function PluginSettings() {
                 {t("vencord.requiredPlugins")}
             </Forms.FormTitle>
             <div className={cl("grid")}>
-                {requiredPlugins}
+                {requiredPlugins.length
+                    ? requiredPlugins
+                    : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                }
             </div>
         </SettingsTab >
     );

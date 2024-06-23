@@ -21,12 +21,10 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
-import { RC } from "@webpack/types";
-import { Channel, Message, User } from "discord-types/general";
-
-type PermissionName = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "CREATE_GUILD_EXPRESSIONS" | "VIEW_AUDIT_LOG" | "VIEW_CHANNEL" | "VIEW_GUILD_ANALYTICS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "MODERATE_MEMBERS" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "ADD_REACTIONS" | "USE_APPLICATION_COMMANDS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "PRIORITY_SPEAKER" | "STREAM" | "USE_EMBEDDED_ACTIVITIES" | "USE_SOUNDBOARD" | "USE_EXTERNAL_SOUNDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "CREATE_EVENTS";
+import type { Permissions, RC } from "@webpack/types";
+import type { Channel, Guild, Message, User } from "discord-types/general";
 
 interface Tag {
     // name used for identifying, must be alphanumeric + underscores
@@ -34,7 +32,7 @@ interface Tag {
     // name shown on the tag itself, can be anything probably; automatically uppercase'd
     displayName: string;
     description: string;
-    permissions?: PermissionName[];
+    permissions?: Permissions[];
     condition?(message: Message | null, user: User, channel: Channel): boolean;
 }
 
@@ -54,10 +52,14 @@ interface TagSettings {
     [k: string]: TagSetting;
 }
 
-// PermissionStore.computePermissions is not the same function and doesn't work here
-const PermissionUtil = findByPropsLazy("computePermissions", "canEveryoneRole") as {
-    computePermissions({ ...args }): bigint;
-};
+// PermissionStore.computePermissions will not work here since it only gets permissions for the current user
+const computePermissions: (options: {
+    user?: { id: string; } | string | null;
+    context?: Guild | Channel | null;
+    overwrites?: Channel["permissionOverwrites"] | null;
+    checkElevated?: boolean /* = true */;
+    excludeGuildPermissions?: boolean /* = false */;
+}) => bigint = findByCodeLazy(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
 
 const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
@@ -193,7 +195,7 @@ export default definePlugin({
     patches: [
         // add tags to the tag list
         {
-            find: "BotTagTypes:",
+            find: ".ORIGINAL_POSTER=",
             replacement: {
                 match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
                 replace: "($1=$self.getTagTypes()))[$2.BOT"
@@ -222,7 +224,7 @@ export default definePlugin({
         },
         // in messages
         {
-            find: "renderSystemTag:",
+            find: ".Types.ORIGINAL_POSTER",
             replacement: {
                 match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
                 replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
@@ -283,7 +285,7 @@ export default definePlugin({
         const guild = GuildStore.getGuild(channel?.guild_id);
         if (!guild) return [];
 
-        const permissions = PermissionUtil.computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
+        const permissions = computePermissions({ user, context: guild, overwrites: channel.permissionOverwrites });
         return Object.entries(PermissionsBits)
             .map(([perm, permInt]) =>
                 permissions & permInt ? perm : ""
@@ -330,7 +332,7 @@ export default definePlugin({
     }: {
         message?: Message,
         user: User & { isClyde(): boolean; },
-        channel?: Channel & { isForumPost(): boolean; },
+        channel?: Channel & { isForumPost(): boolean; isMediaPost(): boolean; },
         channelId?: string;
         origType?: number;
         location: "chat" | "not-chat";
@@ -367,7 +369,7 @@ export default definePlugin({
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message!, user, channel))
             ) {
-                if (channel.isForumPost() && channel.ownerId === user.id)
+                if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
                     type = Tag.Types[`${tag.name}-OP`];
                 else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
                     type = Tag.Types[`${tag.name}-BOT`];
