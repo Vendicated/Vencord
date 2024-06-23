@@ -82,7 +82,7 @@ export default definePlugin({
             find,
             replacement: {
                 match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                replace: "if($self.settings.store.ignoreBlockedMessages && $self.isBlocked($1.message.author.id)) return;",
+                replace: "if($self.settings.store.ignoreBlockedMessages && $self.isBlocked($1.message?.author?.id)) return;",
             },
         })),
         {
@@ -91,7 +91,7 @@ export default definePlugin({
             predicate: () => settings.store.hideReferencedAuthor,
             replacement: {
                 match: /return null!=.+?SYSTEM_TAG/,
-                replace: "if($self.isBlocked(arguments[0].message.author.id)) return; $&",
+                replace: "if($self.isBlocked(arguments[0]?.message?.author?.id)) return; $&",
             },
         },
         {
@@ -108,10 +108,9 @@ export default definePlugin({
             find: ".ALLOW_EVERYONE_OR_HERE,",
             replacement: {
                 match: /(queryResults.+?)return\{results:(.+?\))}/,
-                replace:
-                    "$1" +
+                replace: "$1" +
                     "let results = $2;" +
-                    "results.users=results.users.filter(res=>!$self.isBlocked(res.user.id));" +
+                    "results.users=results?.users?.filter(item=>!$self.isBlocked(item?.user?.id));" +
                     "return { results }",
             },
         },
@@ -121,12 +120,14 @@ export default definePlugin({
             predicate: () => settings.store.hideFromMemberList,
             replacement: {
                 match: /(memo\((\i)=>{)(let{colorRoleId)/,
-                replace: "$1 if($self.isBlocked($2.user.id)) return; $3",
+                replace: "$1 if($self.isBlocked($2?.user?.id)) return; $3",
             },
         },
     ],
     isBlocked(userId: string) {
         try {
+            if (!userId) throw "userId is invalid";
+
             return RelationshipStore.isBlocked(userId);
         } catch (e) {
             new Logger(this.name).error("Failed to check if user is blocked:", e);
