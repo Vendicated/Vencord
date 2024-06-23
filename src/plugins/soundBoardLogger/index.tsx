@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
-import { ChatBarIcon, IconWithTooltip, LogIcon } from "./components/Icons";
+import { IconWithTooltip, LogIcon } from "./components/Icons";
 import { openSoundBoardLog } from "./components/SoundBoardLog";
 import settings from "./settings";
 import { updateLoggedSounds } from "./store";
@@ -26,7 +25,6 @@ export default definePlugin({
     settings,
     patches: [
         {
-            predicate: () => settings.store.IconLocation === "toolbar",
             find: ".iconBadge}):null",
             replacement: {
                 match: /className:(\i).toolbar,children:(\i)/,
@@ -42,11 +40,9 @@ export default definePlugin({
             await updateLoggedSounds(sound);
             getListeners().forEach(cb => cb());
         });
-        if (settings.store.IconLocation === "chat") addChatBarButton("vc-soundlog-button", ChatBarIcon);
     },
     stop() {
         disableStyle(styles);
-        if (settings.store.IconLocation === "chat") removeChatBarButton("vc-soundlog-button");
     },
     toolbarPatch: obj => {
         if (!obj?.props?.children) return obj;
