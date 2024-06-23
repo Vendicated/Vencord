@@ -10,13 +10,13 @@ import type { FormattedMessage as FM } from "./FormattedMessage";
 function generateI18NMessages() {
     const hookRule = (() => {
         let key;
-        return Vencord.Webpack.find(m => Object.keys(m).some(k => {
-            if (typeof m[k]?.hook?.react === "function") {
-                key = k;
-                return true;
-            }
-            return false;
-        }))[key].hook;
+        return Vencord.Webpack.find(m => {
+            for (const k in m)
+                if (typeof m[k]?.hook?.react === "function") {
+                    key = k;
+                    return true;
+                }
+        })[key].hook;
     })();
     const origHookRuleParse = hookRule.parse;
     let hookArgs;
@@ -60,7 +60,7 @@ function generateI18NMessages() {
                     // Return if an unexpected error is encountered to prevent an infinite loop
                     console.error(`
                         Unexpected error caused by value provided to argument in {'${
-                            [stringableArgs.at(-1), ...hookArgs].filter(Boolean).join("', '")
+                            [stringableArgs.at(-1), ...new Set(hookArgs)].filter(Boolean).join("', '")
                             }'} of message '${key}':\n`,
                         error
                     );

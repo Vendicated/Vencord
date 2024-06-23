@@ -175,8 +175,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }: Rep
 
         if (isFunc) {
             try {
-                // @ts-expect-error
-                const func = (0, eval)(val);
+                const func = (0, eval)(val as string);
                 if (typeof func === "function")
                     setReplacement(() => func);
                 else

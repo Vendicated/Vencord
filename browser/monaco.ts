@@ -6,8 +6,9 @@
 
 import "./patch-worker";
 
-// @ts-ignore
+// @ts-expect-error
 import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
+declare const monaco: typeof import("monaco-editor");
 
 declare global {
     const baseUrl: string;

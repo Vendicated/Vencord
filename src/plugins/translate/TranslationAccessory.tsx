@@ -57,7 +57,7 @@ export function TranslationAccessory({ message }: { message: MessageRecord & { v
             <TranslateIcon width={16} height={16} />
             {MarkupUtils.parse(translation.text)}
             {" "}
-            {/* @ts-ignore */}
+            {/* @ts-expect-error */}
             (translated from {Languages[translation.src] ?? translation.src} - <Dismiss onDismiss={() => { setTranslation(undefined); }} />)
         </span>
     );

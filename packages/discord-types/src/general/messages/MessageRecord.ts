@@ -94,7 +94,7 @@ export declare class MessageRecord<
     reactions: MessageReaction[];
     referralTrialOfferId: string | null;
     roleSubscriptionData: MessageRoleSubscriptionData | undefined;
-    state: MessageStates;
+    state: MessageState;
     stickerItems: StickerItem[];
     stickers: Sticker[];
     tts: boolean;
@@ -293,7 +293,8 @@ export interface MessageRoleSubscriptionData {
     total_months_subscribed: number;
 }
 
-export enum MessageStates {
+// Original name: MessageStates
+export enum MessageState {
     SEND_FAILED = "SEND_FAILED",
     SENDING = "SENDING",
     SENT = "SENT",

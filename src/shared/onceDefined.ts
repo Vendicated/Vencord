@@ -33,16 +33,16 @@ export function onceDefined<T extends object, P extends LiteralUnion<keyof T, Pr
     const propertyAsAny: any = property;
 
     if (property in target) {
-        // @ts-ignore
+        // @ts-expect-error
         callback(target[propertyAsAny]);
         return;
     }
 
     Object.defineProperty(target, property, {
         set(v) {
-            // @ts-ignore
+            // @ts-expect-error
             delete target[propertyAsAny];
-            // @ts-ignore
+            // @ts-expect-error
             target[propertyAsAny] = v;
             callback(v);
         },

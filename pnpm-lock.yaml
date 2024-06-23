@@ -57,8 +57,8 @@ importers:
         specifier: ~4.17.5
         version: 4.17.5
       '@types/node':
-        specifier: ^18.19.38
-        version: 18.19.38
+        specifier: ^18.19.39
+        version: 18.19.39
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -208,8 +208,8 @@ importers:
         specifier: ~4.17.5
         version: 4.17.5
       '@types/node':
-        specifier: ^18.19.38
-        version: 18.19.38
+        specifier: ^18.19.39
+        version: 18.19.39
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -593,8 +593,8 @@ packages:
   '@types/minimist@1.2.2':
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
 
-  '@types/node@18.19.38':
-    resolution: {integrity: sha512-SApYXUF7si4JJ+lO2o6X60OPOnA6wPpbiB09GMCkQ+JAwpa9hxUVG8p7GzA08TKQn5OhzK57rj1wFj+185YsGg==}
+  '@types/node@18.19.39':
+    resolution: {integrity: sha512-nPwTRDKUctxw3di5b4TfT3I0sWDiWoPQCZjXhvdkINntwr8lcoVCKsTgnXeRubKIlfnV+eN/HYk6Jb40tbcEAQ==}
 
   '@types/normalize-package-data@2.4.1':
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -3054,7 +3054,7 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 18.19.38
+      '@types/node': 18.19.39
 
   '@types/har-format@1.2.13': {}
 
@@ -3068,13 +3068,13 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 18.19.38
+      '@types/node': 18.19.39
 
   '@types/lodash@4.17.5': {}
 
   '@types/minimist@1.2.2': {}
 
-  '@types/node@18.19.38':
+  '@types/node@18.19.39':
     dependencies:
       undici-types: 5.26.5
 
@@ -3098,12 +3098,12 @@ snapshots:
 
   '@types/yauzl@2.10.0':
     dependencies:
-      '@types/node': 18.19.38
+      '@types/node': 18.19.39
     optional: true
 
   '@types/yazl@2.4.5':
     dependencies:
-      '@types/node': 18.19.38
+      '@types/node': 18.19.39
 
   '@typescript-eslint/eslint-plugin@7.13.1(@typescript-eslint/parser@7.13.1(eslint@8.57.0(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.2))(eslint@8.57.0(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.2)':
     dependencies:
@@ -5159,7 +5159,7 @@ snapshots:
 
   standalone-electron-types@1.0.0:
     dependencies:
-      '@types/node': 18.19.38
+      '@types/node': 18.19.39
 
   static-extend@0.1.2:
     dependencies:

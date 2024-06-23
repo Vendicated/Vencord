@@ -53,7 +53,7 @@ for (const method of [
     "setPrototypeOf"
 ] as const) {
     handler[method] =
-        // @ts-ignore
+        // @ts-expect-error
         (target: any, ...args: any[]) => Reflect[method](target[SYM_LAZY_GET](), ...args);
 }
 

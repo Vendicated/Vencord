@@ -21,7 +21,7 @@ import esbuild from "esbuild";
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
-// @ts-ignore
+// @ts-expect-error
 import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, disposeAll, globPlugins, IS_DEV, IS_REPORTER, rebuildAll, VERSION, watch, watchAll } from "./common.mjs";
@@ -165,11 +165,11 @@ async function buildExtension(target, files) {
             [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
         ))),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
+            /** @type {Buffer | Uint8Array} */
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
-                // @ts-ignore
                 content = new TextEncoder().encode(JSON.stringify(json));
             }
 

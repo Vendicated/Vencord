@@ -97,7 +97,8 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {(kind: "web" | "discordDesktop" | "vencordDesktop") => import("esbuild").Plugin}
+ * @param {"web" | "discordDesktop" | "vencordDesktop"} kind
+ * @returns {esbuild.Plugin}
  */
 export const globPlugins = kind => ({
     name: "glob-plugins",
@@ -210,7 +211,7 @@ export const fileUrlPlugin = {
             path: args.path,
             pluginData: {
                 uri: args.path,
-                // @ts-ignore
+                // @ts-expect-error
                 path: join(args.resolveDir, args.path.slice("file://".length).split("?")[0])
             }
         }));
@@ -245,7 +246,7 @@ export const fileUrlPlugin = {
                         write: false,
                         minify: true
                     });
-                    // @ts-ignore
+                    // @ts-expect-error
                     content = res.outputFiles[0].text;
                 } else {
                     throw new Error(`Don't know how to minify file type: ${path}`);

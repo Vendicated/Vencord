@@ -112,7 +112,7 @@ export class SettingsStore<T extends object> {
                     );
                     return;
                 }
-                // @ts-ignore
+                // @ts-expect-error
                 v = v[p];
             }
 

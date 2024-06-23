@@ -209,21 +209,21 @@ function initWs(isManual = false) {
                             results = findAll(parsedArgs[0]);
                             break;
                         case "ByProps":
-                            // @ts-ignore
+                            // @ts-expect-error
                             results = findAll(filters.byProps(...parsedArgs));
                             break;
                         case "Store":
                             results = findAll(filters.byStoreName(parsedArgs[0]));
                             break;
                         case "ByCode":
-                            // @ts-ignore
+                            // @ts-expect-error
                             results = findAll(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
-                            // @ts-ignore
+                            // @ts-expect-error
                             results = findAll(filters.componentByCode(...parsedArgs));
                             break;
                         default:

@@ -87,7 +87,7 @@ async function ensureBinary() {
             filter: f => f.name === INSTALLER_PATH_DARWIN
         })[INSTALLER_PATH_DARWIN];
 
-        // @ts-ignore
+        // @ts-expect-error
         writeFileSync(outputFile, bytes, { mode: 0o755 });
 
         console.log("Overriding security policy for installer binary (this is required to run it)");
@@ -104,7 +104,7 @@ async function ensureBinary() {
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
-        // @ts-ignore
+        // @ts-expect-error
         const body = Readable.fromWeb(res.body);
         await finished(body.pipe(createWriteStream(outputFile, {
             mode: 0o755,

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-ignore
+// @ts-expect-error
 process.emit = (originalEmit =>
     function (event, data) {
-        // @ts-ignore
+        // @ts-expect-error
         if (event === "warning" && data?.name === "ExperimentalWarning")
             return false;
 
-        // @ts-ignore
+        // @ts-expect-error
         return originalEmit.apply(process, arguments);
     }
 )(process.emit);

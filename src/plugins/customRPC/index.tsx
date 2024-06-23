@@ -356,10 +356,10 @@ async function createActivity() {
 
     for (const k in activity) {
         if (k === "type") continue;
-        // @ts-ignore
+        // @ts-expect-error
         const v = activity[k];
         if (!v || v.length === 0)
-            // @ts-ignore
+            // @ts-expect-error
             delete activity[k];
     }
 

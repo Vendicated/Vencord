@@ -58,7 +58,7 @@ const nodeCommonOpts = {
 const sourceMapFooter = fileName => watch ? "" : `//# sourceMappingURL=vencord://${fileName}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
-/** @satisfies {import("esbuild").Plugin} */
+/** @satisfies {esbuild.Plugin} */
 const globNativesPlugin = {
     name: "glob-natives-plugin",
     setup: build => {

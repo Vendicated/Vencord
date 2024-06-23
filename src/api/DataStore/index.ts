@@ -22,9 +22,9 @@ export function promisifyRequest<T = undefined>(
     request: IDBRequest<T> | IDBTransaction,
 ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-        // @ts-ignore - file size hacks
+        // @ts-expect-error - file size hacks
         request.oncomplete = request.onsuccess = () => { resolve(request.result); };
-        // @ts-ignore - file size hacks
+        // @ts-expect-error - file size hacks
         request.onabort = request.onerror = () => { reject(request.error); };
     });
 }
@@ -258,7 +258,7 @@ export function values<T = any>(customStore = defaultGetStore()): Promise<T[]> {
 export function entries<KeyType extends IDBValidKey, ValueType = any>(
     customStore = defaultGetStore(),
 ): Promise<[KeyType, ValueType][]> {
-    // @ts-ignore
+    // @ts-expect-error
     return customStore("readonly", store => {
         // Fast path for modern browsers
         // (although, hopefully we'll get a simpler path some day)

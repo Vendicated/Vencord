@@ -160,7 +160,6 @@ export default definePlugin({
                     .forEach(user => { relationships[user.id] = 5; });
                 RelationshipStore.emitChange();
                 if (--count === 0) {
-                    // @ts-ignore
                     FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
                 }
             }

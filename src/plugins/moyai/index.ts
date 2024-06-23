@@ -21,7 +21,7 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { MessageReactionEmoji, MessageRecord } from "@vencord/discord-types";
+import { type MessageReactionEmoji, type MessageRecord, MessageState } from "@vencord/discord-types";
 import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 interface IMessageCreate {
@@ -38,7 +38,7 @@ interface IReactionAdd {
     channelId: string;
     messageId: string;
     messageAuthorId: string;
-    userId: "195136840355807232";
+    userId: string;
     emoji: MessageReactionEmoji;
 }
 
@@ -97,10 +97,9 @@ export default definePlugin({
     settings,
 
     flux: {
-        async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (optimistic || type !== "MESSAGE_CREATE") return;
-            if (message.state === "SENDING") return;
+        async MESSAGE_CREATE({ optimistic, message, channelId }: IMessageCreate) {
+            if (optimistic) return;
+            if (message.state === MessageState.SENDING) return;
             if (settings.store.ignoreBots && message.author.bot) return;
             if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author.id)) return;
             if (!message.content) return;
@@ -114,9 +113,8 @@ export default definePlugin({
             }
         },
 
-        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
+        MESSAGE_REACTION_ADD({ optimistic, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
+            if (optimistic) return;
             if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
             if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(messageAuthorId)) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;

@@ -52,7 +52,7 @@
         "@types/diff": "^5.2.1",
         "@types/html-minifier-terser": "^7.0.2",
         "@types/lodash": "~4.17.5",
-        "@types/node": "^18.19.38",
+        "@types/node": "^18.19.39",
         "@types/react": "~18.2.79",
         "@types/react-dom": "~18.2.25",
         "@types/yazl": "^2.4.5",

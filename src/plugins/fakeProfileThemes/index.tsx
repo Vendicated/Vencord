@@ -30,7 +30,7 @@ import { type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRe
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
-// @ts-ignore
+// @ts-expect-error
 import virtualMerge from "virtual-merge";
 
 interface Colors {

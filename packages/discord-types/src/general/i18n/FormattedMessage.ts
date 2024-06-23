@@ -20,7 +20,7 @@ export declare class FormattedMessage<
     Markdown extends boolean | undefined = boolean
 > {
     /**
-     * @throws {SyntaxError} Argument `message` must follow the proper syntax.
+     * @throws {SyntaxError} Argument `message` must be syntactically valid.
      * @see {@link https://formatjs.io/docs/core-concepts/icu-syntax/}
      * @throws {RangeError} Locale identifiers provided to argument `locales` must be structurally valid.
      * @see {@link https://tc39.es/ecma402/#sec-isstructurallyvalidlanguagetag}
