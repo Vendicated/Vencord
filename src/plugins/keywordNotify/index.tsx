@@ -7,7 +7,7 @@
 import "./style.css";
 
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, SearchableSelect,SelectedChannelStore, TabBar, TextInput, UserStore, UserUtils, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, Select,SelectedChannelStore, TabBar, TextInput, UserStore, UserUtils, useState } from "@webpack/common";
 import { classNameFactory } from "@api/Styles";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
@@ -147,16 +147,17 @@ function ListedIds({ listIds, setListIds }) {
 
 function ListTypeSelector({ listType, setListType }) {
     return (
-        <SearchableSelect
+        <Select
             options={[
                 { label: "Whitelist", value: ListType.Whitelist },
                 { label: "Blacklist", value: ListType.BlackList }
             ]}
             placeholder={"Select a list type"}
-            maxVisibleItems={2}
+            isSelected={v => v === listType}
             closeOnSelect={true}
             value={listType}
-            onChange={setListType}
+            select={setListType}
+            serialize={v => v}
         />
     );
 }
@@ -303,7 +304,7 @@ export default definePlugin({
     applyKeywordEntries(m: Message) {
         let matches = false;
 
-        keywordEntries.forEach(entry => {
+        for (let entry of keywordEntries) {
             if (entry.regex === "") {
                 return;
             }
@@ -345,7 +346,7 @@ export default definePlugin({
                     }
                 }
             }
-        });
+        }
 
         if (matches) {
             m.mentions.push(currentUser);
