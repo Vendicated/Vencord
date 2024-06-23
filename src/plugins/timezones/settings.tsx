@@ -46,14 +46,14 @@ export default definePluginSettings({
         ],
         default: CustomTimezonePreference.Secondary,
     },
-    showTimezonesInChat: {
+    showInChat: {
         type: OptionType.BOOLEAN,
-        description: "Show timezones in chat",
+        description: "Show local time on messages in chat",
         default: true,
     },
-    showTimezonesInProfile: {
+    showInProfile: {
         type: OptionType.BOOLEAN,
-        description: "Show timezones in profile",
+        description: "Show timezones in user profiles",
         default: true,
     },
 });

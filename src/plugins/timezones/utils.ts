@@ -6,12 +6,12 @@
 
 import * as DataStore from "@api/DataStore";
 import { findStoreLazy } from "@webpack";
-export const DATASTORE_KEY = "plugins.timezones.savedTimezones";
-
 import { debounce } from "@shared/debounce";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 
 import { CustomTimezonePreference } from "./settings";
+
+export const DATASTORE_KEY = "plugins.timezones.savedTimezones";
 
 export interface TimezoneDB {
     [userId: string]: string;
@@ -25,8 +25,13 @@ const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 export function getTimeString(timezone: string, timestamp = new Date()): string {
     try {
         const locale = UserSettingsProtoStore.settings.localization.locale.value;
-        return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", timeZone: timezone }).format(timestamp); // we hate javascript
+        return new Intl.DateTimeFormat(locale, {
+            hour: "numeric",
+            minute: "numeric",
+            timeZone: timezone,
+        }).format(timestamp); // we hate javascript
     } catch (e) {
+        // TODO: log error
         return "Error"; // incase it gets invalid timezone from api, probably not gonna happen but if it does this will prevent discord from crashing
     }
 }
@@ -42,7 +47,7 @@ async function bulkFetchTimezones(ids: string[]): Promise<TimezoneDB | undefined
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-User-Agent": VENCORD_USER_AGENT
+                "X-User-Agent": VENCORD_USER_AGENT,
             },
             body: JSON.stringify(ids),
         });
@@ -106,15 +111,14 @@ export function getUserTimezone(discordID: string, strategy: CustomTimezonePrefe
     });
 }
 
-const gist = "e321f856f98676505efb90aad82feff1";
-const revision = "91034ee32eff93a7cb62d10702f6b1d01e0309e6";
-const timezonesLink = `https://gist.githubusercontent.com/ArjixWasTaken/${gist}/raw/${revision}/timezones.json`;
+const timezonesLink = "https://gist.githubusercontent.com/ArjixWasTaken/e321f856f98676505efb90aad82feff1/raw/91034ee32eff93a7cb62d10702f6b1d01e0309e6/timezones.json";
 
 export const getAllTimezones = async (): Promise<string[]> => {
     if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
         try {
             return Intl.supportedValuesOf("timeZone");
-        } catch { }
+        } catch {
+        }
     }
 
     return await fetch(timezonesLink).then(tzs => tzs.json());

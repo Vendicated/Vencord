@@ -8,13 +8,10 @@ import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, SearchableSelect, Text, Toasts, UserStore } from "@webpack/common";
+import { SearchableSelect, Text, Toasts, useEffect, UserStore, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import settings from "./settings";
-const classNames = findByPropsLazy("customStatusSection");
-
-
 import { CogWheel, DeleteIcon } from "@components/Icons";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { makeLazy } from "@utils/lazy";
@@ -22,6 +19,9 @@ import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 
 import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./utils";
+
+const classNames = findByPropsLazy("customStatusSection");
+
 const styles = findByPropsLazy("timestampInline");
 
 const useTimezones = makeLazy(getAllTimezones);
@@ -30,58 +30,59 @@ export default definePlugin({
     settings,
 
     name: "Timezones",
-    description: "Allows you to see and set the timezones of other users.",
-    authors: [Devs.mantikafasi, Devs.Arjix],
+    description: "Set and display the local times of you and other users via TimezoneDB",
+    authors: [Devs.rushii, Devs.mantikafasi, Devs.Aria, Devs.Arjix],
 
     commands: [
         {
             name: "timezone",
-            description: "Sends link to a website that shows timezone string, useful if you want to know your friends timezone",
-            execute: () => {
-                return { content: "https://gh.lewisakura.moe/timezone/" };
-            }
-        }
+            description: "Sends a link to a utility website that shows your current timezone identifier",
+            execute: () => ({ content: "https://gh.lewisakura.moe/timezone/" }),
+        },
     ],
 
+    // TODO: show button to authorize tzdb and manage public tz
     settingsAboutComponent: () => {
         const href = `${API_URL}?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
         return (
             <Text variant="text-md/normal">
-                A plugin that displays the local time for specific users using their timezone. <br />
-                Timezones can either be set manually or fetched automatically from the <a href={href}>TimezoneDB</a>
+                <br/>
+                This plugin supports setting your own Timezone publicly for others to fetch and display via <a href={href}>TimezoneDB</a>.
+                You can override other users' timezones locally if they haven't set their own.
             </Text>
         );
     },
 
     patches: [
+        // {
+        //     find: "copyMetaData:\"User Tag\"",
+        //     replacement: {
+        //         match: /return(\(0.+?}\)}\)]}\))}/,
+        //         replace: "return [$1, $self.getProfileTimezonesComponent(arguments[0])] }",
+        //     },
+        // },
         {
-            find: "copyMetaData:\"User Tag\"",
-            replacement: {
-
-                match: /return(\(0,.\.jsx\)\(.\.default,{className:.+?}\)]}\)}\))/,
-                replace: "return [$1, $self.getProfileTimezonesComponent(arguments[0])]"
-            },
-        },
-        {
+            // TODO: fix this
             // thank you https://github.com/Syncxv/vc-timezones/blob/master/index.tsx for saving me from painful work
-            find: ".badgesContainer,",
+            find: ".badgesContainer,{",
             replacement: {
                 match: /id:\(0,\i\.getMessageTimestampId\)\(\i\),timestamp.{1,50}}\),/,
-                replace: "$&,$self.getTimezonesComponent(arguments[0]),"
-            }
-        }
+                replace: "$&,$self.getTimezonesComponent(arguments[0]),",
+            },
+        },
     ],
 
+    // TODO: make this not ugly (port vc-timezones plugin)
     getProfileTimezonesComponent: ({ user }: { user: User; }) => {
-        const { preference, showTimezonesInProfile } = settings.use(["preference", "showTimezonesInProfile"]);
+        const { preference, showInProfile } = settings.use(["preference", "showInProfile"]);
 
-        const [timezone, setTimezone] = React.useState<string | undefined>();
-        const [isInEditMode, setIsInEditMode] = React.useState(false);
-        const [timezones, setTimezones] = React.useState<string[]>([]);
+        const [timezone, setTimezone] = useState<string | undefined>();
+        const [isInEditMode, setIsInEditMode] = useState(false);
+        const [timezones, setTimezones] = useState<string[]>([]);
 
         const forceUpdate = useForceUpdater();
 
-        React.useEffect(() => {
+        useEffect(() => {
             useTimezones().then(setTimezones);
             getUserTimezone(user.id, preference).then(tz => setTimezone(tz));
 
@@ -91,20 +92,20 @@ export default definePlugin({
             return () => clearInterval(interval);
         }, [preference]);
 
-        if (!showTimezonesInProfile)
+        if (!showInProfile)
             return null;
 
         return (
             <Text variant="text-sm/normal" className={classNames.customStatusSection}
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    ...(isInEditMode ? {
-                        display: "flex",
-                        flexDirection: "column",
-                    } : {})
-                }}
+                  style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      ...(isInEditMode ? {
+                          display: "flex",
+                          flexDirection: "column",
+                      } : {}),
+                  }}
             >
                 {!isInEditMode &&
                     <span
@@ -114,7 +115,7 @@ export default definePlugin({
                                 Toasts.show({
                                     type: Toasts.Type.MESSAGE,
                                     message: timezone,
-                                    id: Toasts.genId()
+                                    id: Toasts.genId(),
                                 });
                             }
                         }}
@@ -129,7 +130,9 @@ export default definePlugin({
                             placeholder="Pick a timezone"
                             options={timezones.map(tz => ({ label: tz, value: tz }))}
                             value={timezone ? { label: timezone, value: timezone } : undefined}
-                            onChange={value => { setTimezone(value); }}
+                            onChange={value => {
+                                setTimezone(value);
+                            }}
                         />
                     </span>
                 )}
@@ -141,10 +144,10 @@ export default definePlugin({
                         alignItems: "center",
                         justifyContent: "space-around",
                         width: "60%",
-                        marginTop: "5%"
+                        marginTop: "5%",
                     } : {
                         marginLeft: "2%",
-                        display: "flex"
+                        display: "flex",
                     }}
                 >
                     <CogWheel
@@ -168,7 +171,7 @@ export default definePlugin({
                                 Toasts.show({
                                     type: Toasts.Type.SUCCESS,
                                     message: "Timezone set!",
-                                    id: Toasts.genId()
+                                    id: Toasts.genId(),
                                 });
 
                                 setIsInEditMode(false);
@@ -177,7 +180,7 @@ export default definePlugin({
                                 Toasts.show({
                                     type: Toasts.Type.FAILURE,
                                     message: "Something went wrong, please try again later.",
-                                    id: Toasts.genId()
+                                    id: Toasts.genId(),
                                 });
                             });
                         }}
@@ -188,7 +191,12 @@ export default definePlugin({
 
                     {isInEditMode &&
                         <DeleteIcon
-                            style={{ cursor: "pointer", padding: "2px", border: "2px solid grey", borderRadius: "50px" }}
+                            style={{
+                                cursor: "pointer",
+                                padding: "2px",
+                                border: "2px solid grey",
+                                borderRadius: "50px",
+                            }}
                             onClick={() => {
                                 DataStore.update(DATASTORE_KEY, (oldValue: TimezoneDB | undefined) => {
                                     oldValue = oldValue || {};
@@ -198,7 +206,7 @@ export default definePlugin({
                                     Toasts.show({
                                         type: Toasts.Type.SUCCESS,
                                         message: "Timezone removed!",
-                                        id: Toasts.genId()
+                                        id: Toasts.genId(),
                                     });
                                     setIsInEditMode(false);
                                     setTimezone(await getUserTimezone(user.id, preference));
@@ -207,7 +215,7 @@ export default definePlugin({
                                     Toasts.show({
                                         type: Toasts.Type.FAILURE,
                                         message: "Something went wrong, please try again later.",
-                                        id: Toasts.genId()
+                                        id: Toasts.genId(),
                                     });
                                 });
                             }}
@@ -217,31 +225,33 @@ export default definePlugin({
                         />
                     }
                 </span>
-            </Text >
+            </Text>
         );
     },
 
     getTimezonesComponent: ({ message }: { message: Message; }) => {
+        console.log(message);
 
-        const { showTimezonesInChat, preference } = settings.use(["preference", "showTimezonesInChat"]);
-        const [timezone, setTimezone] = React.useState<string | undefined>();
+        const { showInChat, preference } = settings.use(["preference", "showInChat"]);
+        const [timeString, setTimeString] = useState<string>();
 
-        React.useEffect(() => {
-            if (!showTimezonesInChat) return;
-
-            getUserTimezone(message.author.id, preference).then(tz => setTimezone(tz));
-        }, [showTimezonesInChat, preference]);
-
-        if (!showTimezonesInChat || message.author.id === UserStore.getCurrentUser()?.id)
+        if (!showInChat || message.author.id === UserStore.getCurrentUser()?.id)
             return null;
 
-        return (
+        useEffect(() => {
+            if (!showInChat) return;
+
+            (async function() {
+                const timezone = await getUserTimezone(message.author.id, preference);
+                const timestamp = (message.timestamp as unknown) as Date; // discord-types is outdated
+                setTimeString(timezone && "• " + getTimeString(timezone, timestamp));
+            })();
+        }, [showInChat, preference]);
+
+        return <>
             <span className={classes(styles.timestampInline, styles.timestamp)}>
-                {
-                    timezone && "• " + getTimeString(timezone,
-                        /* message.timestamp is actually Date but as discord-types is outdated I had to do this */
-                        ((message.timestamp as unknown) as Date))
-                }
-            </span>);
-    }
+                {timeString}
+            </span>
+        </>;
+    },
 });
