@@ -6,16 +6,13 @@
 
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { useAwaiter } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 export const DATASTORE_KEY = "pk";
 export let authors: Record<string, Author> = {};
-const ReactionManager = findByPropsLazy("addReaction", "getReactors");
 
 export interface Author {
     messageIds: string[];
@@ -30,6 +27,7 @@ export function isPk(msg: Message) {
 }
 
 export function isOwnPkMessage(message: Message, localSystemData: string): boolean {
+    if (!isPk(message)) return false;
     const localSystem: Author[] = JSON.parse(localSystemData);
     return localSystem.map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
 }
@@ -52,14 +50,20 @@ export function replyToMessage(msg: Message, mention: boolean, hideMention: bool
 }
 
 export function deleteMessage(msg: Message) {
-    msg.addReaction(
-        {
-            id: undefined,
-            name: "❌",
-            animated: false
-        },
-        true
-    );
+    // todo: fix
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_REACTION_ADD",
+        message: msg,
+        emoji: { name: "❌" },
+    });
+    Toasts.show({
+        message: "This needs to be fixed, use :x: to delete messages for now.",
+        id: Toasts.genId(),
+        type: Toasts.Type.FAILURE,
+        options: {
+            duration: 3000
+        }
+    });
 }
 
 export function generateAuthorData(message: Message) {
