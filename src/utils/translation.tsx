@@ -120,9 +120,9 @@ export function t(key: string, variables?: Record<string, any>): string {
             }
         }
 
-        if (!variables) return translation as string;
+        if (!variables) return translation;
 
-        return format(translation as string, variables);
+        return format(translation, variables);
     };
 
     // top level support hax (thank you vee!!)
