@@ -20,7 +20,7 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
-import { Alerts, moment, Parser, Timestamp, useState } from "@webpack/common";
+import { Alerts, Parser, Timestamp, useState } from "@webpack/common";
 
 import { Auth, getToken } from "../auth";
 import { Review, ReviewType } from "../entities";
@@ -45,7 +45,7 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
-        p("botTag", "botTagRegular")
+        p("botTagRegular")
     );
 
     const dateFormat = new Intl.DateTimeFormat();
@@ -142,7 +142,7 @@ export default LazyComponent(() => {
 
                     {review.type === ReviewType.System && (
                         <span
-                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.px, botTag.rem)}
                             style={{ marginLeft: "4px" }}>
                             <span className={botTag.botText}>
                                 System
@@ -163,7 +163,7 @@ export default LazyComponent(() => {
 
                 {
                     !settings.store.hideTimestamps && review.type !== ReviewType.System && (
-                        <Timestamp timestamp={moment(review.timestamp * 1000)} >
+                        <Timestamp timestamp={new Date(review.timestamp * 1000)} >
                             {dateFormat.format(review.timestamp * 1000)}
                         </Timestamp>)
                 }

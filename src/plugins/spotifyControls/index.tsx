@@ -18,6 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -31,7 +32,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -47,12 +48,12 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "showTaglessAccountPanel:",
+            find: '"AccountConnected"',
             replacement: {
-                // return React.createElement(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /return ?(.{0,30}\(.{1,3},\{[^}]+?,showTaglessAccountPanel:.+?\}\))/,
-                // return [Player, Panel]
-                replace: "return [$self.renderPlayer(),$1]"
+                // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
+                // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
+                replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
         },
         {
@@ -60,7 +61,7 @@ export default definePlugin({
             replacement: [{
                 // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
-                replace: "post:$1.bind(null,$2.post),$&"
+                replace: "post:$1.bind(null,$2.post),vcSpotifyMarker:1,$&"
             },
             {
                 // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
@@ -76,8 +77,34 @@ export default definePlugin({
                 match: /repeat:"off"!==(.{1,3}),/,
                 replace: "actual_repeat:$1,$&"
             }
+        },
+        {
+            find: "artists.filter",
+            replacement: {
+                match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
+                replace: ""
+            }
         }
     ],
+
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
-    renderPlayer: () => <Player />
+
+    PanelWrapper({ VencordOriginal, ...props }) {
+        return (
+            <>
+                <ErrorBoundary
+                    fallback={() => (
+                        <div className="vc-spotify-fallback">
+                            <p>Failed to render Spotify Modal :(</p>
+                            <p >Check the console for errors</p>
+                        </div>
+                    )}
+                >
+                    <Player />
+                </ErrorBoundary>
+
+                <VencordOriginal {...props} />
+            </>
+        );
+    }
 });

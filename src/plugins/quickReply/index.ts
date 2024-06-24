@@ -24,6 +24,7 @@ import { ChannelStore, FluxDispatcher as Dispatcher, MessageStore, PermissionsBi
 import { Message } from "discord-types/general";
 
 const Kangaroo = findByPropsLazy("jumpToMessage");
+const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
@@ -54,7 +55,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "QuickReply",
-    authors: [Devs.obscurity, Devs.Ven, Devs.pylix],
+    authors: [Devs.fawn, Devs.Ven, Devs.pylix],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
     settings,
 
@@ -137,6 +138,10 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     if (!isReply) { // we are editing so only include own
         const meId = UserStore.getCurrentUser().id;
         messages = messages.filter(m => m.author.id === meId);
+    }
+
+    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
+        messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
     }
 
     const mutate = (i: number) => isUp

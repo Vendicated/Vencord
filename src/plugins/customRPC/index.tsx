@@ -17,17 +17,23 @@
 */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
+import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
+const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-const Colors = findByPropsLazy("profileColors");
+
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -175,7 +181,7 @@ const settings = definePluginSettings({
     },
     startTime: {
         type: OptionType.NUMBER,
-        description: "Start timestamp (only for custom timestamp mode)",
+        description: "Start timestamp in milliseconds (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -185,7 +191,7 @@ const settings = definePluginSettings({
     },
     endTime: {
         type: OptionType.NUMBER,
-        description: "End timestamp (only for custom timestamp mode)",
+        description: "End timestamp in milliseconds (only for custom timestamp mode)",
         onChange: onChange,
         disabled: isTimestampDisabled,
         isValid: (value: number) => {
@@ -313,12 +319,12 @@ async function createActivity(): Promise<Activity | undefined> {
     switch (settings.store.timestampMode) {
         case TimestampMode.NOW:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000)
+                start: Date.now()
             };
             break;
         case TimestampMode.TIME:
             activity.timestamps = {
-                start: Math.floor(Date.now() / 1000) - (new Date().getHours() * 3600) - (new Date().getMinutes() * 60) - new Date().getSeconds()
+                start: Date.now() - (new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()) * 1000
             };
             break;
         case TimestampMode.CUSTOM:
@@ -386,15 +392,37 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    dependencies: ["UserSettingsAPI"],
     start: setRpc,
     stop: () => setRpc(true),
     settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
+        const gameActivityEnabled = ShowCurrentGame.useSetting();
+        const { profileThemeStyle } = useProfileThemeStyle({});
+
         return (
             <>
+                {!gameActivityEnabled && (
+                    <ErrorCard
+                        className={classes(Margins.top16, Margins.bottom16)}
+                        style={{ padding: "1em" }}
+                    >
+                        <Forms.FormTitle>Notice</Forms.FormTitle>
+                        <Forms.FormText>Game activity isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
+
+                        <Button
+                            color={Button.Colors.TRANSPARENT}
+                            className={Margins.top8}
+                            onClick={() => ShowCurrentGame.updateSetting(true)}
+                        >
+                            Enable
+                        </Button>
+                    </ErrorCard>
+                )}
+
                 <Forms.FormText>
                     Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                     get the application ID.
@@ -405,8 +433,10 @@ export default definePlugin({
                 <Forms.FormText>
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
-                <Forms.FormDivider />
-                <div style={{ width: "284px" }} className={Colors.profileColors}>
+
+                <Forms.FormDivider className={Margins.top8} />
+
+                <div style={{ width: "284px", ...profileThemeStyle }}>
                     {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
                         guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
                         application={{ id: settings.store.appID }}

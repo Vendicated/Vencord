@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
 const EMBED_SUPPRESSED = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
     if (!isEmbedSuppressed && !embeds.length) return;
 
@@ -44,7 +44,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channe
             icon={isEmbedSuppressed ? ImageVisible : ImageInvisible}
             action={() =>
                 RestAPI.patch({
-                    url: `/channels/${channel.id}/messages/${messageId}`,
+                    url: Constants.Endpoints.MESSAGE(channel.id, messageId),
                     body: { flags: isEmbedSuppressed ? flags & ~EMBED_SUPPRESSED : flags | EMBED_SUPPRESSED }
                 })
             }
@@ -56,12 +56,7 @@ export default definePlugin({
     name: "UnsuppressEmbeds",
     authors: [Devs.rad, Devs.HypedDomi],
     description: "Allows you to unsuppress embeds in messages",
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-    },
+    contextMenus: {
+        "message": messageContextMenuPatch
+    }
 });
