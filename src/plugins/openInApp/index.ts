@@ -158,11 +158,11 @@ export default definePlugin({
     handleAccountView(event: { preventDefault(): void; }, platformType: string, userId: string) {
         if (platformType === "spotify" && settings.store.spotify) {
             VencordNative.native.openExternal(`spotify:user:${userId}`);
-            event.preventDefault();
+            event.preventDefault;
         } else if (platformType === "steam" && settings.store.steam) {
             VencordNative.native.openExternal(`steam://openurl/https://steamcommunity.com/profiles/${userId}`);
             showToast("Opened link in Steam", Toasts.Type.SUCCESS);
-            event.preventDefault();
+            event.preventDefault;
         }
     }
 });

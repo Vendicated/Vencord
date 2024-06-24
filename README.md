@@ -21,13 +21,12 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (59 additional plugins)</summary>
+<summary>Extra included plugins (58 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
 - Anammox by Kyuuhachi
 - BetterActivities by D3SOX, Arjix, AutumnVN
-- BetterQuests by kvba
 - BetterQuickReact by Ven and Sqaaakoi
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
